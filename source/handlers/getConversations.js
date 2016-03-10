@@ -1,5 +1,7 @@
-import User from 'models/User';
+import Conversation from 'models/Conversation';
 
 module.exports = (req, reply) => {
-  User.findOne().then(user => reply(user));
+  Conversation.findAll().then(conversations => {
+    reply(JSON.stringify(conversations));
+  });
 };

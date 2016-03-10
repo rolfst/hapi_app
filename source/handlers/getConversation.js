@@ -1,5 +1,7 @@
-// import { Conversation } from '../models';
+import Conversation from 'models/Conversation';
 
 module.exports = (req, reply) => {
-  reply('asd');
+  Conversation.findById(req.params.id).then(conversation => {
+    reply(JSON.stringify(conversation));
+  });
 };
