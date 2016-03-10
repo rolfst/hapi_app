@@ -1,5 +1,5 @@
 import Sequelize from 'sequelize';
-import model from 'models/connection';
+import model from 'connection';
 
 const User = model.define('User', {
   firstName: {
