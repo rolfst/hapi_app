@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "babel-node --debug --presets es2015 -- index.js",
+    "start": "babel-node --presets es2015 -- index.js",
     "flow": "flow --help",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

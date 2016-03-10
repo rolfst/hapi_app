@@ -8,7 +8,7 @@ const models = ['Conversation'];
 const modelInstances = {};
 
 models.map(model => {
-  modelInstances[model] = require('./' + model)(sequelize);
+  modelInstances[model] = require('./' + model + '.js')(sequelize);
   return model;
 });
 

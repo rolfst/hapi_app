@@ -1,8 +1,10 @@
-export default function Conversation(sequelize) {
+import Sequelize from 'sequelize';
+
+function Conversation(sequelize) {
   return sequelize.define('Conversation',
     {
       name: {
-        type: sequelize.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
       },
     }
@@ -11,4 +13,4 @@ export default function Conversation(sequelize) {
   });
 }
 
-export default Conversation;
+module.exports = Conversation;
