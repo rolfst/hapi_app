@@ -1,15 +1,16 @@
 'use strict';
 
 import Hapi from 'hapi';
-import { createRoutes } from './src/routes';
+import routes from 'routes/create-routes';
 
 const server = new Hapi.Server();
+
 server.connection({
   host: 'localhost',
   port: 8000,
 });
 
-createRoutes(server);
+routes.map(route => server.route(route));
 
 server.start(err => {
   if (err) {
