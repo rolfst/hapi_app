@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
+import Conversation from './Conversation'; // deze is undefined
 
 const User = model.define('User', {
   firstName: {
