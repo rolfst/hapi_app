@@ -3,6 +3,8 @@
 import Hapi from 'hapi';
 import routes from 'routes/create-routes';
 
+import ConversationUser from 'models/ConversationUser';
+
 const server = new Hapi.Server();
 
 server.connection({

@@ -1,6 +1,5 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
-import User from './User'; // deze is undefined
 
 const Conversation = model.define('Conversation', {
   type: {
@@ -17,6 +16,6 @@ const Conversation = model.define('Conversation', {
   updatedAt: 'updated_at',
 });
 
-Conversation.sync();
+Conversation.sync({ force: true });
 
 export default Conversation;

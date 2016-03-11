@@ -6,24 +6,21 @@ import User from 'models/User';
 const ConversationUser = model.define('ConversationUser', {
   conversationId: {
     type: Sequelize.INTEGER,
-    field: 'conversation_id',
   },
   userId: {
     type: Sequelize.INTEGER,
-    field: 'user_id',
   },
 }, {
   tableName: 'conversation_user',
 });
 
-ConversationUser.sync();
+ConversationUser.sync({ force: true });
 
-Conversation.belongsToMany(User, {
+export const users = Conversation.belongsToMany(User, {
   through: {
     model: ConversationUser,
     unique: true,
   },
-  as: 'users',
   foreignkey: 'conversation_id',
 });
 
@@ -32,7 +29,6 @@ User.belongsToMany(Conversation, {
     model: ConversationUser,
     unique: true,
   },
-  as: 'conversations',
   foreignkey: 'user_id',
 });
 
