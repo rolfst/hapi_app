@@ -19,4 +19,6 @@ const User = model.define('User', {
   updatedAt: 'updated_at',
 });
 
+User.sync();
+
 export default User;

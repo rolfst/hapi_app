@@ -9,18 +9,13 @@ const Conversation = model.define('Conversation', {
       isIn: ['private', 'group'],
     },
   },
-  users: {
-    type: Sequelize.ARRAY(Sequelize.NUMBER),
-    allowNull: false,
-    validate: {
-      isArray: true,
-    },
-  },
 }, {
   tableName: 'conversations',
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',
 });
+
+Conversation.sync();
 
 export default Conversation;
