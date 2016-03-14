@@ -16,6 +16,4 @@ const Conversation = model.define('Conversation', {
   updatedAt: 'updated_at',
 });
 
-Conversation.sync({ force: true });
-
 export default Conversation;

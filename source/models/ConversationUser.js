@@ -14,8 +14,6 @@ const ConversationUser = model.define('ConversationUser', {
   tableName: 'conversation_user',
 });
 
-ConversationUser.sync({ force: true });
-
 export const users = Conversation.belongsToMany(User, {
   through: {
     model: ConversationUser,
