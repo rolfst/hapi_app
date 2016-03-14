@@ -3,4 +3,4 @@
 /dist
 .DS_Store
 /npm-debug.log
-/source/config.js
+/source/database.json

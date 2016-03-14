@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "cross-env NODE_PATH=source babel-node --presets es2015 -- index.js",
+    "start": "cross-env NODE_PATH=source NODE_ENV=development babel-node --presets es2015 -- index.js",
     "flow": "flow --help",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -22,6 +22,7 @@
     "cross-env": "^1.0.7",
     "eslint": "2.3.0",
     "eslint-config-airbnb": "6.1.0",
-    "eslint-plugin-react": "4.2.1"
+    "eslint-plugin-react": "4.2.1",
+    "sequelize-cli": "^2.3.1"
   }
 }
