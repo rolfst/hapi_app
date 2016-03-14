@@ -5,5 +5,5 @@ module.exports = {
   'underscored':     true,
   'migrations-path': path.resolve('', 'migrations'),
   'seeders-path':    path.resolve('', 'seeders'),
-  'models-path':     path.resolve('source', 'models')
+  'models-path':     path.resolve('source', 'models'),
 }
