@@ -2,9 +2,12 @@ import Sequelize from 'sequelize';
 import model from 'connection';
 
 const Conversation = model.define('Conversation', {
-  name: {
-    type: Sequelize.STRING,
-    allowNull: false,
+  type: {
+    type: Sequelize.ENUM,
+    values: ['private', 'group'],
+    validate: {
+      isIn: ['private', 'group'],
+    },
   },
 }, {
   tableName: 'conversations',
@@ -13,4 +16,4 @@ const Conversation = model.define('Conversation', {
   updatedAt: 'updated_at',
 });
 
-module.exports = Conversation;
+export default Conversation;
