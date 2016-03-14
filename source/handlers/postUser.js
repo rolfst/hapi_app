@@ -5,8 +5,8 @@ const values = ['firstName', 'lastName'];
 
 module.exports = (req, reply) => {
   User.create(destructPayload(values, req.payload)).then(user => {
-    reply(JSON.stringify({ data: user }));
+    reply({ data: user });
   }).catch(error => {
-    reply(JSON.stringify({ message: error.message, errors: error.errors }));
+    reply({ message: error.message, errors: error.errors });
   });
 };

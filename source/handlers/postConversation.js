@@ -8,8 +8,8 @@ module.exports = (req, reply) => {
       { id: 1 },
     ],
   }, { include: [Users] }).then(conversation => {
-    reply(JSON.stringify({ data: conversation }));
+    reply({ data: conversation });
   }).catch(error => {
-    reply(JSON.stringify({ message: error.message, errors: error.errors }));
+    reply({ message: error.message, errors: error.errors });
   });
 };

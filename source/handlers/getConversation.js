@@ -8,6 +8,6 @@ module.exports = (req, reply) => {
       include: [User],
     }
   ).then(conversation => {
-    reply(JSON.stringify({ data: conversation }));
+    reply({ data: conversation });
   });
 };
