@@ -4,7 +4,7 @@ module.exports = {
   up(queryInterface, Sequelize) {
     return queryInterface.createTable('conversations', {
       id: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER.UNSIGNED,
         primaryKey: true,
         autoIncrement: true,
       },
