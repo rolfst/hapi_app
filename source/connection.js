@@ -1,9 +1,6 @@
 import Sequelize from 'sequelize';
-import config from 'config';
+import config from 'database.json';
 
-const { host, name, username, password } = config.database;
+const { host, database, username, password, dialect } = config[process.env.NODE_ENV];
 
-export default new Sequelize(name, username, password, {
-  host,
-  dialect: 'mysql',
-});
+export default new Sequelize(database, username, password, { host, dialect });
