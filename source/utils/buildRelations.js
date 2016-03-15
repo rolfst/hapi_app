@@ -1,22 +1,41 @@
+import _ from 'lodash';
+
+/**
+ * Get the ids from related resources.
+ *
+ * @function getIdsFromRelatedData
+ * @param {array|object} relatedData - The related resource(s).
+ */
+const getIdsFromRelatedData = relatedData => {
+  return _.isArray(relatedData) ? _.map(relatedData, 'id') : [relatedData.id];
+};
+
 /**
  * Build the relationships output.
  *
  * @function buildRelations
- * @param {array} relations - The relations consisting of object with a type and ids property.
- * @param {string} relations.type - The type of resource.
- * @param {array} relations.ids - The ids that are related.
+ * @param {array} relations - The relations to add to the resource.
+ * @param {object} resource - The resource to add the relations to.
  */
-const buildRelations = relations => {
-  const results = relations.reduce((newObj, value) => {
-    let data = value.ids.map(id => {
-      return { type: value.type, id };
-    });
+const buildRelations = (relations, resource) => {
+  const results = relations.reduce((newObj, relation) => {
+    const ids = getIdsFromRelatedData(resource[_.capitalize(relation)]);
 
-    if (value.ids.length === 1) {
-      data = { type: value.type, id: value.ids[0] };
+    let data = { type: relation, id: ids[0] };
+
+    if (ids.length !== 1) {
+      data = ids.map(id => {
+        return { type: relation, id };
+      });
     }
 
-    newObj[value.type] = { data };
+    newObj[relation] = {
+      links: {
+        self: `/${resource.type}/${resource.id}/relationships/${relation}`,
+        related: `/${resource.type}/${resource.id}/${relation}`,
+      },
+      data,
+    };
 
     return newObj;
   }, {});

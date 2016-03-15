@@ -1,4 +1,5 @@
 import Conversation from 'models/Conversation';
+import User from 'models/User';
 import respondWithCollection from 'utils/respondWithCollection';
 import messageSerializer from 'serializers/message';
 
@@ -8,8 +9,14 @@ module.exports = (req, reply) => {
   }).then(conversation => {
     if (!conversation) reply('Not found.');
 
-    conversation.getMessages().then(messages => {
-      reply(respondWithCollection(messages, messageSerializer));
+    conversation.getMessages({
+      include: [{ model: User, attributes: ['id'] }],
+    }).then(messages => {
+      const response = respondWithCollection(messages, messageSerializer, {
+        relations: ['user'],
+      });
+
+      reply(response);
     });
   });
 };
