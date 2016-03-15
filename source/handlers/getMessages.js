@@ -1,4 +1,6 @@
 import Conversation from 'models/Conversation';
+import respondWithCollection from 'utils/respondWithCollection';
+import messageSerializer from 'serializers/message';
 
 module.exports = (req, reply) => {
   Conversation.findOne({
@@ -7,7 +9,7 @@ module.exports = (req, reply) => {
     if (!conversation) reply('Not found.');
 
     conversation.getMessages().then(messages => {
-      reply({ data: messages });
+      reply(respondWithCollection(messages, messageSerializer));
     });
   });
 };
