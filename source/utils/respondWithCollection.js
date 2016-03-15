@@ -1,3 +1,7 @@
 export default (collection, serializer) => {
-  return collection.map(item => serializer(item));
+  const items = collection.map(item => serializer(item));
+
+  return {
+    data: items,
+  };
 };
