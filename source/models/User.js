@@ -2,6 +2,10 @@ import Sequelize from 'sequelize';
 import model from 'connection';
 
 const User = model.define('User', {
+  id: {
+    type: Sequelize.INTEGER,
+    primaryKey: true,
+  },
   firstName: {
     type: Sequelize.STRING,
     field: 'first_name',
@@ -10,8 +14,18 @@ const User = model.define('User', {
   lastName: {
     type: Sequelize.STRING,
     field: 'last_name',
+    allowNull: true,
+  },
+  email: {
+    type: Sequelize.STRING,
     allowNull: false,
   },
+  profileImg: {
+    type: Sequelize.STRING,
+    field: 'profile_img',
+    allowNull: false,
+  },
+  password: Sequelize.STRING,
 }, {
   tableName: 'users',
   timestamps: true,
