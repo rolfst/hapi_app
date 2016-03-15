@@ -7,7 +7,12 @@ const server = new Hapi.Server();
 
 server.connection({
   host: 'localhost',
-  port: 8000,
+  port: 3000,
+});
+
+server.ext('onRequest', (req, reply) => {
+  process.env.BASE_URL = `${req.connection.info.protocol}://${req.info.host}`;
+  return reply.continue();
 });
 
 routes.map(route => server.route(route));
