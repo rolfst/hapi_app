@@ -24,7 +24,7 @@ export default (resource, options = {}, settings) => {
     },
   };
 
-  if (relations) result.relationships = buildRelations(relations);
+  if (relations) result.relationships = buildRelations(relations, resource);
 
   return result;
 };
