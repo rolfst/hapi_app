@@ -6,6 +6,7 @@ module.exports = {
     payload: {
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
+      email: Joi.string(),
     },
   },
   detail: validateId,
