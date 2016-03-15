@@ -1,6 +1,7 @@
-import test from 'tape';
+const assert = require('chai').assert;
 
-test('test timing', assert => {
-  assert.equals(1, 1);
-  assert.end();
+describe('Calc', () => {
+  it('should get sum of numbers', () => {
+    assert.equal(3 * 3, 9);
+  });
 });
