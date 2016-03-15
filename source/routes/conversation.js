@@ -1,4 +1,5 @@
 import { conversation } from 'validators';
+import { message } from 'validators';
 
 export default [
   {
@@ -16,6 +17,13 @@ export default [
     method: 'GET',
     path: '/conversations/{id}/messages',
     handler: require('handlers/getMessages'),
+  }, {
+    method: 'POST',
+    path: '/conversations/{id}/messages',
+    handler: require('handlers/createMessage'),
+    config: {
+      validate: message.create,
+    },
   }, {
     method: 'POST',
     path: '/conversations',
