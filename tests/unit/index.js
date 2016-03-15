@@ -1,4 +1,4 @@
-const assert = require('chai').assert;
+import { assert } from 'chai';
 
 describe('Calc', () => {
   it('should get sum of numbers', () => {
