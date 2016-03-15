@@ -1,3 +1,5 @@
+import { user } from 'validators';
+
 export default [
   {
     method: 'GET',
@@ -7,5 +9,8 @@ export default [
     method: 'POST',
     path: '/users',
     handler: require('handlers/postUser'),
+    config: {
+      validate: user.create,
+    },
   },
 ];
