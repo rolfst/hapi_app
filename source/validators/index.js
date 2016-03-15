@@ -1,2 +1,5 @@
-export const conversation = require('./conversation');
-export const user = require('./user');
+module.exports = {
+  conversation: require('./conversation'),
+  user: require('./user'),
+  message: require('./message'),
+};
