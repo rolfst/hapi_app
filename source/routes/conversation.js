@@ -13,6 +13,10 @@ export default [
       validate: conversation.detail,
     },
   }, {
+    method: 'GET',
+    path: '/conversations/{id}/messages',
+    handler: require('handlers/getMessages'),
+  }, {
     method: 'POST',
     path: '/conversations',
     handler: require('handlers/postConversation'),
