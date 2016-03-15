@@ -1,7 +1,10 @@
 /**
  * Build the relationships output.
+ *
  * @function buildRelations
  * @param {array} relations - The relations consisting of object with a type and ids property.
+ * @param {string} relations.type - The type of resource.
+ * @param {array} relations.ids - The ids that are related.
  */
 const buildRelations = relations => {
   const results = relations.reduce((newObj, value) => {

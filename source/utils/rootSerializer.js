@@ -1,25 +1,30 @@
 import buildRelations from 'utils/buildRelations';
 
 /**
- * Build serialized output for an item based on the child serializer and options.
+ * Build serialized output for an resource based on the child serializer and options.
+ *
  * @function rootSerializer
- * @param {object} item - The item to serialize.
- * @param {object} options - Add options to the item.
- * @param {object} settings - The settings from the child serializer.
+ * @param {object} resource - The resource to serialize.
+ * @param {object} options - Add options to the resource.
+ * @param {array} options.relations - Relations to add to the resource.
+ * @param {array} options.includes - Included relations to add to the resource.
+ * @param {object} settings - The settings of the child serializer.
+ * @param {string} settings.type - The type of the child serializer.
+ * @param {array} settings.relations - Available relations for the child serializer.
  */
-export default (item, options = {}, settings) => {
+export default (resource, options = {}, settings) => {
   const relations = options.relations || false;
 
-  const resource = {
+  const result = {
     type: settings.type,
-    id: item.id,
-    attributes: settings.getAttributes(item),
+    id: resource.id,
+    attributes: settings.getAttributes(resource),
     links: {
-      self: `/${settings.type}/${item.id}`,
+      self: `/${settings.type}/${resource.id}`,
     },
   };
 
-  if (relations) resource.relationships = buildRelations(relations);
+  if (relations) result.relationships = buildRelations(relations);
 
-  return resource;
+  return result;
 };
