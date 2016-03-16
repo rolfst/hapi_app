@@ -1,5 +1,4 @@
 const settings = {
-  type: 'conversations',
   relations: ['messages'],
   getAttributes: conversation => {
     return {
