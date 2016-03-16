@@ -1,7 +1,5 @@
-export default (collection, serializer, options = {}) => {
-  const items = collection.map(item => serializer(item, options));
+import collectionSerializer from 'utils/collectionSerializer';
 
-  return {
-    data: items,
-  };
+export default (collection, settings, options = {}) => {
+  return collection.map(item => collectionSerializer(item, options, settings));
 };

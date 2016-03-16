@@ -1,5 +1,3 @@
-import rootSerializer from 'utils/rootSerializer';
-
 const settings = {
   type: 'messages',
   relations: ['user'],
@@ -13,6 +11,4 @@ const settings = {
   },
 };
 
-export default (message, options = {}) => {
-  return rootSerializer(message, options, settings);
-};
+export default settings;
