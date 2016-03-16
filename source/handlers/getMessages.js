@@ -7,7 +7,7 @@ module.exports = (req, reply) => {
   Conversation.findOne({
     where: { id: req.params.id },
   }).then(conversation => {
-    if (!conversation) reply('Not found.');
+    if (!conversation) return reply('Not found.');
 
     conversation.getMessages({
       include: [{ model: User, attributes: ['id'] }],
@@ -16,7 +16,7 @@ module.exports = (req, reply) => {
         relations: ['user'],
       });
 
-      reply(response);
+      return reply(response);
     });
   });
 };
