@@ -15,6 +15,9 @@ const Conversation = model.define('Conversation', {
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: false,
+  getterMethods: {
+    type: () => 'conversations',
+  },
 });
 
 Conversation.hasMany(Message, {
