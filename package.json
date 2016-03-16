@@ -11,10 +11,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "boom": "^3.1.2",
+    "boom": "3.1.2",
     "hapi": "13.2.1",
     "joi": "8.0.4",
-    "jwt-simple": "^0.5.0",
+    "jwt-simple": "0.5.0",
     "lodash": "4.6.1",
     "mysql": "2.10.2",
     "sequelize": "3.19.3"
