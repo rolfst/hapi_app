@@ -1,10 +1,9 @@
-import { conversation } from 'validators';
-import { message } from 'validators';
+import { conversation, message } from 'validators';
 
 export default [
   {
     method: 'GET',
-    path: '/conversations',
+    path: '/users/me/conversations',
     handler: require('handlers/getConversations'),
     config: {
       auth: 'default',

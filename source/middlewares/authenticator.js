@@ -1,6 +1,6 @@
 import Boom from 'boom';
 import auth from 'services/auth';
-import User from 'models/User';
+import { User } from 'models';
 
 export default (server, options) => {
   return {

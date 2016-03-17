@@ -1,6 +1,5 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
-import Message from 'models/Message';
 
 const Conversation = model.define('Conversation', {
   type: {
@@ -17,13 +16,6 @@ const Conversation = model.define('Conversation', {
   updatedAt: false,
   getterMethods: {
     type: () => 'conversations',
-  },
-});
-
-Conversation.hasMany(Message, {
-  foreignKey: 'parent_id',
-  scope: {
-    parent_type: 'FlexAppeal\\Entities\\Conversation',
   },
 });
 

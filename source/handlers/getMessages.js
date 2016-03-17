@@ -1,5 +1,5 @@
-import Conversation from 'models/Conversation';
-import User from 'models/User';
+import Boom from 'boom';
+import { Conversation, User } from 'models';
 import respondWithCollection from 'utils/respondWithCollection';
 import messageSerializer from 'serializers/message';
 
@@ -9,14 +9,18 @@ module.exports = (req, reply) => {
   }).then(conversation => {
     if (!conversation) return reply('Not found.');
 
-    conversation.getMessages({
-      include: [{ model: User, attributes: ['id'] }],
-    }).then(messages => {
-      const response = respondWithCollection(messages, messageSerializer, {
-        relations: ['user'],
-      });
+    return conversation.hasUser(req.auth.credentials.user).then(result => {
+      if (!result) return reply(Boom.forbidden('User doesn\'t belong to this conversation'));
 
-      return reply(response);
+      return conversation.getMessages({
+        include: [{ model: User, attributes: ['id'] }],
+      }).then(messages => {
+        const response = respondWithCollection(messages, messageSerializer, {
+          relations: ['user'],
+        });
+
+        return reply(response);
+      });
     });
   });
 };
