@@ -11,19 +11,17 @@ module.exports = (req, reply) => {
     if (!conversation) return reply('Not found.');
 
     return conversation.hasUser(req.auth.credentials.user).then(result => {
-      if (result) {
-        return conversation.getMessages({
-          include: [{ model: User, attributes: ['id'] }],
-        }).then(messages => {
-          const response = respondWithCollection(messages, messageSerializer, {
-            relations: ['user'],
-          });
+      if (!result) return reply(Boom.unauthorized('Not related'));
 
-          return reply(response);
+      return conversation.getMessages({
+        include: [{ model: User, attributes: ['id'] }],
+      }).then(messages => {
+        const response = respondWithCollection(messages, messageSerializer, {
+          relations: ['user'],
         });
-      }
 
-      return reply(Boom.unauthorized('Not related'));
+        return reply(response);
+      });
     });
   });
 };

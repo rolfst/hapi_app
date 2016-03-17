@@ -9,13 +9,11 @@ module.exports = (req, reply) => {
     include: [{ model: Message, attributes: ['id'] }, { model: User, attributes: ['id'] }],
   }).then(conversation => {
     conversation.hasUser(req.auth.credentials.user).then(result => {
-      if (result) {
-        return reply(respondWithItem(conversation, conversationSerializer, {
-          relations: ['messages', 'users'],
-        }));
-      }
+      if (!result) return reply(Boom.unauthorized('Not related'));
 
-      return reply(Boom.unauthorized('Not related'));
+      return reply(respondWithItem(conversation, conversationSerializer, {
+        relations: ['messages', 'users'],
+      }));
     });
   });
 };
