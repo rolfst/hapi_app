@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "cross-env NODE_PATH=source NODE_ENV=development babel-node index.js",
-    "test": "cross-env NODE_PATH=source NODE_ENV=development mocha --compilers js:babel-register 'tests/**/*.js'",
+    "test": "cross-env NODE_PATH=source NODE_ENV=development mocha --compilers js:babel-register tests/**/*.js",
     "flow": "flow --help"
   },
   "author": "",
