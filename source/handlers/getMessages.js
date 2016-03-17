@@ -1,3 +1,4 @@
+import Boom from 'boom';
 import { Conversation } from 'models';
 import { User } from 'models';
 import respondWithCollection from 'utils/respondWithCollection';
@@ -9,14 +10,20 @@ module.exports = (req, reply) => {
   }).then(conversation => {
     if (!conversation) return reply('Not found.');
 
-    conversation.getMessages({
-      include: [{ model: User, attributes: ['id'] }],
-    }).then(messages => {
-      const response = respondWithCollection(messages, messageSerializer, {
-        relations: ['user'],
-      });
+    return conversation.hasUser(req.auth.credentials.user).then(result => {
+      if (result) {
+        return conversation.getMessages({
+          include: [{ model: User, attributes: ['id'] }],
+        }).then(messages => {
+          const response = respondWithCollection(messages, messageSerializer, {
+            relations: ['user'],
+          });
 
-      return reply(response);
+          return reply(response);
+        });
+      }
+
+      return reply(Boom.unauthorized('Not related'));
     });
   });
 };
