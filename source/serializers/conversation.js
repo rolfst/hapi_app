@@ -1,5 +1,5 @@
 const settings = {
-  relations: ['messages'],
+  relations: ['users'],
   getAttributes: conversation => {
     return {
       type: conversation.type,

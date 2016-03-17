@@ -1,4 +1,4 @@
-import User from 'models/User';
+import { User } from 'models';
 import { destructPayload } from 'services/payload';
 
 const values = ['firstName', 'lastName', 'email', 'profile_img'];

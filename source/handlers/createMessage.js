@@ -1,5 +1,5 @@
-import Conversation from 'models/Conversation';
-import Message from 'models/Message';
+import { Conversation } from 'models';
+import { Message } from 'models';
 
 module.exports = (req, reply) => {
   Conversation.findById(req.params.id).then(conversation => {

@@ -1,5 +1,5 @@
-import Conversation from 'models/Conversation';
-import User from 'models/User';
+import { Conversation } from 'models';
+import { User } from 'models';
 import respondWithCollection from 'utils/respondWithCollection';
 import messageSerializer from 'serializers/message';
 

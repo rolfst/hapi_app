@@ -4,7 +4,7 @@ import { message } from 'validators';
 export default [
   {
     method: 'GET',
-    path: '/conversations',
+    path: '/users/me/conversations',
     handler: require('handlers/getConversations'),
     config: {
       auth: 'default',

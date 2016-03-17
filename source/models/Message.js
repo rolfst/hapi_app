@@ -1,6 +1,5 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
-import User from 'models/User';
 
 const Message = model.define('Message', {
   text: Sequelize.TEXT,
@@ -17,7 +16,5 @@ const Message = model.define('Message', {
     type: () => 'messages',
   },
 });
-
-Message.belongsTo(User, { foreignKey: 'created_by' });
 
 export default Message;
