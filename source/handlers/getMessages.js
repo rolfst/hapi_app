@@ -1,6 +1,5 @@
 import Boom from 'boom';
-import { Conversation } from 'models';
-import { User } from 'models';
+import { Conversation, User } from 'models';
 import respondWithCollection from 'utils/respondWithCollection';
 import messageSerializer from 'serializers/message';
 

@@ -1,5 +1,4 @@
-import { conversation } from 'validators';
-import { message } from 'validators';
+import { conversation, message } from 'validators';
 
 export default [
   {
