@@ -11,7 +11,7 @@ module.exports = (req, reply) => {
     if (!conversation) return reply('Not found.');
 
     return conversation.hasUser(req.auth.credentials.user).then(result => {
-      if (!result) return reply(Boom.unauthorized('Not related'));
+      if (!result) return reply(Boom.forbidden('User doesn\'t belong to this conversation'));
 
       return conversation.getMessages({
         include: [{ model: User, attributes: ['id'] }],
