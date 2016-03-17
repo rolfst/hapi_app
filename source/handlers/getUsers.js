@@ -1,4 +1,4 @@
-import User from 'models/User';
+import { User } from 'models';
 
 module.exports = (req, reply) => {
   User.findAll().then(users => {

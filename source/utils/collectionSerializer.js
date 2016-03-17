@@ -11,15 +11,15 @@ import buildRelations from 'utils/buildRelations';
  * @param {object} serializer - The serializer of the child serializer.
  * @param {array} serializer.relations - Available relations for the child serializer.
  */
-export default (resource, options = {}, settings) => {
+export default (resource, options = {}, serializer) => {
   const relations = options.relations || false;
 
   const result = {
-    type: settings.type,
+    type: resource.type,
     id: resource.id,
-    attributes: settings.getAttributes(resource),
+    attributes: serializer.getAttributes(resource),
     links: {
-      self: `/${settings.type}/${resource.id}`,
+      self: `/${resource.type}/${resource.id}`,
     },
   };
 

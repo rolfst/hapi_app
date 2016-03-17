@@ -1,4 +1,4 @@
-import Conversation from 'models/Conversation';
+import { Conversation } from 'models';
 
 module.exports = (req, reply) => {
   Conversation.create({
