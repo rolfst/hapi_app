@@ -1,14 +1,32 @@
 import ConversationModel from 'models/Conversation';
-import UserModel from 'models/User';
 import MessageModel from 'models/Message';
+import UserModel from 'models/User';
 
-import buildUserRelationships from 'models/relationships/User';
-import buildConversationRelationships from 'models/relationships/Conversation';
-import buildMessageRelationships from 'models/relationships/Message';
+ConversationModel.belongsToMany(UserModel, {
+  foreignKey: 'conversation_id',
+  otherKey: 'user_id',
+  through: 'conversation_user',
+  timestamps: false,
+});
 
-buildConversationRelationships(ConversationModel, UserModel, MessageModel);
-buildUserRelationships(UserModel, ConversationModel);
-buildMessageRelationships(MessageModel, UserModel);
+ConversationModel.hasMany(MessageModel, {
+  foreignKey: 'parent_id',
+  scope: {
+    parent_type: 'FlexAppeal\\Entities\\Conversation',
+  },
+});
+
+MessageModel.belongsTo(UserModel, {
+  foreignKey: 'created_by',
+});
+
+UserModel.belongsToMany(ConversationModel, {
+  as: 'conversations',
+  foreignKey: 'user_id',
+  otherKey: 'conversation_id',
+  through: 'conversation_user',
+  timestamps: false,
+});
 
 export const Conversation = ConversationModel;
 export const User = UserModel;
