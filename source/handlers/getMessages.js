@@ -7,20 +7,19 @@ module.exports = (req, reply) => {
   Conversation.findOne({
     where: { id: req.params.id },
   }).then(conversation => {
-    if (!conversation) return reply('Not found.');
+    if (!conversation) return reply(Boom.notFound('No conversation found for given id.'));
+    if (!conversation.hasUser(req.auth.credentials.user)) {
+      return reply(Boom.forbidden('User doesn\'t belong to this conversation.'));
+    }
 
-    return conversation.hasUser(req.auth.credentials.user).then(result => {
-      if (!result) return reply(Boom.forbidden('User doesn\'t belong to this conversation'));
-
-      return conversation.getMessages({
-        include: [{ model: User, attributes: ['id'] }],
-      }).then(messages => {
-        const response = respondWithCollection(messages, messageSerializer, {
-          relations: ['user'],
-        });
-
-        return reply(response);
-      });
+    return conversation.getMessages({
+      include: [{ model: User, attributes: ['id'] }],
     });
+  }).then(messages => {
+    const response = respondWithCollection(messages, messageSerializer, {
+      relations: ['user'],
+    });
+
+    return reply(response);
   });
 };
