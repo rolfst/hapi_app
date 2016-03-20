@@ -8,7 +8,7 @@ const server = new Hapi.Server();
 
 server.connection({
   host: 'localhost',
-  port: 3001,
+  port: 8000,
 });
 
 server.auth.scheme('jwt', authenticator);
