@@ -16,10 +16,10 @@ export default (resource, options = {}, serializer) => {
 
   const result = {
     links: {
-      self: `/${resource.type}/${resource.id}`,
+      self: `/${resource.modelType}/${resource.id}`,
     },
     data: {
-      type: resource.type,
+      type: resource.modelType,
       id: resource.id,
       attributes: serializer.getAttributes(resource),
     },
