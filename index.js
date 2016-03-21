@@ -9,6 +9,9 @@ const server = new Hapi.Server();
 server.connection({
   host: 'localhost',
   port: 8000,
+  routes: {
+    cors: true,
+  },
 });
 
 server.auth.scheme('jwt', authenticator);
@@ -29,8 +32,7 @@ server.ext('onPreResponse', (req, reply) => {
 routes.map(route => server.route(route));
 
 server.start(err => {
-  if (err) {
-    throw err;
-  }
+  if (err) throw err;
+
   console.log('Server running at:', server.info.uri);
 });
