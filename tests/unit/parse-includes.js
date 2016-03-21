@@ -13,6 +13,11 @@ it('parse includes from query object', () => {
   );
 
   assert.deepEqual(
+    parseIncludes({}),
+    []
+  );
+
+  assert.deepEqual(
     parseIncludes({ include: 'users,comments.user' }),
     ['users', 'comments.user']
   );
