@@ -20,6 +20,12 @@ server.ext('onRequest', (req, reply) => {
   return reply.continue();
 });
 
+server.ext('onPreResponse', (req, reply) => {
+  req.response.header('Access-Control-Allow-Origin', '*');
+  req.response.header('Access-Control-Allow-Headers', 'x-api-token');
+  reply.continue();
+});
+
 routes.map(route => server.route(route));
 
 server.start(err => {
