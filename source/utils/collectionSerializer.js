@@ -15,11 +15,11 @@ export default (resource, options = {}, serializer) => {
   const relations = options.relations || false;
 
   const result = {
-    type: resource.type,
+    type: resource.modelType,
     id: resource.id,
     attributes: serializer.getAttributes(resource),
     links: {
-      self: `/${resource.type}/${resource.id}`,
+      self: `/${resource.modelType}/${resource.id}`,
     },
   };
 

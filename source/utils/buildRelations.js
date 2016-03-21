@@ -31,8 +31,8 @@ const buildRelations = (relations, resource) => {
 
     newObj[relation] = {
       links: {
-        self: `/${resource.type}/${resource.id}/relationships/${relation}`,
-        related: `/${resource.type}/${resource.id}/${relation}`,
+        self: `/${resource.modelType}/${resource.id}/relationships/${relation}`,
+        related: `/${resource.modelType}/${resource.id}/${relation}`,
       },
       data,
     };

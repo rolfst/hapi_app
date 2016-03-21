@@ -13,7 +13,7 @@ const Message = model.define('Message', {
   createdAt: 'created_at',
   updatedAt: 'updated_at',
   getterMethods: {
-    type: () => 'messages',
+    modelType: () => 'messages',
   },
 });
 

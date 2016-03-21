@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bluebird": "3.3.4",
     "boom": "3.1.2",
     "hapi": "13.2.1",
     "joi": "8.0.4",

@@ -32,7 +32,7 @@ const User = model.define('User', {
   createdAt: 'created_at',
   updatedAt: 'updated_at',
   getterMethods: {
-    type: () => 'users',
+    modelType: () => 'users',
   },
 });
 
