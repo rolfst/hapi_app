@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
+import User from 'models/User';
 
 const Message = model.define('Message', {
   text: Sequelize.TEXT,
@@ -14,6 +15,9 @@ const Message = model.define('Message', {
   updatedAt: 'updated_at',
   getterMethods: {
     modelType: () => 'messages',
+  },
+  defaultScope: {
+    include: [{ model: User }]
   },
 });
 
