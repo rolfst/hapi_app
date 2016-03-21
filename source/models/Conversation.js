@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
+import User from 'models/User';
 
 const Conversation = model.define('Conversation', {
   type: {
@@ -16,6 +17,9 @@ const Conversation = model.define('Conversation', {
   updatedAt: false,
   getterMethods: {
     type: () => 'conversations',
+  },
+  defaultScope: {
+    include: [{ model: User }]
   },
 });
 
