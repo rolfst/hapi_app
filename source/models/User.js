@@ -31,9 +31,6 @@ const User = model.define('User', {
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',
-  getterMethods: {
-    modelType: () => 'users',
-  },
 });
 
 export default User;
