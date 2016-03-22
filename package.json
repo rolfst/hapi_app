@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "migrate": "sequelize db:migrate",
-    "start:acc": "NODE_PATH=build NODE_ENV=acceptance node build/index.js",
     "clean": "rimraf build && mkdir build",
     "copy-config": "cp ./source/database.json ./build/",
+    "start:acc": "NODE_PATH=build NODE_ENV=acceptance node build/index.js",
     "build": "npm run clean && babel ./source -d ./build -s && npm run copy-config",
     "dev": "cross-env NODE_PATH=source NODE_ENV=development babel-node ./source/index.js",
     "test": "cross-env NODE_PATH=source NODE_ENV=development mocha --compilers js:babel-register tests/**/*.js",
@@ -37,7 +37,7 @@
     "eslint-config-airbnb": "6.1.0",
     "eslint-plugin-react": "4.2.1",
     "mocha": "2.4.5",
-    "rimraf": "^2.5.2",
+    "rimraf": "2.5.2",
     "sequelize-cli": "2.3.1"
   }
 }
