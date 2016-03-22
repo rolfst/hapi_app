@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "migrate": "sequelize db:migrate",
     "start:acc": "NODE_PATH=build NODE_ENV=acceptance node build/index.js",
     "clean": "rimraf build && mkdir build",
     "copy-config": "cp ./source/database.json ./build/",
