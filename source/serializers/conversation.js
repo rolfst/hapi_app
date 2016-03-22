@@ -3,7 +3,7 @@ import messageSerializer from 'serializers/message';
 
 export default item => {
   let output = {
-    type: item.type,
+    type: 'conversation',
     id: item.id.toString(),
     created_at: item.created_at,
   };

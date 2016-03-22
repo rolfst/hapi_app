@@ -32,9 +32,6 @@ const User = model.define('User', {
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',
-  getterMethods: {
-    modelType: () => 'users',
-  },
   instanceMethods: {
     hasConversationWith: (UserModel, userIds) => {
       return Promise.resolve(Conversation.findAll({
