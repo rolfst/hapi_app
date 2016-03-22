@@ -1,6 +1,6 @@
 import Boom from 'boom';
 import _ from 'lodash';
-import { Message, User, Conversation } from 'models';
+import { Message, Conversation } from 'models';
 import respondWithItem from 'utils/respondWithItem';
 import conversationSerializer from 'serializers/conversation';
 import parseIncludes from 'utils/parseIncludes';
@@ -8,7 +8,7 @@ import parseIncludes from 'utils/parseIncludes';
 module.exports = (req, reply) => {
   const includes = parseIncludes(req.query);
 
-  let modelIncludes = [];
+  const modelIncludes = [];
 
   if (_.includes(includes, 'messages')) {
     modelIncludes.push({ model: Message });

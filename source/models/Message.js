@@ -17,7 +17,7 @@ const Message = model.define('Message', {
     modelType: () => 'messages',
   },
   defaultScope: {
-    include: [{ model: User }]
+    include: [{ model: User }],
   },
 });
 

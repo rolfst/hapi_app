@@ -7,5 +7,5 @@ export default item => {
     email: item.email,
     profile_img: item.profileImg,
     created_at: item.created_at,
-  }
+  };
 };

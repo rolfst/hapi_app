@@ -2,7 +2,7 @@ import Boom from 'boom';
 import auth from 'services/auth';
 import { User } from 'models';
 
-export default (server, options) => {
+export default () => {
   return {
     authenticate: (request, reply) => {
       const req = request.raw.req;

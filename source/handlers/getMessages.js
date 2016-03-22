@@ -1,13 +1,9 @@
 import Boom from 'boom';
-import Promise from 'bluebird';
-import { Conversation, User } from 'models';
+import { Conversation } from 'models';
 import respondWithCollection from 'utils/respondWithCollection';
 import messageSerializer from 'serializers/message';
-import parseIncludes from 'utils/parseIncludes';
 
 module.exports = (req, reply) => {
-  const includes = parseIncludes(req.query);
-
   Conversation.findById(req.params.id)
     .then(conversation => {
       if (!conversation) throw Boom.notFound('No conversation found for the given id.');

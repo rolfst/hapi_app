@@ -3,6 +3,7 @@
 import Hapi from 'hapi';
 import routes from 'routes/create-routes';
 import authenticator from 'middlewares/authenticator';
+import 'database.json';
 
 const server = new Hapi.Server();
 
@@ -25,19 +26,21 @@ server.ext('onRequest', (req, reply) => {
 
 // Accept CORS requests
 server.ext('onPreResponse', (req, reply) => {
-  const headers = 'Origin, X-API-Token, Content-Type, Accept';
+  const allowedHeaders = 'Origin, X-API-Token, Content-Type, Accept';
 
-	if (req.response.isBoom) {
-		return reply(req.response.output.payload)
-			.code(req.response.output.statusCode)
+  if (req.response.isBoom) {
+    const { payload, statusCode } = req.response.output;
+
+    return reply(payload)
+			.code(statusCode)
 			.header('Access-Control-Allow-Origin', '*')
-			.header('Access-Control-Allow-Headers', headers);
-	}
+			.header('Access-Control-Allow-Headers', allowedHeaders);
+  }
 
-	req.response.header('Access-Control-Allow-Origin', '*');
-	req.response.header('Access-Control-Allow-Headers', headers);
+  req.response.header('Access-Control-Allow-Origin', '*');
+  req.response.header('Access-Control-Allow-Headers', allowedHeaders);
 
-	reply.continue();
+  return reply.continue();
 });
 
 routes.map(route => server.route(route));

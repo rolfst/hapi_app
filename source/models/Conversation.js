@@ -23,7 +23,7 @@ const Conversation = model.define('Conversation', {
     modelType: () => 'conversations',
   },
   defaultScope: {
-    include: [{ model: User }]
+    include: [{ model: User }],
   },
 });
 
