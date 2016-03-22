@@ -12,11 +12,11 @@ module.exports = (req, reply) => {
 
   User.findById(req.auth.credentials.user.id).then(user => {
     return user.hasConversationWith(User, payload.users);
-  }).then(hasConversationWith => {
-    if (hasConversationWith) {
-      throw Boom.forbidden('You are already in a conversation with this person');
+  }).then(existingConversation => {
+    if (existingConversation) {
+      return Conversation.findById(existingConversation.id, { include: [User, Message] });
     }
-  }).then(() => {
+
     return Conversation.create({
       type: payload.type.toUpperCase(),
       createdBy: req.auth.credentials.user.id,
@@ -24,11 +24,11 @@ module.exports = (req, reply) => {
       return [newConversation, newConversation.addUsers(payload.users)];
     }).spread(newConversation => {
       return Conversation.findById(newConversation.id, { include: [User, Message] });
-    }).then(newConversation => {
-      return reply(respondWithItem(newConversation, conversationSerializer, {
-        relations: ['messages', 'users'],
-      }));
     });
+  }).then(conversation => {
+    return reply(respondWithItem(conversation, conversationSerializer, {
+      relations: ['messages', 'users'],
+    }));
   }).catch(error => {
     reply(error);
   });

@@ -52,7 +52,7 @@ const User = model.define('User', {
           '`Users.count` > 1',
         ],
       })).then(existingChats => {
-        return existingChats.length > 0;
+        return existingChats[0] || null;
       });
     },
   },
