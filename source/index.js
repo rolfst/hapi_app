@@ -3,7 +3,6 @@
 import Hapi from 'hapi';
 import routes from 'routes/create-routes';
 import authenticator from 'middlewares/authenticator';
-import 'database.json';
 
 const server = new Hapi.Server();
 
