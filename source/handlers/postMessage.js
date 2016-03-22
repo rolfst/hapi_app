@@ -5,7 +5,7 @@ import messageSerializer from 'serializers/message';
 
 module.exports = (req, reply) => {
   Conversation.findById(req.params.id).then(conversation => {
-    if (!conversation) return reply(Boom.notFound('No conversation found for id.'));
+    if (!conversation) throw Boom.notFound('No conversation found for id.');
 
     // const message = messageFactory.buildForConversation(conversation.id, req.payload.body);
 
@@ -19,8 +19,8 @@ module.exports = (req, reply) => {
       return Message.findById(createdMessage.id);
     }).then(createdMessage => {
       return reply(respondWithItem(createdMessage, messageSerializer));
-    }).catch(error => {
-      reply(error);
     });
+  }).catch(error => {
+    reply(error);
   });
 };
