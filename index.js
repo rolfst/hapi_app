@@ -24,8 +24,11 @@ server.ext('onRequest', (req, reply) => {
 });
 
 server.ext('onPreResponse', (req, reply) => {
+  /* console.log(req);
+
   req.response.header('Access-Control-Allow-Origin', '*');
   req.response.header('Access-Control-Allow-Headers', 'x-api-token');
+  reply.continue(); */
   reply.continue();
 });
 

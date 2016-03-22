@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
+import Conversation from './Conversation';
 
 const User = model.define('User', {
   id: {
@@ -33,6 +34,27 @@ const User = model.define('User', {
   updatedAt: 'updated_at',
   getterMethods: {
     modelType: () => 'users',
+  },
+  instanceMethods: {
+    hasConversationWith: (UserModel, userId) => {
+      return Promise.resolve(Conversation.findAll({
+        include: [{
+          model: UserModel,
+          attributes: ['id', [model.fn('COUNT', '`Users`.`id`'), 'count']],
+          where: {
+            id: {
+              $in: [1, userId],
+            },
+          },
+        }],
+        group: ['Conversation.id'],
+        having: [
+          '`Users.count` > 1',
+        ],
+      })).then(existingChats => {
+        return existingChats.length > 0;
+      });
+    },
   },
 });
 
