@@ -2,6 +2,7 @@ import { destructPayload } from 'services/payload';
 import { Message, User, Conversation } from 'models';
 import respondWithItem from 'utils/respondWithItem';
 import conversationSerializer from 'serializers/conversation';
+import Boom from 'boom';
 
 const values = ['type', 'users'];
 
@@ -10,20 +11,12 @@ module.exports = (req, reply) => {
   payload.users.push(req.auth.credentials.user.id);
 
   User.findById(req.auth.credentials.user.id).then(user => {
-    return user.hasConversationWith(User, payload);
+    return user.hasConversationWith(User, payload.users);
   }).then(hasConversationWith => {
-    console.log(hasConversationWith);
-    reply('ok');
-  }).catch(e => {
-    console.log(e);
-    reply(e);
-  });
-
-  // user.hasConversationWith(userId);
-
-  /*
-    if (existingChats.length) throw Boom.forbidden('You are already in a conversation with this person');
-
+    if (hasConversationWith) {
+      throw Boom.forbidden('You are already in a conversation with this person');
+    }
+  }).then(() => {
     return Conversation.create({
       type: payload.type.toUpperCase(),
       createdBy: req.auth.credentials.user.id,
@@ -38,5 +31,5 @@ module.exports = (req, reply) => {
     });
   }).catch(error => {
     reply(error);
-  }); */
+  });
 };

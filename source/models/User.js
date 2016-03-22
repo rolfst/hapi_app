@@ -36,14 +36,14 @@ const User = model.define('User', {
     modelType: () => 'users',
   },
   instanceMethods: {
-    hasConversationWith: (UserModel, userId) => {
+    hasConversationWith: (UserModel, userIds) => {
       return Promise.resolve(Conversation.findAll({
         include: [{
           model: UserModel,
           attributes: ['id', [model.fn('COUNT', '`Users`.`id`'), 'count']],
           where: {
             id: {
-              $in: [1, userId],
+              $in: userIds,
             },
           },
         }],
