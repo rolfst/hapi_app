@@ -15,6 +15,7 @@ module.exports = (req, reply) => {
     console.log(hasConversationWith);
     reply('ok');
   }).catch(e => {
+    console.log(e);
     reply(e);
   });
 
