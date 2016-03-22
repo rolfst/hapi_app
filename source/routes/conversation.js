@@ -26,7 +26,7 @@ export default [
   }, {
     method: 'POST',
     path: '/conversations/{id}/messages',
-    handler: require('handlers/createMessage'),
+    handler: require('handlers/postMessage'),
     config: {
       validate: message.create,
       auth: 'default',

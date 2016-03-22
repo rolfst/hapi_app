@@ -6,7 +6,7 @@ module.exports = {
       id: Joi.number(),
     },
     payload: {
-      body: Joi.string().required(),
+      text: Joi.string().required(),
     },
   },
 };

@@ -12,11 +12,15 @@ module.exports = (req, reply) => {
     return Message.create({
       parentId: conversation.id,
       parentType: 'FlexAppeal\\Entities\\Conversation',
-      text: req.payload.body,
+      text: req.payload.text,
       createdBy: req.auth.credentials.user.id,
       messageType: 'default',
     }).then(createdMessage => {
+      return Message.findById(createdMessage.id);
+    }).then(createdMessage => {
       return reply(respondWithItem(createdMessage, messageSerializer));
+    }).catch(error => {
+      reply(error);
     });
   });
 };
