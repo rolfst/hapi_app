@@ -23,10 +23,21 @@ server.ext('onRequest', (req, reply) => {
   return reply.continue();
 });
 
+// Accept CORS requests
 server.ext('onPreResponse', (req, reply) => {
-  req.response.header('Access-Control-Allow-Origin', '*');
-  req.response.header('Access-Control-Allow-Headers', 'x-api-token');
-  reply.continue();
+  const headers = 'Origin, X-API-Token, Content-Type, Accept';
+
+	if (req.response.isBoom) {
+		return reply(req.response.output.payload)
+			.code(req.response.output.statusCode)
+			.header('Access-Control-Allow-Origin', '*')
+			.header('Access-Control-Allow-Headers', headers);
+	}
+
+	req.response.header('Access-Control-Allow-Origin', '*');
+	req.response.header('Access-Control-Allow-Headers', headers);
+
+	reply.continue();
 });
 
 routes.map(route => server.route(route));
