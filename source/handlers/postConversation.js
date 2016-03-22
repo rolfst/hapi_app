@@ -2,9 +2,6 @@ import { destructPayload } from 'services/payload';
 import { Message, User, Conversation } from 'models';
 import respondWithItem from 'utils/respondWithItem';
 import conversationSerializer from 'serializers/conversation';
-import Promise from 'bluebird';
-import sequelize from 'connection';
-import Boom from 'boom';
 
 const values = ['type', 'users'];
 

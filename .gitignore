@@ -1,6 +1,7 @@
 /node_modules
 /.idea
-/dist
+/build
 .DS_Store
 /npm-debug.log
 /source/database.json
+.eslintcache
