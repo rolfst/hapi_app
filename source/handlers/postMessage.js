@@ -1,6 +1,5 @@
 import Boom from 'boom';
 import _ from 'lodash';
-import fetch from 'isomorphic-fetch';
 import { Conversation, Message } from 'models';
 import messageFactory from 'factories/message';
 import socket from 'services/socket';
@@ -21,7 +20,7 @@ module.exports = (req, reply) => {
     }).spread((message, users) => {
       const userIds = _.map(users, 'id');
       const response = respondWithItem(message, messageSerializer);
-      
+
       socket.send('send-message', userIds, response, req.headers['x-api-token']);
 
       return reply(response);

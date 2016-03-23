@@ -15,7 +15,7 @@
     "test": "cross-env NODE_PATH=source NODE_ENV=development mocha --compilers js:babel-register tests/**/*.js",
     "flow": "flow --help",
     "lint": "eslint --cache source/",
-    "check": "npm run lint; npm run test; npm outdated --depth 0"
+    "check": "npm run lint && npm run test && npm outdated --depth 0"
   },
   "author": "",
   "license": "ISC",

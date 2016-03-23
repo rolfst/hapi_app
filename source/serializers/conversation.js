@@ -8,7 +8,7 @@ export default item => {
     created_at: item.created_at,
   };
 
-  if (item.Messages && item.Messages.length > 0) {
+  if (item.Messages) {
     const messages = item.Messages.map(message => messageSerializer(message));
 
     output = Object.assign(output, { messages });
