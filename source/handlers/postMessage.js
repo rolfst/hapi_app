@@ -1,5 +1,4 @@
 import Boom from 'boom';
-import fetch from 'isomorphic-fetch';
 import { Conversation, Message } from 'models';
 import messageFactory from 'factories/message';
 import socket from 'services/socket';
