@@ -13,9 +13,9 @@ module.exports = (req, reply) => {
         .buildForConversation(conversation.id, req.auth.credentials.user.id, req.payload.text)
         .save();
 
-      return [ createdMessage, conversation.getUsers() ];
+      return [createdMessage, conversation.getUsers()];
     }).spread((createdMessage, users) => {
-      return [ Message.findById(createdMessage.id), users ];
+      return [Message.findById(createdMessage.id), users];
     }).spread((message, users) => {
       const userIds = users.map(user => user.id);
       const response = respondWithItem(message, messageSerializer);
