@@ -2,7 +2,7 @@ import userSerializer from 'serializers/user';
 
 export default item => {
   return {
-    type: 'message',
+    type: 'conversation_message',
     id: item.id.toString(),
     text: item.text,
     created_at: item.created_at,
