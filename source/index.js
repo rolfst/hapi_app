@@ -1,6 +1,7 @@
 'use strict';
 
 import Hapi from 'hapi';
+import dotenv from 'dotenv';
 import routes from 'routes/create-routes';
 import authenticator from 'middlewares/authenticator';
 
@@ -46,6 +47,8 @@ routes.map(route => server.route(route));
 
 server.start(err => {
   if (err) throw err;
+
+  dotenv.config();
 
   console.log('Server running at:', server.info.uri);
 });
