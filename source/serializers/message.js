@@ -7,7 +7,7 @@ export default item => {
     text: item.text,
     created_at: item.created_at,
     updated_at: item.updated_at,
-    conversation_id: item.parentId,
+    conversation_id: item.parentId.toString(),
     created_by: userSerializer(item.User),
   };
 };
