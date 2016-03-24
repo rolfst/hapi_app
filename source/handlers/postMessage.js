@@ -1,11 +1,14 @@
 import Boom from 'boom';
 import { Conversation, Message } from 'models';
 import messageFactory from 'factories/message';
+import notifier from 'services/notifier';
 import socket from 'services/socket';
 import respondWithItem from 'utils/respondWithItem';
 import messageSerializer from 'serializers/message';
 
 module.exports = (req, reply) => {
+  const loggedUser = req.auth.credentials.user;
+
   Conversation.findById(req.params.id)
     .then(conversation => {
       if (!conversation) throw Boom.notFound('No conversation found for id.');
@@ -17,10 +20,12 @@ module.exports = (req, reply) => {
     }).spread((createdMessage, users) => {
       return [Message.findById(createdMessage.id), users];
     }).spread((message, users) => {
-      const userIds = users.map(user => user.id);
+      const ids = users.filter(user => user.id !== loggedUser.id).map(user => user.id);
+      const emails = users.filter(user => user.id !== loggedUser.id).map(user => user.email);
       const response = respondWithItem(message, messageSerializer);
 
-      socket.send('send-message', userIds, response, req.headers['x-api-token']);
+      notifier.sendForMessage(message.id, emails, message.text);
+      socket.send('send-message', ids, response, req.headers['x-api-token']);
 
       return reply(response);
     }).catch(error => {
