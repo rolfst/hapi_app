@@ -2,7 +2,9 @@ import Parse from 'parse/node';
 import moment from 'moment';
 
 const sendPush = (emails, message, extraData) => {
-  Parse.initialize(process.env.PARSE_APP_ID, process.env.PARSE_CLIENT_KEY, process.env.PARSE_MASTER_KEY);
+  const { PARSE_APP_ID, PARSE_CLIENT_KEY, PARSE_MASTER_KEY } = process.env;
+
+  Parse.initialize(PARSE_APP_ID, PARSE_CLIENT_KEY, PARSE_MASTER_KEY);
 
   const query = new Parse.Query(Parse.Installation);
   query.containedIn('loggedin_as_email', emails || []);
