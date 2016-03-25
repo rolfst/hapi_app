@@ -5,11 +5,13 @@ import dotenv from 'dotenv';
 import routes from 'routes/create-routes';
 import authenticator from 'middlewares/authenticator';
 
+const { PORT } = process.env;
+
 const server = new Hapi.Server();
 
 server.connection({
   host: 'localhost',
-  port: 8000,
+  port: PORT || 8000,
   routes: {
     cors: true,
   },
