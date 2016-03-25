@@ -9,7 +9,7 @@ const createServer = port => {
 
   server.connection({
     host: 'localhost',
-    port: port,
+    port,
     routes: {
       cors: true,
     },
@@ -46,6 +46,6 @@ const createServer = port => {
   routes.map(route => server.route(route));
 
   return server;
-}
+};
 
 export default createServer;

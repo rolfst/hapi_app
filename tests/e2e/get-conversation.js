@@ -24,19 +24,13 @@ before(() => {
     token = json.data.access_token;
     user = json.data.user;
 
-    Conversation.create({
-      type: 'PRIVATE',
-      createdBy: user.id,
-    }).then(conversation => {
-      console.log('created', conversation);
-      conversation = conversation;
-    });
+    return Conversation.create({ type: 'PRIVATE', createdBy: user.id });
+  }).then(createdConversation => {
+    conversation = createdConversation;
   });
 });
 
 it('GET /conversations/:id', () => {
-  console.log(conversation);
-
   return server.inject({
     method: 'GET',
     url: `/conversations/${conversation.id}`,
@@ -45,15 +39,19 @@ it('GET /conversations/:id', () => {
     },
     credentials: { user },
   }).then(response => {
-    console.log(response.result);
+    assert.deepEqual(response.result, {
+      data: {
+        type: 'conversation',
+        id: conversation.id.toString(),
+        created_at: conversation.created_at,
+      },
+    });
+
     assert.equal(response.statusCode, 200);
   });
-
-  // assert.equal(1, 1);
 });
 
-// after(() => {
-//   return User.destroy({
-//     where: { email: 'testgebruiker@flex-appeal.nl' },
-//   });
-// });
+after(() => {
+  return Conversation.findById(conversation.id)
+    .then(conversation => conversation.destroy());
+});
