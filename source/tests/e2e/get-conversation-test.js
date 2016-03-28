@@ -1,5 +1,4 @@
 import { assert } from 'chai';
-import fetch from 'isomorphic-fetch';
 import Conversation from 'models/Conversation';
 
 import authenticate from 'tests/utils/authenticate';
@@ -14,7 +13,8 @@ let conversation = null;
 
 before(() => {
   return authenticate({}).then(({ user, token }) => {
-    token = token, user = user;
+    token = token;
+    user = user;
 
     return Conversation.create({ type: 'PRIVATE', createdBy: user.id });
   }).then(createdConversation => {
@@ -26,9 +26,9 @@ it('GET /conversations/:id', () => {
   return inject(server, user, {
     method: 'GET',
     url: `/conversations/${conversation.id}`,
-    token
+    token,
   }).then(response => {
-      assert.deepEqual(response.result, {
+    assert.deepEqual(response.result, {
         data: {
           type: 'conversation',
           id: conversation.id.toString(),
@@ -36,7 +36,7 @@ it('GET /conversations/:id', () => {
         },
       });
 
-      assert.equal(response.statusCode, 200);
+    assert.equal(response.statusCode, 200);
   });
 });
 
