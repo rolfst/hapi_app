@@ -13,8 +13,6 @@ export default {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ payload: payloadJson, userIds }),
-    }).then(res => {
-      console.log(res);
     });
   },
 };
