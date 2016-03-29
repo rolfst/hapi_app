@@ -1,7 +1,8 @@
 import userSerializer from 'serializers/user';
+import conversationSerializer from 'serializers/conversation';
 
 export default item => {
-  return {
+  let output = {
     type: 'conversation_message',
     id: item.id.toString(),
     text: item.text,
@@ -10,4 +11,12 @@ export default item => {
     conversation_id: item.parentId.toString(),
     created_by: userSerializer(item.User),
   };
+
+  if (item.Conversation) {
+    const conversation = conversationSerializer(item.Conversation);
+
+    output = Object.assign(output, { conversation });
+  }
+
+  return output;
 };

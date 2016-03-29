@@ -20,6 +20,10 @@ MessageModel.belongsTo(UserModel, {
   foreignKey: 'created_by',
 });
 
+MessageModel.belongsTo(ConversationModel, {
+  foreignKey: 'parent_id',
+});
+
 UserModel.belongsToMany(ConversationModel, {
   as: 'conversations',
   foreignKey: 'user_id',
