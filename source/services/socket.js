@@ -8,6 +8,8 @@ export default {
     fetch(`${WEBSOCKET_URL}/${eventName}?token=${token}`, {
       method: 'POST',
       body: JSON.stringify({ payload, userIds }),
+    }).then(res => {
+      console.log(res);
     });
   },
 };
