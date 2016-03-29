@@ -1,11 +1,12 @@
 import userSerializer from 'serializers/user';
 import messageSerializer from 'serializers/message';
+import formatDate from 'utils/formatDate';
 
 export default item => {
   let output = {
     type: 'conversation',
     id: item.id.toString(),
-    created_at: item.created_at,
+    created_at: formatDate(item.created_at),
   };
 
   if (item.Messages) {
