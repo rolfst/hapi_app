@@ -11,6 +11,8 @@ export default {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ payload: JSON.stringify(payload), userIds }),
+    }).then(res => {
+      console.log(res);
     });
   },
 };
