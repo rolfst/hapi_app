@@ -18,7 +18,7 @@ module.exports = (req, reply) => {
 
       return [createdMessage, conversation.getUsers()];
     }).spread((createdMessage, users) => {
-      return [Message.findById(createdMessage.id), users];
+      return [Message.findById(createdMessage.id, { include: [Conversation] }), users];
     }).spread((message, users) => {
       const ids = users.filter(user => user.id !== loggedUser.id).map(user => user.id);
       const emails = users.filter(user => user.id !== loggedUser.id).map(user => user.email);
