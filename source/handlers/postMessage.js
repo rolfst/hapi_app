@@ -24,7 +24,7 @@ module.exports = (req, reply) => {
       const emails = users.filter(user => user.id !== loggedUser.id).map(user => user.email);
       const response = respondWithItem(message, messageSerializer);
 
-      notifier.sendForMessage(message.id, emails, message.text);
+      notifier.sendForMessage(message.id, message.Conversation.id, emails, message.text);
       socket.send('send-message', ids, response, req.headers['x-api-token']);
 
       return reply(response);

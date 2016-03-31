@@ -23,7 +23,11 @@ const sendPush = (emails, message, extraData) => {
 
 export default {
   sendPush,
-  sendForMessage: (messageId, emails, message, extraData) => {
-    return sendPush(emails, message, Object.assign({ id: messageId, type: 'message' }, extraData));
+  sendForMessage: (messageId, conversationId, emails, message, extraData) => {
+    return sendPush(emails, message, Object.assign({
+      id: messageId,
+      conversation_id: conversationId,
+      type: 'message',
+    }, extraData));
   },
 };
