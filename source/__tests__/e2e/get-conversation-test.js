@@ -1,8 +1,9 @@
+/* eslint no-console: "off" */
 import { assert } from 'chai';
 import Conversation from 'models/Conversation';
 
-import authenticate from 'tests/utils/authenticate';
-import inject from 'tests/utils/inject';
+import authenticate from '__tests__/utils/authenticate';
+import inject from '__tests__/utils/inject';
 import createServer from 'server';
 
 const server = createServer(8000);
@@ -12,11 +13,11 @@ let user = null;
 let conversation = null;
 
 before(() => {
-  return authenticate({}).then(({ user, token }) => {
-    token = token;
-    user = user;
+  return authenticate({}).then(({ authUser, authToken }) => {
+    token = authToken;
+    user = authUser;
 
-    return Conversation.create({ type: 'PRIVATE', createdBy: user.id });
+    return Conversation.create({ type: 'PRIVATE', createdBy: authUser.id });
   }).then(createdConversation => {
     conversation = createdConversation;
   });
@@ -29,12 +30,12 @@ it('GET /conversations/:id', () => {
     token,
   }).then(response => {
     assert.deepEqual(response.result, {
-        data: {
-          type: 'conversation',
-          id: conversation.id.toString(),
-          created_at: conversation.created_at,
-        },
-      });
+      data: {
+        type: 'conversation',
+        id: conversation.id.toString(),
+        created_at: conversation.created_at,
+      },
+    });
 
     assert.equal(response.statusCode, 200);
   });
@@ -42,5 +43,5 @@ it('GET /conversations/:id', () => {
 
 after(() => {
   return Conversation.findById(conversation.id)
-    .then(conversation => conversation.destroy());
+    .then(foundConversation => foundConversation.destroy());
 });
