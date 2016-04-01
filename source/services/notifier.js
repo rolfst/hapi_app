@@ -27,7 +27,7 @@ export default {
     return sendPush(emails, message, Object.assign({
       id: messageId,
       conversation_id: conversationId,
-      type: 'message',
+      type: 'conversation_message',
     }, extraData));
   },
 };
