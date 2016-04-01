@@ -87,7 +87,7 @@ describe('Serializer: single resource', () => {
       };
     };
 
-    const resource = {
+    const resourceToTest = {
       type: 'messages',
       id: 1,
       body: 'Text of a message.',
@@ -110,7 +110,7 @@ describe('Serializer: single resource', () => {
       };
     };
 
-    const actual = respondWithItem(resource, messageSerializer);
+    const actual = respondWithItem(resourceToTest, messageSerializer);
     const expected = {
       data: {
         type: 'messages',

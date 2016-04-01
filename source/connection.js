@@ -1,3 +1,4 @@
+/* eslint no-console: "off" */
 import Sequelize from 'sequelize';
 import config from 'database.json';
 
