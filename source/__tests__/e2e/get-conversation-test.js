@@ -1,6 +1,7 @@
 /* eslint no-console: "off" */
 import { assert } from 'chai';
 import Conversation from 'models/Conversation';
+import formatDate from 'utils/formatDate';
 
 import authenticate from '__tests__/utils/authenticate';
 import inject from '__tests__/utils/inject';
@@ -19,6 +20,7 @@ before(() => {
 
     return Conversation.create({ type: 'PRIVATE', createdBy: authUser.id });
   }).then(createdConversation => {
+    createdConversation.addUsers([user.id]);
     conversation = createdConversation;
   });
 });
@@ -33,7 +35,7 @@ it('GET /conversations/:id', () => {
       data: {
         type: 'conversation',
         id: conversation.id.toString(),
-        created_at: conversation.created_at,
+        created_at: formatDate(conversation.created_at),
       },
     });
 

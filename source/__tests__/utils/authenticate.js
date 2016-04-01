@@ -1,3 +1,7 @@
+import { User } from 'models';
+
+let token;
+
 export default ({ email = 'ruben@flex-appeal.nl', password = 'admin' }) => {
   return fetch('https://test.api.flex-appeal.nl/v1/authorize', {
     method: 'POST',
@@ -5,6 +9,9 @@ export default ({ email = 'ruben@flex-appeal.nl', password = 'admin' }) => {
     body: JSON.stringify({ email, password }),
   }).then(response => response.json())
     .then(json => {
-      return { user: json.data.user, token: json.data.access_token };
+      token = json.data.access_token;
+      return User.findById(json.data.user.id);
+    }).then(user => {
+      return { authUser: user, authToken: token };
     });
 };
