@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import { Conversation, Message } from 'models';
+import { Conversation, Message, User } from 'models';
 import messageFactory from 'factories/message';
 import notifier from 'services/notifier';
 import socket from 'services/socket';
@@ -18,13 +18,13 @@ module.exports = (req, reply) => {
 
       return [createdMessage, conversation.getUsers()];
     }).spread((createdMessage, users) => {
-      return [Message.findById(createdMessage.id, { include: [Conversation] }), users];
+      return [Message.findById(createdMessage.id, { include: [Conversation, User] }), users];
     }).spread((message, users) => {
       const ids = users.filter(user => user.id !== loggedUser.id).map(user => user.id);
       const emails = users.filter(user => user.id !== loggedUser.id).map(user => user.email);
       const response = respondWithItem(message, messageSerializer);
 
-      notifier.sendForMessage(message.parentId.toString(), emails, message.text);
+      notifier.sendForMessage(message.Conversation.id, emails, message);
       socket.send('send-message', ids, response, req.headers['x-api-token']);
 
       return reply(response);
