@@ -7,4 +7,13 @@ const { host, database, username, password, dialect } = config[process.env.NODE_
 const logging = process.env.NODE_ENV !== 'testing' ?
   log => console.info(log) : false;
 
-export default new Sequelize(database, username, password, { host, dialect, logging });
+const define = {
+  charset: 'utf8mb4',
+  collate: 'utf8mb4_unicode_ci',
+};
+
+const dialectOptions = {
+  charset: 'utf8mb4',
+};
+
+export default new Sequelize(database, username, password, { host, dialect, logging, define, dialectOptions });
