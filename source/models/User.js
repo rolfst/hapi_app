@@ -32,6 +32,11 @@ const User = model.define('User', {
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',
+  getterMethods: {
+    fullName: function () { // eslint-disable-line object-shorthand
+      return `${this.firstName} ${this.lastName || ''}`;
+    },
+  },
   instanceMethods: {
     hasConversationWith: (UserModel, userIds) => {
       return Promise.resolve(Conversation.findAll({

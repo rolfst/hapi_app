@@ -6,13 +6,15 @@ const sendPush = (emails, message, extraData) => {
 
   Parse.initialize(PARSE_APP_ID, PARSE_CLIENT_KEY, PARSE_MASTER_KEY);
 
+  const plainMessage = `${message.User.fullName}: ${message.text}`;
+
   const query = new Parse.Query(Parse.Installation);
   query.containedIn('loggedin_as_email', emails || []);
 
   return Parse.Push.send({
     where: query,
     data: Object.assign({
-      alert: message,
+      alert: plainMessage,
       sound: 'default',
       badge: 'Increment',
       network_id: null,
