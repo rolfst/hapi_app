@@ -11,7 +11,6 @@ const sendPush = (emails, message, extraData) => {
 
   return Parse.Push.send({
     where: query,
-    push_time: moment().add(1, 'minutes').toISOString(),
     data: Object.assign({
       alert: message,
       sound: 'default',
