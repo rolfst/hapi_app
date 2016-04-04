@@ -33,7 +33,7 @@ const User = model.define('User', {
   createdAt: 'created_at',
   updatedAt: 'updated_at',
   getterMethods: {
-    fullName: function() {
+    fullName: function () { // eslint-disable-line object-shorthand
       return `${this.firstName} ${this.lastName || ''}`;
     },
   },
