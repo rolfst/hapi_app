@@ -1,5 +1,4 @@
 import Parse from 'parse/node';
-import moment from 'moment';
 
 const sendPush = (emails, message, extraData) => {
   const { PARSE_APP_ID, PARSE_CLIENT_KEY, PARSE_MASTER_KEY } = process.env;
