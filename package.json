@@ -13,7 +13,7 @@
     "build": "npm run clean && babel ./source -d ./build -s && npm run copy-config",
     "debug": "node-debug | npm run dev",
     "dev": "cross-env NODE_PATH=source NODE_ENV=development babel-node ./source/index.js",
-    "test": "cross-env NODE_PATH=source NODE_ENV=development mocha --compilers js:babel-register tests/**/*.js",
+    "test": "cross-env NODE_PATH=source NODE_ENV=testing mocha --compilers js:babel-register source/__tests__/**/*-test.js",
     "flow": "flow --help",
     "lint": "eslint --cache source/",
     "check": "npm run lint && npm run test && npm outdated --depth 0"

@@ -16,10 +16,15 @@ module.exports = (req, reply) => {
 
   Conversation.findById(req.params.id, { include: modelIncludes })
     .then(conversation => {
-      if (!conversation.hasUser(req.auth.credentials.user)) {
+      return [conversation.hasUser(req.auth.credentials.user), conversation];
+    }).spread((hasUser, conversation) => {
+      if (!hasUser) {
         throw Boom.forbidden('User doesn\'t belong to this conversation');
       }
 
       return reply(respondWithItem(conversation, conversationSerializer));
-    }).catch(boom => reply(boom));
+    }).catch(boom => {
+      console.log(boom);
+      reply(boom);
+    });
 };

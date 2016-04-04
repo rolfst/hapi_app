@@ -7,8 +7,6 @@ const sendPush = (emails, message, extraData) => {
   Parse.initialize(PARSE_APP_ID, PARSE_CLIENT_KEY, PARSE_MASTER_KEY);
 
   const plainMessage = `${message.User.fullName}: ${message.text}`;
-  console.log(plainMessage);
-  return;
 
   const query = new Parse.Query(Parse.Installation);
   query.containedIn('loggedin_as_email', emails || []);
@@ -27,7 +25,10 @@ const sendPush = (emails, message, extraData) => {
 
 export default {
   sendPush,
-  sendForMessage: (messageId, emails, message, extraData) => {
-    return sendPush(emails, message, Object.assign({ id: messageId, type: 'message' }, extraData));
+  sendForMessage: (conversationId, emails, message, extraData) => {
+    return sendPush(emails, message, Object.assign({
+      id: conversationId,
+      type: 'conversation',
+    }, extraData));
   },
 };

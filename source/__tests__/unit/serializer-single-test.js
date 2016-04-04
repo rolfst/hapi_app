@@ -1,5 +1,4 @@
 import { assert } from 'chai';
-import messageSerializer from 'serializers/message';
 import respondWithItem from 'utils/respondWithItem';
 
 const resource = {
@@ -44,8 +43,8 @@ describe('Serializer: single resource', () => {
         first_name: item.firstName,
         last_name: item.lastName,
         full_name: item.fullName,
-      }
-    }
+      };
+    };
 
     const messageSerializer = item => {
       return {
@@ -70,7 +69,7 @@ describe('Serializer: single resource', () => {
           first_name: 'John',
           last_name: 'Doe',
           full_name: 'John Doe',
-        }
+        },
       },
     };
 
@@ -85,10 +84,10 @@ describe('Serializer: single resource', () => {
         first_name: item.firstName,
         last_name: item.lastName,
         full_name: item.fullName,
-      }
-    }
+      };
+    };
 
-    const resource = {
+    const resourceToTest = {
       type: 'messages',
       id: 1,
       body: 'Text of a message.',
@@ -97,7 +96,7 @@ describe('Serializer: single resource', () => {
       updated_at: '2016-02-29T20:14:48+0100',
       Users: [
         { type: 'users', id: 5, firstName: 'John', lastName: 'Doe', fullName: 'John Doe' },
-        { type: 'users', id: 19, firstName: 'Foo', lastName: 'Baz', fullName: 'Foo Baz' }
+        { type: 'users', id: 19, firstName: 'Foo', lastName: 'Baz', fullName: 'Foo Baz' },
       ],
     };
 
@@ -111,7 +110,7 @@ describe('Serializer: single resource', () => {
       };
     };
 
-    const actual = respondWithItem(resource, messageSerializer);
+    const actual = respondWithItem(resourceToTest, messageSerializer);
     const expected = {
       data: {
         type: 'messages',
@@ -130,7 +129,7 @@ describe('Serializer: single resource', () => {
           first_name: 'Foo',
           last_name: 'Baz',
           full_name: 'Foo Baz',
-        }]
+        }],
       },
     };
 
