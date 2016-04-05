@@ -1,9 +1,15 @@
+import Boom from 'boom';
+
 import { Message, User, Conversation } from 'models';
 import respondWithItem from 'utils/respondWithItem';
 import conversationSerializer from 'serializers/conversation';
 
 export function postConversation({ type, createdBy, users }) {
-  return User.findById(createdBy).then(user => {
+  new Promise().then(() => {
+    if (users.length < 2) throw Boom.forbidden('Test');
+  }).then(() => {
+    return User.findById(createdBy);
+  }).then(user => {
     return user.hasConversationWith(User, users);
   }).then(existingConversation => {
     if (existingConversation) {
