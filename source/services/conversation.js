@@ -5,8 +5,11 @@ import respondWithItem from 'utils/respondWithItem';
 import conversationSerializer from 'serializers/conversation';
 
 export function postConversation({ type, createdBy, users }) {
-  new Promise().then(() => {
-    if (users.length < 2) throw Boom.forbidden('Test');
+  return new Promise((resolve, reject) => {
+    if (users.length < 2) reject(Boom.forbidden('Not enough conversation participants'));
+    if (users[0] === users[1]) reject(Boom.forbidden('Can\'t start a conversation with yourself'));
+
+    resolve();
   }).then(() => {
     return User.findById(createdBy);
   }).then(user => {
