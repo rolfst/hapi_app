@@ -29,6 +29,12 @@ const createServer = port => {
 
   // Accept CORS requests
   server.ext('onPreResponse', (req, reply) => {
+    if (req.response.isBoom) {
+      const { payload, statusCode } = req.response.output;
+
+      return reply(payload).code(statusCode);
+    }
+
     req.response.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTION');
 
     return reply.continue();
