@@ -11,7 +11,10 @@ const createServer = port => {
     host: 'localhost',
     port,
     routes: {
-      cors: true,
+      cors: {
+        origin: ['*'],
+        headers: ['Origin', 'X-API-Token', 'Content-Type', 'Accept'],
+      },
     },
   });
 
@@ -26,19 +29,7 @@ const createServer = port => {
 
   // Accept CORS requests
   server.ext('onPreResponse', (req, reply) => {
-    const allowedHeaders = 'Origin, X-API-Token, Content-Type, Accept';
-
-    if (req.response.isBoom) {
-      const { payload, statusCode } = req.response.output;
-
-      return reply(payload)
-        .code(statusCode)
-        .header('Access-Control-Allow-Origin', '*')
-        .header('Access-Control-Allow-Headers', allowedHeaders);
-    }
-
-    req.response.header('Access-Control-Allow-Origin', '*');
-    req.response.header('Access-Control-Allow-Headers', allowedHeaders);
+    req.response.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTION');
 
     return reply.continue();
   });
