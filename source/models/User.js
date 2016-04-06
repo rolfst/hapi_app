@@ -21,6 +21,11 @@ const User = model.define('User', {
     type: Sequelize.STRING,
     allowNull: false,
   },
+  phoneNum: {
+    type: Sequelize.STRING,
+    allowNull: true,
+    field: 'phone_num',
+  },
   profileImg: {
     type: Sequelize.STRING,
     field: 'profile_img',
