@@ -3,8 +3,6 @@ import formatDate from 'utils/formatDate';
 export default item => {
   const environment = process.env.NODE_ENV === 'production' ? 'production' : 'staging';
 
-  console.log(item);
-
   return {
     type: 'user',
     id: item.id.toString(),
