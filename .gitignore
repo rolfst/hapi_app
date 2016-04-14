@@ -6,3 +6,5 @@
 source/database.json
 .eslintcache
 .env*
+
+/coverage
