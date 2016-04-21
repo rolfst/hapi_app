@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import respondWithItem from 'utils/respondWithItem';
+import respondWithItem from 'utils/respond-with-item';
 
 const resource = {
   type: 'messages',
