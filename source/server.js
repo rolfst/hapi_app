@@ -1,8 +1,8 @@
 'use strict';
 
 import Hapi from 'hapi';
-import routes from 'routes/create-routes';
-import authenticator from 'middlewares/authenticator';
+import routes from 'create-routes';
+import authenticator from 'common/middlewares/authenticator';
 
 const createServer = port => {
   const server = new Hapi.Server();

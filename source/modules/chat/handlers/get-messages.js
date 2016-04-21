@@ -1,0 +1,21 @@
+import Boom from 'boom';
+import { Conversation } from 'modules/chat/models';
+import respondWithCollection from 'common/utils/respond-with-collection';
+import messageSerializer from 'modules/chat/serializers/message';
+
+module.exports = (req, reply) => {
+  Conversation.findById(req.params.id)
+    .then(conversation => {
+      if (!conversation) throw Boom.notFound('No conversation found for the given id.');
+
+      if (!conversation.hasUser(req.auth.credentials.user)) {
+        throw Boom.forbidden('User doesn\'t belong to this conversation');
+      }
+
+      return conversation.getMessages();
+    }).then(messages => {
+      const response = respondWithCollection(messages, messageSerializer);
+
+      return reply(response);
+    }).catch(boom => reply(boom));
+};
