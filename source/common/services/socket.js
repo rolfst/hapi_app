@@ -1,6 +1,6 @@
 import fetch from 'isomorphic-fetch';
 
-export const WEBSOCKET_URL = 'http://realtime.flex-appeal.nl';
+export const WEBSOCKET_URL = process.env['REALTIME_BASE_URL'];
 
 export default {
   send: (eventName, userIds, payload, token) => {
