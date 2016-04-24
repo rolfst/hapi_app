@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import parseIncludes from 'utils/parseIncludes';
+import parseIncludes from 'common/utils/parse-includes';
 
 it('parse includes from query object', () => {
   assert.deepEqual(

@@ -1,6 +1,7 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
 import User from 'common/models/user';
+import formatDate from 'common/utils/format-date';
 
 const Message = model.define('Message', {
   text: Sequelize.TEXT,
@@ -16,6 +17,19 @@ const Message = model.define('Message', {
   defaultScope: {
     include: [{ model: User }],
   },
+  instanceMethods: {
+    toJSON: function() {
+      return {
+        type: 'conversation_message',
+        id: this.id.toString(),
+        text: this.text,
+        created_at: formatDate(this.created_at),
+        updated_at: formatDate(this.updated_at),
+        conversation_id: item.parentId.toString(),
+        created_by: item.User.toJSON(),
+      }
+    }
+  }
 });
 
 export default Message;

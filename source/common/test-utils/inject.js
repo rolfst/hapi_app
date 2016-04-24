@@ -1,4 +1,4 @@
-export default (server, user, { token, method, url }) => {
+export default (server, user, { token, method, url, payload }) => {
   return server.inject({
     method,
     url,
@@ -6,5 +6,6 @@ export default (server, user, { token, method, url }) => {
       'X-API-Token': token,
     },
     credentials: { user },
+    payload,
   });
 };
