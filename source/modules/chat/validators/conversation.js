@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { validateId } from 'common/services/validate';
+import { validateId } from 'common/utils/validate';
 
 export default {
   create: {

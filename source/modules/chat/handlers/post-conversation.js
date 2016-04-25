@@ -5,7 +5,7 @@ module.exports = (req, reply) => {
   const { type, users } = req.payload;
   users.push(req.auth.credentials.user.id);
 
-  createConversation(type, req.auth.credentials.user, users)
+  createConversation(type, req.auth.credentials.user.id, users)
     .then(conversation => reply(respondWithItem(conversation)))
     .catch(boom => reply(boom));
 };
