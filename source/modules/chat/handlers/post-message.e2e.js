@@ -27,6 +27,7 @@ describe('Post message', () => {
   });
 
   after(() => {
+    // TODO: Messages for this test won't delete in the db
     return conversation.destroy();
   });
 });
