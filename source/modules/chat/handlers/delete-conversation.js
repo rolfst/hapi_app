@@ -1,12 +1,7 @@
-import Boom from 'boom';
-import { Conversation } from 'modules/chat/models';
+import { deleteConversationById } from 'modules/chat/repositories/conversation';
 
 module.exports = (req, reply) => {
-  Conversation.findById(req.params.id).then(conversation => {
-    return conversation.destroy();
-  }).then(() => {
-    reply({ message: 'Successfully deleted conversation' });
-  }).catch(err => {
-    reply(Boom.badRequest(err));
-  });
+  return deleteConversationById(req.params.id)
+    .then(() => reply({ message: 'Successfully deleted conversation' }))
+    .catch(boom => reply(boom));
 };

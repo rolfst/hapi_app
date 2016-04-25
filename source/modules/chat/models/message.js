@@ -25,8 +25,8 @@ const Message = model.define('Message', {
         text: this.text,
         created_at: formatDate(this.created_at),
         updated_at: formatDate(this.updated_at),
-        conversation_id: item.parentId.toString(),
-        created_by: item.User.toJSON(),
+        conversation_id: this.parentId.toString(),
+        created_by: this.User.toJSON(),
       }
     }
   }

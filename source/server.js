@@ -5,7 +5,19 @@ import routes from 'create-routes';
 import authenticator from 'common/middlewares/authenticator';
 
 const createServer = port => {
-  const server = new Hapi.Server();
+  let options = {};
+
+  const makeConfig = () => {
+    if (process.env.NODE_ENV === 'debug') {
+      options['debug'] = {
+        request: ['error'],
+      };
+    }
+
+    return options;
+  }
+
+  const server = new Hapi.Server(makeConfig());
 
   server.connection({
     host: 'localhost',

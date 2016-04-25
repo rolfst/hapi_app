@@ -2,7 +2,6 @@ import Boom from 'boom';
 
 import { Message, User, Conversation } from 'modules/chat/models';
 import respondWithItem from 'common/utils/respond-with-item';
-import conversationSerializer from 'modules/chat/serializers/conversation';
 
 export function postConversation({ type, createdBy, users }) {
   return new Promise((resolve, reject) => {
@@ -28,7 +27,7 @@ export function postConversation({ type, createdBy, users }) {
       return Conversation.findById(newConversation.id, { include: [User, Message] });
     });
   }).then(conversation => {
-    return respondWithItem(conversation, conversationSerializer, {
+    return respondWithItem(conversation, {
       relations: ['messages', 'users'],
     });
   });

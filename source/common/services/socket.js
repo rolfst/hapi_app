@@ -3,7 +3,9 @@ import fetch from 'isomorphic-fetch';
 export const WEBSOCKET_URL = process.env['REALTIME_BASE_URL'];
 
 export default {
-  send: (eventName, userIds, payload, token) => {
+  send: (eventName, users, payload, token) => {
+    const userIds = users.map(user => user.id);
+
     fetch(`${WEBSOCKET_URL}/${eventName}?token=${token}`, {
       method: 'POST',
       headers: {
