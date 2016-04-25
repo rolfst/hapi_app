@@ -25,6 +25,8 @@ describe('Get conversation', () => {
       });
   });
 
+  // TODO: Add ?include=messages case
+
   after(() => {
     return conversation.destroy();
   });

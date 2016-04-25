@@ -22,6 +22,8 @@ describe('Get conversations for logged user', () => {
       });
   });
 
+  // TODO: Add ?include=messages case
+
   after(() => {
     return deleteAllConversationsForUser(global.authUser);
   });

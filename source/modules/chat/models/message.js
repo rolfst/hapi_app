@@ -19,7 +19,7 @@ const Message = model.define('Message', {
   },
   instanceMethods: {
     toJSON: function () { // eslint-disable-line
-      const output = {
+      let output = {
         type: 'conversation_message',
         id: this.id.toString(),
         text: this.text,
@@ -30,7 +30,7 @@ const Message = model.define('Message', {
       };
 
       if (this.Conversation) {
-        output = Object.assign(output, { conversation: item.Conversation.toJSON() });
+        output = Object.assign(output, { conversation: this.Conversation.toJSON() });
       }
 
       return output;
