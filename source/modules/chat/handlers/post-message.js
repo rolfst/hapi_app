@@ -1,7 +1,4 @@
-import Boom from 'boom';
-import _ from 'lodash';
-import { Conversation, Message, User } from 'modules/chat/models';
-import messageFactory from 'modules/chat/factories/message';
+import { Conversation, User } from 'modules/chat/models';
 import notifier from 'common/services/notifier';
 import socket from 'common/services/socket';
 import respondWithItem from 'common/utils/respond-with-item';

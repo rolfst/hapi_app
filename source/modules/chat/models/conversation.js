@@ -24,12 +24,12 @@ const Conversation = model.define('Conversation', {
     include: [{ model: User }],
   },
   instanceMethods: {
-    toJSON: function() {
+    toJSON: function () { // eslint-disable-line
       let output = {
         type: 'conversation',
         id: this.id.toString(),
         created_at: formatDate(this.created_at),
-      }
+      };
 
       if (this.Messages) {
         const messages = this.Messages.map(message => message.toJSON());
@@ -44,8 +44,8 @@ const Conversation = model.define('Conversation', {
       }
 
       return output;
-    }
-  }
+    },
+  },
 });
 
 export default Conversation;

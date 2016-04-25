@@ -1,4 +1,3 @@
-import { postConversation } from 'common/services/conversation';
 import respondWithItem from 'common/utils/respond-with-item';
 import { createConversation } from 'modules/chat/repositories/conversation';
 

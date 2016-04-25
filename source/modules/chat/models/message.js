@@ -18,7 +18,7 @@ const Message = model.define('Message', {
     include: [{ model: User }],
   },
   instanceMethods: {
-    toJSON: function() {
+    toJSON: function () { // eslint-disable-line
       return {
         type: 'conversation_message',
         id: this.id.toString(),
@@ -27,9 +27,9 @@ const Message = model.define('Message', {
         updated_at: formatDate(this.updated_at),
         conversation_id: this.parentId.toString(),
         created_by: this.User.toJSON(),
-      }
-    }
-  }
+      };
+    },
+  },
 });
 
 export default Message;

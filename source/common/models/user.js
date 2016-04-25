@@ -39,7 +39,7 @@ const User = model.define('User', {
   createdAt: 'created_at',
   updatedAt: 'updated_at',
   getterMethods: {
-    fullName: function () { // eslint-disable-line object-shorthand
+    fullName: function () { // eslint-disable-line
       return `${this.firstName || ''} ${this.lastName || ''}`;
     },
   },
@@ -63,7 +63,7 @@ const User = model.define('User', {
         return existingChats[0] || null;
       });
     },
-    toJSON: function() {
+    toJSON: function () { // eslint-disable-line
       const environment = process.env.NODE_ENV === 'production' ? 'production' : 'staging';
 
       return {

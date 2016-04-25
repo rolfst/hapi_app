@@ -1,6 +1,5 @@
-import Boom from 'boom';
 import _ from 'lodash';
-import { Message, Conversation } from 'modules/chat/models';
+import { Message } from 'modules/chat/models';
 import { findConversationById } from 'modules/chat/repositories/conversation';
 import respondWithItem from 'common/utils/respond-with-item';
 import parseIncludes from 'common/utils/parse-includes';

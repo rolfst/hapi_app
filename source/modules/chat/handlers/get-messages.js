@@ -1,5 +1,3 @@
-import Boom from 'boom';
-import { Conversation } from 'modules/chat/models';
 import respondWithCollection from 'common/utils/respond-with-collection';
 import { findConversationById } from 'modules/chat/repositories/conversation';
 import { findAllForConversation } from 'modules/chat/repositories/message';

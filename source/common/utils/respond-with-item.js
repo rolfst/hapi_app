@@ -1,3 +1,3 @@
-export default (item, serializer) => {
+export default item => {
   return { data: item.toJSON() };
 };

@@ -1,7 +1,8 @@
 import Message from 'modules/chat/models/message';
+import Boom from 'boom';
 
 export function findAllForConversation(conversation) {
-    return conversation.getMessages();
+  return conversation.getMessages();
 }
 
 export function createMessage(conversationId, creatorId, text) {

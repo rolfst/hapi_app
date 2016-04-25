@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { User, Message } from 'modules/chat/models';
+import { Message } from 'modules/chat/models';
 import respondWithCollection from 'common/utils/respond-with-collection';
 import parseIncludes from 'common/utils/parse-includes';
 import { findAllForUser } from 'modules/chat/repositories/conversation';
