@@ -14,6 +14,15 @@ export function deleteConversationById(id) {
     .catch(err => Boom.badRequest(err));
 }
 
+export function deleteAllConversationsForUser(user) {
+  return user.getConversations()
+    .then(conversations => {
+      conversations.map(conversation => {
+        conversation.destroy();
+      });
+    });
+}
+
 export function findConversationById(id, includes) {
   return Conversation
     .findById(id, { include: includes })
@@ -29,7 +38,7 @@ export function findAllForUser(user, includes) {
   return user.getConversations({ include: includes });
 }
 
-export function createConversation(type, creator, participants) {
+export function createConversation(type, creatorId, participants) {
   // TODO: Move logic to acl
   if (participants.length < 2) {
     return Boom.forbidden('A conversation must have 2 or more participants');
@@ -41,7 +50,7 @@ export function createConversation(type, creator, participants) {
 
   // TODO: Add acl to check if user already has a conversation with a participant
   // user.hasConversationWith(User, users);
-  return Conversation.create({ type: type.toUpperCase(), createdBy: creator.id })
+  return Conversation.create({ type: type.toUpperCase(), createdBy: creatorId })
     .then(createdConversation => {
       return [createdConversation, createdConversation.addUsers(participants)];
     })

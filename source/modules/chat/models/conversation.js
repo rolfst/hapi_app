@@ -46,6 +46,12 @@ const Conversation = model.define('Conversation', {
       return output;
     },
   },
+  hooks: {
+    afterDestroy: function (conversation, options) {
+      conversation.getMessages()
+        .then(messages => messages.map(message => message.destroy()));
+    },
+  },
 });
 
 export default Conversation;
