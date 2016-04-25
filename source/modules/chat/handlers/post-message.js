@@ -1,35 +1,28 @@
-import Boom from 'boom';
-import { Conversation, Message, User } from 'modules/chat/models';
-import messageFactory from 'modules/chat/factories/message';
+import { Conversation, User } from 'modules/chat/models';
 import notifier from 'common/services/notifier';
 import socket from 'common/services/socket';
 import respondWithItem from 'common/utils/respond-with-item';
-import messageSerializer from 'modules/chat/serializers/message';
+import { findConversationById } from 'modules/chat/repositories/conversation';
+import { findMessageById, createMessage } from 'modules/chat/repositories/message';
 
 module.exports = (req, reply) => {
   const loggedUser = req.auth.credentials.user;
 
-  Conversation.findById(req.params.id)
+  findConversationById(req.params.id)
     .then(conversation => {
-      if (!conversation) throw Boom.notFound('No conversation found for id.');
-      const createdMessage = messageFactory
-        .buildForConversation(conversation.id, req.auth.credentials.user.id, req.payload.text)
-        .save();
-
+      const createdMessage = createMessage(conversation.id, loggedUser.id, req.payload.text);
       return [createdMessage, conversation.getUsers()];
-    }).spread((createdMessage, users) => {
-      return [Message.findById(createdMessage.id, { include: [Conversation, User] }), users];
-    }).spread((message, users) => {
-      const ids = users.filter(user => user.id !== loggedUser.id).map(user => user.id);
-      const emails = users.filter(user => user.id !== loggedUser.id).map(user => user.email);
-      const response = respondWithItem(message, messageSerializer);
+    })
+    .spread((createdMessage, participants) => {
+      return findMessageById(createdMessage.id, [Conversation, User])
+        .then(message => {
+          const usersToNotify = participants.filter(user => user.id !== loggedUser.id);
+          notifier.sendForMessage(usersToNotify, message);
 
-      notifier.sendForMessage(message.Conversation.id, emails, message);
-      socket.send('send-message', ids, response, req.headers['x-api-token']);
+          const response = respondWithItem(message);
+          socket.send('send-message', usersToNotify, response, req.headers['x-api-token']);
 
-      return reply(response);
-    }).catch(error => {
-      console.error(error);
-      reply(error);
+          return reply(response);
+        });
     });
 };

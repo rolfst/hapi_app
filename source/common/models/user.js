@@ -1,6 +1,7 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
 import Conversation from 'modules/chat/models/Conversation';
+import formatDate from 'common/utils/format-date';
 
 const User = model.define('User', {
   id: {
@@ -38,8 +39,8 @@ const User = model.define('User', {
   createdAt: 'created_at',
   updatedAt: 'updated_at',
   getterMethods: {
-    fullName: function () { // eslint-disable-line object-shorthand
-      return `${this.firstName} ${this.lastName || ''}`;
+    fullName: function () { // eslint-disable-line
+      return `${this.firstName || ''} ${this.lastName || ''}`;
     },
   },
   instanceMethods: {
@@ -61,6 +62,21 @@ const User = model.define('User', {
       })).then(existingChats => {
         return existingChats[0] || null;
       });
+    },
+    toJSON: function () { // eslint-disable-line
+      const environment = process.env.NODE_ENV === 'production' ? 'production' : 'staging';
+
+      return {
+        type: 'user',
+        id: this.id.toString(),
+        first_name: this.firstName,
+        last_name: this.lastName,
+        full_name: this.fullName,
+        email: this.email,
+        phone_num: this.phoneNum,
+        profile_img: `https://s3.eu-central-1.amazonaws.com/flex-appeal/${environment}/profiles/${this.profileImg}`,
+        created_at: formatDate(this.created_at),
+      };
     },
   },
 });

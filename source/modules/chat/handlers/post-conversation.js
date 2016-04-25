@@ -1,23 +1,11 @@
-import { postConversation } from 'common/services/conversation';
 import respondWithItem from 'common/utils/respond-with-item';
-import conversationSerializer from 'modules/chat/serializers/conversation';
+import { createConversation } from 'modules/chat/repositories/conversation';
 
 module.exports = (req, reply) => {
   const { type, users } = req.payload;
   users.push(req.auth.credentials.user.id);
 
-  postConversation({
-    type: type.toUpperCase(),
-    createdBy: req.auth.credentials.user.id,
-    users,
-  })
-    .then(conversation => {
-      return respondWithItem(conversation, conversationSerializer, {
-        relations: ['messages', 'users'],
-      });
-    })
-    .then(data => reply(data))
-    .catch(error => {
-      reply(error);
-    });
+  createConversation(type, req.auth.credentials.user, users)
+    .then(conversation => reply(respondWithItem(conversation)))
+    .catch(boom => reply(boom));
 };

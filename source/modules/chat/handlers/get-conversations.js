@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import { User, Message } from 'modules/chat/models';
-import conversationSerializer from 'modules/chat/serializers/conversation';
+import { Message } from 'modules/chat/models';
 import respondWithCollection from 'common/utils/respond-with-collection';
 import parseIncludes from 'common/utils/parse-includes';
+import { findAllForUser } from 'modules/chat/repositories/conversation';
 
 module.exports = (req, reply) => {
   const includes = parseIncludes(req.query);
@@ -13,13 +13,6 @@ module.exports = (req, reply) => {
     modelIncludes.push({ model: Message });
   }
 
-  User.findById(req.auth.credentials.user.id)
-    .then(user => {
-      return user.getConversations({ include: modelIncludes });
-    })
-    .then(conversations => {
-      const response = respondWithCollection(conversations, conversationSerializer);
-
-      reply(response);
-    });
+  findAllForUser(req.auth.credentials.user)
+    .then(conversations => reply(respondWithCollection(conversations)));
 };
