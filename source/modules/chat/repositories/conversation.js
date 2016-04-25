@@ -18,7 +18,7 @@ export function deleteAllConversationsForUser(user) {
   return user.getConversations()
     .then(conversations => {
       conversations.map(conversation => {
-        conversation.destroy();
+        return conversation.destroy();
       });
     });
 }

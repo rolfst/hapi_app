@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { postRequest } from 'common/test-utils/request';
 
-import { createConversation, deleteConversationById } from 'modules/chat/repositories/conversation';
+import { deleteConversationById } from 'modules/chat/repositories/conversation';
 
 let conversationId = null;
 

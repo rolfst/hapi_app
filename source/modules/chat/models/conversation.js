@@ -47,7 +47,7 @@ const Conversation = model.define('Conversation', {
     },
   },
   hooks: {
-    afterDestroy: function (conversation, options) {
+    afterDestroy: function (conversation) { // eslint-disable-line
       conversation.getMessages()
         .then(messages => messages.map(message => message.destroy()));
     },

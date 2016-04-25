@@ -1,7 +1,10 @@
 import { assert } from 'chai';
 import { getRequest } from 'common/test-utils/request';
 
-import { createConversation, deleteAllConversationsForUser } from 'modules/chat/repositories/conversation';
+import {
+  createConversation,
+  deleteAllConversationsForUser,
+} from 'modules/chat/repositories/conversation';
 
 
 describe('Get conversations for logged user', () => {
@@ -21,8 +24,6 @@ describe('Get conversations for logged user', () => {
         assert.equal(response.statusCode, 200);
       });
   });
-
-  // TODO: Add ?include=messages case
 
   after(() => {
     return deleteAllConversationsForUser(global.authUser);

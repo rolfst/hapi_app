@@ -1,7 +1,7 @@
 import Parse from 'parse/node';
 
 const sendPush = (users, text, extraData) => {
-  if (process.env.NODE_ENV === 'testing') return;
+  if (process.env.NODE_ENV === 'testing') return false;
 
   const { PARSE_APP_ID, PARSE_CLIENT_KEY, PARSE_MASTER_KEY } = process.env;
 
