@@ -4,9 +4,10 @@ import Conversation from 'modules/chat/models/Conversation';
 import formatDate from 'common/utils/format-date';
 
 const User = model.define('User', {
-  id: {
-    type: Sequelize.INTEGER,
-    primaryKey: true,
+  profileImg: {
+    type: Sequelize.STRING,
+    field: 'profile_img',
+    allowNull: false,
   },
   firstName: {
     type: Sequelize.STRING,
@@ -22,17 +23,29 @@ const User = model.define('User', {
     type: Sequelize.STRING,
     allowNull: false,
   },
+  password: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+  address: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+  zipCode: {
+    type: Sequelize.STRING,
+    allowNull: true,
+    field: 'zip_code',
+  },
+  dateOfBirth: {
+    type: Sequelize.DATE,
+    allowNull: true,
+    field: 'date_of_birth',
+  },
   phoneNum: {
     type: Sequelize.STRING,
     allowNull: true,
     field: 'phone_num',
   },
-  profileImg: {
-    type: Sequelize.STRING,
-    field: 'profile_img',
-    allowNull: false,
-  },
-  password: Sequelize.STRING,
 }, {
   tableName: 'users',
   timestamps: true,

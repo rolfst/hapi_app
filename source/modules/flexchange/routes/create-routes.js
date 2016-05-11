@@ -1,3 +1,3 @@
-import conversation from 'modules/chat/routes/conversation';
+import shift from 'modules/flexchange/routes/shift';
 
-export default [...conversation];
+export default [...shift];

@@ -2,7 +2,12 @@
 
 import Hapi from 'hapi';
 import routes from 'create-routes';
-import authenticator from 'common/middlewares/authenticator';
+import jwtStrategy from 'common/middlewares/authenticator-strategy';
+import integrationStrategy from 'common/middlewares/integration-strategy';
+
+if (process.env.NODE_ENV === 'debug') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
 
 const createServer = port => {
   const options = {};
@@ -30,8 +35,10 @@ const createServer = port => {
     },
   });
 
-  server.auth.scheme('jwt', authenticator);
+  server.auth.scheme('jwt', jwtStrategy);
   server.auth.strategy('default', 'jwt');
+  server.auth.scheme('integration', integrationStrategy);
+  server.auth.strategy('integration', 'integration');
   server.auth.default('default');
 
   server.ext('onRequest', (req, reply) => {
