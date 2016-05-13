@@ -6,7 +6,6 @@ export default baseUrl => {
   const endpoint = `${baseUrl}/me/shifts/${date}`;
 
   return pmtClient(endpoint)
-    .then(res => res.json())
     .then(data => data.shifts)
     .catch(err => console.log(err));
 };

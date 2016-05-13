@@ -3,7 +3,7 @@ import { Network, Integration } from 'common/models';
 
 export function findNetworkById(id) {
   return Network
-    .findById(id)
+    .findById(id, { include: Integration })
     .then(network => {
       if (!network) return Boom.notFound('No network found.');
 
