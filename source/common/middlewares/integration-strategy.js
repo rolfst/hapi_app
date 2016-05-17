@@ -17,7 +17,7 @@ export default () => {
         }).then(integration => {
           if (!integration) throw Error('Invalid token.');
 
-          return reply.continue({ credentials: { integration } });
+          return reply.continue({ credentials: integration });
         });
       } catch (e) {
         return reply(Boom.forbidden(e.message));

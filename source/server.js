@@ -4,6 +4,7 @@ import Hapi from 'hapi';
 import routes from 'create-routes';
 import jwtStrategy from 'common/middlewares/authenticator-strategy';
 import integrationStrategy from 'common/middlewares/integration-strategy';
+import { findNetworkById } from 'common/repositories/network';
 
 if (process.env.NODE_ENV === 'debug') {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -43,6 +44,7 @@ const createServer = port => {
 
   server.ext('onRequest', (req, reply) => {
     process.env.BASE_URL = `${req.connection.info.protocol}://${req.info.host}`;
+
     return reply.continue();
   });
 
