@@ -15,6 +15,14 @@ export default {
       config: { auth }
     }
   },
+  put: (path, handler, auth = 'default') => {
+    return {
+      method: 'PUT',
+      path,
+      handler: handler.default ? handler.default : handler,
+      config: { auth }
+    }
+  },
   patch: (path, handler, auth = 'default') => {
     return {
       method: 'PATCH',

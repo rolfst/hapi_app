@@ -36,6 +36,20 @@ const Exchange = model.define('Exchange', {
 }, {
   tableName: 'services',
   timestamps: false,
+  instanceMethods: {
+    toJSON: function () { // eslint-disable-line
+      let output = {
+        type: 'exchange',
+        id: this.id.toString(),
+        title: this.title,
+        description: this.description,
+        date: formatDate(this.date),
+        created_at: formatDate(this.created_at),
+      };
+
+      return output;
+    },
+  },
 });
 
 export default Exchange;
