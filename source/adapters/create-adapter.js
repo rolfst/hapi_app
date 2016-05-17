@@ -1,5 +1,5 @@
 import IntegrationNotFound from 'common/errors/integration-not-found';
-import pmtAdapter from 'integrations/pmt/adapter';
+import pmtAdapter from 'adapters/pmt/adapter';
 
 const getAdapterForService = name => {
   const drivers = {

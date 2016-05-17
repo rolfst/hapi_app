@@ -1,4 +1,4 @@
-import createAdapter from 'integrations/create-adapter';
+import createAdapter from 'adapters/create-adapter';
 import { findNetworkById } from 'common/repositories/network';
 
 export default (req, reply) => {

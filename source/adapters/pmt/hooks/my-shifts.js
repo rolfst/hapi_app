@@ -1,4 +1,4 @@
-import pmtClient from 'integrations/pmt/client';
+import pmtClient from 'adapters/pmt/client';
 import moment from 'moment';
 
 export default baseUrl => {

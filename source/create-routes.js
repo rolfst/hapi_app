@@ -1,12 +1,12 @@
 import Boom from 'boom';
 import chatRoutes from 'modules/chat/routes/create-routes';
 import flexchangeRoutes from 'modules/flexchange/routes/create-routes';
-import createAdapter from 'integrations/create-adapter';
+import createAdapter from 'adapters/create-adapter';
 
 const defaultRoutes = [
   {
     method: 'GET',
-    path: '/integrations/{id}/sync',
+    path: '/adapters/{id}/sync',
     handler: (req, reply) => {
       try {
         createAdapter(req.params.id).initialSync();
@@ -22,7 +22,7 @@ const defaultRoutes = [
     },
   }, {
     method: 'GET',
-    path: '/integrations/event',
+    path: '/adapters/event',
     handler: (req, reply) => {
       try {
         const eventTypes = ['NEW_STORE', 'NEW_EMPLOYEE', 'UPDATE_EMPLOYEE'];

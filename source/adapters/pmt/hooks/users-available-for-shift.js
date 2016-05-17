@@ -1,4 +1,4 @@
-import pmtClient from 'integrations/pmt/client';
+import pmtClient from 'adapters/pmt/client';
 
 export default (baseUrl, shiftId) => {
   const endpoint = `${baseUrl}/shift/${shiftId}/available`;

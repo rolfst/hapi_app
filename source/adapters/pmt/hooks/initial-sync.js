@@ -1,11 +1,11 @@
 import { findNetworksForIntegration } from 'common/repositories/network';
 import { findAllUsers, createOrUpdateUser } from 'common/repositories/user';
-import fetchPmtUsers from 'integrations/pmt/hooks/fetch-users';
+import fetchPmtUsers from 'adapters/pmt/hooks/fetch-users';
 import {
   pmtUserBelongsToNetwork,
   updateNetworkActivityForPmtUser,
   addPmtUserForNetwork,
-} from 'integrations/pmt/queries';
+} from 'adapters/pmt/queries';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
