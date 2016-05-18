@@ -1,4 +1,4 @@
-import Exchange from 'modules/flexchange/models/exchange';
+import { Exchange } from 'modules/flexchange/models'; // eslint-disable-line
 
 export function findExchangeById(exchangeId) {
   return Exchange
@@ -10,6 +10,10 @@ export function findExchangeById(exchangeId) {
     })
 }
 
-export function getExchangeValues(exchange) {
-  //TODO
-};
+export function findExchangesByUser(user) {
+  return user.getExchanges();
+}
+
+export function findExchangesByNetwork(network) {
+  return network.getExchanges();
+}

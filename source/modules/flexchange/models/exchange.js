@@ -44,13 +44,12 @@ const Exchange = model.define('Exchange', {
   },
 }, {
   tableName: 'exchanges',
-  underscore: true,
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',
   instanceMethods: {
     toJSON: function () { // eslint-disable-line
-      let output = {
+      return {
         type: 'exchange',
         id: this.id.toString(),
         title: this.title,
@@ -61,8 +60,6 @@ const Exchange = model.define('Exchange', {
         decline_count:  this.declineCount,
         created_at: formatDate(this.created_at),
       };
-
-      return output;
     },
   },
 });
