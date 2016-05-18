@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import { Exchange } from 'modules/flexchange/models'; // eslint-disable-line
+import { Exchange, ExchangeResponse } from 'modules/flexchange/models'; // eslint-disable-line
 import { User } from 'common/models';
 
 export function findExchangeById(exchangeId) {

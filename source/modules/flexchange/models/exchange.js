@@ -71,13 +71,19 @@ const Exchange = model.define('Exchange', {
 
       if (this.ApprovedUser) {
         output = Object.assign(output, {
-          approved_user: this.ApprovedUser.toSimpleJSON()
+          approved_user: this.ApprovedUser.toSimpleJSON(),
         });
       }
 
       if (this.User) {
         output = Object.assign(output, {
-          user: this.User.toSimpleJSON()
+          user: this.User.toSimpleJSON(),
+        });
+      }
+
+      if (this.ExchangeResponses) {
+        output = Object.assign(output, {
+          responses: this.ExchangeResponses.map(res => res.toJSON()),
         });
       }
 
