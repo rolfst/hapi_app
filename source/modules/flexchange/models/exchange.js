@@ -81,6 +81,12 @@ const Exchange = model.define('Exchange', {
         });
       }
 
+      if (this.ExchangeResponses) {
+        output = Object.assign(output, {
+          responses: this.ExchangeResponses.map(res => res.toJSON()),
+        });
+      }
+
       return output;
     },
   },
