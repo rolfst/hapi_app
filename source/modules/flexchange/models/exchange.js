@@ -55,8 +55,8 @@ const Exchange = model.define('Exchange', {
         description: this.description,
         date: formatDate(this.date),
         vote_result: 'TODO',
-        accept_count:  this.acceptCount,
-        decline_count:  this.declineCount,
+        accept_count: this.acceptCount,
+        decline_count: this.declineCount,
         created_at: formatDate(this.created_at),
       };
     },
