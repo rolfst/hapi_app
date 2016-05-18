@@ -22,3 +22,15 @@ export function findExchangeById(id) {
       return exchange;
     });
 }
+
+export function createExchange(userId, networkId, payload) {
+  return Exchange
+    .create({
+      userId,
+      networkId,
+      title: payload.title,
+      description: payload.description,
+      date: payload.date,
+      type: payload.type,
+    });
+}
