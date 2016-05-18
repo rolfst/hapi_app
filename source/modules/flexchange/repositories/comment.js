@@ -2,7 +2,7 @@ import Boom from 'boom';
 import ExchangeComment from 'modules/flexchange/models/exchange-comment';
 
 /**
- * Find an specific exchange comment by id
+ * Find a specific exchange comment by id
  * @param {number} commentId - Id of the comment
  * @method findCommentById
  * @return {promise} Find exchange comment promise
@@ -24,7 +24,7 @@ export function findCommentById(commentId) {
    * @param {string} text - The comment text
    * @param {number} userId - Id of the user placing the comment
  * @method createExchangeComment
- * @return {promise} Create exchange comment promise
+ * @return {promise} - Create exchange comment promise
  */
 export function createExchangeComment(exchangeId, { text, userId }) {
   return ExchangeComment.create({
