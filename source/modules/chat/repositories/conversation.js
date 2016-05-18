@@ -3,6 +3,12 @@ import User from 'common/models/user';
 import Conversation from 'modules/chat/models/conversation';
 import Message from 'modules/chat/models/message';
 
+/**
+ * Delete a specific conversation by id
+ * @param {number} id - Id of the conversation to be deleted
+ * @method deleteConversationById
+ * @return {promise} - Delete conversation promise
+ */
 export function deleteConversationById(id) {
   return Conversation
     .findById(id)
@@ -14,6 +20,12 @@ export function deleteConversationById(id) {
     .catch(err => Boom.badRequest(err));
 }
 
+/**
+ * Delete all conversations for a user
+ * @param {User} user - User to delete the conversations of
+ * @method deleteAllConversationsForUser
+ * @return {promise} - Get conversations promise
+ */
 export function deleteAllConversationsForUser(user) {
   return user.getConversations()
     .then(conversations => {
@@ -23,6 +35,13 @@ export function deleteAllConversationsForUser(user) {
     });
 }
 
+/**
+ * Find a specific conversation by id
+ * @param {number} id - Id of the conversation
+ * @param {array} includes - Relationships to include
+ * @method findConversationById
+ * @return {promise} - Find conversation promise
+ */
 export function findConversationById(id, includes) {
   return Conversation
     .findById(id, { include: includes })
@@ -34,10 +53,25 @@ export function findConversationById(id, includes) {
     .catch(err => Boom.badRequest(err));
 }
 
+/**
+ * Find all conversations for a specific user
+ * @param {User} user - User to find the conversations for
+ * @param {array} includes - Relationships to include
+ * @method findAllForUser
+ * @return {promise} - Get conversations promise
+ */
 export function findAllForUser(user, includes) {
   return user.getConversations({ include: includes });
 }
 
+/**
+ * Create a conversation
+ * @param {string} type - Type of the conversation to be created
+ * @param {number} creatorId - Id of the conversation starter
+ * @param {array} participants - All users participating in the conversation
+ * @method createConversation
+ * @return {promise} - Create conversation promise
+ */
 export function createConversation(type, creatorId, participants) {
   // TODO: Move logic to acl
   if (participants.length < 2) {
