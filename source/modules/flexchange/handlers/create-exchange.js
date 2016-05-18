@@ -10,7 +10,7 @@ export default (req, reply) => {
     }
 
     createExchange(req.auth.credentials.id, req.params.networkId, req.payload)
-      .then(exchange => reply(respondWithItem(exchange)))
+      .then(exchange => reply({ success: true, data: exchange }))
       .catch(err => reply(err));
   });
 };
