@@ -19,4 +19,8 @@ UserModel.hasMany(ExchangeModel, {
   foreignKey: 'user_id',
 });
 
+NetworkModel.hasMany(ExchangeModel, {
+  foreignKey: 'network_id',
+});
+
 export const Exchange = ExchangeModel;
