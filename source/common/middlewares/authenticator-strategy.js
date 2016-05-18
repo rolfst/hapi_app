@@ -19,7 +19,7 @@ export default () => {
           reply.continue({ credentials: user });
         });
       } catch (e) {
-        return reply(Boom.forbidden(e.message));
+        return reply(Boom.unauthorized(e.message));
       }
     },
   };
