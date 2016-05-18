@@ -1,6 +1,7 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
 import formatDate from 'common/utils/format-date';
+import { User } from 'common/models';
 
 const Exchange = model.define('Exchange', {
   userId: {
@@ -42,13 +43,21 @@ const Exchange = model.define('Exchange', {
     type: Sequelize.INTEGER,
     field: 'decline_count',
   },
+  approvedUser: {
+    type: Sequelize.INTEGER,
+    field: 'approved_user',
+    allowNull: true,
+  },
 }, {
   tableName: 'exchanges',
   createdAt: 'created_at',
   updatedAt: 'updated_at',
+  defaultScope: {
+    include: [{ model: User }],
+  },
   instanceMethods: {
     toJSON: function () { // eslint-disable-line
-      return {
+      let output = {
         type: 'exchange',
         id: this.id.toString(),
         title: this.title,
@@ -59,6 +68,20 @@ const Exchange = model.define('Exchange', {
         decline_count: this.declineCount,
         created_at: formatDate(this.created_at),
       };
+
+      if (this.ApprovedUser) {
+        const user = this.ApprovedUser.toSimpleJSON();
+
+        output = Object.assign(output, { accepted_user: user });
+      }
+
+      if (this.User) {
+        const user = this.User.toSimpleJSON();
+
+        output = Object.assign(output, { user });
+      }
+
+      return output;
     },
   },
 });
