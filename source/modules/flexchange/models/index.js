@@ -24,6 +24,11 @@ NetworkModel.hasMany(ExchangeModel, {
   foreignKey: 'network_id',
 });
 
+ExchangeModel.belongsTo(UserModel, {
+  as: 'ApprovedUser',
+  foreignKey: 'approved_user',
+});
+
 TeamModel.belongsToMany(ExchangeModel, {
   foreignKey: 'value',
   otherKey: 'exchange_id',
