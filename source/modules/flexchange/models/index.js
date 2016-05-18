@@ -10,7 +10,6 @@ ExchangeCommentModel.belongsTo(UserModel, {
 
 ExchangeModel.belongsToMany(ExchangeCommentModel, {
   foreignKey: 'parent_id',
-  through: 'comments',
 });
 
 ExchangeModel.belongsTo(UserModel, {
