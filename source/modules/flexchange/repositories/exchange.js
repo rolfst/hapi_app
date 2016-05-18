@@ -24,13 +24,8 @@ export function findExchangeById(id) {
 }
 
 export function createExchange(userId, networkId, payload) {
+  const { title, description, date, type } = payload;
+
   return Exchange
-    .create({
-      userId,
-      networkId,
-      title: payload.title,
-      description: payload.description,
-      date: payload.date,
-      type: payload.type,
-    });
+    .create({ userId, networkId, title, description, date, type });
 }
