@@ -1,7 +1,17 @@
 import ExchangeModel from 'modules/flexchange/models/exchange';
+import ExchangeCommentModel from 'modules/flexchange/models/exchange-comment';
 import UserModel from 'common/models/user';
 import TeamModel from 'common/models/team';
 import NetworkModel from 'common/models/network';
+
+ExchangeCommentModel.belongsTo(UserModel, {
+  foreignKey: 'created_by',
+});
+
+ExchangeModel.belongsToMany(ExchangeCommentModel, {
+  foreignKey: 'parent_id',
+  through: 'comments',
+});
 
 ExchangeModel.belongsTo(UserModel, {
   foreignKey: 'user_id',
