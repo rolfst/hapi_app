@@ -9,7 +9,7 @@ export function findExchangeById(exchangeId) {
       if (!exchange) return Boom.notFound(`No exchange found with id ${exchangeId}.`);
 
       return exchange;
-    })
+    });
 }
 
 export function findExchangesByUser(user) {
@@ -22,6 +22,11 @@ export function findExchangesByNetwork(network) {
 
 export function findExchangesByTeam(team) {
   return team.getExchanges();
+}
+
+export function deleteExchangeById(id) {
+  return findExchangeById(id)
+    .then(exchange => exchange.destroy());
 }
 
 export function createExchange(userId, networkId, payload) {
