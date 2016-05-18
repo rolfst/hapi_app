@@ -31,7 +31,7 @@ export function updateNetworkActivityForPmtUser(networkId, pmtUser) {
   });
 }
 
-export function addPmtUserForNetwork(networkId, userId, externalId, active) {
+export function addPmtUserForNetwork(networkId, userId, externalId) {
   // const deletedAt = active ? null : new Date();
   const queryString = `
     INSERT INTO network_user (network_id, user_id, external_id, deleted_at)

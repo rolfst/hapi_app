@@ -6,5 +6,5 @@ export default (baseUrl, shiftId) => {
   return pmtClient(endpoint)
     .then(res => res.json())
     .then(data => data.successful)
-    .catch(err => console.log(err));
+    .catch(err => console.log(err)); // eslint-disable-line
 };

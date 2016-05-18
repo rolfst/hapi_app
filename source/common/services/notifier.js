@@ -20,7 +20,7 @@ const sendPush = (users, text, extraData) => {
       badge: 'Increment',
       network_id: null,
     }, extraData),
-  }).catch(err => console.log('Parse error:', err));
+  }).catch(err => console.log('Parse error:', err)); // eslint-disable-line
 };
 
 export default {

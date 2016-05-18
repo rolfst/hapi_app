@@ -26,9 +26,8 @@ export function createOrUpdateUser(identifier, data) {
     .then(user => {
       if (user) {
         return user.update(data);
-      } else {
-        return createUser(data);
       }
+      return createUser(data);
     });
 }
 

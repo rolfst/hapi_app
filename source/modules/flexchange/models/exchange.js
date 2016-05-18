@@ -19,7 +19,7 @@ const Exchange = model.define('Exchange', {
     allowNull: false,
   },
   description: {
-    type: Sequelize.TEXT('medium'),
+    type: Sequelize.TEXT('medium'), // eslint-disable-line
     allowNull: false,
   },
   date: {
@@ -27,7 +27,7 @@ const Exchange = model.define('Exchange', {
     allowNull: false,
   },
   type: {
-    type: Sequelize.ENUM('USER', 'TEAM', 'ALL'),
+    type: Sequelize.ENUM('USER', 'TEAM', 'ALL'), // eslint-disable-line
     allowNull: false,
   },
   approvedBy: {
@@ -71,13 +71,13 @@ const Exchange = model.define('Exchange', {
 
       if (this.ApprovedUser) {
         output = Object.assign(output, {
-          approved_user: this.ApprovedUser.toSimpleJSON()
+          approved_user: this.ApprovedUser.toSimpleJSON(),
         });
       }
 
       if (this.User) {
         output = Object.assign(output, {
-          user: this.User.toSimpleJSON()
+          user: this.User.toSimpleJSON(),
         });
       }
 

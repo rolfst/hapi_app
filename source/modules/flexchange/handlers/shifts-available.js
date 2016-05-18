@@ -1,4 +1,4 @@
-export default (req, reply) => {
+/* export default (req, reply) => {
   // TODO: add authorization if user can access the network
   // TODO: add check to check if network has integration enabled or not
   findNetworkById(req.params.networkId).then(network => {
@@ -8,4 +8,4 @@ export default (req, reply) => {
       .usersAvailableForShift(network.externalId, req.params.shiftId)
       .then(users => reply({ data: users }));
   });
-};
+}; */

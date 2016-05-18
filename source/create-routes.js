@@ -13,7 +13,6 @@ const defaultRoutes = [
 
         reply({ message: 'Succesfully synced integration.' }).code(202);
       } catch (err) {
-        console.log(err);
         reply(Boom.badRequest(err));
       }
     },
@@ -31,10 +30,9 @@ const defaultRoutes = [
 
         createAdapter(req.auth.credentials.integration.id).initialSync();
 
-        reply({ message: 'OK' });
+        return reply({ message: 'OK' });
       } catch (err) {
-        console.log(err);
-        reply(Boom.badRequest(err));
+        return reply(Boom.badRequest(err));
       }
     },
     config: {

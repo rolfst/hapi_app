@@ -1,4 +1,4 @@
-export default (req, reply) => {
+/* export default (req, reply) => {
   // TODO: add authorization if user can access the network
   // TODO: add check to check if network has integration enabled or not
   // TODO: add approve and reject hook
@@ -19,4 +19,4 @@ export default (req, reply) => {
         reply({ success: true });
       });
   });
-};
+}; */

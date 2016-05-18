@@ -8,5 +8,5 @@ export default (endpoint, method = 'GET') => {
       // 'api-key': 'flexappeal4rwrs',
     },
   }).then(res => res.json())
-    .catch(err => console.log(err));
+    .catch(err => console.log(err)); // eslint-disable-line
 };

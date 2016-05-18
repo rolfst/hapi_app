@@ -1,3 +1,4 @@
+import Boom from 'boom';
 import ExchangeComment from 'modules/flexchange/models/exchange-comment';
 
 export function findCommentById(commentId) {
@@ -14,7 +15,7 @@ export function createExchangeComment(exchangeId, { text, userId }) {
   return ExchangeComment.create({
     parentId: exchangeId,
     parentType: 'FlexAppeal\\Entities\\Exchange',
-    text: text,
+    text,
     createdBy: userId,
   });
 }

@@ -4,5 +4,5 @@ export default baseUrl => {
   return pmtClient(`${baseUrl}/users`)
     .then(res => res.json())
     .then(json => json.data)
-    .catch(err => console.log(err));
+    .catch(err => console.log(err)); // eslint-disable-line
 };

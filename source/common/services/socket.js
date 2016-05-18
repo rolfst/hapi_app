@@ -14,8 +14,6 @@ export default {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ payload: JSON.stringify(payload), userIds }),
-    }).catch(err => {
-      console.log(err);
     });
   },
 };
