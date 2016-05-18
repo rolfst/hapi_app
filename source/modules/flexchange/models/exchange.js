@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
+import formatDate from 'common/utils/format-date';
 
 const Exchange = model.define('Exchange', {
   userId: {
@@ -33,9 +34,20 @@ const Exchange = model.define('Exchange', {
     field: 'approved_by',
     allowNull: true,
   },
+  acceptCount: {
+    type: Sequelize.INTEGER,
+    field: 'accept_count',
+  },
+  declineCount: {
+    type: Sequelize.INTEGER,
+    field: 'decline_count',
+  },
 }, {
-  tableName: 'services',
-  timestamps: false,
+  tableName: 'exchanges',
+  underscore: true,
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
   instanceMethods: {
     toJSON: function () { // eslint-disable-line
       let output = {
@@ -44,6 +56,9 @@ const Exchange = model.define('Exchange', {
         title: this.title,
         description: this.description,
         date: formatDate(this.date),
+        vote_result: 'TODO',
+        accept_count:  this.acceptCount,
+        decline_count:  this.declineCount,
         created_at: formatDate(this.created_at),
       };
 
