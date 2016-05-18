@@ -4,6 +4,7 @@ import hasIntegration from 'common/utils/network-has-integration';
 import respondWithItem from 'common/utils/respond-with-item';
 
 export default (req, reply) => {
+  // TODO: Add authorization if user can access the network
   findNetworkById(req.params.networkId).then(network => {
     if (hasIntegration(network)) {
       // Execute integration logic with adapter
