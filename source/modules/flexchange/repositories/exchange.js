@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import { Exchange } from 'modules/flexchange/models'; // eslint-disable-line
+import { Exchange, ExchangeResponse } from 'modules/flexchange/models'; // eslint-disable-line
 import { User } from 'common/models';
 
 /**
@@ -10,7 +10,7 @@ import { User } from 'common/models';
  */
 export function findExchangeById(exchangeId) {
   return Exchange
-    .findById(exchangeId, { include: [{ model: User, as: 'ApprovedUser' }] })
+    .findById(exchangeId, { include: [{ model: User, as: 'ApprovedUser' }, { model: ExchangeResponse }] })
     .then(exchange => {
       if (!exchange) return Boom.notFound(`No exchange found with id ${exchangeId}.`);
 
