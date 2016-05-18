@@ -1,3 +1,16 @@
+import { findNetworkById } from 'common/repositories/network';
+import { updateExchangeById } from 'modules/flexchange/repositories/exchange';
+import hasIntegration from 'common/utils/network-has-integration';
+import respondWithItem from 'common/utils/respond-with-item';
+
 export default (req, reply) => {
-  reply('Not implemented yet.');
+  findNetworkById(req.params.networkId).then(network => {
+    if (hasIntegration(network)) {
+      // Execute integration logic with adapter
+    }
+
+    updateExchangeById(req.params.exchangeId, req.payload)
+      .then(exchange => reply({ success: true, data: exchange }))
+      .catch(err => reply(err));
+  });
 };

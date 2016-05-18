@@ -4,7 +4,7 @@ import { User } from 'common/models';
 
 export function findExchangeById(exchangeId) {
   return Exchange
-    .findById(exchangeId, { include: [{ model: User, as: 'ApprovedUser' }] })
+    .findById(exchangeId, { include: [{ model: User, as: 'ApprovedUser' }, { model: ExchangeResponse }] })
     .then(exchange => {
       if (!exchange) return Boom.notFound(`No exchange found with id ${exchangeId}.`);
 
@@ -34,4 +34,11 @@ export function createExchange(userId, networkId, payload) {
 
   return Exchange
     .create({ userId, networkId, title, description, date, type });
+}
+
+export function updateExchangeById(id, payload) {
+  const { title, description } = payload;
+
+  return findExchangeById(id)
+    .then(exchange => exchange.update({ title, description }));
 }
