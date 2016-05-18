@@ -10,11 +10,9 @@ export default (req, reply) => {
       // Execute integration logic with adapter
     }
 
-    findTeamById(req.params.teamId).then(team => {
-      findExchangesByTeam(team)
-        .then(exchanges => reply(respondWithCollection(exchanges)));
-    }).catch(err => {
-      reply(err);
-    });
+    findTeamById(req.params.teamId)
+      .then(team => findExchangesByTeam(team))
+      .then(exchanges => reply(respondWithCollection(exchanges)))
+      .catch(err => reply(err));
   });
 };
