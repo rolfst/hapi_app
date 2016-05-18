@@ -1,5 +1,16 @@
 import Boom from 'boom';
 import { Exchange } from 'modules/flexchange/models'; // eslint-disable-line
+import { User } from 'common/models';
+
+export function findExchangeById(exchangeId) {
+  return Exchange
+    .findById(exchangeId, { include: [{ model: User, as: 'ApprovedUser' }] })
+    .then(exchange => {
+      if (!exchange) return Boom.notFound(`No exchange found with id ${exchangeId}.`);
+
+      return exchange;
+    });
+}
 
 export function findExchangesByUser(user) {
   return user.getExchanges();
@@ -11,16 +22,6 @@ export function findExchangesByNetwork(network) {
 
 export function findExchangesByTeam(team) {
   return team.getExchanges();
-}
-
-export function findExchangeById(id) {
-  return Exchange
-    .findById(id)
-    .then(exchange => {
-      if (!exchange) throw Boom.notFound(`No exchange found with id ${id}.`);
-
-      return exchange;
-    });
 }
 
 export function deleteExchangeById(id) {

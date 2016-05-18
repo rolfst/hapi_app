@@ -91,6 +91,16 @@ const User = model.define('User', {
         created_at: formatDate(this.created_at),
       };
     },
+    toSimpleJSON: function () { // eslint-disable-line
+      const environment = process.env.NODE_ENV === 'production' ? 'production' : 'staging';
+
+      return {
+        type: 'user',
+        id: this.id.toString(),
+        full_name: this.fullName,
+        profile_img: `https://s3.eu-central-1.amazonaws.com/flex-appeal/${environment}/profiles/${this.profileImg}`,
+      };
+    },
   },
 });
 
