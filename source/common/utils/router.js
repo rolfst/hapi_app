@@ -4,39 +4,39 @@ export default {
       method: 'GET',
       path,
       handler: handler.default ? handler.default : handler,
-      config: { auth }
-    }
+      config: { auth },
+    };
   },
   post: (path, handler, auth = 'default') => {
     return {
       method: 'POST',
       path,
       handler: handler.default ? handler.default : handler,
-      config: { auth }
-    }
+      config: { auth },
+    };
   },
   put: (path, handler, auth = 'default') => {
     return {
       method: 'PUT',
       path,
       handler: handler.default ? handler.default : handler,
-      config: { auth }
-    }
+      config: { auth },
+    };
   },
   patch: (path, handler, auth = 'default') => {
     return {
       method: 'PATCH',
       path,
       handler: handler.default ? handler.default : handler,
-      config: { auth }
-    }
+      config: { auth },
+    };
   },
   delete: (path, handler, auth = 'default') => {
     return {
       method: 'DELETE',
       path,
       handler: handler.default ? handler.default : handler,
-      config: { auth }
-    }
+      config: { auth },
+    };
   },
 };

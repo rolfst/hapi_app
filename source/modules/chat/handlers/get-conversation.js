@@ -14,7 +14,7 @@ module.exports = (req, reply) => {
   }
 
   // TODO: implement ACL to check if user belongs to conversation
-  // conversation.hasUser(req.auth.credentials.user)
+  // conversation.hasUser(req.auth.credentials)
   findConversationById(req.params.id, modelIncludes)
     .then(conversation => reply(respondWithItem(conversation)))
     .catch(boom => reply(boom));
