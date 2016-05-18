@@ -23,3 +23,10 @@ export function findExchangesByNetwork(network) {
 export function findExchangesByTeam(team) {
   return team.getExchanges();
 }
+
+export function createExchange(userId, networkId, payload) {
+  const { title, description, date, type } = payload;
+
+  return Exchange
+    .create({ userId, networkId, title, description, date, type });
+}
