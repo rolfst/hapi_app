@@ -12,9 +12,6 @@ export default (req, reply) => {
 
     findExchangeById(req.params.exchangeId)
       .then(exchange => reply(respondWithItem(exchange)))
-      .catch(err => {
-        console.log(err);
-        reply(err)
-      });
+      .catch(err => reply(err));
   });
 };
