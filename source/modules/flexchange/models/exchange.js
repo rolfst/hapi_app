@@ -72,7 +72,7 @@ const Exchange = model.define('Exchange', {
       if (this.ApprovedUser) {
         const user = this.ApprovedUser.toSimpleJSON();
 
-        output = Object.assign(output, { accepted_user: user });
+        output = Object.assign(output, { approved_user: user });
       }
 
       if (this.User) {
