@@ -6,7 +6,7 @@ import { findConversationById } from 'modules/chat/repositories/conversation';
 import { findMessageById, createMessage } from 'modules/chat/repositories/message';
 
 module.exports = (req, reply) => {
-  const loggedUser = req.auth.credentials.user;
+  const loggedUser = req.auth.credentials;
 
   findConversationById(req.params.id)
     .then(conversation => {

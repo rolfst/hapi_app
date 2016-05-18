@@ -1,10 +1,10 @@
 export default {
-  get: (path, handler, auth = 'default') => {
+  get: (path, handler) => {
     return {
       method: 'GET',
       path,
       handler: handler.default ? handler.default : handler,
-      config: { auth }
+      config: { auth: 'default' },
     }
   },
   post: (path, handler, auth = 'default') => {

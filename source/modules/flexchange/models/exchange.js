@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
+import formatDate from 'common/utils/format-date';
 
 const Exchange = model.define('Exchange', {
   userId: {
@@ -34,11 +35,11 @@ const Exchange = model.define('Exchange', {
     allowNull: true,
   },
 }, {
-  tableName: 'services',
+  tableName: 'exchanges',
   timestamps: false,
   instanceMethods: {
     toJSON: function () { // eslint-disable-line
-      let output = {
+      return {
         type: 'exchange',
         id: this.id.toString(),
         title: this.title,
@@ -46,8 +47,6 @@ const Exchange = model.define('Exchange', {
         date: formatDate(this.date),
         created_at: formatDate(this.created_at),
       };
-
-      return output;
     },
   },
 });

@@ -4,7 +4,7 @@ import { findAllForConversation } from 'modules/chat/repositories/message';
 
 module.exports = (req, reply) => {
   // TODO: implement ACL to check if user belongs to conversation
-  // conversation.hasUser(req.auth.credentials.user)
+  // conversation.hasUser(req.auth.credentials)
   return findConversationById(req.params.id)
     .then(conversation => findAllForConversation(conversation))
     .then(messages => reply(respondWithCollection(messages)))
