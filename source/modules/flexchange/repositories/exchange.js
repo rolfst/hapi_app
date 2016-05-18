@@ -7,3 +7,7 @@ export function findExchangesByUser(user) {
 export function findExchangesByNetwork(network) {
   return network.getExchanges();
 }
+
+export function findExchangesByTeam(team) {
+  return team.getExchanges();
+}
