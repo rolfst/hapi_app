@@ -9,7 +9,7 @@ export default (req, reply) => {
     }
 
     deleteExchangeById(req.params.exchangeId)
-      .then(() => reply('Successfully deleted exchange'))
+      .then(() => reply({ success: true }))
       .catch(err => reply(err));
   });
 };
