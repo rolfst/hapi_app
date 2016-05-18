@@ -1,6 +1,5 @@
 import router from 'common/utils/router';
 const basePath = 'modules/flexchange/handlers/';
-import 'modules/flexchange/models';
 
 export default [
   router.get('/v2/networks/{networkId}/users/me/shifts', require(basePath + 'my-shifts')),
