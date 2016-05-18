@@ -9,6 +9,10 @@ export function findExchangesByNetwork(network) {
   return network.getExchanges();
 }
 
+export function findExchangesByTeam(team) {
+  return team.getExchanges();
+}
+
 export function findExchangeById(id) {
   return Exchange
     .findById(id)

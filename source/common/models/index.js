@@ -1,5 +1,6 @@
 import NetworkModel from 'common/models/network';
 import UserModel from 'common/models/user';
+import TeamModel from 'common/models/team';
 import IntegrationModel from 'common/models/integration';
 
 NetworkModel.belongsToMany(IntegrationModel, {
@@ -17,5 +18,6 @@ NetworkModel.belongsToMany(UserModel, {
 });
 
 export const Network = NetworkModel;
-export const Integration = IntegrationModel;
 export const User = UserModel;
+export const Team = TeamModel;
+export const Integration = IntegrationModel;
