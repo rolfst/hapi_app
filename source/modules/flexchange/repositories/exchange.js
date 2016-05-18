@@ -22,3 +22,8 @@ export function findExchangeById(id) {
       return exchange;
     });
 }
+
+export function deleteExchangeById(id) {
+  return findExchangeById(id)
+    .then(exchange => exchange.destroy());
+}

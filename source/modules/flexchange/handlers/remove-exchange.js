@@ -1,5 +1,5 @@
 import { findNetworkById } from 'common/repositories/network';
-import { findExchangeById } from 'modules/flexchange/repositories/exchange';
+import { deleteExchangeById } from 'modules/flexchange/repositories/exchange';
 import hasIntegration from 'common/utils/network-has-integration';
 
 export default (req, reply) => {
@@ -8,8 +8,7 @@ export default (req, reply) => {
       // Execute integration logic with adapter
     }
 
-    findExchangeById(req.params.exchangeId)
-      .then(exchange => exchange.destroy())
+    deleteExchangeById(req.params.exchangeId)
       .then(() => reply('Successfully deleted exchange'))
       .catch(err => reply(err));
   });
