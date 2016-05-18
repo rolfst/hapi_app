@@ -10,7 +10,8 @@ export function findExchangesByNetwork(network) {
 }
 
 export function findExchangeById(id) {
-  return Exchange.findById(id)
+  return Exchange
+    .findById(id)
     .then(exchange => {
       if (!exchange) throw Boom.notFound(`No exchange found with id ${id}.`);
 
