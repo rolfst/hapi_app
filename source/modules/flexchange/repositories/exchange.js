@@ -60,7 +60,7 @@ export function deleteExchangeById(exchangeId) {
 }
 
 /**
- * Create an new exchange
+ * Create a new exchange
  * @param {number} userId - Id of the user placing the exchange
  * @param {number} networkId - Id of the network the exchange is being placed in
  * @param {object} payload - Object containing payload data
