@@ -35,3 +35,10 @@ export function createExchange(userId, networkId, payload) {
   return Exchange
     .create({ userId, networkId, title, description, date, type });
 }
+
+export function updateExchangeById(id, payload) {
+  const { title, description } = payload;
+
+  return findExchangeById(id)
+    .then(exchange => exchange.update({ title, description }));
+}
