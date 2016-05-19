@@ -1,35 +1,49 @@
-import { findNetworkById } from 'common/repositories/network';
+import Boom from 'boom';
+import hasIntegration from 'common/utils/network-has-integration';
 import createAdapter from 'adapters/create-adapter';
+import { findNetworkById } from 'common/repositories/network';
+import { findExchangeById, acceptExchange } from 'modules/flexchange/repositories/exchange';
+import {
+  findExchangeResponseByExchangeAndUser,
+} from 'modules/flexchange/repositories/exchange-response';
 
 export default (req, reply) => {
   // TODO: add authorization if user can access the network
   findNetworkById(req.params.networkId).then(network => {
-    const adapter = createAdapter(network.Integrations[0].id);
-
     const actions = {
-      accept: acceptExchange,
-      decline: declineExchange,
-      approve: approveExchange,
-      reject: rejectExchange,
+      accept: acceptExchangeHook, // eslint-disable-line no-use-before-define
+      decline: declineExchangeHook, // eslint-disable-line no-use-before-define
+      approve: approveExchangeHook, // eslint-disable-line no-use-before-define
+      reject: rejectExchangeHook, // eslint-disable-line no-use-before-define
     };
 
-    const hook = actions[req.payload.action];
+    try {
+      const hook = actions[req.payload.action];
 
-    return hook(network.externalId, req.params.shiftId)
-      .then(success => {
-        if (!success) throw Error(`Could not ${req.payload.action} the shift.`);
-
-        reply({ success: true });
-      });
+      return hook(network, req)
+        .then(exchange => reply({ success: true, data: { exchange } }))
+        .catch(err => reply(err));
+    } catch (err) {
+      return reply(Boom.forbidden('Unknown action.'));
+    }
   });
 };
 
-const acceptExchange = network => {
+const acceptExchangeHook = (network, req) => {
   if (hasIntegration(network)) {
     return createAdapter(network).acceptExchange;
   }
 
-  // 1. Find exchange
+  return findExchangeById(req.params.exchangeId)
+    .then(exchange => {
+      return [exchange, findExchangeResponseByExchangeAndUser(exchange, req.auth.credentials)];
+    })
+    .spread((exchange, exchangeResponse) => {
+      if (exchangeResponse) throw Boom.forbidden('User already responded to this exchange.');
+
+      return acceptExchange(exchange, req.auth.credentials);
+    });
+
   // 2. Check if logged user may accept the exchange
   // 3. Accept exchange from repository
   // 3.1. If exchange is decline, remove declined response and create new accepted response
@@ -37,7 +51,7 @@ const acceptExchange = network => {
   // 5. Return accepted exchange
 };
 
-const declineExchange = network => {
+const declineExchangeHook = network => {
   if (hasIntegration(network)) {
     return createAdapter(network).declineExchange;
   }
@@ -50,7 +64,7 @@ const declineExchange = network => {
   // 5. Return declined exchange
 };
 
-const approveExchange = (network, user) => {
+const approveExchangeHook = (network, user) => {
   // 1. Find exchange
   // 2. Check if logged user may approve the exchange
   // 3. Check if exchange can be approved else throw Error
@@ -63,7 +77,7 @@ const approveExchange = (network, user) => {
   // 7. Return approved exchange
 }
 
-const rejectExchange = (network, user) => {
+const rejectExchangeHook = (network, user) => {
   // 1. Find exchange
   // 2. Check if logged user may approve the exchange
   // 3. Check if exchange can be reject else throw Error

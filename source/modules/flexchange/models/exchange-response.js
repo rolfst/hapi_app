@@ -3,6 +3,7 @@ import model from 'connection';
 import formatDate from 'common/utils/format-date';
 import { User } from 'common/models';
 import {
+  findExchangeById,
   incrementExchangeAcceptCount,
   incrementExchangeDeclineCount,
   decrementExchangeAcceptCount,
@@ -36,8 +37,8 @@ const ExchangeResponse = model.define('ExchangeResponse', {
     include: [{ model: User }],
   },
   hooks: {
-    afterCreate: function (exchangeResponseModel) { // eslint-disable-line func-names, object-shorthand
-      exchangeResponseModel.getExchange().then(exchange => {
+    afterCreate: function (exchangeResponseModel) { // eslint-disable-line func-names, object-shorthand, max-len
+      return findExchangeById(exchangeResponseModel.exchangeId).then(exchange => {
         if (exchangeResponseModel.response) {
           return incrementExchangeAcceptCount(exchange);
         }
@@ -45,7 +46,7 @@ const ExchangeResponse = model.define('ExchangeResponse', {
         return incrementExchangeDeclineCount(exchange);
       });
     },
-    afterDestroy: function (exchangeResponseModel) { // eslint-disable-line func-names, object-shorthand
+    afterDestroy: function (exchangeResponseModel) { // eslint-disable-line func-names, object-shorthand, max-len
       exchangeResponseModel.getExchange().then(exchange => {
         if (exchangeResponseModel.response) {
           return decrementExchangeAcceptCount(exchange);
