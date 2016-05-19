@@ -4,7 +4,6 @@ import Hapi from 'hapi';
 import routes from 'create-routes';
 import jwtStrategy from 'common/middlewares/authenticator-strategy';
 import integrationStrategy from 'common/middlewares/integration-strategy';
-import { findNetworkById } from 'common/repositories/network';
 
 if (process.env.NODE_ENV === 'debug') {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
