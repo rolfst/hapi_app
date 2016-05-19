@@ -6,7 +6,7 @@ import {
   incrementExchangeAcceptCount,
   incrementExchangeDeclineCount,
   decrementExchangeAcceptCount,
-  decrementExchangeDeclineCount
+  decrementExchangeDeclineCount,
 } from 'modules/flexchange/repositories/exchange';
 
 const ExchangeResponse = model.define('ExchangeResponse', {
@@ -36,7 +36,7 @@ const ExchangeResponse = model.define('ExchangeResponse', {
     include: [{ model: User }],
   },
   hooks: {
-    afterCreate: function(responseModel) {
+    afterCreate: function (responseModel) { // eslint-disable-line func-names, object-shorthand
       responseModel.getExchange().then(exchange => {
         if (!!responseModel.response) {
           return incrementExchangeAcceptCount(exchange);
@@ -45,7 +45,7 @@ const ExchangeResponse = model.define('ExchangeResponse', {
         return incrementExchangeDeclineCount(exchange);
       });
     },
-    afterDestroy: function(responseModel) {
+    afterDestroy: function (responseModel) { // eslint-disable-line func-names, object-shorthand
       responseModel.getExchange().then(exchange => {
         if (!!responseModel.response) {
           return decrementExchangeAcceptCount(exchange);
@@ -53,7 +53,7 @@ const ExchangeResponse = model.define('ExchangeResponse', {
 
         return decrementExchangeDeclineCount(exchange);
       });
-    }
+    },
   },
   instanceMethods: {
     toJSON: function () { // eslint-disable-line func-names, object-shorthand
