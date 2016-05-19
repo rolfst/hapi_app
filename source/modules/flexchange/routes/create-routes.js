@@ -1,8 +1,9 @@
+/* eslint-disable max-len */
+
 import router from 'common/utils/router';
 const basePath = 'modules/flexchange/handlers';
 const baseUrl = '/v2/networks/{networkId}';
 
-/*eslint-disable */
 export default [
   router.get(`${baseUrl}/users/me/shifts`, require(`${basePath}/my-shifts`)),
   router.get(`${baseUrl}/users/me/exchanges`, require(`${basePath}/my-exchanges`)), //
@@ -18,4 +19,3 @@ export default [
   router.patch(`${baseUrl}/exchanges/{exchangeId}`, require(`${basePath}/modify-exchange`)),
   router.delete(`${baseUrl}/exchanges/{exchangeId}`, require(`${basePath}/remove-exchange`)),
 ];
-/*eslint-enable */
