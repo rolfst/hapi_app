@@ -30,7 +30,7 @@ const ExchangeResponse = model.define('ExchangeResponse', {
     include: [{ model: User }],
   },
   instanceMethods: {
-    toJSON: function () { // eslint-disable-line
+    toJSON: function () { // eslint-disable-line func-names, object-shorthand
       let output = {
         type: 'exchange_response',
         response: !!this.response,
@@ -39,7 +39,7 @@ const ExchangeResponse = model.define('ExchangeResponse', {
 
       if (this.User) {
         output = Object.assign(output, {
-          user: this.User.toSimpleJSON()
+          user: this.User.toSimpleJSON(),
         });
       }
 

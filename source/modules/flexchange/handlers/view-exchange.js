@@ -14,7 +14,7 @@ export default (req, reply) => {
       .then(exchange => reply(respondWithItem(exchange)))
       .catch(err => {
         console.log(err);
-        reply(err)
+        reply(err);
       });
   });
 };

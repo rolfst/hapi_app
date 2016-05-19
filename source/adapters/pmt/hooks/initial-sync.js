@@ -39,7 +39,7 @@ const initialSync = () => {
     .then(networks => {
       networks.forEach(network => {
         return Promise.all([fetchPmtUsers(network.externalId), findAllUsers()])
-          .then(([pmtUsers, flexUsers]) => { // eslint-disable-line
+          .then(([pmtUsers, flexUsers]) => { // eslint-disable-line no-unused-vars
             pmtUsers.splice(0, 2).forEach(pmtUser => {
               return createOrUpdateUser({ email: pmtUser.email }, mapUser(pmtUser))
                 .then(flexUser => syncActions(network, flexUser, pmtUser));
@@ -64,7 +64,7 @@ const initialSync = () => {
         // });
       });
     })
-    .catch(err => console.log(err)); // eslint-disable-line
+    .catch(err => console.log(err));
 };
 
 export default initialSync;

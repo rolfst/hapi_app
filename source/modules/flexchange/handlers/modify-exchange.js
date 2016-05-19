@@ -1,8 +1,7 @@
-export default (req, reply) => {
-  reply('Not implemented yet.');
-};
+import { findNetworkById } from 'common/repositories/network';
+import createAdapter from 'adapters/create-adapter';
 
-/* export default (req, reply) => {
+export default (req, reply) => {
   // TODO: add authorization if user can access the network
   // TODO: add check to check if network has integration enabled or not
   // TODO: add approve and reject hook
@@ -23,4 +22,4 @@ export default (req, reply) => {
         reply({ success: true });
       });
   });
-}; */
+};

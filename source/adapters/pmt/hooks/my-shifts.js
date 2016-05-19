@@ -7,5 +7,5 @@ export default baseUrl => {
 
   return pmtClient(endpoint)
     .then(data => data.shifts)
-    .catch(err => console.log(err)); // eslint-disable-line
+    .catch(err => console.log(err));
 };
