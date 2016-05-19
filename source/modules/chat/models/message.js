@@ -18,7 +18,7 @@ const Message = model.define('Message', {
     include: [{ model: User }],
   },
   instanceMethods: {
-    toJSON: function () { // eslint-disable-line
+    toJSON: function () { // eslint-disable-line func-names, object-shorthand
       let output = {
         type: 'conversation_message',
         id: this.id.toString(),

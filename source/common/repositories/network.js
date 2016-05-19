@@ -33,6 +33,5 @@ export function findNetworksForIntegration(integrationName) {
 
 export function findAllUsersForNetwork(id) {
   return findNetworkById(id)
-    .then(network => network.getUsers())
-    .catch(err => console.log(err));
+    .then(network => network.getUsers());
 }

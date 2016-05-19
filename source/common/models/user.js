@@ -52,7 +52,7 @@ const User = model.define('User', {
   createdAt: 'created_at',
   updatedAt: 'updated_at',
   getterMethods: {
-    fullName: function () { // eslint-disable-line
+    fullName: function () { // eslint-disable-line func-names, object-shorthand
       return `${this.firstName || ''} ${this.lastName || ''}`;
     },
   },
@@ -76,7 +76,7 @@ const User = model.define('User', {
         return existingChats[0] || null;
       });
     },
-    toJSON: function () { // eslint-disable-line
+    toJSON: function () { // eslint-disable-line func-names, object-shorthand
       const environment = process.env.NODE_ENV === 'production' ? 'production' : 'staging';
 
       return {
@@ -91,7 +91,7 @@ const User = model.define('User', {
         created_at: formatDate(this.created_at),
       };
     },
-    toSimpleJSON: function () { // eslint-disable-line
+    toSimpleJSON: function () { // eslint-disable-line func-names, object-shorthand
       const environment = process.env.NODE_ENV === 'production' ? 'production' : 'staging';
 
       return {

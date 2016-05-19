@@ -15,7 +15,7 @@ const ExchangeComment = model.define('ExchangeComment', {
     allowNull: false,
   },
   text: {
-    type: Sequelize.TEXT('medium'),
+    type: Sequelize.TEXT('medium'), // eslint-disable-line new-cap
     allowNull: false,
   },
   createdBy: {
@@ -31,7 +31,7 @@ const ExchangeComment = model.define('ExchangeComment', {
     include: [{ model: User }],
   },
   instanceMethods: {
-    toJSON: function () { // eslint-disable-line
+    toJSON: function () { // eslint-disable-line func-names, object-shorthand
       let output = {
         type: 'exchange_comment',
         id: this.id.toString(),
@@ -41,7 +41,7 @@ const ExchangeComment = model.define('ExchangeComment', {
 
       if (this.User) {
         output = Object.assign(output, {
-          user: this.User.toSimpleJSON()
+          user: this.User.toSimpleJSON(),
         });
       }
 

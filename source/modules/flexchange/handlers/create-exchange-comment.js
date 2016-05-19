@@ -1,7 +1,6 @@
 import { findNetworkById } from 'common/repositories/network';
 import { createExchangeComment, findCommentById } from 'modules/flexchange/repositories/comment';
 import hasIntegration from 'common/utils/network-has-integration';
-import respondWithItem from 'common/utils/respond-with-item';
 
 export default (req, reply) => {
   findNetworkById(req.params.networkId).then(network => {

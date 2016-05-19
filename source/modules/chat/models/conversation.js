@@ -24,7 +24,7 @@ const Conversation = model.define('Conversation', {
     include: [{ model: User }],
   },
   instanceMethods: {
-    toJSON: function () { // eslint-disable-line
+    toJSON: function () { // eslint-disable-line func-names, object-shorthand
       let output = {
         type: 'conversation',
         id: this.id.toString(),
@@ -47,7 +47,7 @@ const Conversation = model.define('Conversation', {
     },
   },
   hooks: {
-    afterDestroy: function (conversation) { // eslint-disable-line
+    afterDestroy: function (conversation) { // eslint-disable-line func-names, object-shorthand
       conversation.getMessages()
         .then(messages => messages.map(message => message.destroy()));
     },

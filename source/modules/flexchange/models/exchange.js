@@ -19,7 +19,7 @@ const Exchange = model.define('Exchange', {
     allowNull: false,
   },
   description: {
-    type: Sequelize.TEXT('medium'),
+    type: Sequelize.TEXT('medium'), // eslint-disable-line new-cap
     allowNull: false,
   },
   date: {
@@ -27,7 +27,7 @@ const Exchange = model.define('Exchange', {
     allowNull: false,
   },
   type: {
-    type: Sequelize.ENUM('USER', 'TEAM', 'ALL'),
+    type: Sequelize.ENUM('USER', 'TEAM', 'ALL'), // eslint-disable-line new-cap
     allowNull: false,
   },
   approvedBy: {
@@ -56,7 +56,7 @@ const Exchange = model.define('Exchange', {
     include: [{ model: User }],
   },
   instanceMethods: {
-    toJSON: function () { // eslint-disable-line
+    toJSON: function () { // eslint-disable-line func-names, object-shorthand
       let output = {
         type: 'exchange',
         id: this.id.toString(),
