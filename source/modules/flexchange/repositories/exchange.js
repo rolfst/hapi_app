@@ -10,8 +10,7 @@ import { User } from 'common/models';
  */
 export function findExchangeById(exchangeId) {
   return Exchange
-    .findById(exchangeId,
-    {
+    .findById(exchangeId, {
       include: [
         { model: User, as: 'ApprovedUser' },
         { model: ExchangeResponse },
