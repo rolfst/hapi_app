@@ -1,3 +1,7 @@
+export default (req, reply) => {
+  reply('Not implemented yet.');
+};
+
 /* export default (req, reply) => {
   // TODO: add authorization if user can access the network
   // TODO: add check to check if network has integration enabled or not
