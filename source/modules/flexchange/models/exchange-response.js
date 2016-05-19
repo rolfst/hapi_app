@@ -45,9 +45,9 @@ const ExchangeResponse = model.define('ExchangeResponse', {
         return incrementExchangeDeclineCount(exchange);
       });
     },
-    afterDestroy: function (responseModel) { // eslint-disable-line func-names, object-shorthand
-      responseModel.getExchange().then(exchange => {
-        if (responseModel.response) {
+    afterDestroy: function (exchangeResponseModel) { // eslint-disable-line func-names, object-shorthand
+      exchangeResponseModel.getExchange().then(exchange => {
+        if (exchangeResponseModel.response) {
           return decrementExchangeAcceptCount(exchange);
         }
 
