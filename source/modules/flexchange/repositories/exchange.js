@@ -87,3 +87,47 @@ export function updateExchangeById(exchangeId, payload) {
   return findExchangeById(exchangeId)
     .then(exchange => exchange.update({ title, description }));
 }
+
+/**
+ * Increment the accept count by value
+ * @param {Exchange} exchange - The exchange instance to increment on
+ * @param {number} amount - The amount to increment
+ * @method incrementExchangeAcceptCount
+ * @return {promise} New promise with incremented value
+ */
+export function incrementExchangeAcceptCount(exchange, amount = 1) {
+  return exchange.increment({ acceptCount: amount });
+}
+
+/**
+ * Decrement the accept count by value
+ * @param {Exchange} exchange - The exchange instance to decrement on
+ * @param {number} amount - The amount to decrement
+ * @method decrementExchangeAcceptCount
+ * @return {promise} New promise with decremented value
+ */
+export function decrementExchangeAcceptCount(exchange, amount = 1) {
+  return exchange.decrement({ acceptCount: amount });
+}
+
+/**
+ * Increment the decline count by value
+ * @param {Exchange} exchange - The exchange instance to increment on
+ * @param {number} amount - The amount to increment
+ * @method incrementExchangeDeclineCount
+ * @return {promise} New promise with incremented value
+ */
+export function incrementExchangeDeclineCount(exchange, amount = 1) {
+  return exchange.increment({ declineCount: amount });
+}
+
+/**
+ * Decrement the decline count by value
+ * @param {Exchange} exchange - The exchange instance to decrement on
+ * @param {number} amount - The amount to increment
+ * @method decrementExchangeDeclineCount
+ * @return {promise} New promise with decremented value
+ */
+export function decrementExchangeDeclineCount(exchange, amount = 1) {
+  return exchange.decrement({ declineCount: amount });
+}
