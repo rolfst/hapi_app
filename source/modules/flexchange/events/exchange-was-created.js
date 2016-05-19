@@ -1,9 +1,14 @@
-import newExchangeNotification from 'modules/flexchange/events/listeners/new-exchange-notification';
+export default (exchange) => {
+  newExchangeNotification(exchange);
+  trackNewExchange(exchange);
+}
 
-export default function (exchange) {
-  const listeners = [
-    newExchangeNotification,
-  ];
+const newExchangeNotification = exchange => {
+  // Fire notification
+  console.log('notification push');
+}
 
-  return { arguments, listeners };
+const trackNewExchange = exchange => {
+  // Track new exchange in Mixpanel
+  console.log('track mixpanel event');
 }
