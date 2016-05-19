@@ -1,6 +1,6 @@
 class IntegrationNotFound extends Error {
-  constructor(integrationName) {
-    const message = `No adapter found for integration ${integrationName}`;
+  constructor(network) {
+    const message = `No adapter found for network ${network.name}`;
 
     super(message);
     this.name = 'IntegrationNotFound';
