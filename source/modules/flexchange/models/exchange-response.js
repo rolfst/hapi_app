@@ -2,6 +2,12 @@ import Sequelize from 'sequelize';
 import model from 'connection';
 import formatDate from 'common/utils/format-date';
 import { User } from 'common/models';
+import {
+  incrementExchangeAcceptCount,
+  incrementExchangeDeclineCount,
+  decrementExchangeAcceptCount,
+  decrementExchangeDeclineCount,
+} from 'modules/flexchange/repositories/exchange';
 
 const ExchangeResponse = model.define('ExchangeResponse', {
   userId: {
@@ -28,6 +34,26 @@ const ExchangeResponse = model.define('ExchangeResponse', {
   updatedAt: 'updated_at',
   defaultScope: {
     include: [{ model: User }],
+  },
+  hooks: {
+    afterCreate: function (exchangeResponseModel) { // eslint-disable-line func-names, object-shorthand
+      exchangeResponseModel.getExchange().then(exchange => {
+        if (exchangeResponseModel.response) {
+          return incrementExchangeAcceptCount(exchange);
+        }
+
+        return incrementExchangeDeclineCount(exchange);
+      });
+    },
+    afterDestroy: function (exchangeResponseModel) { // eslint-disable-line func-names, object-shorthand
+      exchangeResponseModel.getExchange().then(exchange => {
+        if (exchangeResponseModel.response) {
+          return decrementExchangeAcceptCount(exchange);
+        }
+
+        return decrementExchangeDeclineCount(exchange);
+      });
+    },
   },
   instanceMethods: {
     toJSON: function () { // eslint-disable-line func-names, object-shorthand

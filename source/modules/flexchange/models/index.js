@@ -9,6 +9,10 @@ ExchangeResponseModel.belongsTo(UserModel, {
   foreignKey: 'user_id',
 });
 
+ExchangeResponseModel.belongsTo(ExchangeModel, {
+  foreignKey: 'exchange_id',
+});
+
 ExchangeCommentModel.belongsTo(UserModel, {
   foreignKey: 'created_by',
 });
