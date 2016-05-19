@@ -36,9 +36,9 @@ const ExchangeResponse = model.define('ExchangeResponse', {
     include: [{ model: User }],
   },
   hooks: {
-    afterCreate: function (responseModel) { // eslint-disable-line func-names, object-shorthand
-      responseModel.getExchange().then(exchange => {
-        if (responseModel.response) {
+    afterCreate: function (exchangeResponseModel) { // eslint-disable-line func-names, object-shorthand
+      exchangeResponseModel.getExchange().then(exchange => {
+        if (exchangeResponseModel.response) {
           return incrementExchangeAcceptCount(exchange);
         }
 
