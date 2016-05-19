@@ -38,7 +38,7 @@ const ExchangeResponse = model.define('ExchangeResponse', {
   hooks: {
     afterCreate: function (responseModel) { // eslint-disable-line func-names, object-shorthand
       responseModel.getExchange().then(exchange => {
-        if (!!responseModel.response) {
+        if (responseModel.response) {
           return incrementExchangeAcceptCount(exchange);
         }
 
@@ -47,7 +47,7 @@ const ExchangeResponse = model.define('ExchangeResponse', {
     },
     afterDestroy: function (responseModel) { // eslint-disable-line func-names, object-shorthand
       responseModel.getExchange().then(exchange => {
-        if (!!responseModel.response) {
+        if (responseModel.response) {
           return decrementExchangeAcceptCount(exchange);
         }
 
