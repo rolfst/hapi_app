@@ -35,7 +35,6 @@ export function removeExchangeResponseForExchangeAndUser(exchange, user) {
 
 /**
  * Creates an exchange response
- * @param {number} exchangeId - Exchange the response is send to
  * @param {object} data - User that placed the response
  * @method createExchangeResponse
  * @return {promise} Find exchange response promise
