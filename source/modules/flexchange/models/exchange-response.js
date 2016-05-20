@@ -36,7 +36,7 @@ const ExchangeResponse = model.define('ExchangeResponse', {
     include: [{ model: User }],
   },
   hooks: {
-    afterCreate: function (exchangeResponseModel) { // eslint-disable-line func-names, object-shorthand
+    afterCreate: function (exchangeResponseModel) { // eslint-disable-line func-names, object-shorthand, max-len
       exchangeResponseModel.getExchange().then(exchange => {
         if (exchangeResponseModel.response) {
           return incrementExchangeAcceptCount(exchange);
@@ -45,7 +45,7 @@ const ExchangeResponse = model.define('ExchangeResponse', {
         return incrementExchangeDeclineCount(exchange);
       });
     },
-    afterDestroy: function (exchangeResponseModel) { // eslint-disable-line func-names, object-shorthand
+    afterDestroy: function (exchangeResponseModel) { // eslint-disable-line func-names, object-shorthand, max-len
       exchangeResponseModel.getExchange().then(exchange => {
         if (exchangeResponseModel.response) {
           return decrementExchangeAcceptCount(exchange);
