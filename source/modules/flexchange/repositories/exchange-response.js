@@ -1,5 +1,4 @@
 import { ExchangeResponse } from 'modules/flexchange/models';
-import { findExchangeById } from 'modules/flexchange/repositories/exchange';
 
 /**
  * Find an exchange response by exchange and user

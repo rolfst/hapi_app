@@ -2,10 +2,11 @@ import Boom from 'boom';
 import hasIntegration from 'common/utils/network-has-integration';
 import createAdapter from 'adapters/create-adapter';
 import { findNetworkById } from 'common/repositories/network';
-import { findExchangeById, acceptExchange, declineExchange } from 'modules/flexchange/repositories/exchange';
 import {
-  findExchangeResponseByExchangeAndUser,
-} from 'modules/flexchange/repositories/exchange-response';
+  findExchangeById,
+  acceptExchange,
+  declineExchange,
+} from 'modules/flexchange/repositories/exchange';
 
 export default (req, reply) => {
   // TODO: add authorization if user can access the network
@@ -54,7 +55,7 @@ const declineExchangeAction = (network, req) => {
   return findExchangeById(req.params.exchangeId)
     .then(exchange => {
       // TODO: Check if logged user may decline the exchange
-      return declineExchange(exchange, req.auth.credentials)
+      return declineExchange(exchange, req.auth.credentials);
     })
     .then(declinedExchange => {
       // TODO: Fire ExchangeWasDeclined event
@@ -73,7 +74,7 @@ const approveExchangeAction = (network, user) => {
   // 5. Update approved_by attribute in the exchange from 1. with the current logged user id
   // 6. Fire ExchangeWasApproved event
   // 7. Return approved exchange
-}
+};
 
 const rejectExchangeAction = (network, user) => {
   // 1. Find exchange
@@ -85,4 +86,4 @@ const rejectExchangeAction = (network, user) => {
   // 4. Reject exchange from repository
   // 5. Fire ExchangeWasRejected event
   // 6. Return rejected exchange
-}
+};
