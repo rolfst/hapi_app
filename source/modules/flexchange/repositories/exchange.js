@@ -94,6 +94,24 @@ export function updateExchangeById(exchangeId, payload) {
 }
 
 /**
+ * Add a response to an exchange
+ * @param {Exchange} exchange - Exchange to add the response to
+ * @param {User} user - User accepting the exchange
+ * @method acceptExchange
+ * @return {promise} Add exchange response promise
+ */
+export function acceptExchange(exchange, user) {
+  return ExchangeResponse.create({
+    userId: user.id,
+    exchangeId: exchange.id,
+    response: 1,
+  })
+    .then(exchangeResponse => {
+      return findExchangeById(exchangeResponse.exchangeId);
+    });
+}
+
+/**
  * Increment the accept count by value
  * @param {Exchange} exchange - The exchange instance to increment on
  * @param {number} amount - The amount to increment
