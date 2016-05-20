@@ -36,19 +36,16 @@ const acceptExchangeAction = (network, req) => {
 
   return findExchangeById(req.params.exchangeId)
     .then(exchange => {
+      // TODO: Check if logged user may accept the exchange
       return [exchange, findExchangeResponseByExchangeAndUser(exchange, req.auth.credentials)];
     })
     .spread((exchange, exchangeResponse) => {
+      // TODO: If exchange is decline, remove declined response and create new accepted response
       if (exchangeResponse) throw Boom.forbidden('User already responded to this exchange.');
 
+      // TODO: Fire ExchangeWasAccepted event
       return acceptExchange(exchange, req.auth.credentials);
     });
-
-  // 2. Check if logged user may accept the exchange
-  // 3. Accept exchange from repository
-  // 3.1. If exchange is decline, remove declined response and create new accepted response
-  // 4. Fire ExchangeWasAccepted event
-  // 5. Return accepted exchange
 };
 
 const declineExchangeAction = network => {
