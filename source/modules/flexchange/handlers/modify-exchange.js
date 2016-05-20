@@ -89,11 +89,11 @@ const approveExchangeAction = (network, req) => {
       }
 
       return approveExchange(exchange, req.auth.credentials, userIdToApprove);
+    })
+    .then(exchange => {
+      // TODO: Fire ExchangeWasApproved event
+      return exchange;
     });
-
-  // 5. Update approved_by attribute in the exchange from 1. with the current logged user id
-  // 6. Fire ExchangeWasApproved event
-  // 7. Return approved exchange
 };
 
 const rejectExchangeAction = (network, user) => {
