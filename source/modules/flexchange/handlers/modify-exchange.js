@@ -11,10 +11,10 @@ export default (req, reply) => {
   // TODO: add authorization if user can access the network
   findNetworkById(req.params.networkId).then(network => {
     const actions = {
-      accept: acceptExchangeHook, // eslint-disable-line no-use-before-define
-      decline: declineExchangeHook, // eslint-disable-line no-use-before-define
-      approve: approveExchangeHook, // eslint-disable-line no-use-before-define
-      reject: rejectExchangeHook, // eslint-disable-line no-use-before-define
+      accept: acceptExchangeAction, // eslint-disable-line no-use-before-define
+      decline: declineExchangeAction, // eslint-disable-line no-use-before-define
+      approve: approveExchangeAction, // eslint-disable-line no-use-before-define
+      reject: rejectExchangeAction, // eslint-disable-line no-use-before-define
     };
 
     try {
@@ -29,7 +29,7 @@ export default (req, reply) => {
   });
 };
 
-const acceptExchangeHook = (network, req) => {
+const acceptExchangeAction = (network, req) => {
   if (hasIntegration(network)) {
     return createAdapter(network).acceptExchange;
   }
@@ -51,7 +51,7 @@ const acceptExchangeHook = (network, req) => {
   // 5. Return accepted exchange
 };
 
-const declineExchangeHook = network => {
+const declineExchangeAction = network => {
   if (hasIntegration(network)) {
     return createAdapter(network).declineExchange;
   }
@@ -64,7 +64,7 @@ const declineExchangeHook = network => {
   // 5. Return declined exchange
 };
 
-const approveExchangeHook = (network, user) => {
+const approveExchangeAction = (network, user) => {
   // 1. Find exchange
   // 2. Check if logged user may approve the exchange
   // 3. Check if exchange can be approved else throw Error
@@ -77,7 +77,7 @@ const approveExchangeHook = (network, user) => {
   // 7. Return approved exchange
 }
 
-const rejectExchangeHook = (network, user) => {
+const rejectExchangeAction = (network, user) => {
   // 1. Find exchange
   // 2. Check if logged user may approve the exchange
   // 3. Check if exchange can be reject else throw Error
