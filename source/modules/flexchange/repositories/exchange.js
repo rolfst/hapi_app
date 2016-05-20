@@ -146,8 +146,13 @@ export function declineExchange(exchange, user) {
         return removeExchangeResponseForExchangeAndUser(exchange, user)
           .then(createExchangeResponse(data));
       }
-    })
-    .then(() => findExchangeById(exchange.id));
+    });
+}
+
+export function approveExchange(exchange, user, userIdToApprove) {
+  return findExchangeResponseByExchangeAndUser(exchange, userIdToApprove)
+    .then(exchangeResponse => exchangeResponse.update({ approved: 1 }))
+    .then(() => exchange.update({ approved_by: user.id, approved_user: userIdToApprove }));
 }
 
 /**
