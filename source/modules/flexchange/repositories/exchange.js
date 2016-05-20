@@ -112,7 +112,7 @@ export function acceptExchange(exchange, user) {
     response: 1,
   };
 
-  return findExchangeResponseByExchangeAndUser(exchange, user)
+  return findExchangeResponseByExchangeAndUser(exchange, user.id)
     .then(exchangeResponse => {
       if (!exchangeResponse) return createExchangeResponse(data);
 
@@ -138,7 +138,7 @@ export function declineExchange(exchange, user) {
     response: 0,
   };
 
-  return findExchangeResponseByExchangeAndUser(exchange, user)
+  return findExchangeResponseByExchangeAndUser(exchange, user.id)
     .then(exchangeResponse => {
       if (!exchangeResponse) return createExchangeResponse(data);
 
@@ -146,8 +146,21 @@ export function declineExchange(exchange, user) {
         return removeExchangeResponseForExchangeAndUser(exchange, user)
           .then(createExchangeResponse(data));
       }
-    })
-    .then(() => findExchangeById(exchange.id));
+    });
+}
+
+/**
+ * Approve an exchange
+ * @param {Exchange} exchange - Exchange to approve
+ * @param {User} user - User that approves the exchange
+ * @param {User} userIdToApprove - User that will be approved
+ * @method approveExchange
+ * @return {promise} Promise containing the updated exchange
+ */
+export function approveExchange(exchange, user, userIdToApprove) {
+  return findExchangeResponseByExchangeAndUser(exchange, userIdToApprove)
+    .then(exchangeResponse => exchangeResponse.update({ approved: 1 }))
+    .then(() => exchange.update({ approved_by: user.id, approved_user: userIdToApprove }));
 }
 
 /**

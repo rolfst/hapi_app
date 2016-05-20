@@ -6,7 +6,11 @@ import {
   findExchangeById,
   acceptExchange,
   declineExchange,
+  approveExchange,
 } from 'modules/flexchange/repositories/exchange';
+import {
+  findExchangeResponseByExchangeAndUser,
+} from 'modules/flexchange/repositories/exchange-response';
 
 export default (req, reply) => {
   // TODO: add authorization if user can access the network
@@ -25,7 +29,8 @@ export default (req, reply) => {
         .then(exchange => reply({ success: true, data: { exchange } }))
         .catch(err => reply(err));
     } catch (err) {
-      console.log(err);
+      if (err.isBoom) return reply(err);
+
       return reply(Boom.forbidden('Unknown action.'));
     }
   });
@@ -63,17 +68,32 @@ const declineExchangeAction = (network, req) => {
     });
 };
 
-const approveExchangeAction = (network, user) => {
+const approveExchangeAction = (network, req) => {
+  if (!req.payload.user_id) throw Boom.badData('Missing user_id to approve.');
   // 1. Find exchange
-  // 2. Check if logged user may approve the exchange
-  // 3. Check if exchange can be approved else throw Error
-  // 3.1. Check if user accepted the exchange
-  // 3.2. Check if user response is declined
-  // 3.3. Check if exchange is not already approved
-  // 4. Approve exchange from repository
-  // 5. Update approved_by attribute in the exchange from 1. with the current logged user id
-  // 6. Fire ExchangeWasApproved event
-  // 7. Return approved exchange
+  const userIdToApprove = req.payload.user_id;
+
+  return findExchangeById(req.params.exchangeId)
+    .then(exchange => {
+      // TODO: Check if logged user may approve the exchange
+      const exchangeResponse = findExchangeResponseByExchangeAndUser(exchange, userIdToApprove);
+      return [exchangeResponse, exchange];
+    })
+    .spread((exchangeResponse, exchange) => {
+      if (!exchangeResponse.response) {
+        throw Boom.badData('The user didn\'t accept the exchange.');
+      }
+
+      if (exchangeResponse.approved) {
+        throw Boom.badData('The user is already approved.');
+      }
+
+      return approveExchange(exchange, req.auth.credentials, userIdToApprove);
+    })
+    .then(exchange => {
+      // TODO: Fire ExchangeWasApproved event
+      return exchange;
+    });
 };
 
 const rejectExchangeAction = (network, user) => {
