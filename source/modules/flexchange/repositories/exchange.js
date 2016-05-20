@@ -1,6 +1,11 @@
 import Boom from 'boom';
 import { Exchange, ExchangeResponse } from 'modules/flexchange/models';
 import { User } from 'common/models';
+import { createExchangeResponse } from 'modules/flexchange/repositories/exchange-response';
+import {
+  findExchangeResponseByExchangeAndUser,
+  removeExchangeResponseForExchangeAndUser,
+} from 'modules/flexchange/repositories/exchange-response';
 
 /**
  * Find a specific exchange by id
@@ -101,14 +106,48 @@ export function updateExchangeById(exchangeId, payload) {
  * @return {promise} Add exchange response promise
  */
 export function acceptExchange(exchange, user) {
-  return ExchangeResponse.create({
+  const data = {
     userId: user.id,
     exchangeId: exchange.id,
     response: 1,
-  })
+  };
+
+  return findExchangeResponseByExchangeAndUser(exchange, user)
     .then(exchangeResponse => {
-      return findExchangeById(exchangeResponse.exchangeId);
-    });
+      if (!exchangeResponse) return createExchangeResponse(data);
+
+      if (!exchangeResponse.response) {
+        return removeExchangeResponseForExchangeAndUser(exchange, user)
+          .then(createExchangeResponse(data));
+      }
+    })
+    .then(() => findExchangeById(exchange.id));
+}
+
+/**
+ * Add a response to an exchange
+ * @param {Exchange} exchange - Exchange to add the response to
+ * @param {User} user - User declining the exchange
+ * @method declineExchange
+ * @return {promise} Add exchange response promise
+ */
+export function declineExchange(exchange, user) {
+  const data = {
+    userId: user.id,
+    exchangeId: exchange.id,
+    response: 0,
+  };
+
+  return findExchangeResponseByExchangeAndUser(exchange, user)
+    .then(exchangeResponse => {
+      if (!exchangeResponse) return createExchangeResponse(data);
+
+      if (exchangeResponse.response) {
+        return removeExchangeResponseForExchangeAndUser(exchange, user)
+          .then(createExchangeResponse(data));
+      }
+    })
+    .then(() => findExchangeById(exchange.id));
 }
 
 /**
