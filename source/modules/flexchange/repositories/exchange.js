@@ -112,7 +112,7 @@ export function acceptExchange(exchange, user) {
     response: 1,
   };
 
-  return findExchangeResponseByExchangeAndUser(exchange, user)
+  return findExchangeResponseByExchangeAndUser(exchange, user.id)
     .then(exchangeResponse => {
       if (!exchangeResponse) return createExchangeResponse(data);
 
@@ -138,7 +138,7 @@ export function declineExchange(exchange, user) {
     response: 0,
   };
 
-  return findExchangeResponseByExchangeAndUser(exchange, user)
+  return findExchangeResponseByExchangeAndUser(exchange, user.id)
     .then(exchangeResponse => {
       if (!exchangeResponse) return createExchangeResponse(data);
 
