@@ -71,7 +71,6 @@ const declineExchangeAction = (network, req) => {
 
 const approveExchangeAction = (network, req) => {
   if (!req.payload.user_id) throw Boom.badData('Missing user_id to approve.');
-  // 1. Find exchange
   const userIdToApprove = req.payload.user_id;
 
   return findExchangeById(req.params.exchangeId)
@@ -99,7 +98,6 @@ const approveExchangeAction = (network, req) => {
 
 const rejectExchangeAction = (network, req) => {
   if (!req.payload.user_id) throw Boom.badData('Missing user_id to approve.');
-  // 1. Find exchange
   const userIdToApprove = req.payload.user_id;
 
   return findExchangeById(req.params.exchangeId)
