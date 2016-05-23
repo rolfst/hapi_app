@@ -164,6 +164,20 @@ export function approveExchange(exchange, user, userIdToApprove) {
 }
 
 /**
+ * Reject an exchange
+ * @param {Exchange} exchange - Exchange to reject
+ * @param {User} user - User that rejects the exchange
+ * @param {User} userIdToApprove - User that will be rejected
+ * @method rejectExchange
+ * @return {promise} Promise containing the updated exchange
+ */
+export function rejectExchange(exchange, user, userIdToReject) {
+  return findExchangeResponseByExchangeAndUser(exchange, userIdToReject)
+    .then(exchangeResponse => exchangeResponse.update({ approved: 0 }))
+    .then(() => exchange);
+}
+
+/**
  * Increment the accept count by value
  * @param {Exchange} exchange - The exchange instance to increment on
  * @param {number} amount - The amount to increment

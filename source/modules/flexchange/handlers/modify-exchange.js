@@ -7,6 +7,7 @@ import {
   acceptExchange,
   declineExchange,
   approveExchange,
+  rejectExchange,
 } from 'modules/flexchange/repositories/exchange';
 import {
   findExchangeResponseByExchangeAndUser,
@@ -80,12 +81,12 @@ const approveExchangeAction = (network, req) => {
       return [exchangeResponse, exchange];
     })
     .spread((exchangeResponse, exchange) => {
-      if (!exchangeResponse.response) {
-        throw Boom.badData('The user didn\'t accept the exchange.');
-      }
-
       if (exchangeResponse.approved) {
         throw Boom.badData('The user is already approved.');
+      }
+
+      if (!exchangeResponse.response) {
+        throw Boom.badData('The user didn\'t accept the exchange.');
       }
 
       return approveExchange(exchange, req.auth.credentials, userIdToApprove);
@@ -96,14 +97,34 @@ const approveExchangeAction = (network, req) => {
     });
 };
 
-const rejectExchangeAction = (network, user) => {
+const rejectExchangeAction = (network, req) => {
+  if (!req.payload.user_id) throw Boom.badData('Missing user_id to approve.');
   // 1. Find exchange
-  // 2. Check if logged user may approve the exchange
-  // 3. Check if exchange can be reject else throw Error
-  // 3.1. Check if user accepted the exchange
-  // 3.2. Check if user response is declined
-  // 3.3. Check if exchange is not already rejected
-  // 4. Reject exchange from repository
-  // 5. Fire ExchangeWasRejected event
-  // 6. Return rejected exchange
+  const userIdToApprove = req.payload.user_id;
+
+  return findExchangeById(req.params.exchangeId)
+    .then(exchange => {
+      // TODO: Check if logged user may reject the exchange
+      const exchangeResponse = findExchangeResponseByExchangeAndUser(exchange, userIdToApprove);
+      return [exchangeResponse, exchange];
+    })
+    .spread((exchangeResponse, exchange) => {
+      if (exchangeResponse.approved) {
+        throw Boom.badData('The user is already approved.');
+      }
+
+      if (exchangeResponse.approved === 0) {
+        throw Boom.badData('The user is already rejected.');
+      }
+
+      if (!exchangeResponse.response) {
+        throw Boom.badData('The user didn\'t accept the exchange.');
+      }
+
+      return rejectExchange(exchange, req.auth.credentials, userIdToApprove);
+    })
+    .then(exchange => {
+      // TODO: Fire ExchangeWasRejected event
+      return exchange;
+    });
 };
