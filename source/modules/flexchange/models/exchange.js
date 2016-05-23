@@ -20,7 +20,7 @@ const Exchange = model.define('Exchange', {
   },
   description: {
     type: Sequelize.TEXT('medium'), // eslint-disable-line new-cap
-    allowNull: false,
+    allowNull: true,
   },
   date: {
     type: Sequelize.DATEONLY,

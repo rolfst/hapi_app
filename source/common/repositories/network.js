@@ -1,6 +1,22 @@
 import Boom from 'boom';
 import { Network, Integration } from 'common/models';
 
+export function createNetwork(userId, name = null) {
+  let networkName = name;
+  if (!name) networkName = `test-network-${Math.floor(Math.random() * 1000)}`;
+
+  return Network
+    .create({
+      name: networkName,
+      userId,
+      enabledComponents: "['SOCIAL', 'SCHEDULE', 'CHAT', 'FLEXCHANGE']",
+    });
+}
+
+export function deleteNetwork(id) {
+  return Network.destroy({ where: { id } });
+}
+
 export function findNetworkById(id) {
   return Network
     .findById(id, { include: Integration })
