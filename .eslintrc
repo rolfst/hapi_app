@@ -6,5 +6,10 @@
   "rules": {
       "arrow-body-style": ["off"],
       "consistent-return": ["off"]
+  },
+  "parserOptions": {
+      "ecmaFeatures": {
+        "experimentalObjectRestSpread": true
+      }
   }
 }
