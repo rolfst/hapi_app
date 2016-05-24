@@ -1,18 +1,18 @@
 import IntegrationNotFound from 'common/errors/integration-not-found';
 import pmtAdapter from 'adapters/pmt/adapter';
 
-const getAdapterForService = name => {
+const getAdapterForService = id => {
   const drivers = {
     1: pmtAdapter,
   };
 
-  return drivers[name];
+  return drivers[id];
 };
 
-export default (serviceName) => {
-  const adapter = getAdapterForService(serviceName);
+export default network => {
+  const adapter = getAdapterForService(network.Integrations[0].id);
 
-  if (!adapter) throw new IntegrationNotFound(serviceName);
+  if (!adapter) throw new IntegrationNotFound(network);
 
   return adapter;
 };
