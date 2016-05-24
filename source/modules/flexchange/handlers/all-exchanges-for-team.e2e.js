@@ -18,19 +18,19 @@ describe('Get exchanges for team', () => {
           type: 'TEAM',
         };
 
-        const p1 = createExchange(global.authUser.id, global.network.id, {
+        const exchange1 = createExchange(global.authUser.id, global.network.id, {
           ...defaultArgs,
           title: 'Test shift 1 for team',
         });
 
-        const p2 = createExchange(global.authUser.id, global.network.id, {
+        const exchange2 = createExchange(global.authUser.id, global.network.id, {
           ...defaultArgs,
           title: 'Test shift 2 for team',
         });
 
-        return Promise.all([p1, p2]).then(([r1, r2]) => {
-          createValuesForExchange(r1.id, [team.id]);
-          createValuesForExchange(r2.id, [team.id]);
+        return Promise.all([exchange1, exchange2]).then(exchanges => {
+          createValuesForExchange(exchanges[0].id, [team.id]);
+          createValuesForExchange(exchanges[1].id, [team.id]);
         });
       });
   });

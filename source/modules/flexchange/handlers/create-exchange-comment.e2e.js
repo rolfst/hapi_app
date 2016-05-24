@@ -16,11 +16,11 @@ describe('Get exchanges comment', () => {
       exchange = createdExchange;
       const userId = global.authUser.id;
 
-      const p1 = createExchangeComment(exchange.id, { userId, text: 'Comment #1' });
-      const p2 = createExchangeComment(exchange.id, { userId, text: 'Comment #2' });
-      const p3 = createExchangeComment(exchange.id, { userId, text: 'Comment #3' });
+      const comment1 = createExchangeComment(exchange.id, { userId, text: 'Comment #1' });
+      const comment2 = createExchangeComment(exchange.id, { userId, text: 'Comment #2' });
+      const comment3 = createExchangeComment(exchange.id, { userId, text: 'Comment #3' });
 
-      return Promise.all([p1, p2, p3]);
+      return Promise.all([comment1, comment2, comment3]);
     });
   });
 
