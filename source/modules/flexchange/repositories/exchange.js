@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import { Exchange, ExchangeResponse, ExchangeValues } from 'modules/flexchange/models';
+import { Exchange, ExchangeResponse } from 'modules/flexchange/models';
 import { User } from 'common/models';
 import { createExchangeResponse } from 'modules/flexchange/repositories/exchange-response';
 import {
