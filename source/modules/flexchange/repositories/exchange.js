@@ -153,7 +153,7 @@ export function declineExchange(exchange, user) {
  * Approve an exchange
  * @param {Exchange} exchange - Exchange to approve
  * @param {User} user - User that approves the exchange
- * @param {User} userIdToApprove - User that will be approved
+ * @param {number} userIdToApprove - User that will be approved
  * @method approveExchange
  * @return {promise} Promise containing the updated exchange
  */
@@ -166,12 +166,11 @@ export function approveExchange(exchange, user, userIdToApprove) {
 /**
  * Reject an exchange
  * @param {Exchange} exchange - Exchange to reject
- * @param {User} user - User that rejects the exchange
- * @param {User} userIdToApprove - User that will be rejected
+ * @param {number} userIdToReject - User that will be rejected
  * @method rejectExchange
  * @return {promise} Promise containing the updated exchange
  */
-export function rejectExchange(exchange, user, userIdToReject) {
+export function rejectExchange(exchange, userIdToReject) {
   return findExchangeResponseByExchangeAndUser(exchange, userIdToReject)
     .then(exchangeResponse => exchangeResponse.update({ approved: 0 }))
     .then(() => exchange);

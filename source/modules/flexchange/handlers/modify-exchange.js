@@ -119,7 +119,7 @@ const rejectExchangeAction = (network, req) => {
         throw Boom.badData('The user didn\'t accept the exchange.');
       }
 
-      return rejectExchange(exchange, req.auth.credentials, userIdToApprove);
+      return rejectExchange(exchange, userIdToApprove);
     })
     .then(exchange => {
       // TODO: Fire ExchangeWasRejected event
