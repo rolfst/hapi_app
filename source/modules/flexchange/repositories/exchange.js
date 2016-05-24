@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import { Exchange, ExchangeResponse } from 'modules/flexchange/models';
+import { Exchange, ExchangeResponse, ExchangeValues } from 'modules/flexchange/models';
 import { User } from 'common/models';
 import { createExchangeResponse } from 'modules/flexchange/repositories/exchange-response';
 import {
@@ -70,7 +70,7 @@ export function deleteExchangeById(exchangeId) {
 }
 
 /**
- * Create a new exchange
+ * Create a new exchange for network
  * @param {number} userId - Id of the user placing the exchange
  * @param {number} networkId - Id of the network the exchange is being placed in
  * @param {object} payload - Object containing payload data

@@ -1,9 +1,14 @@
 import ExchangeModel from 'modules/flexchange/models/exchange';
 import ExchangeCommentModel from 'modules/flexchange/models/exchange-comment';
 import ExchangeResponseModel from 'modules/flexchange/models/exchange-response';
+import ExchangeValueModel from 'modules/flexchange/models/exchange-value';
 import UserModel from 'common/models/user';
 import TeamModel from 'common/models/team';
 import NetworkModel from 'common/models/network';
+
+ExchangeModel.hasMany(ExchangeValueModel, {
+  foreignKey: 'exchange_id',
+});
 
 ExchangeResponseModel.belongsTo(UserModel, {
   foreignKey: 'user_id',
@@ -63,3 +68,4 @@ TeamModel.belongsToMany(ExchangeModel, {
 export const Exchange = ExchangeModel;
 export const ExchangeComment = ExchangeCommentModel;
 export const ExchangeResponse = ExchangeResponseModel;
+export const ExchangeValue = ExchangeValueModel;

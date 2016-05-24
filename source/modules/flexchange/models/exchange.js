@@ -38,10 +38,12 @@ const Exchange = model.define('Exchange', {
   acceptCount: {
     type: Sequelize.INTEGER,
     field: 'accept_count',
+    defaultValue: 0,
   },
   declineCount: {
     type: Sequelize.INTEGER,
     field: 'decline_count',
+    defaultValue: 0,
   },
   approvedUser: {
     type: Sequelize.INTEGER,
