@@ -1,3 +1,4 @@
+import Boom from 'boom';
 import { ExchangeResponse } from 'modules/flexchange/models';
 
 /**
@@ -13,6 +14,10 @@ export function findExchangeResponseByExchangeAndUser(exchange, userId) {
       exchangeId: exchange.id,
       userId,
     },
+  }).then(response => {
+    if (!response) throw Boom.badData('No response found for the user.');
+
+    return response;
   });
 }
 
