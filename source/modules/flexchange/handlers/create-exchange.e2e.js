@@ -1,7 +1,6 @@
 import { assert } from 'chai';
 import moment from 'moment';
 import { getRequest } from 'common/test-utils/request';
-import { deleteNetwork } from 'common/repositories/network';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
 
 let exchange = null;
@@ -26,6 +25,4 @@ describe('Create exchange', () => {
         assert.equal(response.statusCode, 200);
       });
   });
-
-  after(() => deleteNetwork(global.network.id));
 });

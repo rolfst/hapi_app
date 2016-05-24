@@ -14,3 +14,7 @@ before(() => {
     });
   });
 });
+
+after(() => {
+  return deleteNetwork(global.network.id);
+});
