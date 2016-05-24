@@ -19,7 +19,7 @@ export default (req, reply) => {
       const hook = actions[req.payload.action];
 
       return hook(network, req)
-        .then(exchange => reply({ success: true, data: { exchange } }))
+        .then(exchange => reply({ success: true, data: exchange.toJSON() }))
         .catch(err => reply(err));
     } catch (err) {
       if (err.isBoom) return reply(err);

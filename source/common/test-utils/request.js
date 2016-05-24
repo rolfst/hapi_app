@@ -34,3 +34,11 @@ export function getRequest(url) {
     url,
   }, makeDefaultOptions(global)));
 }
+
+export function patchRequest(url, payload) {
+  return global.server.inject(Object.assign({
+    method: 'PATCH',
+    url,
+    payload,
+  }, makeDefaultOptions(global)));
+}
