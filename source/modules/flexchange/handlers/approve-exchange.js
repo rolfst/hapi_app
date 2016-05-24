@@ -12,6 +12,7 @@ export default (network, req) => {
     .then(exchange => {
       // TODO: Check if logged user may approve the exchange
       const exchangeResponse = findExchangeResponseByExchangeAndUser(exchange, userIdToApprove);
+
       return [exchangeResponse, exchange];
     })
     .spread((exchangeResponse, exchange) => {
