@@ -7,7 +7,7 @@ import { createExchangeComment } from 'modules/flexchange/repositories/comment';
 
 let exchange = null;
 
-describe('Get exchanges for team', () => {
+describe('Get exchanges comment', () => {
   before(() => {
     return createExchange(global.authUser.id, global.network.id, {
       date: moment().format('YYYY-MM-DD'),
@@ -25,7 +25,7 @@ describe('Get exchanges for team', () => {
     });
   });
 
-  it('should return comments', () => {
+  it('should return comments for exchange', () => {
     return getRequest(`/v2/networks/${global.network.id}/exchanges/${exchange.id}/comments`)
       .then(response => {
         assert.lengthOf(response.result.data, 3);
