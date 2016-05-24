@@ -21,7 +21,7 @@ describe('Accept exchange', () => {
       .then(response => {
         const { data } = response.result;
 
-        // assert.equal(data.vote_result, 'ACCEPTED');
+        // TODO: assert.equal(data.vote_result, 'ACCEPTED');
         assert.equal(data.accept_count, 1);
         assert.equal(data.responses[0].response, true);
         assert.equal(data.responses[0].user.full_name, global.authUser.fullName);
