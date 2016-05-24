@@ -1,7 +1,7 @@
 const makeDefaultOptions = (globalProps) => {
   return {
     headers: { 'X-API-Token': globalProps.authToken },
-    credentials: { user: globalProps.authUser },
+    credentials: globalProps.authUser,
   };
 };
 
