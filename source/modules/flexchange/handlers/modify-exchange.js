@@ -9,10 +9,10 @@ export default (req, reply) => {
   // TODO: add authorization if user can access the network
   findNetworkById(req.params.networkId).then(network => {
     const actions = {
-      accept: acceptExchange, // eslint-disable-line no-use-before-define
-      decline: declineExchange, // eslint-disable-line no-use-before-define
-      approve: approveExchange, // eslint-disable-line no-use-before-define
-      reject: rejectExchange, // eslint-disable-line no-use-before-define
+      accept: acceptExchange,
+      decline: declineExchange,
+      approve: approveExchange,
+      reject: rejectExchange,
     };
 
     try {
