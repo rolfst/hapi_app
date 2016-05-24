@@ -20,7 +20,7 @@ const Exchange = model.define('Exchange', {
   },
   description: {
     type: Sequelize.TEXT('medium'), // eslint-disable-line new-cap
-    allowNull: false,
+    allowNull: true,
   },
   date: {
     type: Sequelize.DATEONLY,
@@ -38,10 +38,12 @@ const Exchange = model.define('Exchange', {
   acceptCount: {
     type: Sequelize.INTEGER,
     field: 'accept_count',
+    defaultValue: 0,
   },
   declineCount: {
     type: Sequelize.INTEGER,
     field: 'decline_count',
+    defaultValue: 0,
   },
   approvedUser: {
     type: Sequelize.INTEGER,

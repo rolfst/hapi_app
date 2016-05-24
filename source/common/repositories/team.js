@@ -10,3 +10,8 @@ export function findTeamById(id) {
       return team;
     });
 }
+
+export function createTeam(networkId, name, description) {
+  return Team
+    .create({ networkId, name, description });
+}

@@ -1,6 +1,7 @@
 import ExchangeModel from 'modules/flexchange/models/exchange';
 import ExchangeCommentModel from 'modules/flexchange/models/exchange-comment';
 import ExchangeResponseModel from 'modules/flexchange/models/exchange-response';
+import ExchangeValueModel from 'modules/flexchange/models/exchange-value';
 import UserModel from 'common/models/user';
 import TeamModel from 'common/models/team';
 import NetworkModel from 'common/models/network';
@@ -17,13 +18,19 @@ ExchangeCommentModel.belongsTo(UserModel, {
   foreignKey: 'created_by',
 });
 
+ExchangeModel.hasMany(ExchangeValueModel, {
+  foreignKey: 'exchange_id',
+});
+
 ExchangeModel.hasMany(ExchangeResponseModel, {
   foreignKey: 'exchange_id',
 });
 
 ExchangeModel.belongsToMany(ExchangeCommentModel, {
   foreignKey: 'parent_id',
+  otherKey: 'id',
   through: 'comments',
+  scope: { parent_type: 'FlexAppeal\\Entities\\Exchange' },
 });
 
 ExchangeModel.belongsTo(UserModel, {
@@ -63,3 +70,4 @@ TeamModel.belongsToMany(ExchangeModel, {
 export const Exchange = ExchangeModel;
 export const ExchangeComment = ExchangeCommentModel;
 export const ExchangeResponse = ExchangeResponseModel;
+export const ExchangeValue = ExchangeValueModel;
