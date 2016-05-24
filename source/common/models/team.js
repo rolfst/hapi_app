@@ -13,7 +13,7 @@ const Team = model.define('Team', {
   },
   description: {
     type: Sequelize.TEXT('medium'), // eslint-disable-line new-cap
-    allowNull: false,
+    allowNull: true,
   },
 }, {
   tableName: 'teams',

@@ -6,10 +6,6 @@ import UserModel from 'common/models/user';
 import TeamModel from 'common/models/team';
 import NetworkModel from 'common/models/network';
 
-ExchangeModel.hasMany(ExchangeValueModel, {
-  foreignKey: 'exchange_id',
-});
-
 ExchangeResponseModel.belongsTo(UserModel, {
   foreignKey: 'user_id',
 });
@@ -22,13 +18,19 @@ ExchangeCommentModel.belongsTo(UserModel, {
   foreignKey: 'created_by',
 });
 
+ExchangeModel.hasMany(ExchangeValueModel, {
+  foreignKey: 'exchange_id',
+});
+
 ExchangeModel.hasMany(ExchangeResponseModel, {
   foreignKey: 'exchange_id',
 });
 
 ExchangeModel.belongsToMany(ExchangeCommentModel, {
   foreignKey: 'parent_id',
+  otherKey: 'id',
   through: 'comments',
+  scope: { parent_type: 'FlexAppeal\\Entities\\Exchange' },
 });
 
 ExchangeModel.belongsTo(UserModel, {

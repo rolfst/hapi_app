@@ -13,6 +13,7 @@ export default [
   router.get(`${baseUrl}/teams/{teamId}/exchanges`, require(`${basePath}/all-exchanges-for-team`)),
   router.get(`${baseUrl}/exchanges/{exchangeId}`, require(`${basePath}/view-exchange`)),
   router.get(`${baseUrl}/exchanges/{exchangeId}/comments`, require(`${basePath}/view-exchange-comments`)),
+  router.get(`${baseUrl}/teams/{exchangeId}`, require(`${basePath}/all-exchanges-for-team`)),
   router.post(`${baseUrl}/exchanges`, require(`${basePath}/create-exchange`)),
   router.post(`${baseUrl}/exchanges/{exchangeId}/comments`, require(`${basePath}/create-exchange-comment`)),
   router.put(`${baseUrl}/exchanges/{exchangeId}`, require(`${basePath}/update-exchange`)),
