@@ -100,50 +100,40 @@ export function updateExchangeById(exchangeId, payload) {
 
 /**
  * Add a response to an exchange
- * @param {Exchange} exchange - Exchange to add the response to
- * @param {User} user - User accepting the exchange
+ * @param {number} exchangeId - Exchange to add the response to
+ * @param {number} userId - User accepting the exchange
  * @method acceptExchange
  * @return {promise} Add exchange response promise
  */
-export function acceptExchange(exchange, user) {
-  const data = {
-    userId: user.id,
-    exchangeId: exchange.id,
-    response: 1,
-  };
+export function acceptExchange(exchangeId, userId) {
+  const data = { userId, exchangeId, response: 1 };
 
-  return findExchangeResponseByExchangeAndUser(exchange, user.id)
+  return findExchangeResponseByExchangeAndUser(exchangeId, userId)
     .then(exchangeResponse => {
-      if (!exchangeResponse) return createExchangeResponse(data);
-
       if (!exchangeResponse.response) {
-        return removeExchangeResponseForExchangeAndUser(exchange, user)
+        return removeExchangeResponseForExchangeAndUser(exchangeId, userId)
           .then(createExchangeResponse(data));
       }
     })
-    .then(() => findExchangeById(exchange.id));
+    .catch(() => createExchangeResponse(data));
 }
 
 /**
  * Add a response to an exchange
- * @param {Exchange} exchange - Exchange to add the response to
- * @param {User} user - User declining the exchange
+ * @param {number} exchangeId - Exchange to add the response to
+ * @param {number} userId - User declining the exchange
  * @method declineExchange
  * @return {promise} Add exchange response promise
  */
-export function declineExchange(exchange, user) {
-  const data = {
-    userId: user.id,
-    exchangeId: exchange.id,
-    response: 0,
-  };
+export function declineExchange(exchangeId, userId) {
+  const data = { userId, exchangeId, response: 0 };
 
-  return findExchangeResponseByExchangeAndUser(exchange, user.id)
+  return findExchangeResponseByExchangeAndUser(exchangeId, userId)
     .then(exchangeResponse => {
       if (!exchangeResponse) return createExchangeResponse(data);
 
       if (exchangeResponse.response) {
-        return removeExchangeResponseForExchangeAndUser(exchange, user)
+        return removeExchangeResponseForExchangeAndUser(exchangeId, userId)
           .then(createExchangeResponse(data));
       }
     });
@@ -158,7 +148,7 @@ export function declineExchange(exchange, user) {
  * @return {promise} Promise containing the updated exchange
  */
 export function approveExchange(exchange, user, userIdToApprove) {
-  return findExchangeResponseByExchangeAndUser(exchange, userIdToApprove)
+  return findExchangeResponseByExchangeAndUser(exchange.id, userIdToApprove)
     .then(exchangeResponse => exchangeResponse.update({ approved: 1 }))
     .then(() => exchange.update({ approved_by: user.id, approved_user: userIdToApprove }));
 }
@@ -171,7 +161,7 @@ export function approveExchange(exchange, user, userIdToApprove) {
  * @return {promise} Promise containing the updated exchange
  */
 export function rejectExchange(exchange, userIdToReject) {
-  return findExchangeResponseByExchangeAndUser(exchange, userIdToReject)
+  return findExchangeResponseByExchangeAndUser(exchange.id, userIdToReject)
     .then(exchangeResponse => exchangeResponse.update({ approved: 0 }))
     .then(() => exchange);
 }
