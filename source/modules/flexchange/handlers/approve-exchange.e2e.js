@@ -24,7 +24,6 @@ describe('Accept exchange', () => {
     return patchRequest(endpoint, { action: 'approve', user_id: 2 })
       .then(response => {
         const { data } = response.result;
-        console.log(response.result);
 
         // TODO: assert.equal(data.vote_result, 'APPROVED');
         assert.equal(data.accept_count, 1);
@@ -33,10 +32,28 @@ describe('Accept exchange', () => {
       });
   });
 
+  it('should fail when exchange is already accepted', () => {
+    const endpoint = `/v2/networks/${global.network.id}/exchanges/${exchange.id}`;
+
+    return patchRequest(endpoint, { action: 'approve', user_id: 2 })
+      .then(response => {
+        assert.equal(response.statusCode, 422);
+      });
+  });
+
   it('should fail when no user_id is present', () => {
     const endpoint = `/v2/networks/${global.network.id}/exchanges/${exchange.id}`;
 
     return patchRequest(endpoint, { action: 'approve' })
+      .then(response => {
+        assert.equal(response.statusCode, 422);
+      });
+  });
+
+  it('should fail if user has not accepted exchange', () => {
+    const endpoint = `/v2/networks/${global.network.id}/exchanges/${exchange.id}`;
+
+    return patchRequest(endpoint, { action: 'approve', user_id: 3 })
       .then(response => {
         assert.equal(response.statusCode, 422);
       });
