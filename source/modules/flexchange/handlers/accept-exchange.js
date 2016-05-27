@@ -10,7 +10,8 @@ export default (network, req) => {
   return findExchangeById(req.params.exchangeId)
     .then(exchange => {
       // TODO: Check if logged user may accept the exchange
-      return acceptExchange(exchange, req.auth.credentials.id);
+      return acceptExchange(exchange.id, req.auth.credentials.id)
+        .then(() => exchange);
     })
     .then(acceptedExchange => {
       // TODO: Fire ExchangeWasAccepted event

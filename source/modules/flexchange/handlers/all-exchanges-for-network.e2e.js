@@ -10,14 +10,20 @@ describe('Get exchanges for network', () => {
       type: 'ALL',
     };
 
-    createExchange(global.authUser.id, global.network.id, {
-      ...defaultArgs,
-      title: 'Test shift 1',
-    });
+    return global.network.getExchanges().then(exchanges => {
+      return exchanges.map(e => e.destroy());
+    }).then(() => {
+      const exchange1 = createExchange(global.authUser.id, global.network.id, {
+        ...defaultArgs,
+        title: 'Test shift 1',
+      });
 
-    createExchange(global.authUser.id, global.network.id, {
-      ...defaultArgs,
-      title: 'Test shift 2',
+      const exchange2 = createExchange(global.authUser.id, global.network.id, {
+        ...defaultArgs,
+        title: 'Test shift 2',
+      });
+
+      return Promise.all([exchange1, exchange2]);
     });
   });
 
