@@ -5,7 +5,7 @@ import { createExchange, acceptExchange } from 'modules/flexchange/repositories/
 
 let exchange = null;
 
-describe('Accept exchange', () => {
+describe('Approve exchange', () => {
   before(() => {
     return createExchange(global.authUser.id, global.network.id, {
       date: moment().format('YYYY-MM-DD'),

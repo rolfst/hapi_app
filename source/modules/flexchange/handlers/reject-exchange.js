@@ -19,10 +19,6 @@ export default (network, req) => {
         throw Boom.badData('The user is already approved.');
       }
 
-      if (exchangeResponse.approved === 0) {
-        throw Boom.badData('The user is already rejected.');
-      }
-
       if (!exchangeResponse.response) {
         throw Boom.badData('The user didn\'t accept the exchange.');
       }
