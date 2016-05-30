@@ -24,7 +24,7 @@ export default (req, reply) => {
     } catch (err) {
       if (err.isBoom) return reply(err);
 
-      return reply(Boom.forbidden('Unknown action.'));
+      return reply(Boom.badData('Unknown action.'));
     }
   });
 };
