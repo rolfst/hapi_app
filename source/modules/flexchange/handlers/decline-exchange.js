@@ -10,10 +10,11 @@ export default (network, req) => {
   return findExchangeById(req.params.exchangeId)
     .then(exchange => {
       // TODO: Check if logged user may decline the exchange
-      return declineExchange(exchange, req.auth.credentials);
+      return declineExchange(exchange.id, req.auth.credentials.id)
+        .then(() => exchange);
     })
-    .then(declinedExchange => {
+    .then(exchange => {
       // TODO: Fire ExchangeWasDeclined event
-      return declinedExchange;
+      return exchange.reload();
     });
 };

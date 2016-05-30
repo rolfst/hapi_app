@@ -22,7 +22,7 @@ export function findExchangeById(exchangeId) {
       ],
     })
     .then(exchange => {
-      if (!exchange) return Boom.notFound(`No exchange found with id ${exchangeId}.`);
+      if (!exchange) throw Boom.notFound(`No exchange found with id ${exchangeId}.`);
 
       return exchange;
     });
@@ -130,13 +130,12 @@ export function declineExchange(exchangeId, userId) {
 
   return findExchangeResponseByExchangeAndUser(exchangeId, userId)
     .then(exchangeResponse => {
-      if (!exchangeResponse) return createExchangeResponse(data);
-
       if (exchangeResponse.response) {
         return removeExchangeResponseForExchangeAndUser(exchangeId, userId)
           .then(createExchangeResponse(data));
       }
-    });
+    })
+    .catch(() => createExchangeResponse(data));
 }
 
 /**
