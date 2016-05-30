@@ -22,7 +22,7 @@ export function findExchangeResponseByExchangeAndUser(exchangeId, userId) {
  * Removes an exchange response for exchange and user
  * @param {number} exchangeId - Exchange the response is send to
  * @param {number} userId - User that placed the response
- * @method findExchangeResponseByExchangeAndUser
+ * @method removeExchangeResponseForExchangeAndUser
  * @return {promise} Find exchange response promise
  */
 export function removeExchangeResponseForExchangeAndUser(exchangeId, userId) {
