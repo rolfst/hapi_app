@@ -29,7 +29,7 @@ describe('Reject exchange', () => {
     const approvedExchangePromise = createExchange(global.authUser.id, global.network.id, {
       date: moment().format('YYYY-MM-DD'),
       type: 'ALL',
-      title: 'Test shift to reject',
+      title: 'Test shift to approve',
     })
     .then(createdExchange => {
       return acceptExchange(createdExchange.id, 2)
