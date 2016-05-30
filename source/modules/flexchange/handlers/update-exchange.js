@@ -9,7 +9,8 @@ export default (req, reply) => {
     }
 
     updateExchangeById(req.params.exchangeId, req.payload)
-      .then(exchange => reply({ success: true, data: exchange }))
+      .then(exchange => exchange.reload())
+      .then(exchange => reply({ success: true, data: exchange.toJSON() }))
       .catch(err => reply(err));
   });
 };
