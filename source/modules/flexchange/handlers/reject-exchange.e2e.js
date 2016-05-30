@@ -23,7 +23,7 @@ describe('Reject exchange', () => {
       const declinedExchange = declineExchange(createdExchange.id, 3);
 
       return Promise.all([acceptedExchange, declinedExchange])
-        .then(() => (exchange = createdExchange));
+        .then(() => createdExchange);
     });
 
     const approvedExchangePromise = createExchange(global.authUser.id, global.network.id, {
@@ -51,7 +51,7 @@ describe('Reject exchange', () => {
         const { data } = response.result;
 
         // TODO: assert.equal(data.vote_result, 'REJECTED');
-        assert.equal(data.accept_count, 1);
+        assert.equal(data.title, 'Test shift to reject');
         assert.equal(response.statusCode, 200);
       });
   });
