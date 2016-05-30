@@ -11,7 +11,8 @@ export default (network, req) => {
   return findExchangeById(req.params.exchangeId)
     .then(exchange => {
       // TODO: Check if logged user may approve the exchange
-      const exchangeResponse = findExchangeResponseByExchangeAndUser(exchange, userIdToApprove);
+      const exchangeResponse = findExchangeResponseByExchangeAndUser(exchange.id, userIdToApprove);
+
       return [exchangeResponse, exchange];
     })
     .spread((exchangeResponse, exchange) => {
@@ -27,6 +28,6 @@ export default (network, req) => {
     })
     .then(exchange => {
       // TODO: Fire ExchangeWasApproved event
-      return exchange;
+      return exchange.reload();
     });
 };

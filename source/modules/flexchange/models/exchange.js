@@ -12,7 +12,7 @@ const Exchange = model.define('Exchange', {
   networkId: {
     type: Sequelize.INTEGER,
     field: 'network_id',
-    allowNull: false,
+    allowNull: true,
   },
   title: {
     type: Sequelize.STRING,

@@ -11,7 +11,7 @@ export default (network, req) => {
   return findExchangeById(req.params.exchangeId)
     .then(exchange => {
       // TODO: Check if logged user may reject the exchange
-      const exchangeResponse = findExchangeResponseByExchangeAndUser(exchange, userIdToApprove);
+      const exchangeResponse = findExchangeResponseByExchangeAndUser(exchange.id, userIdToApprove);
       return [exchangeResponse, exchange];
     })
     .spread((exchangeResponse, exchange) => {
