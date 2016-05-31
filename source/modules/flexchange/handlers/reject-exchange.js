@@ -25,8 +25,8 @@ export default (network, req) => {
 
       return rejectExchange(exchange, userIdToApprove);
     })
-    .then(exchange => {
+    .then(rejectedExchange => {
       // TODO: Fire ExchangeWasRejected event
-      return exchange;
+      return rejectedExchange.reload();
     });
 };

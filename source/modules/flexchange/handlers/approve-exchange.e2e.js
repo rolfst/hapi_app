@@ -13,7 +13,7 @@ describe('Approve exchange', () => {
       title: 'Test shift to approve',
     })
     .then(createdExchange => {
-      return acceptExchange(createdExchange.id, 2)
+      return acceptExchange(createdExchange.id, 1)
         .then(() => (exchange = createdExchange));
     });
   });
@@ -21,13 +21,13 @@ describe('Approve exchange', () => {
   it('should return correct data', () => {
     const endpoint = `/v2/networks/${global.network.id}/exchanges/${exchange.id}`;
 
-    return patchRequest(endpoint, { action: 'approve', user_id: 2 })
+    return patchRequest(endpoint, { action: 'approve', user_id: 1 })
       .then(response => {
         const { data } = response.result;
 
-        // TODO: assert.equal(data.vote_result, 'APPROVED');
+        assert.equal(data.response_status, 'APPROVED');
         assert.equal(data.accept_count, 1);
-        assert.equal(data.approved_user.id, 2);
+        assert.equal(data.approved_user.id, 1);
         assert.equal(response.statusCode, 200);
       });
   });
@@ -35,7 +35,7 @@ describe('Approve exchange', () => {
   it('should fail when exchange is already approved', () => {
     const endpoint = `/v2/networks/${global.network.id}/exchanges/${exchange.id}`;
 
-    return patchRequest(endpoint, { action: 'approve', user_id: 2 })
+    return patchRequest(endpoint, { action: 'approve', user_id: 1 })
       .then(response => {
         assert.equal(response.statusCode, 422);
       });

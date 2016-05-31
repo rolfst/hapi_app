@@ -20,17 +20,17 @@ export function findExchangeById(exchangeId, userId) {
       include: [
         { model: User, as: 'ApprovedUser' },
         { model: ExchangeResponse },
+        { model: ExchangeResponse,
+          as: 'ResponseStatus',
+          where: { userId },
+          limit: 1,
+        },
       ],
     });
 
-  const responsePromise = findExchangeResponseByExchangeAndUser(exchangeId, userId);
-
-  return Promise.all([exchangePromise, responsePromise])
-    .then(([exchange, exchangeResponse]) => {
-      // console.log(exchange.toJSON(), exchangeResponse);
+  return exchangePromise
+    .then(exchange => {
       if (!exchange) throw Boom.notFound(`No exchange found with id ${exchangeId}.`);
-
-      // exchange.vote_result = exchangeResponse.response;
 
       return exchange;
     });

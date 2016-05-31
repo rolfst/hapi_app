@@ -21,7 +21,7 @@ describe('Decline exchange', () => {
       .then(response => {
         const { data } = response.result;
 
-        // TODO: assert.equal(data.vote_result, 'DECLINED');
+        assert.equal(data.response_status, 'DECLINED');
         assert.equal(data.title, 'Test shift to decline');
         assert.equal(data.accept_count, 0);
         assert.equal(data.decline_count, 1);
