@@ -6,7 +6,7 @@ import { createExchangeComment } from 'modules/flexchange/repositories/comment';
 
 let exchange = null;
 
-describe('Get exchanges comment', () => {
+describe('View exchange comment', () => {
   before(() => {
     return createExchange(global.authUser.id, global.network.id, {
       date: moment().format('YYYY-MM-DD'),

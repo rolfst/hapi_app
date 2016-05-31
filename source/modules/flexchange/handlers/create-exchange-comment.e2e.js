@@ -5,7 +5,7 @@ import { createExchange } from 'modules/flexchange/repositories/exchange';
 
 let exchange = null;
 
-describe('Create exchanges comment', () => {
+describe('Create exchange comment', () => {
   before(() => {
     return createExchange(global.authUser.id, global.network.id, {
       date: moment().format('YYYY-MM-DD'),
