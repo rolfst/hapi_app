@@ -2,6 +2,23 @@ import Boom from 'boom';
 import { ExchangeResponse } from 'modules/flexchange/models';
 
 /**
+ * Find an exchange response by exchange and user or throw Error
+ * @param {number} exchangeId - Exchange the response is send to
+ * @param {number} userId - User that placed the response
+ * @method findExchangeResponseByExchangeAndUserOrFail
+ * @return {promise} Find exchange response promise
+ */
+export function findExchangeResponseByExchangeAndUserOrFail(exchangeId, userId) {
+  return ExchangeResponse.findOne({
+    where: { exchangeId, userId },
+  }).then(response => {
+    if (!response) throw Boom.badData('No response found for user.');
+
+    return response;
+  });
+}
+
+/**
  * Find an exchange response by exchange and user
  * @param {number} exchangeId - Exchange the response is send to
  * @param {number} userId - User that placed the response
@@ -11,11 +28,7 @@ import { ExchangeResponse } from 'modules/flexchange/models';
 export function findExchangeResponseByExchangeAndUser(exchangeId, userId) {
   return ExchangeResponse.findOne({
     where: { exchangeId, userId },
-  }).then(response => {
-    if (!response) throw Boom.badData('No response found for the user.');
-
-    return response;
-  });
+  }).then(response => response);
 }
 
 /**

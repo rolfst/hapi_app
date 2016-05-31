@@ -16,6 +16,6 @@ before(done => {
   });
 });
 
-after(() => {
-  return deleteNetwork(global.network.id);
+after(done => {
+  if (global.network) return deleteNetwork(global.network.id).then(() => done());
 });

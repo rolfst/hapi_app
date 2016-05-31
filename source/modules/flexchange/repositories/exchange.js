@@ -4,6 +4,7 @@ import { User } from 'common/models';
 import { createExchangeResponse } from 'modules/flexchange/repositories/exchange-response';
 import {
   findExchangeResponseByExchangeAndUser,
+  findExchangeResponseByExchangeAndUserOrFail,
   removeExchangeResponseForExchangeAndUser,
 } from 'modules/flexchange/repositories/exchange-response';
 
@@ -13,16 +14,23 @@ import {
  * @method findExchangeById
  * @return {promise} Find exchange promise
  */
-export function findExchangeById(exchangeId) {
-  return Exchange
+export function findExchangeById(exchangeId, userId) {
+  const exchangePromise = Exchange
     .findById(exchangeId, {
       include: [
         { model: User, as: 'ApprovedUser' },
         { model: ExchangeResponse },
       ],
-    })
-    .then(exchange => {
+    });
+
+  const responsePromise = findExchangeResponseByExchangeAndUser(exchangeId, userId);
+
+  return Promise.all([exchangePromise, responsePromise])
+    .then(([exchange, exchangeResponse]) => {
+      // console.log(exchange.toJSON(), exchangeResponse);
       if (!exchange) throw Boom.notFound(`No exchange found with id ${exchangeId}.`);
+
+      // exchange.vote_result = exchangeResponse.response;
 
       return exchange;
     });
@@ -65,7 +73,7 @@ export function findExchangesByTeam(team) {
  * @return {promise} Delete exchange promise
  */
 export function deleteExchangeById(exchangeId) {
-  return findExchangeById(exchangeId)
+  return Exchange.findById(exchangeId)
     .then(exchange => exchange.destroy());
 }
 
@@ -94,7 +102,7 @@ export function createExchange(userId, networkId, payload) {
 export function updateExchangeById(exchangeId, payload) {
   const { title, description } = payload;
 
-  return findExchangeById(exchangeId)
+  return Exchange.findById(exchangeId)
     .then(exchange => exchange.update({ title, description }));
 }
 
@@ -108,7 +116,7 @@ export function updateExchangeById(exchangeId, payload) {
 export function acceptExchange(exchangeId, userId) {
   const data = { userId, exchangeId, response: 1 };
 
-  return findExchangeResponseByExchangeAndUser(exchangeId, userId)
+  return findExchangeResponseByExchangeAndUserOrFail(exchangeId, userId)
     .then(exchangeResponse => {
       if (!exchangeResponse.response) {
         return removeExchangeResponseForExchangeAndUser(exchangeId, userId)
@@ -128,7 +136,7 @@ export function acceptExchange(exchangeId, userId) {
 export function declineExchange(exchangeId, userId) {
   const data = { userId, exchangeId, response: 0 };
 
-  return findExchangeResponseByExchangeAndUser(exchangeId, userId)
+  return findExchangeResponseByExchangeAndUserOrFail(exchangeId, userId)
     .then(exchangeResponse => {
       if (exchangeResponse.response) {
         return removeExchangeResponseForExchangeAndUser(exchangeId, userId)
@@ -147,7 +155,7 @@ export function declineExchange(exchangeId, userId) {
  * @return {promise} Promise containing the updated exchange
  */
 export function approveExchange(exchange, user, userIdToApprove) {
-  return findExchangeResponseByExchangeAndUser(exchange.id, userIdToApprove)
+  return findExchangeResponseByExchangeAndUserOrFail(exchange.id, userIdToApprove)
     .then(exchangeResponse => exchangeResponse.update({ approved: 1 }))
     .then(() => exchange.update({ approved_by: user.id, approved_user: userIdToApprove }));
 }
@@ -160,7 +168,7 @@ export function approveExchange(exchange, user, userIdToApprove) {
  * @return {promise} Promise containing the updated exchange
  */
 export function rejectExchange(exchange, userIdToReject) {
-  return findExchangeResponseByExchangeAndUser(exchange.id, userIdToReject)
+  return findExchangeResponseByExchangeAndUserOrFail(exchange.id, userIdToReject)
     .then(exchangeResponse => exchangeResponse.update({ approved: 0 }))
     .then(() => exchange);
 }

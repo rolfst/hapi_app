@@ -32,7 +32,7 @@ describe('Approve exchange', () => {
       });
   });
 
-  it('should fail when exchange is already accepted', () => {
+  it('should fail when exchange is already approved', () => {
     const endpoint = `/v2/networks/${global.network.id}/exchanges/${exchange.id}`;
 
     return patchRequest(endpoint, { action: 'approve', user_id: 2 })

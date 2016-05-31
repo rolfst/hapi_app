@@ -7,7 +7,7 @@ export default (network, req) => {
     return createAdapter(network).acceptExchange;
   }
 
-  return findExchangeById(req.params.exchangeId)
+  return findExchangeById(req.params.exchangeId, req.auth.credentials.id)
     .then(exchange => {
       // TODO: Check if logged user may accept the exchange
       return acceptExchange(exchange.id, req.auth.credentials.id)
