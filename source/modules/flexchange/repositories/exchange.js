@@ -3,7 +3,6 @@ import { Exchange, ExchangeResponse } from 'modules/flexchange/models';
 import { User } from 'common/models';
 import { createExchangeResponse } from 'modules/flexchange/repositories/exchange-response';
 import {
-  findExchangeResponseByExchangeAndUser,
   findExchangeResponseByExchangeAndUserOrFail,
   removeExchangeResponseForExchangeAndUser,
 } from 'modules/flexchange/repositories/exchange-response';
