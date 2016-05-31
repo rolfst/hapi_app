@@ -12,7 +12,7 @@ export default (req, reply) => {
 
     createExchangeComment(req.params.exchangeId, data)
       .then(newExchangeComment => findCommentById(newExchangeComment.id))
-      .then(exchangeComment => reply({ success: true, data: exchangeComment }))
+      .then(exchangeComment => reply({ success: true, data: exchangeComment.toJSON() }))
       .catch(err => reply(err));
   });
 };
