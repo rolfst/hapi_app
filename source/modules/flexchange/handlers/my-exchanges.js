@@ -6,7 +6,7 @@ import respondWithCollection from 'common/utils/respond-with-collection';
 export default (req, reply) => {
   return findNetworkById(req.params.networkId).then(network => {
     if (hasIntegration(network)) {
-      // Execute integration logic with adapter
+      // TODO: Get exchanges from integration.
     }
 
     return findExchangesByUser(req.auth.credentials)

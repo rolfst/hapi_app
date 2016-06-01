@@ -1,4 +1,5 @@
 import Boom from 'boom';
+import employeeRoutes from 'modules/employee/routes/create-routes';
 import chatRoutes from 'modules/chat/routes/create-routes';
 import flexchangeRoutes from 'modules/flexchange/routes/create-routes';
 import createAdapter from 'adapters/create-adapter';
@@ -41,4 +42,4 @@ const defaultRoutes = [
   },
 ];
 
-export default [...defaultRoutes, ...chatRoutes, ...flexchangeRoutes];
+export default [...defaultRoutes, ...chatRoutes, ...flexchangeRoutes, ...employeeRoutes];
