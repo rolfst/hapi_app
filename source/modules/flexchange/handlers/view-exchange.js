@@ -12,7 +12,7 @@ export default (req, reply) => {
       // Execute integration logic with adapter
     }
 
-    findExchangeById(req.params.exchangeId)
+    findExchangeById(req.params.exchangeId, req.auth.credentials.id)
       .then(exchange => reply(respondWithItem(exchange)))
       .catch(err => reply(err));
   });

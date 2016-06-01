@@ -50,6 +50,9 @@ const Exchange = model.define('Exchange', {
     field: 'approved_user',
     allowNull: true,
   },
+  responseStatus: {
+    type: Sequelize.VIRTUAL,
+  },
 }, {
   tableName: 'exchanges',
   createdAt: 'created_at',
@@ -65,7 +68,7 @@ const Exchange = model.define('Exchange', {
         title: this.title,
         description: this.description,
         date: formatDate(this.date),
-        vote_result: 'TODO',
+        response_status: null,
         accept_count: this.acceptCount,
         decline_count: this.declineCount,
         created_at: formatDate(this.created_at),
@@ -87,6 +90,14 @@ const Exchange = model.define('Exchange', {
         output = Object.assign(output, {
           responses: this.ExchangeResponses.map(res => res.toJSON()),
         });
+      }
+
+      if (this.ResponseStatus) {
+        if (this.ResponseStatus.approved !== null) {
+          output.response_status = !!this.ResponseStatus.approved ? 'APPROVED' : 'REJECTED';
+        } else {
+          output.response_status = this.ResponseStatus.response ? 'ACCEPTED' : 'DECLINED';
+        }
       }
 
       return output;

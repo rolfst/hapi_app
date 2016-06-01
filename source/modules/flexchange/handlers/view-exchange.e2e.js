@@ -21,6 +21,7 @@ describe('View exchange', () => {
       const { data } = response.result;
 
       assert.equal(data.title, 'Test shift to view');
+      assert.equal(data.vote_result, null);
       assert.equal(data.description, 'Test description for this cool shift');
     });
   });

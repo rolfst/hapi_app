@@ -2,8 +2,8 @@ import Sequelize from 'sequelize';
 import model from 'connection';
 import formatDate from 'common/utils/format-date';
 import { User } from 'common/models';
+import { Exchange } from 'modules/flexchange/models';
 import {
-  findExchangeById,
   incrementExchangeAcceptCount,
   incrementExchangeDeclineCount,
   decrementExchangeAcceptCount,
@@ -38,7 +38,7 @@ const ExchangeResponse = model.define('ExchangeResponse', {
   },
   hooks: {
     afterCreate: function (exchangeResponseModel) { // eslint-disable-line func-names, object-shorthand, max-len
-      return findExchangeById(exchangeResponseModel.exchangeId).then(exchange => {
+      return Exchange.findById(exchangeResponseModel.exchangeId).then(exchange => {
         if (exchangeResponseModel.response) {
           return incrementExchangeAcceptCount(exchange);
         }

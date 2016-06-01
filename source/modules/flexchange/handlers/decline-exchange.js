@@ -7,7 +7,7 @@ export default (network, req) => {
     return createAdapter(network).declineExchange;
   }
 
-  return findExchangeById(req.params.exchangeId)
+  return findExchangeById(req.params.exchangeId, req.auth.credentials.id)
     .then(exchange => {
       // TODO: Check if logged user may decline the exchange
       return declineExchange(exchange.id, req.auth.credentials.id)

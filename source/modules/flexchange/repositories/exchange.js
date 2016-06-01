@@ -13,14 +13,21 @@ import {
  * @method findExchangeById
  * @return {promise} Find exchange promise
  */
-export function findExchangeById(exchangeId) {
-  return Exchange
+export function findExchangeById(exchangeId, userId) {
+  const exchangePromise = Exchange
     .findById(exchangeId, {
       include: [
         { model: User, as: 'ApprovedUser' },
         { model: ExchangeResponse },
+        { model: ExchangeResponse,
+          as: 'ResponseStatus',
+          where: { userId },
+          required: false,
+        },
       ],
-    })
+    });
+
+  return exchangePromise
     .then(exchange => {
       if (!exchange) throw Boom.notFound(`No exchange found with id ${exchangeId}.`);
 
@@ -65,7 +72,7 @@ export function findExchangesByTeam(team) {
  * @return {promise} Delete exchange promise
  */
 export function deleteExchangeById(exchangeId) {
-  return findExchangeById(exchangeId)
+  return Exchange.findById(exchangeId)
     .then(exchange => exchange.destroy());
 }
 
@@ -94,7 +101,7 @@ export function createExchange(userId, networkId, payload) {
 export function updateExchangeById(exchangeId, payload) {
   const { title, description } = payload;
 
-  return findExchangeById(exchangeId)
+  return Exchange.findById(exchangeId)
     .then(exchange => exchange.update({ title, description }));
 }
 

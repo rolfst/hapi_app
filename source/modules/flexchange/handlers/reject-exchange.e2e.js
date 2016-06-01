@@ -19,7 +19,7 @@ describe('Reject exchange', () => {
       title: 'Test shift to reject',
     })
     .then(createdExchange => {
-      const acceptedExchange = acceptExchange(createdExchange.id, 2);
+      const acceptedExchange = acceptExchange(createdExchange.id, 1);
       const declinedExchange = declineExchange(createdExchange.id, 3);
 
       return Promise.all([acceptedExchange, declinedExchange])
@@ -32,8 +32,8 @@ describe('Reject exchange', () => {
       title: 'Test shift to approve',
     })
     .then(createdExchange => {
-      return acceptExchange(createdExchange.id, 2)
-        .then(() => approveExchange(createdExchange, global.authUser, 2));
+      return acceptExchange(createdExchange.id, 1)
+        .then(() => approveExchange(createdExchange, global.authUser, 1));
     });
 
     return Promise.all([acceptedAndDeclinedExchange, approvedExchangePromise])
@@ -46,11 +46,11 @@ describe('Reject exchange', () => {
   it('should return correct data', () => {
     const endpoint = `/v2/networks/${global.network.id}/exchanges/${exchange.id}`;
 
-    return patchRequest(endpoint, { action: 'reject', user_id: 2 })
+    return patchRequest(endpoint, { action: 'reject', user_id: 1 })
       .then(response => {
         const { data } = response.result;
 
-        // TODO: assert.equal(data.vote_result, 'REJECTED');
+        assert.equal(data.response_status, 'REJECTED');
         assert.equal(data.title, 'Test shift to reject');
         assert.equal(response.statusCode, 200);
       });
@@ -68,7 +68,7 @@ describe('Reject exchange', () => {
   it('should fail when trying to reject a response from an already approved exchange', () => {
     const endpoint = `/v2/networks/${global.network.id}/exchanges/${approvedExchange.id}`;
 
-    return patchRequest(endpoint, { action: 'reject', user_id: 2 })
+    return patchRequest(endpoint, { action: 'reject', user_id: 1 })
       .then(response => {
         assert.equal(response.statusCode, 422);
       });

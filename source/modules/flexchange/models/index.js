@@ -26,6 +26,11 @@ ExchangeModel.hasMany(ExchangeResponseModel, {
   foreignKey: 'exchange_id',
 });
 
+ExchangeModel.hasOne(ExchangeResponseModel, {
+  as: 'ResponseStatus',
+  foreignKey: 'exchange_id',
+});
+
 ExchangeModel.belongsToMany(ExchangeCommentModel, {
   foreignKey: 'parent_id',
   otherKey: 'id',

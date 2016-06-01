@@ -8,13 +8,13 @@ export default (network, req) => {
   if (!req.payload.user_id) throw Boom.badData('Missing user_id to approve.');
   const userIdToApprove = req.payload.user_id;
 
-  return findExchangeById(req.params.exchangeId)
+  return findExchangeById(req.params.exchangeId, req.auth.credentials.id)
     .then(exchange => {
       // TODO: Check if logged user may reject the exchange
-      const exchangeResponse = findExchangeResponseByExchangeAndUser(exchange.id, userIdToApprove);
-      return [exchangeResponse, exchange];
+      return findExchangeResponseByExchangeAndUser(exchange.id, userIdToApprove)
+        .then(exchangeResponse => ([exchangeResponse, exchange]));
     })
-    .spread((exchangeResponse, exchange) => {
+    .then(([exchangeResponse, exchange]) => {
       if (exchangeResponse.approved) {
         throw Boom.badData('The user is already approved.');
       }
@@ -25,8 +25,8 @@ export default (network, req) => {
 
       return rejectExchange(exchange, userIdToApprove);
     })
-    .then(exchange => {
+    .then(rejectedExchange => {
       // TODO: Fire ExchangeWasRejected event
-      return exchange;
+      return rejectedExchange.reload();
     });
 };
