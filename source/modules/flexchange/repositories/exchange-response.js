@@ -5,10 +5,10 @@ import { ExchangeResponse } from 'modules/flexchange/models';
  * Find an exchange response by exchange and user or throw Error
  * @param {number} exchangeId - Exchange the response is send to
  * @param {number} userId - User that placed the response
- * @method findExchangeResponseByExchangeAndUserOrFail
+ * @method findExchangeResponseByExchangeAndUser
  * @return {promise} Find exchange response promise
  */
-export function findExchangeResponseByExchangeAndUserOrFail(exchangeId, userId) {
+export function findExchangeResponseByExchangeAndUser(exchangeId, userId) {
   return ExchangeResponse.findOne({
     where: { exchangeId, userId },
   }).then(response => {
@@ -16,19 +16,6 @@ export function findExchangeResponseByExchangeAndUserOrFail(exchangeId, userId) 
 
     return response;
   });
-}
-
-/**
- * Find an exchange response by exchange and user
- * @param {number} exchangeId - Exchange the response is send to
- * @param {number} userId - User that placed the response
- * @method findExchangeResponseByExchangeAndUser
- * @return {promise} Find exchange response promise
- */
-export function findExchangeResponseByExchangeAndUser(exchangeId, userId) {
-  return ExchangeResponse.findOne({
-    where: { exchangeId, userId },
-  }).then(response => response);
 }
 
 /**

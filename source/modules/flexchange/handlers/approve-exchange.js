@@ -1,7 +1,7 @@
 import Boom from 'boom';
 import { findExchangeById, approveExchange } from 'modules/flexchange/repositories/exchange';
 import {
-  findExchangeResponseByExchangeAndUserOrFail,
+  findExchangeResponseByExchangeAndUser,
 } from 'modules/flexchange/repositories/exchange-response';
 
 export default (network, req) => {
@@ -11,7 +11,7 @@ export default (network, req) => {
   return findExchangeById(req.params.exchangeId, req.auth.credentials.id)
     .then(exchange => {
       // TODO: Check if logged user may approve the exchange
-      return findExchangeResponseByExchangeAndUserOrFail(exchange.id, userIdToApprove)
+      return findExchangeResponseByExchangeAndUser(exchange.id, userIdToApprove)
         .then(exchangeResponse => ([exchangeResponse, exchange]));
     })
     .then(([exchangeResponse, exchange]) => {

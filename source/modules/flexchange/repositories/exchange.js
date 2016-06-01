@@ -3,7 +3,7 @@ import { Exchange, ExchangeResponse } from 'modules/flexchange/models';
 import { User } from 'common/models';
 import { createExchangeResponse } from 'modules/flexchange/repositories/exchange-response';
 import {
-  findExchangeResponseByExchangeAndUserOrFail,
+  findExchangeResponseByExchangeAndUser,
   removeExchangeResponseForExchangeAndUser,
 } from 'modules/flexchange/repositories/exchange-response';
 
@@ -115,7 +115,7 @@ export function updateExchangeById(exchangeId, payload) {
 export function acceptExchange(exchangeId, userId) {
   const data = { userId, exchangeId, response: 1 };
 
-  return findExchangeResponseByExchangeAndUserOrFail(exchangeId, userId)
+  return findExchangeResponseByExchangeAndUser(exchangeId, userId)
     .then(exchangeResponse => {
       if (!exchangeResponse.response) {
         return removeExchangeResponseForExchangeAndUser(exchangeId, userId)
@@ -135,7 +135,7 @@ export function acceptExchange(exchangeId, userId) {
 export function declineExchange(exchangeId, userId) {
   const data = { userId, exchangeId, response: 0 };
 
-  return findExchangeResponseByExchangeAndUserOrFail(exchangeId, userId)
+  return findExchangeResponseByExchangeAndUser(exchangeId, userId)
     .then(exchangeResponse => {
       if (exchangeResponse.response) {
         return removeExchangeResponseForExchangeAndUser(exchangeId, userId)
@@ -154,7 +154,7 @@ export function declineExchange(exchangeId, userId) {
  * @return {promise} Promise containing the updated exchange
  */
 export function approveExchange(exchange, user, userIdToApprove) {
-  return findExchangeResponseByExchangeAndUserOrFail(exchange.id, userIdToApprove)
+  return findExchangeResponseByExchangeAndUser(exchange.id, userIdToApprove)
     .then(exchangeResponse => exchangeResponse.update({ approved: 1 }))
     .then(() => exchange.update({ approved_by: user.id, approved_user: userIdToApprove }));
 }
@@ -167,7 +167,7 @@ export function approveExchange(exchange, user, userIdToApprove) {
  * @return {promise} Promise containing the updated exchange
  */
 export function rejectExchange(exchange, userIdToReject) {
-  return findExchangeResponseByExchangeAndUserOrFail(exchange.id, userIdToReject)
+  return findExchangeResponseByExchangeAndUser(exchange.id, userIdToReject)
     .then(exchangeResponse => exchangeResponse.update({ approved: 0 }))
     .then(() => exchange);
 }
