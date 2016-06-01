@@ -1,7 +1,9 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
-import Conversation from 'modules/chat/models/Conversation';
 import formatDate from 'common/utils/format-date';
+import Conversation from 'modules/chat/models/conversation';
+import Network from 'common/models/network';
+import Team from 'common/models/team';
 
 const User = model.define('User', {
   profileImg: {
@@ -55,6 +57,9 @@ const User = model.define('User', {
     fullName: function () { // eslint-disable-line func-names, object-shorthand
       return `${this.firstName || ''} ${this.lastName || ''}`;
     },
+  },
+  defaultScope: {
+    include: [{ model: Team }, { model: Network }],
   },
   instanceMethods: {
     hasConversationWith: (UserModel, userIds) => {

@@ -17,6 +17,20 @@ NetworkModel.belongsToMany(UserModel, {
   timestamps: false,
 });
 
+UserModel.belongsToMany(NetworkModel, {
+  foreignKey: 'user_id',
+  otherKey: 'network_id',
+  through: 'network_user',
+  timestamps: false,
+});
+
+UserModel.belongsToMany(TeamModel, {
+  foreignKey: 'user_id',
+  otherKey: 'team_id',
+  through: 'team_user',
+  timestamps: false,
+});
+
 export const Network = NetworkModel;
 export const User = UserModel;
 export const Team = TeamModel;

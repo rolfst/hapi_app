@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import Integration from 'common/models/integration';
+import { Integration } from 'common/models';
 
 export default () => {
   return {
