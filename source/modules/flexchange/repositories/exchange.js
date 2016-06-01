@@ -22,7 +22,7 @@ export function findExchangeById(exchangeId, userId) {
         { model: ExchangeResponse,
           as: 'ResponseStatus',
           where: { userId },
-          limit: 1,
+          required: false,
         },
       ],
     });

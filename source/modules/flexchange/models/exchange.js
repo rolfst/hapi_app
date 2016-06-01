@@ -92,11 +92,12 @@ const Exchange = model.define('Exchange', {
         });
       }
 
-      if (this.ResponseStatus && this.ResponseStatus[0]) {
-        if (this.ResponseStatus[0].approved !== null) {
-          output.response_status = !!this.ResponseStatus[0].approved ? 'APPROVED' : 'REJECTED';
+      if (this.ResponseStatus) {
+        console.log(this.ResponseStatus);
+        if (this.ResponseStatus.approved !== null) {
+          output.response_status = !!this.ResponseStatus.approved ? 'APPROVED' : 'REJECTED';
         } else {
-          output.response_status = this.ResponseStatus[0].response ? 'ACCEPTED' : 'DECLINED';
+          output.response_status = this.ResponseStatus.response ? 'ACCEPTED' : 'DECLINED';
         }
       }
 
