@@ -93,7 +93,6 @@ const Exchange = model.define('Exchange', {
       }
 
       if (this.ResponseStatus) {
-        console.log(this.ResponseStatus);
         if (this.ResponseStatus.approved !== null) {
           output.response_status = !!this.ResponseStatus.approved ? 'APPROVED' : 'REJECTED';
         } else {
