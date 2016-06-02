@@ -1,6 +1,7 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
 import formatDate from 'common/utils/format-date';
+import makeFunctionName from 'common/utils/make-function-name';
 import Conversation from 'modules/chat/models/conversation';
 import Network from 'common/models/network';
 import Team from 'common/models/team';
@@ -62,6 +63,11 @@ const User = model.define('User', {
     include: [{ model: Team }, { model: Network }],
   },
   instanceMethods: {
+    setFunctionName: function (networkId) { // eslint-disable-line func-names, object-shorthand
+      this.functionName = makeFunctionName(networkId, this);
+
+      return this;
+    },
     hasConversationWith: (UserModel, userIds) => {
       return Promise.resolve(Conversation.findAll({
         include: [{
@@ -90,6 +96,7 @@ const User = model.define('User', {
         first_name: this.firstName,
         last_name: this.lastName,
         full_name: this.fullName,
+        function: this.functionName,
         email: this.email,
         phone_num: this.phoneNum,
         profile_img: `https://s3.eu-central-1.amazonaws.com/flex-appeal/${environment}/profiles/${this.profileImg}`,

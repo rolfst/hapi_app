@@ -1,3 +1,3 @@
 export default (req, reply) => {
-  reply('View my profile');
+  reply({ data: req.auth.credentials.setFunctionName().toJSON() });
 };
