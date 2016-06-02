@@ -1,3 +1,6 @@
 export default (req, reply) => {
-  reply({ data: req.auth.credentials.setFunctionName().toJSON() });
+  const loggedUser = req.auth.credentials
+    .setFunctionName(req.params.networkId);
+
+  reply({ data: loggedUser.toJSON() });
 };

@@ -64,7 +64,7 @@ const User = model.define('User', {
   },
   instanceMethods: {
     setFunctionName: function (networkId) { // eslint-disable-line func-names, object-shorthand
-      this.functionName = makeFunctionName(networkId, this);
+      this.functionName = makeFunctionName(parseInt(networkId, 10), this);
 
       return this;
     },
