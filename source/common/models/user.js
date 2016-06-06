@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
+import _ from 'lodash';
 import formatDate from 'common/utils/format-date';
 import makeFunctionName from 'common/utils/make-function-name';
 import Conversation from 'modules/chat/models/conversation';
@@ -67,6 +68,9 @@ const User = model.define('User', {
       this.functionName = makeFunctionName(parseInt(networkId, 10), this);
 
       return this;
+    },
+    getNetwork: function (networkId) { // eslint-disable-line func-names, object-shorthand
+      return _.find(this.Networks, { id: parseInt(networkId, 10) });
     },
     hasConversationWith: (UserModel, userIds) => {
       return Promise.resolve(Conversation.findAll({

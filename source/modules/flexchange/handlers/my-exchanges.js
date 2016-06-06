@@ -1,7 +1,7 @@
 import { findNetworkById } from 'common/repositories/network';
 import { findExchangesByUser } from 'modules/flexchange/repositories/exchange';
-import hasIntegration from 'common/utils/network-has-integration';
 import respondWithCollection from 'common/utils/respond-with-collection';
+import hasIntegration from 'common/utils/network-has-integration';
 
 export default (req, reply) => {
   return findNetworkById(req.params.networkId).then(network => {

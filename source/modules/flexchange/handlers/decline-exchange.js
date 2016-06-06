@@ -1,6 +1,6 @@
 import { findExchangeById, declineExchange } from 'modules/flexchange/repositories/exchange';
-import hasIntegration from 'common/utils/network-has-integration';
 import createAdapter from 'adapters/create-adapter';
+import hasIntegration from 'common/utils/network-has-integration';
 
 export default (network, req) => {
   if (hasIntegration(network)) {
