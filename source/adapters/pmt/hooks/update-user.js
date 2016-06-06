@@ -1,8 +1,7 @@
 import pmtClient from 'adapters/pmt/client';
 
 export default baseUrl => {
-  const date = moment().format('DD-MM-YYYY');
-  const endpoint = `${baseUrl}/me/shifts/${date}`;
+  const endpoint = `${baseUrl}/me`;
 
   return pmtClient(endpoint)
     .then(data => data.shifts)
