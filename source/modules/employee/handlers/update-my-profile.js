@@ -3,24 +3,27 @@ import { findNetworkById } from 'common/repositories/network';
 import hasIntegration from 'common/utils/network-has-integration';
 
 export default (req, reply) => {
-  // TODO: Update user for integration.
-
   const loggedUser = req.auth.credentials;
 
   findNetworkById(req.params.networkId).then(network => {
+    // TODO: Check if user can access this network
+    const promises = [];
+
     if (hasIntegration(network)) {
-      const adapter = createAdapter(network.Integrations[0].id);
+      const adapter = createAdapter(network);
 
-      return adapter
-        .updateUser(loggedUser.id, req.payload)
-        .then(shifts => reply({ data: shifts }));
+      const pmtPromise = adapter
+        .updateUser(network.externalId, loggedUser.id, req.payload)
+        .then(result => result);
+
+      promises.push(pmtPromise);
     }
-    // const network = loggedUser.getNetwork(req.params.networkId);
-    // console.log(hasIntegration(network));
-  });
 
-  // return loggedUser
-  //   .update(req.payload)
-  //   .then(user => user.reload())
-  //   .then(user => reply({ success: true, data: user.toJSON() }));
+    const flexAppealPromise = loggedUser.update(req.payload);
+    promises.push(flexAppealPromise);
+
+    return promises;
+  })
+  .spread(() => loggedUser.reload())
+  .then(user => reply({ success: true, data: user.toJSON() }));
 };
