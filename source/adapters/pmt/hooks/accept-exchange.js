@@ -1,10 +1,9 @@
-import pmtClient from 'adapters/pmt/client';
+import client from 'adapters/pmt/client';
 
-export default (baseUrl, shiftId) => {
-  const endpoint = `${baseUrl}/shift/${shiftId}/interestedInShift`;
+export default (baseStoreUrl, shiftId) => {
+  const endpoint = `${baseStoreUrl}/shift/${shiftId}/interestedInShift`;
 
-  return pmtClient(endpoint)
-    .then(res => res.json())
-    .then(data => data.successful)
+  return client.get(endpoint)
+    .then(res => res.successful)
     .catch(err => console.log(err));
 };

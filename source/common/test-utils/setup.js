@@ -4,18 +4,17 @@ import createServer from 'server';
 
 global.server = createServer(8000);
 
-before(done => {
+before(() => {
   return authenticate({}).then(({ authUser, authToken }) => {
     global.authToken = authToken;
     global.authUser = authUser;
 
     return createNetwork(authUser.id).then(createdNetwork => {
       global.network = createdNetwork;
-      done();
     });
   });
 });
 
-after(done => {
-  if (global.network) return deleteNetwork(global.network.id).then(() => done());
+after(() => {
+  if (global.network) return deleteNetwork(global.network.id);
 });

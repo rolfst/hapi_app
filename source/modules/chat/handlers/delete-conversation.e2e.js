@@ -16,6 +16,7 @@ describe('Delete conversation', () => {
   it('should return correct values', () => {
     return deleteRequest(`/conversations/${conversation.id}`)
       .then(response => {
+        console.log(response.result);
         assert.property(response.result, 'message');
         assert.equal(response.statusCode, 200);
       });

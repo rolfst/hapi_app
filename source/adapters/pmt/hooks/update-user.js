@@ -1,4 +1,4 @@
-import pmtClient from 'adapters/pmt/client';
+import client from 'adapters/pmt/client';
 
 export default (baseStoreUrl, userId, input) => {
   const endpoint = `${baseStoreUrl}/me`;
@@ -7,8 +7,6 @@ export default (baseStoreUrl, userId, input) => {
     username: input.email,
   };
 
-  console.log(data);
-
-  return pmtClient('5ddf461ecf593acb207d0f6df36d0f36', endpoint, 'POST', data)
+  return client.post(endpoint, data)
     .then(res => res);
 };
