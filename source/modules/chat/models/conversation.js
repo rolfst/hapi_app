@@ -20,9 +20,6 @@ const Conversation = model.define('Conversation', {
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: false,
-  defaultScope: {
-    include: [{ model: User }],
-  },
   instanceMethods: {
     toJSON: function () { // eslint-disable-line func-names, object-shorthand
       let output = {
