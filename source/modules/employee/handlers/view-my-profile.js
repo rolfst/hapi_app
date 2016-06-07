@@ -1,6 +1,6 @@
 export default (req, reply) => {
   const loggedUser = req.auth.credentials
-    .setFunctionName(req.params.networkId);
+    .setFunctionNameForNetwork(req.params.networkId);
 
   reply({ data: loggedUser.toJSON() });
 };
