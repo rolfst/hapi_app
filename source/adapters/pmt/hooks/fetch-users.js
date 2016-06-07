@@ -1,8 +1,7 @@
-import pmtClient from 'adapters/pmt/client';
+import client from 'adapters/pmt/client';
 
-export default baseUrl => {
-  return pmtClient(`${baseUrl}/users`)
-    .then(res => res.json())
-    .then(json => json.data)
+export default (baseStoreUrl) => {
+  return client.get(`${baseStoreUrl}/users`)
+    .then(res => res.data)
     .catch(err => console.log(err));
 };

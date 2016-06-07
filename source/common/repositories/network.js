@@ -19,7 +19,9 @@ export function deleteNetwork(id) {
 
 export function findNetworkById(id) {
   return Network
-    .findById(id, { include: Integration })
+    .findById(id, {
+      include: [{ model: Integration }],
+    })
     .then(network => {
       if (!network) return Boom.notFound(`No network found with id ${id}.`);
 
@@ -29,7 +31,7 @@ export function findNetworkById(id) {
 
 export function findNetwork(data) {
   return Network
-    .findOne({ where: data, include: Integration })
+    .findOne({ where: data, include: [{ model: Integration }] })
     .then(network => {
       if (!network) return Boom.notFound('No network found for the given data.');
 

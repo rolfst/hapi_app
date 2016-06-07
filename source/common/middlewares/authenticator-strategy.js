@@ -1,6 +1,6 @@
 import Boom from 'boom';
 import jwt from 'jwt-simple';
-import User from 'common/models/user';
+import { User } from 'common/models';
 
 export default () => {
   return {

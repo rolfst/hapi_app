@@ -8,9 +8,7 @@ let conversation = null;
 describe('Delete conversation', () => {
   before(() => {
     return createConversation('PRIVATE', global.authUser.id, [5, global.authUser.id])
-      .then(data => {
-        conversation = data;
-      });
+      .then(data => (conversation = data));
   });
 
   it('should return correct values', () => {

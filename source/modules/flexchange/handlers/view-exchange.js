@@ -1,7 +1,7 @@
 import { findNetworkById } from 'common/repositories/network';
 import { findExchangeById } from 'modules/flexchange/repositories/exchange';
-import hasIntegration from 'common/utils/network-has-integration';
 import respondWithItem from 'common/utils/respond-with-item';
+import hasIntegration from 'common/utils/network-has-integration';
 
 export default (req, reply) => {
   // TODO: Add authorization if user can access the network

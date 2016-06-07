@@ -1,7 +1,5 @@
 import Boom from 'boom';
-import User from 'common/models/user';
-import Conversation from 'modules/chat/models/conversation';
-import Message from 'modules/chat/models/message';
+import { Conversation } from 'modules/chat/models';
 
 /**
  * Delete a specific conversation by id
@@ -86,9 +84,8 @@ export function createConversation(type, creatorId, participants) {
   // user.hasConversationWith(User, users);
   return Conversation.create({ type: type.toUpperCase(), createdBy: creatorId })
     .then(createdConversation => {
-      return [createdConversation, createdConversation.addUsers(participants)];
+      return createdConversation.addUsers(participants)
+        .then(() => createdConversation);
     })
-    .spread(conversationWithParticipants => {
-      return findConversationById(conversationWithParticipants.id, [User, Message]);
-    });
+    .catch(err => console.error('Error while creating a conversation: ', err));
 }

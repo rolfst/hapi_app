@@ -1,3 +1,1 @@
-export default networkModel => {
-  return networkModel.Integrations.length > 0;
-};
+export default network => network.Integrations.length > 0;

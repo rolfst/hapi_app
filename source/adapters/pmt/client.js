@@ -1,12 +1,18 @@
-import fetch from 'node-fetch';
+import request from 'superagent';
 
-export default (token, endpoint, method = 'GET') => {
-  return fetch(endpoint, {
-    method,
-    headers: {
-      'logged-in-user-token': token,
-      // 'api-key': 'flexappeal4rwrs',
-    },
-  }).then(res => res.json())
-    .catch(err => console.log(err));
+function makeRequest(token, endpoint, method = 'GET', data = {}) {
+  return request(method, endpoint)
+    .type('form')
+    .set('logged-in-user-token', token)
+    .set('api-key', 'flexappeal4rwrs')
+    .send(data)
+    .then(res => res.body)
+    .catch(err => console.log('PMT Client error: ', err.body));
+}
+
+export default {
+  post: (token, endpoint, data) => makeRequest(token, endpoint, 'POST', data),
+  get: (token, endpoint) => makeRequest(token, endpoint, 'GET'),
+  put: (token, endpoint, data) => makeRequest(token, endpoint, 'PUT', data),
+  delete: (token, endpoint) => makeRequest(token, endpoint, 'DELETE'),
 };

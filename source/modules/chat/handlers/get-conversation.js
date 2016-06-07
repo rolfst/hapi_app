@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { Message } from 'modules/chat/models';
+import { User } from 'common/models';
 import { findConversationById } from 'modules/chat/repositories/conversation';
 import respondWithItem from 'common/utils/respond-with-item';
 import parseIncludes from 'common/utils/parse-includes';
@@ -7,7 +8,7 @@ import parseIncludes from 'common/utils/parse-includes';
 module.exports = (req, reply) => {
   const includes = parseIncludes(req.query);
 
-  const modelIncludes = [];
+  const modelIncludes = [{ model: User }];
 
   if (_.includes(includes, 'messages')) {
     modelIncludes.push({ model: Message });
