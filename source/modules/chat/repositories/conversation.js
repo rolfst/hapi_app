@@ -1,5 +1,4 @@
 import Boom from 'boom';
-import { User } from 'common/models';
 import { Conversation } from 'modules/chat/models';
 
 /**
@@ -88,5 +87,5 @@ export function createConversation(type, creatorId, participants) {
       return createdConversation.addUsers(participants)
         .then(() => createdConversation);
     })
-    .catch(err => console.error('Error while creating a conversation.'));
+    .catch(err => console.error('Error while creating a conversation: ', err));
 }

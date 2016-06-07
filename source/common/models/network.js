@@ -1,6 +1,5 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
-import Integration from 'common/models/integration';
 
 const Network = model.define('Network', {
   externalId: {
