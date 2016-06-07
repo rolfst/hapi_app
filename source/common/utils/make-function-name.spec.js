@@ -1,17 +1,26 @@
 import { assert } from 'chai';
-import { User, Network, Team } from 'common/models';
+import { User, Network, Team, NetworkUser } from 'common/models';
 import makeFunctionName from 'common/utils/make-function-name';
 
-let user;
 let network1;
 let network2;
+let network3;
 let team1;
 let team2;
+let user;
 
 describe('Function name', () => {
   before(() => {
-    network1 = Network.build({ id: 1, name: 'Cool network' });
-    network2 = Network.build({ id: 2, name: 'Cool other network' });
+    const networkUserInstance = NetworkUser.build({ id: 1, deletedAt: null });
+    const networkUserDeletedInstance = NetworkUser.build({ id: 1, deletedAt: new Date() });
+
+    const network1Instance = Network.build({ id: 1, name: 'Cool network' });
+    const network2Instance = Network.build({ id: 2, name: 'Cool other network' });
+    const network3Instance = Network.build({ id: 3, name: 'Cool network where user is deleted' });
+
+    network1 = Object.assign(network1Instance, { NetworkUser: networkUserInstance });
+    network2 = Object.assign(network2Instance, { NetworkUser: networkUserInstance });
+    network3 = Object.assign(network3Instance, { NetworkUser: networkUserDeletedInstance });
     team1 = Team.build({ name: 'Cool team', networkId: 1 });
     team2 = Team.build({ name: 'Cool other team', networkId: 2 });
     user = User.build({ firstName: 'John', lastName: 'Doe' });
@@ -27,7 +36,10 @@ describe('Function name', () => {
   });
 
   it('returns function name when user is deleted from network', () => {
+    const userInstance = Object.assign({}, user);
+    userInstance.Networks = [network3];
 
+    assert.equal(makeFunctionName(network3.id, userInstance), 'Verwijderd');
   });
 
   it('return correct function name when user is not in any team', () => {

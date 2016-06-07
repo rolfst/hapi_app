@@ -8,14 +8,14 @@ import _ from 'lodash';
  * @return {string} The function name
  */
 export default (networkId, user) => {
+  const network = _.find(user.Networks, { id: networkId });
+
+  if (network.NetworkUser.deletedAt !== null) return 'Verwijderd';
+
   const teamsOfNetwork = user.Teams
     .filter(team => team.networkId === networkId);
 
-  if (teamsOfNetwork.length === 0) {
-    const network = _.find(user.Networks, { id: networkId });
-
-    return network.name;
-  }
+  if (teamsOfNetwork.length === 0) return network.name;
 
   const teamNames = teamsOfNetwork.map(team => team.name);
 
