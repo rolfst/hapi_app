@@ -88,5 +88,5 @@ export function createConversation(type, creatorId, participants) {
       return createdConversation.addUsers(participants)
         .then(() => createdConversation);
     })
-    .catch(err => console.log('Blabla error: ', err));
+    .catch(err => console.error('Error while creating a conversation.'));
 }
