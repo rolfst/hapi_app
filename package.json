@@ -24,8 +24,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "babel-plugin-transform-object-rest-spread": "^6.8.0",
-    "bluebird": "^3.3.4",
+    "babel-plugin-transform-object-rest-spread": "6.8.0",
+    "bluebird": "3.3.4",
     "boom": "3.1.2",
     "dotenv": "2.0.0",
     "hapi": "13.2.1",
@@ -35,11 +35,11 @@
     "lodash": "4.6.1",
     "moment": "2.12.0",
     "mysql": "2.10.2",
-    "node-fetch": "^1.5.1",
+    "node-fetch": "1.5.1",
     "node-inspector": "0.12.7",
     "parse": "1.8.1",
     "sequelize": "3.19.3",
-    "superagent": "^2.0.0"
+    "superagent": "2.0.0"
   },
   "devDependencies": {
     "babel-cli": "6.6.5",
