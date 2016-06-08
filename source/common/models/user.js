@@ -23,9 +23,13 @@ const User = model.define('User', {
     field: 'last_name',
     allowNull: true,
   },
-  email: {
+  username: {
     type: Sequelize.STRING,
     allowNull: false,
+  },
+  email: {
+    type: Sequelize.STRING,
+    allowNull: true,
   },
   password: {
     type: Sequelize.STRING,
