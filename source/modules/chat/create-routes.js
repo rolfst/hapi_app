@@ -6,7 +6,7 @@ export default [
     path: '/users/me/conversations',
     handler: require('modules/chat/handlers/get-conversations'),
     config: {
-      auth: 'default',
+      auth: 'jwt',
     },
   }, {
     method: 'GET',
@@ -14,14 +14,14 @@ export default [
     handler: require('modules/chat/handlers/get-conversation'),
     config: {
       validate: validators.conversation.detail,
-      auth: 'default',
+      auth: 'jwt',
     },
   }, {
     method: 'GET',
     path: '/conversations/{id}/messages',
     handler: require('modules/chat/handlers/get-messages'),
     config: {
-      auth: 'default',
+      auth: 'jwt',
     },
   }, {
     method: 'POST',
@@ -29,7 +29,7 @@ export default [
     handler: require('modules/chat/handlers/post-message'),
     config: {
       validate: validators.message.create,
-      auth: 'default',
+      auth: 'jwt',
     },
   }, {
     method: 'POST',
@@ -37,7 +37,7 @@ export default [
     handler: require('modules/chat/handlers/post-conversation'),
     config: {
       validate: validators.conversation.create,
-      auth: 'default',
+      auth: 'jwt',
     },
   }, {
     method: 'DELETE',
@@ -45,7 +45,7 @@ export default [
     handler: require('modules/chat/handlers/delete-conversation'),
     config: {
       validate: validators.conversation.delete,
-      auth: 'default',
+      auth: 'jwt',
     },
   },
 ];

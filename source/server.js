@@ -36,10 +36,9 @@ const createServer = port => {
   });
 
   server.auth.scheme('jwt', jwtStrategy);
-  server.auth.strategy('default', 'jwt');
+  server.auth.strategy('jwt', 'jwt');
   server.auth.scheme('integration', integrationStrategy);
   server.auth.strategy('integration', 'integration');
-  server.auth.default('default');
 
   server.ext('onRequest', (req, reply) => {
     process.env.BASE_URL = `${req.connection.info.protocol}://${req.info.host}`;
