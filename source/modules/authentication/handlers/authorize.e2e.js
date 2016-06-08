@@ -2,8 +2,9 @@ import { assert } from 'chai';
 import { createUser } from 'common/repositories/user';
 import { postRequest } from 'common/test-utils/request';
 
+const url = '/v2/authorize';
 const loginRequest = (username, password) => {
-  return postRequest('/v2/authorize', { username, password });
+  return postRequest(url, { username, password });
 };
 
 const userInput = { username: 'John', password: 'ihazswag ' };
@@ -14,9 +15,9 @@ describe('Authorize', () => {
   });
 
   it('checks for required input fields', () => {
-    const response1 = postRequest('/v2/authorize', { foo: 'bar' });
-    const response2 = postRequest('/v2/authorize', { username: 'bar' });
-    const response3 = postRequest('/v2/authorize', { password: 'bar' });
+    const response1 = postRequest(url, { foo: 'bar' });
+    const response2 = postRequest(url, { username: 'bar' });
+    const response3 = postRequest(url, { password: 'bar' });
 
     return Promise.all([response1, response2, response3])
       .then(responses => {
