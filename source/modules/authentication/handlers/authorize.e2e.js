@@ -27,7 +27,7 @@ describe('Authorize', () => {
   });
 
   it('can login with correct credentials', () => {
-    return loginRequest(userInput.username, 'ihazswag').then(res => {
+    return loginRequest(userInput.username, userInput.password).then(res => {
       const { data } = res.result;
       assert.property(data, 'access_token');
       assert.property(data, 'refresh_token');
