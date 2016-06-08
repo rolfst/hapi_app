@@ -1,9 +1,20 @@
 /* eslint-disable max-len */
 
-import router from 'common/utils/router';
+import Joi from 'joi';
 const basePath = 'modules/authentication/handlers';
 
 export default [
-  router.post('/v2/authorize', require(`${basePath}/authorize`), null),
-  // router.get('/v2/delegate', require(`${basePath}/delegate`)),
+  {
+    method: 'POST',
+    path: '/v2/authorize',
+    handler: require(`${basePath}/authorize`).default,
+    config: {
+      validate: {
+        payload: {
+          username: Joi.string().alphanum().required(),
+          password: Joi.string().required(),
+        },
+      },
+    },
+  },
 ];

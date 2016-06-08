@@ -1,5 +1,6 @@
+import Boom from 'boom';
+
 export default (req, reply) => {
-  return reply('OK');
   // 1. Validate input
   // 2. Check if password matches
   // 3. Check if user belongs to a network

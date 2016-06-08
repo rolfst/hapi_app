@@ -7,7 +7,9 @@ const loginRequest = (username, password) => {
   return postRequest(url, { username, password });
 };
 
-const userInput = { username: 'John', password: 'ihazswag ' };
+const userInput = {
+  username: 'Johnnie', firstName: 'John', lastName: 'Doe', password: 'ihazswag',
+};
 
 describe('Authorize', () => {
   before(() => {
