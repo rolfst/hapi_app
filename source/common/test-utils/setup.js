@@ -1,6 +1,9 @@
 import authenticate from 'common/test-utils/authenticate';
 import { createNetwork, deleteNetwork } from 'common/repositories/network';
 import createServer from 'server';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 global.server = createServer(8000);
 
