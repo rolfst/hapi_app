@@ -2,6 +2,8 @@
 
 import Hapi from 'hapi';
 import Boom from 'boom';
+import createError from 'common/utils/create-error';
+import respondWithError from 'common/utils/respond-with-error';
 import routes from 'create-routes';
 import jwtStrategy from 'common/middlewares/authenticator-strategy';
 import integrationStrategy from 'common/middlewares/integration-strategy';
@@ -49,10 +51,17 @@ const createServer = port => {
 
   // Accept CORS requests
   server.ext('onPreResponse', (req, reply) => {
-    const { isBoom, data, output, statusCode } = req.response;
+    if (req.response.data && req.response.data.isJoi) {
+      const error = createError(Boom.badData(req.response.message), 'validation_error');
+      const response = respondWithError(error);
 
-    if (data.isJoi) return reply(Boom.badData(req.response.message));
-    if (isBoom) return reply(output.payload).code(statusCode);
+      return reply(response).code(response.error.status_code);
+    }
+
+    if (req.response.isBoom) {
+      const response = respondWithError(req.response);
+      return reply(response).code(response.error.status_code);
+    }
 
     req.response.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTION');
 
