@@ -9,7 +9,7 @@ let team1;
 let team2;
 let user;
 
-describe('Function name', () => {
+describe('makeFunctionName', () => {
   before(() => {
     const networkUserInstance = NetworkUser.build({ id: 1, deletedAt: null });
     const networkUserDeletedInstance = NetworkUser.build({ id: 1, deletedAt: new Date() });
