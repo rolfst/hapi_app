@@ -13,6 +13,14 @@ export function findAllUsers() {
   return User.findAll();
 }
 
+export function updateUser(userId, attributes) {
+  return User.findById(userId)
+    .then(user => {
+      return user.update(attributes).then(() => user);
+    })
+    .then(updatedUser => updatedUser.reload());
+}
+
 export function createUser(attributes) {
   const values = Object.assign(attributes, {
     profileImg: _.sample(dummyProfileImgPaths),

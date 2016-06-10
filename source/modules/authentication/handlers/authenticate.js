@@ -1,7 +1,7 @@
 import moment from 'moment';
 import checkPassword from 'common/utils/check-password';
 import userBelongsToNetwork from 'common/utils/user-belongs-to-network';
-import { findUserByUsername } from 'common/repositories/user';
+import { findUserByUsername, updateUser } from 'common/repositories/user';
 import { findOrCreateUserDevice } from 'common/repositories/authentication';
 import createAccessToken from 'common/utils/create-access-token';
 import createRefreshToken from 'common/utils/create-refresh-token';
@@ -14,25 +14,24 @@ export default async (req, reply) => {
   try {
     const user = await findUserByUsername(payload.username);
 
-    if (!user || !checkPassword(user.password, payload.password)) throw WrongCredentials;
+    if (!checkPassword(user.password, payload.password) || !user) throw WrongCredentials;
     if (!userBelongsToNetwork(user)) throw NotInAnyNetwork;
 
     const deviceName = req.headers['user-agent'];
 
     const device = await findOrCreateUserDevice(user.id, deviceName);
+    const updatedUser = await updateUser(user.id, { lastLogin: moment().toISOString() });
 
     const accessToken = createAccessToken(user.id, device.device_id);
     const refreshToken = createRefreshToken(user.id, device.device_id);
-
-    await user.update({ lastLogin: moment().toISOString() });
-
-    const updatedUser = await user.reload();
 
     const data = {
       access_token: accessToken,
       refresh_token: refreshToken,
       user: updatedUser.toJSON(),
     };
+
+    // TODO: Send analytics to Mixpanel
 
     return reply({ data });
   } catch (err) {
