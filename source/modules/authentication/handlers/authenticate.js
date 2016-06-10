@@ -37,28 +37,5 @@ export default async (req, reply) => {
     return reply({ data });
   } catch (err) {
     return reply(err);
-  };
-  //
-  //
-  // return findUserByUsername(payload.username).then(user => {
-  //   if (!user || !checkPassword(user.password, payload.password)) throw WrongCredentials;
-  //   if (!userBelongsToNetwork(user)) throw NotInAnyNetwork;
-  //
-  //   const deviceName = req.headers['user-agent'];
-  //
-  //   return findOrCreateUserDevice(user.id, deviceName).then(device => {
-  //     const accessToken = createAccessToken(user.id, device.device_id);
-  //     const refreshToken = createRefreshToken(user.id, device.device_id);
-  //
-  //     return user.update({ lastLogin: moment().toISOString() }).then(() => user.reload())
-  //       .then(updatedUser => );
-  //   });
-  // }).catch(err => reply(err));
-  // 4. Create deviceId based on user agent
-  // 5. Check if deviceId already exists or create new one
-  // 6. Generate JWT token
-  // 7. Generated refresh token
-  // 8. Send data to Mixpanel
-  // 9. Update last_login for user
-  // 10. Return response
+  }
 };
