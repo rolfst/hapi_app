@@ -27,6 +27,8 @@ const createServer = port => {
 
   const server = new Hapi.Server(makeConfig());
 
+  server.register([require('hapi-async-handler')]);
+
   server.connection({
     host: 'localhost',
     port,
