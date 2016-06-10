@@ -11,7 +11,7 @@ export default [
     config: {
       validate: {
         payload: {
-          username: Joi.string().alphanum().required(),
+          username: Joi.string().required(),
           password: Joi.string().required(),
         },
       },
