@@ -1,3 +1,4 @@
+import 'babel-polyfill';
 import authenticate from 'common/test-utils/authenticate';
 import { createNetwork, deleteNetwork } from 'common/repositories/network';
 import createServer from 'server';
