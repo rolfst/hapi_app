@@ -2,7 +2,10 @@ import { assert } from 'chai';
 import { createUser } from 'common/repositories/user';
 import { postRequest } from 'common/test-utils/request';
 
-const url = '/v2/authorize';
+let userWithNetwork;
+let userWithoutNetwork;
+
+const url = '/v2/authenticate';
 const loginRequest = (username, password) => {
   return postRequest(url, { username, password });
 };
@@ -13,7 +16,17 @@ const userInput = {
 
 describe('Authorize', () => {
   before(() => {
-    return createUser(userInput);
+    const userWithNetworkPromise = createUser(userInput)
+      .then(createdUser => {
+        return createdUser.setNetworks([global.network]).then(() => createdUser);
+      })
+      .then(createdUser => createdUser.reload())
+      .then(createdUserWithNetwork => (userWithNetwork = createdUserWithNetwork));
+
+    const userWithoutNetworkPromise = createUser({ ...userInput, username: 'JohnnieLonely' })
+      .then(user => (userWithoutNetwork = user));
+
+    return Promise.all([userWithNetworkPromise, userWithoutNetworkPromise]);
   });
 
   it('checks for required input fields', () => {
@@ -23,9 +36,9 @@ describe('Authorize', () => {
 
     return Promise.all([response1, response2, response3])
       .then(responses => {
-        assert.equal(responses[0].result.statusCode, 422);
-        assert.equal(responses[1].result.statusCode, 422);
-        assert.equal(responses[2].result.statusCode, 422);
+        assert.equal(responses[0].statusCode, 422);
+        assert.equal(responses[1].statusCode, 422);
+        assert.equal(responses[2].statusCode, 422);
       });
   });
 
@@ -40,13 +53,20 @@ describe('Authorize', () => {
 
   it('should fail when credentials are not correct', () => {
     return loginRequest(userInput.username, 'ihaznoswag').then(res => {
-      const { errors } = res.result;
-      assert.equal(errors.title, 'wrong_credentials');
+      assert.equal(res.result.error.title, 'wrong_credentials');
       assert.equal(res.statusCode, 403);
     });
   });
 
   it('should fail when user does not belong to a network', () => {
-    // TODO
+    return loginRequest('JohnnieLonely', userInput.password).then(res => {
+      assert.equal(res.result.error.title, 'not_in_network');
+      assert.equal(res.statusCode, 403);
+    });
+  });
+
+  after(() => {
+    userWithNetwork.destroy();
+    userWithoutNetwork.destroy();
   });
 });

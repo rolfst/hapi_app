@@ -6,8 +6,10 @@ const basePath = 'modules/authentication/handlers';
 export default [
   {
     method: 'POST',
-    path: '/v2/authorize',
-    handler: require(`${basePath}/authorize`).default,
+    path: '/v2/authenticate',
+    handler: {
+      async: require(`${basePath}/authenticate`).default,
+    },
     config: {
       validate: {
         payload: {
