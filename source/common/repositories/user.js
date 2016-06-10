@@ -21,6 +21,10 @@ export function createUser(attributes) {
   return User.create(values);
 }
 
+export function findUserByUsername(username) {
+  return User.findOne({ where: { username } });
+}
+
 export function createOrUpdateUser(identifier, data) {
   return User.findOne({ where: identifier })
     .then(user => {
