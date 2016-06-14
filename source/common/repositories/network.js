@@ -1,16 +1,8 @@
 import Boom from 'boom';
 import { Network, Integration } from 'common/models';
 
-export function createNetwork(userId, name = null) {
-  let networkName = name;
-  if (!name) networkName = `test-network-${Math.floor(Math.random() * 1000)}`;
-
-  return Network
-    .create({
-      name: networkName,
-      userId,
-      enabledComponents: "['SOCIAL', 'SCHEDULE', 'CHAT', 'FLEXCHANGE']",
-    });
+export function findIntegrationByName(name) {
+  return Integration.findOne({ where: { name } });
 }
 
 export function deleteNetwork(id) {
@@ -20,7 +12,7 @@ export function deleteNetwork(id) {
 export function findNetworkById(id) {
   return Network
     .findById(id, {
-      include: [{ model: Integration }],
+      include: [{ model: Integration, required: false }],
     })
     .then(network => {
       if (!network) return Boom.notFound(`No network found with id ${id}.`);
@@ -31,7 +23,7 @@ export function findNetworkById(id) {
 
 export function findNetwork(data) {
   return Network
-    .findOne({ where: data, include: [{ model: Integration }] })
+    .findOne({ where: data, include: [{ model: Integration, required: false }] })
     .then(network => {
       if (!network) return Boom.notFound('No network found for the given data.');
 
@@ -52,4 +44,24 @@ export function findNetworksForIntegration(integrationName) {
 export function findAllUsersForNetwork(id) {
   return findNetworkById(id)
     .then(network => network.getUsers());
+}
+
+export async function createNetwork(userId, name = null) {
+  let networkName = name;
+  if (!name) networkName = `test-network-${Math.floor(Math.random() * 1000)}`;
+
+  const enabledComponents = "['SOCIAL', 'SCHEDULE', 'CHAT', 'FLEXCHANGE']";
+  const network = await Network.create({ name: networkName, userId, enabledComponents });
+
+  return await findNetworkById(network.id);
+}
+
+export async function createPmtNetwork(userId) {
+  const networkName = `test-pmt-network-${Math.floor(Math.random() * 1000)}`;
+  const network = await createNetwork(userId, networkName);
+  const integration = await findIntegrationByName('PMT');
+
+  await network.setIntegrations([integration]);
+
+  return await findNetworkById(network.id);
 }
