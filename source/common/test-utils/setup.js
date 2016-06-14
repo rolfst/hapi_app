@@ -1,6 +1,6 @@
 import 'babel-polyfill';
 import authenticate from 'common/test-utils/authenticate';
-import { createNetwork, deleteNetwork } from 'common/repositories/network';
+import { createNetwork, createPmtNetwork, deleteNetwork } from 'common/repositories/network';
 import createServer from 'server';
 import dotenv from 'dotenv';
 
@@ -13,9 +13,15 @@ before(() => {
     global.authToken = authToken;
     global.authUser = authUser;
 
-    return createNetwork(authUser.id).then(createdNetwork => {
+    const flexAppealNetwork = createNetwork(authUser.id).then(createdNetwork => {
       global.network = createdNetwork;
     });
+
+    const pmtNetwork = createPmtNetwork(authUser.id).then(createdNetwork => {
+      global.pmtNetwork = createdNetwork;
+    });
+
+    return Promise.all([flexAppealNetwork, pmtNetwork]);
   });
 });
 
