@@ -5,6 +5,7 @@ import makePassword from 'common/utils/make-password';
 import formatDate from 'common/utils/format-date';
 import makeFunctionName from 'common/utils/make-function-name';
 import Conversation from 'modules/chat/models/conversation';
+import Integration from 'common/models/integration';
 import Network from 'common/models/network';
 import Team from 'common/models/team';
 
@@ -72,9 +73,6 @@ const User = model.define('User', {
     fullName: function () { // eslint-disable-line func-names, object-shorthand
       return `${this.firstName || ''} ${this.lastName || ''}`;
     },
-  },
-  defaultScope: {
-    include: [{ model: Team }, { model: Network }],
   },
   instanceMethods: {
     setFunctionNameForNetwork: function (networkId) { // eslint-disable-line func-names, object-shorthand, max-len
