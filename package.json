@@ -14,6 +14,7 @@
     "debug": "node-debug | npm run dev",
     "dev": "cross-env NODE_PATH=source NODE_ENV=development babel-node ./source/index.js",
     "test": "npm run test:e2e && npm run test:unit",
+    "test:integrations": "cross-env NODE_PATH=source NODE_ENV=testing mocha --timeout 20000 --compilers js:babel-register source/common/test-utils/setup.js source/adapters/**/*.e2e.js",
     "test:e2e": "cross-env NODE_PATH=source NODE_ENV=testing mocha --timeout 20000 --compilers js:babel-register source/common/test-utils/setup.js source/**/*.e2e.js",
     "test:unit": "cross-env NODE_PATH=source NODE_ENV=testing mocha --timeout 10000 --compilers js:babel-register source/common/test-utils/setup.js source/**/*.spec.js",
     "coverage": "cross-env NODE_PATH=source NODE_ENV=testing istanbul cover _mocha -- --compilers js:babel-register './source/**/*.spec.js'",
