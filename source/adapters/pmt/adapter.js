@@ -5,13 +5,15 @@ import myShifts from 'adapters/pmt/hooks/my-shifts';
 import acceptExchange from 'adapters/pmt/hooks/accept-exchange';
 import updateUser from 'adapters/pmt/hooks/update-user';
 
-const pmtAdapter = {
-  authenticate,
-  initialSync,
-  usersAvailableForShift,
-  myShifts,
-  updateUser,
-  acceptExchange,
+const pmtAdapter = (token) => {
+  return {
+    initialSync,
+    authenticate,
+    usersAvailableForShift: usersAvailableForShift(token),
+    myShifts: myShifts(token),
+    updateUser: updateUser(token),
+    acceptExchange: acceptExchange(token),
+  };
 };
 
 export default pmtAdapter;
