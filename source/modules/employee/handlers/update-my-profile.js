@@ -10,7 +10,7 @@ export default (req, reply) => {
     const promises = [];
 
     if (hasIntegration(network)) {
-      const adapter = createAdapter(network);
+      const adapter = createAdapter(network, req.auth.artifacts.integrations);
 
       const pmtPromise = adapter
         .updateUser(network.externalId, loggedUser.id, req.payload)

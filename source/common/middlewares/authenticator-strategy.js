@@ -16,7 +16,10 @@ export default () => {
         const decodedToken = jwt.decode(token, process.env.JWT_SECRET);
 
         return User.findById(decodedToken.sub).then(user => {
-          reply.continue({ credentials: user });
+          reply.continue({
+            credentials: user,
+            artifacts: { integrations: decodedToken.integrations },
+          });
         });
       } catch (e) {
         return reply(Boom.unauthorized(e.message));
