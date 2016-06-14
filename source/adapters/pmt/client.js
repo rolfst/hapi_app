@@ -7,7 +7,7 @@ function makeRequest(token, endpoint, method = 'GET', data = {}) {
     .set('api-key', 'flexappeal4rwrs')
     .send(data)
     .then(res => res.body)
-    .catch(err => console.log('PMT Client error: ', err.body));
+    .catch(err => console.log('PMT Client error: ', err));
 }
 
 export default {
