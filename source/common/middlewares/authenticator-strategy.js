@@ -17,9 +17,9 @@ export default () => {
         const decodedToken = jwt.decode(token, process.env.JWT_SECRET);
 
         return User.findById(decodedToken.sub).then(user => {
-          if (!user.getNetwork(params.networkId)) {
-            return reply(Boom.unauthorized('User is not in this network'));
-          }
+          const network = user.getNetwork(params.networkId);
+
+          user.set('scope', network.NetworkUser.roleType);
 
           reply.continue({ credentials: user });
         });

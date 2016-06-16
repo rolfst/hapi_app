@@ -1,4 +1,5 @@
 import Boom from 'boom';
+import { hasRole, role } from 'common/services/permission';
 import { findNetworkById } from 'common/repositories/network';
 import acceptExchange from 'modules/flexchange/handlers/accept-exchange';
 import declineExchange from 'modules/flexchange/handlers/decline-exchange';
@@ -16,7 +17,14 @@ export default (req, reply) => {
     };
 
     try {
-      const hook = actions[req.payload.action];
+      const { action } = req.payload;
+
+      if ((action === 'approve' || action === 'reject') &&
+        !hasRole(req.auth.credentials, role.ADMIN)) {
+        return reply(Boom.forbidden('Insufficient scope'));
+      }
+
+      const hook = actions[action];
 
       return hook(network, req)
         .then(exchange => reply({ success: true, data: exchange.toJSON() }))
@@ -24,7 +32,7 @@ export default (req, reply) => {
     } catch (err) {
       if (err.isBoom) return reply(err);
 
-      return reply(Boom.badData('Unknown action.'));
+      return reply(Boom.badData(err));
     }
   });
 };

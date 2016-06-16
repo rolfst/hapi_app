@@ -50,6 +50,9 @@ const User = model.define('User', {
     allowNull: true,
     field: 'phone_num',
   },
+  scope: {
+    type: Sequelize.VIRTUAL,
+  },
 }, {
   tableName: 'users',
   timestamps: true,

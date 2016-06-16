@@ -1,42 +1,74 @@
+import { role } from 'common/services/permission';
+
+export const defaultScope = [role.EMPLOYEE, role.ADMIN];
+export const defaultStrategy = 'default';
+
+export const adminScope = [role.ADMIN];
+
 export default {
-  get: (path, handler, auth = 'default') => {
+  get: (path, handler, scope = defaultScope, strategy = defaultStrategy) => {
     return {
       method: 'GET',
       path,
       handler: handler.default ? handler.default : handler,
-      config: { auth },
+      config: { auth: {
+        strategy,
+        access: {
+          scope,
+        },
+      } },
     };
   },
-  post: (path, handler, auth = 'default') => {
+  post: (path, handler, scope = defaultScope, strategy = defaultStrategy) => {
     return {
       method: 'POST',
       path,
       handler: handler.default ? handler.default : handler,
-      config: { auth },
+      config: { auth: {
+        strategy,
+        access: {
+          scope,
+        },
+      } },
     };
   },
-  put: (path, handler, auth = 'default') => {
+  put: (path, handler, scope = defaultScope, strategy = defaultStrategy) => {
     return {
       method: 'PUT',
       path,
       handler: handler.default ? handler.default : handler,
-      config: { auth },
+      config: { auth: {
+        strategy,
+        access: {
+          scope,
+        },
+      } },
     };
   },
-  patch: (path, handler, auth = 'default') => {
+  patch: (path, handler, scope = defaultScope, strategy = defaultStrategy) => {
     return {
       method: 'PATCH',
       path,
       handler: handler.default ? handler.default : handler,
-      config: { auth },
+      config: { auth: {
+        strategy,
+        access: {
+          scope,
+        },
+      } },
     };
   },
-  delete: (path, handler, auth = 'default') => {
+  delete: (path, handler, scope = defaultScope, strategy = defaultStrategy) => {
     return {
       method: 'DELETE',
       path,
       handler: handler.default ? handler.default : handler,
-      config: { auth },
+      config: { auth: {
+        strategy,
+        access: {
+          scope,
+        },
+      } },
     };
   },
 };

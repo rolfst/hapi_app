@@ -1,3 +1,4 @@
+import { adminScope } from 'common/utils/router';
 /* eslint-disable max-len */
 
 import router from 'common/utils/router';
@@ -8,7 +9,7 @@ export default [
   router.get(`${baseUrl}/users/me/shifts`, require(`${basePath}/my-shifts`)),
   router.get(`${baseUrl}/users/me/exchanges`, require(`${basePath}/my-exchanges`)), //
   // router.get(`${baseUrl}/users/me/exchanges/responded_to`, require(`${basePath}/exchanges-responded-to`)),
-  router.get(`${baseUrl}/exchanges`, require(`${basePath}/all-exchanges-for-network`)), //
+  router.get(`${baseUrl}/exchanges`, require(`${basePath}/all-exchanges-for-network`), adminScope), //
   router.get(`${baseUrl}/shifts/{shiftId}/available`, require(`${basePath}/shifts-available`)),
   router.get(`${baseUrl}/teams/{teamId}/exchanges`, require(`${basePath}/all-exchanges-for-team`)),
   router.get(`${baseUrl}/exchanges/{exchangeId}`, require(`${basePath}/view-exchange`)),
