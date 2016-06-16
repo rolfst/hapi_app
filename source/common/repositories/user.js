@@ -25,10 +25,22 @@ export function findAllUsers() {
   return User.findAll(defaultIncludes);
 }
 
+export function findUserById(id) {
+  return User.findOne({ ...defaultIncludes, where: { id } });
+}
+
+export function findUserByUsername(username) {
+  return User.findOne({ ...defaultIncludes, where: { username } });
+}
+
 export function getIntegrationTokensForUser(user) {
   const result = user.Networks
     .filter(network => network.NetworkUser.userToken !== null)
-    .map(network => ({ name: network.Integrations[0].name, token: network.NetworkUser.userToken }));
+    .map(network => ({
+      name: network.Integrations[0].name,
+      token: network.NetworkUser.userToken,
+      externalId: network.NetworkUser.externalId,
+    }));
 
   return result;
 }
@@ -47,10 +59,6 @@ export function createUser(attributes) {
   });
 
   return User.create(values);
-}
-
-export function findUserByUsername(username) {
-  return User.findOne({ ...defaultIncludes, where: { username } });
 }
 
 export function createOrUpdateUser(identifier, data) {
