@@ -9,6 +9,7 @@ const NetworkUser = model.define('NetworkUser', {
   roleType: {
     type: Sequelize.STRING,
     field: 'role_type',
+    defaultValue: 'EMPLOYEE',
   },
   unreadCount: {
     type: Sequelize.INTEGER,
