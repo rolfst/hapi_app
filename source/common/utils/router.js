@@ -1,74 +1,40 @@
-import { role } from 'common/services/permission';
+import { roles } from 'common/services/permission';
+import preFetchNetwork from 'common/middlewares/prefetch-network';
 
-export const defaultScope = [role.EMPLOYEE, role.ADMIN];
-export const defaultStrategy = 'default';
+export const defaultScope = [roles.EMPLOYEE, roles.ADMIN];
+export const adminScope = [roles.ADMIN];
 
-export const adminScope = [role.ADMIN];
+function makeRoute(method, path, handler, scope = defaultScope, strategy = 'jwt') {
+  const route = {
+    method,
+    path,
+    handler: handler.default ? handler.default : handler,
+    config: {
+      auth: {
+        strategy,
+        access: { scope },
+      },
+      pre: [{ method: preFetchNetwork, assign: 'network' }],
+    },
+  };
+
+  return route;
+}
 
 export default {
-  get: (path, handler, scope = defaultScope, strategy = defaultStrategy) => {
-    return {
-      method: 'GET',
-      path,
-      handler: handler.default ? handler.default : handler,
-      config: { auth: {
-        strategy,
-        access: {
-          scope,
-        },
-      } },
-    };
+  get: (path, handler) => {
+    return makeRoute('GET', path, handler);
   },
-  post: (path, handler, scope = defaultScope, strategy = defaultStrategy) => {
-    return {
-      method: 'POST',
-      path,
-      handler: handler.default ? handler.default : handler,
-      config: { auth: {
-        strategy,
-        access: {
-          scope,
-        },
-      } },
-    };
+  post: (path, handler) => {
+    return makeRoute('POST', path, handler);
   },
-  put: (path, handler, scope = defaultScope, strategy = defaultStrategy) => {
-    return {
-      method: 'PUT',
-      path,
-      handler: handler.default ? handler.default : handler,
-      config: { auth: {
-        strategy,
-        access: {
-          scope,
-        },
-      } },
-    };
+  put: (path, handler) => {
+    return makeRoute('PUT', path, handler);
   },
-  patch: (path, handler, scope = defaultScope, strategy = defaultStrategy) => {
-    return {
-      method: 'PATCH',
-      path,
-      handler: handler.default ? handler.default : handler,
-      config: { auth: {
-        strategy,
-        access: {
-          scope,
-        },
-      } },
-    };
+  patch: (path, handler) => {
+    return makeRoute('PATCH', path, handler);
   },
-  delete: (path, handler, scope = defaultScope, strategy = defaultStrategy) => {
-    return {
-      method: 'DELETE',
-      path,
-      handler: handler.default ? handler.default : handler,
-      config: { auth: {
-        strategy,
-        access: {
-          scope,
-        },
-      } },
-    };
+  delete: (path, handler) => {
+    return makeRoute('DELETE', path, handler);
   },
 };

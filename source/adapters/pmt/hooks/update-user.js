@@ -1,12 +1,12 @@
+import createAdapterHook from 'common/utils/create-adapter-hook';
 import client from 'adapters/pmt/client';
 
-export default (baseStoreUrl, userId, input) => {
+const hook = token => (baseStoreUrl, userId, input) => {
   const endpoint = `${baseStoreUrl}/me`;
+  const data = { email: input.email };
 
-  const data = {
-    username: input.email,
-  };
-
-  return client.post(endpoint, data)
+  return client.post(endpoint, token, data)
     .then(res => res);
 };
+
+export default createAdapterHook(hook);

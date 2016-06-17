@@ -1,7 +1,8 @@
 import Boom from 'boom';
-import employeeRoutes from 'modules/employee/routes/create-routes';
-import chatRoutes from 'modules/chat/routes/create-routes';
-import flexchangeRoutes from 'modules/flexchange/routes/create-routes';
+import authenticationRoutes from 'modules/authentication/create-routes';
+import employeeRoutes from 'modules/employee/create-routes';
+import chatRoutes from 'modules/chat/create-routes';
+import flexchangeRoutes from 'modules/flexchange/create-routes';
 import createAdapter from 'adapters/create-adapter';
 
 const defaultRoutes = [
@@ -18,7 +19,7 @@ const defaultRoutes = [
       }
     },
     config: {
-      auth: 'default',
+      auth: 'jwt',
     },
   }, {
     method: 'GET',
@@ -42,4 +43,10 @@ const defaultRoutes = [
   },
 ];
 
-export default [...defaultRoutes, ...chatRoutes, ...flexchangeRoutes, ...employeeRoutes];
+export default [
+  ...defaultRoutes,
+  ...chatRoutes,
+  ...flexchangeRoutes,
+  ...employeeRoutes,
+  ...authenticationRoutes,
+];

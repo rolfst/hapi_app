@@ -1,9 +1,12 @@
+import createAdapterHook from 'common/utils/create-adapter-hook';
 import client from 'adapters/pmt/client';
 
-export default (baseStoreUrl, shiftId) => {
+const hook = token => (baseStoreUrl, shiftId) => {
   const endpoint = `${baseStoreUrl}/shift/${shiftId}/interestedInShift`;
 
-  return client.get(endpoint)
+  return client.get(endpoint, token)
     .then(res => res.successful)
     .catch(err => console.log(err));
 };
+
+export default createAdapterHook(hook);

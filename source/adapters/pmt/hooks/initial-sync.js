@@ -26,6 +26,7 @@ const syncActions = (network, flexUser, pmtUser) => {
 
 const mapUser = pmtUser => {
   return {
+    username: pmtUser.email,
     email: pmtUser.email,
     firstName: pmtUser.first_name,
     lastName: pmtUser.last_name,
