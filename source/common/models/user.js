@@ -5,9 +5,6 @@ import makePassword from 'common/utils/make-password';
 import formatDate from 'common/utils/format-date';
 import makeFunctionName from 'common/utils/make-function-name';
 import Conversation from 'modules/chat/models/conversation';
-import Integration from 'common/models/integration';
-import Network from 'common/models/network';
-import Team from 'common/models/team';
 
 const User = model.define('User', {
   username: {
