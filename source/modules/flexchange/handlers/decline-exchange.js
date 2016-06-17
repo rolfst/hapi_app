@@ -4,7 +4,7 @@ import hasIntegration from 'common/utils/network-has-integration';
 
 export default (network, req) => {
   if (hasIntegration(network)) {
-    return createAdapter(network).declineExchange;
+    return createAdapter(network, req.auth.artifacts.integrations).declineExchange;
   }
 
   return findExchangeById(req.params.exchangeId, req.auth.credentials.id)

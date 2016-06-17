@@ -1,11 +1,16 @@
+import preFetchNetwork from 'common/middlewares/prefetch-network';
+
 function makeRoute(method, path, handler, auth) {
   const route = {
     method,
     path,
     handler: handler.default ? handler.default : handler,
+    config: {
+      pre: [{ method: preFetchNetwork, assign: 'network' }],
+    },
   };
 
-  if (auth !== null) route.config = { auth };
+  if (auth !== null) route.config.auth = auth;
 
   return route;
 }

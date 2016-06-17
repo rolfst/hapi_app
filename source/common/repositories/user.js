@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import sequelize from 'sequelize';
 import db from 'connection';
-import { User } from 'common/models';
+import { User, Network, Integration, Team } from 'common/models';
 
 const dummyProfileImgPaths = [
   'default/default-1.png',
@@ -9,8 +9,40 @@ const dummyProfileImgPaths = [
   'default/default-3.png',
 ];
 
+const defaultIncludes = {
+  include: [{
+    model: Team,
+  }, {
+    model: Network,
+    include: [{
+      model: Integration,
+      required: false,
+    }],
+  }],
+};
+
 export function findAllUsers() {
-  return User.findAll();
+  return User.findAll(defaultIncludes);
+}
+
+export function findUserById(id) {
+  return User.findOne({ ...defaultIncludes, where: { id } });
+}
+
+export function findUserByUsername(username) {
+  return User.findOne({ ...defaultIncludes, where: { username } });
+}
+
+export function getIntegrationTokensForUser(user) {
+  const result = user.Networks
+    .filter(network => network.NetworkUser.userToken !== null)
+    .map(network => ({
+      name: network.Integrations[0].name,
+      token: network.NetworkUser.userToken,
+      externalId: network.NetworkUser.externalId,
+    }));
+
+  return result;
 }
 
 export function updateUser(userId, attributes) {
@@ -27,10 +59,6 @@ export function createUser(attributes) {
   });
 
   return User.create(values);
-}
-
-export function findUserByUsername(username) {
-  return User.findOne({ where: { username } });
 }
 
 export function createOrUpdateUser(identifier, data) {

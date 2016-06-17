@@ -1,20 +1,22 @@
 import moment from 'moment';
-import checkPassword from 'common/utils/check-password';
 import userBelongsToNetwork from 'common/utils/user-belongs-to-network';
-import { findUserByUsername, updateUser } from 'common/repositories/user';
+import { getIntegrationTokensForUser, updateUser } from 'common/repositories/user';
 import { findOrCreateUserDevice } from 'common/repositories/authentication';
 import createAccessToken from 'common/utils/create-access-token';
 import createRefreshToken from 'common/utils/create-refresh-token';
-import WrongCredentials from 'common/errors/wrong-credentials';
 import NotInAnyNetwork from 'common/errors/not-in-any-network';
+import authenticateUser from 'common/utils/authenticate-user';
 
 export default async (req, reply) => {
-  const { payload } = req;
+  const { username, password } = req.payload;
+  let authenticatedIntegrations = [];
 
   try {
-    const user = await findUserByUsername(payload.username);
+    const credentials = { username, password };
+    const user = await authenticateUser(credentials);
 
-    if (!checkPassword(user.password, payload.password) || !user) throw WrongCredentials;
+    authenticatedIntegrations = await getIntegrationTokensForUser(user);
+
     if (!userBelongsToNetwork(user)) throw NotInAnyNetwork;
 
     const deviceName = req.headers['user-agent'];
@@ -22,7 +24,7 @@ export default async (req, reply) => {
     const device = await findOrCreateUserDevice(user.id, deviceName);
     const updatedUser = await updateUser(user.id, { lastLogin: moment().toISOString() });
 
-    const accessToken = createAccessToken(user.id, device.device_id);
+    const accessToken = createAccessToken(user.id, device.device_id, authenticatedIntegrations);
     const refreshToken = createRefreshToken(user.id, device.device_id);
 
     const data = {
