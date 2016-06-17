@@ -1,4 +1,4 @@
-import jwt from 'jwt-simple';
+import tokenUtil from 'common/utils/token';
 import _ from 'lodash';
 
 export default (userId, deviceId) => {
@@ -9,5 +9,5 @@ export default (userId, deviceId) => {
     jti: _.random(1000000, 9999999),
   };
 
-  return jwt.encode(payload, process.env.JWT_SECRET);
+  return tokenUtil.encode(payload);
 };

@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import jwt from 'jwt-simple';
+import tokenUtil from 'common/utils/token';
 import { findUserById } from 'common/repositories/user';
 
 export default () => {
@@ -13,7 +13,7 @@ export default () => {
       }
 
       try {
-        const decodedToken = jwt.decode(token, process.env.JWT_SECRET);
+        const decodedToken = tokenUtil.decode(token);
         const user = await findUserById(decodedToken.sub);
 
         return reply.continue({

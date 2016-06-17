@@ -1,7 +1,7 @@
-import jwt from 'jwt-simple';
+import tokenUtil from 'common/utils/token';
 
 export const makeDefaultOptions = (globalProps) => {
-  const decodedToken = jwt.decode(globalProps.authToken, process.env.JWT_SECRET);
+  const decodedToken = tokenUtil.decode(globalProps.authToken);
 
   return {
     headers: { 'X-API-Token': globalProps.authToken },

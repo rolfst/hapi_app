@@ -1,4 +1,4 @@
-import jwt from 'jwt-simple';
+import tokenUtil from 'common/utils/token';
 import _ from 'lodash';
 import moment from 'moment';
 
@@ -14,5 +14,5 @@ export default (userId, deviceId, integrations) => {
     integrations,
   };
 
-  return jwt.encode(payload, process.env.JWT_SECRET);
+  return tokenUtil.encode(payload);
 };

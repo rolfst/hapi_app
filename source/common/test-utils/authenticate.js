@@ -1,4 +1,4 @@
-import jwt from 'jwt-simple';
+import tokenUtil from 'common/utils/token';
 import { findUserByUsername } from 'common/repositories/user';
 
 export default async (server) => {
@@ -13,7 +13,7 @@ export default async (server) => {
 
     const { user: userObj, access_token: accessToken } = response.result.data;
 
-    const decodedToken = jwt.decode(accessToken, process.env.JWT_SECRET);
+    const decodedToken = tokenUtil.decode(accessToken);
     const user = await findUserByUsername(userObj.username);
 
     return { authUser: user, authToken: accessToken, authIntegrations: decodedToken.integrations };
