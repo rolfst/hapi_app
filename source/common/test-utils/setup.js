@@ -9,22 +9,35 @@ dotenv.config();
 global.server = createServer(8000);
 
 before(() => {
-  return authenticate({}).then(({ authUser, authToken }) => {
+  return authenticate(global.server).then(({ authUser, authToken, authIntegrations }) => {
+    global.authIntegrations = authIntegrations;
     global.authToken = authToken;
-    global.authUser = authUser;
 
     const flexAppealNetwork = createNetwork(authUser.id).then(createdNetwork => {
-      global.network = createdNetwork;
+      return createdNetwork.setUsers([authUser]).then(() => {
+        return createdNetwork.reload()
+          .then(network => (global.network = network));
+      });
     });
 
     const pmtNetwork = createPmtNetwork(authUser.id).then(createdNetwork => {
-      global.pmtNetwork = createdNetwork;
+      return createdNetwork.setUsers([authUser]).then(() => {
+        return createdNetwork.reload()
+          .then(network => (global.pmtNetwork = network));
+      });
     });
 
-    return Promise.all([flexAppealNetwork, pmtNetwork]);
+    return Promise.all([flexAppealNetwork, pmtNetwork])
+      .then(() => authUser.reload())
+      .then(user => (global.authUser = user));
   });
 });
 
 after(() => {
-  if (global.network) return deleteNetwork(global.network.id);
+  if (global.network) {
+    return Promise.all([
+      // deleteNetwork(global.network.id),
+      deleteNetwork(global.pmtNetwork.id),
+    ]);
+  }
 });
