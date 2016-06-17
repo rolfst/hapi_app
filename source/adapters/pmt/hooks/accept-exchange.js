@@ -4,7 +4,7 @@ import client from 'adapters/pmt/client';
 const hook = token => (baseStoreUrl, shiftId) => {
   const endpoint = `${baseStoreUrl}/shift/${shiftId}/interestedInShift`;
 
-  return client.get(token, endpoint)
+  return client.get(endpoint, token)
     .then(res => res.successful)
     .catch(err => console.log(err));
 };

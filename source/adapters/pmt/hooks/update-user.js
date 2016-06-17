@@ -5,7 +5,7 @@ const hook = token => (baseStoreUrl, userId, input) => {
   const endpoint = `${baseStoreUrl}/me`;
   const data = { email: input.email };
 
-  return client.post(token, endpoint, data)
+  return client.post(endpoint, token, data)
     .then(res => res);
 };
 
