@@ -45,7 +45,6 @@ describe('Plugin: Network', () => {
       handler: (req, reply) => reply(req.pre.network),
       config: {
         pre: [{ method: preFetchNetwork, assign: 'network' }],
-        auth: 'jwt',
       },
     });
 
