@@ -46,8 +46,8 @@ export function findAllUsersForNetwork(id) {
     .then(network => network.getUsers());
 }
 
-export async function createNetwork(userId, externalId = null) {
-  const networkName = `test-network-${Math.floor(Math.random() * 1000)}`;
+export async function createNetwork(userId, name = null, externalId = null) {
+  const networkName = name !== null ? name : `test-network-${Math.floor(Math.random() * 1000)}`;
 
   const enabledComponents = "['SOCIAL', 'SCHEDULE', 'CHAT', 'FLEXCHANGE']";
   const network = await Network.create({
@@ -58,7 +58,7 @@ export async function createNetwork(userId, externalId = null) {
 }
 
 export async function createPmtNetwork(userId) {
-  const network = await createNetwork(userId, 'https://partner2.testpmt.nl/rest.php/dokkum');
+  const network = await createNetwork(userId, null, 'https://partner2.testpmt.nl/rest.php/dokkum');
   const integration = await findIntegrationByName('PMT');
 
   await network.setIntegrations([integration]);
