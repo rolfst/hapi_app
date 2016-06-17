@@ -1,4 +1,4 @@
-import UserDevice from 'common/models/user-device';
+import { UserDevice } from 'common/models';
 import createDeviceId from 'common/utils/create-device-id';
 
 export function findUserDevice(userId, deviceName) {
