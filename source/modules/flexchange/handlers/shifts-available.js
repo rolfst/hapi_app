@@ -1,14 +1,15 @@
-import { findNetworkById } from 'common/repositories/network';
+import Boom from 'boom';
 import createAdapter from 'adapters/create-adapter';
+import hasIntegration from 'common/utils/network-has-integration';
 
 export default (req, reply) => {
-  // TODO: add authorization if user can access the network
-  // TODO: add check to check if network has integration enabled or not
-  findNetworkById(req.params.networkId).then(network => {
-    const adapter = createAdapter(network, req.auth.artifacts.integrations);
+  if (!hasIntegration(req.pre.network)) {
+    return reply(Boom.forbidden('User does not have an activated integration.'));
+  }
 
-    return adapter
-      .usersAvailableForShift(network.externalId, req.params.shiftId)
-      .then(users => reply({ data: users }));
-  });
+  const adapter = createAdapter(req.pre.network, req.auth.artifacts.integrations);
+
+  return adapter
+    .usersAvailableForShift(req.pre.network.externalId, req.params.shiftId)
+    .then(users => reply({ data: users }));
 };
