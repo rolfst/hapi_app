@@ -19,6 +19,6 @@ describe('PMT: Update User', () => {
   });
 
   after(() => {
-    return putRequest(endpoint, { email: global.authUser.email });
+    return putRequest(endpoint, { email: 'ruben@flex-appeal.nl' });
   });
 });
