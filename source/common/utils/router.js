@@ -1,34 +1,40 @@
+import { roles } from 'common/services/permission';
 import preFetchNetwork from 'common/middlewares/prefetch-network';
 
-function makeRoute(method, path, handler, auth) {
+export const defaultScope = [roles.EMPLOYEE, roles.ADMIN];
+export const adminScope = [roles.ADMIN];
+
+function makeRoute(method, path, handler, scope = defaultScope, strategy = 'jwt') {
   const route = {
     method,
     path,
     handler: handler.default ? handler.default : handler,
     config: {
+      auth: {
+        strategy,
+        access: { scope },
+      },
       pre: [{ method: preFetchNetwork, assign: 'network' }],
     },
   };
-
-  if (auth !== null) route.config.auth = auth;
 
   return route;
 }
 
 export default {
-  get: (path, handler, auth = 'jwt') => {
-    return makeRoute('GET', path, handler, auth);
+  get: (path, handler) => {
+    return makeRoute('GET', path, handler);
   },
-  post: (path, handler, auth = 'jwt') => {
-    return makeRoute('POST', path, handler, auth);
+  post: (path, handler) => {
+    return makeRoute('POST', path, handler);
   },
-  put: (path, handler, auth = 'jwt') => {
-    return makeRoute('PUT', path, handler, auth);
+  put: (path, handler) => {
+    return makeRoute('PUT', path, handler);
   },
-  patch: (path, handler, auth = 'jwt') => {
-    return makeRoute('PATCH', path, handler, auth);
+  patch: (path, handler) => {
+    return makeRoute('PATCH', path, handler);
   },
-  delete: (path, handler, auth = 'jwt') => {
-    return makeRoute('DELETE', path, handler, auth);
+  delete: (path, handler) => {
+    return makeRoute('DELETE', path, handler);
   },
 };

@@ -56,6 +56,9 @@ const User = model.define('User', {
     allowNull: true,
     field: 'phone_num',
   },
+  scope: {
+    type: Sequelize.VIRTUAL,
+  },
   lastLogin: {
     type: Sequelize.DATE,
     allowNull: true,

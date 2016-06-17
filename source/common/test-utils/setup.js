@@ -1,6 +1,7 @@
 import 'babel-polyfill';
 import dotenv from 'dotenv';
 import createServer from 'server';
+import { roles } from 'common/services/permission';
 import authenticate from 'common/test-utils/authenticate';
 import { createNetwork, createPmtNetwork, deleteNetwork } from 'common/repositories/network';
 import generateNetworkName from 'common/test-utils/create-network-name';
@@ -16,7 +17,7 @@ before(() => {
 
     const flexAppealNetwork = createNetwork(authUser.id, generateNetworkName())
       .then(createdNetwork => {
-        return createdNetwork.setUsers([authUser]).then(() => {
+        return createdNetwork.addUser(authUser, { roleType: roles.ADMIN }).then(() => {
           return createdNetwork.reload()
             .then(network => (global.network = network));
         });
@@ -24,7 +25,7 @@ before(() => {
 
     const pmtNetwork = createPmtNetwork(authUser.id, generateNetworkName())
       .then(createdNetwork => {
-        return createdNetwork.setUsers([authUser]).then(() => {
+        return createdNetwork.addUser(authUser, { roleType: roles.ADMIN }).then(() => {
           return createdNetwork.reload()
             .then(network => (global.pmtNetwork = network));
         });
@@ -32,7 +33,10 @@ before(() => {
 
     return Promise.all([flexAppealNetwork, pmtNetwork])
       .then(() => authUser.reload())
-      .then(user => (global.authUser = user));
+      .then(user => {
+        user.set('scope', 'ADMIN');
+        global.authUser = user;
+      });
   });
 });
 
