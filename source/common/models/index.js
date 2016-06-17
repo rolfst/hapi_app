@@ -3,6 +3,7 @@ import UserModel from 'common/models/user';
 import TeamModel from 'common/models/team';
 import IntegrationModel from 'common/models/integration';
 import NetworkUserModel from 'common/models/network-user';
+import UserDeviceModel from 'common/models/user-device';
 
 NetworkModel.belongsToMany(IntegrationModel, {
   foreignKey: 'network_id',
@@ -37,3 +38,4 @@ export const User = UserModel;
 export const Team = TeamModel;
 export const Integration = IntegrationModel;
 export const NetworkUser = NetworkUserModel;
+export const UserDevice = UserDeviceModel;

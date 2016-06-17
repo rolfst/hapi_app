@@ -1,10 +1,10 @@
 import Boom from 'boom';
-import jwt from 'jwt-simple';
-import { User } from 'common/models';
+import tokenUtil from 'common/utils/token';
+import { findUserById } from 'common/repositories/user';
 
 export default () => {
   return {
-    authenticate: (request, reply) => {
+    authenticate: async (request, reply) => {
       const req = request.raw.req;
       const token = req.headers['x-api-token'];
 
@@ -13,13 +13,16 @@ export default () => {
       }
 
       try {
-        const decodedToken = jwt.decode(token, process.env.JWT_SECRET);
+        const decodedToken = tokenUtil.decode(token);
+        const user = await findUserById(decodedToken.sub);
 
-        return User.findById(decodedToken.sub).then(user => {
-          reply.continue({ credentials: user });
+        return reply.continue({
+          credentials: user,
+          artifacts: { integrations: decodedToken.integrations },
         });
-      } catch (e) {
-        return reply(Boom.unauthorized(e.message));
+      } catch (err) {
+        console.log('Error in Authenticator Strategy: ', err);
+        return reply(Boom.unauthorized(err.message));
       }
     },
   };

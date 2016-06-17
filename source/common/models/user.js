@@ -1,13 +1,16 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
 import _ from 'lodash';
+import makePassword from 'common/utils/make-password';
 import formatDate from 'common/utils/format-date';
 import makeFunctionName from 'common/utils/make-function-name';
 import Conversation from 'modules/chat/models/conversation';
-import Network from 'common/models/network';
-import Team from 'common/models/team';
 
 const User = model.define('User', {
+  username: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
   profileImg: {
     type: Sequelize.STRING,
     field: 'profile_img',
@@ -25,11 +28,14 @@ const User = model.define('User', {
   },
   email: {
     type: Sequelize.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   password: {
     type: Sequelize.STRING,
     allowNull: true,
+    set: function (val) { // eslint-disable-line object-shorthand, func-names
+      this.setDataValue('password', makePassword(val));
+    },
   },
   address: {
     type: Sequelize.STRING,
@@ -41,7 +47,7 @@ const User = model.define('User', {
     field: 'zip_code',
   },
   dateOfBirth: {
-    type: Sequelize.DATE,
+    type: Sequelize.DATEONLY,
     allowNull: true,
     field: 'date_of_birth',
   },
@@ -49,6 +55,11 @@ const User = model.define('User', {
     type: Sequelize.STRING,
     allowNull: true,
     field: 'phone_num',
+  },
+  lastLogin: {
+    type: Sequelize.DATE,
+    allowNull: true,
+    field: 'last_login',
   },
 }, {
   tableName: 'users',
@@ -59,9 +70,6 @@ const User = model.define('User', {
     fullName: function () { // eslint-disable-line func-names, object-shorthand
       return `${this.firstName || ''} ${this.lastName || ''}`;
     },
-  },
-  defaultScope: {
-    include: [{ model: Team }, { model: Network }],
   },
   instanceMethods: {
     setFunctionNameForNetwork: function (networkId) { // eslint-disable-line func-names, object-shorthand, max-len
@@ -97,6 +105,7 @@ const User = model.define('User', {
       return {
         type: 'user',
         id: this.id.toString(),
+        username: this.username,
         first_name: this.firstName,
         last_name: this.lastName,
         full_name: this.fullName,
@@ -105,6 +114,7 @@ const User = model.define('User', {
         phone_num: this.phoneNum,
         profile_img: `https://s3.eu-central-1.amazonaws.com/flex-appeal/${environment}/profiles/${this.profileImg}`,
         created_at: formatDate(this.created_at),
+        last_login: formatDate(this.lastLogin),
       };
     },
     toSimpleJSON: function () { // eslint-disable-line func-names, object-shorthand
