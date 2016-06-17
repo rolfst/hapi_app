@@ -10,7 +10,6 @@ describe('PMT: Update User', () => {
     endpoint = `/v2/networks/${global.pmtNetwork.id}/users/me`;
 
     await putRequest(endpoint, { email: 'pmt-hodor@flex-appeal.nl' });
-
     const result = await fetchUsersHook(global.pmtNetwork.externalId);
 
     const externalId = _.find(global.authIntegrations, { name: 'PMT' }).externalId;
@@ -20,6 +19,6 @@ describe('PMT: Update User', () => {
   });
 
   after(() => {
-    return putRequest(endpoint, { email: 'ruben@flex-appeal.nl' });
+    return putRequest(endpoint, { email: global.authUser.email });
   });
 });
