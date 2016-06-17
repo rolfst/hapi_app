@@ -36,7 +36,7 @@ before(() => {
 after(() => {
   if (global.network) {
     return Promise.all([
-      // deleteNetwork(global.network.id),
+      deleteNetwork(global.network.id),
       deleteNetwork(global.pmtNetwork.id),
     ]);
   }
