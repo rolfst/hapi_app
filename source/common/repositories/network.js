@@ -47,18 +47,16 @@ export function findAllUsersForNetwork(id) {
 }
 
 export async function createNetwork(userId, name = null, externalId = null) {
-  const networkName = name !== null ? name : `test-network-${Math.floor(Math.random() * 1000)}`;
-
   const enabledComponents = "['SOCIAL', 'SCHEDULE', 'CHAT', 'FLEXCHANGE']";
   const network = await Network.create({
-    name: networkName, userId, enabledComponents, externalId,
+    name, userId, enabledComponents, externalId,
   });
 
   return await findNetworkById(network.id);
 }
 
-export async function createPmtNetwork(userId) {
-  const network = await createNetwork(userId, null, 'https://partner2.testpmt.nl/rest.php/dokkum');
+export async function createPmtNetwork(userId, name = null) {
+  const network = await createNetwork(userId, name, 'https://partner2.testpmt.nl/rest.php/dokkum');
   const integration = await findIntegrationByName('PMT');
 
   await network.setIntegrations([integration]);

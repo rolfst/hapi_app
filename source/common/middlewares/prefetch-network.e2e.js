@@ -4,6 +4,7 @@ import jwtStrategy from 'common/middlewares/authenticator-strategy';
 import { getRequest } from 'common/test-utils/request';
 import { createNetwork } from 'common/repositories/network';
 import preFetchNetwork from 'common/middlewares/prefetch-network';
+import generateNetworkName from 'common/test-utils/create-network-name';
 
 describe('Plugin: Network', () => {
   let server;
@@ -17,8 +18,9 @@ describe('Plugin: Network', () => {
   });
 
   afterEach(() => server.stop());
-  before(() => createNetwork(2).then(createdNetwork => (network = createdNetwork)));
   after(() => network.destroy());
+  before(() => createNetwork(2, generateNetworkName())
+    .then(createdNetwork => (network = createdNetwork)));
 
   it('should add network to request', async () => {
     const networkId = global.network.id;

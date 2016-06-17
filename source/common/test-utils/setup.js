@@ -1,8 +1,9 @@
 import 'babel-polyfill';
+import dotenv from 'dotenv';
+import createServer from 'server';
 import authenticate from 'common/test-utils/authenticate';
 import { createNetwork, createPmtNetwork, deleteNetwork } from 'common/repositories/network';
-import createServer from 'server';
-import dotenv from 'dotenv';
+import generateNetworkName from 'common/test-utils/create-network-name';
 
 dotenv.config();
 
@@ -13,19 +14,21 @@ before(() => {
     global.authIntegrations = authIntegrations;
     global.authToken = authToken;
 
-    const flexAppealNetwork = createNetwork(authUser.id).then(createdNetwork => {
-      return createdNetwork.setUsers([authUser]).then(() => {
-        return createdNetwork.reload()
-          .then(network => (global.network = network));
+    const flexAppealNetwork = createNetwork(authUser.id, generateNetworkName())
+      .then(createdNetwork => {
+        return createdNetwork.setUsers([authUser]).then(() => {
+          return createdNetwork.reload()
+            .then(network => (global.network = network));
+        });
       });
-    });
 
-    const pmtNetwork = createPmtNetwork(authUser.id).then(createdNetwork => {
-      return createdNetwork.setUsers([authUser]).then(() => {
-        return createdNetwork.reload()
-          .then(network => (global.pmtNetwork = network));
+    const pmtNetwork = createPmtNetwork(authUser.id, generateNetworkName())
+      .then(createdNetwork => {
+        return createdNetwork.setUsers([authUser]).then(() => {
+          return createdNetwork.reload()
+            .then(network => (global.pmtNetwork = network));
+        });
       });
-    });
 
     return Promise.all([flexAppealNetwork, pmtNetwork])
       .then(() => authUser.reload())
