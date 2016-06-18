@@ -1,6 +1,7 @@
 /* eslint no-console: "off" */
 'use strict';
 
+import 'babel-polyfill';
 import dotenv from 'dotenv';
 import createServer from 'server';
 
