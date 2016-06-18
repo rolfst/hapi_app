@@ -1,11 +1,33 @@
 'use strict';
 
 import Hapi from 'hapi';
-import routes from 'routes/create-routes';
-import authenticator from 'middlewares/authenticator';
+import Boom from 'boom';
+import createError from 'common/utils/create-error';
+import respondWithError from 'common/utils/respond-with-error';
+import routes from 'create-routes';
+import jwtStrategy from 'common/middlewares/authenticator-strategy';
+import integrationStrategy from 'common/middlewares/integration-strategy';
+
+if (process.env.NODE_ENV === 'debug') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
 
 const createServer = port => {
-  const server = new Hapi.Server();
+  const options = {};
+
+  const makeConfig = () => {
+    if (process.env.NODE_ENV === 'debug') {
+      options.debug = {
+        request: ['error'],
+      };
+    }
+
+    return options;
+  };
+
+  const server = new Hapi.Server(makeConfig());
+
+  server.register([require('hapi-async-handler')]);
 
   server.connection({
     host: 'localhost',
@@ -18,21 +40,29 @@ const createServer = port => {
     },
   });
 
-  server.auth.scheme('jwt', authenticator);
-  server.auth.strategy('default', 'jwt');
-  server.auth.default('default');
+  server.auth.scheme('jwt', jwtStrategy);
+  server.auth.strategy('jwt', 'jwt');
+  server.auth.scheme('integration', integrationStrategy);
+  server.auth.strategy('integration', 'integration');
 
   server.ext('onRequest', (req, reply) => {
     process.env.BASE_URL = `${req.connection.info.protocol}://${req.info.host}`;
+
     return reply.continue();
   });
 
   // Accept CORS requests
   server.ext('onPreResponse', (req, reply) => {
-    if (req.response.isBoom) {
-      const { payload, statusCode } = req.response.output;
+    if (req.response.data && req.response.data.isJoi) {
+      const error = createError(Boom.badData(req.response.message), 'validation_error');
+      const response = respondWithError(error);
 
-      return reply(payload).code(statusCode);
+      return reply(response).code(response.error.status_code);
+    }
+
+    if (req.response.isBoom) {
+      const response = respondWithError(req.response);
+      return reply(response).code(response.error.status_code);
     }
 
     req.response.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTION');
