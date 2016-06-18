@@ -46,6 +46,7 @@ const createServer = port => {
   server.auth.strategy('integration', 'integration');
 
   server.ext('onRequest', (req, reply) => {
+    console.log('Received request with path', req.path);
     process.env.BASE_URL = `${req.connection.info.protocol}://${req.info.host}`;
 
     return reply.continue();
