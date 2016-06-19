@@ -3,14 +3,14 @@ import validators from 'modules/chat/validators';
 export default [
   {
     method: 'GET',
-    path: '/users/me/conversations',
+    path: '/v1/chats/users/me/conversations',
     handler: require('modules/chat/handlers/get-conversations'),
     config: {
       auth: 'jwt',
     },
   }, {
     method: 'GET',
-    path: '/conversations/{id}',
+    path: '/v1/chats/conversations/{id}',
     handler: require('modules/chat/handlers/get-conversation'),
     config: {
       validate: validators.conversation.detail,
@@ -18,14 +18,14 @@ export default [
     },
   }, {
     method: 'GET',
-    path: '/conversations/{id}/messages',
+    path: '/v1/chats/conversations/{id}/messages',
     handler: require('modules/chat/handlers/get-messages'),
     config: {
       auth: 'jwt',
     },
   }, {
     method: 'POST',
-    path: '/conversations/{id}/messages',
+    path: '/v1/chats/conversations/{id}/messages',
     handler: require('modules/chat/handlers/post-message'),
     config: {
       validate: validators.message.create,
@@ -33,7 +33,7 @@ export default [
     },
   }, {
     method: 'POST',
-    path: '/conversations',
+    path: '/v1/chats/conversations',
     handler: require('modules/chat/handlers/post-conversation'),
     config: {
       validate: validators.conversation.create,
@@ -41,7 +41,7 @@ export default [
     },
   }, {
     method: 'DELETE',
-    path: '/conversations/{id}',
+    path: '/v1/chats/conversations/{id}',
     handler: require('modules/chat/handlers/delete-conversation'),
     config: {
       validate: validators.conversation.delete,
