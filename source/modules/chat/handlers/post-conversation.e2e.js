@@ -7,7 +7,7 @@ let conversationId = null;
 
 describe('Post conversation', () => {
   it('should show new conversation data', () => {
-    return postRequest('/conversations', {
+    return postRequest('/v1/chats/conversations', {
       type: 'private',
       users: [5],
     }).then(response => {

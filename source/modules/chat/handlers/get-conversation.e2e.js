@@ -23,7 +23,7 @@ describe('Get conversation', () => {
   });
 
   it('should return correct values', () => {
-    return getRequest(`/conversations/${conversation.id}`)
+    return getRequest(`/v1/chats/conversations/${conversation.id}`)
       .then(response => {
         const { data } = response.result;
 
@@ -35,7 +35,7 @@ describe('Get conversation', () => {
   });
 
   it('should include messages in conversations', () => {
-    return getRequest(`/conversations/${conversation.id}?include=messages`)
+    return getRequest(`/v1/chats/conversations/${conversation.id}?include=messages`)
       .then(response => {
         const { data } = response.result;
 

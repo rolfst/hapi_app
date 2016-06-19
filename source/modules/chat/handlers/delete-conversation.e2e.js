@@ -12,7 +12,7 @@ describe('Delete conversation', () => {
   });
 
   it('should return correct values', () => {
-    return deleteRequest(`/conversations/${conversation.id}`)
+    return deleteRequest(`/v1/chats/conversations/${conversation.id}`)
       .then(response => {
         assert.property(response.result, 'message');
         assert.equal(response.statusCode, 200);

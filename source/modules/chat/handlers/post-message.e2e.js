@@ -14,7 +14,7 @@ describe('Post message', () => {
   });
 
   it('should show new message data', () => {
-    return postRequest(`/conversations/${conversation.id}/messages`, {
+    return postRequest(`/v1/chats/conversations/${conversation.id}/messages`, {
       text: 'Test message',
     }).then(response => {
       const { data } = response.result;

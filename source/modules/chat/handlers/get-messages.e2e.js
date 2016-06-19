@@ -26,7 +26,7 @@ describe('Get messages', () => {
   });
 
   it('should return messages for conversation', () => {
-    return getRequest(`/conversations/${conversation.id}/messages`)
+    return getRequest(`/v1/chats/conversations/${conversation.id}/messages`)
       .then(response => {
         const { data } = response.result;
 

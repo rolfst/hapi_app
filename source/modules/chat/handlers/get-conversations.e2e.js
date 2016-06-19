@@ -18,7 +18,7 @@ describe('Get conversations for logged user', () => {
   });
 
   it('should return correct values', () => {
-    return getRequest('/users/me/conversations')
+    return getRequest('/v1/chats/users/me/conversations')
       .then(response => {
         assert.lengthOf(response.result.data, 3);
         assert.equal(response.statusCode, 200);
