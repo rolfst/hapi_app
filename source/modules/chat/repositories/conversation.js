@@ -56,8 +56,9 @@ export async function createConversation(type, creatorId, participants) {
   try {
     const data = { type: type.toUpperCase(), createdBy: creatorId };
     const createdConversation = await Conversation.create(data);
+    await createdConversation.addUsers(participants);
 
-    return await createdConversation.addUsers(participants);
+    return await createdConversation.reload();
   } catch (err) {
     console.error('Error while creating a conversation', err);
   }
