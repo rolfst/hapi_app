@@ -17,15 +17,20 @@ describe('Get conversations for logged user', () => {
     ]);
   });
 
-  it('should return correct values', () => {
-    return getRequest('/v1/chats/users/me/conversations')
-      .then(response => {
-        assert.lengthOf(response.result.data, 3);
-        assert.equal(response.statusCode, 200);
-      });
+  it('should return correct values', async () => {
+    const response = await getRequest('/v1/chats/users/me/conversations');
+
+    assert.lengthOf(response.result.data, 3);
+    assert.equal(response.statusCode, 200);
   });
 
-  after(() => {
-    return deleteAllConversationsForUser(global.authUser);
+  it('should return empty array when no conversations found', async () => {
+    await deleteAllConversationsForUser(global.authUser);
+    const response = await getRequest('/v1/chats/users/me/conversations');
+
+    assert.lengthOf(response.result.data, 0);
+    assert.equal(response.statusCode, 200);
   });
+
+  after(() => deleteAllConversationsForUser(global.authUser));
 });

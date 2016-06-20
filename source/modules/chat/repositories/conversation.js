@@ -27,9 +27,7 @@ export function deleteConversationById(id) {
 export function deleteAllConversationsForUser(user) {
   return user.getConversations()
     .then(conversations => {
-      conversations.map(conversation => {
-        return conversation.destroy();
-      });
+      return Promise.all(conversations.map(conversation => conversation.destroy()));
     });
 }
 

@@ -16,9 +16,11 @@ export default () => {
       try {
         const decodedToken = tokenUtil.decode(token);
         const user = await findUserById(decodedToken.sub);
-        const network = user.getNetwork(params.networkId);
 
-        user.set('scope', network.NetworkUser.roleType);
+        if (params.networkId) {
+          const network = user.getNetwork(params.networkId);
+          user.set('scope', network.NetworkUser.roleType);
+        }
 
         return reply.continue({
           credentials: user,
