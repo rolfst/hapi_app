@@ -18,18 +18,26 @@ describe('Get conversations for logged user', () => {
   });
 
   it('should return correct values', async () => {
-    const response = await getRequest('/v1/chats/users/me/conversations');
+    const { result, statusCode } = await getRequest('/v1/chats/users/me/conversations');
 
-    assert.lengthOf(response.result.data, 3);
-    assert.equal(response.statusCode, 200);
+    assert.lengthOf(result.data, 3);
+    assert.equal(statusCode, 200);
+  });
+
+  it('should show participants of the conversation', async () => {
+    const { result, statusCode } = await getRequest('/v1/chats/users/me/conversations');
+
+    assert.property(result.data[0], 'users');
+    assert.lengthOf(result.data[0].users, 2);
+    assert.equal(statusCode, 200);
   });
 
   it('should return empty array when no conversations found', async () => {
     await deleteAllConversationsForUser(global.authUser);
-    const response = await getRequest('/v1/chats/users/me/conversations');
+    const { result, statusCode } = await getRequest('/v1/chats/users/me/conversations');
 
-    assert.lengthOf(response.result.data, 0);
-    assert.equal(response.statusCode, 200);
+    assert.lengthOf(result.data, 0);
+    assert.equal(statusCode, 200);
   });
 
   after(() => deleteAllConversationsForUser(global.authUser));

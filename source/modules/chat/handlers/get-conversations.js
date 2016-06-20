@@ -13,6 +13,6 @@ module.exports = (req, reply) => {
     modelIncludes.push({ model: Message });
   }
 
-  return findAllForUser(req.auth.credentials)
+  return findAllForUser(req.auth.credentials, modelIncludes)
     .then(conversations => reply(respondWithCollection(conversations)));
 };

@@ -1,4 +1,5 @@
 import Boom from 'boom';
+import { User } from 'common/models';
 import { Conversation } from 'modules/chat/models';
 
 /**
@@ -56,8 +57,8 @@ export function findConversationById(id, includes) {
  * @method findAllForUser
  * @return {promise} - Get conversations promise
  */
-export function findAllForUser(user, includes) {
-  return user.getConversations({ include: includes });
+export function findAllForUser(user, includes = []) {
+  return user.getConversations({ include: [...includes, { model: User }] });
 }
 
 /**
