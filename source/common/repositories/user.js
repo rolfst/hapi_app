@@ -58,7 +58,9 @@ export function createUser(attributes) {
     profileImg: _.sample(dummyProfileImgPaths),
   });
 
-  return User.create(values);
+  return User.create(values).then(user => {
+    return findUserById(user.id);
+  });
 }
 
 export function createOrUpdateUser(identifier, data) {

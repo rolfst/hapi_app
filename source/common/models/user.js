@@ -80,9 +80,6 @@ const User = model.define('User', {
 
       return this;
     },
-    getNetwork: function (networkId) { // eslint-disable-line func-names, object-shorthand
-      return _.find(this.Networks, { id: parseInt(networkId, 10) });
-    },
     hasConversationWith: (UserModel, userIds) => {
       return Promise.resolve(Conversation.findAll({
         include: [{

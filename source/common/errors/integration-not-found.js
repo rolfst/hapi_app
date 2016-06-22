@@ -1,12 +1,6 @@
-class IntegrationNotFound extends Error {
-  constructor(network) {
-    const message = `No adapter found for network ${network.name}`;
+import Boom from 'boom';
+import createError from 'common/utils/create-error';
 
-    super(message);
-    this.name = 'IntegrationNotFound';
-    this.message = message;
-    this.stack = (new Error()).stack;
-  }
-}
+const boom = Boom.forbidden('No integration setting found for network');
 
-export default IntegrationNotFound;
+export default createError(boom, 'integration_not_found');

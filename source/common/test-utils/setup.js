@@ -1,4 +1,5 @@
 import 'babel-polyfill';
+import chai from 'chai';
 import dotenv from 'dotenv';
 import createServer from 'server';
 import { roles } from 'common/services/permission';
@@ -6,6 +7,8 @@ import authenticate from 'common/test-utils/authenticate';
 import { createNetwork, createPmtNetwork, deleteNetwork } from 'common/repositories/network';
 import generateNetworkName from 'common/test-utils/create-network-name';
 
+const chaiAsPromised = require('chai-as-promised');
+chai.use(chaiAsPromised);
 dotenv.config();
 
 global.server = createServer(8000);

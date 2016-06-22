@@ -2,22 +2,18 @@ import _ from 'lodash';
 import IntegrationNotFound from 'common/errors/integration-not-found';
 import pmtAdapter from 'adapters/pmt/adapter';
 
-const getAdapterForService = (id, tokens) => {
-  const getTokenForName = (name) => {
-    return _.find(tokens, { name }).token;
-  };
+const availableIntegrations = ({
+  1: {
+    name: 'PMT',
+    adapter: pmtAdapter,
+  },
+});
 
-  const drivers = {
-    1: pmtAdapter(getTokenForName('PMT')),
-  };
+export default (network, authSettings, integrations = availableIntegrations) => {
+  const integration = integrations[network.Integrations[0].id];
+  if (!integration) throw IntegrationNotFound;
 
-  return drivers[id];
-};
+  const authSetting = _.find(authSettings, { name: integration.name });
 
-export default (network, tokens) => {
-  const adapter = getAdapterForService(network.Integrations[0].id, tokens);
-
-  if (!adapter) throw new IntegrationNotFound(network);
-
-  return adapter;
+  return integration.adapter(authSetting.token);
 };
