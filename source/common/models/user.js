@@ -1,6 +1,5 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
-import _ from 'lodash';
 import makePassword from 'common/utils/make-password';
 import formatDate from 'common/utils/format-date';
 import makeFunctionName from 'common/utils/make-function-name';
