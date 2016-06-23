@@ -1,61 +1,65 @@
 import { assert } from 'chai';
 import moment from 'moment';
+import authenticate from 'common/test-utils/authenticate';
 import { patchRequest } from 'common/test-utils/request';
 import { createExchange, acceptExchange } from 'modules/flexchange/repositories/exchange';
 
 let exchange = null;
 
 describe('Approve exchange', () => {
-  before(() => {
-    return createExchange(global.authUser.id, global.network.id, {
+  before(async () => {
+    exchange = await createExchange(global.authUser.id, global.network.id, {
       date: moment().format('YYYY-MM-DD'),
       type: 'ALL',
       title: 'Test shift to approve',
-    })
-    .then(createdExchange => {
-      return acceptExchange(createdExchange.id, 1)
-        .then(() => (exchange = createdExchange));
     });
+
+    return acceptExchange(exchange.id, 1);
   });
 
-  it('should return correct data', () => {
+  it('should return correct data', async () => {
     const endpoint = `/v2/networks/${global.network.id}/exchanges/${exchange.id}`;
 
-    return patchRequest(endpoint, { action: 'approve', user_id: 1 })
-      .then(response => {
-        const { data } = response.result;
+    const { result, statusCode } = await patchRequest(endpoint, { action: 'approve', user_id: 1 });
 
-        assert.equal(data.response_status, 'APPROVED');
-        assert.equal(data.accept_count, 1);
-        assert.equal(data.approved_user.id, 1);
-        assert.equal(response.statusCode, 200);
-      });
+    assert.equal(result.data.response_status, 'APPROVED');
+    assert.equal(result.data.accept_count, 1);
+    assert.equal(result.data.approved_user.id, 1);
+    assert.equal(statusCode, 200);
   });
 
-  it('should fail when exchange is already approved', () => {
+  it('should fail when exchange is already approved', async () => {
     const endpoint = `/v2/networks/${global.network.id}/exchanges/${exchange.id}`;
 
-    return patchRequest(endpoint, { action: 'approve', user_id: 1 })
-      .then(response => {
-        assert.equal(response.statusCode, 422);
-      });
+    const { statusCode } = await patchRequest(endpoint, { action: 'approve', user_id: 1 });
+
+    assert.equal(statusCode, 422);
   });
 
-  it('should fail when no user_id is present', () => {
+  it('should fail when no user_id is present', async () => {
     const endpoint = `/v2/networks/${global.network.id}/exchanges/${exchange.id}`;
 
-    return patchRequest(endpoint, { action: 'approve' })
-      .then(response => {
-        assert.equal(response.statusCode, 422);
-      });
+    const { statusCode } = await patchRequest(endpoint, { action: 'approve' });
+
+    assert.equal(statusCode, 422);
   });
 
-  it('should fail if user has not accepted exchange', () => {
+  it('should fail if user has not accepted exchange', async () => {
     const endpoint = `/v2/networks/${global.network.id}/exchanges/${exchange.id}`;
 
-    return patchRequest(endpoint, { action: 'approve', user_id: 3 })
-      .then(response => {
-        assert.equal(response.statusCode, 422);
-      });
+    const { statusCode } = await patchRequest(endpoint, { action: 'approve', user_id: 3 });
+
+    assert.equal(statusCode, 422);
+  });
+
+  it('should fail when user doesn\'t have permission to accept', async () => {
+    const endpoint = `/v2/networks/1/exchanges/${exchange.id}`;
+    const payload = { action: 'approve' };
+
+    const credentials = { username: 'liam@flex-appeal.nl', password: 'admin' };
+    const { authToken } = await authenticate(global.server, credentials);
+    const { statusCode } = await patchRequest(endpoint, payload, global.server, authToken);
+
+    assert.equal(statusCode, 403);
   });
 });

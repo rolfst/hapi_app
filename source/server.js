@@ -2,6 +2,9 @@
 
 import Hapi from 'hapi';
 import Boom from 'boom';
+import _ from 'lodash';
+import authorizationPlugin from 'flex-hapi-authorization';
+import createActions from 'common/utils/create-actions';
 import createError from 'common/utils/create-error';
 import respondWithError from 'common/utils/respond-with-error';
 import routes from 'create-routes';
@@ -27,7 +30,7 @@ const createServer = port => {
 
   const server = new Hapi.Server(makeConfig());
 
-  server.register([require('hapi-async-handler')]);
+  server.register(require('hapi-async-handler'));
 
   server.connection({
     host: 'localhost',
@@ -36,6 +39,19 @@ const createServer = port => {
       cors: {
         origin: ['*'],
         headers: ['Origin', 'X-API-Token', 'Content-Type', 'Accept'],
+      },
+    },
+  });
+
+  server.register({
+    register: authorizationPlugin, options: {
+      actions: createActions(),
+      role: (user, params) => {
+        if (params.networkId) {
+          const network = _.find(user.Networks, { id: parseInt(params.networkId, 10) });
+
+          return network.NetworkUser.roleType;
+        }
       },
     },
   });

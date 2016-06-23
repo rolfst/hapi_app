@@ -14,7 +14,7 @@ const userInput = {
   username: 'Johnnie', firstName: 'John', lastName: 'Doe', password: 'ihazswag',
 };
 
-describe('Authorize', () => {
+describe('Authenticate', () => {
   before(() => {
     const userWithNetworkPromise = createUser(userInput)
       .then(createdUser => {

@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import moment from 'moment';
+import authenticate from 'common/test-utils/authenticate';
 import { patchRequest } from 'common/test-utils/request';
 import {
   createExchange,
@@ -12,65 +13,63 @@ let exchange = null;
 let approvedExchange = null;
 
 describe('Reject exchange', () => {
-  before(() => {
-    const acceptedAndDeclinedExchange = createExchange(global.authUser.id, global.network.id, {
+  before(async () => {
+    const exchangeAPromise = createExchange(global.authUser.id, global.network.id, {
       date: moment().format('YYYY-MM-DD'),
       type: 'ALL',
-      title: 'Test shift to reject',
-    })
-    .then(createdExchange => {
-      const acceptedExchange = acceptExchange(createdExchange.id, 1);
-      const declinedExchange = declineExchange(createdExchange.id, 3);
-
-      return Promise.all([acceptedExchange, declinedExchange])
-        .then(() => createdExchange);
+      title: 'Test shift to accept & reject',
     });
-
-    const approvedExchangePromise = createExchange(global.authUser.id, global.network.id, {
+    const exchangeBPromise = createExchange(global.authUser.id, global.network.id, {
       date: moment().format('YYYY-MM-DD'),
       type: 'ALL',
       title: 'Test shift to approve',
-    })
-    .then(createdExchange => {
-      return acceptExchange(createdExchange.id, 1)
-        .then(() => approveExchange(createdExchange, global.authUser, 1));
     });
 
-    return Promise.all([acceptedAndDeclinedExchange, approvedExchangePromise])
-      .then(values => {
-        exchange = values[0];
-        approvedExchange = values[1];
-      });
+    const [exchangeA, exchangeB] = await Promise.all([exchangeAPromise, exchangeBPromise]);
+    const acceptAPromise = acceptExchange(exchangeA.id, 1);
+    const declineAPromise = declineExchange(exchangeA.id, 3);
+    const acceptBPromise = acceptExchange(exchangeB.id, 1);
+
+    await Promise.all([acceptAPromise, declineAPromise, acceptBPromise]);
+
+    exchange = exchangeA;
+    approvedExchange = await approveExchange(exchangeB, global.authUser, 1);
   });
 
-  it('should return correct data', () => {
+  it('should return correct data', async () => {
     const endpoint = `/v2/networks/${global.network.id}/exchanges/${exchange.id}`;
 
-    return patchRequest(endpoint, { action: 'reject', user_id: 1 })
-      .then(response => {
-        const { data } = response.result;
+    const { result, statusCode } = await patchRequest(endpoint, { action: 'reject', user_id: 1 });
 
-        assert.equal(data.response_status, 'REJECTED');
-        assert.equal(data.title, 'Test shift to reject');
-        assert.equal(response.statusCode, 200);
-      });
+    assert.equal(result.data.response_status, 'REJECTED');
+    assert.equal(result.data.title, 'Test shift to accept & reject');
+    assert.equal(statusCode, 200);
   });
 
-  it('should fail when trying to reject a declined response', () => {
+  it('should fail when trying to reject a declined response', async () => {
     const endpoint = `/v2/networks/${global.network.id}/exchanges/${exchange.id}`;
 
-    return patchRequest(endpoint, { action: 'reject', user_id: 3 })
-      .then(response => {
-        assert.equal(response.statusCode, 422);
-      });
+    const { statusCode } = await patchRequest(endpoint, { action: 'reject', user_id: 3 });
+
+    assert.equal(statusCode, 422);
   });
 
-  it('should fail when trying to reject a response from an already approved exchange', () => {
+  it('should fail when trying to reject a response from an already approved exchange', async () => {
     const endpoint = `/v2/networks/${global.network.id}/exchanges/${approvedExchange.id}`;
 
-    return patchRequest(endpoint, { action: 'reject', user_id: 1 })
-      .then(response => {
-        assert.equal(response.statusCode, 422);
-      });
+    const { statusCode } = await patchRequest(endpoint, { action: 'reject', user_id: 1 });
+
+    assert.equal(statusCode, 422);
+  });
+
+  it('should fail when user doesn\'t have permission to accept', async () => {
+    const endpoint = `/v2/networks/1/exchanges/${exchange.id}`;
+    const payload = { action: 'reject' };
+
+    const credentials = { username: 'liam@flex-appeal.nl', password: 'admin' };
+    const { authToken } = await authenticate(global.server, credentials);
+    const { statusCode } = await patchRequest(endpoint, payload, global.server, authToken);
+
+    assert.equal(statusCode, 403);
   });
 });

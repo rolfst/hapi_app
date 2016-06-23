@@ -1,9 +1,9 @@
 import tokenUtil from 'common/utils/token';
 import { findUserByUsername } from 'common/repositories/user';
 
-export default async (server) => {
-  const credentials = { username: 'ruben@flex-appeal.nl', password: 'admin' };
+const defaultCredentials = { username: 'ruben@flex-appeal.nl', password: 'admin' };
 
+export default async (server, credentials = defaultCredentials) => {
   try {
     const response = await server.inject({
       method: 'POST',

@@ -1,49 +1,41 @@
-import tokenUtil from 'common/utils/token';
-
-export const makeDefaultOptions = (globalProps) => {
-  const decodedToken = tokenUtil.decode(globalProps.authToken);
-
-  return {
-    headers: { 'X-API-Token': globalProps.authToken },
-    credentials: globalProps.authUser,
-    artifacts: { integrations: decodedToken.integrations },
-  };
+export const makeOptions = (token) => {
+  return { headers: { 'X-API-Token': token } };
 };
 
-export function deleteRequest(url, server = global.server) {
+export function deleteRequest(url, server = global.server, token = global.authToken) {
   return server.inject(Object.assign({
     method: 'DELETE',
     url,
-  }, makeDefaultOptions(global)));
+  }, makeOptions(token)));
 }
 
-export function postRequest(url, payload, server = global.server) {
+export function postRequest(url, payload, server = global.server, token = global.authToken) {
   return server.inject(Object.assign({
     method: 'POST',
     url,
     payload,
-  }, makeDefaultOptions(global)));
+  }, makeOptions(token)));
 }
 
-export function putRequest(url, payload, server = global.server) {
+export function putRequest(url, payload, server = global.server, token = global.authToken) {
   return server.inject(Object.assign({
     method: 'PUT',
     url,
     payload,
-  }, makeDefaultOptions(global)));
+  }, makeOptions(token)));
 }
 
-export function getRequest(url, server = global.server) {
+export function getRequest(url, server = global.server, token = global.authToken) {
   return server.inject(Object.assign({
     method: 'GET',
     url,
-  }, makeDefaultOptions(global)));
+  }, makeOptions(token)));
 }
 
-export function patchRequest(url, payload, server = global.server) {
+export function patchRequest(url, payload, server = global.server, token = global.authToken) {
   return server.inject(Object.assign({
     method: 'PATCH',
     url,
     payload,
-  }, makeDefaultOptions(global)));
+  }, makeOptions(token)));
 }

@@ -1,10 +1,6 @@
-import { roles } from 'common/services/permission';
 import preFetchNetwork from 'common/middlewares/prefetch-network';
 
-export const defaultScope = [roles.EMPLOYEE, roles.ADMIN];
-export const adminScope = [roles.ADMIN];
-
-function makeRoute(method, path, handler, scope = defaultScope, strategy = 'jwt') {
+function makeRoute(method, path, handler, strategy = 'jwt') {
   const route = {
     method,
     path,
@@ -12,7 +8,6 @@ function makeRoute(method, path, handler, scope = defaultScope, strategy = 'jwt'
     config: {
       auth: {
         strategy,
-        access: { scope },
       },
       pre: [{ method: preFetchNetwork, assign: 'network' }],
     },

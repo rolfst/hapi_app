@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import { hasRole, roles } from 'common/services/permission';
+import { check } from 'flex-hapi-authorization';
 import acceptExchange from 'modules/flexchange/handlers/accept-exchange';
 import declineExchange from 'modules/flexchange/handlers/decline-exchange';
 import approveExchange from 'modules/flexchange/handlers/approve-exchange';
@@ -13,21 +13,20 @@ export default async (req, reply) => {
     reject: rejectExchange,
   };
 
+  const { action } = req.payload;
+
   try {
-    const { action } = req.payload;
-
-    if ((action === 'approve' || action === 'reject') &&
-      !hasRole(req.auth.credentials, roles.ADMIN)) {
-      return reply(Boom.forbidden('Insufficient scope'));
-    }
-
     const hook = actions[action];
+    if (!hook) throw Boom.badData('Unknown action.');
+
+    check(req.auth.credentials, `${action}-exchange`);
+
     const exchange = await hook(req.pre.network, req);
 
     return reply({ success: true, data: exchange.toJSON() });
   } catch (err) {
-    if (err.isBoom) return reply(err);
+    if (err.isBoom) reply(err);
 
-    return reply(Boom.badData('Unknown action.'));
+    reply(Boom.forbidden(err));
   }
 };

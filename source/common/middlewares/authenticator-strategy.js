@@ -26,12 +26,12 @@ export const authenticate = async (networkId, token = null) => {
 
 export default () => {
   return {
-    authenticate: (request, reply) => {
+    authenticate: async (request, reply) => {
       const { networkId } = request.params;
       const token = request.raw.req.headers['x-api-token'];
 
       try {
-        const result = authenticate(networkId, token);
+        const result = await authenticate(networkId, token);
 
         return reply.continue(result);
       } catch (err) {
