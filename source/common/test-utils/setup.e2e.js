@@ -1,11 +1,9 @@
 import { Server } from 'hapi';
 import { assert } from 'chai';
-import { getRequest } from 'common/test-utils/request';
 import jwtStrategy from 'common/middlewares/authenticator-strategy';
-import { roles } from 'common/services/permission';
 
 describe('Setup', () => {
-  let server;
+  let server; // eslint-disable-line prefer-const
 
   before(() => {
     server = new Server();
