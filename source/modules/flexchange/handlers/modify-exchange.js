@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import { check } from 'flex-hapi-authorization';
+import { check } from 'hapi-acl-plugin';
 import acceptExchange from 'modules/flexchange/handlers/accept-exchange';
 import declineExchange from 'modules/flexchange/handlers/decline-exchange';
 import approveExchange from 'modules/flexchange/handlers/approve-exchange';
