@@ -1,5 +1,5 @@
 {
-  "name": "hapi-test",
+  "name": "node-flex-api",
   "version": "0.1.0",
   "description": "",
   "main": "index.js",
@@ -30,7 +30,7 @@
     "boom": "3.1.2",
     "dotenv": "2.0.0",
     "hapi": "13.2.1",
-    "hapi-acl-plugin": "0.0.8",
+    "hapi-acl-plugin": "0.0.23",
     "hapi-async-handler": "1.0.3",
     "isomorphic-fetch": "2.2.1",
     "joi": "8.0.4",
