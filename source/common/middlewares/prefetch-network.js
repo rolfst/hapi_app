@@ -1,8 +1,8 @@
-import _ from 'lodash';
 import Boom from 'boom';
+import selectNetwork from 'common/utils/select-network';
 
 export const selectNetworkForUser = (user, networkIdToSelect) => {
-  const selectedNetwork = _.find(user.Networks, { id: networkIdToSelect });
+  const selectedNetwork = selectNetwork(user.Networks, networkIdToSelect);
 
   if (!selectedNetwork) throw new Error('User does not belong to the network.');
 

@@ -1,17 +1,20 @@
-/* eslint no-console: "off" */
-'use strict';
-
 import 'babel-polyfill';
-import dotenv from 'dotenv';
 import createServer from 'server';
+import analytics from 'common/services/analytics';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
-const { PORT } = process.env;
-const server = createServer(PORT || 8000);
+if (process.env.NODE_ENV === 'debug') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
+const server = createServer(process.env.PORT || 8000);
 
 server.start(err => {
   if (err) throw err;
+
+  analytics.init();
 
   console.log('Server running at:', server.info.uri);
 });

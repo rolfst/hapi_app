@@ -1,4 +1,6 @@
 import Boom from 'boom';
+import analytics from 'common/services/analytics';
+import approveExchangeEvent from 'common/events/approve-exchange-event';
 import { findExchangeById, approveExchange } from 'modules/flexchange/repositories/exchange';
 import {
   findExchangeResponseByExchangeAndUser,
@@ -26,7 +28,8 @@ export default (network, req) => {
       return approveExchange(exchange, req.auth.credentials, userIdToApprove);
     })
     .then(exchange => {
-      // TODO: Fire ExchangeWasApproved event
+      analytics.track(approveExchangeEvent(network, exchange));
+
       return exchange.reload();
     });
 };

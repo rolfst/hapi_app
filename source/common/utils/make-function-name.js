@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import selectNetwork from 'common/utils/select-network';
 
 /**
  * Create function name based on User model
@@ -8,7 +8,7 @@ import _ from 'lodash';
  * @return {string} The function name
  */
 export default (networkId, user) => {
-  const network = _.find(user.Networks, { id: networkId });
+  const network = selectNetwork(user.Networks, networkId);
 
   if (network.NetworkUser.deletedAt !== null) return 'Verwijderd';
 

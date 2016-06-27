@@ -2,20 +2,16 @@
 
 import Hapi from 'hapi';
 import Boom from 'boom';
-import _ from 'lodash';
 import authorizationPlugin from 'hapi-acl-plugin';
 import createActions from 'common/utils/create-actions';
 import createError from 'common/utils/create-error';
 import respondWithError from 'common/utils/respond-with-error';
+import selectNetwork from 'common/utils/select-network';
 import routes from 'create-routes';
 import jwtStrategy from 'common/middlewares/authenticator-strategy';
 import integrationStrategy from 'common/middlewares/integration-strategy';
 
-if (process.env.NODE_ENV === 'debug') {
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-}
-
-const createServer = port => {
+const createServer = (port) => {
   const options = {};
 
   const makeConfig = () => {
@@ -48,7 +44,7 @@ const createServer = port => {
       actions: createActions(),
       role: (user, params) => {
         if (params.networkId) {
-          const network = _.find(user.Networks, { id: parseInt(params.networkId, 10) });
+          const network = selectNetwork(user.Networks, params.networkId);
 
           return network.NetworkUser.roleType;
         }
@@ -85,7 +81,7 @@ const createServer = port => {
       return reply(response).code(response.error.status_code);
     }
 
-    req.response.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTION');
+    req.response.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTION');
 
     return reply.continue();
   });

@@ -1,11 +1,13 @@
 import moment from 'moment';
-import userBelongsToNetwork from 'common/utils/user-belongs-to-network';
 import { getIntegrationTokensForUser, updateUser } from 'common/repositories/user';
 import { findOrCreateUserDevice } from 'common/repositories/authentication';
+import userBelongsToNetwork from 'common/utils/user-belongs-to-network';
 import createAccessToken from 'common/utils/create-access-token';
 import createRefreshToken from 'common/utils/create-refresh-token';
-import NotInAnyNetwork from 'common/errors/not-in-any-network';
 import authenticateUser from 'common/utils/authenticate-user';
+import analytics from 'common/services/analytics';
+import firstLoginEvent from 'common/events/first-login-event';
+import NotInAnyNetwork from 'common/errors/not-in-any-network';
 
 export default async (req, reply) => {
   const { username, password } = req.payload;
@@ -33,7 +35,9 @@ export default async (req, reply) => {
       user: updatedUser.toJSON(),
     };
 
-    // TODO: Send analytics to Mixpanel
+    analytics.registerProfile(user);
+    analytics.setUser(user);
+    if (user.lastLogin === null) analytics.track(firstLoginEvent());
 
     return reply({ data });
   } catch (err) {

@@ -1,10 +1,14 @@
 import Boom from 'boom';
-import _ from 'lodash';
+import analytics from 'common/services/analytics';
 import tokenUtil from 'common/utils/token';
+import selectNetwork from 'common/utils/select-network';
 import { findUserById } from 'common/repositories/user';
 
 export const getRoleType = (user, networkId) => {
-  const network = _.find(user.Networks, { id: parseInt(networkId, 10) });
+  const network = selectNetwork(user.Networks, networkId);
+
+  if (!network) throw new Error('User does not belong to this network.');
+
   return network.NetworkUser.roleType;
 };
 
@@ -17,6 +21,8 @@ export const authenticate = async (networkId, token = null) => {
   if (networkId) {
     user.scope = getRoleType(user, networkId);
   }
+
+  analytics.setUser(user);
 
   return {
     credentials: user,
