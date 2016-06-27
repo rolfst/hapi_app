@@ -11,9 +11,9 @@ describe('Get conversations for logged user', () => {
   before(() => {
     return Promise.all([
       deleteAllConversationsForUser(global.authUser),
-      createConversation('PRIVATE', global.authUser.id, [2, global.authUser.id]),
-      createConversation('PRIVATE', global.authUser.id, [3, global.authUser.id]),
-      createConversation('PRIVATE', global.authUser.id, [4, global.authUser.id]),
+      createConversation('PRIVATE', global.authUser.id, [63, global.authUser.id]),
+      createConversation('PRIVATE', global.authUser.id, [64, global.authUser.id]),
+      createConversation('PRIVATE', global.authUser.id, [2698, global.authUser.id]),
     ]);
   });
 

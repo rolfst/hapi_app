@@ -18,6 +18,6 @@ export default async (server, credentials = defaultCredentials) => {
 
     return { authUser: user, authToken: accessToken, authIntegrations: decodedToken.integrations };
   } catch (err) {
-    console.log('Authentication error: ', err);
+    console.log('Test util\'s authentication error: ', err);
   }
 };

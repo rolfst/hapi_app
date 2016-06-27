@@ -27,7 +27,7 @@ describe('Reject exchange', () => {
 
     const [exchangeA, exchangeB] = await Promise.all([exchangeAPromise, exchangeBPromise]);
     const acceptAPromise = acceptExchange(exchangeA.id, 1);
-    const declineAPromise = declineExchange(exchangeA.id, 3);
+    const declineAPromise = declineExchange(exchangeA.id, 63);
     const acceptBPromise = acceptExchange(exchangeB.id, 1);
 
     await Promise.all([acceptAPromise, declineAPromise, acceptBPromise]);
@@ -49,7 +49,7 @@ describe('Reject exchange', () => {
   it('should fail when trying to reject a declined response', async () => {
     const endpoint = `/v2/networks/${global.network.id}/exchanges/${exchange.id}`;
 
-    const { statusCode } = await patchRequest(endpoint, { action: 'reject', user_id: 3 });
+    const { statusCode } = await patchRequest(endpoint, { action: 'reject', user_id: 63 });
 
     assert.equal(statusCode, 422);
   });
@@ -63,7 +63,8 @@ describe('Reject exchange', () => {
   });
 
   it('should fail when user doesn\'t have permission to accept', async () => {
-    const endpoint = `/v2/networks/1/exchanges/${exchange.id}`;
+    // TODO: remove usage of hardcoded network id and user
+    const endpoint = `/v2/networks/45/exchanges/${exchange.id}`;
     const payload = { action: 'reject' };
 
     const credentials = { username: 'liam@flex-appeal.nl', password: 'admin' };

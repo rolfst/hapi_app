@@ -19,7 +19,7 @@ describe('Plugin: Network', () => {
 
   afterEach(() => server.stop());
   after(() => network.destroy());
-  before(() => createNetwork(2, generateNetworkName())
+  before(() => createNetwork(1, generateNetworkName())
     .then(createdNetwork => (network = createdNetwork)));
 
   it('should add network to request', async () => {

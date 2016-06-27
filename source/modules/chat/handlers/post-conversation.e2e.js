@@ -9,12 +9,12 @@ describe('Post conversation', () => {
   it('should show new conversation data', () => {
     return postRequest('/v1/chats/conversations', {
       type: 'private',
-      users: [5],
+      users: [63],
     }).then(response => {
       const { data } = response.result;
       conversationId = data.id;
 
-      assert.equal(data.users[0].id, 5);
+      assert.equal(data.users[0].id, 63);
       assert.equal(data.users[1].id, global.authUser.id);
       assert.equal(response.statusCode, 200);
     });

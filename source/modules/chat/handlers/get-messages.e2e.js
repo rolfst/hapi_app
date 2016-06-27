@@ -13,14 +13,14 @@ const timestamp = new Date().getTime();
 
 describe('Get messages', () => {
   before(() => {
-    return createConversation('PRIVATE', global.authUser.id, [2, global.authUser.id])
+    return createConversation('PRIVATE', global.authUser.id, [63, global.authUser.id])
       .then(createdConversation => {
         conversation = createdConversation;
 
         return Promise.all([
           createMessage(conversation.id, global.authUser.id, `Test bericht 1${timestamp}`),
           createMessage(conversation.id, global.authUser.id, `Test bericht 2${timestamp}`),
-          createMessage(conversation.id, 2, `Test bericht 3${timestamp}`),
+          createMessage(conversation.id, 63, `Test bericht 3${timestamp}`),
         ]);
       });
   });

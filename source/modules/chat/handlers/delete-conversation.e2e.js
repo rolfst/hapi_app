@@ -7,7 +7,7 @@ let conversation = null;
 
 describe('Delete conversation', () => {
   before(() => {
-    return createConversation('PRIVATE', global.authUser.id, [5, global.authUser.id])
+    return createConversation('PRIVATE', global.authUser.id, [63, global.authUser.id])
       .then(data => (conversation = data));
   });
 

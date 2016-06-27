@@ -53,7 +53,8 @@ describe('Approve exchange', () => {
   });
 
   it('should fail when user doesn\'t have permission to accept', async () => {
-    const endpoint = `/v2/networks/1/exchanges/${exchange.id}`;
+    // TODO: remove usage of hardcoded network id and user
+    const endpoint = `/v2/networks/45/exchanges/${exchange.id}`;
     const payload = { action: 'approve' };
 
     const credentials = { username: 'liam@flex-appeal.nl', password: 'admin' };
