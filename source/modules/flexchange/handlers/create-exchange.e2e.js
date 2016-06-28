@@ -7,7 +7,7 @@ let exchange = null;
 
 describe('Create exchange', () => {
   before(() => {
-    return createExchange(global.authUser.id, global.network.id, {
+    return createExchange(global.users.admin.id, global.networks.flexAppeal.id, {
       date: moment().format('YYYY-MM-DD'),
       type: 'ALL',
       title: 'Test shift for network',
@@ -17,7 +17,7 @@ describe('Create exchange', () => {
   });
 
   it('should return exchange data', () => {
-    return getRequest(`/v2/networks/${global.network.id}/exchanges/${exchange.id}`)
+    return getRequest(`/v2/networks/${global.networks.flexAppeal.id}/exchanges/${exchange.id}`)
       .then(response => {
         const { data } = response.result;
 

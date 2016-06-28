@@ -1,34 +1,16 @@
 import { assert } from 'chai';
+import blueprints from 'common/test-utils/blueprints';
+import NotInAnyNetwork from 'common/errors/not-in-any-network';
+import WrongCredentials from 'common/errors/wrong-credentials';
 import { createUser } from 'common/repositories/user';
 import { postRequest } from 'common/test-utils/request';
-
-let userWithNetwork;
-let userWithoutNetwork;
 
 const url = '/v2/authenticate';
 const loginRequest = (username, password) => {
   return postRequest(url, { username, password });
 };
 
-const userInput = {
-  username: 'Johnnie', firstName: 'John', lastName: 'Doe', password: 'ihazswag',
-};
-
 describe('Authenticate', () => {
-  before(() => {
-    const userWithNetworkPromise = createUser(userInput)
-      .then(createdUser => {
-        return createdUser.setNetworks([global.network]).then(() => createdUser);
-      })
-      .then(createdUser => createdUser.reload())
-      .then(createdUserWithNetwork => (userWithNetwork = createdUserWithNetwork));
-
-    const userWithoutNetworkPromise = createUser({ ...userInput, username: 'JohnnieLonely' })
-      .then(user => (userWithoutNetwork = user));
-
-    return Promise.all([userWithNetworkPromise, userWithoutNetworkPromise]);
-  });
-
   it('checks for required input fields', () => {
     const response1 = postRequest(url, { foo: 'bar' });
     const response2 = postRequest(url, { username: 'bar' });
@@ -42,31 +24,26 @@ describe('Authenticate', () => {
       });
   });
 
-  it('can login with correct credentials', () => {
-    return loginRequest(userInput.username, userInput.password).then(res => {
-      const { data } = res.result;
-      assert.property(data, 'access_token');
-      assert.property(data, 'refresh_token');
-      assert.equal(data.user.username, userInput.username);
-    });
+  it('can login with correct credentials', async () => {
+    const { result } = await loginRequest(blueprints.users.admin.username, blueprints.users.admin.password);
+    const { data } = result;
+
+    assert.property(data, 'access_token');
+    assert.property(data, 'refresh_token');
+    assert.equal(data.user.username, blueprints.users.admin.username);
   });
 
-  it('should fail when credentials are not correct', () => {
-    return loginRequest(userInput.username, 'ihaznoswag').then(res => {
-      assert.equal(res.result.error.title, 'wrong_credentials');
-      assert.equal(res.statusCode, 403);
-    });
+  it('should fail when credentials are not correct', async () => {
+    const { result, statusCode } = await loginRequest(blueprints.users.employee.username, 'wrongpassword');
+
+    assert.equal(result.error.title, WrongCredentials.name);
+    assert.equal(statusCode, 403);
   });
 
-  it('should fail when user does not belong to a network', () => {
-    return loginRequest('JohnnieLonely', userInput.password).then(res => {
-      assert.equal(res.result.error.title, 'not_in_network');
-      assert.equal(res.statusCode, 403);
-    });
-  });
+  it('should fail when user does not belong to a network', async () => {
+    const { result, statusCode } = await loginRequest(blueprints.users.networkless.username, blueprints.users.networkless.password);
 
-  after(() => {
-    userWithNetwork.destroy();
-    userWithoutNetwork.destroy();
+    assert.equal(result.error.title, NotInAnyNetwork.name);
+    assert.equal(statusCode, 403);
   });
 });

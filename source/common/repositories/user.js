@@ -25,12 +25,18 @@ export function findAllUsers() {
   return User.findAll(defaultIncludes);
 }
 
-export function findUserById(id) {
-  return User.findOne({ ...defaultIncludes, where: { id } });
+export async function findUserById(id) {
+  const user = await User.findOne({ ...defaultIncludes, where: { id } });
+  if (!user) throw new Error(`No user found with id ${id}`);
+
+  return user;
 }
 
-export function findUserByUsername(username) {
-  return User.findOne({ ...defaultIncludes, where: { username } });
+export async function findUserByUsername(username) {
+  const user = await User.findOne({ ...defaultIncludes, where: { username } });
+  if (!user) throw new Error(`No user found with username ${username}`);
+
+  return user;
 }
 
 export function getIntegrationTokensForUser(user) {

@@ -20,7 +20,6 @@ export default async (req, reply) => {
     if (!hook) throw Boom.badData('Unknown action.');
 
     check(req.auth.credentials, `${action}-exchange`);
-
     const exchange = await hook(req.pre.network, req);
 
     return reply({ success: true, data: exchange.toJSON() });

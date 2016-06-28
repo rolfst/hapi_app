@@ -8,13 +8,13 @@ let exchange = null;
 
 describe('View exchange comment', () => {
   before(() => {
-    return createExchange(global.authUser.id, global.network.id, {
+    return createExchange(global.users.admin.id, global.networks.flexAppeal.id, {
       date: moment().format('YYYY-MM-DD'),
       type: 'ALL',
       title: 'Test shift 1 for network',
     }).then(createdExchange => {
       exchange = createdExchange;
-      const userId = global.authUser.id;
+      const userId = global.users.admin.id;
 
       const comment1 = createExchangeComment(exchange.id, { userId, text: 'Comment #1' });
       const comment2 = createExchangeComment(exchange.id, { userId, text: 'Comment #2' });
@@ -25,7 +25,7 @@ describe('View exchange comment', () => {
   });
 
   it('should return comments for exchange', () => {
-    return getRequest(`/v2/networks/${global.network.id}/exchanges/${exchange.id}/comments`)
+    return getRequest(`/v2/networks/${global.networks.flexAppeal.id}/exchanges/${exchange.id}/comments`)
       .then(response => {
         assert.lengthOf(response.result.data, 3);
         assert.equal(response.statusCode, 200);

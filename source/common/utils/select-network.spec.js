@@ -6,6 +6,6 @@ describe('selectNetwork', () => {
     const networks = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }];
     const actual = selectNetwork(networks, 2);
 
-    assert.equal(actual, { id: 2 });
+    assert.deepEqual(actual, { id: 2 });
   });
 });

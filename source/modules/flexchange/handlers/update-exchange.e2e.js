@@ -7,7 +7,7 @@ let exchange = null;
 
 describe('Update exchange', () => {
   before(() => {
-    return createExchange(global.authUser.id, global.network.id, {
+    return createExchange(global.users.admin.id, global.networks.flexAppeal.id, {
       date: moment().format('YYYY-MM-DD'),
       type: 'ALL',
       title: 'Test shift to update',
@@ -15,7 +15,7 @@ describe('Update exchange', () => {
   });
 
   it('should return updated attributes', () => {
-    return putRequest(`/v2/networks/${global.network.id}/exchanges/${exchange.id}`, {
+    return putRequest(`/v2/networks/${global.networks.flexAppeal.id}/exchanges/${exchange.id}`, {
       title: 'New title',
       description: 'New description',
     })

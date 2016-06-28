@@ -1,41 +1,29 @@
 import { assert } from 'chai';
 import { getRequest } from 'common/test-utils/request';
-
-import {
-  createConversation,
-  deleteAllConversationsForUser,
-} from 'modules/chat/repositories/conversation';
-
+import { createConversation } from 'modules/chat/repositories/conversation';
 import { createMessage } from 'modules/chat/repositories/message';
 
 let conversation;
-const timestamp = new Date().getTime();
 
 describe('Get messages', () => {
-  before(() => {
-    return createConversation('PRIVATE', global.authUser.id, [63, global.authUser.id])
-      .then(createdConversation => {
-        conversation = createdConversation;
+  before(async () => {
+    const createdConversation = await createConversation('PRIVATE', global.users.admin.id, [global.users.employee.id, global.users.admin.id]);
+    conversation = createdConversation;
 
-        return Promise.all([
-          createMessage(conversation.id, global.authUser.id, `Test bericht 1${timestamp}`),
-          createMessage(conversation.id, global.authUser.id, `Test bericht 2${timestamp}`),
-          createMessage(conversation.id, 63, `Test bericht 3${timestamp}`),
-        ]);
-      });
+    return Promise.all([
+      createMessage(conversation.id, global.users.admin.id, 'Test bericht 1'),
+      createMessage(conversation.id, global.users.admin.id, 'Test bericht 2'),
+      createMessage(conversation.id, global.users.employee.id, 'Test bericht 3'),
+    ]);
   });
 
-  it('should return messages for conversation', () => {
-    return getRequest(`/v1/chats/conversations/${conversation.id}/messages`)
-      .then(response => {
-        const { data } = response.result;
+  after(() => conversation.destroy());
 
-        assert.lengthOf(data, 3);
-        assert.equal(response.statusCode, 200);
-      });
-  });
+  it('should return messages for conversation', async () => {
+    const endpoint = `/v1/chats/conversations/${conversation.id}/messages`;
+    const { result, statusCode } = await getRequest(endpoint);
 
-  after(() => {
-    return deleteAllConversationsForUser(global.authUser);
+    assert.lengthOf(result.data, 3);
+    assert.equal(statusCode, 200);
   });
 });

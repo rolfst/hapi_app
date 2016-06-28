@@ -1,4 +1,6 @@
 import { assert } from 'chai';
+import blueprints from 'common/test-utils/blueprints';
+import { createUser } from 'common/repositories/user';
 import { getRequest } from 'common/test-utils/request';
 
 import {
@@ -6,18 +8,35 @@ import {
   deleteAllConversationsForUser,
 } from 'modules/chat/repositories/conversation';
 
+let users = [];
+let conversations = [];
 
 describe('Get conversations for logged user', () => {
-  before(() => {
-    return Promise.all([
-      deleteAllConversationsForUser(global.authUser),
-      createConversation('PRIVATE', global.authUser.id, [63, global.authUser.id]),
-      createConversation('PRIVATE', global.authUser.id, [64, global.authUser.id]),
-      createConversation('PRIVATE', global.authUser.id, [2698, global.authUser.id]),
+  before(async () => {
+    const creator = global.users.admin;
+    const employee = blueprints.users.employee;
+    const createdUsers = await Promise.all([
+      createUser({ ...employee, username: `${employee.username}1` }),
+      createUser({ ...employee, username: `${employee.username}2` }),
+      createUser({ ...employee, username: `${employee.username}3` }),
     ]);
+
+    const createdConversations = await Promise.all([
+      createConversation('PRIVATE', creator.id, [createdUsers[0].id, creator.id]),
+      createConversation('PRIVATE', creator.id, [createdUsers[1].id, creator.id]),
+      createConversation('PRIVATE', creator.id, [createdUsers[2].id, creator.id]),
+    ]);
+
+    users = createdUsers;
+    conversations = createdConversations;
   });
 
-  it('should return correct values', async () => {
+  after(() => Promise.all([
+    conversations.map(c => c.destroy()),
+    users.map(u => u.destroy()),
+  ]));
+
+  it('check for conversation count', async () => {
     const { result, statusCode } = await getRequest('/v1/chats/users/me/conversations');
 
     assert.lengthOf(result.data, 3);
@@ -33,12 +52,10 @@ describe('Get conversations for logged user', () => {
   });
 
   it('should return empty array when no conversations found', async () => {
-    await deleteAllConversationsForUser(global.authUser);
+    await deleteAllConversationsForUser(global.users.admin);
     const { result, statusCode } = await getRequest('/v1/chats/users/me/conversations');
 
     assert.lengthOf(result.data, 0);
     assert.equal(statusCode, 200);
   });
-
-  after(() => deleteAllConversationsForUser(global.authUser));
 });

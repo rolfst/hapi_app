@@ -2,7 +2,9 @@ import 'babel-polyfill';
 import chai from 'chai';
 import dotenv from 'dotenv';
 import createServer from 'server';
+import blueprints from 'common/test-utils/blueprints';
 import { roles } from 'common/services/permission';
+import { createUser } from 'common/repositories/user';
 import authenticate from 'common/test-utils/authenticate';
 import { createNetwork, createPmtNetwork, deleteNetwork } from 'common/repositories/network';
 import generateNetworkName from 'common/test-utils/create-network-name';
@@ -13,41 +15,60 @@ dotenv.config();
 
 global.server = createServer(8000);
 
-before(() => {
-  return authenticate(global.server).then(({ authUser, authToken, authIntegrations }) => {
-    global.authIntegrations = authIntegrations;
-    global.authToken = authToken;
+let createdAdmin;
+let createdEmployee;
+let createdNetworklessUser;
 
-    const flexAppealNetwork = createNetwork(authUser.id, generateNetworkName())
-      .then(createdNetwork => {
-        return createdNetwork.addUser(authUser, { roleType: roles.ADMIN }).then(() => {
-          return createdNetwork.reload()
-            .then(network => (global.network = network));
-        });
-      });
-
-    const pmtNetwork = createPmtNetwork(authUser.id, generateNetworkName())
-      .then(createdNetwork => {
-        return createdNetwork.addUser(authUser, { roleType: roles.ADMIN }).then(() => {
-          return createdNetwork.reload()
-            .then(network => (global.pmtNetwork = network));
-        });
-      });
-
-    return Promise.all([flexAppealNetwork, pmtNetwork])
-      .then(() => authUser.reload())
-      .then(user => {
-        user.set('scope', 'ADMIN');
-        global.authUser = user;
-      });
-  });
-});
-
-after(() => {
-  if (global.network) {
-    return Promise.all([
-      deleteNetwork(global.network.id),
-      deleteNetwork(global.pmtNetwork.id),
+before(async () => {
+  try {
+    const [admin, employee, networkless] = await Promise.all([
+      createUser(blueprints.users.admin),
+      createUser(blueprints.users.employee),
+      createUser(blueprints.users.networkless),
     ]);
+
+    createdAdmin = admin;
+    createdEmployee = employee;
+    createdNetworklessUser = networkless;
+
+    // Create networks
+    const [createdFlexNetwork, createdPMTNetwork] = await Promise.all([
+      createNetwork(admin.id, generateNetworkName()),
+      createPmtNetwork(admin.id, generateNetworkName()),
+    ]);
+
+    // Add user to the networks
+    await Promise.all([
+      createdFlexNetwork.addUser(admin, { roleType: roles.ADMIN }),
+      createdFlexNetwork.addUser(employee, { roleType: roles.EMPLOYEE }),
+      createdPMTNetwork.addUser(admin, { roleType: roles.ADMIN, externalId: 8023, userToken: '379ce9b4176cb89354c1f74b3a2c1c7a' }),
+    ]);
+
+    // Reload networks to include added users
+    const [flexAppealNetwork, pmtNetwork] = await Promise.all([
+      createdFlexNetwork.reload(),
+      createdPMTNetwork.reload(),
+    ]);
+
+    const [newAdmin, newEmployee] = await Promise.all([
+      admin.reload(),
+      employee.reload(),
+    ]);
+
+    const { username, password } = blueprints.users.admin;
+    const { token, integrations } = await authenticate(global.server, { username, password });
+
+    global.users = { admin: newAdmin, employee: newEmployee };
+    global.tokens = { admin: token };
+    global.integrations = { admin: integrations };
+    global.networks = { flexAppeal: flexAppealNetwork, pmt: pmtNetwork };
+  } catch (err) {
+    console.log('Error in test setup', err);
   }
 });
+
+after(() => Promise.all([
+  createdAdmin.destroy(),
+  createdEmployee.destroy(),
+  createdNetworklessUser.destroy(),
+]).catch(err => console.log('Error in test teardown', err)));

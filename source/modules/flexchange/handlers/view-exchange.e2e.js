@@ -7,7 +7,7 @@ let exchange = null;
 
 describe('View exchange', () => {
   before(() => {
-    return createExchange(global.authUser.id, global.network.id, {
+    return createExchange(global.users.admin.id, global.networks.flexAppeal.id, {
       date: moment().format('YYYY-MM-DD'),
       type: 'ALL',
       title: 'Test shift to view',
@@ -16,7 +16,7 @@ describe('View exchange', () => {
   });
 
   it('should return correct attributes', () => {
-    return getRequest(`/v2/networks/${global.network.id}/exchanges/${exchange.id}`)
+    return getRequest(`/v2/networks/${global.networks.flexAppeal.id}/exchanges/${exchange.id}`)
     .then(response => {
       const { data } = response.result;
 
@@ -27,7 +27,7 @@ describe('View exchange', () => {
   });
 
   it('should fail when exchange cannot be found', () => {
-    return getRequest(`/v2/networks/${global.network.id}/exchanges/${exchange.id + 1337}`)
+    return getRequest(`/v2/networks/${global.networks.flexAppeal.id}/exchanges/${exchange.id + 1337}`)
     .then(response => {
       assert.equal(response.statusCode, 404);
     });

@@ -1,51 +1,44 @@
 import { assert } from 'chai';
+import _ from 'lodash';
 import { getRequest } from 'common/test-utils/request';
-
 import { createConversation } from 'modules/chat/repositories/conversation';
 import { createMessage } from 'modules/chat/repositories/message';
 
-let conversation = null;
-const timestamp = new Date().getTime();
+let conversation;
 
 describe('Get conversation', () => {
-  before(() => {
-    return createConversation('PRIVATE', global.authUser.id, [63, global.authUser.id])
-      .then(data => {
-        conversation = data;
+  before(async () => {
+    const participants = [global.users.employee.id, global.users.admin.id];
+    const withoutParticipants = _.partial(createConversation, 'PRIVATE', global.users.admin.id);
+    const createdConversation = await withoutParticipants(participants);
+    conversation = createdConversation;
 
-        return Promise.all([
-          createMessage(conversation.id, global.authUser.id, `Test bericht 1${timestamp}`),
-          createMessage(conversation.id, global.authUser.id, `Test bericht 2${timestamp}`),
-          createMessage(conversation.id, 63, `Test bericht 3${timestamp}`),
-          createMessage(conversation.id, 63, `Test bericht 4${timestamp}`),
-        ]);
-      });
+    return Promise.all([
+      createMessage(conversation.id, global.users.admin.id, 'Test bericht 1'),
+      createMessage(conversation.id, global.users.admin.id, 'Test bericht 2'),
+      createMessage(conversation.id, global.users.employee.id, 'Test bericht 3'),
+      createMessage(conversation.id, global.users.employee.id, 'Test bericht 4'),
+    ]);
   });
 
-  it('should return correct values', () => {
-    return getRequest(`/v1/chats/conversations/${conversation.id}`)
-      .then(response => {
-        const { data } = response.result;
+  after(() => conversation.destroy());
 
-        assert.equal(data.id, conversation.id);
-        assert.equal(data.users[0].id, 63);
-        assert.equal(data.users[1].id, global.authUser.id);
-        assert.equal(response.statusCode, 200);
-      });
+  it('should return correct values', async () => {
+    const endpoint = `/v1/chats/conversations/${conversation.id}`;
+    const { result, statusCode } = await getRequest(endpoint);
+
+    assert.equal(result.data.id, conversation.id);
+    assert.equal(result.data.users[0].id, global.users.employee.id);
+    assert.equal(result.data.users[1].id, global.users.admin.id);
+    assert.equal(statusCode, 200);
   });
 
-  it('should include messages in conversations', () => {
-    return getRequest(`/v1/chats/conversations/${conversation.id}?include=messages`)
-      .then(response => {
-        const { data } = response.result;
+  it('should include messages in conversations', async () => {
+    const endpoint = `/v1/chats/conversations/${conversation.id}?include=messages`;
+    const { result, statusCode } = await getRequest(endpoint);
 
-        assert.equal(data.id, conversation.id);
-        assert.lengthOf(data.messages, 4);
-        assert.equal(response.statusCode, 200);
-      });
-  });
-
-  after(() => {
-    return conversation.destroy();
+    assert.equal(result.data.id, conversation.id);
+    assert.lengthOf(result.data.messages, 4);
+    assert.equal(statusCode, 200);
   });
 });

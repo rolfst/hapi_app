@@ -6,7 +6,7 @@ export default async ({ username, password }) => {
   const user = await findUserByUsername(username);
   const validPassword = checkPassword(user.password, password);
 
-  if (!user || !validPassword) throw WrongCredentials;
+  if (!validPassword) throw WrongCredentials;
 
   return user;
 };

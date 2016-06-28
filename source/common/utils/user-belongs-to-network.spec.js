@@ -17,7 +17,7 @@ describe('userBelongsToNetwork', () => {
   after(() => user.destroy());
 
   it('should check if user belongs to network', () => {
-    assert.equal(userBelongsToNetwork(global.authUser), true);
+    assert.equal(userBelongsToNetwork(global.users.admin), true);
     assert.equal(userBelongsToNetwork(user), false);
   });
 });

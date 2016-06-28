@@ -6,9 +6,6 @@ import { findUserById } from 'common/repositories/user';
 
 export const getRoleType = (user, networkId) => {
   const network = selectNetwork(user.Networks, networkId);
-
-  if (!network) throw new Error('User does not belong to this network.');
-
   return network.NetworkUser.roleType;
 };
 

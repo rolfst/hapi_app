@@ -7,7 +7,7 @@ let exchange = null;
 
 describe('Modify exchange', () => {
   before(() => {
-    return createExchange(global.authUser.id, global.network.id, {
+    return createExchange(global.users.admin.id, global.networks.flexAppeal.id, {
       date: moment().format('YYYY-MM-DD'),
       type: 'ALL',
       title: 'Test shift to check for modification',
@@ -15,7 +15,7 @@ describe('Modify exchange', () => {
   });
 
   it('should fail when action does not exist', () => {
-    const endpoint = `/v2/networks/${global.network.id}/exchanges/${exchange.id}`;
+    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/exchanges/${exchange.id}`;
 
     return patchRequest(endpoint, { action: 'action_that_does_not_exist' })
       .then(response => {

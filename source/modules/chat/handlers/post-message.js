@@ -8,7 +8,7 @@ import { findMessageById, createMessage } from 'modules/chat/repositories/messag
 module.exports = (req, reply) => {
   const loggedUser = req.auth.credentials;
 
-  findConversationById(req.params.id)
+  return findConversationById(req.params.id)
     .then(conversation => {
       const createdMessage = createMessage(conversation.id, loggedUser.id, req.payload.text);
       return [createdMessage, conversation.getUsers()];

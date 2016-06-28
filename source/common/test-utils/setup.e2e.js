@@ -13,16 +13,24 @@ describe('Setup', () => {
     server.auth.default('jwt');
   });
 
-  it('should create Flex-Appeal network', () => {
-    const integrations = global.network.Integrations;
+  describe('Flex-Appeal', () => {
+    it('should create network', () => {
+      const integrations = global.networks.flexAppeal.Integrations;
 
-    assert.lengthOf(integrations, 0);
+      assert.lengthOf(integrations, 0);
+    });
   });
 
-  it('should create PMT network', () => {
-    const integrations = global.pmtNetwork.Integrations;
+  describe('PMT', () => {
+    it('should create network', () => {
+      const integrations = global.networks.pmt.Integrations;
 
-    assert.lengthOf(integrations, 1);
-    assert.equal(integrations[0].name, 'PMT');
+      assert.lengthOf(integrations, 1);
+      assert.equal(integrations[0].name, 'PMT');
+    });
+
+    it('should have user token for user', () => {
+      //
+    });
   });
 });

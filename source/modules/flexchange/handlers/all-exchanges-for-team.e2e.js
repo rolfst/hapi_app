@@ -9,7 +9,7 @@ let team = null;
 
 describe('Get exchanges for team', () => {
   before(() => {
-    return createTeam(global.network.id, 'Team #1')
+    return createTeam(global.networks.flexAppeal.id, 'Team #1')
       .then(createdTeam => {
         team = createdTeam;
 
@@ -18,12 +18,12 @@ describe('Get exchanges for team', () => {
           type: 'TEAM',
         };
 
-        const exchange1 = createExchange(global.authUser.id, global.network.id, {
+        const exchange1 = createExchange(global.users.admin.id, global.networks.flexAppeal.id, {
           ...defaultArgs,
           title: 'Test shift 1 for team',
         });
 
-        const exchange2 = createExchange(global.authUser.id, global.network.id, {
+        const exchange2 = createExchange(global.users.admin.id, global.networks.flexAppeal.id, {
           ...defaultArgs,
           title: 'Test shift 2 for team',
         });
@@ -36,7 +36,7 @@ describe('Get exchanges for team', () => {
   });
 
   it('should return exchanges', () => {
-    return getRequest(`/v2/networks/${global.network.id}/teams/${team.id}/exchanges`)
+    return getRequest(`/v2/networks/${global.networks.flexAppeal.id}/teams/${team.id}/exchanges`)
       .then(response => {
         assert.lengthOf(response.result.data, 2);
         assert.equal(response.statusCode, 200);

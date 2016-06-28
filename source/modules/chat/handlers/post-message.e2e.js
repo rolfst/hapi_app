@@ -1,33 +1,25 @@
 import { assert } from 'chai';
 import { postRequest } from 'common/test-utils/request';
-
 import { createConversation } from 'modules/chat/repositories/conversation';
 
-let conversation = null;
+let conversation;
 
 describe('Post message', () => {
-  before(() => {
-    return createConversation('PRIVATE', global.authUser.id, [63, global.authUser.id])
-      .then(data => {
-        conversation = data;
-      });
+  before(async () => {
+    const createdConversation = await createConversation('PRIVATE', global.users.admin.id, [global.users.employee.id, global.users.admin.id]);
+    conversation = createdConversation;
   });
 
-  it('should show new message data', () => {
-    return postRequest(`/v1/chats/conversations/${conversation.id}/messages`, {
-      text: 'Test message',
-    }).then(response => {
-      const { data } = response.result;
+  after(() => conversation.destroy());
 
-      assert.equal(data.conversation_id, conversation.id);
-      assert.equal(data.text, 'Test message');
-      assert.equal(data.created_by.id, global.authUser.id);
-      assert.equal(response.statusCode, 200);
-    });
-  });
+  it('should show new message data', async () => {
+    const endpoint = `/v1/chats/conversations/${conversation.id}/messages`;
+    const { result, statusCode } = await postRequest(endpoint, { text: 'Test message' });
+    const { data } = result;
 
-  after(() => {
-    // TODO: Messages for this test won't delete in the db
-    return conversation.destroy();
+    assert.equal(data.conversation_id, conversation.id);
+    assert.equal(data.text, 'Test message');
+    assert.equal(data.created_by.id, global.users.admin.id);
+    assert.equal(statusCode, 200);
   });
 });

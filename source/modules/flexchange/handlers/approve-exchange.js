@@ -6,30 +6,25 @@ import {
   findExchangeResponseByExchangeAndUser,
 } from 'modules/flexchange/repositories/exchange-response';
 
-export default (network, req) => {
+export default async (network, req) => {
   if (!req.payload.user_id) throw Boom.badData('Missing user_id to approve.');
   const userIdToApprove = req.payload.user_id;
 
-  return findExchangeById(req.params.exchangeId, req.auth.credentials.id)
-    .then(exchange => {
-      // TODO: Check if logged user may approve the exchange
-      return findExchangeResponseByExchangeAndUser(exchange.id, userIdToApprove)
-        .then(exchangeResponse => ([exchangeResponse, exchange]));
-    })
-    .then(([exchangeResponse, exchange]) => {
-      if (exchangeResponse.approved) {
-        throw Boom.badData('The user is already approved.');
-      }
+  const exchange = await findExchangeById(req.params.exchangeId, req.auth.credentials.id);
+  const exchangeResponse = await findExchangeResponseByExchangeAndUser(exchange.id, userIdToApprove);
 
-      if (!exchangeResponse.response) {
-        throw Boom.badData('The user didn\'t accept the exchange.');
-      }
+  if (exchangeResponse.approved === 0) {
+    throw Boom.badData('Cannot approve a rejected response.');
+  }
 
-      return approveExchange(exchange, req.auth.credentials, userIdToApprove);
-    })
-    .then(exchange => {
-      analytics.track(approveExchangeEvent(network, exchange));
+  if (!exchangeResponse.response) {
+    throw Boom.badData('The user didn\'t accept the exchange.');
+  }
 
-      return exchange.reload();
-    });
+  const approvedExchange = await approveExchange(exchange, req.auth.credentials, userIdToApprove);
+  const reloadedExchange = await approvedExchange.reload();
+
+  analytics.track(approveExchangeEvent(network, reloadedExchange));
+
+  return reloadedExchange;
 };
