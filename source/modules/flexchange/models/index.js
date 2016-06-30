@@ -35,6 +35,7 @@ ExchangeModel.belongsToMany(ExchangeCommentModel, {
   foreignKey: 'parent_id',
   otherKey: 'id',
   through: 'comments',
+  as: 'Comments',
   scope: { parent_type: 'FlexAppeal\\Entities\\Exchange' },
 });
 

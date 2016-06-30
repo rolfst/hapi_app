@@ -1,15 +1,21 @@
-import { createExchangeComment, findCommentById } from 'modules/flexchange/repositories/comment';
+import {
+  createExchangeComment,
+  findCommentById,
+} from 'modules/flexchange/repositories/comment';
 import hasIntegration from 'common/utils/network-has-integration';
+import * as newCommentNotification from '../notifications/new-exchange-comment';
 
-export default (req, reply) => {
+export default async (req, reply) => {
   if (hasIntegration(req.pre.network)) {
     // Execute integration logic with adapter
   }
 
   const data = { text: req.payload.text, userId: req.auth.credentials.id };
 
-  createExchangeComment(req.params.exchangeId, data)
-    .then(newExchangeComment => findCommentById(newExchangeComment.id))
-    .then(exchangeComment => reply({ success: true, data: exchangeComment.toJSON() }))
-    .catch(err => reply(err));
+  const createdExchangeComment = await createExchangeComment(req.params.exchangeId, data);
+  const exchangeComment = await findCommentById(createdExchangeComment.id);
+
+  newCommentNotification.send(exchangeComment);
+
+  return reply({ success: true, data: exchangeComment.toJSON() });
 };

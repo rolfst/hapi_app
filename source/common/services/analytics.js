@@ -24,7 +24,7 @@ export default (() => {
         $phone: user.phoneNum,
       });
     },
-    track(event) {
+    async track(event) {
       if (process.env.NODE_ENV === 'testing') return false;
       if (!client) throw new Error('No client initialized.');
       if (!currentUser) throw new Error('No user set to track events.');

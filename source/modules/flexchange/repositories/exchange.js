@@ -112,17 +112,22 @@ export function updateExchangeById(exchangeId, payload) {
  * @method acceptExchange
  * @return {promise} Add exchange response promise
  */
-export function acceptExchange(exchangeId, userId) {
+export async function acceptExchange(exchangeId, userId) {
   const data = { userId, exchangeId, response: 1 };
+  const exchange = await findExchangeById(exchangeId, userId);
 
-  return findExchangeResponseByExchangeAndUser(exchangeId, userId)
-    .then(exchangeResponse => {
-      if (!exchangeResponse.response) {
-        return removeExchangeResponseForExchangeAndUser(exchangeId, userId)
-          .then(createExchangeResponse(data));
-      }
-    })
-    .catch(() => createExchangeResponse(data));
+  try {
+    const exchangeResponse = await findExchangeResponseByExchangeAndUser(exchange.id, userId);
+
+    if (!exchangeResponse.response) {
+      await removeExchangeResponseForExchangeAndUser(exchange.id, userId);
+      await createExchangeResponse(data);
+    }
+  } catch (err) {
+    await createExchangeResponse(data);
+  } finally {
+    return exchange.reload();
+  }
 }
 
 /**
@@ -156,7 +161,8 @@ export function declineExchange(exchangeId, userId) {
 export function approveExchange(exchange, user, userIdToApprove) {
   return findExchangeResponseByExchangeAndUser(exchange.id, userIdToApprove)
     .then(exchangeResponse => exchangeResponse.update({ approved: 1 }))
-    .then(() => exchange.update({ approved_by: user.id, approved_user: userIdToApprove }));
+    .then(() => exchange.update({ approved_by: user.id, approved_user: userIdToApprove }))
+    .then(() => exchange.reload());
 }
 
 /**

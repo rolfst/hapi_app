@@ -1,5 +1,4 @@
 import { assert } from 'chai';
-import { createUser } from 'common/repositories/user';
 import userBelongsToNetwork from 'common/utils/user-belongs-to-network';
 
 const credentials = {
@@ -7,17 +6,13 @@ const credentials = {
 };
 
 describe('userBelongsToNetwork', () => {
-  let user;
-
-  before(async () => {
-    const createdUser = await createUser(credentials);
-    user = createdUser;
-  });
-
-  after(() => user.destroy());
-
   it('should check if user belongs to network', () => {
-    assert.equal(userBelongsToNetwork(global.users.admin), true);
-    assert.equal(userBelongsToNetwork(user), false);
+    const userFixture = {
+      ...credentials,
+      Networks: [{ name: 'Flex-Appeal', NetworkUser: { deletedAt: null } }],
+    };
+
+    assert.equal(userBelongsToNetwork(userFixture), true);
+    assert.equal(userBelongsToNetwork({ ...userFixture, Networks: [] }), false);
   });
 });

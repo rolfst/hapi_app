@@ -1,10 +1,10 @@
 import { check } from 'hapi-acl-plugin';
 import { Conversation, User } from 'modules/chat/models';
-import notifier from 'common/services/notifier';
 import socket from 'common/services/socket';
 import respondWithItem from 'common/utils/respond-with-item';
 import { findConversationById } from 'modules/chat/repositories/conversation';
 import { findMessageById, createMessage } from 'modules/chat/repositories/message';
+import * as newMessageNotification from 'modules/chat/notifications/new-message';
 
 module.exports = async (req, reply) => {
   const loggedUser = req.auth.credentials;
@@ -21,7 +21,7 @@ module.exports = async (req, reply) => {
     const usersToNotify = conversation.Users.filter(user => user.id !== loggedUser.id);
     const response = respondWithItem(message);
 
-    notifier.sendForMessage(usersToNotify, message);
+    newMessageNotification.send(message, usersToNotify);
     socket.send('send-message', usersToNotify, response, req.headers['x-api-token']);
 
     return reply({ success: true, data: response });

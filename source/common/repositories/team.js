@@ -1,5 +1,8 @@
 import Boom from 'boom';
+import sequelize from 'sequelize';
+import _ from 'lodash';
 import { Team } from 'common/models';
+import { User } from 'common/models';
 
 export function findTeamById(id) {
   return Team
@@ -14,4 +17,12 @@ export function findTeamById(id) {
 export function createTeam(networkId, name, description) {
   return Team
     .create({ networkId, name, description });
+}
+
+export function findUsersByTeamIds(ids) {
+  return User
+    .findAll({
+      include: [{ model: Team }],
+      where: sequelize.where(sequelize.col('Teams.id'), { $in: ids }),
+    });
 }

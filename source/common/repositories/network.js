@@ -41,9 +41,12 @@ export function findNetworksForIntegration(integrationName) {
     });
 }
 
-export function findAllUsersForNetwork(id) {
-  return findNetworkById(id)
-    .then(network => network.getUsers());
+export function findAllUsersForNetwork(network) {
+  return network.getUsers();
+}
+
+export function findAdminsByNetwork(network) {
+  return network.getAdmins();
 }
 
 export async function createNetwork(userId, name = null, externalId = null) {

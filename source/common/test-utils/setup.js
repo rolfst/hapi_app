@@ -1,12 +1,14 @@
 import 'babel-polyfill';
 import chai from 'chai';
+import sinon from 'sinon';
 import dotenv from 'dotenv';
 import createServer from 'server';
+import Parse from 'parse/node';
 import blueprints from 'common/test-utils/blueprints';
 import { roles } from 'common/services/permission';
 import { createUser } from 'common/repositories/user';
 import authenticate from 'common/test-utils/authenticate';
-import { createNetwork, createPmtNetwork, deleteNetwork } from 'common/repositories/network';
+import { createNetwork, createPmtNetwork } from 'common/repositories/network';
 import generateNetworkName from 'common/test-utils/create-network-name';
 
 const chaiAsPromised = require('chai-as-promised');
@@ -62,6 +64,9 @@ before(async () => {
     global.tokens = { admin: token };
     global.integrations = { admin: integrations };
     global.networks = { flexAppeal: flexAppealNetwork, pmt: pmtNetwork };
+
+    // Disable Parse send when testing
+    sinon.stub(Parse.Push, 'send').returns(null);
   } catch (err) {
     console.log('Error in test setup', err);
   }

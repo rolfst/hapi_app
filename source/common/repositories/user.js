@@ -32,6 +32,14 @@ export async function findUserById(id) {
   return user;
 }
 
+export function findUsersByIds(ids) {
+  return User.findAll({
+    where: {
+      id: { $in: ids },
+    },
+  });
+}
+
 export async function findUserByUsername(username) {
   const user = await User.findOne({ ...defaultIncludes, where: { username } });
   if (!user) throw new Error(`No user found with username ${username}`);

@@ -34,3 +34,7 @@ export function createExchangeComment(exchangeId, { text, userId }) {
     createdBy: userId,
   });
 }
+
+export function findCommentsByExchange(exchange) {
+  return exchange.getComments();
+}

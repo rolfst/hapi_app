@@ -1,6 +1,5 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import { createUser } from 'common/repositories/user';
 import makePassword from 'common/utils/make-password';
 import authenticateUser from 'common/utils/authenticate-user';
 import WrongCredentials from 'common/errors/wrong-credentials';
@@ -12,12 +11,7 @@ const credentials = {
 };
 
 describe('authenticateUser', () => {
-  let user;
-
-  before(() => createUser(credentials).then(createdUser => (user = createdUser)));
-  after(() => user.destroy());
-
-  it('return true when credentials do match', async () => {
+  it('check if credentials match', async () => {
     sinon.stub(userRepo, 'findUserByUsername').returns(Promise.resolve({
       username: credentials.username,
       password: makePassword(credentials.password),

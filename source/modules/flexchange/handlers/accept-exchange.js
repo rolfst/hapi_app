@@ -1,17 +1,21 @@
 import Boom from 'boom';
-import { acceptExchange } from 'modules/flexchange/repositories/exchange';
 import createAdapter from 'adapters/create-adapter';
 import hasIntegration from 'common/utils/network-has-integration';
+import { acceptExchange } from 'modules/flexchange/repositories/exchange';
+import * as notification from 'modules/flexchange/notifications/accepted-exchange';
 
 export default async (network, exchange, req) => {
+  const { artifacts, credentials } = req.auth;
+  const { approved } = exchange.ResponseStatus;
+
   if (hasIntegration(network)) {
-    return createAdapter(network, req.auth.artifacts.integrations).acceptExchange;
+    return createAdapter(network, artifacts.integrations).acceptExchange;
   }
 
-  if (exchange.ResponseStatus.approved === 0) throw Boom.badData('Can\'t accept this exchange anymore.');
+  if (approved === 0) throw Boom.badData('Can\'t accept this exchange anymore.');
 
-  await acceptExchange(exchange.id, req.auth.credentials.id);
+  const acceptedExchange = await acceptExchange(exchange.id, req.auth.credentials.id);
+  notification.send(network, acceptedExchange, credentials);
 
-  // TODO: Fire ExchangeWasAccepted event
-  return exchange.reload();
+  return exchange;
 };
