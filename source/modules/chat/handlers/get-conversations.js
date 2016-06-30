@@ -14,5 +14,6 @@ module.exports = (req, reply) => {
   }
 
   return findAllForUser(req.auth.credentials, modelIncludes)
-    .then(conversations => reply(respondWithCollection(conversations)));
+    .then(conversations => reply(respondWithCollection(conversations)))
+    .catch(boom => reply(boom));
 };

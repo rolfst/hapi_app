@@ -40,7 +40,7 @@ export function findMessageById(id, includes) {
   return Message
     .findById(id, { include: includes })
     .then(message => {
-      if (!message) return Boom.notFound('No message found.');
+      if (!message) throw Boom.notFound('No message found.');
 
       return message;
     })

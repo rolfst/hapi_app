@@ -1,12 +1,21 @@
+import { check } from 'hapi-acl-plugin';
 import respondWithCollection from 'common/utils/respond-with-collection';
 import { findConversationById } from 'modules/chat/repositories/conversation';
 import { findAllForConversation } from 'modules/chat/repositories/message';
+import { User } from 'common/models';
 
-module.exports = (req, reply) => {
-  // TODO: implement ACL to check if user belongs to conversation
-  // conversation.hasUser(req.auth.credentials)
-  return findConversationById(req.params.id)
-    .then(conversation => findAllForConversation(conversation))
-    .then(messages => reply(respondWithCollection(messages)))
-    .catch(boom => reply(boom));
+module.exports = async (req, reply) => {
+  try {
+    const { credentials } = req.auth;
+    const modelIncludes = [{ model: User }];
+    const conversation = await findConversationById(req.params.id, modelIncludes);
+
+    check(credentials, 'get-conversation', conversation, 'You\'re not part of this conversation');
+
+    const messages = await findAllForConversation(conversation);
+
+    return reply(respondWithCollection(messages));
+  } catch (err) {
+    reply(err);
+  }
 };
