@@ -108,12 +108,13 @@ export function updateExchangeById(exchangeId, payload) {
 /**
  * Add a response to an exchange
  * @param {number} exchangeId - Exchange to add the response to
- * @param {number} userId - User accepting the exchange
- * @method acceptExchange
- * @return {promise} Add exchange response promise
+ * @param {number} userId - User declining the exchange
+ * @param {number} response - Value of response
+ * @method respondToExchange
+ * @return {promise} Respond to exchange promise
  */
-export async function acceptExchange(exchangeId, userId) {
-  const data = { userId, exchangeId, response: 1 };
+export async function respondToExchange(exchangeId, userId, response) {
+  const data = { userId, exchangeId, response };
   const exchange = await findExchangeById(exchangeId, userId);
 
   try {
@@ -125,9 +126,20 @@ export async function acceptExchange(exchangeId, userId) {
     }
   } catch (err) {
     await createExchangeResponse(data);
-  } finally {
-    return exchange.reload();
   }
+
+  return exchange.reload();
+}
+
+/**
+ * Add a response to an exchange
+ * @param {number} exchangeId - Exchange to add the response to
+ * @param {number} userId - User accepting the exchange
+ * @method acceptExchange
+ * @return {promise} Add exchange response promise
+ */
+export async function acceptExchange(exchangeId, userId) {
+  return respondToExchange(exchangeId, userId, 1);
 }
 
 /**
@@ -137,17 +149,8 @@ export async function acceptExchange(exchangeId, userId) {
  * @method declineExchange
  * @return {promise} Add exchange response promise
  */
-export function declineExchange(exchangeId, userId) {
-  const data = { userId, exchangeId, response: 0 };
-
-  return findExchangeResponseByExchangeAndUser(exchangeId, userId)
-    .then(exchangeResponse => {
-      if (exchangeResponse.response) {
-        return removeExchangeResponseForExchangeAndUser(exchangeId, userId)
-          .then(createExchangeResponse(data));
-      }
-    })
-    .catch(() => createExchangeResponse(data));
+export async function declineExchange(exchangeId, userId) {
+  return respondToExchange(exchangeId, userId, 0);
 }
 
 /**

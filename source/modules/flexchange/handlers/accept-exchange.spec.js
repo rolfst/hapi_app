@@ -17,12 +17,13 @@ describe('Accept exchange', () => {
     sandbox.stub(hasIntegration, 'default').returns(null);
 
     const networkFixture = {};
+    const exchangeFixture = { ResponseStatus: {} };
     const requestFixture = {
       auth: { credentials: {} },
       params: { exchangeId: null },
     };
 
-    await handler.default(networkFixture, requestFixture);
+    await handler.default(networkFixture, exchangeFixture, requestFixture);
 
     assert.equal(notification.send.calledOnce, true);
   });

@@ -19,12 +19,12 @@ module.exports = async (req, reply) => {
     const message = await findMessageById(createdMessage.id, [Conversation, User]);
 
     const usersToNotify = conversation.Users.filter(user => user.id !== loggedUser.id);
-    const response = respondWithItem(message);
+    const data = respondWithItem(message);
 
     newMessageNotification.send(message, usersToNotify);
-    socket.send('send-message', usersToNotify, response, req.headers['x-api-token']);
+    socket.send('send-message', usersToNotify, data, req.headers['x-api-token']);
 
-    return reply({ success: true, data: response });
+    return reply({ success: true, ...data });
   } catch (err) {
     return reply(err);
   }

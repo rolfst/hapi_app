@@ -6,7 +6,8 @@ import * as notification from 'modules/flexchange/notifications/accepted-exchang
 
 export default async (network, exchange, req) => {
   const { artifacts, credentials } = req.auth;
-  const { approved } = exchange.ResponseStatus;
+  const { ResponseStatus } = exchange;
+  const approved = ResponseStatus ? ResponseStatus.approved : null;
 
   if (hasIntegration(network)) {
     return createAdapter(network, artifacts.integrations).acceptExchange;
@@ -17,5 +18,5 @@ export default async (network, exchange, req) => {
   const acceptedExchange = await acceptExchange(exchange.id, req.auth.credentials.id);
   notification.send(network, acceptedExchange, credentials);
 
-  return exchange;
+  return acceptedExchange;
 };

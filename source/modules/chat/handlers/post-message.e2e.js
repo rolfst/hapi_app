@@ -6,8 +6,8 @@ let conversation;
 
 describe('Post message', () => {
   before(async () => {
-    const createdConversation = await createConversation('PRIVATE', global.users.admin.id, [global.users.employee.id, global.users.admin.id]);
-    conversation = createdConversation;
+    const { employee, admin } = global.users;
+    conversation = await createConversation('PRIVATE', admin.id, [employee.id, admin.id]);
   });
 
   after(() => conversation.destroy());

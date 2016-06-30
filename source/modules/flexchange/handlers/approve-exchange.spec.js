@@ -21,13 +21,14 @@ describe('Approve exchange', () => {
       .returns({ approved: null, response: 1 });
 
     const networkFixture = {};
+    const exchangeFixture = {};
     const requestFixture = {
       auth: { credentials: {} },
       params: { exchangeId: null },
       payload: { user_id: 1 },
     };
 
-    await handler.default(networkFixture, requestFixture);
+    await handler.default(networkFixture, exchangeFixture, requestFixture);
 
     assert.equal(creatorApproved.send.calledOnce, true);
     assert.equal(substituteApproved.send.calledOnce, true);

@@ -14,20 +14,18 @@ describe('Decline exchange', () => {
     }).then(createdExchange => (exchange = createdExchange));
   });
 
-  it('should return correct data', () => {
+  it('should return correct data', async () => {
     const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/exchanges/${exchange.id}`;
 
-    return patchRequest(endpoint, { action: 'decline' })
-      .then(response => {
-        const { data } = response.result;
+    const response = await patchRequest(endpoint, { action: 'decline' });
+    const { data } = response.result;
 
-        assert.equal(data.response_status, 'DECLINED');
-        assert.equal(data.title, 'Test shift to decline');
-        assert.equal(data.accept_count, 0);
-        assert.equal(data.decline_count, 1);
-        assert.equal(data.responses[0].response, false);
-        assert.equal(data.responses[0].user.full_name, global.users.admin.fullName);
-        assert.equal(response.statusCode, 200);
-      });
+    assert.equal(data.response_status, 'DECLINED');
+    assert.equal(data.title, 'Test shift to decline');
+    assert.equal(data.accept_count, 0);
+    assert.equal(data.decline_count, 1);
+    assert.equal(data.responses[0].response, false);
+    assert.equal(data.responses[0].user.full_name, global.users.admin.fullName);
+    assert.equal(response.statusCode, 200);
   });
 });
