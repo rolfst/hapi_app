@@ -1,5 +1,7 @@
 import Boom from 'boom';
+import moment from 'moment';
 import { check } from 'hapi-acl-plugin';
+import { findExchangeById } from 'modules/flexchange/repositories/exchange';
 import acceptExchange from 'modules/flexchange/handlers/accept-exchange';
 import declineExchange from 'modules/flexchange/handlers/decline-exchange';
 import approveExchange from 'modules/flexchange/handlers/approve-exchange';
@@ -16,13 +18,18 @@ export default async (req, reply) => {
   const { action } = req.payload;
 
   try {
-    const hook = actions[action];
-    if (!hook) throw Boom.badData('Unknown action.');
+    const actionHook = actions[action];
+    if (!actionHook) throw Boom.badData('Unknown action.');
 
     check(req.auth.credentials, `${action}-exchange`);
-    const exchange = await hook(req.pre.network, req);
+    const exchange = await findExchangeById(req.params.exchangeId, req.auth.credentials.id);
 
-    return reply({ success: true, data: exchange.toJSON() });
+    if (moment(exchange.date).diff(moment(), 'days') < 0) throw Boom.badData('Exchange has been expired.');
+    if (exchange.approvedBy) throw Boom.badData('Exchange has already been approved.');
+
+    const updatedExchange = await actionHook(req.pre.network, exchange, req);
+
+    return reply({ success: true, data: updatedExchange.toJSON() });
   } catch (err) {
     if (err.isBoom) reply(err);
 

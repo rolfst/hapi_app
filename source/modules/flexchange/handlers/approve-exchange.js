@@ -1,17 +1,16 @@
 import Boom from 'boom';
 import analytics from 'common/services/analytics';
 import approveExchangeEvent from 'common/events/approve-exchange-event';
-import { findExchangeById, approveExchange } from 'modules/flexchange/repositories/exchange';
+import { approveExchange } from 'modules/flexchange/repositories/exchange';
 import {
   findExchangeResponseByExchangeAndUser,
 } from 'modules/flexchange/repositories/exchange-response';
 
-export default async (network, req) => {
+export default async (network, exchange, req) => {
   if (!req.payload.user_id) throw Boom.badData('Missing user_id to approve.');
   const userIdToApprove = req.payload.user_id;
 
-  const exchange = await findExchangeById(req.params.exchangeId, req.auth.credentials.id);
-  const exchangeResponse = await findExchangeResponseByExchangeAndUser(exchange.id, userIdToApprove);
+  const exchangeResponse = await findExchangeResponseByExchangeAndUser(exchange.id, userIdToApprove); // eslint-disable-line max-len
 
   if (exchangeResponse.approved === 0) {
     throw Boom.badData('Cannot approve a rejected response.');
