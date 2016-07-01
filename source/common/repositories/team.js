@@ -19,6 +19,17 @@ export function createTeam(networkId, name, description) {
     .create({ networkId, name, description });
 }
 
+export async function validateTeamIds(ids, networkId) {
+  const teamsCount = await Team.count({
+    where: {
+      id: { $in: ids },
+      networkId,
+    },
+  });
+
+  return teamsCount === ids.length;
+}
+
 export function findUsersByTeamIds(ids) {
   return User
     .findAll({

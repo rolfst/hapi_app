@@ -1,5 +1,8 @@
+import Boom from 'boom';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
 import { createValuesForExchange } from 'modules/flexchange/repositories/exchange-value';
+import { validateTeamIds } from 'common/repositories/team';
+import { validateUserIds } from 'common/repositories/user';
 import { findAllUsersForNetwork } from 'common/repositories/network';
 import { findUsersByTeamIds } from 'common/repositories/team';
 import { findUsersByIds } from 'common/repositories/user';
@@ -33,20 +36,29 @@ export default async (req, reply) => {
   try {
     const { credentials } = req.auth;
     const { network } = req.pre;
-    let exchangeValues;
+    let values;
 
     if (hasIntegration(network)) {
       // Execute integration logic with adapter
     }
 
     const newExchange = await createExchange(credentials.id, network.id, req.payload);
+    const { type } = newExchange;
 
-    if (['TEAM', 'USER'].includes(newExchange.type)) {
-      exchangeValues = JSON.parse(req.payload.values);
-      createValuesForExchange(newExchange.id, exchangeValues);
+    if (['TEAM', 'USER'].includes(type)) {
+      let validator;
+      values = JSON.parse(req.payload.values);
+
+      if (type === 'TEAM') validator = validateTeamIds(values, network.id);
+      if (type === 'USER') validator = validateUserIds(values, network.id);
+
+      const isValid = await validator;
+      if (!isValid) throw Boom.badData('Incorrect values.');
+
+      await createValuesForExchange(newExchange.id, values);
     }
 
-    sendNotification(newExchange, network, exchangeValues, credentials);
+    sendNotification(newExchange, network, values, credentials);
 
     analytics.track(newExchangeEvent(req.pre.network, newExchange));
 

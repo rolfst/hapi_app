@@ -99,6 +99,17 @@ export function createUsers(userCollection) {
   return User.bulkCreate(values);
 }
 
+export async function validateUserIds(ids, networkId) {
+  const usersCount = await User.count({
+    where: {
+      id: { $in: ids },
+    },
+    include: [{ model: Network, required: true, where: { id: networkId } }],
+  });
+
+  return usersCount === ids.length;
+}
+
 export function updateNetworkActivityForUser(networkId, userId, active) {
   const deletedAt = active ? null : sequelize.fn('NOW');
   const queryString = `
