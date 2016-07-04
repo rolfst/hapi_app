@@ -7,8 +7,8 @@ let conversation;
 
 describe('Get messages', () => {
   before(async () => {
-    const createdConversation = await createConversation('PRIVATE', global.users.admin.id, [global.users.employee.id, global.users.admin.id]);
-    conversation = createdConversation;
+    const participants = [global.users.employee.id, global.users.admin.id];
+    conversation = await createConversation('PRIVATE', global.users.admin.id, participants);
 
     return Promise.all([
       createMessage(conversation.id, global.users.admin.id, 'Test bericht 1'),

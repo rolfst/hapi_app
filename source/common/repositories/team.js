@@ -1,6 +1,5 @@
 import Boom from 'boom';
 import sequelize from 'sequelize';
-import _ from 'lodash';
 import { Team } from 'common/models';
 import { User } from 'common/models';
 

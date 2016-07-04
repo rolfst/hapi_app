@@ -7,6 +7,8 @@ import declineExchange from 'modules/flexchange/handlers/decline-exchange';
 import approveExchange from 'modules/flexchange/handlers/approve-exchange';
 import rejectExchange from 'modules/flexchange/handlers/reject-exchange';
 
+const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
+
 export default async (req, reply) => {
   const actions = {
     accept: acceptExchange,
@@ -24,7 +26,7 @@ export default async (req, reply) => {
     check(req.auth.credentials, `${action}-exchange`);
     const exchange = await findExchangeById(req.params.exchangeId, req.auth.credentials.id);
 
-    if (moment(exchange.date).diff(moment(), 'days') < 0) throw Boom.badData('Exchange has been expired.');
+    if (isExpired(exchange.date)) throw Boom.badData('Exchange has been expired.');
     if (exchange.approvedBy) throw Boom.badData('Exchange has already been approved.');
 
     const updatedExchange = await actionHook(req.pre.network, exchange, req);

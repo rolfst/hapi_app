@@ -1,7 +1,5 @@
 import { assert } from 'chai';
 import moment from 'moment';
-import blueprints from 'common/test-utils/blueprints';
-import authenticate from 'common/test-utils/authenticate';
 import { patchRequest } from 'common/test-utils/request';
 import {
   createExchange,
@@ -10,11 +8,14 @@ import {
   approveExchange,
 } from 'modules/flexchange/repositories/exchange';
 
+let network;
 let exchange = null;
 let approvedExchange = null;
 
 describe('Reject exchange', () => {
   before(async () => {
+    network = global.networks.flexAppeal;
+
     const exchangeAPromise = createExchange(global.users.admin.id, global.networks.flexAppeal.id, {
       date: moment().format('YYYY-MM-DD'),
       type: 'ALL',
@@ -39,8 +40,9 @@ describe('Reject exchange', () => {
   });
 
   it('should return correct data', async () => {
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/exchanges/${exchange.id}`;
-    const { result, statusCode } = await patchRequest(endpoint, { action: 'reject', user_id: global.users.admin.id });
+    const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}`;
+    const payload = { action: 'reject', user_id: global.users.admin.id };
+    const { result, statusCode } = await patchRequest(endpoint, payload);
 
     assert.equal(result.data.response_status, 'REJECTED');
     assert.equal(result.data.title, 'Test shift to accept & reject');
@@ -48,25 +50,26 @@ describe('Reject exchange', () => {
   });
 
   it('should fail when trying to reject a declined response', async () => {
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/exchanges/${exchange.id}`;
-    const { statusCode } = await patchRequest(endpoint, { action: 'reject', user_id: global.users.employee.id });
+    const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}`;
+    const payload = { action: 'reject', user_id: global.users.employee.id };
+    const { statusCode } = await patchRequest(endpoint, payload);
 
     assert.equal(statusCode, 422);
   });
 
   it('should fail when trying to reject a response from an already approved exchange', async () => {
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/exchanges/${approvedExchange.id}`;
-    const { statusCode } = await patchRequest(endpoint, { action: 'reject', user_id: global.users.admin.id });
+    const endpoint = `/v2/networks/${network.id}/exchanges/${approvedExchange.id}`;
+    const payload = { action: 'reject', user_id: global.users.admin.id };
+    const { statusCode } = await patchRequest(endpoint, payload);
 
     assert.equal(statusCode, 422);
   });
 
   it('should fail when user doesn\'t have permission to reject', async () => {
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/exchanges/${exchange.id}`;
+    const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}`;
     const payload = { action: 'reject', user_id: global.users.admin.id };
-    const { username, password } = blueprints.users.employee;
-    const { token } = await authenticate(global.server, { username, password });
-    const { result, statusCode } = await patchRequest(endpoint, payload, global.server, token);
+    const promise = patchRequest(endpoint, payload, global.server, global.tokens.employee);
+    const { statusCode } = await promise;
 
     assert.equal(statusCode, 403);
   });

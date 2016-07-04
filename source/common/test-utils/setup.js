@@ -17,21 +17,17 @@ dotenv.config();
 
 global.server = createServer(8000);
 
-let createdAdmin;
-let createdEmployee;
-let createdNetworklessUser;
+let admin;
+let employee;
+let networklessUser;
 
 before(async () => {
   try {
-    const [admin, employee, networkless] = await Promise.all([
+    [admin, employee, networklessUser] = await Promise.all([
       createUser(blueprints.users.admin),
       createUser(blueprints.users.employee),
       createUser(blueprints.users.networkless),
     ]);
-
-    createdAdmin = admin;
-    createdEmployee = employee;
-    createdNetworklessUser = networkless;
 
     // Create networks
     const [createdFlexNetwork, createdPMTNetwork] = await Promise.all([
@@ -61,18 +57,37 @@ before(async () => {
       employee.reload(),
     ]);
 
-    const { username, password } = blueprints.users.admin;
-    const { token, integrations } = await authenticate(global.server, { username, password });
+    const adminCredentials = blueprints.users.admin;
+    const adminAuth = await authenticate(global.server, {
+      username: adminCredentials.username,
+      password: adminCredentials.password,
+    });
+
+    const employeeCredentials = blueprints.users.employee;
+    const employeeAuth = await authenticate(global.server, {
+      username: employeeCredentials.username,
+      password: employeeCredentials.password,
+    });
 
     global.users = {
       admin: newAdmin,
       employee: newEmployee,
-      networklessUser: networkless,
     };
 
-    global.tokens = { admin: token };
-    global.integrations = { admin: integrations };
-    global.networks = { flexAppeal: flexAppealNetwork, pmt: pmtNetwork };
+    global.tokens = {
+      admin: adminAuth.token,
+      employee: employeeAuth.token,
+    };
+
+    global.integrations = {
+      admin: adminAuth.integrations,
+      employee: employeeAuth.integrations,
+    };
+
+    global.networks = {
+      flexAppeal: flexAppealNetwork,
+      pmt: pmtNetwork,
+    };
 
     // Disable Parse send when testing
     sinon.stub(Parse.Push, 'send').returns(null);
@@ -82,7 +97,7 @@ before(async () => {
 });
 
 after(() => Promise.all([
-  createdAdmin.destroy(),
-  createdEmployee.destroy(),
-  createdNetworklessUser.destroy(),
+  admin.destroy(),
+  employee.destroy(),
+  networklessUser.destroy(),
 ]).catch(err => console.log('Error in test teardown', err)));

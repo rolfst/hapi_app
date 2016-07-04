@@ -2,24 +2,11 @@ import { Server } from 'hapi';
 import { assert } from 'chai';
 import jwtStrategy from 'common/middlewares/authenticator-strategy';
 import { getRequest } from 'common/test-utils/request';
-import { createUser } from 'common/repositories/user';
-import { createNetwork } from 'common/repositories/network';
 import preFetchNetwork from 'common/middlewares/prefetch-network';
-import generateNetworkName from 'common/test-utils/create-network-name';
+
+let server;
 
 describe('Plugin: Network', () => {
-  let server;
-  let network;
-  let user;
-
-  before(async () => {
-    const userData = { username: 'john@flex-appeal.nl', firstName: 'John', lastName: 'Doe', password: 'hodor' };
-    const createdUser = await createUser(userData);
-    const createdNetwork = await createNetwork(createdUser.id, generateNetworkName());
-    network = createdNetwork;
-    user = createdUser;
-  });
-
   beforeEach(() => {
     server = new Server();
     server.connection({ port: 2000 });
@@ -28,10 +15,9 @@ describe('Plugin: Network', () => {
   });
 
   afterEach(() => server.stop());
-  after(() => Promise.all([user.destroy(), network.destroy()]));
 
   it('should add network to request', async () => {
-    const networkId = global.networks.flexAppeal.id;
+    const networkId = global.networks.pmt.id;
 
     server.route({
       method: 'GET',
@@ -59,7 +45,8 @@ describe('Plugin: Network', () => {
       },
     });
 
-    const res = await getRequest(`/v2/networks/${network.id}`, server);
+    const endpoint = `/v2/networks/${global.networks.pmt.id}`;
+    const res = await getRequest(endpoint, server, global.tokens.employee);
 
     assert.equal(res.statusCode, 403);
   });
