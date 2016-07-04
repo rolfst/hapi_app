@@ -72,6 +72,7 @@ before(async () => {
     global.users = {
       admin: newAdmin,
       employee: newEmployee,
+      networklessUser,
     };
 
     global.tokens = {
