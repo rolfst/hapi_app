@@ -1,3 +1,4 @@
+import Sequelize from 'connection';
 import Boom from 'boom';
 import { User } from 'common/models';
 import { Conversation } from 'modules/chat/models';
@@ -32,6 +33,24 @@ export function findAllForUser(user, includes = []) {
   return user.getConversations({ include: [...includes, defaultIncludes] });
 }
 
+export async function findExistingConversationWithUser(loggedUser, user) {
+  const conversations = await Conversation.findAll({
+    include: [{
+      model: User,
+      attributes: ['id', [Sequelize.fn('COUNT', '`Users`.`id`'), 'count']],
+      where: {
+        id: { $in: [loggedUser, user] },
+      },
+    }],
+    group: ['Conversation.id'],
+    having: [
+      '`Users.count` = 2',
+    ],
+  });
+
+  return conversations[0];
+}
+
 /**
  * Create a conversation
  * @param {string} type - Type of the conversation to be created
@@ -50,14 +69,16 @@ export async function createConversation(type, creatorId, participants) {
     throw Boom.forbidden('You cannot create a conversation with yourself');
   }
 
-  // TODO: Add acl to check if user already has a conversation with a participant
-  // user.hasConversationWith(User, users);
   try {
-    const data = { type: type.toUpperCase(), createdBy: creatorId };
-    const createdConversation = await Conversation.create(data);
-    await createdConversation.addUsers(participants);
+    let conversation = await findExistingConversationWithUser(creatorId, participants[0]);
 
-    return await createdConversation.reload();
+    if (!conversation) {
+      const data = { type: type.toUpperCase(), createdBy: creatorId };
+      conversation = await Conversation.create(data);
+      await conversation.addUsers(participants);
+    }
+
+    return conversation;
   } catch (err) {
     console.error('Error while creating a conversation', err);
   }
