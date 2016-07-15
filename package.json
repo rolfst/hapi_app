@@ -42,7 +42,6 @@
     "moment": "2.12.0",
     "mysql": "2.10.2",
     "node-fetch": "1.5.1",
-    "node-inspector": "0.12.7",
     "parse": "1.8.1",
     "sequelize": "3.19.3",
     "superagent": "2.0.0",
@@ -66,6 +65,7 @@
     "mocha": "2.4.5",
     "rimraf": "2.5.2",
     "sequelize-cli": "2.3.1",
-    "sinon": "1.17.4"
+    "sinon": "1.17.4",
+    "node-inspector": "0.12.7"
   }
 }
