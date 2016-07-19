@@ -1,3 +1,4 @@
+import Boom from 'boom';
 import {
   createExchangeComment,
   findCommentById,
@@ -10,12 +11,19 @@ export default async (req, reply) => {
     // Execute integration logic with adapter
   }
 
-  const data = { text: req.payload.text, userId: req.auth.credentials.id };
+  try {
+    if (!req.payload.text) throw Boom.badData('Text is a required field.');
 
-  const createdExchangeComment = await createExchangeComment(req.params.exchangeId, data);
-  const exchangeComment = await findCommentById(createdExchangeComment.id);
+    const data = { text: req.payload.text, userId: req.auth.credentials.id };
+    const createdExchangeComment = await createExchangeComment(req.params.exchangeId, data);
+    const exchangeComment = await findCommentById(createdExchangeComment.id);
 
-  newCommentNotification.send(exchangeComment);
+    newCommentNotification.send(exchangeComment);
 
-  return reply({ success: true, data: exchangeComment.toJSON() });
+    return reply({ success: true, data: exchangeComment.toJSON() });
+  } catch (err) {
+    console.log('Error when creating a exchange comment', err);
+
+    return reply(err);
+  }
 };
