@@ -21,7 +21,7 @@ describe('Create exchange comment', () => {
       pre: { network: {} },
       auth: { credentials: {} },
       params: { exchangeId: null },
-      payload: { text: '' },
+      payload: { text: 'test' },
     };
 
     await handler.default(requestFixture, () => false);
