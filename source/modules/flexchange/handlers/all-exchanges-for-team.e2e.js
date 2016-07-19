@@ -45,7 +45,9 @@ describe('Get exchanges for team', () => {
   });
 
   it('should return exchanges with responses', () => {
-    return getRequest(`/v2/networks/${global.networks.flexAppeal.id}/teams/${team.id}/exchanges?include=responses`)
+    const { flexAppeal } = global.networks;
+
+    return getRequest(`/v2/networks/${flexAppeal.id}/teams/${team.id}/exchanges?include=responses`)
       .then(response => {
         assert.lengthOf(response.result.data, 2);
         assert.isDefined(response.result.data[0].responses);
