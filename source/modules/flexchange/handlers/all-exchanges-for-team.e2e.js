@@ -39,6 +39,16 @@ describe('Get exchanges for team', () => {
     return getRequest(`/v2/networks/${global.networks.flexAppeal.id}/teams/${team.id}/exchanges`)
       .then(response => {
         assert.lengthOf(response.result.data, 2);
+        assert.isUndefined(response.result.data[0].responses);
+        assert.equal(response.statusCode, 200);
+      });
+  });
+
+  it('should return exchanges with responses', () => {
+    return getRequest(`/v2/networks/${global.networks.flexAppeal.id}/teams/${team.id}/exchanges?include=responses`)
+      .then(response => {
+        assert.lengthOf(response.result.data, 2);
+        assert.isDefined(response.result.data[0].responses);
         assert.equal(response.statusCode, 200);
       });
   });

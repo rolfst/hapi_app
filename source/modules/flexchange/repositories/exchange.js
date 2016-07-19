@@ -51,8 +51,8 @@ export function findExchangesByUser(user) {
  * @method findExchangesByNetwork
  * @return {promise} Get exchanges promise
  */
-export function findExchangesByNetwork(network) {
-  return network.getExchanges();
+export function findExchangesByNetwork(network, includes = []) {
+  return network.getExchanges({ include: includes });
 }
 
 /**
@@ -61,8 +61,8 @@ export function findExchangesByNetwork(network) {
  * @method findExchangesByTeam
  * @return {promise} Get exchanges promise
  */
-export function findExchangesByTeam(team) {
-  return team.getExchanges();
+export function findExchangesByTeam(team, includes = []) {
+  return team.getExchanges({ include: includes });
 }
 
 /**
