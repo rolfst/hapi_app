@@ -14,10 +14,10 @@ describe('Post conversation', () => {
     );
   });
 
-  after(() => Promise.alL([
+  after(() => Promise.all([
     deleteConversationById(conversationId),
     deleteConversationById(conversation.id),
-  });
+  ]));
 
   it('should show new conversation data', async () => {
     const endpoint = '/v1/chats/conversations';
