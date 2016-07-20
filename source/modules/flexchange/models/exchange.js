@@ -92,6 +92,12 @@ const Exchange = model.define('Exchange', {
         });
       }
 
+      if (this.Comments) {
+        output = Object.assign(output, {
+          comments: this.Comments.map(res => res.toJSON()),
+        });
+      }
+
       if (this.ResponseStatus) {
         if (this.ResponseStatus.approved !== null) {
           output.response_status = !!this.ResponseStatus.approved ? 'APPROVED' : 'REJECTED';

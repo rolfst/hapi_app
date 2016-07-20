@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import { Exchange, ExchangeResponse } from 'modules/flexchange/models';
+import { Exchange, ExchangeResponse, ExchangeComment } from 'modules/flexchange/models';
 import { User } from 'common/models';
 import { createExchangeResponse } from 'modules/flexchange/repositories/exchange-response';
 import {
@@ -19,6 +19,7 @@ export function findExchangeById(exchangeId, userId) {
       include: [
         { model: User, as: 'ApprovedUser' },
         { model: ExchangeResponse },
+        { model: ExchangeComment, as: 'Comments' },
         { model: ExchangeResponse,
           as: 'ResponseStatus',
           where: { userId },
