@@ -129,7 +129,10 @@ const Exchange = model.define('Exchange', {
       }
 
       if (this.Values) {
-        output = Object.assign(output, { values: mapValuesToNames(this.Values, this.type) });
+        output = Object.assign(output, {
+          placed_for: this.type,
+          values: mapValuesToNames(this.Values, this.type),
+        });
       }
 
       return output;

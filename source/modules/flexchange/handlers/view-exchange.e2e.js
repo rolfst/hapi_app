@@ -24,6 +24,7 @@ describe('View exchange', () => {
 
     assert.equal(result.data.title, 'Test shift to view');
     assert.equal(result.data.vote_result, null);
+    assert.equal(result.data.placed_for, 'ALL');
     assert.equal(result.data.description, 'Test description for this cool shift');
   });
 
