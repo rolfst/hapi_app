@@ -93,6 +93,7 @@ const Exchange = model.define('Exchange', {
         accept_count: this.acceptCount,
         decline_count: this.declineCount,
         created_at: formatDate(this.created_at),
+        is_approved: !!this.approvedUserId,
       };
 
       if (this.ApprovedUser) {
