@@ -10,7 +10,9 @@ export default async (req, reply) => {
 
   try {
     const exchange = await findExchangeById(req.params.exchangeId, req.auth.credentials.id);
-    exchange.Values = await findValuesForExchange(exchange.ExchangeValues, exchange.type);
+    if (exchange.ExchangeValues) {
+      exchange.Values = await findValuesForExchange(exchange.ExchangeValues, exchange.type);
+    }
 
     return reply(respondWithItem(exchange));
   } catch (err) {

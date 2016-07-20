@@ -17,7 +17,7 @@ import {
  */
 export async function findExchangeById(exchangeId, userId) {
   try {
-    const exchange = Exchange
+    const exchange = await Exchange
       .findById(exchangeId, {
         include: [
           { model: User, as: 'ApprovedUser' },
