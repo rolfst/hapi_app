@@ -3,6 +3,25 @@ import model from 'connection';
 import formatDate from 'common/utils/format-date';
 import { User } from 'common/models';
 
+export const exchangeTypes = {
+  ALL: 'ALL',
+  TEAM: 'TEAM',
+  USER: 'USER',
+};
+
+const mapValuesToNames = (values, type) => {
+  switch (type) {
+    case exchangeTypes.ALL:
+      return [values.name];
+    case exchangeTypes.TEAM:
+      return values.map(team => team.name);
+    case exchangeTypes.USER:
+      return values.map(user => user.fullName);
+    default:
+      return [];
+  }
+};
+
 const Exchange = model.define('Exchange', {
   userId: {
     type: Sequelize.INTEGER,
@@ -27,7 +46,9 @@ const Exchange = model.define('Exchange', {
     allowNull: false,
   },
   type: {
-    type: Sequelize.ENUM('USER', 'TEAM', 'ALL'), // eslint-disable-line new-cap
+    type: Sequelize.ENUM( // eslint-disable-line new-cap
+      exchangeTypes.ALL, exchangeTypes.TEAM, exchangeTypes.USER
+    ),
     allowNull: false,
   },
   approvedBy: {
@@ -104,6 +125,10 @@ const Exchange = model.define('Exchange', {
         } else {
           output.response_status = this.ResponseStatus.response ? 'ACCEPTED' : 'DECLINED';
         }
+      }
+
+      if (this.Values) {
+        output = Object.assign(output, { values: mapValuesToNames(this.Values, this.type) });
       }
 
       return output;

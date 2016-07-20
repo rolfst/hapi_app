@@ -1,5 +1,7 @@
 import Boom from 'boom';
-import { Exchange, ExchangeResponse, ExchangeComment } from 'modules/flexchange/models';
+import {
+  Exchange, ExchangeResponse, ExchangeComment, ExchangeValue,
+} from 'modules/flexchange/models';
 import { User } from 'common/models';
 import { createExchangeResponse } from 'modules/flexchange/repositories/exchange-response';
 import {
@@ -13,27 +15,29 @@ import {
  * @method findExchangeById
  * @return {promise} Find exchange promise
  */
-export function findExchangeById(exchangeId, userId) {
-  const exchangePromise = Exchange
-    .findById(exchangeId, {
-      include: [
-        { model: User, as: 'ApprovedUser' },
-        { model: ExchangeResponse },
-        { model: ExchangeComment, as: 'Comments' },
-        { model: ExchangeResponse,
-          as: 'ResponseStatus',
-          where: { userId },
-          required: false,
-        },
-      ],
-    });
+export async function findExchangeById(exchangeId, userId) {
+  try {
+    const exchange = Exchange
+      .findById(exchangeId, {
+        include: [
+          { model: User, as: 'ApprovedUser' },
+          { model: ExchangeResponse },
+          { model: ExchangeComment, as: 'Comments' },
+          { model: ExchangeValue },
+          { model: ExchangeResponse,
+            as: 'ResponseStatus',
+            where: { userId },
+            required: false,
+          },
+        ],
+      });
 
-  return exchangePromise
-    .then(exchange => {
-      if (!exchange) throw Boom.notFound(`No exchange found with id ${exchangeId}.`);
+    if (!exchange) throw Boom.notFound(`No exchange found with id ${exchangeId}.`);
 
-      return exchange;
-    });
+    return exchange;
+  } catch (err) {
+    throw err;
+  }
 }
 
 /**

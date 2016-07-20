@@ -13,6 +13,13 @@ export function findTeamById(id) {
     });
 }
 
+export function findTeamsByIds(ids) {
+  return Team
+    .findAll({
+      where: { id: { $in: ids } },
+    });
+}
+
 export function createTeam(networkId, name, description) {
   return Team
     .create({ networkId, name, description });
