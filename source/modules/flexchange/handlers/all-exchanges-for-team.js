@@ -13,13 +13,7 @@ export default async (req, reply) => {
 
   const { credentials } = req.auth;
   const includes = parseIncludes(req.query);
-  const modelIncludes = [
-    { model: ExchangeResponse,
-      as: 'ResponseStatus',
-      where: { userId: req.auth.credentials.id },
-      required: false,
-    },
-  ];
+  const modelIncludes = [];
 
   if (_.includes(includes, 'responses')) {
     modelIncludes.push({ model: ExchangeResponse });
