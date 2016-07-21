@@ -11,8 +11,15 @@ export default async (req, reply) => {
     // Execute integration logic with adapter
   }
 
+  const { credentials } = req.auth;
   const includes = parseIncludes(req.query);
-  const modelIncludes = [];
+  const modelIncludes = [
+    { model: ExchangeResponse,
+      as: 'ResponseStatus',
+      where: { userId: req.auth.credentials.id },
+      required: false,
+    },
+  ];
 
   if (_.includes(includes, 'responses')) {
     modelIncludes.push({ model: ExchangeResponse });
@@ -24,7 +31,7 @@ export default async (req, reply) => {
 
   try {
     const team = await findTeamById(req.params.teamId);
-    const exchanges = await findExchangesByTeam(team, modelIncludes);
+    const exchanges = await findExchangesByTeam(team, credentials.id, modelIncludes);
 
     return reply(respondWithCollection(exchanges));
   } catch (err) {

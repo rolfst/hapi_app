@@ -66,7 +66,7 @@ const Exchange = model.define('Exchange', {
     field: 'decline_count',
     defaultValue: 0,
   },
-  approvedUser: {
+  approvedUserId: {
     type: Sequelize.INTEGER,
     field: 'approved_user',
     allowNull: true,

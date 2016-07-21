@@ -10,6 +10,7 @@ export default async (req, reply) => {
     // TODO: Execute integration logic with adapter
   }
 
+  const { credentials } = req.auth;
   const includes = parseIncludes(req.query);
   const modelIncludes = [];
 
@@ -22,7 +23,7 @@ export default async (req, reply) => {
   }
 
   try {
-    const exchanges = await findExchangesByNetwork(req.pre.network, modelIncludes);
+    const exchanges = await findExchangesByNetwork(req.pre.network, credentials.id, modelIncludes);
 
     return reply(respondWithCollection(exchanges));
   } catch (err) {

@@ -56,8 +56,14 @@ export function findExchangesByUser(user) {
  * @method findExchangesByNetwork
  * @return {promise} Get exchanges promise
  */
-export function findExchangesByNetwork(network, includes = []) {
-  return network.getExchanges({ include: includes });
+export function findExchangesByNetwork(network, userId, includes = []) {
+  return network.getExchanges({
+    include: [...includes, { model: ExchangeResponse,
+      as: 'ResponseStatus',
+      where: { userId },
+      required: false,
+    }],
+  });
 }
 
 /**
@@ -66,8 +72,14 @@ export function findExchangesByNetwork(network, includes = []) {
  * @method findExchangesByTeam
  * @return {promise} Get exchanges promise
  */
-export function findExchangesByTeam(team, includes = []) {
-  return team.getExchanges({ include: includes });
+export function findExchangesByTeam(team, userId, includes = []) {
+  return team.getExchanges({
+    include: [...includes, { model: ExchangeResponse,
+      as: 'ResponseStatus',
+      where: { userId },
+      required: false,
+    }],
+  });
 }
 
 /**
