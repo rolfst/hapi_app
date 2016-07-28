@@ -23,4 +23,13 @@ describe('userIsDeletedFromNetwork', () => {
 
     assert.equal(userIsDeletedFromNetwork(userFixture, 1), false);
   });
+
+  it('returns false when user doesn\'t belong to a network', () => {
+    const userFixture = {
+      ...credentials,
+      Networks: [],
+    };
+
+    assert.equal(userIsDeletedFromNetwork(userFixture, 1), false);
+  });
 });

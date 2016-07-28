@@ -28,15 +28,12 @@ export const inviteNewUser = async (network, { name, email, roleType }) => {
 
 export const inviteExistingUser = async (network, user, roleType) => {
   if (userIsDeletedFromNetwork(user, network.id)) {
-    const promises = [
-      networkRepo.activateUserInNetwork(network, user),
-      networkRepo.setRoleTypeForUser(network, user, roleType),
-    ];
-
-    await Promise.all(promises);
+    await networkRepo.activateUserInNetwork(network, user);
   } else {
     await networkRepo.addUserToNetwork(network, user, roleType);
   }
+
+  await networkRepo.setRoleTypeForUser(network, user, roleType);
 
   mailer.send(addedToNetworkMail(network, user));
 
