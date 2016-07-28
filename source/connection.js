@@ -2,7 +2,7 @@
 import Sequelize from 'sequelize';
 import config from 'database.json';
 
-const { host, database, username, password, dialect } = config[process.env.NODE_ENV];
+const { host, database, username, password, port, dialect } = config[process.env.NODE_ENV];
 
 const logging = process.env.NODE_ENV !== 'testing' ?
   log => console.info(log) : false;
@@ -17,5 +17,5 @@ const dialectOptions = {
 };
 
 export default new Sequelize(database, username, password,
-  { host, dialect, logging, define, dialectOptions }
+  { host, dialect, port, logging, define, dialectOptions }
 );

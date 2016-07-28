@@ -26,7 +26,7 @@ export default async (req, reply) => {
     check(req.auth.credentials, `${action}-exchange`);
     const exchange = await findExchangeById(req.params.exchangeId, req.auth.credentials.id);
 
-    if (isExpired(exchange.date)) throw Boom.badData('Exchange has been expired.');
+    if (isExpired(exchange.date)) throw Boom.forbidden('Exchange has been expired.');
     if (exchange.approvedBy) throw Boom.badData('Exchange has already been approved.');
 
     const updatedExchange = await actionHook(req.pre.network, exchange, req);
