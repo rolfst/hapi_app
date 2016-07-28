@@ -37,6 +37,8 @@ describe('Get exchanges for team', () => {
     return getRequest(`/v2/networks/${global.networks.flexAppeal.id}/teams/${team.id}/exchanges`)
       .then(response => {
         assert.lengthOf(response.result.data, 2);
+        assert.deepEqual(response.result.data[0].created_in, { type: 'team', ids: [team.id] });
+        assert.equal(response.result.data[0].user.full_name, global.users.admin.fullName);
         assert.isUndefined(response.result.data[0].responses);
         assert.equal(response.statusCode, 200);
       });
@@ -51,5 +53,9 @@ describe('Get exchanges for team', () => {
         assert.isDefined(response.result.data[0].responses);
         assert.equal(response.statusCode, 200);
       });
+  });
+
+  it('should fail when no values are provided', () => {
+    // TODO
   });
 });

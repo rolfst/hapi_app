@@ -15,8 +15,6 @@ import {
 const defaultIncludes = [
     { model: User },
     { model: User, as: 'ApprovedUser' },
-    { model: ExchangeResponse },
-    { model: ExchangeComment, as: 'Comments' },
     { model: ExchangeValue },
 ];
 
@@ -28,15 +26,17 @@ const defaultIncludes = [
  */
 export async function findExchangeById(exchangeId, userId) {
   try {
-    const extraInclude = {
+    const extraIncludes = [{
       model: ExchangeResponse,
       as: 'ResponseStatus',
       where: { userId },
       required: false,
-    };
+    },
+    { model: ExchangeResponse },
+    { model: ExchangeComment, as: 'Comments' }];
 
     const exchange = await Exchange
-      .findById(exchangeId, { include: [...defaultIncludes, extraInclude] });
+      .findById(exchangeId, { include: [...defaultIncludes, ...extraIncludes] });
 
     if (!exchange) throw Boom.notFound(`No exchange found with id ${exchangeId}.`);
 
@@ -69,16 +69,15 @@ export function findExchangesByUser(user) {
  * @method findExchangesByNetwork
  * @return {promise} Get exchanges promise
  */
-export function findExchangesByNetwork(network, userId) {
-  const extraInclude = {
-    model: ExchangeResponse,
+export function findExchangesByNetwork(network, userId, includes = []) {
+  const extraIncludes = [{ model: ExchangeResponse,
     as: 'ResponseStatus',
     where: { userId },
     required: false,
-  };
+  }, ...includes];
 
   return network.getExchanges({
-    include: [...defaultIncludes, extraInclude],
+    include: [...defaultIncludes, ...extraIncludes],
   });
 }
 
@@ -88,16 +87,15 @@ export function findExchangesByNetwork(network, userId) {
  * @method findExchangesByTeam
  * @return {promise} Get exchanges promise
  */
-export function findExchangesByTeam(team, userId) {
-  const extraInclude = {
-    model: ExchangeResponse,
+export function findExchangesByTeam(team, userId, includes = []) {
+  const extraIncludes = [{ model: ExchangeResponse,
     as: 'ResponseStatus',
     where: { userId },
     required: false,
-  };
+  }, ...includes];
 
   return team.getExchanges({
-    include: [...defaultIncludes, extraInclude],
+    include: [...defaultIncludes, ...extraIncludes],
   });
 }
 
