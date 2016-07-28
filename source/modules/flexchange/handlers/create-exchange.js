@@ -1,16 +1,17 @@
 import Boom from 'boom';
-import { exchangeTypes } from 'modules/flexchange/models/exchange';
-import { findExchangeById, createExchange } from 'modules/flexchange/repositories/exchange';
+import { roles } from 'common/services/permission';
+import excludeUser from 'common/utils/exclude-users';
+import IntegrationNotFound from 'common/errors/integration-not-found';
 import { validateTeamIds } from 'common/repositories/team';
 import { findAllUsersForNetwork } from 'common/repositories/network';
 import { findUsersByTeamIds } from 'common/repositories/team';
 import hasIntegration from 'common/utils/network-has-integration';
 import analytics from 'common/services/analytics';
 import newExchangeEvent from 'common/events/new-exchange-event';
+import { exchangeTypes } from 'modules/flexchange/models/exchange';
+import { findExchangeById, createExchange } from 'modules/flexchange/repositories/exchange';
 import * as createdByAdminNotification from '../notifications/exchange-created-by-admin';
 import * as createdNotification from '../notifications/exchange-created';
-import { roles } from 'common/services/permission';
-import excludeUser from 'common/utils/exclude-users';
 
 export const sendNotification = async (exchange, network, exchangeValues, loggedUser) => {
   const { roleType } = network.NetworkUser;
@@ -33,12 +34,13 @@ export default async (req, reply) => {
   try {
     const { credentials } = req.auth;
     const { network } = req.pre;
+    const { title, description, date, type, values } = req.payload;
+    const externalShiftId = req.payload.external_shift_id;
 
-    if (hasIntegration(network)) {
-      // Execute integration logic with adapter
+    if (externalShiftId && !hasIntegration(network)) {
+      throw IntegrationNotFound;
     }
 
-    const { title, description, date, type, values } = req.payload;
     const parsedValues = values ? JSON.parse(values) : null;
 
     if (type === exchangeTypes.TEAM) {
@@ -46,7 +48,7 @@ export default async (req, reply) => {
       if (!isValid) throw Boom.badData('Incorrect values.');
     }
 
-    const attributes = { title, description, date, type, values: parsedValues };
+    const attributes = { title, description, date, type, externalShiftId, values: parsedValues };
     const createdExchange = await createExchange(credentials.id, network.id, attributes);
 
     sendNotification(createdExchange, network, values, credentials);

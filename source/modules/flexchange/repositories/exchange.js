@@ -69,13 +69,16 @@ export function findExchangesByUser(user) {
  * @method findExchangesByNetwork
  * @return {promise} Get exchanges promise
  */
-export function findExchangesByNetwork(network, userId, includes = []) {
+export function findExchangesByNetwork(network, userId) {
+  const extraInclude = {
+    model: ExchangeResponse,
+    as: 'ResponseStatus',
+    where: { userId },
+    required: false,
+  };
+
   return network.getExchanges({
-    include: [...includes, { model: ExchangeResponse,
-      as: 'ResponseStatus',
-      where: { userId },
-      required: false,
-    }],
+    include: [...defaultIncludes, extraInclude],
   });
 }
 
@@ -85,13 +88,16 @@ export function findExchangesByNetwork(network, userId, includes = []) {
  * @method findExchangesByTeam
  * @return {promise} Get exchanges promise
  */
-export function findExchangesByTeam(team, userId, includes = []) {
+export function findExchangesByTeam(team, userId) {
+  const extraInclude = {
+    model: ExchangeResponse,
+    as: 'ResponseStatus',
+    where: { userId },
+    required: false,
+  };
+
   return team.getExchanges({
-    include: [...includes, { model: ExchangeResponse,
-      as: 'ResponseStatus',
-      where: { userId },
-      required: false,
-    }],
+    include: [...defaultIncludes, extraInclude],
   });
 }
 

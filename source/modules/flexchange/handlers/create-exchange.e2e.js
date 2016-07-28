@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import moment from 'moment';
+import { findExchangeById } from 'modules/flexchange/repositories/exchange';
 import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import { postRequest } from 'common/test-utils/request';
 import { createTeam } from 'common/repositories/team';
@@ -20,7 +21,7 @@ describe('Create exchange', () => {
     otherNetworkTeam.destroy();
   });
 
-  it('creates exchange for a network', async () => {
+  it('should create exchange for a network', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges`;
     const { statusCode, result } = await postRequest(endpoint, {
       title: 'Test shift for network',
@@ -34,7 +35,7 @@ describe('Create exchange', () => {
     assert.equal(statusCode, 200);
   });
 
-  it('creates exchange for a team', async () => {
+  it('should create exchange for a team', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges`;
     const { statusCode, result } = await postRequest(endpoint, {
       title: 'Test shift for network',
@@ -47,6 +48,32 @@ describe('Create exchange', () => {
     assert.deepEqual(result.data.created_in, { type: 'team', ids: [flexAppealTeam.id] });
     assert.equal(result.data.title, 'Test shift for network');
     assert.equal(statusCode, 200);
+  });
+
+  it('should create exchange with external shift id', async () => {
+    const endpoint = `/v2/networks/${global.networks.pmt.id}/exchanges`;
+    const { result } = await postRequest(endpoint, {
+      title: 'Test shift for network',
+      date: moment().format('YYYY-MM-DD'),
+      type: exchangeTypes.NETWORK,
+      external_shift_id: 1,
+    });
+
+    const actual = await findExchangeById(result.data.id);
+
+    assert.equal(actual.externalShiftId, 1);
+  });
+
+  it('should fail for exchange with external shift id in network without integration', async () => {
+    const endpoint = `/v2/networks/${network.id}/exchanges`;
+    const { statusCode } = await postRequest(endpoint, {
+      title: 'Test shift for network',
+      date: moment().format('YYYY-MM-DD'),
+      type: exchangeTypes.NETWORK,
+      external_shift_id: 1,
+    });
+
+    assert.equal(statusCode, 403);
   });
 
   it('should fail when id\'s don\'t match teams in database', async () => {

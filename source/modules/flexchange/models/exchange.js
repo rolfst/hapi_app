@@ -56,6 +56,11 @@ const Exchange = model.define('Exchange', {
     field: 'approved_user',
     allowNull: true,
   },
+  externalShiftId: {
+    type: Sequelize.INTEGER,
+    field: 'external_shift_id',
+    allowNull: true,
+  },
   responseStatus: {
     type: Sequelize.VIRTUAL,
   },
