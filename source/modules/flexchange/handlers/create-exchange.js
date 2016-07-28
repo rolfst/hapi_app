@@ -1,11 +1,9 @@
 import Boom from 'boom';
-import { createExchange } from 'modules/flexchange/repositories/exchange';
-import { createValuesForExchange } from 'modules/flexchange/repositories/exchange-value';
+import { exchangeTypes } from 'modules/flexchange/models/exchange';
+import { findExchangeById, createExchange } from 'modules/flexchange/repositories/exchange';
 import { validateTeamIds } from 'common/repositories/team';
-import { validateUserIds } from 'common/repositories/user';
 import { findAllUsersForNetwork } from 'common/repositories/network';
 import { findUsersByTeamIds } from 'common/repositories/team';
-import { findUsersByIds } from 'common/repositories/user';
 import hasIntegration from 'common/utils/network-has-integration';
 import analytics from 'common/services/analytics';
 import newExchangeEvent from 'common/events/new-exchange-event';
@@ -18,9 +16,8 @@ export const sendNotification = async (exchange, network, exchangeValues, logged
   const { roleType } = network.NetworkUser;
   let usersPromise;
 
-  if (exchange.type === 'ALL') usersPromise = findAllUsersForNetwork(network);
-  else if (exchange.type === 'TEAM') usersPromise = findUsersByTeamIds(exchangeValues);
-  else if (exchange.type === 'USER') usersPromise = findUsersByIds(exchangeValues);
+  if (exchange.type === exchangeTypes.NETWORK) usersPromise = findAllUsersForNetwork(network);
+  else if (exchange.type === exchangeTypes.TEAM) usersPromise = findUsersByTeamIds(exchangeValues);
 
   const users = await usersPromise;
   const usersToNotify = excludeUser(users, loggedUser);
@@ -36,33 +33,28 @@ export default async (req, reply) => {
   try {
     const { credentials } = req.auth;
     const { network } = req.pre;
-    let values;
 
     if (hasIntegration(network)) {
       // Execute integration logic with adapter
     }
 
-    const newExchange = await createExchange(credentials.id, network.id, req.payload);
-    const { type } = newExchange;
+    const { title, description, date, type, values } = req.payload;
+    const parsedValues = values ? JSON.parse(values) : null;
 
-    if (['TEAM', 'USER'].includes(type)) {
-      let validator;
-      values = JSON.parse(req.payload.values);
-
-      if (type === 'TEAM') validator = validateTeamIds(values, network.id);
-      if (type === 'USER') validator = validateUserIds(values, network.id);
-
-      const isValid = await validator;
+    if (type === exchangeTypes.TEAM) {
+      const isValid = await validateTeamIds(parsedValues, network.id);
       if (!isValid) throw Boom.badData('Incorrect values.');
-
-      await createValuesForExchange(newExchange.id, values);
     }
 
-    sendNotification(newExchange, network, values, credentials);
+    const attributes = { title, description, date, type, values: parsedValues };
+    const createdExchange = await createExchange(credentials.id, network.id, attributes);
 
-    analytics.track(newExchangeEvent(req.pre.network, newExchange));
+    sendNotification(createdExchange, network, values, credentials);
+    analytics.track(newExchangeEvent(req.pre.network, createdExchange));
 
-    return reply({ success: true, data: newExchange });
+    const response = await findExchangeById(createdExchange.id);
+
+    return reply({ success: true, data: response.toJSON() });
   } catch (err) {
     console.log('Error creating exchange', err);
     return reply(err);

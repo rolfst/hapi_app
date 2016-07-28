@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import moment from 'moment';
+import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import { postRequest } from 'common/test-utils/request';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
 
@@ -12,7 +13,7 @@ describe('Create exchange comment', () => {
 
     exchange = await createExchange(global.users.admin.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
-      type: 'ALL',
+      type: exchangeTypes.NETWORK,
       title: 'Test shift 1 for network',
     });
   });

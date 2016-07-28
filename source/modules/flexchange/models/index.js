@@ -1,3 +1,4 @@
+import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import ExchangeModel from 'modules/flexchange/models/exchange';
 import ExchangeCommentModel from 'modules/flexchange/models/exchange-comment';
 import ExchangeResponseModel from 'modules/flexchange/models/exchange-response';
@@ -69,7 +70,7 @@ TeamModel.belongsToMany(ExchangeModel, {
   foreignKey: 'value',
   otherKey: 'exchange_id',
   through: 'exchange_values',
-  scope: { type: 'TEAM' },
+  scope: { type: exchangeTypes.TEAM },
   timestamps: false,
 });
 

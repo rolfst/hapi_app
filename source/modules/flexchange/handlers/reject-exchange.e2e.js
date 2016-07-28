@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import moment from 'moment';
+import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import { patchRequest } from 'common/test-utils/request';
 import {
   createExchange,
@@ -18,13 +19,13 @@ describe('Reject exchange', () => {
 
     const exchangeAPromise = createExchange(global.users.admin.id, global.networks.flexAppeal.id, {
       date: moment().format('YYYY-MM-DD'),
-      type: 'ALL',
+      type: exchangeTypes.NETWORK,
       title: 'Test shift to accept & reject',
     });
 
     const exchangeBPromise = createExchange(global.users.admin.id, global.networks.flexAppeal.id, {
       date: moment().format('YYYY-MM-DD'),
-      type: 'ALL',
+      type: exchangeTypes.NETWORK,
       title: 'Test shift to approve',
     });
 

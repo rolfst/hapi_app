@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
+import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import * as hasIntegration from 'common/utils/network-has-integration';
 import * as exchangeRepo from 'modules/flexchange/repositories/exchange';
 import * as exchangeValueRepo from 'modules/flexchange/repositories/exchange-value';
@@ -15,9 +16,10 @@ describe('Create exchange', () => {
     sandbox = sinon.sandbox.create();
 
     sandbox.stub(hasIntegration, 'default').returns(null);
-    sandbox.stub(exchangeRepo, 'createExchange').returns(Promise.resolve({ type: 'ALL' }));
     sandbox.stub(exchangeValueRepo, 'createValuesForExchange').returns(null);
     sandbox.stub(networkRepo, 'findAllUsersForNetwork').returns(Promise.resolve([]));
+    sandbox.stub(exchangeRepo, 'createExchange')
+      .returns(Promise.resolve({ type: exchangeTypes.NETWORK }));
   });
   after(() => (sandbox.restore()));
 
@@ -30,7 +32,7 @@ describe('Create exchange', () => {
       } },
       auth: { credentials: {} },
       params: { exchangeId: null },
-      payload: { user_id: 1, type: 'ALL' },
+      payload: { user_id: 1, type: exchangeTypes.NETWORK },
     };
 
     await handler.default(requestFixture, () => false);
@@ -47,7 +49,7 @@ describe('Create exchange', () => {
       } },
       auth: { credentials: {} },
       params: { exchangeId: null },
-      payload: { user_id: 1, type: 'ALL' },
+      payload: { user_id: 1, type: exchangeTypes.NETWORK },
     };
 
     await handler.default(requestFixture, () => false);

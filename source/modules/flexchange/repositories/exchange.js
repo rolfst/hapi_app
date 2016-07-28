@@ -1,13 +1,24 @@
 import Boom from 'boom';
+import { omit } from 'lodash';
+import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import {
   Exchange, ExchangeResponse, ExchangeComment, ExchangeValue,
 } from 'modules/flexchange/models';
 import { User } from 'common/models';
 import { createExchangeResponse } from 'modules/flexchange/repositories/exchange-response';
+import { createValuesForExchange } from 'modules/flexchange/repositories/exchange-value';
 import {
   findExchangeResponseByExchangeAndUser,
   removeExchangeResponseForExchangeAndUser,
 } from 'modules/flexchange/repositories/exchange-response';
+
+const defaultIncludes = [
+    { model: User },
+    { model: User, as: 'ApprovedUser' },
+    { model: ExchangeResponse },
+    { model: ExchangeComment, as: 'Comments' },
+    { model: ExchangeValue },
+];
 
 /**
  * Find a specific exchange by id
@@ -17,20 +28,15 @@ import {
  */
 export async function findExchangeById(exchangeId, userId) {
   try {
+    const extraInclude = {
+      model: ExchangeResponse,
+      as: 'ResponseStatus',
+      where: { userId },
+      required: false,
+    };
+
     const exchange = await Exchange
-      .findById(exchangeId, {
-        include: [
-          { model: User, as: 'ApprovedUser' },
-          { model: ExchangeResponse },
-          { model: ExchangeComment, as: 'Comments' },
-          { model: ExchangeValue },
-          { model: ExchangeResponse,
-            as: 'ResponseStatus',
-            where: { userId },
-            required: false,
-          },
-        ],
-      });
+      .findById(exchangeId, { include: [...defaultIncludes, extraInclude] });
 
     if (!exchange) throw Boom.notFound(`No exchange found with id ${exchangeId}.`);
 
@@ -47,7 +53,14 @@ export async function findExchangeById(exchangeId, userId) {
  * @return {promise} Get exchanges promise
  */
 export function findExchangesByUser(user) {
-  return user.getExchanges();
+  const extraInclude = {
+    model: ExchangeResponse,
+    as: 'ResponseStatus',
+    where: { userId: user.id },
+    required: false,
+  };
+
+  return user.getExchanges({ include: [...defaultIncludes, extraInclude] });
 }
 
 /**
@@ -97,15 +110,20 @@ export function deleteExchangeById(exchangeId) {
  * Create a new exchange for network
  * @param {number} userId - Id of the user placing the exchange
  * @param {number} networkId - Id of the network the exchange is being placed in
- * @param {object} payload - Object containing payload data
+ * @param {object} attributes - Object containing attributes
  * @method createExchange
  * @return {promise} Create exchange promise
  */
-export function createExchange(userId, networkId, payload) {
-  const { title, description, date, type } = payload;
+export async function createExchange(userId, networkId, attributes) {
+  const exchange = await Exchange.create({ ...omit(attributes, 'values'), userId, networkId });
 
-  return Exchange
-    .create({ userId, networkId, title, description, date, type });
+  if (exchange.type === exchangeTypes.NETWORK) {
+    await createValuesForExchange(exchange.id, [networkId]);
+  } else {
+    await createValuesForExchange(exchange.id, attributes.values);
+  }
+
+  return exchange.reload();
 }
 
 /**

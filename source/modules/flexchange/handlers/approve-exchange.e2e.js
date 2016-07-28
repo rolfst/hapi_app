@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import moment from 'moment';
+import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import blueprints from 'common/test-utils/blueprints';
 import authenticate from 'common/test-utils/authenticate';
 import { patchRequest } from 'common/test-utils/request';
@@ -21,13 +22,13 @@ describe('Approve exchange', () => {
 
     const exchangeToAccept = await createExchange(creator.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
-      type: 'ALL',
+      type: exchangeTypes.NETWORK,
       title: 'Test exchange to approve',
     });
 
     const exchangeToReject = await createExchange(creator.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
-      type: 'ALL',
+      type: exchangeTypes.NETWORK,
       title: 'Test exchange to approve',
     });
 

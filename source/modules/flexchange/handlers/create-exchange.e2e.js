@@ -1,22 +1,17 @@
 import { assert } from 'chai';
 import moment from 'moment';
-import { getRequest, postRequest } from 'common/test-utils/request';
-import { createExchange } from 'modules/flexchange/repositories/exchange';
+import { exchangeTypes } from 'modules/flexchange/models/exchange';
+import { postRequest } from 'common/test-utils/request';
 import { createTeam } from 'common/repositories/team';
 
-let exchange;
+let network;
 let flexAppealTeam;
 let otherNetworkTeam;
 
 describe('Create exchange', () => {
   before(async () => {
-    exchange = await createExchange(global.users.admin.id, global.networks.flexAppeal.id, {
-      date: moment().format('YYYY-MM-DD'),
-      type: 'ALL',
-      title: 'Test shift for network',
-    });
-
-    flexAppealTeam = await createTeam(global.networks.flexAppeal.id, 'Test network', '');
+    network = global.networks.flexAppeal;
+    flexAppealTeam = await createTeam(network.id, 'Test network', '');
     otherNetworkTeam = await createTeam(32, 'Test network', '');
   });
 
@@ -25,46 +20,41 @@ describe('Create exchange', () => {
     otherNetworkTeam.destroy();
   });
 
-  it('should return exchange data', async () => {
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/exchanges/${exchange.id}`;
-    const { statusCode, result } = await getRequest(endpoint);
+  it('creates exchange for a network', async () => {
+    const endpoint = `/v2/networks/${network.id}/exchanges`;
+    const { statusCode, result } = await postRequest(endpoint, {
+      title: 'Test shift for network',
+      date: moment().format('YYYY-MM-DD'),
+      type: exchangeTypes.NETWORK,
+    });
 
+    assert.equal(result.data.user.fullName, global.users.admin.full_name);
+    assert.deepEqual(result.data.created_in, { type: 'network', id: network.id });
     assert.equal(result.data.title, 'Test shift for network');
     assert.equal(statusCode, 200);
   });
 
-  it('should fail when id\'s don\'t match users in database', async () => {
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/exchanges`;
-    const { admin } = global.users;
-    const { statusCode } = await postRequest(endpoint, {
-      title: 'Test shift',
+  it('creates exchange for a team', async () => {
+    const endpoint = `/v2/networks/${network.id}/exchanges`;
+    const { statusCode, result } = await postRequest(endpoint, {
+      title: 'Test shift for network',
       date: moment().format('YYYY-MM-DD'),
-      type: 'USER',
-      values: JSON.stringify([admin.id, 2]),
+      type: exchangeTypes.TEAM,
+      values: JSON.stringify([flexAppealTeam.id]),
     });
 
-    assert.equal(statusCode, 422);
-  });
-
-  it('should fail when user don\'t belong to the network', async () => {
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/exchanges`;
-    const { admin, networklessUser } = global.users;
-    const { statusCode } = await postRequest(endpoint, {
-      title: 'Test shift',
-      date: moment().format('YYYY-MM-DD'),
-      type: 'USER',
-      values: JSON.stringify([admin.id, networklessUser.id]),
-    });
-
-    assert.equal(statusCode, 422);
+    assert.equal(result.data.user.fullName, global.users.admin.full_name);
+    assert.deepEqual(result.data.created_in, { type: 'team', ids: [flexAppealTeam.id] });
+    assert.equal(result.data.title, 'Test shift for network');
+    assert.equal(statusCode, 200);
   });
 
   it('should fail when id\'s don\'t match teams in database', async () => {
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/exchanges`;
+    const endpoint = `/v2/networks/${network.id}/exchanges`;
     const { statusCode } = await postRequest(endpoint, {
       title: 'Test shift',
       date: moment().format('YYYY-MM-DD'),
-      type: 'TEAM',
+      type: exchangeTypes.TEAM,
       values: JSON.stringify([flexAppealTeam.id, '20']),
     });
 
@@ -72,11 +62,11 @@ describe('Create exchange', () => {
   });
 
   it('should fail when teams don\'t belong to the network', async () => {
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/exchanges`;
+    const endpoint = `/v2/networks/${network.id}/exchanges`;
     const { statusCode } = await postRequest(endpoint, {
       title: 'Test shift',
       date: moment().format('YYYY-MM-DD'),
-      type: 'TEAM',
+      type: exchangeTypes.TEAM,
       values: JSON.stringify([flexAppealTeam.id, otherNetworkTeam.id]),
     });
 

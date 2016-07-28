@@ -1,17 +1,18 @@
 import { assert } from 'chai';
 import moment from 'moment';
+import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import { patchRequest } from 'common/test-utils/request';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
 
-let exchange = null;
+let exchange;
 
 describe('Decline exchange', () => {
-  before(() => {
-    return createExchange(global.users.admin.id, global.networks.flexAppeal.id, {
+  before(async () => {
+    exchange = await createExchange(global.users.admin.id, global.networks.flexAppeal.id, {
       date: moment().format('YYYY-MM-DD'),
-      type: 'ALL',
+      type: exchangeTypes.NETWORK,
       title: 'Test shift to decline',
-    }).then(createdExchange => (exchange = createdExchange));
+    });
   });
 
   it('should return correct data', async () => {

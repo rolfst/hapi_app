@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import moment from 'moment';
+import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import { putRequest } from 'common/test-utils/request';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
 
@@ -9,7 +10,7 @@ describe('Update exchange', () => {
   before(() => {
     return createExchange(global.users.admin.id, global.networks.flexAppeal.id, {
       date: moment().format('YYYY-MM-DD'),
-      type: 'ALL',
+      type: exchangeTypes.NETWORK,
       title: 'Test shift to update',
     }).then(createdExchange => (exchange = createdExchange));
   });

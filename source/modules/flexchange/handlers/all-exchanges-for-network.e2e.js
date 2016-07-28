@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import moment from 'moment';
+import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import { getRequest } from 'common/test-utils/request';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
 
@@ -7,7 +8,7 @@ describe('Get exchanges for network', () => {
   before(() => {
     const defaultArgs = {
       date: moment().format('YYYY-MM-DD'),
-      type: 'ALL',
+      type: exchangeTypes.NETWORK,
     };
 
     return global.networks.flexAppeal.getExchanges().then(exchanges => {

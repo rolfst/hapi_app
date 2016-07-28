@@ -1,25 +1,10 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
 import formatDate from 'common/utils/format-date';
-import { User } from 'common/models';
 
 export const exchangeTypes = {
-  ALL: 'ALL',
+  NETWORK: 'ALL',
   TEAM: 'TEAM',
-  USER: 'USER',
-};
-
-const mapValuesToNames = (values, type) => {
-  switch (type) {
-    case exchangeTypes.ALL:
-      return [values.name];
-    case exchangeTypes.TEAM:
-      return values.map(team => team.name);
-    case exchangeTypes.USER:
-      return values.map(user => user.fullName);
-    default:
-      return [];
-  }
 };
 
 const Exchange = model.define('Exchange', {
@@ -47,7 +32,7 @@ const Exchange = model.define('Exchange', {
   },
   type: {
     type: Sequelize.ENUM( // eslint-disable-line new-cap
-      exchangeTypes.ALL, exchangeTypes.TEAM, exchangeTypes.USER
+      exchangeTypes.NETWORK, exchangeTypes.TEAM
     ),
     allowNull: false,
   },
@@ -78,9 +63,6 @@ const Exchange = model.define('Exchange', {
   tableName: 'exchanges',
   createdAt: 'created_at',
   updatedAt: 'updated_at',
-  defaultScope: {
-    include: [{ model: User }],
-  },
   instanceMethods: {
     toJSON: function () { // eslint-disable-line func-names, object-shorthand
       let output = {
@@ -128,11 +110,17 @@ const Exchange = model.define('Exchange', {
         }
       }
 
-      if (this.Values) {
-        output = Object.assign(output, {
-          placed_for: this.type,
-          values: mapValuesToNames(this.Values, this.type),
-        });
+      if (this.ExchangeValues) {
+        let exchangeValueOutput;
+
+        if (this.type === exchangeTypes.NETWORK) {
+          exchangeValueOutput = { type: 'network', id: this.ExchangeValues[0].value };
+        } else {
+          const valueIds = this.ExchangeValues.map(v => v.value);
+          exchangeValueOutput = { type: this.type.toLowerCase(), ids: valueIds };
+        }
+
+        output = { ...output, created_in: exchangeValueOutput };
       }
 
       return output;

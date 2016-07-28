@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import moment from 'moment';
+import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import { getRequest } from 'common/test-utils/request';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
 
@@ -12,7 +13,7 @@ describe('View exchange', () => {
 
     exchange = await createExchange(global.users.admin.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
-      type: 'ALL',
+      type: exchangeTypes.NETWORK,
       title: 'Test shift to view',
       description: 'Test description for this cool shift',
     });
@@ -22,9 +23,10 @@ describe('View exchange', () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}`;
     const { result } = await getRequest(endpoint);
 
+    assert.equal(result.data.user.fullName, global.users.admin.full_name);
     assert.equal(result.data.title, 'Test shift to view');
     assert.equal(result.data.vote_result, null);
-    assert.equal(result.data.placed_for, 'ALL');
+    assert.deepEqual(result.data.created_in, { type: 'network', id: network.id });
     assert.equal(result.data.description, 'Test description for this cool shift');
   });
 
