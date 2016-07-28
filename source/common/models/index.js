@@ -6,6 +6,11 @@ import IntegrationModel from 'common/models/integration';
 import NetworkUserModel from 'common/models/network-user';
 import UserDeviceModel from 'common/models/user-device';
 
+NetworkModel.belongsTo(UserModel, {
+  as: 'SuperAdmin',
+  foreignKey: 'user_id',
+});
+
 NetworkModel.belongsToMany(IntegrationModel, {
   foreignKey: 'network_id',
   otherKey: 'service_id',
@@ -17,14 +22,17 @@ NetworkModel.belongsToMany(UserModel, {
   foreignKey: 'network_id',
   otherKey: 'user_id',
   through: NetworkUserModel,
+  scope: {
+    deletedAt: { $ne: null },
+  },
   timestamps: false,
 });
 
 NetworkModel.belongsToMany(UserModel, {
+  as: 'Admins',
   foreignKey: 'network_id',
   otherKey: 'user_id',
   through: NetworkUserModel,
-  as: 'Admins',
   scope: sequelize.where(sequelize.col('NetworkUser.role_type'), 'ADMIN'),
   timestamps: false,
 });

@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import makePassword from 'common/utils/make-password';
+import * as password from 'common/utils/password';
 import authenticateUser from 'common/utils/authenticate-user';
 import WrongCredentials from 'common/errors/wrong-credentials';
 import * as checkPassword from 'common/utils/check-password';
@@ -14,7 +14,7 @@ describe('authenticateUser', () => {
   it('check if credentials match', async () => {
     sinon.stub(userRepo, 'findUserByUsername').returns(Promise.resolve({
       username: credentials.username,
-      password: makePassword(credentials.password),
+      password: password.make(credentials.password),
     }));
 
     const stub = sinon.stub(checkPassword, 'default').returns(true);

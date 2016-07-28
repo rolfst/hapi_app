@@ -6,13 +6,23 @@ const credentials = {
 };
 
 describe('userBelongsToNetwork', () => {
-  it('should check if user belongs to network', () => {
+  it('check if user belongs to any network', () => {
     const userFixture = {
       ...credentials,
-      Networks: [{ name: 'Flex-Appeal', NetworkUser: { deletedAt: null } }],
+      Networks: [{ id: 1, name: 'Flex-Appeal', NetworkUser: { deletedAt: null } }],
     };
 
     assert.equal(userBelongsToNetwork(userFixture), true);
     assert.equal(userBelongsToNetwork({ ...userFixture, Networks: [] }), false);
+  });
+
+  it('check if user belongs to the given network', () => {
+    const userFixture = {
+      ...credentials,
+      Networks: [{ id: 1, name: 'Flex-Appeal', NetworkUser: { deletedAt: null } }],
+    };
+
+    assert.equal(userBelongsToNetwork(userFixture, 1), true);
+    assert.equal(userBelongsToNetwork(userFixture, 2), false);
   });
 });

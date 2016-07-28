@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import Parse from 'parse/node';
 import * as notify from 'common/services/notifier';
 
-describe('Service: notifier', () => {
+describe('Notifier', () => {
   it('should return the right receivers', () => {
     const users = [
       { fullName: 'Test1', email: 'test1@flex-appeal.nl' },

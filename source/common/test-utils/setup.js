@@ -4,6 +4,7 @@ import sinon from 'sinon';
 import dotenv from 'dotenv';
 import createServer from 'server';
 import Parse from 'parse/node';
+import * as mailer from 'common/services/mailer';
 import blueprints from 'common/test-utils/blueprints';
 import { roles } from 'common/services/permission';
 import { createUser } from 'common/repositories/user';
@@ -92,6 +93,9 @@ before(async () => {
 
     // Disable Parse send when testing
     sinon.stub(Parse.Push, 'send').returns(null);
+
+    // Disble mailing when testing
+    sinon.stub(mailer, 'send').returns(null);
   } catch (err) {
     console.log('Error in test setup', err);
   }

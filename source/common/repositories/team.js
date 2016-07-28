@@ -13,6 +13,10 @@ export function findTeamById(id) {
     });
 }
 
+export function addUserToTeam(team, user) {
+  return team.addUser(user);
+}
+
 export function findTeamsByIds(ids) {
   return Team
     .findAll({
@@ -20,7 +24,7 @@ export function findTeamsByIds(ids) {
     });
 }
 
-export function createTeam(networkId, name, description) {
+export function createTeam(networkId, name, description = null) {
   return Team
     .create({ networkId, name, description });
 }

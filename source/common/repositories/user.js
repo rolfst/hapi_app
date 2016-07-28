@@ -17,6 +17,9 @@ const defaultIncludes = {
     include: [{
       model: Integration,
       required: false,
+    }, {
+      model: User,
+      as: 'SuperAdmin',
     }],
   }],
 };
@@ -38,6 +41,10 @@ export function findUsersByIds(ids) {
       id: { $in: ids },
     },
   });
+}
+
+export function findUserByEmail(email) {
+  return User.findOne({ ...defaultIncludes, where: { email } });
 }
 
 export async function findUserByUsername(username) {

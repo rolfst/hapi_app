@@ -1,11 +1,11 @@
 import { assert } from 'chai';
 import checkPassword from 'common/utils/check-password';
-import makePassword from 'common/utils/make-password';
+import * as password from 'common/utils/password';
 
 describe('checkPassword', () => {
   it('return true when password match', () => {
     const plainPassword = 'foo';
-    const hashedPassword = makePassword(plainPassword);
+    const hashedPassword = password.make(plainPassword);
 
     const actual = checkPassword(hashedPassword, plainPassword);
     assert.equal(actual, true);
@@ -13,7 +13,7 @@ describe('checkPassword', () => {
 
   it('return false when password do not match', () => {
     const plainPassword = 'foo';
-    const hashedPassword = makePassword('baz');
+    const hashedPassword = password.make('baz');
 
     const actual = checkPassword(hashedPassword, plainPassword);
     assert.equal(actual, false);

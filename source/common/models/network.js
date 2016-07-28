@@ -38,6 +38,10 @@ const Network = model.define('Network', {
     type: Sequelize.STRING,
     field: 'enabled_components',
   },
+  welcomeMailTemplate: {
+    type: Sequelize.STRING,
+    field: 'welcome_mail_template',
+  },
 }, {
   tableName: 'networks',
   timestamps: true,

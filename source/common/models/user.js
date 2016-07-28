@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 import model from 'connection';
-import makePassword from 'common/utils/make-password';
+import * as password from 'common/utils/password';
 import formatDate from 'common/utils/format-date';
 import makeFunctionName from 'common/utils/make-function-name';
 import Conversation from 'modules/chat/models/conversation';
@@ -33,7 +33,7 @@ const User = model.define('User', {
     type: Sequelize.STRING,
     allowNull: true,
     set: function (val) { // eslint-disable-line object-shorthand, func-names
-      this.setDataValue('password', makePassword(val));
+      this.setDataValue('password', password.make(val));
     },
   },
   address: {

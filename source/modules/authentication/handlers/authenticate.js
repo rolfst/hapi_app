@@ -41,6 +41,7 @@ export default async (req, reply) => {
 
     return reply({ data });
   } catch (err) {
+    console.log('Error when authenticating user', err);
     return reply(err);
   }
 };

@@ -1,12 +1,12 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import bcrypt from 'bcrypt';
-import makePassword from 'common/utils/make-password';
+import * as password from 'common/utils/password';
 
-describe('makePassword', () => {
+describe('password', () => {
   it('should make password hash', () => {
     const stub = sinon.stub(bcrypt, 'hashSync').returns('foo');
-    const actual = makePassword('mypassword');
+    const actual = password.make('mypassword');
 
     assert.equal(stub.calledWith('mypassword'), true);
     assert.equal(actual, 'foo');
@@ -15,7 +15,7 @@ describe('makePassword', () => {
 
   it('should replace hashed password', () => {
     const stub = sinon.stub(bcrypt, 'hashSync').returns('$2a$hashedpassword');
-    const actual = makePassword('mypassword');
+    const actual = password.make('mypassword');
 
     assert.equal(actual, '$2y$hashedpassword');
     stub.restore();

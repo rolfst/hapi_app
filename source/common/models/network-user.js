@@ -6,6 +6,14 @@ const NetworkUser = model.define('NetworkUser', {
     type: Sequelize.INTEGER,
     field: 'external_id',
   },
+  networkId: {
+    type: Sequelize.INTEGER,
+    field: 'network_id',
+  },
+  userId: {
+    type: Sequelize.INTEGER,
+    field: 'user_id',
+  },
   roleType: {
     type: Sequelize.STRING,
     field: 'role_type',

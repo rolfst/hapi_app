@@ -1,5 +1,10 @@
 import Boom from 'boom';
-import { Network, Integration } from 'common/models';
+import { Network, User, NetworkUser, Integration } from 'common/models';
+
+const defaultIncludes = [
+  { model: Integration, required: false },
+  { model: User, as: 'SuperAdmin' },
+];
 
 export function findIntegrationByName(name) {
   return Integration.findOne({ where: { name } });
@@ -9,10 +14,30 @@ export function deleteNetwork(id) {
   return Network.destroy({ where: { id } });
 }
 
+export async function activateUserInNetwork(network, user) {
+  const result = await NetworkUser.findOne({
+    where: { networkId: network.id, userId: user.id },
+  });
+
+  return result.update({ deletedAt: null });
+}
+
+export async function setRoleTypeForUser(network, user, roleType) {
+  const result = await NetworkUser.findOne({
+    where: { networkId: network.id, userId: user.id },
+  });
+
+  return result.update({ roleType });
+}
+
+export function addUserToNetwork(network, user, roleType) {
+  return user.addNetwork(network, { roleType });
+}
+
 export function findNetworkById(id) {
   return Network
     .findById(id, {
-      include: [{ model: Integration, required: false }],
+      include: defaultIncludes,
     })
     .then(network => {
       if (!network) return Boom.notFound(`No network found with id ${id}.`);
@@ -23,7 +48,7 @@ export function findNetworkById(id) {
 
 export function findNetwork(data) {
   return Network
-    .findOne({ where: data, include: [{ model: Integration, required: false }] })
+    .findOne({ where: data, include: defaultIncludes })
     .then(network => {
       if (!network) return Boom.notFound('No network found for the given data.');
 
@@ -47,6 +72,10 @@ export function findAllUsersForNetwork(network) {
 
 export function findAdminsByNetwork(network) {
   return network.getAdmins();
+}
+
+export function findTeamsForNetwork(network) {
+  return network.getTeams();
 }
 
 export async function createNetwork(userId, name = null, externalId = null) {
