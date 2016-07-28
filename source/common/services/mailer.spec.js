@@ -1,6 +1,5 @@
 import { assert } from 'chai';
 import _ from 'lodash';
-import sinon from 'sinon';
 import mailFixture from 'common/test-utils/fixtures/mail';
 import * as mailer from 'common/services/mailer';
 
