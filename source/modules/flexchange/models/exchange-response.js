@@ -61,6 +61,7 @@ const ExchangeResponse = model.define('ExchangeResponse', {
       let output = {
         type: 'exchange_response',
         response: !!this.response,
+        is_approved: this.approved !== null ? !!this.approved : null,
         created_at: formatDate(this.created_at),
       };
 
