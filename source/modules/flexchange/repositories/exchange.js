@@ -46,6 +46,14 @@ export async function findExchangeById(exchangeId, userId) {
   }
 }
 
+export async function findExchangesByExternalIds(externalIds) {
+  const exchanges = await Exchange.findAll({
+    where: { externalShiftId: { $in: externalIds } },
+  });
+
+  return exchanges;
+}
+
 /**
  * Find exchanges by user
  * @param {User} user - User we want the exchanges from
