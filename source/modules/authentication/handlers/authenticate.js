@@ -1,23 +1,28 @@
 import moment from 'moment';
-import { getIntegrationTokensForUser, updateUser } from 'common/repositories/user';
+import { updateUser } from 'common/repositories/user';
 import { findOrCreateUserDevice } from 'common/repositories/authentication';
 import userBelongsToNetwork from 'common/utils/user-belongs-to-network';
 import createAccessToken from 'common/utils/create-access-token';
 import createRefreshToken from 'common/utils/create-refresh-token';
-import authenticateUser from 'common/utils/authenticate-user';
 import analytics from 'common/services/analytics';
 import firstLoginEvent from 'common/events/first-login-event';
 import NotInAnyNetwork from 'common/errors/not-in-any-network';
+import authenticateUser from 'modules/authentication/services/authenticate-user';
+import authenticateIntegrations from 'modules/authentication/services/authenticate-integrations';
+import setIntegrationTokens from 'modules/authentication/services/set-integration-tokens';
 
 export default async (req, reply) => {
   const { username, password } = req.payload;
-  let authenticatedIntegrations = [];
 
   try {
     const credentials = { username, password };
     const user = await authenticateUser(credentials);
 
-    authenticatedIntegrations = await getIntegrationTokensForUser(user);
+    const authenticatedIntegrations = await authenticateIntegrations(user.Networks, credentials);
+
+    if (authenticatedIntegrations.length > 0) {
+      await setIntegrationTokens(user, authenticatedIntegrations);
+    }
 
     if (!userBelongsToNetwork(user)) throw NotInAnyNetwork;
 

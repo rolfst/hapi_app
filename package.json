@@ -47,7 +47,8 @@
     "sequelize": "3.19.3",
     "smtpapi": "1.2.0",
     "superagent": "2.0.0",
-    "uuid-v4": "0.1.0"
+    "uuid-v4": "0.1.0",
+    "bluebird": "3.3.4"
   },
   "devDependencies": {
     "babel-cli": "6.6.5",
@@ -65,9 +66,9 @@
     "eslint-plugin-react": "4.2.1",
     "istanbul": "1.0.0-alpha.2",
     "mocha": "2.4.5",
+    "node-inspector": "0.12.7",
     "rimraf": "2.5.2",
     "sequelize-cli": "2.3.1",
-    "sinon": "1.17.4",
-    "node-inspector": "0.12.7"
+    "sinon": "1.17.4"
   }
 }

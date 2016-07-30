@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import sequelize from 'sequelize';
 import db from 'connection';
-import { User, Network, Integration, Team } from 'common/models';
+import { User, Network, NetworkUser, Integration, Team } from 'common/models';
 
 const dummyProfileImgPaths = [
   'default/default-1.png',
@@ -52,18 +52,6 @@ export async function findUserByUsername(username) {
   if (!user) throw new Error(`No user found with username ${username}`);
 
   return user;
-}
-
-export function getIntegrationTokensForUser(user) {
-  const result = user.Networks
-    .filter(network => network.NetworkUser.userToken !== null)
-    .map(network => ({
-      name: network.Integrations[0].name,
-      token: network.NetworkUser.userToken,
-      externalId: network.NetworkUser.externalId,
-    }));
-
-  return result;
 }
 
 export function updateUser(userId, attributes) {
@@ -130,6 +118,16 @@ export function updateNetworkActivityForUser(networkId, userId, active) {
     type: sequelize.QueryTypes.UPDATE,
     replacements: [deletedAt, userId, networkId],
   });
+}
+
+export async function setIntegrationToken(user, network, token) {
+  const result = await NetworkUser.findOne({
+    where: { userId: user.id, networkId: network.id },
+  });
+
+  if (!result) throw new Error('User does not belong to the network.');
+
+  return result.update({ userToken: token });
 }
 
 export function userBelongsToNetwork(userId, networkId) {

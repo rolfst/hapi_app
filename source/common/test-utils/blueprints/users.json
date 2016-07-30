@@ -1,20 +1,20 @@
 {
   "admin": {
-    "username": "Godfather",
+    "username": "god@flex-appeal.nl",
     "firstName": "Godfather",
     "lastName": "Administrator",
     "email": "god@flex-appeal.nl",
     "password": "iamgod"
   },
   "employee": {
-    "username": "Johnnie",
+    "username": "johndoe@flex-appeal.nl",
     "firstName": "John",
     "lastName": "Doe",
     "email": "johndoe@flex-appeal.nl",
     "password": "ihazswag"
   },
   "networkless": {
-    "username": "NoFriends",
+    "username": "lonely@flex-appeal.nl",
     "firstName": "Jason",
     "lastName": "Lonely",
     "email": "lonely@flex-appeal.nl",

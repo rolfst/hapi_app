@@ -13,7 +13,7 @@ const loginRequest = (username, password) => {
 };
 
 describe('Authenticate', () => {
-  it('checks for required input fields', () => {
+  it('should check for required input fields', () => {
     const response1 = postRequest(url, { foo: 'bar' });
     const response2 = postRequest(url, { username: 'bar' });
     const response3 = postRequest(url, { password: 'bar' });
@@ -26,7 +26,7 @@ describe('Authenticate', () => {
       });
   });
 
-  it('can login with correct credentials', async () => {
+  it('should login with correct credentials', async () => {
     const { result } = await loginRequest(adminCredentials.username, adminCredentials.password);
     const { data } = result;
 

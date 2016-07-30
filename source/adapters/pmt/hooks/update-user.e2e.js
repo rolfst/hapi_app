@@ -13,7 +13,7 @@ describe('PMT: Update User', () => {
     await putRequest(endpoint, { email: 'pmt-hodor@flex-appeal.nl' });
     const result = await fetchUsersHook(global.networks.pmt.externalId);
     const externalId = _.find(global.integrations.admin, { name: 'PMT' }).externalId;
-    const actual = _.find(result, { id: externalId });
+    const actual = _.find(result, { id: externalId.toString() });
 
     assert.equal(actual.email, 'pmt-hodor@flex-appeal.nl');
   });

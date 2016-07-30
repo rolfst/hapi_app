@@ -9,11 +9,17 @@ const availableIntegrations = ({
   },
 });
 
-export default (network, authSettings, integrations = availableIntegrations) => {
+export default (network, authSettings = [], integrations = availableIntegrations) => {
   const integration = integrations[network.Integrations[0].id];
   if (!integration) throw IntegrationNotFound;
 
-  const authSetting = _.find(authSettings, { name: integration.name });
+  let token = null;
 
-  return integration.adapter(authSetting.token);
+  if (authSettings) {
+    const authSetting = _.find(authSettings, { name: integration.name });
+
+    token = authSetting ? authSetting.token : null;
+  }
+
+  return integration.adapter(token);
 };

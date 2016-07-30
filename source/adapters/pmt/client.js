@@ -1,4 +1,5 @@
 import request from 'superagent';
+import ExpiredToken from 'common/errors/expired-token';
 
 function makeRequest(endpoint, token = null, method = 'GET', data = {}) {
   return request(method, endpoint)
@@ -7,7 +8,10 @@ function makeRequest(endpoint, token = null, method = 'GET', data = {}) {
     .set('api-key', 'flexappeal4rwrs')
     .send(data)
     .then(res => res.body)
-    .catch(err => console.log('PMT Client error: ', err));
+    .catch(err => {
+      if (err.response.statusCode === 400) throw ExpiredToken;
+      else console.log('PMT Client error: ', err);
+    });
 }
 
 export default {

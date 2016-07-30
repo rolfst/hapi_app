@@ -9,7 +9,11 @@ const hook = token => baseStoreUrl => {
 
   return client.get(endpoint, token)
     .then(res => res.shifts.map(s => shiftSerializer(s)))
-    .catch(err => console.log('error', err));
+    .catch(err => {
+      console.log('Error retrieving shifts from PMT', err);
+
+      throw err;
+    });
 };
 
 export default createAdapterHook(hook);

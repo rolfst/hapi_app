@@ -1,10 +1,10 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import * as password from 'common/utils/password';
-import authenticateUser from 'common/utils/authenticate-user';
 import WrongCredentials from 'common/errors/wrong-credentials';
 import * as checkPassword from 'common/utils/check-password';
 import * as userRepo from 'common/repositories/user';
+import authenticateUser from 'modules/authentication/services/authenticate-user';
 
 const credentials = {
   username: 'Johnnie', firstName: 'John', lastName: 'Doe', password: 'ihazswag',

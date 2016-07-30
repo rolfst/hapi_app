@@ -1,4 +1,5 @@
 import Boom from 'boom';
+import ExpiredToken from 'common/errors/expired-token';
 import analytics from 'common/services/analytics';
 import tokenUtil from 'common/utils/token';
 import selectNetwork from 'common/utils/select-network';
@@ -38,6 +39,8 @@ export default () => {
 
         return reply.continue(result);
       } catch (err) {
+        if (err.message === 'Token expired') return reply(ExpiredToken);
+
         console.log('Error in Authenticator Strategy: ', err);
         return reply(Boom.unauthorized(err.message));
       }
