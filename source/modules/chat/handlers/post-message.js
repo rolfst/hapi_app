@@ -16,7 +16,8 @@ module.exports = async (req, reply) => {
     check(loggedUser, 'get-conversation', conversation, 'You\'re not part of this conversation');
 
     const createdMessage = await createMessage(conversation.id, loggedUser.id, req.payload.text);
-    const message = await findMessageById(createdMessage.id, [Conversation, User]);
+    const message = await findMessageById(createdMessage.id,
+      [{ model: Conversation, include: [User] }, User]);
 
     const usersToNotify = conversation.Users.filter(user => user.id !== loggedUser.id);
     const data = respondWithItem(message);

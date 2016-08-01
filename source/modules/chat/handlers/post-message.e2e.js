@@ -20,6 +20,7 @@ describe('Post message', () => {
     assert.equal(data.conversation_id, conversation.id);
     assert.equal(data.text, 'Test message');
     assert.equal(data.created_by.id, global.users.admin.id);
+    assert.equal(data.conversation.users.length, 2);
     assert.equal(statusCode, 200);
   });
 });
