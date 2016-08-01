@@ -35,24 +35,22 @@ export default async (req, reply) => {
     const { credentials } = req.auth;
     const { network } = req.pre;
     const { title, description, date, type, values } = req.payload;
-    const externalShiftId = req.payload.external_shift_id;
+    const shiftId = req.payload.shift_id;
 
-    if (externalShiftId && !hasIntegration(network)) {
+    if (shiftId && !hasIntegration(network)) {
       throw IntegrationNotFound;
     }
 
-    const parsedValues = values ? JSON.parse(values) : null;
-
     if (type === exchangeTypes.TEAM) {
-      const isValid = await validateTeamIds(parsedValues, network.id);
+      const isValid = await validateTeamIds(values, network.id);
       if (!isValid) throw Boom.badData('Incorrect values.');
     }
 
-    const attributes = { title, description, date, type, externalShiftId, values: parsedValues };
+    const attributes = { title, description, date, type, shiftId, values };
     const createdExchange = await createExchange(credentials.id, network.id, attributes);
 
     sendNotification(createdExchange, network, values, credentials);
-    analytics.track(newExchangeEvent(req.pre.network, createdExchange));
+    analytics.track(newExchangeEvent(network, createdExchange));
 
     const response = await findExchangeById(createdExchange.id);
 

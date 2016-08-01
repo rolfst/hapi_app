@@ -36,7 +36,7 @@ describe('Get conversations for logged user', () => {
     users.map(u => u.destroy()),
   ]));
 
-  it('check for conversation count', async () => {
+  it('should return conversation collection', async () => {
     const { result, statusCode } = await getRequest('/v1/chats/users/me/conversations');
 
     assert.lengthOf(result.data, 3);

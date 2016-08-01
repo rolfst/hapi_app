@@ -46,9 +46,9 @@ export async function findExchangeById(exchangeId, userId) {
   }
 }
 
-export async function findExchangesByExternalIds(externalIds) {
+export async function findExchangesByShiftIds(shiftIds) {
   const exchanges = await Exchange.findAll({
-    where: { externalShiftId: { $in: externalIds } },
+    where: { shiftId: { $in: shiftIds } },
   });
 
   return exchanges;

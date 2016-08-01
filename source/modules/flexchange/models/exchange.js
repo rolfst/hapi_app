@@ -56,7 +56,7 @@ const Exchange = model.define('Exchange', {
     field: 'approved_user',
     allowNull: true,
   },
-  externalShiftId: {
+  shiftId: {
     type: Sequelize.INTEGER,
     field: 'external_shift_id',
     allowNull: true,

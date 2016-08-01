@@ -82,7 +82,7 @@ describe('Approve exchange', () => {
 
   it('should fail when user doesn\'t have permission to approve', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${acceptedExchange.id}`;
-    const payload = { action: 'approve' };
+    const payload = { action: 'approve', user_id: global.users.employee.id };
     const { username, password } = blueprints.users.employee;
     const { token } = await authenticate(global.server, { username, password });
     const { statusCode } = await patchRequest(endpoint, payload, global.server, token);

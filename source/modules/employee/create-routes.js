@@ -1,32 +1,22 @@
-/* eslint-disable max-len */
+import createRoutes from 'common/utils/create-routes';
 
-import { string, number } from 'joi';
-import preFetchNetwork from 'common/middlewares/prefetch-network';
-import router from 'common/utils/router';
-const basePath = 'modules/employee/handlers';
-const baseUrl = '/v2/networks/{networkId}';
+const baseImport = 'modules/employee/handlers';
+const basePath = '/v2/networks/{networkId}';
 
-const routeConfig = {
-  auth: 'jwt',
-  pre: [{ method: preFetchNetwork, assign: 'network' }],
-};
+const routes = [{
+  method: 'GET',
+  url: `${basePath}/users/me`,
+  handler: require(`${baseImport}/view-my-profile`),
+}, {
+  method: 'PUT',
+  url: `${basePath}/users/me`,
+  handler: require(`${baseImport}/update-my-profile`),
+  validator: require('modules/employee/validators/update-user'),
+}, {
+  method: 'POST',
+  url: `${basePath}/users`,
+  handler: require(`${baseImport}/invite-user`),
+  validator: require('modules/employee/validators/create-user'),
+}];
 
-export default [
-  router.get(`${baseUrl}/users/me`, require(`${basePath}/view-my-profile`)),
-  router.put(`${baseUrl}/users/me`, require(`${basePath}/update-my-profile`)),
-  {
-    method: 'POST',
-    path: `${baseUrl}/users`,
-    handler: require(`${basePath}/invite-user`).default,
-    config: {
-      ...routeConfig,
-      validate: {
-        payload: {
-          name: string().required(),
-          email: string().email().required(),
-          team_id: number(),
-        },
-      },
-    },
-  },
-];
+export default createRoutes(routes);

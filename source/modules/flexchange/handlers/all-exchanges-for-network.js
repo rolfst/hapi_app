@@ -1,15 +1,10 @@
 import { findExchangesByNetwork } from 'modules/flexchange/repositories/exchange';
 import { ExchangeResponse, ExchangeComment } from 'modules/flexchange/models';
 import respondWithCollection from 'common/utils/respond-with-collection';
-import hasIntegration from 'common/utils/network-has-integration';
 import parseIncludes from 'common/utils/parse-includes';
 import _ from 'lodash';
 
 export default async (req, reply) => {
-  if (hasIntegration(req.pre.network)) {
-    // TODO: Execute integration logic with adapter
-  }
-
   const { credentials } = req.auth;
   const includes = parseIncludes(req.query);
   const modelIncludes = [];

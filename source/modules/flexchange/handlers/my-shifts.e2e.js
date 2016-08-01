@@ -17,7 +17,7 @@ describe('My shifts', () => {
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'External shift from integration',
-      externalShiftId: 25280343,
+      shiftId: 25280343,
     });
 
     const stubbedResult = [{

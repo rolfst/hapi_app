@@ -18,7 +18,7 @@ describe('My shifts', () => {
     const fakeExchanges = [{
       id: 3,
       title: 'External shift #1',
-      externalShiftId: 25280341,
+      shiftId: 25280341,
     }];
 
     const actual = mapShiftsWithExchanges(fakeShifts, fakeExchanges);

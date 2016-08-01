@@ -41,7 +41,7 @@ describe('Create exchange', () => {
       title: 'Test shift for network',
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.TEAM,
-      values: JSON.stringify([flexAppealTeam.id]),
+      values: [flexAppealTeam.id],
     });
 
     assert.equal(result.data.user.fullName, global.users.admin.full_name);
@@ -56,12 +56,12 @@ describe('Create exchange', () => {
       title: 'Test shift for network',
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
-      external_shift_id: 1,
+      shift_id: 1,
     });
 
     const actual = await findExchangeById(result.data.id);
 
-    assert.equal(actual.externalShiftId, 1);
+    assert.equal(actual.shiftId, 1);
   });
 
   it('should fail for exchange with external shift id in network without integration', async () => {
@@ -70,7 +70,7 @@ describe('Create exchange', () => {
       title: 'Test shift for network',
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
-      external_shift_id: 1,
+      shift_id: 1,
     });
 
     assert.equal(statusCode, 403);
@@ -82,7 +82,7 @@ describe('Create exchange', () => {
       title: 'Test shift',
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.TEAM,
-      values: JSON.stringify([flexAppealTeam.id, '20']),
+      values: [flexAppealTeam.id, 20],
     });
 
     assert.equal(statusCode, 422);
@@ -94,7 +94,7 @@ describe('Create exchange', () => {
       title: 'Test shift',
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.TEAM,
-      values: JSON.stringify([flexAppealTeam.id, otherNetworkTeam.id]),
+      values: [flexAppealTeam.id, otherNetworkTeam.id],
     });
 
     assert.equal(statusCode, 422);

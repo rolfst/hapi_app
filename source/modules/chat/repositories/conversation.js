@@ -107,8 +107,5 @@ export function deleteConversationById(id) {
  * @return {promise} - Get conversations promise
  */
 export function deleteAllConversationsForUser(user) {
-  return user.getConversations()
-    .then(conversations => {
-      return Promise.all(conversations.map(conversation => conversation.destroy()));
-    });
+  return user.setConversations([]);
 }

@@ -17,13 +17,10 @@ export default async (req, reply) => {
     reject: rejectExchange,
   };
 
-  const { action } = req.payload;
-
   try {
-    const actionHook = actions[action];
-    if (!actionHook) throw Boom.badData('Unknown action.');
+    const actionHook = actions[req.payload.action];
 
-    check(req.auth.credentials, `${action}-exchange`);
+    check(req.auth.credentials, `${req.payload.action}-exchange`);
     const exchange = await findExchangeById(req.params.exchangeId, req.auth.credentials.id);
 
     if (isExpired(exchange.date)) throw Boom.forbidden('Exchange has been expired.');

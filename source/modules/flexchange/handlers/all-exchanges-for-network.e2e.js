@@ -32,23 +32,22 @@ describe('Get exchanges for network', () => {
     });
   });
 
-  it('should return exchanges', () => {
-    return getRequest(`/v2/networks/${network.id}/exchanges`)
-      .then(response => {
-        assert.lengthOf(response.result.data, 2);
-        assert.deepEqual(response.result.data[0].created_in, { type: 'network', id: network.id });
-        assert.equal(response.result.data[0].user.full_name, global.users.admin.fullName);
-        assert.isUndefined(response.result.data[0].responses);
-        assert.equal(response.statusCode, 200);
-      });
+  it('should return exchanges', async () => {
+    const { result, statusCode } = await getRequest(`/v2/networks/${network.id}/exchanges`);
+
+    assert.lengthOf(result.data, 2);
+    assert.deepEqual(result.data[0].created_in, { type: 'network', id: network.id });
+    assert.equal(result.data[0].user.full_name, global.users.admin.fullName);
+    assert.isUndefined(result.data[0].responses);
+    assert.equal(statusCode, 200);
   });
 
-  it('should return exchanges with responses', () => {
-    return getRequest(`/v2/networks/${network.id}/exchanges?include=responses`)
-      .then(response => {
-        assert.lengthOf(response.result.data, 2);
-        assert.isDefined(response.result.data[0].responses);
-        assert.equal(response.statusCode, 200);
-      });
+  it('should return exchanges with responses', async () => {
+    const endpoint = `/v2/networks/${network.id}/exchanges?include=responses`;
+    const { result, statusCode } = await getRequest(endpoint);
+
+    assert.lengthOf(result.data, 2);
+    assert.isDefined(result.data[0].responses);
+    assert.equal(statusCode, 200);
   });
 });
