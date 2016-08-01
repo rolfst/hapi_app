@@ -1,5 +1,5 @@
 import Sequelize from 'sequelize';
-import model from 'connection';
+import { db as model } from 'connections';
 
 const NetworkUser = model.define('NetworkUser', {
   externalId: {

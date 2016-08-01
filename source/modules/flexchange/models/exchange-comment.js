@@ -1,5 +1,5 @@
 import Sequelize from 'sequelize';
-import model from 'connection';
+import { db as model } from 'connections';
 import formatDate from 'common/utils/format-date';
 import { User } from 'common/models';
 

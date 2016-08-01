@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import ExpiredToken from 'common/errors/expired-token';
+import ExpiredToken from 'common/errors/token-expired';
 import analytics from 'common/services/analytics';
 import tokenUtil from 'common/utils/token';
 import selectNetwork from 'common/utils/select-network';

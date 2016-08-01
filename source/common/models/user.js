@@ -1,5 +1,5 @@
 import Sequelize from 'sequelize';
-import model from 'connection';
+import { db as model } from 'connections';
 import * as password from 'common/utils/password';
 import formatDate from 'common/utils/format-date';
 import makeFunctionName from 'common/utils/make-function-name';

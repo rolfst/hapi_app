@@ -41,7 +41,7 @@ describe('Authenticate', () => {
       'wrongpassword'
     );
 
-    assert.equal(result.error.title, WrongCredentials.name);
+    assert.equal(result.error.title, WrongCredentials.type);
     assert.equal(statusCode, 403);
   });
 
@@ -51,7 +51,7 @@ describe('Authenticate', () => {
       networklessUserCredentials.password
     );
 
-    assert.equal(result.error.title, NotInAnyNetwork.name);
+    assert.equal(result.error.title, NotInAnyNetwork.type);
     assert.equal(statusCode, 403);
   });
 });

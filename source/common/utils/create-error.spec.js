@@ -7,6 +7,6 @@ describe('createError', () => {
     const boom = Boom.badData('No user found for given username and password.');
     const error = createError(boom, 'WrongCredentials');
 
-    assert.equal(error.output.payload.title, 'WrongCredentials');
+    assert.equal(error.output.payload.type, 'WrongCredentials');
   });
 });

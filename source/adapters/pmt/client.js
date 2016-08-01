@@ -1,5 +1,5 @@
 import request from 'superagent';
-import ExpiredToken from 'common/errors/expired-token';
+import ExpiredToken from 'common/errors/token-expired';
 
 function makeRequest(endpoint, token = null, method = 'GET', data = {}) {
   return request(method, endpoint)

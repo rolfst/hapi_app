@@ -1,9 +1,7 @@
-export default error => {
-  return {
-    error: {
-      title: error.output.payload.title,
-      detail: error.output.payload.message,
-      status_code: error.output.statusCode,
-    },
-  };
-};
+export default error => ({
+  error: {
+    type: error.output.payload.type,
+    detail: error.output.payload.message,
+    status_code: error.output.statusCode,
+  },
+});

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import sequelize from 'sequelize';
-import db from 'connection';
+import { db } from 'connections';
 import { User, Network, NetworkUser, Integration, Team } from 'common/models';
 
 const dummyProfileImgPaths = [

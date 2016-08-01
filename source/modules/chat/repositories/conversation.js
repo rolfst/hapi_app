@@ -1,4 +1,4 @@
-import Sequelize from 'connection';
+import { db as Sequelize } from 'connections';
 import Boom from 'boom';
 import { User } from 'common/models';
 import { Conversation } from 'modules/chat/models';

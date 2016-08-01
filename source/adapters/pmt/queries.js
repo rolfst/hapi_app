@@ -1,5 +1,5 @@
 import sequelize from 'sequelize';
-import db from 'connection';
+import { db } from 'connections';
 
 export function pmtUserBelongsToNetwork(userId, networkId) {
   const queryString = `
