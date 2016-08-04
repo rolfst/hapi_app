@@ -5,7 +5,7 @@ function makeRequest(endpoint, token = null, method = 'GET', data = {}) {
   return request(method, endpoint)
     .type('form')
     .set('logged-in-user-token', token)
-    .set('api-key', 'flexappeal4rwrs')
+    .set('api-key', 'flexappeal')
     .send(data)
     .then(res => res.body)
     .catch(err => {
