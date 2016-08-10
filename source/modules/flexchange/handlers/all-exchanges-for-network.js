@@ -18,7 +18,8 @@ export default async (req, reply) => {
   }
 
   try {
-    const exchanges = await findExchangesByNetwork(req.pre.network, credentials.id, modelIncludes);
+    const args = [req.pre.network, credentials.id, modelIncludes, req.query];
+    const exchanges = await findExchangesByNetwork.apply(null, args);
 
     return reply(respondWithCollection(exchanges));
   } catch (err) {

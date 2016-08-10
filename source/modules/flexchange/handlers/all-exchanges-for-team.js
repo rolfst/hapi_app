@@ -25,7 +25,8 @@ export default async (req, reply) => {
 
   try {
     const team = await findTeamById(req.params.teamId);
-    const exchanges = await findExchangesByTeam(team, credentials.id, modelIncludes);
+    const args = [team, credentials.id, modelIncludes, req.query];
+    const exchanges = await findExchangesByTeam.apply(null, args);
 
     return reply(respondWithCollection(exchanges));
   } catch (err) {

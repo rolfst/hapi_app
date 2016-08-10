@@ -71,22 +71,38 @@ export function findExchangesByUser(user) {
   return user.getExchanges({ include: [...defaultIncludes, extraInclude] });
 }
 
-/**
- * Find exchange by network
- * @param {Network} network - Netwerk we want the exchanges from
- * @method findExchangesByNetwork
- * @return {promise} Get exchanges promise
- */
-export function findExchangesByNetwork(network, userId, includes = []) {
+export function findExchangesForModel(model, userId, includes = [], filter = {}) {
   const extraIncludes = [{ model: ExchangeResponse,
     as: 'ResponseStatus',
     where: { userId },
     required: false,
   }, ...includes];
 
-  return network.getExchanges({
+  let dateFilter;
+
+  const options = {
     include: [...defaultIncludes, ...extraIncludes],
-  });
+  };
+
+  if (filter.start && filter.end) {
+    dateFilter = { $between: [filter.start, filter.end] };
+  } else if (filter.start && !filter.end) {
+    dateFilter = { $gt: filter.start };
+  }
+
+  if (dateFilter) options.where = { date: dateFilter };
+
+  return model.getExchanges(options);
+}
+
+/**
+ * Find exchange by network
+ * @param {Network} network - Netwerk we want the exchanges from
+ * @method findExchangesByNetwork
+ * @return {promise} Get exchanges promise
+ */
+export function findExchangesByNetwork(network, userId, includes = [], filter = {}) {
+  return findExchangesForModel(network, userId, includes, filter);
 }
 
 /**
@@ -95,16 +111,8 @@ export function findExchangesByNetwork(network, userId, includes = []) {
  * @method findExchangesByTeam
  * @return {promise} Get exchanges promise
  */
-export function findExchangesByTeam(team, userId, includes = []) {
-  const extraIncludes = [{ model: ExchangeResponse,
-    as: 'ResponseStatus',
-    where: { userId },
-    required: false,
-  }, ...includes];
-
-  return team.getExchanges({
-    include: [...defaultIncludes, ...extraIncludes],
-  });
+export function findExchangesByTeam(team, userId, includes = [], filter = {}) {
+  return findExchangesForModel(team, userId, includes, filter);
 }
 
 /**
