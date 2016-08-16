@@ -1,7 +1,8 @@
 import { check } from 'hapi-acl-plugin';
-import { Conversation, User } from 'modules/chat/models';
+import { User } from 'common/models';
 import socket from 'common/services/socket';
 import respondWithItem from 'common/utils/respond-with-item';
+import { Conversation } from 'modules/chat/models';
 import { findConversationById } from 'modules/chat/repositories/conversation';
 import { findMessageById, createMessage } from 'modules/chat/repositories/message';
 import * as newMessageNotification from 'modules/chat/notifications/new-message';
@@ -27,6 +28,7 @@ module.exports = async (req, reply) => {
 
     return reply({ success: true, ...data });
   } catch (err) {
+    console.log('Error creating message', err);
     return reply(err);
   }
 };
