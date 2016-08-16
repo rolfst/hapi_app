@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import * as password from 'common/utils/password';
 import WrongCredentials from 'common/errors/wrong-credentials';
-import * as checkPassword from 'common/utils/check-password';
+import * as checkPassword from 'modules/authentication/utils/check-password';
 import * as userRepo from 'common/repositories/user';
 import authenticateUser from 'modules/authentication/services/authenticate-user';
 

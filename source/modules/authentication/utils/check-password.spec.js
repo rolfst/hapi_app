@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import checkPassword from 'common/utils/check-password';
+import checkPassword from 'modules/authentication/utils/check-password';
 import * as password from 'common/utils/password';
 
 describe('checkPassword', () => {

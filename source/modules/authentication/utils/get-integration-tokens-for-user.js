@@ -4,6 +4,7 @@ const getIntegrationTokensForUser = (user) => {
     .map(network => ({
       name: network.Integrations[0].name,
       token: network.NetworkUser.userToken,
+      externalId: network.NetworkUser.externalId,
     }));
 
   return result;

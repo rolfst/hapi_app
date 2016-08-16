@@ -1,6 +1,5 @@
 import Boom from 'boom';
 import { roles } from 'common/services/permission';
-import excludeUser from 'common/utils/exclude-users';
 import IntegrationNotFound from 'common/errors/integration-not-found';
 import { validateTeamIds } from 'common/repositories/team';
 import { findAllUsersForNetwork } from 'common/repositories/network';
@@ -21,7 +20,7 @@ export const sendNotification = async (exchange, network, exchangeValues, logged
   else if (exchange.type === exchangeTypes.TEAM) usersPromise = findUsersByTeamIds(exchangeValues);
 
   const users = await usersPromise;
-  const usersToNotify = excludeUser(users, loggedUser);
+  const usersToNotify = users.filter(u => u.id !== loggedUser.id);
 
   if (roleType === roles.EMPLOYEE) {
     createdNotification.send(usersToNotify, exchange);
