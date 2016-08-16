@@ -33,5 +33,4 @@ UserModel.belongsToMany(ConversationModel, {
 });
 
 export const Conversation = ConversationModel;
-export const User = UserModel;
 export const Message = MessageModel;

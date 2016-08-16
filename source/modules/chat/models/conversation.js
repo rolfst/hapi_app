@@ -23,9 +23,15 @@ const Conversation = model.define('Conversation', {
     toJSON: function () { // eslint-disable-line func-names, object-shorthand
       let output = {
         type: 'conversation',
-        id: this.id.toString(),
+        id: this.dataValues.id.toString(),
         created_at: formatDate(this.created_at),
       };
+
+      if (this.last_message !== undefined) {
+        output = Object.assign(output, {
+          last_message: this.last_message ? this.last_message.toJSON() : null,
+        });
+      }
 
       if (this.Messages) {
         const messages = this.Messages.map(message => message.toJSON());

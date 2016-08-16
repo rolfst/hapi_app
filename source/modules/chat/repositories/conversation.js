@@ -3,7 +3,9 @@ import Boom from 'boom';
 import { User } from 'common/models';
 import { Conversation } from 'modules/chat/models';
 
-const defaultIncludes = { model: User };
+const defaultIncludes = [
+  { model: User },
+];
 
 /**
  * Find a specific conversation by id
@@ -29,8 +31,20 @@ export function findConversationById(id, includes) {
  * @method findAllForUser
  * @return {promise} - Get conversations promise
  */
-export function findAllForUser(user, includes = []) {
-  return user.getConversations({ include: [...includes, defaultIncludes] });
+export async function findAllForUser(user, includes = []) {
+  const conversations = await user.getConversations({ include: [
+    ...includes,
+    ...defaultIncludes,
+  ] });
+
+  return conversations.map(c => {
+    const conversation = c;
+    const { Messages } = conversation;
+
+    conversation.last_message = Messages[Messages.length - 1] || null;
+
+    return conversation;
+  });
 }
 
 export async function findExistingConversationWithUser(loggedUser, user) {
