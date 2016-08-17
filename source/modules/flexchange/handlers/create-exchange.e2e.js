@@ -12,14 +12,14 @@ let otherNetworkTeam;
 describe('Create exchange', () => {
   before(async () => {
     network = global.networks.flexAppeal;
-    flexAppealTeam = await createTeam(network.id, 'Test network', '');
-    otherNetworkTeam = await createTeam(32, 'Test network', '');
+
+    [flexAppealTeam, otherNetworkTeam] = await Promise.all([
+      createTeam(network.id, 'Test network', ''),
+      createTeam(32, 'Test network', ''),
+    ]);
   });
 
-  after(() => {
-    flexAppealTeam.destroy();
-    otherNetworkTeam.destroy();
-  });
+  after(() => Promise.all([flexAppealTeam.destroy(), otherNetworkTeam.destroy()]));
 
   it('should create exchange for a network', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges`;
