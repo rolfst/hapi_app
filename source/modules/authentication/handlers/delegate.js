@@ -14,7 +14,11 @@ export default async (req, reply) => {
 
     const deviceName = req.headers['user-agent'];
     const device = await findOrCreateUserDevice(userId, deviceName);
-    const refreshedAccessToken = createAccessToken(userId, device.device_id, authenticatedIntegrations);
+    const refreshedAccessToken = createAccessToken(
+      userId,
+      device.device_id,
+      authenticatedIntegrations
+    );
 
     return reply({ success: true, data: { access_token: refreshedAccessToken } });
   } catch (err) {
