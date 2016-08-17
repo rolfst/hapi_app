@@ -18,6 +18,12 @@ export function findExchangeResponseByExchangeAndUser(exchangeId, userId) {
   });
 }
 
+export function findAcceptedExchangeResponsesForUser(userId) {
+  return ExchangeResponse.findAll({
+    where: { userId, response: 1 },
+  });
+}
+
 /**
  * Removes an exchange response for exchange and user
  * @param {number} exchangeId - Exchange the response is send to

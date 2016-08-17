@@ -21,6 +21,7 @@ const defaultIncludes = [
 /**
  * Find a specific exchange by id
  * @param {number} exchangeId - Id of exchange being looked for
+ * @param {number} userId - Id of the user to use in includes
  * @method findExchangeById
  * @return {promise} Find exchange promise
  */
@@ -44,6 +45,29 @@ export async function findExchangeById(exchangeId, userId) {
   } catch (err) {
     throw err;
   }
+}
+
+/**
+ * Find a specific exchange by ids
+ * @param {number} exchangeIds - Id of exchange being looked for
+ * @param {number} userId - Id of the user to use in includes
+ * @method findExchangeByIds
+ * @return {promise} Find exchanges promise
+ */
+export function findExchangeByIds(exchangeIds, userId) {
+  const extraIncludes = [{
+    model: ExchangeResponse,
+    as: 'ResponseStatus',
+    where: { userId },
+    required: false,
+  },
+  { model: ExchangeResponse },
+  { model: ExchangeComment, as: 'Comments' }];
+
+  return Exchange.findAll({
+    where: { id: { $in: exchangeIds } },
+    include: [...defaultIncludes, ...extraIncludes],
+  });
 }
 
 export async function findExchangesByShiftIds(shiftIds) {
