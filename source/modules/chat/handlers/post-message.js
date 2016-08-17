@@ -9,7 +9,7 @@ import * as newMessageNotification from 'modules/chat/notifications/new-message'
 
 module.exports = async (req, reply) => {
   const loggedUser = req.auth.credentials;
-  const conversationIncludes = [{ model: User }];
+  const conversationIncludes = [];
 
   try {
     const conversation = await findConversationById(req.params.id, conversationIncludes);
