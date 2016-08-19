@@ -22,7 +22,10 @@ describe('Get conversations for logged user', () => {
     await createMessage(conversation.id, user.id, 'Last message');
   });
 
-  after(() => Promise.all([conversation.destroy(), user.destroy()]));
+  after(async () => {
+    await conversation.destroy();
+    await user.destroy();
+  });
 
   it('should return conversation collection', async () => {
     const { result, statusCode } = await getRequest('/v1/chats/users/me/conversations');
