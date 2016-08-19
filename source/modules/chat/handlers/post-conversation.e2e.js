@@ -5,12 +5,12 @@ import {
   deleteAllConversationsForUser,
 } from 'modules/chat/repositories/conversation';
 
-let alreadyCreatedConversation;
+let createdConversation;
 
 describe('Post conversation', () => {
   before(async () => {
     const { admin, networklessUser } = global.users;
-    alreadyCreatedConversation = await createConversation(
+    createdConversation = await createConversation(
       'private', admin.id, [admin.id, networklessUser.id]
     );
   });
@@ -32,7 +32,7 @@ describe('Post conversation', () => {
     const payload = { type: 'private', users: [global.users.networklessUser.id] };
     const { result, statusCode } = await postRequest(endpoint, payload);
 
-    assert.equal(result.data.id, alreadyCreatedConversation.id);
+    assert.equal(result.data.id, createdConversation.id);
     assert.equal(statusCode, 200);
   });
 });
