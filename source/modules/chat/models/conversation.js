@@ -43,7 +43,8 @@ const Conversation = model.define('Conversation', {
   },
   hooks: {
     afterDestroy: function (conversation) { // eslint-disable-line func-names, object-shorthand
-      return conversation.setMessages([]);
+      return conversation.getMessages()
+        .then(messages => messages.map(m => m.destroy()));
     },
   },
 });
