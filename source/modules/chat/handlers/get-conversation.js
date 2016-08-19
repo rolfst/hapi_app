@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import { check } from 'hapi-acl-plugin';
 import { Message } from 'modules/chat/models';
-import { User } from 'common/models';
 import { findConversationById } from 'modules/chat/repositories/conversation';
 import respondWithItem from 'common/utils/respond-with-item';
 import parseIncludes from 'common/utils/parse-includes';
@@ -9,7 +8,7 @@ import parseIncludes from 'common/utils/parse-includes';
 module.exports = async (req, reply) => {
   const { credentials } = req.auth;
   const includes = parseIncludes(req.query);
-  const modelIncludes = [{ model: User }];
+  const modelIncludes = [];
 
   if (_.includes(includes, 'messages')) modelIncludes.push({ model: Message });
 
@@ -20,6 +19,7 @@ module.exports = async (req, reply) => {
 
     return reply(respondWithItem(conversation));
   } catch (err) {
+    console.log('Error getting conversation', err);
     return reply(err);
   }
 };

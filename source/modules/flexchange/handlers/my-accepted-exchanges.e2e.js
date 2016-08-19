@@ -9,22 +9,22 @@ import {
   approveExchange,
 } from 'modules/flexchange/repositories/exchange';
 
-describe('Accepted exchanges', () => {
+describe('My Accepted exchanges', () => {
   let network;
   let acceptedExchange;
   let approvedExchange;
   let declinedExchange;
 
-  before(() => {
+  before(async () => {
     network = global.networks.flexAppeal;
 
-    acceptedExchange = createExchange(global.users.employee.id, network.id, {
+    const acceptedExchangePromise = createExchange(global.users.employee.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'Accepted shift',
     }).then((exchange) => acceptExchange(exchange.id, global.users.admin.id));
 
-    approvedExchange = createExchange(global.users.employee.id, network.id, {
+    const approvedExchangePromise = createExchange(global.users.employee.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'Approved shift',
@@ -32,13 +32,17 @@ describe('Accepted exchanges', () => {
     .then((exchange) => acceptExchange(exchange.id, global.users.admin.id))
     .then((exchange) => approveExchange(exchange, global.users.admin, global.users.admin.id));
 
-    declinedExchange = createExchange(global.users.admin.id, network.id, {
+    const declinedExchangePromise = createExchange(global.users.admin.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'Declined shift',
     }).then((exchange) => declineExchange(exchange.id, global.users.admin.id));
 
-    return Promise.all([acceptedExchange, declinedExchange, approvedExchange]);
+    [acceptedExchange, declinedExchange, approvedExchange] = await Promise.all([
+      acceptedExchangePromise,
+      declinedExchangePromise,
+      approvedExchangePromise,
+    ]);
   });
 
   after(() => Promise.all([

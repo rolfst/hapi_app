@@ -25,23 +25,16 @@ const Conversation = model.define('Conversation', {
         type: 'conversation',
         id: this.dataValues.id.toString(),
         created_at: formatDate(this.created_at),
+        last_message: this.LastMessage ? this.LastMessage.toJSON() : null,
       };
-
-      if (this.last_message !== undefined) {
-        output = Object.assign(output, {
-          last_message: this.last_message ? this.last_message.toJSON() : null,
-        });
-      }
 
       if (this.Messages) {
         const messages = this.Messages.map(message => message.toJSON());
-
         output = Object.assign(output, { messages });
       }
 
       if (this.Users && this.Users.length > 0) {
         const users = this.Users.map(user => user.toJSON());
-
         output = Object.assign(output, { users });
       }
 
@@ -50,8 +43,7 @@ const Conversation = model.define('Conversation', {
   },
   hooks: {
     afterDestroy: function (conversation) { // eslint-disable-line func-names, object-shorthand
-      conversation.getMessages()
-        .then(messages => messages.map(message => message.destroy()));
+      return conversation.setMessages([]);
     },
   },
 });

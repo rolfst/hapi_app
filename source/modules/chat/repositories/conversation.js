@@ -1,10 +1,11 @@
 import { db as Sequelize } from 'connections';
 import Boom from 'boom';
 import { User } from 'common/models';
-import { Conversation } from 'modules/chat/models';
+import { Conversation, Message } from 'modules/chat/models';
 
 const defaultIncludes = [
   { model: User },
+  { model: Message, as: 'LastMessage' },
 ];
 
 /**
@@ -14,14 +15,18 @@ const defaultIncludes = [
  * @method findConversationById
  * @return {promise} - Find conversation promise
  */
-export function findConversationById(id, includes) {
-  return Conversation
-    .findById(id, { include: includes })
-    .then(conversation => {
-      if (!conversation) throw Boom.notFound('No conversation found.');
-
-      return conversation;
+export async function findConversationById(id, includes = []) {
+  try {
+    const conversation = await Conversation.findById(id, {
+      include: [...includes, ...defaultIncludes],
     });
+
+    if (!conversation) throw Boom.notFound('No conversation found.');
+
+    return conversation;
+  } catch (err) {
+    console.log('Error in findConversationById:', err);
+  }
 }
 
 /**
@@ -31,38 +36,34 @@ export function findConversationById(id, includes) {
  * @method findAllForUser
  * @return {promise} - Get conversations promise
  */
-export async function findAllForUser(user, includes = []) {
-  const conversations = await user.getConversations({ include: [
-    ...includes,
-    ...defaultIncludes,
-  ] });
-
-  return conversations.map(c => {
-    const conversation = c;
-    const { Messages } = conversation;
-
-    conversation.last_message = Messages[Messages.length - 1] || null;
-
-    return conversation;
+export function findAllForUser(user, includes = []) {
+  return user.getConversations({
+    include: [...includes, ...defaultIncludes],
   });
 }
 
-export async function findExistingConversationWithUser(loggedUser, user) {
-  const conversations = await Conversation.findAll({
-    include: [{
+export async function findExistingConversationWithUser(loggedUserId, userId) {
+  try {
+    const extraIncludes = {
       model: User,
       attributes: ['id', [Sequelize.fn('COUNT', '`Users`.`id`'), 'count']],
       where: {
-        id: { $in: [loggedUser, user] },
+        id: { $in: [loggedUserId, userId] },
       },
-    }],
-    group: ['Conversation.id'],
-    having: [
-      '`Users.count` = 2',
-    ],
-  });
+    };
 
-  return conversations[0];
+    const conversations = await Conversation.findAll({
+      include: [{ model: Message, as: 'LastMessage' }, extraIncludes],
+      group: ['Conversation.id'],
+      having: [
+        '`Users.count` = 2',
+      ],
+    });
+
+    return conversations[0];
+  } catch (err) {
+    console.log('Error in findExistingConversationWithUser:', err);
+  }
 }
 
 /**
@@ -92,9 +93,9 @@ export async function createConversation(type, creatorId, participants) {
       await conversation.addUsers(participants);
     }
 
-    return conversation;
+    return conversation.reload();
   } catch (err) {
-    console.error('Error while creating a conversation', err);
+    console.error('Error in createConversation:', err);
   }
 }
 

@@ -16,6 +16,16 @@ ConversationModel.hasMany(MessageModel, {
   },
 });
 
+ConversationModel.hasOne(MessageModel, {
+  foreignKey: 'parent_id',
+  as: 'LastMessage',
+  scope: {
+    parent_type: 'FlexAppeal\\Entities\\Conversation',
+  },
+  limit: 1,
+  order: 'created_at DESC',
+});
+
 MessageModel.belongsTo(UserModel, {
   foreignKey: 'created_by',
 });
