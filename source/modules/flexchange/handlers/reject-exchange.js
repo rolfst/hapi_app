@@ -19,7 +19,7 @@ export default async (network, exchange, req) => {
     throw Boom.badData('The user didn\'t accept the exchange.');
   }
 
-  const rejectedExchange = await rejectExchange(exchange, userIdToReject);
+  const rejectedExchange = await rejectExchange(exchange, req.auth.credentials, userIdToReject);
   const reloadedExchange = await rejectedExchange.reload();
   // TODO: Fire ExchangeWasRejected event
 

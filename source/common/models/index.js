@@ -1,10 +1,15 @@
 import sequelize from 'sequelize';
+import ActivityModel from 'common/models/activity';
 import NetworkModel from 'common/models/network';
 import UserModel from 'common/models/user';
 import TeamModel from 'common/models/team';
 import IntegrationModel from 'common/models/integration';
 import NetworkUserModel from 'common/models/network-user';
 import UserDeviceModel from 'common/models/user-device';
+
+ActivityModel.belongsTo(UserModel, {
+  foreignKey: 'user_id',
+});
 
 NetworkModel.belongsTo(UserModel, {
   as: 'SuperAdmin',
@@ -58,6 +63,7 @@ TeamModel.belongsToMany(UserModel, {
   timestamps: false,
 });
 
+export const Activity = ActivityModel;
 export const Network = NetworkModel;
 export const User = UserModel;
 export const Team = TeamModel;

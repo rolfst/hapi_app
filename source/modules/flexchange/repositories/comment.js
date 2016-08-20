@@ -1,4 +1,6 @@
 import Boom from 'boom';
+import { ActivityTypes } from 'common/models/activity';
+import { createActivity } from 'common/repositories/activity';
 import ExchangeComment from 'modules/flexchange/models/exchange-comment';
 
 /**
@@ -26,13 +28,24 @@ export function findCommentById(commentId) {
  * @method createExchangeComment
  * @return {promise} - Create exchange comment promise
  */
-export function createExchangeComment(exchangeId, { text, userId }) {
-  return ExchangeComment.create({
+export async function createExchangeComment(exchangeId, { text, userId }) {
+  const exchangeComment = await ExchangeComment.create({
     parentId: exchangeId,
     parentType: 'FlexAppeal\\Entities\\Exchange',
     text,
     createdBy: userId,
   });
+
+  await createActivity({
+    activityType: ActivityTypes.EXCHANGE_COMMENT,
+    userId,
+    sourceId: exchangeId,
+    metaData: {
+      comment_id: exchangeComment.id,
+    },
+  });
+
+  return exchangeComment;
 }
 
 export function findCommentsByExchange(exchange) {

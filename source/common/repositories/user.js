@@ -35,14 +35,6 @@ export async function findUserById(id) {
   return user;
 }
 
-export function findUsersByIds(ids) {
-  return User.findAll({
-    where: {
-      id: { $in: ids },
-    },
-  });
-}
-
 export function findUserByEmail(email) {
   return User.findOne({ ...defaultIncludes, where: { email } });
 }

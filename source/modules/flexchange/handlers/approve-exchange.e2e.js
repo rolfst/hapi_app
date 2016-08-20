@@ -36,7 +36,7 @@ describe('Approve exchange', () => {
       .then(() => exchangeToAccept.reload());
 
     const rejectedExchangePromise = await acceptExchange(exchangeToReject.id, creator.id)
-      .then(() => rejectExchange(exchangeToReject, creator.id));
+      .then(() => rejectExchange(exchangeToReject, creator, creator.id));
 
     [acceptedExchange, rejectedExchange] = await Promise.all([
       acceptedExchangePromise, rejectedExchangePromise,

@@ -1,6 +1,7 @@
 import Sequelize from 'sequelize';
 import { db as model } from 'connections';
 import formatDate from 'common/utils/format-date';
+import makeCreatedInObject from 'modules/flexchange/utils/created-in-text';
 
 export const exchangeTypes = {
   NETWORK: 'ALL',
@@ -68,6 +69,12 @@ const Exchange = model.define('Exchange', {
   tableName: 'exchanges',
   createdAt: 'created_at',
   updatedAt: 'updated_at',
+  hooks: {
+    afterDestroy: function (exchange) { // eslint-disable-line func-names, object-shorthand
+      return exchange.getActivities()
+        .then(activities => activities.map(a => a.destroy()));
+    },
+  },
   instanceMethods: {
     toJSON: function () { // eslint-disable-line func-names, object-shorthand
       let output = {
@@ -116,16 +123,7 @@ const Exchange = model.define('Exchange', {
       }
 
       if (this.ExchangeValues) {
-        let exchangeValueOutput;
-
-        if (this.type === exchangeTypes.NETWORK) {
-          exchangeValueOutput = { type: 'network', id: this.ExchangeValues[0].value };
-        } else {
-          const valueIds = this.ExchangeValues.map(v => v.value);
-          exchangeValueOutput = { type: this.type.toLowerCase(), ids: valueIds };
-        }
-
-        output = { ...output, created_in: exchangeValueOutput };
+        output = { ...output, created_in: makeCreatedInObject(this) };
       }
 
       return output;

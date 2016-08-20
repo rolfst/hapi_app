@@ -1,10 +1,13 @@
 import Boom from 'boom';
 import { omit } from 'lodash';
+import makeCreatedInObject from 'modules/flexchange/utils/created-in-text';
+import { ActivityTypes } from 'common/models/activity';
+import { createActivity } from 'common/repositories/activity';
+import { User } from 'common/models';
 import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import {
   Exchange, ExchangeResponse, ExchangeComment, ExchangeValue,
 } from 'modules/flexchange/models';
-import { User } from 'common/models';
 import { createExchangeResponse } from 'modules/flexchange/repositories/exchange-response';
 import { createValuesForExchange } from 'modules/flexchange/repositories/exchange-value';
 import {
@@ -14,6 +17,7 @@ import {
 
 const defaultIncludes = [
     { model: User },
+    { model: User, as: 'Approver' },
     { model: User, as: 'ApprovedUser' },
     { model: ExchangeValue },
 ];
@@ -72,6 +76,7 @@ export function findExchangeByIds(exchangeIds, userId) {
 
 export async function findExchangesByShiftIds(shiftIds) {
   const exchanges = await Exchange.findAll({
+    include: defaultIncludes,
     where: { shiftId: { $in: shiftIds } },
   });
 
@@ -160,12 +165,24 @@ export function deleteExchangeById(exchangeId) {
  */
 export async function createExchange(userId, networkId, attributes) {
   const exchange = await Exchange.create({ ...omit(attributes, 'values'), userId, networkId });
+  let exchangeValues;
 
   if (exchange.type === exchangeTypes.NETWORK) {
-    await createValuesForExchange(exchange.id, [networkId]);
+    exchangeValues = await createValuesForExchange(exchange.id, [networkId]);
   } else {
-    await createValuesForExchange(exchange.id, attributes.values);
+    exchangeValues = await createValuesForExchange(exchange.id, attributes.values);
   }
+
+  exchange.ExchangeValues = exchangeValues;
+
+  createActivity({
+    activityType: ActivityTypes.EXCHANGE_CREATED,
+    userId,
+    sourceId: exchange.id,
+    metaData: {
+      created_in: makeCreatedInObject(exchange),
+    },
+  });
 
   return exchange.reload();
 }
@@ -218,7 +235,15 @@ export async function respondToExchange(exchangeId, userId, response) {
  * @return {promise} Add exchange response promise
  */
 export async function acceptExchange(exchangeId, userId) {
-  return respondToExchange(exchangeId, userId, 1);
+  const exchange = await respondToExchange(exchangeId, userId, 1);
+
+  createActivity({
+    activityType: ActivityTypes.EXCHANGE_ACCEPTED,
+    userId,
+    sourceId: exchangeId,
+  });
+
+  return exchange;
 }
 
 /**
@@ -229,22 +254,45 @@ export async function acceptExchange(exchangeId, userId) {
  * @return {promise} Add exchange response promise
  */
 export async function declineExchange(exchangeId, userId) {
-  return respondToExchange(exchangeId, userId, 0);
+  const exchange = await respondToExchange(exchangeId, userId, 0);
+
+  createActivity({
+    activityType: ActivityTypes.EXCHANGE_DECLINED,
+    userId,
+    sourceId: exchangeId,
+  });
+
+  return exchange;
 }
 
 /**
  * Approve an exchange
  * @param {Exchange} exchange - Exchange to approve
- * @param {User} user - User that approves the exchange
+ * @param {User} approvingUser - User that approves the exchange
  * @param {number} userIdToApprove - User that will be approved
  * @method approveExchange
  * @return {promise} Promise containing the updated exchange
  */
-export function approveExchange(exchange, user, userIdToApprove) {
-  return findExchangeResponseByExchangeAndUser(exchange.id, userIdToApprove)
-    .then(exchangeResponse => exchangeResponse.update({ approved: 1 }))
-    .then(() => exchange.update({ approved_by: user.id, approved_user: userIdToApprove }))
-    .then(() => exchange.reload());
+export async function approveExchange(exchange, approvingUser, userIdToApprove) {
+  const exchangeResponse = await findExchangeResponseByExchangeAndUser(
+    exchange.id, userIdToApprove
+  );
+
+  await Promise.all([
+    exchangeResponse.update({ approved: 1 }),
+    exchange.update({ approved_by: approvingUser.id, approved_user: userIdToApprove }),
+  ]);
+
+  createActivity({
+    activityType: ActivityTypes.EXCHANGE_APPROVED,
+    userId: approvingUser.id,
+    sourceId: exchange.id,
+    metaData: {
+      approved_user_id: userIdToApprove,
+    },
+  });
+
+  return exchange.reload();
 }
 
 /**
@@ -254,10 +302,23 @@ export function approveExchange(exchange, user, userIdToApprove) {
  * @method rejectExchange
  * @return {promise} Promise containing the updated exchange
  */
-export function rejectExchange(exchange, userIdToReject) {
-  return findExchangeResponseByExchangeAndUser(exchange.id, userIdToReject)
-    .then(exchangeResponse => exchangeResponse.update({ approved: 0 }))
-    .then(() => exchange);
+export async function rejectExchange(exchange, rejectingUser, userIdToReject) {
+  const exchangeResponse = await findExchangeResponseByExchangeAndUser(
+    exchange.id, userIdToReject
+  );
+
+  await exchangeResponse.update({ approved: 0 });
+
+  createActivity({
+    activityType: ActivityTypes.EXCHANGE_REJECTED,
+    userId: rejectingUser.id,
+    sourceId: exchange.id,
+    metaData: {
+      rejected_user_id: userIdToReject,
+    },
+  });
+
+  return exchange.reload();
 }
 
 /**

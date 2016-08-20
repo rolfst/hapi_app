@@ -1,9 +1,11 @@
 import { exchangeTypes } from 'modules/flexchange/models/exchange';
+import { ActivityTypes } from 'common/models/activity';
 import ExchangeModel from 'modules/flexchange/models/exchange';
 import ExchangeCommentModel from 'modules/flexchange/models/exchange-comment';
 import ExchangeResponseModel from 'modules/flexchange/models/exchange-response';
 import ExchangeValueModel from 'modules/flexchange/models/exchange-value';
 import UserModel from 'common/models/user';
+import ActivityModel from 'common/models/activity';
 import TeamModel from 'common/models/team';
 import NetworkModel from 'common/models/network';
 
@@ -17,6 +19,21 @@ ExchangeResponseModel.belongsTo(ExchangeModel, {
 
 ExchangeCommentModel.belongsTo(UserModel, {
   foreignKey: 'created_by',
+});
+
+ExchangeModel.hasMany(ActivityModel, {
+  foreignKey: 'source_id',
+  scope: {
+    activity_type: {
+      $in: [
+        ActivityTypes.EXCHANGE_ACCEPTED,
+        ActivityTypes.EXCHANGE_REJECTED,
+        ActivityTypes.EXCHANGE_APPROVED,
+        ActivityTypes.EXCHANGE_CREATED,
+        ActivityTypes.EXCHANGE_COMMENT,
+      ],
+    },
+  },
 });
 
 ExchangeModel.hasMany(ExchangeValueModel, {
