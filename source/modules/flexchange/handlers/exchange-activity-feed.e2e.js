@@ -52,7 +52,13 @@ describe('Exchange activity feed', () => {
 
   after(() => exchange.destroy());
 
-  it('should return correct activity order', async () => {
+  it('should contain ids as string', () => {
+    const actual = result[0];
+
+    assert.isString(actual.data.source_id);
+  });
+
+  it('should return correct activity order', () => {
     const actual = result.map(item => item.data.activity_type);
     const expected = [
       ActivityTypes.EXCHANGE_CREATED,
@@ -72,7 +78,7 @@ describe('Exchange activity feed', () => {
       type: 'activity',
       data: {
         activity_type: ActivityTypes.EXCHANGE_CREATED,
-        source_id: exchange.id,
+        source_id: exchange.id.toString(),
         user: global.users.employee.toSimpleJSON(),
         meta_data: {
           created_in: { type: 'network', id: network.id },
@@ -89,7 +95,7 @@ describe('Exchange activity feed', () => {
       type: 'activity',
       data: {
         activity_type: ActivityTypes.EXCHANGE_ACCEPTED,
-        source_id: exchange.id,
+        source_id: exchange.id.toString(),
         user: global.users.admin.toSimpleJSON(),
         meta_data: {},
       },
@@ -104,7 +110,7 @@ describe('Exchange activity feed', () => {
       type: 'activity',
       data: {
         activity_type: ActivityTypes.EXCHANGE_COMMENT,
-        source_id: exchange.id,
+        source_id: exchange.id.toString(),
         user: global.users.employee.toSimpleJSON(),
         meta_data: {
           comment_id: comment.id,
@@ -121,7 +127,7 @@ describe('Exchange activity feed', () => {
       type: 'activity',
       data: {
         activity_type: ActivityTypes.EXCHANGE_REJECTED,
-        source_id: exchange.id,
+        source_id: exchange.id.toString(),
         user: global.users.admin.toSimpleJSON(),
         meta_data: {
           rejected_user_id: global.users.employee.id,
@@ -138,7 +144,7 @@ describe('Exchange activity feed', () => {
       type: 'activity',
       data: {
         activity_type: ActivityTypes.EXCHANGE_APPROVED,
-        source_id: exchange.id,
+        source_id: exchange.id.toString(),
         user: global.users.admin.toSimpleJSON(),
         meta_data: {
           approved_user_id: global.users.admin.id,
