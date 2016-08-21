@@ -1,4 +1,5 @@
 import Sequelize from 'sequelize';
+import moment from 'moment';
 import { db as model } from 'connections';
 import formatDate from 'common/utils/format-date';
 import makeCreatedInObject from 'modules/flexchange/utils/created-in-text';
@@ -62,6 +63,16 @@ const Exchange = model.define('Exchange', {
     field: 'external_shift_id',
     allowNull: true,
   },
+  startTime: {
+    type: Sequelize.DATE,
+    field: 'start_time',
+    allowNull: true,
+  },
+  endTime: {
+    type: Sequelize.DATE,
+    field: 'end_time',
+    allowNull: true,
+  },
   responseStatus: {
     type: Sequelize.VIRTUAL,
   },
@@ -83,6 +94,8 @@ const Exchange = model.define('Exchange', {
         title: this.title,
         description: this.description,
         date: formatDate(this.date),
+        start_time: moment(this.startTime).toISOString(),
+        end_time: moment(this.endTime).toISOString(),
         response_status: null,
         accept_count: this.acceptCount,
         decline_count: this.declineCount,
