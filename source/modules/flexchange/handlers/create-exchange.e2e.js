@@ -64,6 +64,37 @@ describe('Create exchange', () => {
     assert.equal(actual.shiftId, 1);
   });
 
+  it('should create exchange with begin and end-time', async () => {
+    const endpoint = `/v2/networks/${global.networks.pmt.id}/exchanges`;
+    const payload = {
+      title: 'Test shift for network',
+      date: moment().format('YYYY-MM-DD'),
+      type: exchangeTypes.NETWORK,
+      start_time: moment().toISOString(),
+      end_time: moment().add(2, 'hours').toISOString(),
+    };
+
+    const { result } = await postRequest(endpoint, payload);
+
+    assert.isTrue(moment(result.data.start_time).isSame(payload.start_time, 'minute'));
+    assert.isTrue(moment(result.data.end_time).isSame(payload.end_time, 'minute'));
+  });
+
+  it('should fail when end_time is before start_time', async () => {
+    const endpoint = `/v2/networks/${global.networks.pmt.id}/exchanges`;
+    const payload = {
+      title: 'Test shift for network',
+      date: moment().format('YYYY-MM-DD'),
+      type: exchangeTypes.NETWORK,
+      start_time: moment().toISOString(),
+      end_time: moment().subtract(2, 'hours').toISOString(),
+    };
+
+    const { statusCode } = await postRequest(endpoint, payload);
+
+    assert.equal(statusCode, 422);
+  });
+
   it('should fail for exchange with external shift id in network without integration', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges`;
     const { statusCode } = await postRequest(endpoint, {
