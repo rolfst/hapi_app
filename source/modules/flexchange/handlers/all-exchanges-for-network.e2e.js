@@ -17,7 +17,7 @@ describe('Get exchanges for network', () => {
     network = global.networks.flexAppeal;
 
     return network.getExchanges().then(exchanges => {
-      return exchanges.map(e => e.destroy());
+      return Promise.all(exchanges.map(e => e.destroy()));
     }).then(() => {
       const exchange1 = createExchange(global.users.admin.id, network.id, {
         ...defaultArgs,
