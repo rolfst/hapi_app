@@ -195,10 +195,8 @@ export async function createExchange(userId, networkId, attributes) {
  * @return {promise} Update exchange promise
  */
 export function updateExchangeById(exchangeId, payload) {
-  const { title, description } = payload;
-
   return Exchange.findById(exchangeId)
-    .then(exchange => exchange.update({ title, description }));
+    .then(exchange => exchange.update(payload));
 }
 
 /**

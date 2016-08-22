@@ -15,16 +15,43 @@ describe('Update exchange', () => {
     }).then(createdExchange => (exchange = createdExchange));
   });
 
-  it('should return updated attributes', () => {
-    return putRequest(`/v2/networks/${global.networks.flexAppeal.id}/exchanges/${exchange.id}`, {
+  it('should return updated attributes', async () => {
+    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/exchanges/${exchange.id}`;
+    const payload = {
       title: 'New title',
       description: 'New description',
-    })
-    .then(response => {
-      const { data } = response.result;
+      start_time: moment().toISOString(),
+      end_time: moment().add(2, 'hours').toISOString(),
+    };
 
-      assert.equal(data.title, 'New title');
-      assert.equal(data.description, 'New description');
-    });
+    const { result: { data } } = await putRequest(endpoint, payload);
+
+    assert.equal(data.title, 'New title');
+    assert.equal(data.description, 'New description');
+    assert.isTrue(moment(data.start_time).isSame(payload.start_time, 'minute'));
+    assert.isTrue(moment(data.end_time).isSame(payload.end_time, 'minute'));
+  });
+
+  it('should fail when end_time is defined without defining start_time', async () => {
+    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/exchanges/${exchange.id}`;
+    const payload = {
+      end_time: moment().add(2, 'hours').toISOString(),
+    };
+
+    const { statusCode } = await putRequest(endpoint, payload);
+
+    assert.equal(statusCode, 422);
+  });
+
+  it('should fail when end_time is before start_time', async () => {
+    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/exchanges/${exchange.id}`;
+    const payload = {
+      start_time: moment().toISOString(),
+      end_time: moment().subtract(2, 'hours').toISOString(),
+    };
+
+    const { statusCode } = await putRequest(endpoint, payload);
+
+    assert.equal(statusCode, 422);
   });
 });

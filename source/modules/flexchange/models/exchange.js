@@ -22,7 +22,7 @@ const Exchange = model.define('Exchange', {
   },
   title: {
     type: Sequelize.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   description: {
     type: Sequelize.TEXT('medium'), // eslint-disable-line new-cap

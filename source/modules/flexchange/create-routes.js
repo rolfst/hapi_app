@@ -57,6 +57,7 @@ const routes = [{
   method: 'PUT',
   url: `${baseUrl}/exchanges/{exchangeId}`,
   handler: require(`${basePath}/update-exchange`),
+  validator: require('modules/flexchange/validators/update-exchange'),
 }, {
   method: 'PATCH',
   url: `${baseUrl}/exchanges/{exchangeId}`,

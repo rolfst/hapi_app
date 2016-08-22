@@ -2,7 +2,7 @@ import Joi from 'joi';
 
 export default {
   payload: Joi.object().keys({
-    title: Joi.string().min(5).required(),
+    title: Joi.string().min(5),
     type: Joi.string().valid(['TEAM', 'USER', 'ALL']),
     description: Joi.string(),
     values: Joi.array().when('type', {
