@@ -76,6 +76,8 @@ describe('Get exchanges for network', () => {
       start: moment().startOf('isoweek').format('YYYY-MM-DD'),
     });
 
+    console.log('start of the week', moment().startOf('isoweek').format('YYYY-MM-DD'));
+
     const endpoint = `/v2/networks/${network.id}/exchanges?${query}`;
     const { result, statusCode } = await getRequest(endpoint);
 
