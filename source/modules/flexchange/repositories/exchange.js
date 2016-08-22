@@ -116,7 +116,7 @@ export function findExchangesForModel(model, userId, includes = [], filter = {})
   if (filter.start && filter.end) {
     dateFilter = { $between: [filter.start, filter.end] };
   } else if (filter.start && !filter.end) {
-    dateFilter = { $gt: filter.start };
+    dateFilter = { $gte: filter.start };
   }
 
   if (dateFilter) options.where = { date: dateFilter };

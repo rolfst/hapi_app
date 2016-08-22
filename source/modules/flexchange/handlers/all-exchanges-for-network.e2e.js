@@ -32,7 +32,7 @@ describe('Get exchanges for network', () => {
       const exchange3 = createExchange(global.users.admin.id, network.id, {
         ...defaultArgs,
         date: moment().add(2, 'weeks').format('YYYY-MM-DD'),
-        title: 'Test shift 2',
+        title: 'Test shift 3',
       });
 
       return Promise.all([exchange1, exchange2, exchange3]);
@@ -75,8 +75,6 @@ describe('Get exchanges for network', () => {
     const query = qs.stringify({
       start: moment().startOf('isoweek').format('YYYY-MM-DD'),
     });
-
-    console.log('start of the week', moment().startOf('isoweek').format('YYYY-MM-DD'));
 
     const endpoint = `/v2/networks/${network.id}/exchanges?${query}`;
     const { result, statusCode } = await getRequest(endpoint);
