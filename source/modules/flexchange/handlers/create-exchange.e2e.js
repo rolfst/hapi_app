@@ -32,6 +32,8 @@ describe('Create exchange', () => {
     assert.equal(result.data.user.fullName, global.users.admin.full_name);
     assert.deepEqual(result.data.created_in, { type: 'network', id: network.id });
     assert.equal(result.data.title, 'Test shift for network');
+    assert.equal(result.data.start_time, null);
+    assert.equal(result.data.end_time, null);
     assert.equal(statusCode, 200);
   });
 
@@ -47,6 +49,8 @@ describe('Create exchange', () => {
     assert.equal(result.data.user.fullName, global.users.admin.full_name);
     assert.deepEqual(result.data.created_in, { type: 'team', ids: [flexAppealTeam.id] });
     assert.equal(result.data.title, 'Test shift for network');
+    assert.equal(result.data.start_time, null);
+    assert.equal(result.data.end_time, null);
     assert.equal(statusCode, 200);
   });
 
