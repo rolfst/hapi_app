@@ -28,18 +28,22 @@ describe('Exchange activity feed', () => {
       date: moment().format('YYYY-MM-DD'),
     });
 
-    await Promise.delay(1000);
-    await acceptExchange(exchange.id, admin.id);
-    await Promise.delay(1000);
-    comment = await createExchangeComment(
-      exchange.id, { text: 'Foo comment', userId: employee.id }
-    );
-    await Promise.delay(1000);
-    await acceptExchange(exchange.id, employee.id);
-    await Promise.delay(1000);
-    await rejectExchange(exchange, admin, employee.id);
-    await Promise.delay(1000);
-    await approveExchange(exchange, admin, admin.id);
+    const actions = [
+      () => acceptExchange(exchange.id, admin.id),
+      () => createExchangeComment(
+        exchange.id, { text: 'Foo comment', userId: employee.id }
+      ),
+      () => acceptExchange(exchange.id, employee.id),
+      () => rejectExchange(exchange, admin, employee.id),
+      () => approveExchange(exchange, admin, admin.id),
+    ];
+
+    const values = await Promise.mapSeries(actions, async item => {
+      await Promise.delay(1000);
+      return item();
+    });
+
+    comment = values[1];
 
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}/activity_feed`;
     const response = await getRequest(endpoint);
