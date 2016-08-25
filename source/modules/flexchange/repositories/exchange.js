@@ -22,6 +22,18 @@ const defaultIncludes = [
     { model: ExchangeValue },
 ];
 
+const createDateFilter = (filter) => {
+  let dateFilter;
+
+  if (filter.start && filter.end) {
+    dateFilter = { $between: [filter.start, filter.end] };
+  } else if (filter.start && !filter.end) {
+    dateFilter = { $gte: filter.start };
+  }
+
+  return dateFilter;
+};
+
 /**
  * Find a specific exchange by id
  * @param {number} exchangeId - Id of exchange being looked for
@@ -100,6 +112,32 @@ export function findExchangesByUser(user) {
   return user.getExchanges({ include: [...defaultIncludes, extraInclude] });
 }
 
+export function findExchangesForValues(type, values, userId, includes = [], filter = {}) {
+  const extraIncludes = [{ model: ExchangeResponse,
+    as: 'ResponseStatus',
+    where: { userId },
+    required: false,
+  }, ...includes];
+
+  const options = {
+    include: [...defaultIncludes, ...extraIncludes],
+  };
+
+  const dateFilter = createDateFilter(filter);
+
+  if (dateFilter) options.where = { date: dateFilter };
+
+  return Exchange.findAll({
+    where: { type },
+    include: [{
+      model: ExchangeValue,
+      where: {
+        value: { $in: values },
+      },
+    }],
+  });
+}
+
 export function findExchangesForModel(model, userId, includes = [], filter = {}) {
   const extraIncludes = [{ model: ExchangeResponse,
     as: 'ResponseStatus',
@@ -107,17 +145,11 @@ export function findExchangesForModel(model, userId, includes = [], filter = {})
     required: false,
   }, ...includes];
 
-  let dateFilter;
-
   const options = {
     include: [...defaultIncludes, ...extraIncludes],
   };
 
-  if (filter.start && filter.end) {
-    dateFilter = { $between: [filter.start, filter.end] };
-  } else if (filter.start && !filter.end) {
-    dateFilter = { $gte: filter.start };
-  }
+  const dateFilter = createDateFilter(filter);
 
   if (dateFilter) options.where = { date: dateFilter };
 

@@ -1,8 +1,8 @@
-import { roles } from 'common/services/permission';
+import { UserRoles } from 'common/services/permission';
 
 export default {
-  'accept-exchange': [roles.EMPLOYEE, roles.ADMIN],
-  'decline-exchange': [roles.EMPLOYEE, roles.ADMIN],
-  'approve-exchange': roles.ADMIN,
-  'reject-exchange': roles.ADMIN,
+  'accept-exchange': [UserRoles.EMPLOYEE, UserRoles.ADMIN],
+  'decline-exchange': [UserRoles.EMPLOYEE, UserRoles.ADMIN],
+  'approve-exchange': UserRoles.ADMIN,
+  'reject-exchange': UserRoles.ADMIN,
 };

@@ -1,6 +1,6 @@
 import Boom from 'boom';
 import moment from 'moment';
-import { roles } from 'common/services/permission';
+import { UserRoles } from 'common/services/permission';
 import IntegrationNotFound from 'common/errors/integration-not-found';
 import { validateTeamIds } from 'common/repositories/team';
 import { findAllUsersForNetwork } from 'common/repositories/network';
@@ -23,9 +23,9 @@ export const sendNotification = async (exchange, network, exchangeValues, logged
   const users = await usersPromise;
   const usersToNotify = users.filter(u => u.id !== loggedUser.id);
 
-  if (roleType === roles.EMPLOYEE) {
+  if (roleType === UserRoles.EMPLOYEE) {
     createdNotification.send(usersToNotify, exchange);
-  } else if (roleType === roles.ADMIN) {
+  } else if (roleType === UserRoles.ADMIN) {
     createdByAdminNotification.send(usersToNotify, exchange);
   }
 };

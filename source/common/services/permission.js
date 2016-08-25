@@ -1,7 +1,8 @@
-import _ from 'lodash';
-
-export const roles = { ADMIN: 'ADMIN', EMPLOYEE: 'EMPLOYEE' };
+export const UserRoles = { ADMIN: 'ADMIN', EMPLOYEE: 'EMPLOYEE' };
 
 export function hasRole(user, requiredRole) {
-  return _.includes(user.scope, requiredRole);
+  return user.role === requiredRole;
 }
+
+export const isAdmin = (user) => user.role === UserRoles.ADMIN;
+export const isEmployee = (user) => user.role === UserRoles.EMPLOYEE;

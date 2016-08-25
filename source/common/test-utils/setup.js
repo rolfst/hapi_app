@@ -6,7 +6,7 @@ import createServer from 'server';
 import Parse from 'parse/node';
 import * as mailer from 'common/services/mailer';
 import blueprints from 'common/test-utils/blueprints';
-import { roles } from 'common/services/permission';
+import { UserRoles } from 'common/services/permission';
 import { createUser } from 'common/repositories/user';
 import authenticate from 'common/test-utils/authenticate';
 import { createNetwork, createPmtNetwork } from 'common/repositories/network';
@@ -38,10 +38,10 @@ before(async () => {
 
     // Add user to the networks
     await Promise.all([
-      createdFlexNetwork.addUser(admin, { roleType: roles.ADMIN }),
-      createdFlexNetwork.addUser(employee, { roleType: roles.EMPLOYEE }),
+      createdFlexNetwork.addUser(admin, { roleType: UserRoles.ADMIN }),
+      createdFlexNetwork.addUser(employee, { roleType: UserRoles.EMPLOYEE }),
       createdPMTNetwork.addUser(admin, {
-        roleType: roles.ADMIN,
+        roleType: UserRoles.ADMIN,
         externalId: 8023,
         userToken: '379ce9b4176cb89354c1f74b3a2c1c7a',
       }),
