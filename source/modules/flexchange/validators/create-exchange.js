@@ -4,7 +4,7 @@ export default {
   payload: Joi.object().keys({
     title: Joi.string().min(5),
     type: Joi.string().valid(['TEAM', 'USER', 'ALL']),
-    description: Joi.string(),
+    description: Joi.string().empty(''),
     values: Joi.array().when('type', {
       is: 'TEAM',
       then: Joi.any().required(),

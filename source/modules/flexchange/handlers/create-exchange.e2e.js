@@ -26,15 +26,16 @@ describe('Create exchange', () => {
     const { statusCode, result } = await postRequest(endpoint, {
       title: 'Test shift for network',
       date: moment().format('YYYY-MM-DD'),
+      description: '',
       type: exchangeTypes.NETWORK,
     });
 
+    assert.equal(statusCode, 200);
     assert.equal(result.data.user.fullName, global.users.admin.full_name);
     assert.deepEqual(result.data.created_in, { type: 'network', id: network.id });
     assert.equal(result.data.title, 'Test shift for network');
     assert.equal(result.data.start_time, null);
     assert.equal(result.data.end_time, null);
-    assert.equal(statusCode, 200);
   });
 
   it('should create exchange for a team', async () => {
@@ -46,12 +47,12 @@ describe('Create exchange', () => {
       values: [flexAppealTeam.id],
     });
 
+    assert.equal(statusCode, 200);
     assert.equal(result.data.user.fullName, global.users.admin.full_name);
     assert.deepEqual(result.data.created_in, { type: 'team', ids: [flexAppealTeam.id] });
     assert.equal(result.data.title, 'Test shift for network');
     assert.equal(result.data.start_time, null);
     assert.equal(result.data.end_time, null);
-    assert.equal(statusCode, 200);
   });
 
   it('should create exchange with external shift id', async () => {
