@@ -12,7 +12,6 @@ import { createExchangeResponse } from 'modules/flexchange/repositories/exchange
 import { createValuesForExchange } from 'modules/flexchange/repositories/exchange-value';
 import {
   findExchangeResponseByExchangeAndUser,
-  removeExchangeResponseForExchangeAndUser,
 } from 'modules/flexchange/repositories/exchange-response';
 
 const defaultIncludes = [

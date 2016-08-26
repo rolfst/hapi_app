@@ -10,7 +10,10 @@ describe('Invite user #Controller', () => {
 
   before(async () => {
     network = global.networks.flexAppeal;
-    team = await createTeam(network.id, 'Cool Team');
+    team = await createTeam({
+      networkId: network.id,
+      name: 'Cool Team',
+    });
   });
 
   after(() => team.destroy());

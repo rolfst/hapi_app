@@ -10,7 +10,8 @@ function makeRequest(endpoint, token = null, method = 'GET', data = {}) {
     .then(res => res.body)
     .catch(err => {
       if (err.response.statusCode === 400) throw ExpiredToken;
-      else console.log('PMT Client error: ', err);
+
+      console.log('PMT Client error: ', err);
     });
 }
 

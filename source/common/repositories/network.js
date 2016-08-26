@@ -30,10 +30,6 @@ export async function setRoleTypeForUser(network, user, roleType) {
   return result.update({ roleType });
 }
 
-export function addUserToNetwork(network, user, roleType) {
-  return user.addNetwork(network, { roleType });
-}
-
 export function findNetworkById(id) {
   return Network
     .findById(id, {
@@ -66,7 +62,12 @@ export function findNetworksForIntegration(integrationName) {
     });
 }
 
+export function findActiveUsersForNetwork(network) {
+  return network.getUsers();
+}
+
 export function findAllUsersForNetwork(network) {
+  // TODO: Not working yet, created an issue into the Sequelize github repo
   return network.getUsers();
 }
 
@@ -75,7 +76,9 @@ export function findAdminsByNetwork(network) {
 }
 
 export function findTeamsForNetwork(network) {
-  return network.getTeams();
+  return network.getTeams({
+    include: [{ model: User }],
+  });
 }
 
 export async function createNetwork(userId, name = null, externalId = null) {
@@ -84,14 +87,16 @@ export async function createNetwork(userId, name = null, externalId = null) {
     name, userId, enabledComponents, externalId,
   });
 
-  return await findNetworkById(network.id);
+  return findNetworkById(network.id);
 }
 
-export async function createPmtNetwork(userId, name = null) {
-  const network = await createNetwork(userId, name, 'https://partner2.testpmt.nl/rest.php/dokkum');
-  const integration = await findIntegrationByName('PMT');
+export async function createIntegrationNetwork({
+  userId, externalId, name, integrationName,
+}) {
+  const network = await createNetwork(userId, name, externalId);
+  const integration = await findIntegrationByName(integrationName);
 
   await network.setIntegrations([integration]);
 
-  return await findNetworkById(network.id);
+  return findNetworkById(network.id);
 }

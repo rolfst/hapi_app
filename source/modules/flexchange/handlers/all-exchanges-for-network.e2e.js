@@ -18,9 +18,9 @@ describe('Get exchanges for network', () => {
     network = global.networks.flexAppeal;
 
     const [team1, team2, team3] = await Promise.all([
-      createTeam(network.id, 'Test team 1'),
-      createTeam(network.id, 'Test team 2'),
-      createTeam(network.id, 'Test team 3'),
+      createTeam({ networkId: network.id, name: 'Test team 1' }),
+      createTeam({ networkId: network.id, name: 'Test team 2' }),
+      createTeam({ networkId: network.id, name: 'Test team 3' }),
     ]);
 
     await global.users.employee.addTeams([team2, team3]);

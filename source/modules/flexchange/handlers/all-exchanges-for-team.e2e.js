@@ -13,7 +13,7 @@ describe('Get exchanges for team', () => {
   before(() => {
     network = global.networks.flexAppeal;
 
-    return createTeam(network.id, 'Team #1')
+    return createTeam({ networkId: network.id, name: 'Team #1' })
       .then(createdTeam => {
         team = createdTeam;
 

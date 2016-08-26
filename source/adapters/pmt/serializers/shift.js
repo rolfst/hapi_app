@@ -1,9 +1,9 @@
-import formatDate from 'adapters/pmt/format-date';
+import moment from 'moment';
 
-export default (pmtShift) => ({
-  id: pmtShift.id,
-  start_time: formatDate(pmtShift.start_time),
-  end_time: formatDate(pmtShift.end_time),
-  break: pmtShift.break,
-  team_id: pmtShift.department,
+export default (externalShift) => ({
+  id: externalShift.id,
+  start_time: moment(externalShift.start_time, 'DD-MM-YYYY HH:mm:ss').toISOString(),
+  end_time: moment(externalShift.end_time, 'DD-MM-YYYY HH:mm:ss').toISOString(),
+  break: externalShift.break,
+  team_id: externalShift.department,
 });

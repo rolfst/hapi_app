@@ -2,13 +2,6 @@ import Sequelize from 'sequelize';
 import { db as model } from 'connections';
 import formatDate from 'common/utils/format-date';
 import { User } from 'common/models';
-import { Exchange } from 'modules/flexchange/models';
-import {
-  incrementExchangeAcceptCount,
-  incrementExchangeDeclineCount,
-  decrementExchangeAcceptCount,
-  decrementExchangeDeclineCount,
-} from 'modules/flexchange/repositories/exchange';
 
 const ExchangeResponse = model.define('ExchangeResponse', {
   userId: {

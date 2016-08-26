@@ -2,11 +2,12 @@ import inviteUser from 'modules/employee/controllers/invite-user';
 
 export default async (req, reply) => {
   try {
-    await inviteUser(req.pre.network, req.payload);
+    const invitedUser = await inviteUser(req.pre.network, req.payload);
 
-    reply({ message: 'User is invited.' });
+    return reply({ success: true, data: invitedUser.toJSON() });
   } catch (err) {
     console.log('Error when creating user for network', err);
-    reply(err);
+
+    return reply(err);
   }
 };

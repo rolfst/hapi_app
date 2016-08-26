@@ -15,6 +15,11 @@ const Team = db.define('Team', {
     type: Sequelize.TEXT('medium'), // eslint-disable-line new-cap
     allowNull: true,
   },
+  externalId: {
+    type: Sequelize.STRING,
+    field: 'external_id',
+    allowNull: true,
+  },
 }, {
   tableName: 'teams',
   createdAt: 'created_at',

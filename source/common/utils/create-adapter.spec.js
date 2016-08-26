@@ -1,31 +1,27 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import IntegrationNotFound from 'common/errors/integration-not-found';
-import * as unit from 'adapters/create-adapter';
+import * as unit from 'common/utils/create-adapter';
 
 describe('createAdapter', () => {
-  const network = { name: 'My network', Integrations: [{ id: 1 }] };
+  const network = { name: 'My network', Integrations: [{ name: 'foo' }] };
   const authSettings = [{ name: 'foo', token: 'footoken' }];
 
-  it('should pass token to the adapter', () => {
+  it('should pass network and token to adapter', () => {
     const adapterSpy = sinon.spy();
-    const fakeIntegrations = {
-      1: { name: 'foo', adapter: adapterSpy },
-    };
+    const fakeIntegrations = [{ name: 'foo', adapter: adapterSpy }];
 
     unit.default(network, authSettings, { integrations: fakeIntegrations });
 
-    assert(adapterSpy.calledWith('footoken'));
-    assert(adapterSpy.calledOnce);
+    assert.isTrue(adapterSpy.calledWith(network, 'footoken'));
+    assert.isTrue(adapterSpy.calledOnce);
 
     adapterSpy.reset();
   });
 
   it('should return the adapter', () => {
     const fakeAdapter = () => ({ foo: 'baz' });
-    const fakeIntegrations = {
-      1: { name: 'foo', adapter: fakeAdapter },
-    };
+    const fakeIntegrations = [{ name: 'foo', adapter: fakeAdapter }];
 
     const actual = unit.default(network, authSettings, { integrations: fakeIntegrations });
 
@@ -34,9 +30,7 @@ describe('createAdapter', () => {
 
   it('should proceed without token', () => {
     const fakeAdapter = () => ({ foo: 'baz' });
-    const fakeIntegrations = {
-      1: { name: 'foo', adapter: fakeAdapter },
-    };
+    const fakeIntegrations = [{ name: 'foo', adapter: fakeAdapter }];
 
     const actual = unit.default(network, [], {
       proceedWithoutToken: true,
@@ -54,9 +48,7 @@ describe('createAdapter', () => {
 
   it('should fail when no token found', () => {
     const fakeAdapter = () => ({ foo: 'baz' });
-    const fakeIntegrations = {
-      1: { name: 'foo', adapter: fakeAdapter },
-    };
+    const fakeIntegrations = [{ name: 'foo', adapter: fakeAdapter }];
 
     const actual = () => unit.default(network, [], { integrations: fakeIntegrations });
 

@@ -1,6 +1,6 @@
 import Boom from 'boom';
 import _ from 'lodash';
-import createAdapter from 'adapters/create-adapter';
+import createAdapter from 'common/utils/create-adapter';
 import hasIntegration from 'common/utils/network-has-integration';
 import { findExchangesByShiftIds } from 'modules/flexchange/repositories/exchange';
 

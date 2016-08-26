@@ -9,7 +9,7 @@ import blueprints from 'common/test-utils/blueprints';
 import { UserRoles } from 'common/services/permission';
 import { createUser } from 'common/repositories/user';
 import authenticate from 'common/test-utils/authenticate';
-import { createNetwork, createPmtNetwork } from 'common/repositories/network';
+import { createNetwork, createIntegrationNetwork } from 'common/repositories/network';
 import generateNetworkName from 'common/test-utils/create-network-name';
 
 const chaiAsPromised = require('chai-as-promised');
@@ -33,7 +33,12 @@ before(async () => {
     // Create networks
     const [createdFlexNetwork, createdPMTNetwork] = await Promise.all([
       createNetwork(admin.id, generateNetworkName()),
-      createPmtNetwork(admin.id, generateNetworkName()),
+      createIntegrationNetwork({
+        userId: admin.id,
+        externalId: 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi',
+        name: generateNetworkName(),
+        integrationName: 'PMT',
+      }),
     ]);
 
     // Add user to the networks
@@ -101,8 +106,12 @@ before(async () => {
   }
 });
 
-after(() => Promise.all([
-  admin.destroy(),
-  employee.destroy(),
-  networklessUser.destroy(),
-]).catch(err => console.log('Error in test teardown', err)));
+after(async () => {
+  try {
+    await Promise.all([networklessUser.destroy(), employee.destroy()]);
+
+    return admin.destroy();
+  } catch (err) {
+    console.log('Error in test teardown', err);
+  }
+});

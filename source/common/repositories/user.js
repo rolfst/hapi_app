@@ -46,12 +46,64 @@ export async function findUserByUsername(username) {
   return user;
 }
 
-export function updateUser(userId, attributes) {
-  return User.findById(userId)
-    .then(user => {
-      return user.update(attributes).then(() => user);
-    })
-    .then(updatedUser => updatedUser.reload());
+export function addExternalUsersToNetwork(users, network) {
+  const promises = users
+    .map(user => NetworkUser.create({
+      externalId: user.externalId,
+      networkId: network.id,
+      userId: user.id,
+      roleType: user.roleType,
+      deletedAt: user.isActive ? null : new Date(),
+    }));
+
+  return Promise.all(promises);
+}
+
+export function addUsersToNetwork(user, network, roleType = 'EMPLOYEE') {
+  return network
+    .addUsers(user, { roleType })
+    .catch(err => console.log('Error while adding user to network', err));
+}
+
+export async function addUserToNetwork(user, network, {
+  roleType = 'EMPLOYEE',
+  externalId = null,
+  isActive = true,
+}) {
+  await network
+    .addUser(user, { roleType, externalId, deletedAt: isActive ? null : new Date() });
+
+  return user.reload();
+}
+
+export function getIntegrationTokensForUser(user) {
+  const result = user.Networks
+    .filter(network => network.NetworkUser.userToken !== null)
+    .map(network => ({
+      name: network.Integrations[0].name,
+      token: network.NetworkUser.userToken,
+      externalId: network.NetworkUser.externalId,
+    }));
+
+  return result;
+}
+
+export async function updateUser(userId, attributes) {
+  const user = await User.findById(userId);
+  const updatedUser = await user.update(attributes);
+
+  return updatedUser.reload();
+}
+
+export async function updateUserByEmail(email, attributes) {
+  try {
+    const user = await User.findOne({ where: { email } });
+    const updatedUser = await user.update(attributes);
+
+    return updatedUser.reload();
+  } catch (err) {
+    console.log('Could not update the user', err);
+  }
 }
 
 export function createUser(attributes) {
@@ -64,26 +116,15 @@ export function createUser(attributes) {
   });
 }
 
-export function createOrUpdateUser(identifier, data) {
-  return User.findOne({ where: identifier })
-    .then(user => {
-      if (user) {
-        return user.update(data);
-      }
-      return createUser(data);
-    });
-}
-
-export function createUsers(userCollection) {
-  const values = userCollection.map(user => {
-    const userWithProfileImg = Object.assign(user, {
+export function createBulkUsers(users) {
+  const promises = users
+    .map(user => ({
+      ...user,
       profileImg: _.sample(dummyProfileImgPaths),
-    });
+    }))
+    .map(user => User.create(user));
 
-    return userWithProfileImg;
-  });
-
-  return User.bulkCreate(values);
+  return Promise.all(promises);
 }
 
 export async function validateUserIds(ids, networkId) {

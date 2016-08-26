@@ -2,10 +2,6 @@ import Sequelize from 'sequelize';
 import { db as model } from 'connections';
 
 const NetworkUser = model.define('NetworkUser', {
-  externalId: {
-    type: Sequelize.INTEGER,
-    field: 'external_id',
-  },
   networkId: {
     type: Sequelize.INTEGER,
     field: 'network_id',
@@ -13,6 +9,10 @@ const NetworkUser = model.define('NetworkUser', {
   userId: {
     type: Sequelize.INTEGER,
     field: 'user_id',
+  },
+  externalId: {
+    type: Sequelize.INTEGER,
+    field: 'external_id',
   },
   roleType: {
     type: Sequelize.STRING,
@@ -30,6 +30,7 @@ const NetworkUser = model.define('NetworkUser', {
   deletedAt: {
     type: Sequelize.DATE,
     field: 'deleted_at',
+    defaultValue: null,
   },
   userToken: {
     type: Sequelize.STRING,
@@ -37,7 +38,10 @@ const NetworkUser = model.define('NetworkUser', {
   },
 }, {
   tableName: 'network_user',
-  timestamps: false,
+  timestamps: true,
+  createdAt: false,
+  updatedAt: false,
+  paranoid: true,
 });
 
 export default NetworkUser;

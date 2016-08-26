@@ -5,6 +5,7 @@ import addedToNetworkMail from 'common/mails/added-to-network';
 import * as mailer from 'common/services/mailer';
 import { createUser, findUserByEmail } from 'common/repositories/user';
 import * as networkRepo from 'common/repositories/network';
+import { addUserToNetwork } from 'common/repositories/user';
 import { findTeamById, addUserToTeam } from 'common/repositories/team';
 import userBelongsToNetwork from 'common/utils/user-belongs-to-network';
 import userIsDeletedFromNetwork from 'common/utils/user-is-deleted-from-network';
@@ -19,7 +20,7 @@ export const inviteNewUser = async (network, { name, email, roleType }) => {
   };
 
   const user = await createUser(attributes);
-  await networkRepo.addUserToNetwork(network, user, roleType);
+  await addUserToNetwork(user, network, { roleType });
 
   mailer.send(signupMail(network, user, plainPassword));
 
@@ -30,7 +31,7 @@ export const inviteExistingUser = async (network, user, roleType) => {
   if (userIsDeletedFromNetwork(user, network.id)) {
     await networkRepo.activateUserInNetwork(network, user);
   } else {
-    await networkRepo.addUserToNetwork(network, user, roleType);
+    await addUserToNetwork(user, network, { roleType });
   }
 
   await networkRepo.setRoleTypeForUser(network, user, roleType);

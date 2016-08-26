@@ -1,5 +1,5 @@
 import Promise from 'bluebird';
-import createAdapter from 'adapters/create-adapter';
+import createAdapter from 'common/utils/create-adapter';
 import networkHasIntegration from 'common/utils/network-has-integration';
 
 const makeAuthenticationPromises = (networks, credentials) => {

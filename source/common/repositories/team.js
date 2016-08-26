@@ -24,9 +24,13 @@ export function findTeamsByIds(ids) {
     });
 }
 
-export function createTeam(networkId, name, description = null) {
+export function createTeam({ networkId, name, description = null, externalId }) {
   return Team
-    .create({ networkId, name, description });
+    .create({ networkId, name, description, externalId });
+}
+
+export function createBulkTeams(teams) {
+  return Promise.all(teams.map(team => Team.create(team)));
 }
 
 export async function validateTeamIds(ids, networkId) {

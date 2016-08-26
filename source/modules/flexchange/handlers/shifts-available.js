@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import createAdapter from 'adapters/create-adapter';
+import createAdapter from 'common/utils/create-adapter';
 import hasIntegration from 'common/utils/network-has-integration';
 
 export default (req, reply) => {

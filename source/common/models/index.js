@@ -16,6 +16,10 @@ NetworkModel.belongsTo(UserModel, {
   foreignKey: 'user_id',
 });
 
+NetworkModel.hasMany(TeamModel, {
+  foreignKey: 'network_id',
+});
+
 NetworkModel.belongsToMany(IntegrationModel, {
   foreignKey: 'network_id',
   otherKey: 'service_id',
@@ -27,9 +31,6 @@ NetworkModel.belongsToMany(UserModel, {
   foreignKey: 'network_id',
   otherKey: 'user_id',
   through: NetworkUserModel,
-  scope: {
-    deletedAt: { $ne: null },
-  },
   timestamps: false,
 });
 

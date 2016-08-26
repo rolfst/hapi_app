@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import moment from 'moment';
-import * as createAdapter from 'adapters/create-adapter';
+import * as createAdapter from 'common/utils/create-adapter';
 import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import { getRequest } from 'common/test-utils/request';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
@@ -36,6 +36,8 @@ describe('My shifts', () => {
       myShifts: () => stubbedResult,
     });
   });
+
+  after(() => createAdapter.default.restore());
 
   it('should pair exchanges', async () => {
     const endpoint = `/v2/networks/${network.id}/users/me/shifts`;

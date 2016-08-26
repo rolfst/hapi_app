@@ -1,12 +1,14 @@
-import createAdapterHook from 'common/utils/create-adapter-hook';
 import client from 'adapters/pmt/client';
 
-const hook = token => (baseStoreUrl, shiftId) => {
-  const endpoint = `${baseStoreUrl}/shift/${shiftId}/available`;
+export default (token) => async (baseStoreUrl, shiftId) => {
+  try {
+    const endpoint = `${baseStoreUrl}/shift/${shiftId}/available`;
+    const result = await client.get(endpoint, token);
 
-  return client.get(endpoint, token)
-    .then(res => res.users)
-    .catch(err => console.log(err));
+    return result.users;
+  } catch (err) {
+    console.log('Error retrieving available users for shift from PMT:', err);
+
+    throw err;
+  }
 };
-
-export default createAdapterHook(hook);
