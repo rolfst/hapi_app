@@ -30,4 +30,17 @@ describe('Accept exchange', () => {
     assert.equal(data.responses[0].user.full_name, global.users.admin.fullName);
     assert.equal(response.statusCode, 200);
   });
+
+  it('should be able to accept after declining', async () => {
+    const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}`;
+
+    await patchRequest(endpoint, { action: 'decline' });
+    const { statusCode, result: { data } } = await patchRequest(endpoint, { action: 'accept' });
+
+    assert.equal(statusCode, 200);
+    assert.equal(data.response_status, 'ACCEPTED');
+    assert.equal(data.accept_count, 1);
+    assert.equal(data.responses[0].response, true);
+    assert.equal(data.responses[0].user.full_name, global.users.admin.fullName);
+  });
 });

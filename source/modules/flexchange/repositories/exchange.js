@@ -232,6 +232,50 @@ export function updateExchangeById(exchangeId, payload) {
 }
 
 /**
+ * Increment the accept count by value
+ * @param {Exchange} exchange - The exchange instance to increment on
+ * @param {number} amount - The amount to increment
+ * @method incrementExchangeAcceptCount
+ * @return {promise} New promise with incremented value
+ */
+export function incrementExchangeAcceptCount(exchange, amount = 1) {
+  return exchange.increment({ acceptCount: amount });
+}
+
+/**
+ * Decrement the accept count by value
+ * @param {Exchange} exchange - The exchange instance to decrement on
+ * @param {number} amount - The amount to decrement
+ * @method decrementExchangeAcceptCount
+ * @return {promise} New promise with decremented value
+ */
+export function decrementExchangeAcceptCount(exchange, amount = 1) {
+  return exchange.decrement({ acceptCount: amount });
+}
+
+/**
+ * Increment the decline count by value
+ * @param {Exchange} exchange - The exchange instance to increment on
+ * @param {number} amount - The amount to increment
+ * @method incrementExchangeDeclineCount
+ * @return {promise} New promise with incremented value
+ */
+export function incrementExchangeDeclineCount(exchange, amount = 1) {
+  return exchange.increment({ declineCount: amount });
+}
+
+/**
+ * Decrement the decline count by value
+ * @param {Exchange} exchange - The exchange instance to decrement on
+ * @param {number} amount - The amount to increment
+ * @method decrementExchangeDeclineCount
+ * @return {promise} New promise with decremented value
+ */
+export function decrementExchangeDeclineCount(exchange, amount = 1) {
+  return exchange.decrement({ declineCount: amount });
+}
+
+/**
  * Add a response to an exchange
  * @param {number} exchangeId - Exchange to add the response to
  * @param {number} userId - User declining the exchange
@@ -243,11 +287,18 @@ export async function respondToExchange(exchangeId, userId, response) {
   const data = { userId, exchangeId, response };
   const exchange = await findExchangeById(exchangeId, userId);
 
+  if (data.response === 0) await incrementExchangeDeclineCount(exchange);
+  else if (data.response === 1) await incrementExchangeAcceptCount(exchange);
+
   try {
     const exchangeResponse = await findExchangeResponseByExchangeAndUser(exchange.id, userId);
 
-    if (!exchangeResponse.response) {
-      await removeExchangeResponseForExchangeAndUser(exchange.id, userId);
+    if (exchangeResponse) {
+      await exchangeResponse.destroy();
+
+      if (exchangeResponse.response === 0) await decrementExchangeDeclineCount(exchange);
+      else if (exchangeResponse.response === 1) await decrementExchangeAcceptCount(exchange);
+
       await createExchangeResponse(data);
     }
   } catch (err) {
@@ -349,48 +400,4 @@ export async function rejectExchange(exchange, rejectingUser, userIdToReject) {
   });
 
   return exchange.reload();
-}
-
-/**
- * Increment the accept count by value
- * @param {Exchange} exchange - The exchange instance to increment on
- * @param {number} amount - The amount to increment
- * @method incrementExchangeAcceptCount
- * @return {promise} New promise with incremented value
- */
-export function incrementExchangeAcceptCount(exchange, amount = 1) {
-  return exchange.increment({ acceptCount: amount });
-}
-
-/**
- * Decrement the accept count by value
- * @param {Exchange} exchange - The exchange instance to decrement on
- * @param {number} amount - The amount to decrement
- * @method decrementExchangeAcceptCount
- * @return {promise} New promise with decremented value
- */
-export function decrementExchangeAcceptCount(exchange, amount = 1) {
-  return exchange.decrement({ acceptCount: amount });
-}
-
-/**
- * Increment the decline count by value
- * @param {Exchange} exchange - The exchange instance to increment on
- * @param {number} amount - The amount to increment
- * @method incrementExchangeDeclineCount
- * @return {promise} New promise with incremented value
- */
-export function incrementExchangeDeclineCount(exchange, amount = 1) {
-  return exchange.increment({ declineCount: amount });
-}
-
-/**
- * Decrement the decline count by value
- * @param {Exchange} exchange - The exchange instance to decrement on
- * @param {number} amount - The amount to increment
- * @method decrementExchangeDeclineCount
- * @return {promise} New promise with decremented value
- */
-export function decrementExchangeDeclineCount(exchange, amount = 1) {
-  return exchange.decrement({ declineCount: amount });
 }

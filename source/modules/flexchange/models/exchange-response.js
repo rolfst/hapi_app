@@ -36,26 +36,6 @@ const ExchangeResponse = model.define('ExchangeResponse', {
   defaultScope: {
     include: [{ model: User }],
   },
-  hooks: {
-    afterCreate: function (exchangeResponseModel) { // eslint-disable-line func-names, object-shorthand, max-len
-      return Exchange.findById(exchangeResponseModel.exchangeId).then(exchange => {
-        if (exchangeResponseModel.response) {
-          return incrementExchangeAcceptCount(exchange);
-        }
-
-        return incrementExchangeDeclineCount(exchange);
-      });
-    },
-    afterDestroy: function (exchangeResponseModel) { // eslint-disable-line func-names, object-shorthand, max-len
-      exchangeResponseModel.getExchange().then(exchange => {
-        if (exchangeResponseModel.response) {
-          return decrementExchangeAcceptCount(exchange);
-        }
-
-        return decrementExchangeDeclineCount(exchange);
-      });
-    },
-  },
   instanceMethods: {
     toJSON: function () { // eslint-disable-line func-names, object-shorthand
       let output = {
