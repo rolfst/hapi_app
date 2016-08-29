@@ -1,12 +1,12 @@
 import Boom from 'boom';
 import moment from 'moment';
-import { pick } from 'lodash';
+import { pick, includes } from 'lodash';
 import camelCaseKeys from 'common/utils/camel-case-keys';
 import { UserRoles } from 'common/services/permission';
 import IntegrationNotFound from 'common/errors/integration-not-found';
-import { validateTeamIds } from 'common/repositories/team';
+import { findUsersByTeamIds, validateTeamIds } from 'common/repositories/team';
 import { findAllUsersForNetwork } from 'common/repositories/network';
-import { findUsersByTeamIds } from 'common/repositories/team';
+import { validateUserIds } from 'common/repositories/user';
 import hasIntegration from 'common/utils/network-has-integration';
 import analytics from 'common/services/analytics';
 import newExchangeEvent from 'common/events/new-exchange-event';
@@ -38,7 +38,9 @@ export default async (req, reply) => {
     const { network } = req.pre;
 
     const whitelist = pick(req.payload,
-      'title', 'description', 'date', 'type', 'shift_id', 'start_time', 'end_time', 'values'
+      'title', 'description', 'date',
+      'type', 'shift_id', 'start_time',
+      'end_time', 'values', 'team_id'
     );
 
     const data = camelCaseKeys(whitelist);
@@ -51,8 +53,12 @@ export default async (req, reply) => {
       throw IntegrationNotFound;
     }
 
-    if (data.type === exchangeTypes.TEAM) {
-      const isValid = await validateTeamIds(data.values, network.id);
+    if (includes([exchangeTypes.TEAM, exchangeTypes.USER], data.type)) {
+      let validator;
+      if (data.type === exchangeTypes.TEAM) validator = validateTeamIds;
+      if (data.type === exchangeTypes.USER) validator = validateUserIds;
+
+      const isValid = validator ? await validator(data.values, network.id) : true;
       if (!isValid) throw Boom.badData('Incorrect values.');
     }
 

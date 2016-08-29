@@ -3,6 +3,7 @@ import moment from 'moment';
 import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import { getRequest } from 'common/test-utils/request';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
+import { createTeam } from 'common/repositories/team';
 
 let network;
 let exchange;
@@ -28,6 +29,22 @@ describe('View exchange', () => {
     assert.equal(result.data.vote_result, null);
     assert.deepEqual(result.data.created_in, { type: 'network', id: network.id });
     assert.equal(result.data.description, 'Test description for this cool shift');
+  });
+
+  it('should return correct attributes for exchange from external shift', async () => {
+    const team = await createTeam({ networkId: network.id, name: 'Test network' });
+    const externalShiftExchange = await createExchange(global.users.admin.id, network.id, {
+      date: moment().format('YYYY-MM-DD'),
+      type: exchangeTypes.USER,
+      shiftId: 1,
+      teamId: team.id,
+      values: [global.users.admin.id],
+    });
+
+    const endpoint = `/v2/networks/${network.id}/exchanges/${externalShiftExchange.id}`;
+    const { result } = await getRequest(endpoint);
+
+    assert.deepEqual(result.data.created_in, { type: 'team', ids: [team.id] });
   });
 
   it('should fail when exchange cannot be found', async () => {

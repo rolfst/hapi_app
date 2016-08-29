@@ -8,7 +8,11 @@ export const mapShiftsWithExchanges = (shifts, exchanges) => {
   return shifts.map(shift => {
     const exchange = _.find(exchanges, { shiftId: parseInt(shift.id, 10) });
 
-    return { ...shift, exchange_id: exchange ? exchange.id : null };
+    return {
+      ...shift,
+      exchange_id: exchange ? exchange.id : null,
+      team_id: exchange ? exchange.teamId : null,
+    };
   });
 };
 

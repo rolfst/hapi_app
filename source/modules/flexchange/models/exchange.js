@@ -7,6 +7,7 @@ import makeCreatedInObject from 'modules/flexchange/utils/created-in-text';
 export const exchangeTypes = {
   NETWORK: 'ALL',
   TEAM: 'TEAM',
+  USER: 'USER',
 };
 
 const Exchange = model.define('Exchange', {
@@ -18,6 +19,11 @@ const Exchange = model.define('Exchange', {
   networkId: {
     type: Sequelize.INTEGER,
     field: 'network_id',
+    allowNull: true,
+  },
+  teamId: {
+    type: Sequelize.INTEGER,
+    field: 'team_id',
     allowNull: true,
   },
   title: {

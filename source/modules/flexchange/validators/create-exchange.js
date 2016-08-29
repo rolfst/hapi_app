@@ -14,7 +14,8 @@ export default {
     }),
     date: Joi.date().format('YYYY-MM-DD').required(),
     shift_id: Joi.number(),
+    team_id: Joi.number(),
     start_time: Joi.date().iso(),
     end_time: Joi.date().iso(),
-  }).and('start_time', 'end_time'),
+  }).and('start_time', 'end_time').and('shift_id', 'team_id'),
 };

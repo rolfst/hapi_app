@@ -18,17 +18,20 @@ describe('My shifts', () => {
       type: exchangeTypes.NETWORK,
       title: 'External shift from integration',
       shiftId: 25280343,
+      teamId: 14,
     });
 
     const stubbedResult = [{
       id: '25280341',
       start_time: '2016-12-19T08:00:00+0100',
       end_time: '2016-12-19T16:30:00+0100',
+      department: '14',
       break: '01:30:00',
     }, {
       id: '25280343',
       start_time: '2016-12-21T08:00:00+0100',
       end_time: '2016-12-21T15:00:00+0100',
+      department: '14',
       break: '01:15:00',
     }];
 
@@ -44,6 +47,8 @@ describe('My shifts', () => {
     const { result } = await getRequest(endpoint);
 
     assert.equal(result.data[0].exchange_id, null);
+    assert.equal(result.data[0].team_id, null);
     assert.equal(result.data[1].exchange_id, createdExchange.id);
+    assert.equal(result.data[1].team_id, 14);
   });
 });
