@@ -26,13 +26,6 @@ describe('Authenticate', () => {
       });
   });
 
-  it('should return user object', async () => {
-    const { username, password } = adminCredentials;
-    const { result: { data } } = await loginRequest({ username, password });
-
-    assert.equal(data.user.id, global.users.admin.id);
-  });
-
   it('should login with correct credentials', async () => {
     const { username, password } = adminCredentials;
     const { result } = await loginRequest({ username, password });

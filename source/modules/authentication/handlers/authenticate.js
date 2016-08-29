@@ -38,22 +38,16 @@ export default async (req, reply) => {
     const deviceName = req.headers['user-agent'];
 
     const device = await findOrCreateUserDevice(user.id, deviceName);
-    const updatedUser = await updateUser(user.id, { lastLogin: moment().toISOString() });
+    updateUser(user.id, { lastLogin: moment().toISOString() });
 
     const accessToken = createAccessToken(user.id, device.device_id, authenticatedIntegrations);
     const refreshToken = createRefreshToken(user.id, device.device_id);
-
-    const data = {
-      access_token: accessToken,
-      refresh_token: refreshToken,
-      user: updatedUser.toJSON(),
-    };
 
     analytics.registerProfile(user);
     analytics.setUser(user);
     if (user.lastLogin === null) analytics.track(firstLoginEvent());
 
-    return reply({ data });
+    return reply({ data: { access_token: accessToken, refresh_token: refreshToken } });
   } catch (err) {
     console.log('Error when authenticating user', err);
     return reply(err);

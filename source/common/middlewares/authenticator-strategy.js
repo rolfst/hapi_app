@@ -1,6 +1,7 @@
 import Boom from 'boom';
 import analytics from 'common/services/analytics';
 import tokenUtil from 'common/utils/token';
+import addNetworkScope from 'common/utils/add-network-scope';
 import selectNetwork from 'common/utils/select-network';
 import { findUserById } from 'common/repositories/user';
 
@@ -22,7 +23,7 @@ export const authenticate = async (networkId, token = null) => {
   analytics.setUser(user);
 
   return {
-    credentials: user.selectNetwork(networkId),
+    credentials: networkId ? addNetworkScope(user, networkId) : user,
     artifacts: { integrations },
   };
 };

@@ -18,6 +18,7 @@ describe('authenticatorStrategy', () => {
     sandbox = sinon.sandbox.create();
     sandbox.stub(userRepo, 'findUserById').returns(user);
   });
+
   afterEach(() => (sandbox.restore()));
 
   it('should return correct user credentials', async () => {
