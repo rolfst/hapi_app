@@ -3,6 +3,7 @@ import { db as model } from 'connections';
 import * as password from 'common/utils/password';
 import formatDate from 'common/utils/format-date';
 import makeFunctionName from 'common/utils/make-function-name';
+import selectNetwork from 'common/utils/select-network';
 import Conversation from 'modules/chat/models/conversation';
 
 const User = model.define('User', {
@@ -74,8 +75,9 @@ const User = model.define('User', {
     },
   },
   instanceMethods: {
-    setFunctionNameForNetwork: function (networkId) { // eslint-disable-line func-names, object-shorthand, max-len
+    selectNetwork: function (networkId) { // eslint-disable-line func-names, object-shorthand, max-len
       this.functionName = makeFunctionName(parseInt(networkId, 10), this);
+      this.integrationAuth = !!selectNetwork(this.Networks, networkId).NetworkUser.userToken;
 
       return this;
     },
@@ -109,6 +111,7 @@ const User = model.define('User', {
         last_name: this.lastName,
         full_name: this.fullName,
         function: this.functionName,
+        integration_auth: this.integrationAuth,
         email: this.email,
         phone_num: this.phoneNum,
         profile_img: `https://s3.eu-central-1.amazonaws.com/flex-appeal/${environment}/profiles/${this.profileImg}`,

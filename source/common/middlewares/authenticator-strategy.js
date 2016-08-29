@@ -22,7 +22,7 @@ export const authenticate = async (networkId, token = null) => {
   analytics.setUser(user);
 
   return {
-    credentials: user,
+    credentials: user.selectNetwork(networkId),
     artifacts: { integrations },
   };
 };

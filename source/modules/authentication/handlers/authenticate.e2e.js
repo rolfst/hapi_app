@@ -8,7 +8,7 @@ const url = '/v2/authenticate';
 const adminCredentials = blueprints.users.admin;
 const employeeCredentials = blueprints.users.employee;
 const networklessUserCredentials = blueprints.users.networkless;
-const loginRequest = (username, password) => {
+const loginRequest = ({ username, password }) => {
   return postRequest(url, { username, password });
 };
 
@@ -26,8 +26,16 @@ describe('Authenticate', () => {
       });
   });
 
+  it('should return user object', async () => {
+    const { username, password } = adminCredentials;
+    const { result: { data } } = await loginRequest({ username, password });
+
+    assert.equal(data.user.id, global.users.admin.id);
+  });
+
   it('should login with correct credentials', async () => {
-    const { result } = await loginRequest(adminCredentials.username, adminCredentials.password);
+    const { username, password } = adminCredentials;
+    const { result } = await loginRequest({ username, password });
     const { data } = result;
 
     assert.property(data, 'access_token');
@@ -36,20 +44,16 @@ describe('Authenticate', () => {
   });
 
   it('should fail when credentials are not correct', async () => {
-    const { result, statusCode } = await loginRequest(
-      employeeCredentials.username,
-      'wrongpassword'
-    );
+    const { username } = employeeCredentials;
+    const { result, statusCode } = await loginRequest({ username, password: 'wrongpassword' });
 
     assert.equal(result.error.title, WrongCredentials.type);
     assert.equal(statusCode, 403);
   });
 
   it('should fail when user does not belong to a network', async () => {
-    const { result, statusCode } = await loginRequest(
-      networklessUserCredentials.username,
-      networklessUserCredentials.password
-    );
+    const { username, password } = networklessUserCredentials;
+    const { result, statusCode } = await loginRequest({ username, password });
 
     assert.equal(result.error.title, NotInAnyNetwork.type);
     assert.equal(statusCode, 403);
