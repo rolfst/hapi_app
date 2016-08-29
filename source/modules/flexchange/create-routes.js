@@ -10,7 +10,7 @@ const routes = [{
 }, {
   method: 'GET',
   url: `${baseUrl}/shifts/{shiftId}/available`,
-  handler: require(`${basePath}/shifts-available`),
+  handler: require(`${basePath}/available-users-for-shift`),
 }, {
   method: 'GET',
   url: `${baseUrl}/users/me/exchanges`,

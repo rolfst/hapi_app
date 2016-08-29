@@ -1,5 +1,6 @@
 import 'babel-polyfill';
 import chai from 'chai';
+import nock from 'nock';
 import sinon from 'sinon';
 import dotenv from 'dotenv';
 import createServer from 'server';
@@ -40,6 +41,12 @@ before(async () => {
         integrationName: 'PMT',
       }),
     ]);
+
+    // Mocking this because we add integration settings to the JWT token
+    // after the user can authenticate to the intergration.
+    nock(createdPMTNetwork.externalId)
+      .post('/login')
+      .reply(200, { logged_in_user_token: '379ce9b4176cb89354c1f74b3a2c1c7a', user_id: 8023 });
 
     // Add user to the networks
     await Promise.all([
@@ -105,6 +112,8 @@ before(async () => {
     console.log('Error in test setup', err);
   }
 });
+
+afterEach(() => nock.cleanAll());
 
 after(async () => {
   try {

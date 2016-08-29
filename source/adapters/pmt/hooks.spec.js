@@ -17,8 +17,6 @@ describe('PMT Hooks', () => {
     baseMock.get('/users').reply(200, { data: stubs.users });
   });
 
-  after(() => nock.restore());
-
   describe('fetchTeams', () => {
     it('should conform to internal team contract', async () => {
       const actual = await fetchTeams(fakeBaseStoreUrl)();

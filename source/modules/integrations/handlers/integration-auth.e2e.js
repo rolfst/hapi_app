@@ -31,12 +31,12 @@ describe('Integration auth', () => {
 
     network = await createIntegrationNetwork({
       userId: global.users.admin.id,
-      externalId: 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi',
+      externalId: 'api.coolintegration.nl',
       name: 'Network with integration',
       integrationName: 'NEW_INTEGRATION',
     });
 
-    await network.addUser(global.users.admin);
+    await network.addUser(global.users.employee);
   });
 
   after(async () => {
@@ -50,7 +50,7 @@ describe('Integration auth', () => {
     const { result: { data } } = await postRequest(endpoint, {
       username: 'foo',
       password: 'baz',
-    });
+    }, global.server, global.tokens.employee);
 
     const actual = tokenUtil.decode(data.access_token);
 
@@ -59,9 +59,12 @@ describe('Integration auth', () => {
 
   it('should add integration token for user in network', async () => {
     const endpoint = `/v2/networks/${network.id}/integration_auth`;
-    await postRequest(endpoint, { username: 'foo', password: 'baz' });
+    await postRequest(endpoint, {
+      username: 'foo',
+      password: 'baz',
+    }, global.server, global.tokens.employee);
 
-    const user = await findUserById(global.users.admin.id);
+    const user = await findUserById(global.users.employee.id);
     const { NetworkUser } = selectNetwork(user.Networks, network.id);
 
     assert.equal(NetworkUser.userToken, 'auth_token');
@@ -76,7 +79,10 @@ describe('Integration auth', () => {
     sinon.stub(createAdapter, 'default').returns(fakeAdapter);
 
     const endpoint = `/v2/networks/${network.id}/integration_auth`;
-    const { statusCode } = await postRequest(endpoint, { username: 'foo', password: 'wrong_pass' });
+    const { statusCode } = await postRequest(endpoint, {
+      username: 'foo',
+      password: 'wrong_pass',
+    }, global.server, global.tokens.employee);
 
     assert.equal(statusCode, 401);
   });

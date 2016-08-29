@@ -54,6 +54,12 @@ const User = model.define('User', {
     allowNull: true,
     field: 'phone_num',
   },
+  functionName: {
+    type: Sequelize.VIRTUAL,
+  },
+  integrationAuth: {
+    type: Sequelize.VIRTUAL,
+  },
   role: {
     type: Sequelize.VIRTUAL,
   },

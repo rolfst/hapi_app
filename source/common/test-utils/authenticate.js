@@ -1,5 +1,5 @@
 import tokenUtil from 'common/utils/token';
-import { findUserByUsername } from 'common/repositories/user';
+import { findUserById } from 'common/repositories/user';
 
 export default async (server, credentials) => {
   try {
@@ -9,9 +9,9 @@ export default async (server, credentials) => {
       payload: credentials,
     });
 
-    const { user: userObj, access_token: accessToken } = response.result.data;
+    const { access_token: accessToken } = response.result.data;
     const decodedToken = tokenUtil.decode(accessToken);
-    const user = await findUserByUsername(userObj.username);
+    const user = await findUserById(decodedToken.sub);
 
     return { user, token: accessToken, integrations: decodedToken.integrations };
   } catch (err) {

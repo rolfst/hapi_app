@@ -8,7 +8,7 @@ const pmtAdapter = (network, token) => ({
   authenticate,
   fetchTeams: fetchTeams(network.externalId),
   fetchUsers: fetchUsers(network.externalId),
-  usersAvailableForShift: usersAvailableForShift(token),
+  usersAvailableForShift: usersAvailableForShift(token, network.externalId),
   myShifts: myShifts(token),
 });
 

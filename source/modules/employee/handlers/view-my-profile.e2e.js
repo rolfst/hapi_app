@@ -9,8 +9,6 @@ describe('Authenticate', () => {
       .reply(200, { logged_in_user_token: 'fake_token', user_id: 1 });
   });
 
-  after(() => nock.restore());
-
   it('should return user object', async () => {
     const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/users/me`;
     const { result: { data } } = await getRequest(endpoint);
