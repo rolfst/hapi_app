@@ -33,6 +33,7 @@ describe('Authenticate', () => {
 
     assert.property(data, 'access_token');
     assert.property(data, 'refresh_token');
+    assert.property(data, 'last_login');
   });
 
   it('should fail when credentials are not correct', async () => {

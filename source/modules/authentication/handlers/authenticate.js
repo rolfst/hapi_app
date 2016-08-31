@@ -47,7 +47,11 @@ export default async (req, reply) => {
     analytics.setUser(user);
     if (user.lastLogin === null) analytics.track(firstLoginEvent());
 
-    return reply({ data: { access_token: accessToken, refresh_token: refreshToken } });
+    return reply({ data: {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      last_login: user.lastLogin,
+    } });
   } catch (err) {
     console.log('Error when authenticating user', err);
     return reply(err);
