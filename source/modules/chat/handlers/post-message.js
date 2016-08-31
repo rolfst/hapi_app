@@ -28,7 +28,6 @@ module.exports = async (req, reply) => {
 
     return reply({ success: true, ...data });
   } catch (err) {
-    console.log('Error creating message', err);
     return reply(err);
   }
 };

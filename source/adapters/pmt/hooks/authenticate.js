@@ -1,18 +1,8 @@
-import request from 'superagent';
+import client from 'adapters/pmt/client';
 
 export default async (baseStoreUrl, credentials) => {
-  try {
-    const endpoint = `${baseStoreUrl}/login`;
-    const { body } = await request
-      .post(endpoint)
-      .type('form')
-      .send(credentials)
-      .set('api-key', 'testpmtapi');
+  const endpoint = `${baseStoreUrl}/login`;
+  const result = await client.post(endpoint, null, credentials);
 
-    return { name: 'PMT', token: body.logged_in_user_token, externalId: body.user_id };
-  } catch (err) {
-    console.log('Could not authenticate with PMT:', err);
-
-    throw err;
-  }
+  return { name: 'PMT', token: result.logged_in_user_token, externalId: result.user_id };
 };

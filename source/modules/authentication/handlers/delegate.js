@@ -22,7 +22,6 @@ export default async (req, reply) => {
 
     return reply({ success: true, data: { access_token: refreshedAccessToken } });
   } catch (err) {
-    console.log('Error when delegating', err);
     return reply(err);
   }
 };

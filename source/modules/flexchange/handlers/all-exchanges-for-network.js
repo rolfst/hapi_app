@@ -43,7 +43,6 @@ export default async (req, reply) => {
 
     return reply(respondWithCollection(exchanges));
   } catch (err) {
-    console.log('Error while fetching exchanges by network', err);
     return reply(err);
   }
 };

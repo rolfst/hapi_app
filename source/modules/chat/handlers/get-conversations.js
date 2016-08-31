@@ -17,7 +17,6 @@ module.exports = async (req, reply) => {
 
     return reply(respondWithCollection(conversations));
   } catch (err) {
-    console.log('Error getting conversations', err);
     return reply(err);
   }
 };

@@ -18,7 +18,7 @@ export const mapShiftsWithExchanges = (shifts, exchanges) => {
 
 export default async (req, reply) => {
   if (!hasIntegration(req.pre.network)) {
-    return reply(Boom.forbidden('Network does not have an activated integration.'));
+    throw Boom.forbidden('Network does not have an activated integration.');
   }
 
   try {
@@ -29,7 +29,6 @@ export default async (req, reply) => {
 
     return reply({ data: mapShiftsWithExchanges(shifts, exchanges) });
   } catch (err) {
-    console.log('Error retrieving shifts', err);
     return reply(err);
   }
 };

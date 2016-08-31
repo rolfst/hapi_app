@@ -53,7 +53,6 @@ export default async (req, reply) => {
       last_login: user.lastLogin,
     } });
   } catch (err) {
-    console.log('Error when authenticating user', err);
     return reply(err);
   }
 };

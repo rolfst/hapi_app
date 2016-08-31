@@ -1,11 +1,9 @@
-const newExchangeNotification = exchange => {
-  // Fire notification
-  console.log('notification push for: ', exchange.title);
+const newExchangeNotification = (exchange) => { // eslint-disable-line no-unused-vars
+  // TODO: Fire notification
 };
 
-const trackNewExchange = exchange => {
-  // Track new exchange in Mixpanel
-  console.log('track mixpanel event for: ', exchange.title);
+const trackNewExchange = (exchange) => { // eslint-disable-line no-unused-vars
+  // TODO: Track new exchange in Mixpanel
 };
 
 export default (exchange) => {

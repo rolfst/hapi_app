@@ -1,12 +1,8 @@
 import { findExchangesByUser } from 'modules/flexchange/repositories/exchange';
 import respondWithCollection from 'common/utils/respond-with-collection';
-import hasIntegration from 'common/utils/network-has-integration';
 
-export default (req, reply) => {
-  if (hasIntegration(req.pre.network)) {
-    // TODO: Get exchanges from integration.
-  }
+export default async (req, reply) => {
+  const exchanges = await findExchangesByUser(req.auth.credentials);
 
-  return findExchangesByUser(req.auth.credentials)
-    .then(exchanges => reply(respondWithCollection(exchanges)));
+  return reply(respondWithCollection(exchanges));
 };

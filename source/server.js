@@ -2,6 +2,7 @@
 
 import Hapi from 'hapi';
 import routes from 'create-routes';
+import log from 'common/services/logger';
 import jwtStrategy from 'common/middlewares/authenticator-strategy';
 import integrationStrategy from 'common/middlewares/integration-strategy';
 import * as serverUtil from 'common/utils/server';
@@ -24,6 +25,16 @@ const createServer = (port) => {
   // Register server extensions
   server.ext('onRequest', serverUtil.onRequest);
   server.ext('onPreResponse', serverUtil.onPreResponse);
+  server.ext('onPostAuth', (req, reply) => {
+    log.init(req);
+
+    reply.continue();
+  });
+
+  server.on('request-internal', (request, event, tags) => {
+    if (process.env.NODE_ENV === 'testing') return false;
+    if (tags.error && tags.handler) log.internalError(event);
+  });
 
   // Register routes
   routes.map(route => server.route(route));

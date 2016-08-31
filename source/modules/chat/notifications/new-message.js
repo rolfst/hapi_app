@@ -1,4 +1,4 @@
-import notify from 'common/services/notifier';
+import notifier from 'common/services/notifier';
 
 export const createNotification = (message) => {
   return {
@@ -13,5 +13,5 @@ export const createNotification = (message) => {
 export const send = (message, usersToNotify) => {
   const notification = createNotification(message);
 
-  notify(usersToNotify, notification);
+  notifier.send(usersToNotify, notification);
 };

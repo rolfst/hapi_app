@@ -16,17 +16,13 @@ const defaultIncludes = [
  * @return {promise} - Find conversation promise
  */
 export async function findConversationById(id, includes = []) {
-  try {
-    const conversation = await Conversation.findById(id, {
-      include: [...includes, ...defaultIncludes],
-    });
+  const conversation = await Conversation.findById(id, {
+    include: [...includes, ...defaultIncludes],
+  });
 
-    if (!conversation) throw Boom.notFound('No conversation found.');
+  if (!conversation) throw Boom.notFound('No conversation found.');
 
-    return conversation;
-  } catch (err) {
-    console.log('Error in findConversationById:', err);
-  }
+  return conversation;
 }
 
 /**
@@ -43,27 +39,23 @@ export function findAllForUser(user, includes = []) {
 }
 
 export async function findExistingConversationWithUser(loggedUserId, userId) {
-  try {
-    const extraIncludes = {
-      model: User,
-      attributes: ['id', [Sequelize.fn('COUNT', '`Users`.`id`'), 'count']],
-      where: {
-        id: { $in: [loggedUserId, userId] },
-      },
-    };
+  const extraIncludes = {
+    model: User,
+    attributes: ['id', [Sequelize.fn('COUNT', '`Users`.`id`'), 'count']],
+    where: {
+      id: { $in: [loggedUserId, userId] },
+    },
+  };
 
-    const conversations = await Conversation.findAll({
-      include: [{ model: Message, as: 'LastMessage' }, extraIncludes],
-      group: ['Conversation.id'],
-      having: [
-        '`Users.count` = 2',
-      ],
-    });
+  const conversations = await Conversation.findAll({
+    include: [{ model: Message, as: 'LastMessage' }, extraIncludes],
+    group: ['Conversation.id'],
+    having: [
+      '`Users.count` = 2',
+    ],
+  });
 
-    return conversations[0];
-  } catch (err) {
-    console.log('Error in findExistingConversationWithUser:', err);
-  }
+  return conversations[0];
 }
 
 /**
@@ -84,19 +76,15 @@ export async function createConversation(type, creatorId, participants) {
     throw Boom.forbidden('You cannot create a conversation with yourself');
   }
 
-  try {
-    let conversation = await findExistingConversationWithUser(creatorId, participants[0]);
+  let conversation = await findExistingConversationWithUser(creatorId, participants[0]);
 
-    if (!conversation) {
-      const data = { type: type.toUpperCase(), createdBy: creatorId };
-      conversation = await Conversation.create(data);
-      await conversation.addUsers(participants);
-    }
-
-    return conversation.reload();
-  } catch (err) {
-    console.error('Error in createConversation:', err);
+  if (!conversation) {
+    const data = { type: type.toUpperCase(), createdBy: creatorId };
+    conversation = await Conversation.create(data);
+    await conversation.addUsers(participants);
   }
+
+  return conversation.reload();
 }
 
 /**

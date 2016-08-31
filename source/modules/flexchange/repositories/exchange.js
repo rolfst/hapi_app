@@ -41,25 +41,21 @@ const createDateFilter = (filter) => {
  * @return {promise} Find exchange promise
  */
 export async function findExchangeById(exchangeId, userId) {
-  try {
-    const extraIncludes = [{
-      model: ExchangeResponse,
-      as: 'ResponseStatus',
-      where: { userId },
-      required: false,
-    },
-    { model: ExchangeResponse },
-    { model: ExchangeComment, as: 'Comments' }];
+  const extraIncludes = [{
+    model: ExchangeResponse,
+    as: 'ResponseStatus',
+    where: { userId },
+    required: false,
+  },
+  { model: ExchangeResponse },
+  { model: ExchangeComment, as: 'Comments' }];
 
-    const exchange = await Exchange
-      .findById(exchangeId, { include: [...defaultIncludes, ...extraIncludes] });
+  const exchange = await Exchange
+    .findById(exchangeId, { include: [...defaultIncludes, ...extraIncludes] });
 
-    if (!exchange) throw Boom.notFound(`No exchange found with id ${exchangeId}.`);
+  if (!exchange) throw Boom.notFound(`No exchange found with id ${exchangeId}.`);
 
-    return exchange;
-  } catch (err) {
-    throw err;
-  }
+  return exchange;
 }
 
 /**

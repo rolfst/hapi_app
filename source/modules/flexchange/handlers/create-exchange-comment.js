@@ -14,8 +14,6 @@ export default async (req, reply) => {
 
     return reply({ success: true, data: exchangeComment.toJSON() });
   } catch (err) {
-    console.log('Error when creating a exchange comment', err);
-
     return reply(err);
   }
 };

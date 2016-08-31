@@ -1,4 +1,5 @@
 import Mixpanel from 'mixpanel';
+import log from 'common/services/logger';
 
 export default (() => {
   let client = null;
@@ -7,7 +8,7 @@ export default (() => {
   return {
     init() {
       if (client === null) {
-        client = Mixpanel.init(process.env.MIXPANEL_TOKEN, { debug: true });
+        client = Mixpanel.init(process.env.MIXPANEL_TOKEN);
       }
     },
     setUser(user) {
@@ -15,21 +16,27 @@ export default (() => {
     },
     registerProfile(user) {
       if (process.env.NODE_ENV === 'testing') return false;
-      if (!client) throw new Error('No client initialized.');
+      if (!client) throw new Error('No Mixpanel client initialized.');
 
-      client.people.set(user.id, {
+      const payload = {
         $first_name: user.firstName,
         $last_name: user.lastName,
         $email: user.email,
         $phone: user.phoneNum,
-      });
+      };
+
+      log.info('Sending the following data to Mixpanel', { ...payload });
+      client.people.set(user.id, payload);
     },
-    async track(event) {
+    track(event) {
       if (process.env.NODE_ENV === 'testing') return false;
-      if (!client) throw new Error('No client initialized.');
+      if (!client) throw new Error('No Mixpanel client initialized.');
       if (!currentUser) throw new Error('No user set to track events.');
 
-      return client.track(event.name, { ...event.data, distinct_id: currentUser.id });
+      const { name, data } = event;
+
+      log.info('Sending the following data to Mixpanel', { ...data, event_name: name });
+      client.track(name, { ...data, distinct_id: currentUser.id });
     },
   };
 })();

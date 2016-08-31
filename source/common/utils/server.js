@@ -8,10 +8,6 @@ import createActions from 'common/utils/create-actions';
 import respondWithError from 'common/utils/respond-with-error';
 
 export const onRequest = (req, reply) => {
-  if (process.env.NODE_ENV !== 'testing') {
-    console.log('Received request with path', req.path);
-  }
-
   const uri = req.raw.req.url;
   const parsed = Url.parse(uri, false);
   parsed.query = Qs.parse(parsed.query);
@@ -56,12 +52,6 @@ export const registerAuthorizationPlugin = () => ({
 
 export const makeConfig = () => {
   const options = {};
-
-  if (process.env.NODE_ENV === 'debug') {
-    options.debug = {
-      request: ['error'],
-    };
-  }
 
   return options;
 };

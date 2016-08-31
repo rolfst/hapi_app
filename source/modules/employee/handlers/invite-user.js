@@ -6,8 +6,6 @@ export default async (req, reply) => {
 
     return reply({ success: true, data: invitedUser.toJSON() });
   } catch (err) {
-    console.log('Error when creating user for network', err);
-
     return reply(err);
   }
 };

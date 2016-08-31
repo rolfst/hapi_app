@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { findExchangeById } from 'modules/flexchange/repositories/exchange';
 import { findCommentsByExchange } from 'modules/flexchange/repositories/comment';
-import notify from 'common/services/notifier';
+import notifier from 'common/services/notifier';
 
 export const createNotification = (exchange, comment) => {
   const creator = comment.User.fullName;
@@ -23,5 +23,5 @@ export const send = async (comment) => {
 
   const notification = createNotification(exchange, comment);
 
-  notify(usersToNotify, notification);
+  notifier.send(usersToNotify, notification);
 };

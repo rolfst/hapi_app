@@ -18,8 +18,6 @@ export default async (req, reply) => {
 
     return reply({ success: true, data: updatedExchange.toJSON() });
   } catch (err) {
-    console.log('Error updating exchange:', err);
-
     return reply(err);
   }
 };

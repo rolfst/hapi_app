@@ -7,6 +7,6 @@ export default async (req, reply) => {
 
     return reply({ success: true, data: updatedUser.toJSON() });
   } catch (err) {
-    console.log('Error updating logged user', err);
+    return reply(err);
   }
 };

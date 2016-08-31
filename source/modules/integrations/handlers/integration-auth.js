@@ -22,8 +22,6 @@ export default async (req, reply) => {
 
     return reply({ data: { access_token: newAccessToken } });
   } catch (err) {
-    console.log('Could not authenticate with integration:', err);
-
-    return reply(Boom.unauthorized('Could not authenticate with integration.'));
+    return reply(Boom.unauthorized('Could not authenticate with integration'));
   }
 };

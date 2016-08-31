@@ -1,4 +1,4 @@
-import notify from 'common/services/notifier';
+import notifier from 'common/services/notifier';
 import moment from 'moment';
 import 'moment/locale/nl';
 moment.locale('nl');
@@ -21,5 +21,5 @@ export const send = async (exchange) => {
 
   const notification = createNotification(exchange, approvedUser);
 
-  return notify([exchangeUser], notification);
+  return notifier.send([exchangeUser], notification);
 };

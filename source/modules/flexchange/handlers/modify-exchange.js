@@ -30,8 +30,6 @@ export default async (req, reply) => {
 
     return reply({ success: true, data: updatedExchange.toJSON() });
   } catch (err) {
-    if (err.isBoom) reply(err);
-
-    reply(Boom.forbidden(err));
+    return reply(err);
   }
 };

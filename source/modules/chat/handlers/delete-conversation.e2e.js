@@ -1,13 +1,13 @@
 import { assert } from 'chai';
-import _ from 'lodash';
+import { partial } from 'lodash';
 import { deleteRequest } from 'common/test-utils/request';
 import { createConversation } from 'modules/chat/repositories/conversation';
 
-let conversation;
-
 describe('Delete conversation', () => {
+  let conversation;
+
   before(async () => {
-    const conversationPartial = _.partial(createConversation, 'PRIVATE', global.users.admin.id);
+    const conversationPartial = partial(createConversation, 'PRIVATE', global.users.admin.id);
     const participants = [global.users.employee.id, global.users.admin.id];
     const createdConversation = await conversationPartial(participants);
     conversation = createdConversation;
@@ -17,9 +17,8 @@ describe('Delete conversation', () => {
 
   it('should return correct values', async () => {
     const endpoint = `/v1/chats/conversations/${conversation.id}`;
-    const { result, statusCode } = await deleteRequest(endpoint);
+    const { statusCode } = await deleteRequest(endpoint);
 
-    assert.property(result, 'message');
     assert.equal(statusCode, 200);
   });
 });

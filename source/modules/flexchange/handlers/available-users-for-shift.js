@@ -7,7 +7,6 @@ import hasIntegration from 'common/utils/network-has-integration';
 export default async (req, reply) => {
   try {
     if (!hasIntegration(req.pre.network)) throw IntegrationNotFound;
-
     const adapter = createAdapter(req.pre.network, req.auth.artifacts.integrations);
 
     const externalUsers = await adapter
@@ -22,8 +21,6 @@ export default async (req, reply) => {
 
     return reply({ data: response });
   } catch (err) {
-    console.log('Error retrieving available users for shift:', err);
-
     return reply(err);
   }
 };

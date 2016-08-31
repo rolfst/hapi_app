@@ -1,3 +1,4 @@
+import log from 'common/services/logger';
 import { findNetworkById } from 'common/repositories/network';
 import * as userRepo from 'common/repositories/user';
 import createAdapter from 'common/utils/create-adapter';
@@ -23,12 +24,11 @@ export default async (req, reply) => {
     const users = await importUsers(internalUsers, externalUsers, network);
     const teams = await importTeams(externalTeams, network);
 
-    // Add users to their team
     await addUsersToTeam(users, teams, externalUsers);
 
     return reply({ success: true });
   } catch (err) {
-    console.log('Error importing network:', err);
+    log.error('Could not import network', { stack: err.stack, network_id: req.params.networkId });
 
     return reply(err);
   }

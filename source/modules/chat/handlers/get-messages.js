@@ -15,6 +15,6 @@ module.exports = async (req, reply) => {
 
     return reply(respondWithCollection(messages));
   } catch (err) {
-    reply(err);
+    return reply(err);
   }
 };

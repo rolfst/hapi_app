@@ -1,17 +1,29 @@
 import request from 'superagent';
+import log from 'common/services/logger';
 import ExpiredToken from 'common/errors/token-expired';
 
-function makeRequest(endpoint, token = null, method = 'GET', data = {}) {
+export function makeRequest(endpoint, token = null, method = 'GET', data = {}) {
+  log.info('Calling PMT client', { url: endpoint, method, username: data.username });
+
   return request(method, endpoint)
     .type('form')
     .set('logged-in-user-token', token)
     .set('api-key', 'testpmtapi')
     .send(data)
-    .then(res => res.body)
-    .catch(err => {
-      if (err.response.statusCode === 400) throw ExpiredToken;
+    .then(res => {
+      log.debug('PMT client responsed with body', { body: res.body });
 
-      console.log('PMT Client error: ', err);
+      return res.body;
+    })
+    .catch(err => {
+      const { body, statusCode } = err.response;
+
+      if (statusCode === 400) {
+        log.info('PMT token expired', { username: data.username });
+        throw ExpiredToken;
+      }
+
+      log.error('PMT Client error', { body: body.error || null, status: statusCode });
     });
 }
 

@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import SendGridSMTP from 'smtpapi';
 import { mapValues } from 'lodash';
+import log from 'common/services/logger';
 
 const smtpConfig = {
   host: process.env.SMTP_HOST,
@@ -70,7 +71,11 @@ export const createMailOptions = (mail) => {
 };
 
 export const send = (mail) => {
-  return transporter.sendMail(createMailOptions(mail), (err) => {
-    if (err) console.log('Error when sending mail to SendGrid', err);
+  const mailOptions = createMailOptions(mail);
+
+  log.info('Sending mail', { ...mail.options });
+
+  return transporter.sendMail(mailOptions, (err) => {
+    if (err) log.error('Error when sending mail', { err, mail_options: mailOptions });
   });
 };

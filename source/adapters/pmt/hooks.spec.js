@@ -1,4 +1,5 @@
-import nock from 'nock';
+import sinon from 'sinon';
+import client from 'adapters/pmt/client';
 import fetchTeams from 'adapters/pmt/hooks/fetch-teams';
 import fetchUsers from 'adapters/pmt/hooks/fetch-users';
 import teamSerializer from 'adapters/pmt/serializers/team';
@@ -7,31 +8,33 @@ import { assert } from 'chai';
 import stubs from 'adapters/pmt/test-utils/stubs';
 
 describe('PMT Hooks', () => {
-  let fakeBaseStoreUrl;
-
-  before(async () => {
-    fakeBaseStoreUrl = 'http://mypmtstore.nl';
-    const baseMock = nock(fakeBaseStoreUrl);
-
-    baseMock.get('/departments').reply(200, { departments: stubs.departments });
-    baseMock.get('/users').reply(200, { data: stubs.users });
-  });
+  const fakeBaseStoreUrl = 'http://mypmtstore.nl';
 
   describe('fetchTeams', () => {
     it('should conform to internal team contract', async () => {
+      sinon.stub(client, 'get').returns(Promise.resolve({ departments: stubs.departments }));
+
       const actual = await fetchTeams(fakeBaseStoreUrl)();
       const expected = stubs.departments.map(teamSerializer);
 
       assert.deepEqual(actual, expected);
       assert.property(actual[0], 'externalId');
       assert.property(actual[0], 'name');
+
+      client.get.restore();
     });
   });
 
   describe('fetchUsers', () => {
     let hookResult;
 
-    before(async () => (hookResult = await fetchUsers(fakeBaseStoreUrl)()));
+    before(async () => {
+      sinon.stub(client, 'get').returns(Promise.resolve({ data: stubs.users }));
+
+      hookResult = await fetchUsers(fakeBaseStoreUrl)();
+    });
+
+    after(() => client.get.restore());
 
     it('should set correct value for isActive property', async () => {
       assert.equal(hookResult[0].isActive, true);

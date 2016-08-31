@@ -43,6 +43,5 @@ export function findMessageById(id, includes) {
       if (!message) throw Boom.notFound('No message found.');
 
       return message;
-    })
-    .catch(err => Boom.badRequest(err));
+    });
 }

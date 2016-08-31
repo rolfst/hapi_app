@@ -74,7 +74,6 @@ export default async (req, reply) => {
 
     return reply({ success: true, data: response.toJSON() });
   } catch (err) {
-    console.log('Error creating exchange', err);
     return reply(err);
   }
 };

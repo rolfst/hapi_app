@@ -1,7 +1,7 @@
 import moment from 'moment';
 import 'moment/locale/nl';
 moment.locale('nl');
-import notify from 'common/services/notifier';
+import notifier from 'common/services/notifier';
 import { findAdminsByNetwork } from 'common/repositories/network';
 
 export const createNotification = (exchange, substituteUser) => {
@@ -21,5 +21,5 @@ export const send = async (network, exchange, userThatAccepts) => {
   const usersToNotify = admins.filter(u => u.id !== userThatAccepts.id);
   const notification = createNotification(exchange, userThatAccepts);
 
-  return notify(usersToNotify, notification);
+  return notifier.send(usersToNotify, notification);
 };

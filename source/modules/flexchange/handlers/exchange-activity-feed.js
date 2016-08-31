@@ -16,7 +16,6 @@ export default async (req, reply) => {
 
     return reply({ data: activities });
   } catch (err) {
-    console.log('Error loading exchange activity feed:', err);
     return reply(err);
   }
 };

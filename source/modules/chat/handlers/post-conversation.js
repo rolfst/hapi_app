@@ -11,7 +11,6 @@ module.exports = async (req, reply) => {
 
     return reply(respondWithItem(conversation));
   } catch (err) {
-    console.log('Error posting conversation:', err);
     return reply(err);
   }
 };

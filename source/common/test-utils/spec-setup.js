@@ -1,12 +1,10 @@
 import 'babel-polyfill';
 import chai from 'chai';
 import sinon from 'sinon';
-import Parse from 'parse/node';
+import notifier from 'common/services/notifier';
 
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
-before(() => {
-  global.parseSendStub = sinon.stub(Parse.Push, 'send').returns(null);
-});
-after(() => Parse.Push.send.restore());
+before(() => sinon.stub(notifier, 'send').returns(null));
+after(() => notifier.send.restore());

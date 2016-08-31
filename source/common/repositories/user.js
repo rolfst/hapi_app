@@ -60,9 +60,7 @@ export function addExternalUsersToNetwork(users, network) {
 }
 
 export function addUsersToNetwork(user, network, roleType = 'EMPLOYEE') {
-  return network
-    .addUsers(user, { roleType })
-    .catch(err => console.log('Error while adding user to network', err));
+  return network.addUsers(user, { roleType });
 }
 
 export async function addUserToNetwork(user, network, {
@@ -96,14 +94,10 @@ export async function updateUser(userId, attributes) {
 }
 
 export async function updateUserByEmail(email, attributes) {
-  try {
-    const user = await User.findOne({ where: { email } });
-    const updatedUser = await user.update(attributes);
+  const user = await User.findOne({ where: { email } });
+  const updatedUser = await user.update(attributes);
 
-    return updatedUser.reload();
-  } catch (err) {
-    console.log('Could not update the user', err);
-  }
+  return updatedUser.reload();
 }
 
 export function createUser(attributes) {

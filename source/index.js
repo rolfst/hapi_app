@@ -1,5 +1,6 @@
 import 'babel-polyfill';
 import dotenv from 'dotenv';
+import log from 'common/services/logger';
 dotenv.config();
 
 const createServer = require('server').default;
@@ -16,5 +17,5 @@ server.start(err => {
 
   analytics.init();
 
-  console.log('Server running at:', server.info.uri);
+  log.info(`Server running at ${server.info.uri}`);
 });
