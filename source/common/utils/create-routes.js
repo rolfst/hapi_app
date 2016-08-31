@@ -1,9 +1,9 @@
 import preFetchNetwork from 'common/middlewares/prefetch-network';
 
-const createDefaultConfig = (stategy) => {
+const createDefaultConfig = (stategy, prefetch) => {
   const config = { auth: stategy };
 
-  if (stategy === 'jwt') {
+  if (stategy === 'jwt' && prefetch) {
     config.pre = [{ method: preFetchNetwork, assign: 'network' }];
   }
 
@@ -13,7 +13,7 @@ const createDefaultConfig = (stategy) => {
 const getImport = (importFn) => importFn.default ? importFn.default : importFn;
 
 export const createRoute = ({
-  method, url, handler, validator, auth = true, strategy = 'jwt',
+  method, url, handler, validator, auth = true, strategy = 'jwt', prefetch = true,
 }) => {
   const route = {
     method,
@@ -24,7 +24,7 @@ export const createRoute = ({
     },
   };
 
-  if (auth) route.config = { ...route.config, ...createDefaultConfig(strategy) };
+  if (auth) route.config = { ...route.config, ...createDefaultConfig(strategy, prefetch) };
 
   return route;
 };

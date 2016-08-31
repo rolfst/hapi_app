@@ -1,49 +1,35 @@
+import createRoutes from 'common/utils/create-routes';
+
 const routes = [{
   method: 'GET',
-  path: '/v1/chats/users/me/conversations',
+  url: '/v1/chats/users/me/conversations',
   handler: require('modules/chat/handlers/get-conversations'),
-  config: {
-    auth: 'jwt',
-    validate: require('modules/chat/validators/get-conversation').default,
-  },
+  validator: require('modules/chat/validators/get-conversation'),
 }, {
   method: 'GET',
-  path: '/v1/chats/conversations/{id}',
+  url: '/v1/chats/conversations/{id}',
   handler: require('modules/chat/handlers/get-conversation'),
-  config: {
-    auth: 'jwt',
-    validate: require('modules/chat/validators/get-conversation').default,
-  },
+  validator: require('modules/chat/validators/get-conversation'),
 }, {
   method: 'GET',
-  path: '/v1/chats/conversations/{id}/messages',
+  url: '/v1/chats/conversations/{id}/messages',
   handler: require('modules/chat/handlers/get-messages'),
-  config: {
-    auth: 'jwt',
-  },
 }, {
   method: 'POST',
-  path: '/v1/chats/conversations/{id}/messages',
+  url: '/v1/chats/conversations/{id}/messages',
   handler: require('modules/chat/handlers/post-message'),
-  config: {
-    auth: 'jwt',
-    validate: require('modules/chat/validators/create-message').default,
-  },
+  validator: require('modules/chat/validators/create-message'),
 }, {
   method: 'POST',
-  path: '/v1/chats/conversations',
+  url: '/v1/chats/conversations',
   handler: require('modules/chat/handlers/post-conversation'),
-  config: {
-    auth: 'jwt',
-    validate: require('modules/chat/validators/create-conversation').default,
-  },
+  validator: require('modules/chat/validators/create-conversation'),
 }, {
   method: 'DELETE',
-  path: '/v1/chats/conversations/{id}',
+  url: '/v1/chats/conversations/{id}',
   handler: require('modules/chat/handlers/delete-conversation'),
-  config: {
-    auth: 'jwt',
-  },
 }];
 
-export default routes;
+const addPrefetchValue = (route) => ({ ...route, prefetch: false });
+
+export default createRoutes(routes.map(addPrefetchValue));

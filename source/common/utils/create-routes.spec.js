@@ -74,5 +74,23 @@ describe('createRoutes', () => {
 
       assert.deepEqual(actual, expected);
     });
+
+    it('should be able to disable prefetching network', () => {
+      const fakeRoute = {
+        method: 'POST',
+        url: '/foo/baz',
+        handler: 'handler',
+        validator: 'my_validator',
+        prefetch: false,
+      };
+
+      const actual = systemUnderTest.createRoute(fakeRoute);
+      const expected = { ...routeStub, config: {
+        auth: 'jwt',
+        validate: 'my_validator',
+      } };
+
+      assert.deepEqual(actual, expected);
+    });
   });
 });
