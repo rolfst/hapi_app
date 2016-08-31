@@ -1,30 +1,30 @@
-import request from 'superagent';
+import fetch from 'isomorphic-fetch';
 import log from 'common/services/logger';
 import ExpiredToken from 'common/errors/token-expired';
 
-export function makeRequest(endpoint, token = null, method = 'GET', data = {}) {
+export async function makeRequest(endpoint, token = null, method = 'GET', data = {}) {
   log.info('Calling PMT client', { url: endpoint, method, username: data.username });
 
-  return request(method, endpoint)
-    .type('form')
-    .set('logged-in-user-token', token)
-    .set('api-key', 'testpmtapi')
-    .send(data)
-    .then(res => {
-      log.debug('PMT client responsed with body', { body: res.body });
+  const response = await fetch(endpoint, {
+    method,
+    headers: {
+      'api-key': 'testpmtapi',
+    },
+    body: JSON.stringify(data),
+  });
 
-      return res.body;
-    })
-    .catch(err => {
-      const { body, statusCode } = err.response;
+  const json = await response.json();
 
-      if (statusCode === 400) {
-        log.info('PMT token expired', { username: data.username });
-        throw ExpiredToken;
-      }
+  if (response.status === 400) {
+    log.info('PMT token expired', { username: data.username });
+    throw ExpiredToken;
+  } else if (!response.ok) {
+    log.error('PMT Client error', { json: json.error || null, status_code: response.status });
+  }
 
-      log.error('PMT Client error', { body: body.error || null, status: statusCode });
-    });
+  log.debug('PMT client responded with json', { json });
+
+  return json;
 }
 
 export default {
