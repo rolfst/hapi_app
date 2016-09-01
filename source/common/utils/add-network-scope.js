@@ -7,6 +7,7 @@ export default (userModel, networkId) => {
 
   newUserModel.functionName = makeFunctionName(parseInt(networkId, 10), userModel);
   newUserModel.integrationAuth = !!selectedNetwork.NetworkUser.userToken;
+  newUserModel.role = selectedNetwork.NetworkUser.roleType;
 
   return newUserModel;
 };

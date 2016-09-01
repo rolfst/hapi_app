@@ -113,6 +113,8 @@ const User = model.define('User', {
         email: this.email,
         phone_num: this.phoneNum,
         profile_img: `https://s3.eu-central-1.amazonaws.com/flex-appeal/${environment}/profiles/${this.profileImg}`,
+        date_of_birth: this.dateOfBirth,
+        role_type: this.role,
         created_at: formatDate(this.created_at),
         last_login: formatDate(this.lastLogin),
       };
