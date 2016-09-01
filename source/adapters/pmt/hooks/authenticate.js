@@ -1,6 +1,6 @@
 import client from 'adapters/pmt/client';
 
-export default async (baseStoreUrl, credentials) => {
+export default (baseStoreUrl) => async (credentials) => {
   const endpoint = `${baseStoreUrl}/login`;
   const result = await client.post(endpoint, null, credentials);
 

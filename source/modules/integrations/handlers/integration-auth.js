@@ -8,8 +8,8 @@ export default async (req, reply) => {
   try {
     const user = req.auth.credentials;
     const authenticatedIntegrations = req.auth.artifacts.integrations;
-    const adapter = createAdapter(req.pre.network);
-    const authResult = await adapter.authenticate();
+    const adapter = createAdapter(req.pre.network, null, { proceedWithoutToken: true });
+    const authResult = await adapter.authenticate(req.payload);
 
     const deviceName = req.headers['user-agent'];
     const device = await findOrCreateUserDevice(user.id, deviceName);
