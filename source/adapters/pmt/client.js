@@ -21,7 +21,6 @@ export async function makeRequest(endpoint, token = null, method = 'GET', data =
   });
 
   const json = await response.json();
-  console.log('pmt json', json);
 
   log.debug('PMT client responded with json', { json });
 
