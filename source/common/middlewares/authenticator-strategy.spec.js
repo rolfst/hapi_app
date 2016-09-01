@@ -25,7 +25,7 @@ describe('authenticatorStrategy', () => {
     sandbox.stub(tokenUtil, 'decode').returns({ sub: user.id });
     const result = await strategy.authenticate(1, 'foo');
 
-    assert.deepEqual(result.credentials, { ...user, scope: 'admin' });
+    assert.deepEqual(result.credentials, user);
   });
 
   it('should find user by token sub', async () => {
