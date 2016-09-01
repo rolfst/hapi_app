@@ -25,8 +25,8 @@ describe('Invite user #Controller', () => {
     afterEach(() => existingUser.setNetworks([]));
 
     it('should fail when user belongs to the network', async () => {
-      const { firstName, email } = global.users.employee;
-      const payload = { name: firstName, email };
+      const { firstName, lastName, email } = global.users.employee;
+      const payload = { firstName, lastName, email };
 
       assert.isRejected(controller.default(network, payload));
     });
@@ -36,46 +36,66 @@ describe('Invite user #Controller', () => {
     });
 
     it('should add to the network as admin', async () => {
-      const { firstName, email } = existingUser;
-      const payload = { name: firstName, email, isAdmin: true };
+      const { firstName, lastName, email } = existingUser;
+      const payload = { firstName, lastName, email, roleType: 'admin' };
       const actual = await controller.default(network, payload);
 
+      assert.equal(actual.firstName, firstName);
+      assert.equal(actual.lastName, lastName);
+      assert.equal(actual.email, email);
       assert.equal(actual.Networks[0].NetworkUser.roleType, 'ADMIN');
     });
 
     it('should add to the network as employee', async () => {
-      const { firstName, email } = existingUser;
-      const payload = { name: firstName, email };
+      const { firstName, lastName, email } = existingUser;
+      const payload = { firstName, lastName, email };
       const actual = await controller.default(network, payload);
 
       assert.equal(actual.Networks[0].id, network.id);
       assert.equal(actual.Networks[0].NetworkUser.roleType, 'EMPLOYEE');
     });
 
-    it('should add to the team', async () => {
-      const { firstName, email } = existingUser;
-      const payload = { name: firstName, email, teamId: team.id };
+    it('should add to the teams', async () => {
+      const { firstName, lastName, email } = existingUser;
+      const payload = { firstName, lastName, email, teamIds: [team.id] };
       const actual = await controller.default(network, payload);
 
       assert.isDefined(find(actual.Teams, { id: team.id }));
+      assert.equal(actual.Teams.length, 1);
+    });
+
+    it('should add to the multiple teams', async () => {
+      const extraTeam = await createTeam({
+        networkId: network.id,
+        name: 'Cool Team',
+      });
+
+      const { firstName, lastName, email } = existingUser;
+      const payload = { firstName, lastName, email, teamIds: [team.id, extraTeam.id] };
+      const actual = await controller.default(network, payload);
+
+      assert.equal(actual.Teams.length, 2);
+
+      await extraTeam.destroy();
     });
   });
 
   describe('New User', () => {
-    const payload = { name: 'Cool User', email: 'test-user@foo.com' };
+    const payload = { firstName: 'John', lastName: 'Doe', email: 'test-user@foo.com' };
 
     afterEach(() => findUserByEmail(payload.email).then(u => u.destroy()));
 
     it('should create when not exists', async () => {
       const actual = await controller.default(network, payload);
 
-      assert.equal(actual.firstName, payload.name);
+      assert.equal(actual.firstName, payload.firstName);
+      assert.equal(actual.lastName, payload.lastName);
       assert.equal(actual.username, payload.email);
       assert.equal(actual.email, payload.email);
     });
 
     it('should add to the network as admin', async () => {
-      const actual = await controller.default(network, { ...payload, isAdmin: true });
+      const actual = await controller.default(network, { ...payload, roleType: 'admin' });
 
       assert.equal(actual.Networks[0].id, network.id);
       assert.equal(actual.Networks[0].NetworkUser.roleType, 'ADMIN');
@@ -88,10 +108,25 @@ describe('Invite user #Controller', () => {
       assert.equal(actual.Networks[0].NetworkUser.roleType, 'EMPLOYEE');
     });
 
-    it('should add to the team', async () => {
-      const actual = await controller.default(network, { ...payload, teamId: team.id });
+    it('should add to the teams', async () => {
+      const actual = await controller.default(network, { ...payload, teamIds: [team.id] });
 
       assert.isDefined(find(actual.Teams, { id: team.id }));
+    });
+
+    it('should add to the multiple teams', async () => {
+      const extraTeam = await createTeam({
+        networkId: network.id,
+        name: 'Cool Team',
+      });
+
+      const actual = await controller.default(network, {
+        ...payload, teamIds: [team.id, extraTeam.id],
+      });
+
+      assert.equal(actual.Teams.length, 2);
+
+      await extraTeam.destroy();
     });
   });
 
@@ -108,8 +143,8 @@ describe('Invite user #Controller', () => {
     afterEach(() => deletedUser.setNetworks([]));
 
     it('should add to the network as admin', async () => {
-      const { firstName, email } = deletedUser;
-      const payload = { name: firstName, email, isAdmin: true };
+      const { firstName, lastName, email } = deletedUser;
+      const payload = { firstName, lastName, email, roleType: 'admin' };
       const actual = await controller.default(network, payload);
 
       assert.equal(actual.Networks[0].NetworkUser.roleType, 'ADMIN');
@@ -117,8 +152,8 @@ describe('Invite user #Controller', () => {
     });
 
     it('should add to the network as employee', async () => {
-      const { firstName, email } = deletedUser;
-      const payload = { name: firstName, email };
+      const { firstName, lastName, email } = deletedUser;
+      const payload = { firstName, lastName, email };
       const actual = await controller.default(network, payload);
 
       assert.equal(actual.Networks[0].id, network.id);
@@ -126,12 +161,28 @@ describe('Invite user #Controller', () => {
       assert.equal(actual.Networks[0].NetworkUser.deletedAt, null);
     });
 
-    it('should add to the team', async () => {
-      const { firstName, email } = deletedUser;
-      const payload = { name: firstName, email, teamId: team.id };
+    it('should add to the teams', async () => {
+      const { firstName, lastName, email } = deletedUser;
+      const payload = { firstName, lastName, email, teamIds: [team.id] };
       const actual = await controller.default(network, payload);
 
       assert.isDefined(find(actual.Teams, { id: team.id }));
+      assert.equal(actual.Teams.length, 1);
+    });
+
+    it('should add to the multiple teams', async () => {
+      const extraTeam = await createTeam({
+        networkId: network.id,
+        name: 'Cool Team',
+      });
+
+      const { firstName, lastName, email } = deletedUser;
+      const payload = { firstName, lastName, email, teamIds: [team.id, extraTeam.id] };
+      const actual = await controller.default(network, payload);
+
+      assert.equal(actual.Teams.length, 2);
+
+      await extraTeam.destroy();
     });
   });
 });

@@ -6,14 +6,15 @@ import * as mailer from 'common/services/mailer';
 import { createUser, findUserByEmail } from 'common/repositories/user';
 import * as networkRepo from 'common/repositories/network';
 import { addUserToNetwork } from 'common/repositories/user';
-import { findTeamById, addUserToTeam } from 'common/repositories/team';
+import { addUserToTeams } from 'common/repositories/team';
 import userBelongsToNetwork from 'common/utils/user-belongs-to-network';
 import userIsDeletedFromNetwork from 'common/utils/user-is-deleted-from-network';
 
-export const inviteNewUser = async (network, { name, email, roleType }) => {
+export const inviteNewUser = async (network, { firstName, lastName, email, roleType }) => {
   const plainPassword = password.plainRandom();
   const attributes = {
-    firstName: name,
+    firstName,
+    lastName,
     username: email,
     email,
     password: password.make(plainPassword),
@@ -41,20 +42,19 @@ export const inviteExistingUser = async (network, user, roleType) => {
   return user;
 };
 
-export default async (network, { name, email, teamId, isAdmin }) => {
-  const roleType = isAdmin ? 'ADMIN' : 'EMPLOYEE';
-  const team = teamId ? await findTeamById(teamId) : null;
+export default async (network, { firstName, lastName, email, teamIds, roleType }) => {
+  const role = roleType ? roleType.toUpperCase() : 'EMPLOYEE';
   let user = await findUserByEmail(email);
 
   if (user && userBelongsToNetwork(user, network.id)) {
     throw Boom.badData('User with the same email already in this network.');
   } else if (user && !userBelongsToNetwork(user, network.id)) {
-    await inviteExistingUser(network, user, roleType);
+    await inviteExistingUser(network, user, role);
   } else {
-    user = await inviteNewUser(network, { name, email, roleType });
+    user = await inviteNewUser(network, { firstName, lastName, email, roleType: role });
   }
 
-  if (team) await addUserToTeam(team, user);
+  if (teamIds && teamIds.length > 0) await addUserToTeams(teamIds, user.id);
 
   return user.reload();
 };

@@ -1,7 +1,6 @@
 import Boom from 'boom';
 import sequelize from 'sequelize';
-import { Team } from 'common/models';
-import { User } from 'common/models';
+import { Team, User, TeamUser } from 'common/models';
 
 export function findTeamById(id) {
   return Team
@@ -11,6 +10,12 @@ export function findTeamById(id) {
 
       return team;
     });
+}
+
+export function addUserToTeams(teamIds, userId) {
+  const values = teamIds.map(teamId => ({ teamId, userId }));
+
+  return TeamUser.bulkCreate(values);
 }
 
 export function addUserToTeam(team, user) {

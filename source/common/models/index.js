@@ -5,6 +5,7 @@ import UserModel from 'common/models/user';
 import TeamModel from 'common/models/team';
 import IntegrationModel from 'common/models/integration';
 import NetworkUserModel from 'common/models/network-user';
+import TeamUserModel from 'common/models/team-user';
 import UserDeviceModel from 'common/models/user-device';
 
 ActivityModel.belongsTo(UserModel, {
@@ -70,4 +71,5 @@ export const User = UserModel;
 export const Team = TeamModel;
 export const Integration = IntegrationModel;
 export const NetworkUser = NetworkUserModel;
+export const TeamUser = TeamUserModel;
 export const UserDevice = UserDeviceModel;
