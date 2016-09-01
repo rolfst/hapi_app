@@ -4,11 +4,11 @@ import fetchUsers from 'adapters/pmt/hooks/fetch-users';
 import usersAvailableForShift from 'adapters/pmt/hooks/users-available-for-shift';
 import myShifts from 'adapters/pmt/hooks/my-shifts';
 
-const pmtAdapter = (network, token) => ({
-  authenticate,
-  fetchTeams: fetchTeams(network.externalId),
-  fetchUsers: fetchUsers(network.externalId),
-  usersAvailableForShift: usersAvailableForShift(token, network.externalId),
+const pmtAdapter = ({ externalId }, token) => ({
+  authenticate: authenticate(externalId),
+  fetchTeams: fetchTeams(externalId),
+  fetchUsers: fetchUsers(externalId),
+  usersAvailableForShift: usersAvailableForShift(token, externalId),
   myShifts: myShifts(token),
 });
 
