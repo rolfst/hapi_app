@@ -8,7 +8,6 @@ const createMetaData = (event) => ({
 });
 
 export default (() => {
-  let _logger;
   let _defaultMeta;
 
   return {
@@ -27,29 +26,31 @@ export default (() => {
           },
         };
       }
-
-      _logger = bunyan.createLogger({
+    },
+    getLogger() {
+      return bunyan.createLogger({
         name: 'node-api',
         streams: process.env.NODE_ENV === 'testing' ? [] : [{
           level: 'info',
           stream: process.stdout,
         }],
+        ..._defaultMeta,
       });
     },
     debug(message, metaData) {
-      _logger.debug(metaData, message);
+      this.getLogger().debug(metaData, message);
     },
     info(message, metaData) {
-      _logger.info(metaData, message);
+      this.getLogger().info(metaData, message);
     },
     warning(message, metaData) {
-      _logger.warn(metaData, message);
+      this.getLogger().warn(metaData, message);
     },
     error(message, metaData) {
-      _logger.error({ ...metaData, _defaultMeta }, message);
+      this.getLogger().error({ ...metaData, _defaultMeta }, message);
     },
     internalError(event) {
-      _logger.error({ ...createMetaData(event), _defaultMeta }, 'Internal error');
+      this.getLogger().error({ ...createMetaData(event), _defaultMeta }, 'Internal error');
     },
   };
 })();
