@@ -1,5 +1,8 @@
 import Sequelize from 'sequelize';
 import { db as model } from 'connections';
+import { flatten } from 'lodash';
+import networkHasIntegration from 'common/utils/network-has-integration';
+import formatDate from 'common/utils/format-date';
 
 const Network = model.define('Network', {
   externalId: {
@@ -47,6 +50,20 @@ const Network = model.define('Network', {
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',
+  instanceMethods: {
+    toJSON: function () { // eslint-disable-line func-names, object-shorthand
+      const replaceChars = (string) => string.match(/([A-Z])\w+/g);
+
+      return {
+        type: 'network',
+        id: this.id.toString(),
+        name: this.name,
+        enabled_components: flatten(this.enabledComponents.split(',').map(replaceChars)),
+        has_integration: networkHasIntegration(this),
+        created_at: formatDate(this.createdAt),
+      };
+    },
+  },
 });
 
 export default Network;
