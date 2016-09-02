@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import { omit } from 'lodash';
+import { omit, isEqual } from 'lodash';
 import makeCreatedInObject from 'modules/flexchange/utils/created-in-text';
 import { ActivityTypes } from 'common/models/activity';
 import { createActivity } from 'common/repositories/activity';
@@ -108,33 +108,36 @@ export function findExchangesByUser(user) {
 }
 
 export function findExchangesForValues(type, values, userId, includes = [], filter = {}) {
-  const extraIncludes = [{ model: ExchangeResponse,
+  const extraIncludes = [{
+    model: ExchangeResponse,
     as: 'ResponseStatus',
     where: { userId },
     required: false,
+  }, {
+    model: ExchangeValue,
+    where: {
+      value: { $in: values },
+    },
   }, ...includes];
 
   const options = {
-    include: [...defaultIncludes, ...extraIncludes],
+    include: [
+      ...defaultIncludes.filter(i => !isEqual(i, { model: ExchangeValue })),
+      ...extraIncludes,
+    ],
+    where: { type },
   };
 
   const dateFilter = createDateFilter(filter);
 
   if (dateFilter) options.where = { date: dateFilter };
 
-  return Exchange.findAll({
-    where: { type },
-    include: [{
-      model: ExchangeValue,
-      where: {
-        value: { $in: values },
-      },
-    }],
-  });
+  return Exchange.findAll(options);
 }
 
 export function findExchangesForModel(model, userId, includes = [], filter = {}) {
-  const extraIncludes = [{ model: ExchangeResponse,
+  const extraIncludes = [{
+    model: ExchangeResponse,
     as: 'ResponseStatus',
     where: { userId },
     required: false,

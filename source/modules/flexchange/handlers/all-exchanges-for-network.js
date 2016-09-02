@@ -24,16 +24,20 @@ export default async (req, reply) => {
   try {
     const network = req.pre.network;
     let exchanges;
-    const args = [network, credentials.id, modelIncludes, req.query];
 
     if (isAdmin(credentials)) {
-      exchanges = await findExchangesByNetwork.apply(null, args);
+      exchanges = await findExchangesByNetwork(
+        network, credentials.id, modelIncludes, req.query
+      );
     } else if (isEmployee(credentials)) {
       const teamIds = credentials.Teams
         .filter(t => t.networkId === network.id)
         .map(t => t.id);
 
-      const exchangesInNetwork = await findExchangesForValues('ALL', [network.id]);
+      const exchangesInNetwork = await findExchangesForValues(
+        'ALL', [network.id], credentials.id, modelIncludes, req.query
+      );
+
       const exchangesInTeams = await findExchangesForValues(
         'TEAM', teamIds, credentials.id, modelIncludes, req.query
       );
