@@ -2,7 +2,7 @@ import Boom from 'boom';
 import createAdapter from 'common/utils/create-adapter';
 import { setIntegrationToken } from 'common/repositories/user';
 import { findOrCreateUserDevice } from 'common/repositories/authentication';
-import createAccessToken from 'modules/authentication/services/create-access-token';
+import createAccessToken from 'modules/authentication/utils/create-access-token';
 
 export default async (req, reply) => {
   try {

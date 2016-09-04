@@ -1,26 +1,11 @@
-import Boom from 'boom';
-import token from 'common/utils/token';
-import { findOrCreateUserDevice } from 'common/repositories/authentication';
-import createAccessToken from 'modules/authentication/services/create-access-token';
-import findIntegrationTokens from 'modules/authentication/services/find-integration-tokens';
+import * as AuthenticationService from 'modules/authentication/services/authentication';
 
-export default async (req, reply) => {
+export default async (request, reply) => {
   try {
-    const decodedToken = token.decode(req.query.refresh_token);
-    if (!decodedToken.sub) throw Boom.badData('No sub found in refresh token.');
+    const payload = { refreshToken: request.query.refresh_token };
+    const result = await AuthenticationService.delegate(payload, { request });
 
-    const userId = decodedToken.sub;
-    const authenticatedIntegrations = await findIntegrationTokens(userId);
-
-    const deviceName = req.headers['user-agent'];
-    const device = await findOrCreateUserDevice(userId, deviceName);
-    const refreshedAccessToken = createAccessToken(
-      userId,
-      device.device_id,
-      authenticatedIntegrations
-    );
-
-    return reply({ success: true, data: { access_token: refreshedAccessToken } });
+    return reply({ success: true, data: { access_token: result.refreshedAccessToken } });
   } catch (err) {
     return reply(err);
   }

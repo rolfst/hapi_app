@@ -25,13 +25,14 @@ describe('Available users for shift', () => {
 
   it('should return available users', async () => {
     const endpoint = `/v2/networks/${global.networks.pmt.id}/shifts/1/available`;
-    const { result } = await getRequest(endpoint);
+    const { result, statusCode } = await getRequest(endpoint);
 
     const [newEmployee, newAdmin] = await Promise.all([
       global.users.employee.reload(),
       global.users.admin.reload(),
     ]);
 
+    assert.equal(statusCode, 200);
     assert.deepEqual(result.data, [
       addNetworkScope(newEmployee, global.networks.pmt.id).toJSON(),
       addNetworkScope(newAdmin, global.networks.pmt.id).toJSON(),

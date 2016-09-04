@@ -74,18 +74,6 @@ export async function addUserToNetwork(user, network, {
   return user.reload();
 }
 
-export function getIntegrationTokensForUser(user) {
-  const result = user.Networks
-    .filter(network => network.NetworkUser.userToken !== null)
-    .map(network => ({
-      name: network.Integrations[0].name,
-      token: network.NetworkUser.userToken,
-      externalId: network.NetworkUser.externalId,
-    }));
-
-  return result;
-}
-
 export async function updateUser(userId, attributes) {
   const user = await User.findById(userId);
   const updatedUser = await user.update(attributes);

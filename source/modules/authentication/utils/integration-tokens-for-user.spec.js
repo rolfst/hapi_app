@@ -1,7 +1,7 @@
 import { assert } from 'chai';
-import * as unit from 'modules/authentication/utils/get-integration-tokens-for-user';
+import * as unit from 'modules/authentication/utils/integration-tokens-for-user';
 
-describe('#findIntegrationTokens', () => {
+describe('integrationTokensForUser', () => {
   it('transform result into integration objects', async () => {
     const user = {
       Networks: [{

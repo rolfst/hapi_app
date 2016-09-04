@@ -30,7 +30,7 @@ export default (() => {
     getLogger() {
       return bunyan.createLogger({
         name: 'node-api',
-        streams: process.env.NODE_ENV === 'testing' ? [] : [{
+        streams: [{
           level: 'info',
           stream: process.stdout,
         }],
