@@ -11,6 +11,8 @@ import { createIntegration } from 'common/repositories/integration';
 describe('Integration auth', () => {
   let integration;
   let network;
+  let hookStub;
+
   const authResult = {
     name: 'NEW_INTEGRATION',
     token: 'auth_token',
@@ -21,6 +23,8 @@ describe('Integration auth', () => {
     const fakeAdapter = {
       authenticate: () => Promise.resolve(authResult),
     };
+
+    hookStub = sinon.stub(fakeAdapter, 'authenticate').returns(Promise.resolve(authResult));
 
     sinon.stub(createAdapter, 'default').returns(fakeAdapter);
 
@@ -43,6 +47,17 @@ describe('Integration auth', () => {
     createAdapter.default.restore();
     await integration.destroy();
     await network.destroy();
+  });
+
+  it('hook should be called with the credentials', async () => {
+    const endpoint = `/v2/networks/${network.id}/integration_auth`;
+    const { statusCode } = await postRequest(endpoint, {
+      username: 'foo',
+      password: 'baz',
+    }, global.server, global.tokens.employee);
+
+    assert.equal(statusCode, 200);
+    assert.isTrue(hookStub.calledWithMatch({ username: 'foo', password: 'baz' }));
   });
 
   it('should return new access token', async () => {

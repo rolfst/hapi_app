@@ -18,10 +18,8 @@ export const authenticateUser = async ({ username, password }) => {
 export const makeAuthenticationPromises = (networks, credentials) => {
   return networks
     .filter(networkUtil.hasIntegration)
-    .map(network => ({ network, adapter: createAdapter(network, [], {
-      proceedWithoutToken: true,
-    }) }))
-    .map(({ network, adapter }) => adapter.authenticate(network.externalId, credentials))
+    .map(network => createAdapter(network, [], { proceedWithoutToken: true }))
+    .map(adapter => adapter.authenticate(credentials))
     .map(promise => Promise.resolve(promise));
 };
 

@@ -1,12 +1,12 @@
 import Boom from 'boom';
-import _ from 'lodash';
+import { find } from 'lodash';
 import createAdapter from 'common/utils/create-adapter';
 import * as networkUtil from 'common/utils/network';
 import { findExchangesByShiftIds } from 'modules/flexchange/repositories/exchange';
 
 export const mapShiftsWithExchanges = (shifts, exchanges) => {
   return shifts.map(shift => {
-    const exchange = _.find(exchanges, { shiftId: parseInt(shift.id, 10) });
+    const exchange = find(exchanges, { shiftId: parseInt(shift.id, 10) });
 
     return {
       ...shift,
@@ -17,11 +17,11 @@ export const mapShiftsWithExchanges = (shifts, exchanges) => {
 };
 
 export default async (req, reply) => {
-  if (!networkUtil.hasIntegration(req.pre.network)) {
-    throw Boom.forbidden('Network does not have an activated integration.');
-  }
-
   try {
+    if (!networkUtil.hasIntegration(req.pre.network)) {
+      throw Boom.forbidden('Network does not have an activated integration.');
+    }
+
     const adapter = createAdapter(req.pre.network, req.auth.artifacts.integrations);
     const shifts = await adapter.myShifts(req.pre.network.externalId);
 

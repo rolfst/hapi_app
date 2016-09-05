@@ -16,6 +16,7 @@ export async function makeRequest(endpoint, token = null, method = 'GET', data =
       method,
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
+        'logged-in-user-token': token,
         'api-key': 'testpmtapi',
       },
       body: createFormEncodedString(data),
@@ -25,12 +26,7 @@ export async function makeRequest(endpoint, token = null, method = 'GET', data =
 
     log.debug('PMT client responded with json', { json });
 
-    if (response.status === 400) {
-      log.info('PMT token expired', { username: data.username });
-      throw ExpiredToken;
-    } else if (!response.ok) {
-      log.error('PMT Client error', { json: json.error || null, status_code: response.status });
-    }
+    if (response.status === 400) throw ExpiredToken;
 
     return json;
   } catch (err) {
