@@ -33,6 +33,7 @@ describe('Invite user', () => {
     const { result, statusCode } = await postRequest(endpoint, payload);
 
     assert.equal(statusCode, 200);
+    assert.equal(result.data.username, payload.email);
     assert.equal(result.data.email, payload.email);
     assert.equal(result.data.role_type, payload.role_type.toUpperCase());
   });

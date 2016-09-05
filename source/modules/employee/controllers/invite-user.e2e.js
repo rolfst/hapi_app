@@ -42,6 +42,7 @@ describe('Invite user #Controller', () => {
 
       assert.equal(actual.firstName, firstName);
       assert.equal(actual.lastName, lastName);
+      assert.equal(actual.username, email);
       assert.equal(actual.email, email);
       assert.equal(actual.Networks[0].NetworkUser.roleType, 'ADMIN');
     });
