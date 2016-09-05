@@ -1,7 +1,7 @@
 import Boom from 'boom';
 import _ from 'lodash';
 import createAdapter from 'common/utils/create-adapter';
-import hasIntegration from 'common/utils/network-has-integration';
+import * as networkUtil from 'common/utils/network';
 import { findExchangesByShiftIds } from 'modules/flexchange/repositories/exchange';
 
 export const mapShiftsWithExchanges = (shifts, exchanges) => {
@@ -17,7 +17,7 @@ export const mapShiftsWithExchanges = (shifts, exchanges) => {
 };
 
 export default async (req, reply) => {
-  if (!hasIntegration(req.pre.network)) {
+  if (!networkUtil.hasIntegration(req.pre.network)) {
     throw Boom.forbidden('Network does not have an activated integration.');
   }
 

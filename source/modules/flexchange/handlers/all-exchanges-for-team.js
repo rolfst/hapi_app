@@ -1,7 +1,7 @@
 import { findTeamById } from 'common/repositories/team';
 import { ExchangeResponse, ExchangeComment } from 'modules/flexchange/models';
 import { findExchangesByTeam } from 'modules/flexchange/repositories/exchange';
-import respondWithCollection from 'common/utils/respond-with-collection';
+import * as responseUtil from 'common/utils/response';
 import parseIncludes from 'common/utils/parse-includes';
 import _ from 'lodash';
 
@@ -23,7 +23,7 @@ export default async (req, reply) => {
     const args = [team, credentials.id, modelIncludes, req.query];
     const exchanges = await findExchangesByTeam.apply(null, args);
 
-    return reply(respondWithCollection(exchanges));
+    return reply({ data: responseUtil.serialize(exchanges) });
   } catch (err) {
     return reply(err);
   }

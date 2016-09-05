@@ -7,7 +7,7 @@ import IntegrationNotFound from 'common/errors/integration-not-found';
 import { findUsersByTeamIds, validateTeamIds } from 'common/repositories/team';
 import { findAllUsersForNetwork } from 'common/repositories/network';
 import { validateUserIds } from 'common/repositories/user';
-import hasIntegration from 'common/utils/network-has-integration';
+import * as networkUtil from 'common/utils/network';
 import analytics from 'common/services/analytics';
 import newExchangeEvent from 'common/events/new-exchange-event';
 import { exchangeTypes } from 'modules/flexchange/models/exchange';
@@ -49,7 +49,7 @@ export default async (req, reply) => {
       throw Boom.badData('end_time should be after start_time');
     }
 
-    if (data.shiftId && !hasIntegration(network)) {
+    if (data.shiftId && !networkUtil.hasIntegration(network)) {
       throw IntegrationNotFound;
     }
 

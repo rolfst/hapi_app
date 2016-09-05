@@ -1,8 +1,8 @@
 import Boom from 'boom';
-import selectNetwork from 'common/utils/select-network';
+import * as networkUtil from 'common/utils/network';
 
 export const selectNetworkForUser = (user, networkIdToSelect) => {
-  const selectedNetwork = selectNetwork(user.Networks, networkIdToSelect);
+  const selectedNetwork = networkUtil.select(user.Networks, networkIdToSelect);
 
   if (!selectedNetwork) throw new Error('User does not belong to the network.');
 

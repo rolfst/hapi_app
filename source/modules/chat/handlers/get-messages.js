@@ -1,5 +1,5 @@
 import { check } from 'hapi-acl-plugin';
-import respondWithCollection from 'common/utils/respond-with-collection';
+import * as responseUtil from 'common/utils/response';
 import { findConversationById } from 'modules/chat/repositories/conversation';
 import { findAllForConversation } from 'modules/chat/repositories/message';
 
@@ -13,7 +13,7 @@ module.exports = async (req, reply) => {
 
     const messages = await findAllForConversation(conversation);
 
-    return reply(respondWithCollection(messages));
+    return reply({ data: responseUtil.serialize(messages) });
   } catch (err) {
     return reply(err);
   }

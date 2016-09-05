@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { check } from 'hapi-acl-plugin';
 import { Message } from 'modules/chat/models';
 import { findConversationById } from 'modules/chat/repositories/conversation';
-import respondWithItem from 'common/utils/respond-with-item';
+import * as responseUtil from 'common/utils/response';
 import parseIncludes from 'common/utils/parse-includes';
 
 module.exports = async (req, reply) => {
@@ -17,7 +17,7 @@ module.exports = async (req, reply) => {
 
     check(credentials, 'get-conversation', conversation, 'You\'re not part of this conversation');
 
-    return reply(respondWithItem(conversation));
+    return reply({ data: responseUtil.serialize(conversation) });
   } catch (err) {
     return reply(err);
   }

@@ -3,7 +3,7 @@ import Promise from 'bluebird';
 import createAdapter from 'common/utils/create-adapter';
 import WrongCredentials from 'common/errors/wrong-credentials';
 import * as userRepo from 'common/repositories/user';
-import networkHasIntegration from 'common/utils/network-has-integration';
+import * as networkUtil from 'common/utils/network';
 import checkPassword from 'modules/authentication/utils/check-password';
 
 export const authenticateUser = async ({ username, password }) => {
@@ -17,7 +17,7 @@ export const authenticateUser = async ({ username, password }) => {
 
 export const makeAuthenticationPromises = (networks, credentials) => {
   return networks
-    .filter(networkHasIntegration)
+    .filter(networkUtil.hasIntegration)
     .map(network => ({ network, adapter: createAdapter(network, [], {
       proceedWithoutToken: true,
     }) }))
@@ -32,7 +32,7 @@ export const mapNetworkAndToken = (network, authenticatedIntegrations) => ({
 
 export const setIntegrationTokens = (user, authenticatedIntegrations) => {
   const setIntegrationTokenPromises = user.Networks
-    .filter(networkHasIntegration)
+    .filter(networkUtil.hasIntegration)
     .map(network => mapNetworkAndToken(network, authenticatedIntegrations))
     .map(({ network, token }) => userRepo.setIntegrationToken(user, network, token));
 

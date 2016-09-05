@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 import { assert } from 'chai';
-import selectNetwork from 'common/utils/select-network';
+import * as networkUtil from 'common/utils/network';
 import tokenUtil from 'common/utils/token';
 import * as createAdapter from 'common/utils/create-adapter';
 import { postRequest } from 'common/test-utils/request';
@@ -65,7 +65,7 @@ describe('Integration auth', () => {
     }, global.server, global.tokens.employee);
 
     const user = await findUserById(global.users.employee.id);
-    const { NetworkUser } = selectNetwork(user.Networks, network.id);
+    const { NetworkUser } = networkUtil.select(user.Networks, network.id);
 
     assert.equal(NetworkUser.userToken, 'auth_token');
   });

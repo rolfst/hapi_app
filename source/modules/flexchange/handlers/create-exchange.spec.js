@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import { exchangeTypes } from 'modules/flexchange/models/exchange';
-import * as hasIntegration from 'common/utils/network-has-integration';
+import * as networkUtil from 'common/utils/network';
 import * as exchangeRepo from 'modules/flexchange/repositories/exchange';
 import * as exchangeValueRepo from 'modules/flexchange/repositories/exchange-value';
 import * as networkRepo from 'common/repositories/network';
@@ -15,7 +15,7 @@ describe('Create exchange', () => {
   before(() => {
     sandbox = sinon.sandbox.create();
 
-    sandbox.stub(hasIntegration, 'default').returns(null);
+    sandbox.stub(networkUtil, 'hasIntegration').returns(null);
     sandbox.stub(exchangeValueRepo, 'createValuesForExchange').returns(null);
     sandbox.stub(networkRepo, 'findAllUsersForNetwork').returns(Promise.resolve([]));
     sandbox.stub(exchangeRepo, 'createExchange')

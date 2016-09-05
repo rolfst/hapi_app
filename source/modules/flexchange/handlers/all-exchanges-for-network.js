@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { isAdmin, isEmployee } from 'common/services/permission';
-import respondWithCollection from 'common/utils/respond-with-collection';
+import * as responseUtil from 'common/utils/response';
 import parseIncludes from 'common/utils/parse-includes';
 import {
   findExchangesByNetwork,
@@ -45,7 +45,7 @@ export default async (req, reply) => {
       exchanges = [...exchangesInNetwork, ...exchangesInTeams];
     }
 
-    return reply(respondWithCollection(exchanges));
+    return reply({ data: responseUtil.serialize(exchanges) });
   } catch (err) {
     return reply(err);
   }

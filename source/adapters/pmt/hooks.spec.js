@@ -5,17 +5,17 @@ import fetchUsers from 'adapters/pmt/hooks/fetch-users';
 import teamSerializer from 'adapters/pmt/serializers/team';
 import userSerializer from 'adapters/pmt/serializers/user';
 import { assert } from 'chai';
-import stubs from 'adapters/pmt/test-utils/stubs';
+import blueprints from 'adapters/pmt/test-utils/blueprints';
 
 describe('PMT Hooks', () => {
   const fakeBaseStoreUrl = 'http://mypmtstore.nl';
 
   describe('fetchTeams', () => {
     it('should conform to internal team contract', async () => {
-      sinon.stub(client, 'get').returns(Promise.resolve({ departments: stubs.departments }));
+      sinon.stub(client, 'get').returns(Promise.resolve({ departments: blueprints.departments }));
 
       const actual = await fetchTeams(fakeBaseStoreUrl)();
-      const expected = stubs.departments.map(teamSerializer);
+      const expected = blueprints.departments.map(teamSerializer);
 
       assert.deepEqual(actual, expected);
       assert.property(actual[0], 'externalId');
@@ -29,7 +29,7 @@ describe('PMT Hooks', () => {
     let hookResult;
 
     before(async () => {
-      sinon.stub(client, 'get').returns(Promise.resolve({ data: stubs.users }));
+      sinon.stub(client, 'get').returns(Promise.resolve({ data: blueprints.users }));
 
       hookResult = await fetchUsers(fakeBaseStoreUrl)();
     });
@@ -47,7 +47,7 @@ describe('PMT Hooks', () => {
     });
 
     it('should conform to internal user contract', async () => {
-      const expected = stubs.users.map(userSerializer);
+      const expected = blueprints.users.map(userSerializer);
 
       assert.deepEqual(hookResult, expected);
       assert.property(hookResult[0], 'externalId');

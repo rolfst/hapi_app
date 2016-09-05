@@ -2,10 +2,10 @@ import Boom from 'boom';
 import Url from 'url';
 import Qs from 'qs';
 import authorizationPlugin from 'hapi-acl-plugin';
-import selectNetwork from 'common/utils/select-network';
+import * as networkUtil from 'common/utils/network';
 import createError from 'common/utils/create-error';
 import createActions from 'common/utils/create-actions';
-import respondWithError from 'common/utils/respond-with-error';
+import * as responseUtil from 'common/utils/response';
 
 export const onRequest = (req, reply) => {
   const uri = req.raw.req.url;
@@ -31,7 +31,7 @@ export const onPreResponse = (req, reply) => {
       error = createError(Boom.badData(errorMessage), 'ValidationError');
     }
 
-    return reply(respondWithError(error)).code(error.output.statusCode);
+    return reply(responseUtil.error(error)).code(error.output.statusCode);
   }
 
   return reply.continue();
@@ -42,7 +42,7 @@ export const registerAuthorizationPlugin = () => ({
     actions: createActions(),
     role: (user, params) => {
       if (params.networkId) {
-        const network = selectNetwork(user.Networks, params.networkId);
+        const network = networkUtil.select(user.Networks, params.networkId);
 
         return network.NetworkUser.roleType;
       }

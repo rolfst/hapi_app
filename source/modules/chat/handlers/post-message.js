@@ -1,7 +1,7 @@
 import { check } from 'hapi-acl-plugin';
 import { User } from 'common/models';
 import socket from 'common/services/socket';
-import respondWithItem from 'common/utils/respond-with-item';
+import * as responseUtil from 'common/utils/response';
 import { Conversation } from 'modules/chat/models';
 import { findConversationById } from 'modules/chat/repositories/conversation';
 import { findMessageById, createMessage } from 'modules/chat/repositories/message';
@@ -21,12 +21,12 @@ module.exports = async (req, reply) => {
       [{ model: Conversation, include: [User] }, User]);
 
     const usersToNotify = conversation.Users.filter(user => user.id !== loggedUser.id);
-    const data = respondWithItem(message);
+    const data = responseUtil.serialize(message);
 
     newMessageNotification.send(message, usersToNotify);
     socket.send('send-message', usersToNotify, data, req.headers['x-api-token']);
 
-    return reply({ success: true, ...data });
+    return reply({ success: true, data });
   } catch (err) {
     return reply(err);
   }

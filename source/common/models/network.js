@@ -1,7 +1,7 @@
 import Sequelize from 'sequelize';
 import { db as model } from 'connections';
 import { flatten } from 'lodash';
-import networkHasIntegration from 'common/utils/network-has-integration';
+import * as networkUtil from 'common/utils/network';
 import formatDate from 'common/utils/format-date';
 
 const Network = model.define('Network', {
@@ -59,7 +59,7 @@ const Network = model.define('Network', {
         id: this.id.toString(),
         name: this.name,
         enabled_components: flatten(this.enabledComponents.split(',').map(replaceChars)),
-        has_integration: networkHasIntegration(this),
+        has_integration: networkUtil.hasIntegration(this),
         created_at: formatDate(this.createdAt),
       };
     },

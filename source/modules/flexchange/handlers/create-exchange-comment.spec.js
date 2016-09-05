@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import * as handler from 'modules/flexchange/handlers/create-exchange-comment';
 import * as commentRepo from 'modules/flexchange/repositories/comment';
-import * as hasIntegration from 'common/utils/network-has-integration';
+import * as networkUtil from 'common/utils/network';
 import * as notification from 'modules/flexchange/notifications/new-exchange-comment';
 
 describe('Create exchange comment', () => {
@@ -12,7 +12,7 @@ describe('Create exchange comment', () => {
   afterEach(() => (sandbox.restore()));
 
   it('should send a notification to the whole network', async () => {
-    sandbox.stub(hasIntegration, 'default').returns(null);
+    sandbox.stub(networkUtil, 'hasIntegration').returns(null);
     sandbox.stub(commentRepo, 'createExchangeComment').returns({});
     sandbox.stub(commentRepo, 'findCommentById').returns({ toJSON: () => '' });
     sandbox.stub(notification, 'send').returns(Promise.resolve(null));

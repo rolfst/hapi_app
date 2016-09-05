@@ -1,5 +1,5 @@
 import { includes } from 'lodash';
-import respondWithCollection from 'common/utils/respond-with-collection';
+import * as responseUtil from 'common/utils/response';
 import parseIncludes from 'common/utils/parse-includes';
 import { Message } from 'modules/chat/models';
 import { findAllForUser } from 'modules/chat/repositories/conversation';
@@ -15,7 +15,7 @@ module.exports = async (req, reply) => {
   try {
     const conversations = await findAllForUser(req.auth.credentials, modelIncludes);
 
-    return reply(respondWithCollection(conversations));
+    return reply({ data: responseUtil.serialize(conversations) });
   } catch (err) {
     return reply(err);
   }

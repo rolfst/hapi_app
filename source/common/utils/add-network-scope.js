@@ -1,11 +1,10 @@
-import makeFunctionName from 'common/utils/make-function-name';
-import selectNetwork from 'common/utils/select-network';
+import * as networkUtil from 'common/utils/network';
 
 export default (userModel, networkId) => {
   const newUserModel = userModel;
-  const selectedNetwork = selectNetwork(userModel.Networks, networkId);
+  const selectedNetwork = networkUtil.select(userModel.Networks, networkId);
 
-  newUserModel.functionName = makeFunctionName(parseInt(networkId, 10), userModel);
+  newUserModel.functionName = networkUtil.makeFunctionName(parseInt(networkId, 10), userModel);
   newUserModel.integrationAuth = !!selectedNetwork.NetworkUser.userToken;
   newUserModel.role = selectedNetwork.NetworkUser.roleType;
 

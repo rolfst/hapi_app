@@ -1,6 +1,6 @@
 import nock from 'nock';
 import { assert } from 'chai';
-import addNetworkScope from 'common/utils/add-network-scope';
+import * as networkUtil from 'common/utils/network';
 import { getRequest } from 'common/test-utils/request';
 
 describe('Available users for shift', () => {
@@ -34,8 +34,8 @@ describe('Available users for shift', () => {
 
     assert.equal(statusCode, 200);
     assert.deepEqual(result.data, [
-      addNetworkScope(newEmployee, global.networks.pmt.id).toJSON(),
-      addNetworkScope(newAdmin, global.networks.pmt.id).toJSON(),
+      networkUtil.addUserScope(newEmployee, global.networks.pmt.id).toJSON(),
+      networkUtil.addUserScope(newAdmin, global.networks.pmt.id).toJSON(),
     ]);
   });
 
