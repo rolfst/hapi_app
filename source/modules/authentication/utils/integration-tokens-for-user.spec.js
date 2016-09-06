@@ -15,7 +15,7 @@ describe('integrationTokensForUser', () => {
       }],
     };
 
-    const actual = await unit.default(user);
+    const actual = await unit.getIntegrationTokensForUser(user);
     const expected = [{ name: 'foo', token: 'my_token', externalId: 1337 }];
 
     assert.deepEqual(actual, expected);

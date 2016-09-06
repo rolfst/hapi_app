@@ -1,4 +1,4 @@
-const getIntegrationTokensForUser = (user) => {
+export const getIntegrationTokensForUser = (user) => {
   const result = user.Networks
     .filter(network => network.NetworkUser.userToken !== null)
     .map(network => ({
@@ -9,5 +9,3 @@ const getIntegrationTokensForUser = (user) => {
 
   return result;
 };
-
-export default getIntegrationTokensForUser;

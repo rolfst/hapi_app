@@ -10,6 +10,7 @@ import * as authenticationRepo from 'common/repositories/authentication';
 import createAccessToken from 'modules/authentication/utils/create-access-token';
 import createRefreshToken from 'modules/authentication/utils/create-refresh-token';
 import * as impl from 'modules/authentication/services/authentication/implementation';
+import * as integrationUtil from 'modules/authentication/utils/integration-tokens-for-user';
 
 // TODO: This should be moved to a Integration service
 const authenticateWithIntegrations = async (user, credentials) => {
@@ -24,13 +25,12 @@ const authenticateWithIntegrations = async (user, credentials) => {
 };
 
 export const delegate = async (payload, { request }) => {
-  const decodedToken = tokenUtil.decode(request.query.refresh_token);
+  const decodedToken = tokenUtil.decode(payload.refreshToken);
   if (!decodedToken.sub) throw Boom.badData('No sub found in refresh token.');
 
   const userId = decodedToken.sub;
   const user = await userRepo.findUserById(userId);
-
-  const authenticatedIntegrations = authenticateWithIntegrations(user, payload);
+  const authenticatedIntegrations = integrationUtil.getIntegrationTokensForUser(user);
 
   const deviceName = request.headers['user-agent'];
   const device = await authenticationRepo.findOrCreateUserDevice(userId, deviceName);
