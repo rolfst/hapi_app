@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { includes, orderBy} from 'lodash';
 import { isAdmin, isEmployee } from 'common/services/permission';
 import * as responseUtil from 'common/utils/response';
 import parseIncludes from 'common/utils/parse-includes';
@@ -10,14 +10,14 @@ import { ExchangeResponse, ExchangeComment } from 'modules/flexchange/models';
 
 export default async (req, reply) => {
   const { credentials } = req.auth;
-  const includes = parseIncludes(req.query);
+  const queryIncludes = parseIncludes(req.query);
   const modelIncludes = [];
 
-  if (_.includes(includes, 'responses')) {
+  if (includes(queryIncludes, 'responses')) {
     modelIncludes.push({ model: ExchangeResponse });
   }
 
-  if (_.includes(includes, 'comments')) {
+  if (includes(queryIncludes, 'comments')) {
     modelIncludes.push({ model: ExchangeComment, as: 'Comments' });
   }
 
@@ -45,7 +45,9 @@ export default async (req, reply) => {
       exchanges = [...exchangesInNetwork, ...exchangesInTeams];
     }
 
-    return reply({ data: responseUtil.serialize(exchanges) });
+    const response = orderBy(exchanges, 'date');
+
+    return reply({ data: responseUtil.serialize(response) });
   } catch (err) {
     return reply(err);
   }
