@@ -4,7 +4,7 @@ import { omit } from 'lodash';
 const createMetaData = (event) => ({
   msec: event.data.msec || null,
   tags: event.tags,
-  stack: event.data ? event.data.data.stack : null,
+  stack: event.data.data ? event.data.data.stack : null,
 });
 
 export default (() => {

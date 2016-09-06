@@ -1,6 +1,5 @@
 import fetch from 'isomorphic-fetch';
 import Boom from 'boom';
-import log from 'common/services/logger';
 import ExpiredToken from 'common/errors/token-expired';
 
 const createFormEncodedString = (data) => {
@@ -11,8 +10,6 @@ const createFormEncodedString = (data) => {
 
 export async function makeRequest(endpoint, token = null, method = 'GET', data = {}) {
   try {
-    log.info('Calling PMT client', { url: endpoint, method, username: data.username });
-
     const response = await fetch(endpoint, {
       method,
       headers: {
@@ -25,16 +22,14 @@ export async function makeRequest(endpoint, token = null, method = 'GET', data =
 
     const json = await response.json();
 
-    log.debug('PMT client responded with json', { json });
-
-    console.log(json);
+    console.info('PMT client responded with json', json);
 
     if (response.status === 400) throw ExpiredToken;
     if (!response.ok) throw Boom.badData(json.error);
 
     return json;
   } catch (err) {
-    log.error('PMT Client error', { err });
+    console.error('PMT Client error', err);
   }
 }
 

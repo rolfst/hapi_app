@@ -1,14 +1,20 @@
 'use strict';
 
 import Hapi from 'hapi';
+import { omit } from 'lodash';
 import routes from 'create-routes';
-import log from 'common/services/logger';
+import raven from 'raven';
 import jwtStrategy from 'common/middlewares/authenticator-strategy';
 import integrationStrategy from 'common/middlewares/integration-strategy';
 import * as serverUtil from 'common/utils/server';
 import { server as serverConnection } from 'connections';
 
 const createServer = (port) => {
+  const ravenClient = new raven.Client(process.env.SENTRY_DSN, {
+    release: require('../package.json').version,
+    environment: process.env.NODE_ENV,
+  });
+
   const server = new Hapi.Server(serverUtil.makeConfig());
   server.connection({ ...serverConnection, port });
 
@@ -25,14 +31,34 @@ const createServer = (port) => {
   // Register server extensions
   server.ext('onRequest', serverUtil.onRequest);
   server.ext('onPreResponse', serverUtil.onPreResponse);
+
   server.ext('onPostAuth', (req, reply) => {
-    log.init(req);
+    const requestContext = {
+      id: req.id,
+      payload: omit(req.payload, 'password'),
+      user_agent: req.headers['user-agent'],
+      method: req.method,
+      url: req.path,
+      headers: req.headers,
+    };
+
+    ravenClient.setExtraContext({ request: requestContext });
+    ravenClient.setUserContext(req.auth.credentials ? req.auth.credentials.toJSON() : null);
 
     reply.continue();
   });
 
   server.on('request-internal', (request, event, tags) => {
-    if (tags.error && tags.handler) log.internalError(event);
+    if (process.env.NODE_ENV === 'testing') return false;
+
+    if (tags.error && tags.internal) {
+      if (process.env.NODE_ENV === 'debug') {
+        console.error(request.getLog());
+        return false;
+      }
+
+      ravenClient.captureException(event.data);
+    }
   });
 
   // Register routes

@@ -1,5 +1,4 @@
 import Boom from 'boom';
-import log from 'common/services/logger';
 import analytics from 'common/services/analytics';
 import tokenUtil from 'common/utils/token';
 import * as networkUtil from 'common/utils/network';
@@ -30,7 +29,7 @@ export default () => {
 
         return reply.continue(result);
       } catch (err) {
-        log.error('Error in Authenticator Strategy: ', { stack: err.stack });
+        console.error('Error in Authenticator Strategy', err);
         return reply(Boom.unauthorized(err.message));
       }
     },

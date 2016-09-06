@@ -1,4 +1,3 @@
-import log from 'common/services/logger';
 import { findNetworkById } from 'common/repositories/network';
 import * as userRepo from 'common/repositories/user';
 import createAdapter from 'common/utils/create-adapter';
@@ -28,7 +27,10 @@ export default async (req, reply) => {
 
     return reply({ success: true });
   } catch (err) {
-    log.error('Could not import network', { stack: err.stack, network_id: req.params.networkId });
+    console.error('Could not import network', {
+      stack: err.stack,
+      network_id: req.params.networkId,
+    });
 
     return reply(err);
   }

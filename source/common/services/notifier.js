@@ -1,5 +1,4 @@
 import Parse from 'parse/node';
-import log from 'common/services/logger';
 
 export const createEmailList = (users) => {
   return users.map(user => user.email).filter(u => u);
@@ -29,10 +28,9 @@ export default (() => {
 
       const emails = createEmailList(users);
 
-      log.info('Sending push notification', { payload: data, email_list: emails });
 
       Parse.Push.send({ where: createQuery(emails), data })
-        .catch(err => log.error('Error sending push notification', { stack: err.stack }));
+        .catch(err => console.log('Error sending push notification', { stack: err.stack }));
     },
   };
 })();

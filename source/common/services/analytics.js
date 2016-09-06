@@ -1,5 +1,4 @@
 import Mixpanel from 'mixpanel';
-import log from 'common/services/logger';
 
 export default (() => {
   let client = null;
@@ -25,7 +24,6 @@ export default (() => {
         $phone: user.phoneNum,
       };
 
-      log.info('Sending the following data to Mixpanel', { ...payload });
       client.people.set(user.id, payload);
     },
     track(event) {
@@ -35,7 +33,6 @@ export default (() => {
 
       const { name, data } = event;
 
-      log.info('Sending the following data to Mixpanel', { ...data, event_name: name });
       client.track(name, { ...data, distinct_id: currentUser.id });
     },
   };

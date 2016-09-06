@@ -1,4 +1,4 @@
-import { includes, orderBy} from 'lodash';
+import { includes, orderBy } from 'lodash';
 import { isAdmin, isEmployee } from 'common/services/permission';
 import * as responseUtil from 'common/utils/response';
 import parseIncludes from 'common/utils/parse-includes';

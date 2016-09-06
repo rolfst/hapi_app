@@ -12,7 +12,7 @@
     "start:prod": "cross-env NODE_PATH=build NODE_ENV=production node build/index.js",
     "build": "npm run clean && babel ./source -d ./build -s && npm run copy-config",
     "debug": "node-debug | npm run dev",
-    "dev": "cross-env NODE_PATH=source NODE_ENV=development babel-node ./source/index.js",
+    "dev": "cross-env NODE_PATH=source NODE_ENV=debug babel-node ./source/index.js",
     "test": "npm run test:unit && npm run test:e2e",
     "test:integrations": "cross-env NODE_PATH=source NODE_ENV=testing mocha --timeout 20000 --compilers js:babel-register source/common/test-utils/setup.js 'source/adapters/**/*.e2e.js'",
     "test:e2e": "cross-env NODE_PATH=source NODE_ENV=testing mocha --timeout 20000 --compilers js:babel-register source/common/test-utils/setup.js 'source/**/*.e2e.js'",
@@ -44,6 +44,7 @@
     "nodemailer": "2.5.0",
     "parse": "1.8.1",
     "qs": "6.2.1",
+    "raven": "0.12.1",
     "sequelize": "3.19.3",
     "smtpapi": "1.2.0",
     "uuid-v4": "0.1.0"

@@ -1,13 +1,7 @@
 import { assert } from 'chai';
-import sinon from 'sinon';
 import * as notifier from 'common/services/notifier';
-import logger from 'common/services/logger';
 
 describe('Notifier', () => {
-  before(() => {
-    sinon.stub(logger);
-  });
-
   it('should return the right receivers', () => {
     const users = [
       { fullName: 'Test1', email: 'test1@flex-appeal.nl' },
