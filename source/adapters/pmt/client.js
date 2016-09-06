@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch';
+import Boom from 'boom';
 import log from 'common/services/logger';
 import ExpiredToken from 'common/errors/token-expired';
 
@@ -26,7 +27,10 @@ export async function makeRequest(endpoint, token = null, method = 'GET', data =
 
     log.debug('PMT client responded with json', { json });
 
+    console.log(json);
+
     if (response.status === 400) throw ExpiredToken;
+    if (!response.ok) throw Boom.badData(json.error);
 
     return json;
   } catch (err) {
