@@ -43,7 +43,6 @@ export const delegate = async (payload, { request }) => {
 
 export const authenticate = async (payload, { request }) => {
   const user = await impl.authenticateUser(payload);
-
   const authenticatedIntegrations = await authenticateWithIntegrations(user, payload);
 
   if (!userBelongsToNetwork(user)) throw NotInAnyNetwork;

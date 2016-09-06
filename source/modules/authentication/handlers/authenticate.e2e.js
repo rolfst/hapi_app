@@ -5,7 +5,6 @@ import WrongCredentials from 'common/errors/wrong-credentials';
 import { postRequest } from 'common/test-utils/request';
 
 const url = '/v2/authenticate';
-const adminCredentials = blueprints.users.admin;
 const employeeCredentials = blueprints.users.employee;
 const networklessUserCredentials = blueprints.users.networkless;
 const loginRequest = ({ username, password }) => {
@@ -27,7 +26,7 @@ describe('Authenticate', () => {
   });
 
   it('should login with correct credentials', async () => {
-    const { username, password } = adminCredentials;
+    const { username, password } = employeeCredentials;
     const { result } = await loginRequest({ username, password });
     const { data } = result;
 

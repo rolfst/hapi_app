@@ -24,7 +24,6 @@ export default async (request, reply) => {
       },
     });
   } catch (err) {
-    console.log(err);
     return reply(err);
   }
 };
