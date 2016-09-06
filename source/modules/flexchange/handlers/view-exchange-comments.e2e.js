@@ -5,10 +5,11 @@ import { getRequest } from 'common/test-utils/request';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
 import { createExchangeComment } from 'modules/flexchange/repositories/comment';
 
-let network;
-let exchange = null;
-
 describe('View exchange comment', () => {
+  let network;
+  let exchange;
+  let createdComments;
+
   before(async () => {
     network = global.networks.flexAppeal;
     const userId = global.users.admin.id;
@@ -23,8 +24,10 @@ describe('View exchange comment', () => {
     const comment2 = createExchangeComment(exchange.id, { userId, text: 'Comment #2' });
     const comment3 = createExchangeComment(exchange.id, { userId, text: 'Comment #3' });
 
-    return Promise.all([comment1, comment2, comment3]);
+    createdComments = await Promise.all([comment1, comment2, comment3]);
   });
+
+  after(() => Promise.all([...createdComments, exchange].map(model => model.destroy())));
 
   it('should return comments for exchange', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}/comments`;

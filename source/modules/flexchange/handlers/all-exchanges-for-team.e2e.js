@@ -9,39 +9,39 @@ import { createExchange } from 'modules/flexchange/repositories/exchange';
 describe('Get exchanges for team', () => {
   let team;
   let network;
+  let createdExchanges;
 
-  before(() => {
+  before(async () => {
     network = global.networks.flexAppeal;
 
-    return createTeam({ networkId: network.id, name: 'Team #1' })
-      .then(createdTeam => {
-        team = createdTeam;
+    team = await createTeam({ networkId: network.id, name: 'Team #1' });
 
-        const defaultArgs = {
-          date: moment().format('YYYY-MM-DD'),
-          type: exchangeTypes.TEAM,
-          values: [team.id],
-        };
+    const defaultArgs = {
+      date: moment().format('YYYY-MM-DD'),
+      type: exchangeTypes.TEAM,
+      values: [team.id],
+    };
 
-        const exchange1 = createExchange(global.users.admin.id, network.id, {
-          ...defaultArgs,
-          title: 'Test shift 1 for team',
-        });
+    const exchange1 = createExchange(global.users.admin.id, network.id, {
+      ...defaultArgs,
+      title: 'Test shift 1 for team',
+    });
 
-        const exchange2 = createExchange(global.users.admin.id, network.id, {
-          ...defaultArgs,
-          title: 'Test shift 2 for team',
-        });
+    const exchange2 = createExchange(global.users.admin.id, network.id, {
+      ...defaultArgs,
+      title: 'Test shift 2 for team',
+    });
 
-        const exchange3 = createExchange(global.users.admin.id, network.id, {
-          ...defaultArgs,
-          date: moment().add(2, 'weeks').format('YYYY-MM-DD'),
-          title: 'Test shift 2',
-        });
+    const exchange3 = createExchange(global.users.admin.id, network.id, {
+      ...defaultArgs,
+      date: moment().add(2, 'weeks').format('YYYY-MM-DD'),
+      title: 'Test shift 2',
+    });
 
-        return Promise.all([exchange1, exchange2, exchange3]);
-      });
+    createdExchanges = await Promise.all([exchange1, exchange2, exchange3]);
   });
+
+  after(() => Promise.all(createdExchanges.map(e => e.destroy())));
 
   it('should return exchanges', () => {
     return getRequest(`/v2/networks/${network.id}/teams/${team.id}/exchanges`)

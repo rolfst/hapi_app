@@ -8,6 +8,7 @@ import { createExchange } from 'modules/flexchange/repositories/exchange';
 
 describe('Get exchanges for network', () => {
   let network;
+  let createdExchanges;
 
   before(async () => {
     const defaultArgs = {
@@ -46,8 +47,10 @@ describe('Get exchanges for network', () => {
       title: 'Test shift 3',
     });
 
-    return Promise.all([exchange1, exchange2, exchange3]);
+    createdExchanges = await Promise.all([exchange1, exchange2, exchange3]);
   });
+
+  after(() => Promise.all(createdExchanges.map(e => e.destroy())));
 
   it('should return exchanges for admin', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges`;

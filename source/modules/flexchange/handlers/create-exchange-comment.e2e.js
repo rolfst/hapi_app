@@ -4,10 +4,10 @@ import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import { postRequest } from 'common/test-utils/request';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
 
-let network;
-let exchange;
-
 describe('Create exchange comment', () => {
+  let network;
+  let exchange;
+
   before(async () => {
     network = global.networks.flexAppeal;
 
@@ -17,6 +17,8 @@ describe('Create exchange comment', () => {
       title: 'Test shift 1 for network',
     });
   });
+
+  after(() => exchange.destroy());
 
   it('should create comment for exchange', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}/comments`;

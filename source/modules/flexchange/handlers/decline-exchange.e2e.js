@@ -4,9 +4,9 @@ import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import { patchRequest } from 'common/test-utils/request';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
 
-let exchange;
-
 describe('Decline exchange', () => {
+  let exchange;
+
   before(async () => {
     exchange = await createExchange(global.users.admin.id, global.networks.flexAppeal.id, {
       date: moment().format('YYYY-MM-DD'),
@@ -14,6 +14,8 @@ describe('Decline exchange', () => {
       title: 'Test shift to decline',
     });
   });
+
+  after(() => exchange.destroy());
 
   it('should return correct data', async () => {
     const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/exchanges/${exchange.id}`;

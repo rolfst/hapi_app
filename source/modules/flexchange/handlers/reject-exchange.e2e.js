@@ -9,11 +9,12 @@ import {
   approveExchange,
 } from 'modules/flexchange/repositories/exchange';
 
-let network;
-let exchange = null;
-let approvedExchange = null;
-
 describe('Reject exchange', () => {
+  let network;
+  let exchange;
+  let approvedExchange;
+  let createdExchanges;
+
   before(async () => {
     network = global.networks.flexAppeal;
 
@@ -34,11 +35,13 @@ describe('Reject exchange', () => {
     const declineAPromise = declineExchange(exchangeA.id, global.users.employee.id);
     const acceptBPromise = acceptExchange(exchangeB.id, global.users.admin.id);
 
-    await Promise.all([acceptAPromise, declineAPromise, acceptBPromise]);
+    createdExchanges = await Promise.all([acceptAPromise, declineAPromise, acceptBPromise]);
 
     exchange = exchangeA;
     approvedExchange = await approveExchange(exchangeB, global.users.admin, global.users.admin.id);
   });
+
+  after(() => Promise.all(createdExchanges.map(e => e.destroy())));
 
   it('should return correct data', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}`;

@@ -18,6 +18,8 @@ describe('Accept exchange', () => {
     });
   });
 
+  after(() => exchange.destroy());
+
   it('should return correct data', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}`;
 

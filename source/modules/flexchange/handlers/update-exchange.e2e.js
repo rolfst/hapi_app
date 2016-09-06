@@ -4,16 +4,18 @@ import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import { putRequest } from 'common/test-utils/request';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
 
-let exchange = null;
-
 describe('Update exchange', () => {
-  before(() => {
-    return createExchange(global.users.admin.id, global.networks.flexAppeal.id, {
+  let exchange;
+
+  before(async () => {
+    exchange = await createExchange(global.users.admin.id, global.networks.flexAppeal.id, {
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'Test shift to update',
-    }).then(createdExchange => (exchange = createdExchange));
+    });
   });
+
+  after(() => exchange.destroy());
 
   it('should return updated attributes', async () => {
     const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/exchanges/${exchange.id}`;

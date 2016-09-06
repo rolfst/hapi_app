@@ -217,6 +217,16 @@ export async function createExchange(userId, networkId, attributes) {
   return exchange.reload();
 }
 
+export function getRespondedToExchange(userId, networkId) {
+  return Exchange.findAll({
+    where: { networkId },
+    include: [{
+      model: ExchangeResponse,
+      where: { userId, $and: [{ response: 1 }, { $or: [{ approved: 1 }, { approved: null }] }] },
+    }],
+  });
+}
+
 /**
  * Update an existing exchange by id
  * @param {number} exchangeId - Id of the exchange being updated

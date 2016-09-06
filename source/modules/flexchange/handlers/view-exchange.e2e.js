@@ -5,10 +5,10 @@ import { getRequest } from 'common/test-utils/request';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
 import { createTeam } from 'common/repositories/team';
 
-let network;
-let exchange;
-
 describe('View exchange', () => {
+  let network;
+  let exchange;
+
   before(async () => {
     network = global.networks.flexAppeal;
 
@@ -19,6 +19,8 @@ describe('View exchange', () => {
       description: 'Test description for this cool shift',
     });
   });
+
+  after(() => exchange.destroy());
 
   it('should return correct attributes', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}`;

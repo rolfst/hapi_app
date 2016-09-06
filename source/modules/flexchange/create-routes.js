@@ -18,6 +18,10 @@ const routes = [{
   validator: require('modules/flexchange/validators/get-exchange'),
 }, {
   method: 'GET',
+  url: `${baseUrl}/users/me/exchanges/responded_to`,
+  handler: require(`${basePath}/responded-to`),
+}, {
+  method: 'GET',
   url: `${baseUrl}/users/me/exchanges/accepted`,
   handler: require(`${basePath}/my-accepted-exchanges`),
 }, {
