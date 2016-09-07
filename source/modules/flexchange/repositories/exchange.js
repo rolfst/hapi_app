@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import { omit, isEqual } from 'lodash';
+import { omit, merge } from 'lodash';
 import makeCreatedInObject from 'modules/flexchange/utils/created-in-text';
 import { ActivityTypes } from 'common/models/activity';
 import { createActivity } from 'common/repositories/activity';
@@ -65,7 +65,7 @@ export async function findExchangeById(exchangeId, userId) {
  * @method findExchangeByIds
  * @return {promise} Find exchanges promise
  */
-export function findExchangeByIds(exchangeIds, userId) {
+export function findExchangeByIds(exchangeIds, userId, extraContraint = {}) {
   const extraIncludes = [{
     model: ExchangeResponse,
     as: 'ResponseStatus',
@@ -75,10 +75,12 @@ export function findExchangeByIds(exchangeIds, userId) {
   { model: ExchangeResponse },
   { model: ExchangeComment, as: 'Comments' }];
 
-  return Exchange.findAll({
+  const options = {
     where: { id: { $in: exchangeIds } },
     include: [...defaultIncludes, ...extraIncludes],
-  });
+  };
+
+  return Exchange.findAll(merge(options, extraContraint));
 }
 
 export async function findExchangesByShiftIds(shiftIds) {
@@ -107,41 +109,31 @@ export function findExchangesByUser(user) {
   return user.getExchanges({ include: [...defaultIncludes, extraInclude] });
 }
 
-export function findExchangesForValues(type, values, userId, includes = [], filter = {}) {
-  const extraIncludes = [{
-    model: ExchangeResponse,
-    as: 'ResponseStatus',
-    where: { userId },
-    required: false,
-  }, {
-    model: ExchangeValue,
-    where: {
-      value: { $in: values },
-    },
-  }, ...includes];
-
-  const options = {
-    include: [
-      ...defaultIncludes.filter(i => !isEqual(i, { model: ExchangeValue })),
-      ...extraIncludes,
-    ],
+export async function findExchangesForValues(type, values, userId, filter = {}) {
+  const validExchangeResult = await Exchange.findAll({
+    attributes: ['id'],
     where: { type },
-  };
+    include: [{
+      model: ExchangeValue,
+      required: true,
+      where: { value: { $in: values } },
+    }],
+  });
 
+  const validExchangeIds = validExchangeResult.map(exchange => exchange.id);
   const dateFilter = createDateFilter(filter);
+  const constraint = dateFilter ? { date: dateFilter } : {};
 
-  if (dateFilter) options.where = { date: dateFilter };
-
-  return Exchange.findAll(options);
+  return findExchangeByIds(validExchangeIds, userId, constraint);
 }
 
-export function findExchangesForModel(model, userId, includes = [], filter = {}) {
+export function findExchangesForModel(model, userId, filter = {}) {
   const extraIncludes = [{
     model: ExchangeResponse,
     as: 'ResponseStatus',
     where: { userId },
     required: false,
-  }, ...includes];
+  }];
 
   const options = {
     include: [...defaultIncludes, ...extraIncludes],
@@ -160,8 +152,8 @@ export function findExchangesForModel(model, userId, includes = [], filter = {})
  * @method findExchangesByNetwork
  * @return {promise} Get exchanges promise
  */
-export function findExchangesByNetwork(network, userId, includes = [], filter = {}) {
-  return findExchangesForModel(network, userId, includes, filter);
+export function findExchangesByNetwork(network, userId, filter = {}) {
+  return findExchangesForModel(network, userId, filter);
 }
 
 /**
@@ -170,8 +162,8 @@ export function findExchangesByNetwork(network, userId, includes = [], filter = 
  * @method findExchangesByTeam
  * @return {promise} Get exchanges promise
  */
-export function findExchangesByTeam(team, userId, includes = [], filter = {}) {
-  return findExchangesForModel(team, userId, includes, filter);
+export function findExchangesByTeam(team, userId, filter = {}) {
+  return findExchangesForModel(team, userId, filter);
 }
 
 /**

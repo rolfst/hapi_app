@@ -1,6 +1,7 @@
 import { assert } from 'chai';
 import qs from 'qs';
 import moment from 'moment';
+import { find } from 'lodash';
 import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import { getRequest } from 'common/test-utils/request';
 import { createTeam } from 'common/repositories/team';
@@ -46,21 +47,13 @@ describe('Get exchanges for team', () => {
   it('should return exchanges', () => {
     return getRequest(`/v2/networks/${network.id}/teams/${team.id}/exchanges`)
       .then(response => {
+        const teamExchange = find(response.result.data, { title: 'Test shift 1 for team' });
+
+        assert.deepEqual(teamExchange.created_in, { type: 'team', ids: [team.id] });
         assert.lengthOf(response.result.data, 3);
         assert.deepEqual(response.result.data[0].created_in, { type: 'team', ids: [team.id] });
         assert.equal(response.result.data[0].user.full_name, global.users.admin.fullName);
         assert.isUndefined(response.result.data[0].responses);
-        assert.equal(response.statusCode, 200);
-      });
-  });
-
-  it('should return exchanges with responses', () => {
-    const { flexAppeal } = global.networks;
-
-    return getRequest(`/v2/networks/${flexAppeal.id}/teams/${team.id}/exchanges?include=responses`)
-      .then(response => {
-        assert.lengthOf(response.result.data, 3);
-        assert.isDefined(response.result.data[0].responses);
         assert.equal(response.statusCode, 200);
       });
   });
