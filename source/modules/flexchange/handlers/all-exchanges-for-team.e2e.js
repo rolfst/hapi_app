@@ -39,7 +39,13 @@ describe('Get exchanges for team', () => {
       title: 'Test shift 2',
     });
 
-    createdExchanges = await Promise.all([exchange1, exchange2, exchange3]);
+    const exchangeInPast = createExchange(global.users.admin.id, network.id, {
+      ...defaultArgs,
+      date: moment().subtract(2, 'weeks').format('YYYY-MM-DD'),
+      title: 'Test shift in past',
+    });
+
+    createdExchanges = await Promise.all([exchange1, exchange2, exchange3, exchangeInPast]);
   });
 
   after(() => Promise.all(createdExchanges.map(e => e.destroy())));
@@ -53,7 +59,7 @@ describe('Get exchanges for team', () => {
         assert.lengthOf(response.result.data, 3);
         assert.deepEqual(response.result.data[0].created_in, { type: 'team', ids: [team.id] });
         assert.equal(response.result.data[0].user.full_name, global.users.admin.fullName);
-        assert.isUndefined(response.result.data[0].responses);
+        assert.lengthOf(response.result.data[0].responses, 0);
         assert.equal(response.statusCode, 200);
       });
   });

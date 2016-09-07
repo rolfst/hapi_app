@@ -1,5 +1,6 @@
 import Boom from 'boom';
 import { omit, merge } from 'lodash';
+import moment from 'moment';
 import makeCreatedInObject from 'modules/flexchange/utils/created-in-text';
 import { ActivityTypes } from 'common/models/activity';
 import { createActivity } from 'common/repositories/activity';
@@ -38,7 +39,7 @@ const createDateFilter = (filter) => {
  * @param {number} exchangeId - Id of exchange being looked for
  * @param {number} userId - Id of the user to use in includes
  * @method findExchangeById
- * @return {promise} Find exchange promise
+ * @return {Promise} Find exchange promise
  */
 export async function findExchangeById(exchangeId, userId) {
   const extraIncludes = [{
@@ -63,7 +64,7 @@ export async function findExchangeById(exchangeId, userId) {
  * @param {number} exchangeIds - Id of exchange being looked for
  * @param {number} userId - Id of the user to use in includes
  * @method findExchangeByIds
- * @return {promise} Find exchanges promise
+ * @return {Promise} Find exchanges promise
  */
 export function findExchangeByIds(exchangeIds, userId, extraContraint = {}) {
   const extraIncludes = [{
@@ -76,7 +77,7 @@ export function findExchangeByIds(exchangeIds, userId, extraContraint = {}) {
   { model: ExchangeComment, as: 'Comments' }];
 
   const options = {
-    where: { id: { $in: exchangeIds } },
+    where: { id: { $in: exchangeIds }, date: { $gte: moment().format('YYYY-MM-DD') } },
     include: [...defaultIncludes, ...extraIncludes],
   };
 
@@ -96,7 +97,7 @@ export async function findExchangesByShiftIds(shiftIds) {
  * Find exchanges by user
  * @param {User} user - User we want the exchanges from
  * @method findExchangesByUser
- * @return {promise} Get exchanges promise
+ * @return {Promise} Get exchanges promise
  */
 export function findExchangesByUser(user) {
   const extraInclude = {
@@ -122,55 +123,46 @@ export async function findExchangesForValues(type, values, userId, filter = {}) 
 
   const validExchangeIds = validExchangeResult.map(exchange => exchange.id);
   const dateFilter = createDateFilter(filter);
-  const constraint = dateFilter ? { date: dateFilter } : {};
+  const constraint = dateFilter ? { where: { date: dateFilter } } : {};
 
   return findExchangeByIds(validExchangeIds, userId, constraint);
-}
-
-export function findExchangesForModel(model, userId, filter = {}) {
-  const extraIncludes = [{
-    model: ExchangeResponse,
-    as: 'ResponseStatus',
-    where: { userId },
-    required: false,
-  }];
-
-  const options = {
-    include: [...defaultIncludes, ...extraIncludes],
-  };
-
-  const dateFilter = createDateFilter(filter);
-
-  if (dateFilter) options.where = { date: dateFilter };
-
-  return model.getExchanges(options);
 }
 
 /**
  * Find exchange by network
  * @param {Network} network - Netwerk we want the exchanges from
  * @method findExchangesByNetwork
- * @return {promise} Get exchanges promise
+ * @return {Promise} Get exchanges promise
  */
-export function findExchangesByNetwork(network, userId, filter = {}) {
-  return findExchangesForModel(network, userId, filter);
-}
+export const findExchangesByNetwork = async (network, userId, filter = {}) => {
+  const exchanges = await network.getExchanges({ attributes: ['id'] });
+  const exchangeIds = exchanges.map(e => e.id);
+  const dateFilter = createDateFilter(filter);
+  const constraint = dateFilter ? { where: { date: dateFilter } } : {};
+
+  return findExchangeByIds(exchangeIds, userId, constraint);
+};
 
 /**
  * Find exchanges by team
  * @param {Team} team - Team we want the exchanges from
  * @method findExchangesByTeam
- * @return {promise} Get exchanges promise
+ * @return {Promise} Get exchanges promise
  */
-export function findExchangesByTeam(team, userId, filter = {}) {
-  return findExchangesForModel(team, userId, filter);
-}
+export const findExchangesByTeam = async (team, userId, filter = {}) => {
+  const exchanges = await team.getExchanges({ attributes: ['id'] });
+  const exchangeIds = exchanges.map(e => e.id);
+  const dateFilter = createDateFilter(filter);
+  const constraint = dateFilter ? { where: { date: dateFilter } } : {};
+
+  return findExchangeByIds(exchangeIds, userId, constraint);
+};
 
 /**
  * Delete a specific exchange by id
  * @param {number} exchangeId - Id of exchange to be deleted
  * @method deleteExchangeById
- * @return {promise} Delete exchange promise
+ * @return {Promise} Delete exchange promise
  */
 export function deleteExchangeById(exchangeId) {
   return Exchange.findById(exchangeId)
@@ -183,7 +175,7 @@ export function deleteExchangeById(exchangeId) {
  * @param {number} networkId - Id of the network the exchange is being placed in
  * @param {object} attributes - Object containing attributes
  * @method createExchange
- * @return {promise} Create exchange promise
+ * @return {Promise} Create exchange promise
  */
 export async function createExchange(userId, networkId, attributes) {
   const exchange = await Exchange.create({ ...omit(attributes, 'values'), userId, networkId });
@@ -224,7 +216,7 @@ export function getRespondedToExchange(userId, networkId) {
  * @param {number} exchangeId - Id of the exchange being updated
  * @param {object} payload - Objecting containing payload data
  * @method updateExchangeById
- * @return {promise} Update exchange promise
+ * @return {Promise} Update exchange promise
  */
 export function updateExchangeById(exchangeId, payload) {
   return Exchange.findById(exchangeId)
@@ -236,7 +228,7 @@ export function updateExchangeById(exchangeId, payload) {
  * @param {Exchange} exchange - The exchange instance to increment on
  * @param {number} amount - The amount to increment
  * @method incrementExchangeAcceptCount
- * @return {promise} New promise with incremented value
+ * @return {Promise} New promise with incremented value
  */
 export function incrementExchangeAcceptCount(exchange, amount = 1) {
   return exchange.increment({ acceptCount: amount });
@@ -247,7 +239,7 @@ export function incrementExchangeAcceptCount(exchange, amount = 1) {
  * @param {Exchange} exchange - The exchange instance to decrement on
  * @param {number} amount - The amount to decrement
  * @method decrementExchangeAcceptCount
- * @return {promise} New promise with decremented value
+ * @return {Promise} New promise with decremented value
  */
 export function decrementExchangeAcceptCount(exchange, amount = 1) {
   return exchange.decrement({ acceptCount: amount });
@@ -258,7 +250,7 @@ export function decrementExchangeAcceptCount(exchange, amount = 1) {
  * @param {Exchange} exchange - The exchange instance to increment on
  * @param {number} amount - The amount to increment
  * @method incrementExchangeDeclineCount
- * @return {promise} New promise with incremented value
+ * @return {Promise} New promise with incremented value
  */
 export function incrementExchangeDeclineCount(exchange, amount = 1) {
   return exchange.increment({ declineCount: amount });
@@ -269,7 +261,7 @@ export function incrementExchangeDeclineCount(exchange, amount = 1) {
  * @param {Exchange} exchange - The exchange instance to decrement on
  * @param {number} amount - The amount to increment
  * @method decrementExchangeDeclineCount
- * @return {promise} New promise with decremented value
+ * @return {Promise} New promise with decremented value
  */
 export function decrementExchangeDeclineCount(exchange, amount = 1) {
   return exchange.decrement({ declineCount: amount });
@@ -281,7 +273,7 @@ export function decrementExchangeDeclineCount(exchange, amount = 1) {
  * @param {number} userId - User declining the exchange
  * @param {number} response - Value of response
  * @method respondToExchange
- * @return {promise} Respond to exchange promise
+ * @return {Promise} Respond to exchange promise
  */
 export async function respondToExchange(exchangeId, userId, response) {
   const data = { userId, exchangeId, response };
@@ -313,7 +305,7 @@ export async function respondToExchange(exchangeId, userId, response) {
  * @param {number} exchangeId - Exchange to add the response to
  * @param {number} userId - User accepting the exchange
  * @method acceptExchange
- * @return {promise} Add exchange response promise
+ * @return {Promise} Add exchange response promise
  */
 export async function acceptExchange(exchangeId, userId) {
   const exchange = await respondToExchange(exchangeId, userId, 1);
@@ -332,7 +324,7 @@ export async function acceptExchange(exchangeId, userId) {
  * @param {number} exchangeId - Exchange to add the response to
  * @param {number} userId - User declining the exchange
  * @method declineExchange
- * @return {promise} Add exchange response promise
+ * @return {Promise} Add exchange response promise
  */
 export async function declineExchange(exchangeId, userId) {
   const exchange = await respondToExchange(exchangeId, userId, 0);
@@ -352,7 +344,7 @@ export async function declineExchange(exchangeId, userId) {
  * @param {User} approvingUser - User that approves the exchange
  * @param {number} userIdToApprove - User that will be approved
  * @method approveExchange
- * @return {promise} Promise containing the updated exchange
+ * @return {Promise} Promise containing the updated exchange
  */
 export async function approveExchange(exchange, approvingUser, userIdToApprove) {
   const exchangeResponse = await findExchangeResponseByExchangeAndUser(
@@ -381,7 +373,7 @@ export async function approveExchange(exchange, approvingUser, userIdToApprove) 
  * @param {Exchange} exchange - Exchange to reject
  * @param {number} userIdToReject - User that will be rejected
  * @method rejectExchange
- * @return {promise} Promise containing the updated exchange
+ * @return {Promise} Promise containing the updated exchange
  */
 export async function rejectExchange(exchange, rejectingUser, userIdToReject) {
   const exchangeResponse = await findExchangeResponseByExchangeAndUser(

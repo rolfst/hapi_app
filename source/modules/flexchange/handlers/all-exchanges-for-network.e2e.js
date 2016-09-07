@@ -13,11 +13,6 @@ describe('Get exchanges for network', () => {
   let createdExchanges;
 
   before(async () => {
-    const defaultArgs = {
-      date: moment().format('YYYY-MM-DD'),
-      type: exchangeTypes.NETWORK,
-    };
-
     network = global.networks.flexAppeal;
 
     createdTeams = await Promise.all([
@@ -34,24 +29,31 @@ describe('Get exchanges for network', () => {
     await Promise.all(exchanges.map(e => e.destroy()));
 
     const exchange1 = createExchange(global.users.admin.id, network.id, {
-      ...defaultArgs,
+      date: moment().format('YYYY-MM-DD'),
       title: 'Test shift voor teams',
       type: exchangeTypes.TEAM,
       values: [team1.id, team2.id],
     });
 
     const exchange2 = createExchange(global.users.admin.id, network.id, {
-      ...defaultArgs,
+      date: moment().format('YYYY-MM-DD'),
+      type: exchangeTypes.NETWORK,
       title: 'Test shift 2',
     });
 
     const exchange3 = createExchange(global.users.admin.id, network.id, {
-      ...defaultArgs,
+      type: exchangeTypes.NETWORK,
       date: moment().add(2, 'weeks').format('YYYY-MM-DD'),
       title: 'Test shift 3',
     });
 
-    createdExchanges = await Promise.all([exchange1, exchange2, exchange3]);
+    const exchangeInPast = createExchange(global.users.admin.id, network.id, {
+      type: exchangeTypes.NETWORK,
+      date: moment().subtract(2, 'weeks').format('YYYY-MM-DD'),
+      title: 'Test shift in past',
+    });
+
+    createdExchanges = await Promise.all([exchange1, exchange2, exchange3, exchangeInPast]);
   });
 
   after(() => Promise.all(createdExchanges.map(e => e.destroy())));
@@ -65,7 +67,7 @@ describe('Get exchanges for network', () => {
 
     assert.deepEqual(teamExchange.created_in, { type: 'team', ids: [team1.id, team2.id] });
     assert.lengthOf(result.data, 3);
-    assert.isUndefined(result.data[1].responses);
+    assert.lengthOf(result.data[1].responses, 0);
     assert.equal(statusCode, 200);
   });
 
