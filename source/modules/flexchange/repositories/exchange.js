@@ -201,15 +201,20 @@ export async function createExchange(userId, networkId, attributes) {
   return exchange.reload();
 }
 
-export function getRespondedToExchange(userId, networkId) {
-  return Exchange.findAll({
+export const getRespondedToExchange = async (userId, networkId) => {
+  const exchanges = await Exchange.findAll({
+    attributes: ['id'],
     where: { networkId },
     include: [{
       model: ExchangeResponse,
       where: { userId, $and: [{ response: 1 }, { $or: [{ approved: 1 }, { approved: null }] }] },
     }],
   });
-}
+
+  const exchangeIds = exchanges.map(e => e.id);
+
+  return findExchangeByIds(exchangeIds, userId);
+};
 
 /**
  * Update an existing exchange by id
