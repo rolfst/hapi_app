@@ -1,6 +1,5 @@
 import Boom from 'boom';
 import { omit, merge } from 'lodash';
-import moment from 'moment';
 import makeCreatedInObject from 'modules/flexchange/utils/created-in-text';
 import { ActivityTypes } from 'common/models/activity';
 import { createActivity } from 'common/repositories/activity';
@@ -77,7 +76,7 @@ export function findExchangeByIds(exchangeIds, userId, extraContraint = {}) {
   { model: ExchangeComment, as: 'Comments' }];
 
   const options = {
-    where: { id: { $in: exchangeIds }, date: { $gte: moment().format('YYYY-MM-DD') } },
+    where: { id: { $in: exchangeIds } },
     include: [...defaultIncludes, ...extraIncludes],
   };
 

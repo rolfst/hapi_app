@@ -66,7 +66,7 @@ describe('Get exchanges for network', () => {
     const teamExchange = find(result.data, { title: 'Test shift voor teams' });
 
     assert.deepEqual(teamExchange.created_in, { type: 'team', ids: [team1.id, team2.id] });
-    assert.lengthOf(result.data, 3);
+    assert.lengthOf(result.data, 4);
     assert.lengthOf(result.data[1].responses, 0);
     assert.equal(statusCode, 200);
   });
@@ -79,7 +79,7 @@ describe('Get exchanges for network', () => {
     const teamExchange = find(result.data, { title: 'Test shift voor teams' });
 
     assert.deepEqual(teamExchange.created_in, { type: 'team', ids: [team1.id, team2.id] });
-    assert.lengthOf(result.data, 3);
+    assert.lengthOf(result.data, 4);
   });
 
   it('should return exchanges between given date', async () => {

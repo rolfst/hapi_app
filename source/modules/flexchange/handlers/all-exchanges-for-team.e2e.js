@@ -56,7 +56,7 @@ describe('Get exchanges for team', () => {
         const teamExchange = find(response.result.data, { title: 'Test shift 1 for team' });
 
         assert.deepEqual(teamExchange.created_in, { type: 'team', ids: [team.id] });
-        assert.lengthOf(response.result.data, 3);
+        assert.lengthOf(response.result.data, 4);
         assert.deepEqual(response.result.data[0].created_in, { type: 'team', ids: [team.id] });
         assert.equal(response.result.data[0].user.full_name, global.users.admin.fullName);
         assert.lengthOf(response.result.data[0].responses, 0);
