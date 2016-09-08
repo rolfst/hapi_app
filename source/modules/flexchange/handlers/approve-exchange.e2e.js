@@ -4,11 +4,7 @@ import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import blueprints from 'common/test-utils/blueprints';
 import authenticate from 'common/test-utils/authenticate';
 import { patchRequest } from 'common/test-utils/request';
-import {
-  createExchange,
-  acceptExchange,
-  rejectExchange,
-} from 'modules/flexchange/repositories/exchange';
+import * as exchangeRepo from 'modules/flexchange/repositories/exchange';
 
 describe('Approve exchange', () => {
   let creator;
@@ -20,23 +16,25 @@ describe('Approve exchange', () => {
     creator = global.users.admin;
     network = global.networks.flexAppeal;
 
-    const exchangeToAccept = await createExchange(creator.id, network.id, {
+    const exchangeToAccept = await exchangeRepo.createExchange(creator.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'Test exchange to approve',
     });
 
-    const exchangeToReject = await createExchange(creator.id, network.id, {
+    const exchangeToReject = await exchangeRepo.createExchange(creator.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'Test exchange to approve',
     });
 
-    const acceptedExchangePromise = await acceptExchange(exchangeToAccept.id, creator.id)
-      .then(() => exchangeToAccept.reload());
+    const acceptedExchangePromise = await exchangeRepo.acceptExchange(exchangeToAccept.id,
+      creator.id)
+    .then(() => exchangeToAccept.reload());
 
-    const rejectedExchangePromise = await acceptExchange(exchangeToReject.id, creator.id)
-      .then(() => rejectExchange(exchangeToReject, creator, creator.id));
+    const rejectedExchangePromise = await exchangeRepo.acceptExchange(exchangeToReject.id,
+      creator.id)
+    .then(() => exchangeRepo.rejectExchange(exchangeToReject, creator, creator.id));
 
     [acceptedExchange, rejectedExchange] = await Promise.all([
       acceptedExchangePromise, rejectedExchangePromise,

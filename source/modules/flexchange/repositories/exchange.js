@@ -10,9 +10,7 @@ import {
 } from 'modules/flexchange/models';
 import { createExchangeResponse } from 'modules/flexchange/repositories/exchange-response';
 import { createValuesForExchange } from 'modules/flexchange/repositories/exchange-value';
-import {
-  findExchangeResponseByExchangeAndUser,
-} from 'modules/flexchange/repositories/exchange-response';
+import * as exchangeResponseRepo from 'modules/flexchange/repositories/exchange-response';
 
 const defaultIncludes = [
     { model: User },
@@ -287,7 +285,8 @@ export async function respondToExchange(exchangeId, userId, response) {
   else if (data.response === 1) await incrementExchangeAcceptCount(exchange);
 
   try {
-    const exchangeResponse = await findExchangeResponseByExchangeAndUser(exchange.id, userId);
+    const constraint = { exchangeId: exchange.id, userId };
+    const exchangeResponse = await exchangeResponseRepo.findResponseWhere(constraint);
 
     if (exchangeResponse) {
       await exchangeResponse.destroy();
@@ -351,9 +350,8 @@ export async function declineExchange(exchangeId, userId) {
  * @return {Promise} Promise containing the updated exchange
  */
 export async function approveExchange(exchange, approvingUser, userIdToApprove) {
-  const exchangeResponse = await findExchangeResponseByExchangeAndUser(
-    exchange.id, userIdToApprove
-  );
+  const constraint = { exchangeId: exchange.id, userId: userIdToApprove };
+  const exchangeResponse = await exchangeResponseRepo.findResponseWhere(constraint);
 
   await Promise.all([
     exchangeResponse.update({ approved: 1 }),
@@ -380,9 +378,8 @@ export async function approveExchange(exchange, approvingUser, userIdToApprove) 
  * @return {Promise} Promise containing the updated exchange
  */
 export async function rejectExchange(exchange, rejectingUser, userIdToReject) {
-  const exchangeResponse = await findExchangeResponseByExchangeAndUser(
-    exchange.id, userIdToReject
-  );
+  const constraint = { exchangeId: exchange.id, userId: userIdToReject };
+  const exchangeResponse = await exchangeResponseRepo.findResponseWhere(constraint);
 
   await exchangeResponse.update({ approved: 0 });
 

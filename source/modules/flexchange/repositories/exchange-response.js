@@ -3,20 +3,16 @@ import { ExchangeResponse } from 'modules/flexchange/models';
 
 /**
  * Find an exchange response by exchange and user or throw Error
- * @param {number} exchangeId - Exchange the response is send to
- * @param {number} userId - User that placed the response
- * @method findExchangeResponseByExchangeAndUser
+ * @param {object} constraint - object that contains fields and values for the database
+ * @method findResponseWhere
  * @return {promise} Find exchange response promise
  */
-export function findExchangeResponseByExchangeAndUser(exchangeId, userId) {
-  return ExchangeResponse.findOne({
-    where: { exchangeId, userId },
-  }).then(response => {
-    if (!response) throw Boom.badData('No response found for user.');
+export const findResponseWhere = async (constraint) => {
+  const result = await ExchangeResponse.findOne({ where: constraint });
 
-    return response;
-  });
-}
+  if (!result) throw Boom.badData('No response found for user.');
+  return result;
+};
 
 export function findAcceptedExchangeResponsesForUser(userId) {
   return ExchangeResponse.findAll({

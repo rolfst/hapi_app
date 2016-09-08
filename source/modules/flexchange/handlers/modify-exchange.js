@@ -1,32 +1,26 @@
-import Boom from 'boom';
-import moment from 'moment';
+import { pick } from 'lodash';
 import { check } from 'hapi-acl-plugin';
-import { findExchangeById } from 'modules/flexchange/repositories/exchange';
-import acceptExchange from 'modules/flexchange/handlers/accept-exchange';
-import declineExchange from 'modules/flexchange/handlers/decline-exchange';
-import approveExchange from 'modules/flexchange/handlers/approve-exchange';
-import rejectExchange from 'modules/flexchange/handlers/reject-exchange';
+import * as flexchangeService from 'modules/flexchange/services/flexchange';
 
-const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
+const services = {
+  accept: flexchangeService.acceptExchange,
+  decline: flexchangeService.declineExchange,
+  approve: flexchangeService.approveExchange,
+  reject: flexchangeService.rejectExchange,
+};
 
 export default async (req, reply) => {
-  const actions = {
-    accept: acceptExchange,
-    decline: declineExchange,
-    approve: approveExchange,
-    reject: rejectExchange,
-  };
+  const params = pick(req.params, ['exchangeId']);
+  const reqPayload = pick(req.payload, ['action', 'user_id']);
+  const payload = { ...params, ...reqPayload };
+  const { pre, auth } = req;
 
   try {
-    const actionHook = actions[req.payload.action];
+    check(req.auth.credentials, `${payload.action}-exchange`);
 
-    check(req.auth.credentials, `${req.payload.action}-exchange`);
-    const exchange = await findExchangeById(req.params.exchangeId, req.auth.credentials.id);
-
-    if (isExpired(exchange.date)) throw Boom.forbidden('Exchange has been expired.');
-    if (exchange.approvedBy) throw Boom.badData('Exchange has already been approved.');
-
-    const updatedExchange = await actionHook(req.pre.network, exchange, req);
+    const actionHook = services[payload.action];
+    const message = { ...pre, ...auth };
+    const updatedExchange = await actionHook(payload, message);
 
     return reply({ success: true, data: updatedExchange.toJSON() });
   } catch (err) {

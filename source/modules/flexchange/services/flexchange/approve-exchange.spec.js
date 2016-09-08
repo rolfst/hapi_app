@@ -1,10 +1,10 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import * as exchangeRepo from 'modules/flexchange/repositories/exchange';
-import * as exchangeResponseRepo from 'modules/flexchange/repositories/exchange-response';
-import * as handler from 'modules/flexchange/handlers/approve-exchange';
-import * as creatorApproved from '../notifications/creator-approved';
-import * as substituteApproved from '../notifications/substitute-approved';
+import * as exchangeResponseRepo from '../../repositories/exchange-response';
+import * as service from '../flexchange';
+import * as creatorApproved from '../../notifications/creator-approved';
+import * as substituteApproved from '../../notifications/substitute-approved';
 
 describe('Approve exchange', () => {
   let sandbox;
@@ -17,18 +17,15 @@ describe('Approve exchange', () => {
     sandbox.stub(substituteApproved, 'send').returns(Promise.resolve(null));
     sandbox.stub(exchangeRepo, 'findExchangeById').returns({});
     sandbox.stub(exchangeRepo, 'approveExchange').returns({});
-    sandbox.stub(exchangeResponseRepo, 'findExchangeResponseByExchangeAndUser')
+    sandbox.stub(exchangeResponseRepo, 'findResponseWhere')
       .returns({ approved: null, response: 1 });
 
-    const networkFixture = {};
-    const exchangeFixture = {};
-    const requestFixture = {
-      auth: { credentials: {} },
-      params: { exchangeId: null },
-      payload: { user_id: 1 },
+    const messageFixture = { credentials: {}, network: {} };
+    const payload = {
+      exchangeId: null,
+      user_id: 1,
     };
-
-    await handler.default(networkFixture, exchangeFixture, requestFixture);
+    await service.approveExchange(payload, messageFixture);
 
     assert.equal(creatorApproved.send.calledOnce, true);
     assert.equal(substituteApproved.send.calledOnce, true);

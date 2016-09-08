@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import * as exchangeRepo from 'modules/flexchange/repositories/exchange';
-import * as handler from 'modules/flexchange/handlers/accept-exchange';
+import * as service from 'modules/flexchange/services/flexchange';
 import * as notification from 'modules/flexchange/notifications/accepted-exchange';
 import * as networkUtil from 'common/utils/network';
 
@@ -12,18 +12,19 @@ describe('Accept exchange', () => {
   afterEach(() => (sandbox.restore()));
 
   it('should send a notification to the whole network', async () => {
+    const messageFixture = { credentials: {}, network: {} };
+    const exchangeFixture = { ResponseStatus: {} };
+    const payload = {
+      exchangeId: null,
+    };
+
     sandbox.stub(notification, 'send').returns(Promise.resolve(null));
+    sandbox.stub(exchangeRepo, 'findExchangeById').returns(exchangeFixture);
     sandbox.stub(exchangeRepo, 'acceptExchange').returns(null);
     sandbox.stub(networkUtil, 'hasIntegration').returns(null);
 
-    const networkFixture = {};
-    const exchangeFixture = { ResponseStatus: {} };
-    const requestFixture = {
-      auth: { credentials: {} },
-      params: { exchangeId: null },
-    };
 
-    await handler.default(networkFixture, exchangeFixture, requestFixture);
+    await service.acceptExchange(payload, messageFixture);
 
     assert.equal(notification.send.calledOnce, true);
   });
