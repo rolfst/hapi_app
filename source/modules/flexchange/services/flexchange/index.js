@@ -1,7 +1,9 @@
 import Boom from 'boom';
+import { orderBy } from 'lodash';
 import moment from 'moment';
 import analytics from 'common/services/analytics';
 import approveExchangeEvent from 'common/events/approve-exchange-event';
+import { isAdmin, isEmployee } from 'common/services/permission';
 import * as exchangeRepo from '../../repositories/exchange';
 import * as exchangeResponseRepo from '../../repositories/exchange-response';
 import * as notification from '../../notifications/accepted-exchange';
@@ -87,4 +89,29 @@ export const rejectExchange = async (payload, message) => {
   // TODO: Fire ExchangeWasRejected event
 
   return reloadedExchange;
+};
+
+export const listExchangesForNetwork = async (payload, message) => {
+  const { credentials, network } = message;
+  let exchanges;
+
+  if (isAdmin(credentials)) {
+    exchanges = await exchangeRepo.findExchangesByNetwork(
+      network, credentials.id, payload.filter);
+  } else if (isEmployee(credentials)) {
+    const teamIds = credentials.Teams
+      .filter(t => t.networkId === network.id)
+      .map(t => t.id);
+
+    const exchangesInNetwork = await exchangeRepo.findExchangesForValues(
+      'ALL', [network.id], credentials.id, payload.filter);
+
+    const exchangesInTeams = await exchangeRepo.findExchangesForValues(
+      'TEAM', teamIds, credentials.id, payload.filter);
+
+    exchanges = [...exchangesInNetwork, ...exchangesInTeams];
+  }
+  const response = orderBy(exchanges, 'date');
+
+  return response;
 };
