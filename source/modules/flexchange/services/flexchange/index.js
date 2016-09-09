@@ -3,6 +3,7 @@ import { orderBy } from 'lodash';
 import moment from 'moment';
 import analytics from 'common/services/analytics';
 import approveExchangeEvent from 'common/events/approve-exchange-event';
+import * as teamRepo from '../../../../common/repositories/team';
 import { isAdmin, isEmployee } from 'common/services/permission';
 import * as exchangeRepo from '../../repositories/exchange';
 import * as exchangeResponseRepo from '../../repositories/exchange-response';
@@ -89,6 +90,14 @@ export const rejectExchange = async (payload, message) => {
   // TODO: Fire ExchangeWasRejected event
 
   return reloadedExchange;
+};
+
+export const listExchangesForTeam = async (payload, message) => {
+  const team = await teamRepo.findTeamById(payload.teamId);
+  const exchanges = await exchangeRepo.findExchangesByTeam(
+    team, message.credentials.id, payload.filter);
+
+  return exchanges;
 };
 
 export const listExchangesForNetwork = async (payload, message) => {
