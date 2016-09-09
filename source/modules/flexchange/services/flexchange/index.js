@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import { orderBy } from 'lodash';
+import { chain, orderBy } from 'lodash';
 import moment from 'moment';
 import createAdapter from '../../../../common/utils/create-adapter';
 import analytics from '../../../../common/services/analytics';
@@ -11,6 +11,7 @@ import { isAdmin, isEmployee } from 'common/services/permission';
 import * as commentRepo from '../../repositories/comment';
 import * as exchangeRepo from '../../repositories/exchange';
 import * as exchangeResponseRepo from '../../repositories/exchange-response';
+import * as activityRepo from '../../../../common/repositories/activity';
 import * as notification from '../../notifications/accepted-exchange';
 import * as creatorNotifier from '../../notifications/creator-approved';
 import * as substituteNotifier from '../../notifications/substitute-approved';
@@ -159,6 +160,13 @@ export const listExchangesForNetwork = async (payload, message) => {
   const response = orderBy(exchanges, 'date');
 
   return response;
+};
+
+export const listActivities = async (payload) => {
+  const exchange = await exchangeRepo.findExchangeById(payload.exchangeId);
+  const values = await activityRepo.findActivitiesForSource(exchange);
+
+  return chain(values).sortBy('date').value();
 };
 
 export const getExchangeComment = async (payload, message) => {

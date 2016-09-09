@@ -1,20 +1,18 @@
-import _ from 'lodash';
-import { findActivitiesForSource } from 'common/repositories/activity';
-import { findExchangeById } from 'modules/flexchange/repositories/exchange';
+import { pick } from 'lodash';
+import * as flexchangeService from '../services/flexchange';
+import * as responseUtil from 'common/utils/response';
+
+const FILTER_PROPERTIES = ['start', 'end'];
 
 export default async (req, reply) => {
+  const message = { ...req.pre, ...req.auth };
+  const payload = { ...pick(req.params, ['exchangeId']) };
+  payload.filter = pick(req.query, FILTER_PROPERTIES);
+
   try {
-    const exchange = await findExchangeById(req.params.exchangeId);
-    const values = await findActivitiesForSource(exchange);
-    const mapModelToJSON = activityModel => activityModel.toJSON();
+    const activities = await flexchangeService.listActivities(payload, message);
 
-    const activities = _
-      .chain(values)
-      .sortBy('date')
-      .map(mapModelToJSON)
-      .value();
-
-    return reply({ data: activities });
+    return reply({ data: responseUtil.serialize(activities) });
   } catch (err) {
     return reply(err);
   }
