@@ -1,4 +1,4 @@
-import { filter } from 'lodash';
+import { filter, find } from 'lodash';
 import createAdapter from '../../../../common/utils/create-adapter';
 import * as networkUtil from '../../../../common/utils/network';
 import * as userRepo from '../../../../common/repositories/user';
@@ -18,4 +18,16 @@ export const matchUsersForShift = async (usersToMatch, network) => {
     .map((u) => networkUtil.addUserScope(u, network.id));
 
   return response;
+};
+
+export const mergeShiftWithExchange = (shift, exchange) => ({
+  ...shift,
+  exchangeId: exchange ? exchange.id : null,
+  teamId: exchange ? exchange.teamId : null,
+});
+
+export const mapShiftsWithExchanges = (shifts, exchanges) => {
+  const findExchange = (shiftId) => find(exchanges, { shiftId: parseInt(shiftId, 10) });
+
+  return shifts.map(shift => mergeShiftWithExchange(shift, findExchange(shift.id)));
 };

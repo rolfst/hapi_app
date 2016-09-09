@@ -13,6 +13,10 @@ const routes = [{
   handler: require(`${basePath}/available-users-for-shift`),
 }, {
   method: 'GET',
+  url: `${baseUrl}/shifts/{shiftId}`,
+  handler: require(`${basePath}/view-shift`),
+}, {
+  method: 'GET',
   url: `${baseUrl}/users/me/exchanges`,
   handler: require(`${basePath}/my-exchanges`),
   validator: require('modules/flexchange/validators/get-exchange'),

@@ -23,7 +23,7 @@ export default async (req, reply) => {
     }
 
     const adapter = createAdapter(req.pre.network, req.auth.artifacts.integrations);
-    const shifts = await adapter.myShifts(req.pre.network.externalId);
+    const shifts = await adapter.myShifts();
 
     const exchanges = await findExchangesByShiftIds(shifts.map(s => s.id));
 

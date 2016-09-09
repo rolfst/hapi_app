@@ -23,7 +23,6 @@ describe('Accept exchange', () => {
     sandbox.stub(exchangeRepo, 'acceptExchange').returns(null);
     sandbox.stub(networkUtil, 'hasIntegration').returns(null);
 
-
     await service.acceptExchange(payload, messageFixture);
 
     assert.equal(notification.send.calledOnce, true);

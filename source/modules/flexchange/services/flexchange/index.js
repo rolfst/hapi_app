@@ -1,6 +1,7 @@
 import Boom from 'boom';
 import { orderBy } from 'lodash';
 import moment from 'moment';
+import createAdapter from '../../../../common/utils/create-adapter';
 import analytics from '../../../../common/services/analytics';
 import approveExchangeEvent from '../../../../common/events/approve-exchange-event';
 import IntegrationNotFound from 'common/errors/integration-not-found';
@@ -99,6 +100,20 @@ export const rejectExchange = async (payload, message) => {
   return reloadedExchange;
 };
 
+export const getShift = async (payload, message) => {
+  const { network, artifacts } = message;
+
+  if (!networkUtil.hasIntegration(network)) throw IntegrationNotFound;
+
+  const adapter = createAdapter(network, artifacts.integrations);
+  const shift = await adapter.viewShift(payload.shiftId);
+
+  if (!shift) throw Boom.notFound('Shift not found.');
+
+  const [exchange] = await exchangeRepo.findExchangesByShiftIds([shift.id]);
+
+  return impl.mergeShiftWithExchange(shift, exchange);
+};
 
 export const listAvailableUsersForShift = async (payload, message) => {
   const { network, artifacts } = message;
