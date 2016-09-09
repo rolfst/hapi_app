@@ -1,9 +1,12 @@
-import client from 'adapters/pmt/client';
-import userSerializer from 'adapters/pmt/serializers/user';
+import Boom from 'boom';
+import client from '../client';
+import userSerializer from '../serializers/user';
 
 export default (token, baseStoreUrl) => async (shiftId) => {
   const endpoint = `${baseStoreUrl}/shift/${shiftId}/available`;
   const result = await client.get(endpoint, token);
 
-  return result.users.map(userSerializer);
+  if (result.status === 404) throw Boom.notFound('Shift not found.');
+
+  return result.payload.users.map(userSerializer);
 };

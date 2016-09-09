@@ -12,7 +12,8 @@ describe('PMT Hooks', () => {
 
   describe('fetchTeams', () => {
     it('should conform to internal team contract', async () => {
-      sinon.stub(client, 'get').returns(Promise.resolve({ departments: blueprints.departments }));
+      const responseStub = { payload: { departments: blueprints.departments } };
+      sinon.stub(client, 'get').returns(Promise.resolve(responseStub));
 
       const actual = await fetchTeams(fakeBaseStoreUrl)();
       const expected = blueprints.departments.map(teamSerializer);
@@ -29,7 +30,7 @@ describe('PMT Hooks', () => {
     let hookResult;
 
     before(async () => {
-      sinon.stub(client, 'get').returns(Promise.resolve({ data: blueprints.users }));
+      sinon.stub(client, 'get').returns(Promise.resolve({ payload: { data: blueprints.users } }));
 
       hookResult = await fetchUsers(fakeBaseStoreUrl)();
     });

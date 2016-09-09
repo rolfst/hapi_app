@@ -7,5 +7,5 @@ export default (token, baseStoreUrl) => async () => {
   const endpoint = `${baseStoreUrl}/me/shifts/${date}`;
   const result = await client.get(endpoint, token);
 
-  return result.shifts.map(shiftSerializer);
+  return result.payload.shifts.map(shiftSerializer);
 };

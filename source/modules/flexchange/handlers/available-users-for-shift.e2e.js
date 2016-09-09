@@ -39,6 +39,13 @@ describe('Available users for shift', () => {
     ]);
   });
 
+  it('should fail when shift is not found', async () => {
+    const endpoint = `/v2/networks/${global.networks.pmt.id}/shifts/2/available`;
+    const { statusCode } = await getRequest(endpoint);
+
+    assert.equal(statusCode, 404);
+  });
+
   it('should fail when network has no integration', async () => {
     const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/shifts/1/available`;
     const { statusCode } = await getRequest(endpoint);
