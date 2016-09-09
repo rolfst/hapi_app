@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { findExchangeById } from 'modules/flexchange/repositories/exchange';
+import * as exchangeRepo from 'modules/flexchange/repositories/exchange';
 import { findCommentsByExchange } from 'modules/flexchange/repositories/comment';
 import notifier from 'common/services/notifier';
 
@@ -14,7 +14,8 @@ export const createNotification = (exchange, comment) => {
 };
 
 export const send = async (comment) => {
-  const exchange = await findExchangeById(comment.parent_id);
+  const exchange = await exchangeRepo.findExchangeById(comment.parentId);
+
   const comments = await findCommentsByExchange(exchange);
 
   const users = comments.map(c => c.User).concat(exchange.User);

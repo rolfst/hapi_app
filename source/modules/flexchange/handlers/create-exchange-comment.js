@@ -1,18 +1,17 @@
-import {
-  createExchangeComment,
-  findCommentById,
-} from 'modules/flexchange/repositories/comment';
-import * as newCommentNotification from '../notifications/new-exchange-comment';
+import { pick } from 'lodash';
+import * as responseUtil from 'common/utils/response';
+import * as flexchangeService from '../services/flexchange';
+
+const FILTER_PROPERTIES = ['start', 'end'];
 
 export default async (req, reply) => {
+  const message = { ...req.pre, ...req.auth };
+  const payload = { ...pick(req.params, ['exchangeId']), ...pick(req.payload, ['text']) };
+  payload.filter = pick(req.query, FILTER_PROPERTIES);
+
   try {
-    const data = { text: req.payload.text, userId: req.auth.credentials.id };
-    const createdExchangeComment = await createExchangeComment(req.params.exchangeId, data);
-    const exchangeComment = await findCommentById(createdExchangeComment.id);
-
-    newCommentNotification.send(exchangeComment);
-
-    return reply({ success: true, data: exchangeComment.toJSON() });
+    const exchangeComment = await flexchangeService.getExchangeComment(payload, message);
+    return reply({ success: true, data: responseUtil.serialize(exchangeComment) });
   } catch (err) {
     return reply(err);
   }

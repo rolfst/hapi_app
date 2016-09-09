@@ -7,12 +7,16 @@ import IntegrationNotFound from 'common/errors/integration-not-found';
 import * as networkUtil from '../../../../common/utils/network';
 import * as teamRepo from '../../../../common/repositories/team';
 import { isAdmin, isEmployee } from 'common/services/permission';
+import * as commentRepo from '../../repositories/comment';
 import * as exchangeRepo from '../../repositories/exchange';
 import * as exchangeResponseRepo from '../../repositories/exchange-response';
 import * as notification from '../../notifications/accepted-exchange';
 import * as creatorNotifier from '../../notifications/creator-approved';
 import * as substituteNotifier from '../../notifications/substitute-approved';
 import * as impl from './implementation';
+
+// TODO activate notifications
+// import * as commentNotifier from '../../notifications/new-exchange-comment';
 
 const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
 
@@ -140,4 +144,16 @@ export const listExchangesForNetwork = async (payload, message) => {
   const response = orderBy(exchanges, 'date');
 
   return response;
+};
+
+export const getExchangeComment = async (payload, message) => {
+  const data = { text: payload.text, userId: message.credentials.id };
+  const createdExchangeComment = await commentRepo.createExchangeComment(payload.exchangeId, data);
+
+  const exchangeComment = await commentRepo.findCommentById(createdExchangeComment.id);
+
+  // TODO activate notifications
+  // commentNotifier.send(exchangeComment);
+
+  return exchangeComment;
 };
