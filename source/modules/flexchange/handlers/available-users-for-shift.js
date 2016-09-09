@@ -1,24 +1,18 @@
-import * as networkUtil from 'common/utils/network';
-import IntegrationNotFound from 'common/errors/integration-not-found';
-import { findUserByEmail } from 'common/repositories/user';
-import createAdapter from 'common/utils/create-adapter';
+import { pick } from 'lodash';
+import * as responseUtil from 'common/utils/response';
+import * as flexchangeService from '../services/flexchange';
+
+const FILTER_PROPERTIES = ['start', 'end'];
 
 export default async (req, reply) => {
+  const message = { ...req.pre, ...req.auth };
+  const payload = pick(req.params, ['shiftId']);
+  payload.filter = pick(req.query, FILTER_PROPERTIES);
+
   try {
-    if (!networkUtil.hasIntegration(req.pre.network)) throw IntegrationNotFound;
-    const adapter = createAdapter(req.pre.network, req.auth.artifacts.integrations);
+    const response = await flexchangeService.listAvailableUsersForShift(payload, message);
 
-    const externalUsers = await adapter
-      .usersAvailableForShift(req.params.shiftId);
-
-    const internalUsers = await Promise.all(externalUsers.map(u => findUserByEmail(u.email)));
-
-    const response = internalUsers
-      .filter(u => u)
-      .map(u => networkUtil.addUserScope(u, req.pre.network.id))
-      .map(u => u.toJSON());
-
-    return reply({ data: response });
+    return reply({ data: responseUtil.serialize(response) });
   } catch (err) {
     return reply(err);
   }

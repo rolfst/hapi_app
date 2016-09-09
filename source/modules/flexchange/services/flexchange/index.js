@@ -1,8 +1,10 @@
 import Boom from 'boom';
 import { orderBy } from 'lodash';
 import moment from 'moment';
-import analytics from 'common/services/analytics';
-import approveExchangeEvent from 'common/events/approve-exchange-event';
+import analytics from '../../../../common/services/analytics';
+import approveExchangeEvent from '../../../../common/events/approve-exchange-event';
+import IntegrationNotFound from 'common/errors/integration-not-found';
+import * as networkUtil from '../../../../common/utils/network';
 import * as teamRepo from '../../../../common/repositories/team';
 import { isAdmin, isEmployee } from 'common/services/permission';
 import * as exchangeRepo from '../../repositories/exchange';
@@ -10,6 +12,7 @@ import * as exchangeResponseRepo from '../../repositories/exchange-response';
 import * as notification from '../../notifications/accepted-exchange';
 import * as creatorNotifier from '../../notifications/creator-approved';
 import * as substituteNotifier from '../../notifications/substitute-approved';
+import * as impl from './implementation';
 
 const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
 
@@ -90,6 +93,20 @@ export const rejectExchange = async (payload, message) => {
   // TODO: Fire ExchangeWasRejected event
 
   return reloadedExchange;
+};
+
+
+export const listAvailableUsersForShift = async (payload, message) => {
+  const { network, artifacts } = message;
+
+  if (!networkUtil.hasIntegration(network)) throw IntegrationNotFound;
+
+  const externalUsers = await impl.findAvailableUsersForShift(
+    payload.shiftId, network, artifacts);
+
+  const availableUsers = await impl.matchUsersForShift(externalUsers, network);
+
+  return availableUsers;
 };
 
 export const listExchangesForTeam = async (payload, message) => {
