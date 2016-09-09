@@ -180,3 +180,11 @@ export const getExchangeComment = async (payload, message) => {
 
   return exchangeComment;
 };
+
+export const listMyAcceptedExchanges = async (payload, message) => {
+  const responses = await exchangeResponseRepo.findAcceptedExchangeResponsesForUser(
+    message.credentials.id);
+  const exchanges = await exchangeRepo.findExchangeByIds(responses.map(r => r.exchangeId));
+
+  return exchanges;
+};
