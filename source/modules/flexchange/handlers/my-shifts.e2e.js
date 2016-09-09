@@ -1,7 +1,6 @@
 import { assert } from 'chai';
-import sinon from 'sinon';
+import nock from 'nock';
 import moment from 'moment';
-import * as createAdapter from 'common/utils/create-adapter';
 import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import { getRequest } from 'common/test-utils/request';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
@@ -23,31 +22,33 @@ describe('My shifts', () => {
 
     const stubbedResult = [{
       id: '25280341',
-      start_time: '2016-12-19T08:00:00+0100',
-      end_time: '2016-12-19T16:30:00+0100',
+      start_time: '19-12-2016 08:00:00',
+      end_time: '19-12-2016 16:30:00',
       department: '14',
       break: '01:30:00',
     }, {
       id: '25280343',
-      start_time: '2016-12-21T08:00:00+0100',
-      end_time: '2016-12-21T15:00:00+0100',
+      start_time: '21-12-2016 08:00:00',
+      end_time: '21-12-2016 15:00:00',
       department: '14',
       break: '01:15:00',
     }];
 
-    sinon.stub(createAdapter, 'default').returns({
-      myShifts: () => stubbedResult,
-    });
-  });
+    const date = moment().format('DD-MM-YYYY');
 
-  after(() => createAdapter.default.restore());
+    nock(network.externalId)
+      .get(`/me/shifts/${date}`)
+      .reply(200, { shifts: stubbedResult });
+  });
 
   it('should pair exchanges', async () => {
     const endpoint = `/v2/networks/${network.id}/users/me/shifts`;
     const { result } = await getRequest(endpoint);
 
+    assert.equal(result.data[0].date, '2016-12-19');
     assert.equal(result.data[0].exchange_id, null);
     assert.equal(result.data[0].team_id, null);
+    assert.equal(result.data[1].date, '2016-12-21');
     assert.equal(result.data[1].exchange_id, createdExchange.id);
     assert.equal(result.data[1].team_id, 14);
   });

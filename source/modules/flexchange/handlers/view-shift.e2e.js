@@ -44,6 +44,7 @@ describe('View shift', () => {
     assert.equal(result.data.id, stubbedResult.id);
     assert.property(result.data, 'start_time');
     assert.property(result.data, 'end_time');
+    assert.equal(result.data.date, '2016-12-21');
     assert.equal(result.data.break, stubbedResult.break);
     assert.equal(result.data.exchange_id, createdExchange.id);
     assert.equal(result.data.team_id, stubbedResult.department);
