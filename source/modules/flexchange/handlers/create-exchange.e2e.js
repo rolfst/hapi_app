@@ -28,14 +28,16 @@ describe('Create exchange', () => {
       date: moment().format('YYYY-MM-DD'),
       description: '',
       type: exchangeTypes.NETWORK,
+      start_time: moment().toISOString(),
+      end_time: moment().add(2, 'hours').toISOString(),
     });
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.user.fullName, global.users.admin.full_name);
     assert.deepEqual(result.data.created_in, { type: 'network', id: network.id });
     assert.equal(result.data.title, 'Test shift for network');
-    assert.equal(result.data.start_time, null);
-    assert.equal(result.data.end_time, null);
+    assert.isNotNull(result.data.start_time);
+    assert.isNotNull(result.data.end_time);
   });
 
   it('should create exchange for a team', async () => {
@@ -45,29 +47,34 @@ describe('Create exchange', () => {
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.TEAM,
       values: [flexAppealTeam.id],
+      start_time: moment().toISOString(),
+      end_time: moment().add(2, 'hours').toISOString(),
     });
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.user.fullName, global.users.admin.full_name);
     assert.deepEqual(result.data.created_in, { type: 'team', ids: [flexAppealTeam.id] });
     assert.equal(result.data.title, 'Test shift for network');
-    assert.equal(result.data.start_time, null);
-    assert.equal(result.data.end_time, null);
+    assert.isNotNull(result.data.start_time);
+    assert.isNotNull(result.data.end_time);
   });
 
   it('should create exchange for external shift', async () => {
     const endpoint = `/v2/networks/${global.networks.pmt.id}/exchanges`;
     const { result } = await postRequest(endpoint, {
-      date: moment().format('YYYY-MM-DD'),
-      type: exchangeTypes.USER,
       shift_id: 1,
       team_id: flexAppealTeam.id,
+      type: exchangeTypes.USER,
+      date: moment().format('YYYY-MM-DD'),
+      start_time: moment().toISOString(),
+      end_time: moment().add(2, 'hours').toISOString(),
       values: [global.users.admin.id],
     });
 
     const actual = await findExchangeById(result.data.id);
 
     assert.equal(actual.shiftId, 1);
+    assert.equal(actual.type, 'USER');
     assert.equal(actual.teamId, flexAppealTeam.id);
     assert.equal(actual.ExchangeValues[0].value, global.users.admin.id);
   });
@@ -126,6 +133,8 @@ describe('Create exchange', () => {
       shift_id: 1,
       team_id: flexAppealTeam.id,
       values: [global.users.admin.id],
+      start_time: moment().toISOString(),
+      end_time: moment().add(2, 'hours').toISOString(),
     });
 
     assert.equal(statusCode, 403);
