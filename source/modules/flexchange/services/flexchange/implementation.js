@@ -1,4 +1,4 @@
-import { filter, find } from 'lodash';
+import { map, filter, find } from 'lodash';
 import createAdapter from '../../../../common/utils/create-adapter';
 import * as networkUtil from '../../../../common/utils/network';
 import * as userRepo from '../../../../common/repositories/user';
@@ -11,8 +11,8 @@ export const findAvailableUsersForShift = async (shiftId, network, artifacts) =>
 };
 
 export const matchUsersForShift = async (usersToMatch, network) => {
-  const matchedUsers = await Promise.all(
-    usersToMatch.map(u => userRepo.findUserByEmail(u.email)));
+  const externalIds = map(usersToMatch, 'externalId');
+  const matchedUsers = await userRepo.findExternalUsers(externalIds);
 
   const response = filter(matchedUsers, (u) => u)
     .map((u) => networkUtil.addUserScope(u, network.id));

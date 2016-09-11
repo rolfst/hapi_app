@@ -3,24 +3,22 @@ import { Integration } from 'common/models';
 
 export default () => {
   return {
-    authenticate: (request, reply) => {
+    authenticate: async (request, reply) => {
       const req = request.raw.req;
       const token = req.headers['x-api-token'];
 
-      if (!token) {
-        return reply(Boom.unauthorized('No token specified.'));
-      }
+      if (!token) throw new Error('No token specified.');
 
       try {
-        return Integration.findOne({
+        const integration = await Integration.findOne({
           where: { token },
-        }).then(integration => {
-          if (!integration) throw Error('Invalid token.');
-
-          return reply.continue({ credentials: integration });
         });
+
+        if (!integration) throw new Error('Invalid token.');
+
+        return reply.continue({ credentials: integration });
       } catch (e) {
-        return reply(Boom.forbidden(e.message));
+        return reply(Boom.unauthorized(e.message));
       }
     },
   };

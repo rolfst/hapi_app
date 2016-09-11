@@ -3,19 +3,20 @@ import { assert } from 'chai';
 import * as networkUtil from 'common/utils/network';
 import { getRequest } from 'common/test-utils/request';
 
-describe('Available users for shift', () => {
+describe.only('Available users for shift', () => {
   before(async () => {
     await global.networks.pmt.addUser(global.users.employee);
 
+    const adminExternalId = '8023';
+
     const fakeUsers = [{
-      id: global.users.employee.id,
-      email: global.users.employee.email,
+      id: adminExternalId,
+      first_name: global.users.admin.firstName,
+      last_name: global.users.admin.lastName,
     }, {
-      id: global.users.admin.id,
-      email: global.users.admin.email,
-    }, {
-      id: 3,
-      email: 'nonexistinguser@flex-appeal.nl',
+      id: '3',
+      first_name: 'I dont',
+      last_name: 'Exist',
     }];
 
     nock(global.networks.pmt.externalId)
@@ -27,14 +28,10 @@ describe('Available users for shift', () => {
     const endpoint = `/v2/networks/${global.networks.pmt.id}/shifts/1/available`;
     const { result, statusCode } = await getRequest(endpoint);
 
-    const [newEmployee, newAdmin] = await Promise.all([
-      global.users.employee.reload(),
-      global.users.admin.reload(),
-    ]);
+    const newAdmin = await global.users.admin.reload();
 
     assert.equal(statusCode, 200);
     assert.deepEqual(result.data, [
-      networkUtil.addUserScope(newEmployee, global.networks.pmt.id).toJSON(),
       networkUtil.addUserScope(newAdmin, global.networks.pmt.id).toJSON(),
     ]);
   });

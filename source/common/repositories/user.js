@@ -28,6 +28,17 @@ export function findAllUsers() {
   return User.findAll(defaultIncludes);
 }
 
+export const findExternalUsers = async (externalIds) => {
+  const pivotResult = await NetworkUser.findAll({ where: { externalId: { $in: externalIds } } });
+  const userIds = pivotResult.map(result => result.userId);
+  const result = await User.findAll({
+    ...defaultIncludes,
+    where: { id: { $in: userIds } },
+  });
+
+  return result;
+};
+
 export async function findUserById(id) {
   const user = await User.findOne({ ...defaultIncludes, where: { id } });
   if (!user) throw new Error(`No user found with id ${id}`);
