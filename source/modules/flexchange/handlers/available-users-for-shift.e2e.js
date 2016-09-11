@@ -3,7 +3,7 @@ import { assert } from 'chai';
 import * as networkUtil from 'common/utils/network';
 import { getRequest } from 'common/test-utils/request';
 
-describe.only('Available users for shift', () => {
+describe('Available users for shift', () => {
   before(async () => {
     await global.networks.pmt.addUser(global.users.employee);
 
