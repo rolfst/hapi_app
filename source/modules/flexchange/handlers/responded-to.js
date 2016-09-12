@@ -1,13 +1,13 @@
-import * as responseUtil from 'common/utils/response';
-import * as exchangeRepo from '../repositories/exchange';
+import * as flexchangeService from '../services/flexchange';
+import * as responseUtil from '../../../common/utils/response';
 
 export default async (req, reply) => {
-  try {
-    const networkId = req.pre.network.id;
-    const userId = req.auth.credentials.id;
-    const exchanges = await exchangeRepo.getRespondedToExchange(userId, networkId);
+  const message = { ...req.pre, ...req.auth };
 
-    return reply({ data: responseUtil.serialize(exchanges) });
+  try {
+    const result = await flexchangeService.listRespondedTo({}, message);
+
+    return reply({ data: responseUtil.serialize(result) });
   } catch (err) {
     return reply(err);
   }

@@ -68,6 +68,12 @@ export const approveExchange = async (payload, message) => {
   return approvedExchange;
 };
 
+export const listRespondedTo = async (payload, message) => {
+  const { network, credentials } = message;
+
+  return exchangeRepo.getRespondedToExchange(credentials.id, network.id);
+};
+
 export const declineExchange = async (payload, message) => {
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, message.credentials.id);
   const { ResponseStatus } = exchange;
