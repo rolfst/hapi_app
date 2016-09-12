@@ -1,11 +1,14 @@
-import { findExchangeById } from 'modules/flexchange/repositories/exchange';
+import * as flexchangeService from '../services/flexchange';
 import * as responseUtil from 'common/utils/response';
 
 export default async (req, reply) => {
-  try {
-    const exchange = await findExchangeById(req.params.exchangeId, req.auth.credentials.id);
+  const payload = { exchangeId: req.params.exchangeId };
+  const message = { ...req.pre, ...req.auth };
 
-    return reply({ data: responseUtil.serialize(exchange) });
+  try {
+    const result = await flexchangeService.getExchange(payload, message);
+
+    return reply({ data: responseUtil.serialize(result) });
   } catch (err) {
     return reply(err);
   }
