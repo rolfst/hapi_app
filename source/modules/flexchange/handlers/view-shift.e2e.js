@@ -13,7 +13,7 @@ describe('View shift', () => {
     id: '1337',
     start_time: '21-12-2016 08:00:00',
     end_time: '21-12-2016 15:00:00',
-    department: '14',
+    department: '12',
     break: '01:15:00',
   };
 
@@ -47,7 +47,7 @@ describe('View shift', () => {
     assert.equal(result.data.date, '2016-12-21');
     assert.equal(result.data.break, stubbedResult.break);
     assert.equal(result.data.exchange_id, createdExchange.id);
-    assert.equal(result.data.team_id, stubbedResult.department);
+    assert.equal(result.data.team_id, null);
   });
 
   it('should fail when shift not found', async () => {

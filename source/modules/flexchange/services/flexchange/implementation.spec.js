@@ -2,61 +2,80 @@ import { assert } from 'chai';
 import * as impl from './implementation';
 
 describe('Flexchange service', () => {
-  describe('mergeShiftWithExchange', () => {
+  describe('mergeShiftWithExchangeAndTeam', () => {
     it('should add exchange_id and team_id properties to shift object', () => {
-      const shiftBlueprint = {
+      const shiftStub = {
         id: '3314',
         foo: 'Baz',
+        team_id: '94',
       };
 
-      const exchangeBlueprint = {
-        id: '123',
+      const exchangeStub = {
+        id: 123,
         title: 'Foo',
-        teamId: '1',
         other: 'Baz',
       };
 
-      const actual = impl.mergeShiftWithExchange(shiftBlueprint, exchangeBlueprint);
-      const expected = { id: '3314', foo: 'Baz', teamId: '1', exchangeId: '123' };
+      const teamStub = {
+        id: 1233,
+        externalId: '94',
+        name: 'Kassa',
+      };
 
-      assert.isString(actual.teamId);
-      assert.isString(actual.exchangeId);
+      const actual = impl.mergeShiftWithExchangeAndTeam(
+        shiftStub, exchangeStub, teamStub);
+
+      const expected = { id: '3314', foo: 'Baz', teamId: 1233, exchangeId: 123 };
+
       assert.deepEqual(actual, expected);
     });
   });
 
   describe('mapShiftsWithExchanges', () => {
     it('merges exchanges with shifts', () => {
-      const fakeShifts = [{
+      const shiftStub = [{
         id: '25280341',
         start_time: '2016-12-19T08:00:00+0100',
         end_time: '2016-12-19T16:30:00+0100',
         break: '01:30:00',
-        department: '14',
+        team_id: '14',
       }, {
         id: '25280343',
         start_time: '2016-12-21T08:00:00+0100',
         end_time: '2016-12-21T15:00:00+0100',
         break: '01:15:00',
-        department: '14',
+        team_id: '14',
       }];
 
-      const fakeExchanges = [{
+      const exchangeStub = [{
         id: 3,
         title: 'External shift #1',
         shiftId: 25280341,
-        teamId: 14,
       }];
 
-      const actual = impl.mapShiftsWithExchanges(fakeShifts, fakeExchanges);
+      const teamStub = [{
+        id: 1223,
+        externalId: '14',
+        name: 'Kassa',
+      }];
+
+      const actual = impl.mapShiftsWithExchangeAndTeam(
+        shiftStub, exchangeStub, teamStub);
+
       const expected = [{
-        ...fakeShifts[0],
-        exchangeId: '3',
-        teamId: '14',
+        id: '25280341',
+        start_time: '2016-12-19T08:00:00+0100',
+        end_time: '2016-12-19T16:30:00+0100',
+        break: '01:30:00',
+        exchangeId: 3,
+        teamId: 1223,
       }, {
-        ...fakeShifts[1],
+        id: '25280343',
+        start_time: '2016-12-21T08:00:00+0100',
+        end_time: '2016-12-21T15:00:00+0100',
+        break: '01:15:00',
         exchangeId: null,
-        teamId: null,
+        teamId: 1223,
       }];
 
       assert.deepEqual(actual, expected);

@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import { chain, orderBy } from 'lodash';
+import { chain, map, orderBy } from 'lodash';
 import moment from 'moment';
 import createAdapter from '../../../../common/utils/create-adapter';
 import analytics from '../../../../common/services/analytics';
@@ -93,9 +93,13 @@ export const listMyShifts = async (payload, message) => {
 
   const adapter = createAdapter(network, artifacts.integrations);
   const shifts = await adapter.myShifts();
-  const exchanges = await exchangeRepo.findExchangesByShiftIds(shifts.map(s => s.id));
 
-  return impl.mapShiftsWithExchanges(shifts, exchanges);
+  const [exchanges, teams] = await Promise.all([
+    exchangeRepo.findExchangesByShiftIds(map(shifts, 'id')),
+    teamRepo.findTeamsByExternalId(map(shifts, 'team_id')),
+  ]);
+
+  return impl.mapShiftsWithExchangeAndTeam(shifts, exchanges, teams);
 };
 
 export const deleteExchange = async (payload) => {
@@ -148,9 +152,12 @@ export const getShift = async (payload, message) => {
 
   if (!shift) throw Boom.notFound('Shift not found.');
 
-  const [exchange] = await exchangeRepo.findExchangesByShiftIds([shift.id]);
+  const [exchanges, teams] = await Promise.all([
+    exchangeRepo.findExchangesByShiftIds([shift.id]),
+    teamRepo.findTeamsByExternalId([shift.team_id]),
+  ]);
 
-  return impl.mergeShiftWithExchange(shift, exchange);
+  return impl.mergeShiftWithExchangeAndTeam(shift, exchanges[0], teams[0]);
 };
 
 export const listAvailableUsersForShift = async (payload, message) => {

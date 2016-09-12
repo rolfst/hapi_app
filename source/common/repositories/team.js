@@ -29,6 +29,13 @@ export function findTeamsByIds(ids) {
     });
 }
 
+export const findTeamsByExternalId = externalIds => {
+  return Team
+    .findAll({
+      where: { externalId: { $in: externalIds } },
+    });
+};
+
 export function createTeam({ networkId, name, description = null, externalId }) {
   return Team
     .create({ networkId, name, description, externalId });

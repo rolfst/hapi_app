@@ -9,8 +9,8 @@ export default async (req, reply) => {
     const result = await flexchangeService.getShift(payload, message);
     const response = {
       ...omit(result, 'teamId', 'exchangeId'),
-      exchange_id: result.exchangeId,
-      team_id: result.teamId,
+      exchange_id: result.exchangeId ? result.exchangeId.toString() : null,
+      team_id: result.teamId ? result.teamId.toString() : null,
     };
 
     return reply({ data: response });

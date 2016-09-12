@@ -1,16 +1,24 @@
 import { assert } from 'chai';
 import nock from 'nock';
 import moment from 'moment';
+import { createTeam } from 'common/repositories/team';
 import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import { getRequest } from 'common/test-utils/request';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
 
 describe('My shifts', () => {
   let network;
+  let createdTeam;
   let createdExchange;
 
   before(async () => {
     network = global.networks.pmt;
+
+    createdTeam = await createTeam({
+      networkId: network.id,
+      name: 'Cool Team',
+      externalId: '23424',
+    });
 
     createdExchange = await createExchange(global.users.admin.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
@@ -24,13 +32,13 @@ describe('My shifts', () => {
       id: '25280341',
       start_time: '19-12-2016 08:00:00',
       end_time: '19-12-2016 16:30:00',
-      department: '14',
+      department: '12',
       break: '01:30:00',
     }, {
       id: '25280343',
       start_time: '21-12-2016 08:00:00',
       end_time: '21-12-2016 15:00:00',
-      department: '14',
+      department: createdTeam.externalId.toString(),
       break: '01:15:00',
     }];
 
@@ -52,6 +60,6 @@ describe('My shifts', () => {
     assert.equal(result.data[0].team_id, null);
     assert.equal(result.data[1].date, '2016-12-21');
     assert.equal(result.data[1].exchange_id, createdExchange.id);
-    assert.equal(result.data[1].team_id, 14);
+    assert.equal(result.data[1].team_id, createdTeam.id.toString());
   });
 });

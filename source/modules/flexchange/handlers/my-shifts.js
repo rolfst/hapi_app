@@ -3,8 +3,8 @@ import * as flexchangeService from '../services/flexchange';
 
 const transformItem = item => ({
   ...omit(item, 'teamId', 'exchangeId'),
-  exchange_id: item.exchangeId,
-  team_id: item.teamId,
+  exchange_id: item.exchangeId ? item.exchangeId.toString() : null,
+  team_id: item.teamId ? item.teamId.toString() : null,
 });
 
 export default async (req, reply) => {
