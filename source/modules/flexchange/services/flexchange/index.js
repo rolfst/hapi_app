@@ -80,6 +80,12 @@ export const declineExchange = async (payload, message) => {
   return declinedExchange;
 };
 
+export const deleteExchange = async (payload) => {
+  const exchange = await exchangeRepo.findExchangeById(payload.exchangeId);
+
+  return exchangeRepo.deleteExchangeById(exchange.id);
+};
+
 export const rejectExchange = async (payload, message) => {
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId,
     message.credentials.id);
