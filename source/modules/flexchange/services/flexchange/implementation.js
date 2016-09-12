@@ -1,14 +1,6 @@
 import { map, filter, find } from 'lodash';
-import createAdapter from '../../../../common/utils/create-adapter';
 import * as networkUtil from '../../../../common/utils/network';
 import * as userRepo from '../../../../common/repositories/user';
-
-export const findAvailableUsersForShift = async (shiftId, network, artifacts) => {
-  const adapter = createAdapter(network, artifacts.integrations);
-  const externalUsers = await adapter.usersAvailableForShift(shiftId);
-
-  return externalUsers;
-};
 
 export const matchUsersForShift = async (usersToMatch, network) => {
   const externalIds = map(usersToMatch, 'externalId');
@@ -22,8 +14,8 @@ export const matchUsersForShift = async (usersToMatch, network) => {
 
 export const mergeShiftWithExchange = (shift, exchange) => ({
   ...shift,
-  exchangeId: exchange ? exchange.id : null,
-  teamId: exchange ? exchange.teamId : null,
+  exchangeId: exchange ? exchange.id.toString() : null,
+  teamId: exchange ? exchange.teamId.toString() : null,
 });
 
 export const mapShiftsWithExchanges = (shifts, exchanges) => {
