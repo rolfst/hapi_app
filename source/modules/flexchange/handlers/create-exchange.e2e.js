@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import moment from 'moment';
-import { findExchangeById } from 'modules/flexchange/repositories/exchange';
+import { findExchangeById, deleteExchangeById } from 'modules/flexchange/repositories/exchange';
 import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import { postRequest } from 'common/test-utils/request';
 import { createTeam } from 'common/repositories/team';
@@ -38,6 +38,8 @@ describe('Create exchange', () => {
     assert.equal(result.data.title, 'Test shift for network');
     assert.isNotNull(result.data.start_time);
     assert.isNotNull(result.data.end_time);
+
+    return deleteExchangeById(result.data.id);
   });
 
   it('should create exchange for a team', async () => {
@@ -57,6 +59,8 @@ describe('Create exchange', () => {
     assert.equal(result.data.title, 'Test shift for network');
     assert.isNotNull(result.data.start_time);
     assert.isNotNull(result.data.end_time);
+
+    return deleteExchangeById(result.data.id);
   });
 
   it('should create exchange for external shift', async () => {
@@ -77,6 +81,8 @@ describe('Create exchange', () => {
     assert.equal(actual.type, 'USER');
     assert.equal(actual.teamId, flexAppealTeam.id);
     assert.equal(actual.ExchangeValues[0].value, global.users.admin.id);
+
+    return deleteExchangeById(result.data.id);
   });
 
   it('should create exchange with begin and end-time', async () => {
@@ -93,6 +99,8 @@ describe('Create exchange', () => {
 
     assert.isTrue(moment(result.data.start_time).isSame(payload.start_time, 'minute'));
     assert.isTrue(moment(result.data.end_time).isSame(payload.end_time, 'minute'));
+
+    return deleteExchangeById(result.data.id);
   });
 
   it('should fail when end_time is before start_time', async () => {

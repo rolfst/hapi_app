@@ -41,6 +41,8 @@ describe('My shifts', () => {
       .reply(200, { shifts: stubbedResult });
   });
 
+  after(() => createdExchange.destroy());
+
   it('should pair exchanges', async () => {
     const endpoint = `/v2/networks/${network.id}/users/me/shifts`;
     const { result } = await getRequest(endpoint);

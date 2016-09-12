@@ -35,7 +35,7 @@ describe('View shift', () => {
       .reply(200, { shifts: [stubbedResult] });
   });
 
-  after(() => nock.cleanAll());
+  after(() => createdExchange.destroy());
 
   it('should return correct result', async () => {
     const endpoint = `/v2/networks/${network.id}/shifts/1337`;

@@ -96,16 +96,14 @@ export async function findExchangesByShiftIds(shiftIds) {
  * @method findExchangesByUser
  * @return {Promise} Get exchanges promise
  */
-export function findExchangesByUser(user) {
-  const extraInclude = {
-    model: ExchangeResponse,
-    as: 'ResponseStatus',
-    where: { userId: user.id },
-    required: false,
-  };
+export const findExchangesByUser = async (user, filter = {}) => {
+  const exchanges = await user.getExchanges({ attributes: ['id'] });
+  const exchangeIds = exchanges.map(e => e.id);
+  const dateFilter = createDateFilter(filter);
+  const constraint = dateFilter ? { where: { date: dateFilter } } : {};
 
-  return user.getExchanges({ include: [...defaultIncludes, extraInclude] });
-}
+  return findExchangeByIds(exchangeIds, user.id, constraint);
+};
 
 export async function findExchangesForValues(type, values, userId, filter = {}) {
   const validExchangeResult = await Exchange.findAll({

@@ -162,6 +162,10 @@ export const listExchangesForTeam = async (payload, message) => {
   return exchanges;
 };
 
+export const listExchangesForUser = async (payload, message) => {
+  return exchangeRepo.findExchangesByUser(message.credentials, payload.filter);
+};
+
 export const listExchangesForNetwork = async (payload, message) => {
   const { credentials, network } = message;
   let exchanges;

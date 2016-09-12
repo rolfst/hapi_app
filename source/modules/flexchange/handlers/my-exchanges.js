@@ -1,8 +1,19 @@
-import { findExchangesByUser } from 'modules/flexchange/repositories/exchange';
-import * as responseUtil from 'common/utils/response';
+import { pick } from 'lodash';
+import * as responseUtil from '../../../common/utils/response';
+import * as flexchangeService from '../services/flexchange';
+
+const FILTER_PROPERTIES = ['start', 'end'];
 
 export default async (req, reply) => {
-  const exchanges = await findExchangesByUser(req.auth.credentials);
+  const filter = pick(req.query, FILTER_PROPERTIES);
+  const message = { ...req.pre, ...req.auth };
+  const payload = { filter };
 
-  return reply({ data: responseUtil.serialize(exchanges) });
+  try {
+    const result = await flexchangeService.listExchangesForUser(payload, message);
+
+    return reply({ data: responseUtil.serialize(result) });
+  } catch (err) {
+    return reply(err);
+  }
 };

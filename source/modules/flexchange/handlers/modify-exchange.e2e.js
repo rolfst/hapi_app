@@ -25,6 +25,8 @@ describe('Modify exchange', () => {
     });
   });
 
+  after(() => Promise.all([exchange.destroy(), expiredExchange.destroy()]));
+
   it('should fail when action does not exist', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}`;
     const { statusCode } = await patchRequest(endpoint, { action: 'wrong_action' });
