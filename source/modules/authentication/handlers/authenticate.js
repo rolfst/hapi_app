@@ -1,5 +1,5 @@
 import { pick } from 'lodash';
-import * as AuthenticationService from 'modules/authentication/services/authentication';
+import * as authenticationService from '../services/authentication';
 
 /*
  * The authentication script first authenticates with the Flex-Appeal database
@@ -14,15 +14,14 @@ export default async (request, reply) => {
   const payload = pick(request.payload, 'username', 'password');
 
   try {
-    const result = await AuthenticationService.authenticate(payload, { request });
+    const result = await authenticationService.authenticate(payload, { request });
+    const data = {
+      access_token: result.accessToken,
+      refresh_token: result.refreshToken,
+      last_login: result.user.lastLogin,
+    };
 
-    return reply({
-      data: {
-        access_token: result.accessToken,
-        refresh_token: result.refreshToken,
-        last_login: result.user.lastLogin,
-      },
-    });
+    return reply({ data });
   } catch (err) {
     return reply(err);
   }

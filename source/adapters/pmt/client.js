@@ -25,7 +25,7 @@ export async function makeRequest(endpoint, token = null, method = 'GET', data =
     console.info('PMT client responded with json', json);
 
     if (response.status === 400) throw ExpiredToken;
-    if (response.status === 422) throw Boom.badData('Wrong data send to integration.');
+    if (response.status === 401) throw Boom.badData('Wrong data send to integration.');
 
     return { payload: json, status: response.status };
   } catch (err) {
