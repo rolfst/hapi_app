@@ -1,13 +1,14 @@
-import { findExchangeById } from 'modules/flexchange/repositories/exchange';
-import { findCommentsByExchange } from 'modules/flexchange/repositories/comment';
+import * as flexchangeService from '../services/flexchange';
 import * as responseUtil from 'common/utils/response';
 
 export default async (req, reply) => {
-  try {
-    const exchange = await findExchangeById(req.params.exchangeId, req.auth.credentials.id);
-    const comments = await findCommentsByExchange(exchange);
+  const payload = { exchangeId: req.params.exchangeId };
+  const message = { ...req.pre, ...req.auth };
 
-    return reply({ data: responseUtil.serialize(comments) });
+  try {
+    const result = await flexchangeService.listComments(payload, message);
+
+    return reply({ data: responseUtil.serialize(result) });
   } catch (err) {
     return reply(err);
   }

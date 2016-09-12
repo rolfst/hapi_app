@@ -107,6 +107,13 @@ export const rejectExchange = async (payload, message) => {
   return reloadedExchange;
 };
 
+export const listComments = async (payload, message) => {
+  const userId = message.credentials.id;
+  const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, userId);
+
+  return commentRepo.findCommentsByExchange(exchange);
+};
+
 export const getShift = async (payload, message) => {
   const { network, artifacts } = message;
 
