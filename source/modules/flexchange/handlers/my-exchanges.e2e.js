@@ -47,7 +47,6 @@ describe('My exchanges', () => {
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.length, 3);
-    assert.equal(result.data[0].title, 'Test shift created by myself');
   });
 
   it('should return exchanges between given date', async () => {
@@ -59,8 +58,8 @@ describe('My exchanges', () => {
     const endpoint = `/v2/networks/${network.id}/users/me/exchanges?${query}`;
     const { result, statusCode } = await getRequest(endpoint);
 
-    assert.lengthOf(result.data, 1);
     assert.equal(statusCode, 200);
+    assert.lengthOf(result.data, 1);
   });
 
   it('should return all upcoming exchanges when only the start query param is set', async () => {
@@ -71,7 +70,7 @@ describe('My exchanges', () => {
     const endpoint = `/v2/networks/${network.id}/users/me/exchanges?${query}`;
     const { result, statusCode } = await getRequest(endpoint);
 
-    assert.lengthOf(result.data, 2);
     assert.equal(statusCode, 200);
+    assert.lengthOf(result.data, 2);
   });
 });

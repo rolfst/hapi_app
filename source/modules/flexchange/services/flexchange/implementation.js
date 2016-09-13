@@ -12,6 +12,9 @@ export const matchUsersForShift = async (usersToMatch, network) => {
   return response;
 };
 
+export const filterTeamsForNetwork = (teams, networkId) => teams.
+  filter(team => team.networkId === networkId);
+
 export const mergeShiftWithExchangeAndTeam = (shift, exchange, team) => ({
   ...omit(shift, 'team_id'),
   exchangeId: exchange ? exchange.id : null,

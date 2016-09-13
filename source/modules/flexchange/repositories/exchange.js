@@ -105,10 +105,10 @@ export const findExchangesByUser = async (user, filter = {}) => {
   return findExchangeByIds(exchangeIds, user.id, constraint);
 };
 
-export async function findExchangesForValues(type, values, userId, filter = {}) {
+export async function findExchangesForValues(type, networkId, values, userId, filter = {}) {
   const validExchangeResult = await Exchange.findAll({
     attributes: ['id'],
-    where: { type },
+    where: { type, networkId },
     include: [{
       model: ExchangeValue,
       required: true,

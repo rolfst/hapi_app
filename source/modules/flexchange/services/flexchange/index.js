@@ -185,7 +185,7 @@ export const listExchangesForUser = async (payload, message) => {
   return exchangeRepo.findExchangesByUser(message.credentials, payload.filter);
 };
 
-export const listExchangesForNetwork = async (payload, message) => {
+export const listExchangesForIntegratedNetwork = async (payload, message) => {
   const { credentials, network } = message;
   let exchanges;
 
@@ -193,18 +193,41 @@ export const listExchangesForNetwork = async (payload, message) => {
     exchanges = await exchangeRepo.findExchangesByNetwork(
       network, credentials.id, payload.filter);
   } else if (isEmployee(credentials)) {
-    const teamIds = credentials.Teams
-      .filter(t => t.networkId === network.id)
-      .map(t => t.id);
+    const exchangesForUser = await exchangeRepo.findExchangesForValues(
+      'USER', network.id, [credentials.id], credentials.id, payload.filter);
+
+    exchanges = [...exchangesForUser];
+  }
+
+  const response = orderBy(exchanges, 'date');
+
+  return response;
+};
+
+export const listExchangesForNetwork = async (payload, message) => {
+  const { credentials, network } = message;
+  let exchanges;
+
+  if (networkUtil.hasIntegration(network)) {
+    return listExchangesForIntegratedNetwork(payload, message);
+  }
+
+  if (isAdmin(credentials)) {
+    exchanges = await exchangeRepo.findExchangesByNetwork(
+      network, credentials.id, payload.filter);
+  } else if (isEmployee(credentials)) {
+    const teamIds = impl.filterTeamsForNetwork(credentials.Teams, network.id)
+      .map(team => team.id);
 
     const exchangesInNetwork = await exchangeRepo.findExchangesForValues(
-      'ALL', [network.id], credentials.id, payload.filter);
+        'ALL', network.id, [network.id], credentials.id, payload.filter);
 
     const exchangesInTeams = await exchangeRepo.findExchangesForValues(
-      'TEAM', teamIds, credentials.id, payload.filter);
+      'TEAM', network.id, teamIds, credentials.id, payload.filter);
 
     exchanges = [...exchangesInNetwork, ...exchangesInTeams];
   }
+
   const response = orderBy(exchanges, 'date');
 
   return response;
