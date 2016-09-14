@@ -53,7 +53,7 @@ describe('Create exchange validator', () => {
   });
 
   describe('Normal exchange', () => {
-    it('fails when values is present when type is ALL', () => {
+    it('should succeed', () => {
       const payload = {
         type: 'ALL',
         date: '2016-09-10',
@@ -64,7 +64,21 @@ describe('Create exchange validator', () => {
 
       const actual = Joi.validate({ payload }, scheme);
 
-      assert.ifError(actual.error[0]);
+      assert.isNull(actual.error);
+    });
+
+    it('should succeed with empty values', () => {
+      const payload = {
+        type: 'ALL',
+        date: '2016-09-10',
+        values: [],
+        start_time: moment().toISOString(),
+        end_time: moment().add(20, 'minutes').toISOString(),
+      };
+
+      const actual = Joi.validate({ payload }, scheme);
+
+      assert.isNull(actual.error);
     });
 
     it('fails when type is USER and shift_id is not present', () => {
