@@ -5,7 +5,7 @@ export default {
     title: Joi.string().min(5),
     type: Joi.string().valid(['TEAM', 'ALL', 'USER']),
     description: Joi.string().empty(''),
-    values: Joi.array().required(),
+    values: Joi.array(),
     date: Joi.date().format('YYYY-MM-DD').required(),
     shift_id: Joi.number().when('type', {
       is: ['USER'],
