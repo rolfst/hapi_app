@@ -93,11 +93,11 @@ export async function findExchangesByShiftIds(shiftIds) {
 /**
  * Find exchanges by user
  * @param {User} user - User we want the exchanges from
- * @method findExchangesByUser
+ * @method findExchangesByUserAndNetwork
  * @return {Promise} Get exchanges promise
  */
-export const findExchangesByUser = async (user, filter = {}) => {
-  const exchanges = await user.getExchanges({ attributes: ['id'] });
+export const findExchangesByUserAndNetwork = async (user, networkId, filter = {}) => {
+  const exchanges = await user.getExchanges({ attributes: ['id'], where: { networkId } });
   const exchangeIds = exchanges.map(e => e.id);
   const dateFilter = createDateFilter(filter);
   const constraint = dateFilter ? { where: { date: dateFilter } } : {};

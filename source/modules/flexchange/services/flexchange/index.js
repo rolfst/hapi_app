@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import { chain, map, orderBy } from 'lodash';
+import { chain, map } from 'lodash';
 import moment from 'moment';
 import createAdapter from '../../../../common/utils/create-adapter';
 import analytics from '../../../../common/services/analytics';
@@ -7,7 +7,6 @@ import approveExchangeEvent from '../../../../common/events/approve-exchange-eve
 import IntegrationNotFound from 'common/errors/integration-not-found';
 import * as networkUtil from '../../../../common/utils/network';
 import * as teamRepo from '../../../../common/repositories/team';
-import { isAdmin, isEmployee } from 'common/services/permission';
 import * as commentRepo from '../../repositories/comment';
 import * as exchangeRepo from '../../repositories/exchange';
 import * as exchangeResponseRepo from '../../repositories/exchange-response';
@@ -182,53 +181,19 @@ export const listExchangesForTeam = async (payload, message) => {
 };
 
 export const listExchangesForUser = async (payload, message) => {
-  return exchangeRepo.findExchangesByUser(message.credentials, payload.filter);
-};
-
-export const listExchangesForIntegratedNetwork = async (payload, message) => {
-  const { credentials, network } = message;
-  let exchanges;
-
-  if (isAdmin(credentials)) {
-    exchanges = await exchangeRepo.findExchangesByNetwork(
-      network, credentials.id, payload.filter);
-  } else if (isEmployee(credentials)) {
-    const exchangesForUser = await exchangeRepo.findExchangesForValues(
-      'USER', network.id, [credentials.id], credentials.id, payload.filter);
-
-    exchanges = [...exchangesForUser];
-  }
-
-  const response = orderBy(exchanges, 'date');
-
-  return response;
+  return exchangeRepo.findExchangesByUserAndNetwork(
+    message.credentials, message.network.id, payload.filter);
 };
 
 export const listExchangesForNetwork = async (payload, message) => {
   const { credentials, network } = message;
-  let exchanges;
 
-  if (networkUtil.hasIntegration(network)) {
-    return listExchangesForIntegratedNetwork(payload, message);
-  }
+  const exchanges = await impl.findExchangesForUser(network, credentials, payload.filter);
 
-  if (isAdmin(credentials)) {
-    exchanges = await exchangeRepo.findExchangesByNetwork(
-      network, credentials.id, payload.filter);
-  } else if (isEmployee(credentials)) {
-    const teamIds = impl.filterTeamsForNetwork(credentials.Teams, network.id)
-      .map(team => team.id);
-
-    const exchangesInNetwork = await exchangeRepo.findExchangesForValues(
-        'ALL', network.id, [network.id], credentials.id, payload.filter);
-
-    const exchangesInTeams = await exchangeRepo.findExchangesForValues(
-      'TEAM', network.id, teamIds, credentials.id, payload.filter);
-
-    exchanges = [...exchangesInNetwork, ...exchangesInTeams];
-  }
-
-  const response = orderBy(exchanges, 'date');
+  const response = chain(exchanges)
+    .orderBy('date')
+    .uniqBy('id')
+    .value();
 
   return response;
 };
