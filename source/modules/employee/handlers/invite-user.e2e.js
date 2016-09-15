@@ -1,7 +1,15 @@
 import { assert } from 'chai';
+import { findUserByEmail } from 'common/repositories/user';
 import { postRequest } from 'common/test-utils/request';
 
 describe('Invite user', () => {
+  after(async () => {
+    const admin = await findUserByEmail('admin@baz.com');
+    const employee = await findUserByEmail('employee@baz.com');
+
+    return Promise.all([admin.destroy(), employee.destroy()]);
+  });
+
   const user = {
     first_name: 'Foo',
     last_name: 'Baz',

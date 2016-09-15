@@ -8,7 +8,7 @@ import notifier from 'common/services/notifier';
 import * as mailer from 'common/services/mailer';
 import blueprints from 'common/test-utils/blueprints';
 import { UserRoles } from 'common/services/permission';
-import { createUser } from 'common/repositories/user';
+import { createUser, findUserByEmail } from 'common/repositories/user';
 import authenticate from 'common/test-utils/authenticate';
 import { createNetwork, createIntegrationNetwork } from 'common/repositories/network';
 import generateNetworkName from 'common/test-utils/create-network-name';
@@ -110,7 +110,8 @@ before(async () => {
 afterEach(() => nock.cleanAll());
 
 after(async () => {
-  await Promise.all([networklessUser.destroy(), employee.destroy()]);
+  const externalUser = await findUserByEmail('verwijderd@pmt.nl');
+  await Promise.all([networklessUser.destroy(), employee.destroy(), externalUser.destroy()]);
 
   return admin.destroy();
 });
