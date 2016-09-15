@@ -15,6 +15,7 @@ export default async (request, reply) => {
 
   try {
     const result = await authenticationService.authenticate(payload, { request });
+
     const data = {
       access_token: result.accessToken,
       refresh_token: result.refreshToken,

@@ -45,7 +45,7 @@ export const authenticate = async (payload, { request }) => {
   const user = await impl.authenticateUser(payload);
   const authenticatedIntegrations = await authenticateWithIntegrations(user, payload);
 
-  if (!userBelongsToNetwork(user)) throw NotInAnyNetwork;
+  if (!userBelongsToNetwork(user)) throw new NotInAnyNetwork();
 
   const deviceName = request.headers['user-agent'];
 

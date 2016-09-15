@@ -10,7 +10,7 @@ export const authenticateUser = async ({ username, password }) => {
   const user = await userRepo.findUserByUsername(username);
   const validPassword = checkPassword(user.password, password);
 
-  if (!validPassword) throw WrongCredentials;
+  if (!validPassword) throw new WrongCredentials();
 
   return user;
 };

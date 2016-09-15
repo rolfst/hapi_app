@@ -1,6 +1,5 @@
 import { assert } from 'chai';
 import blueprints from 'common/test-utils/blueprints';
-import NotInAnyNetwork from 'common/errors/not-in-any-network';
 import WrongCredentials from 'common/errors/wrong-credentials';
 import { postRequest } from 'common/test-utils/request';
 
@@ -35,19 +34,25 @@ describe('Authenticate', () => {
     assert.property(data, 'last_login');
   });
 
-  it('should fail when credentials are not correct', async () => {
+  it('should fail when password is not correct', async () => {
     const { username } = employeeCredentials;
-    const { result, statusCode } = await loginRequest({ username, password: 'wrongpassword' });
+    const { statusCode } = await loginRequest({ username, password: 'wrongpassword' });
 
-    assert.equal(result.error.title, WrongCredentials.type);
     assert.equal(statusCode, 403);
+  });
+
+  it('should fail when username is not correct', async () => {
+    const { password } = employeeCredentials;
+    const { result, statusCode } = await loginRequest({ username: 'blabla@gmail.com', password });
+
+    assert.equal(statusCode, 403);
+    assert.equal(result.error.title, WrongCredentials.type);
   });
 
   it('should fail when user does not belong to a network', async () => {
     const { username, password } = networklessUserCredentials;
-    const { result, statusCode } = await loginRequest({ username, password });
+    const { statusCode } = await loginRequest({ username, password });
 
-    assert.equal(result.error.title, NotInAnyNetwork.type);
     assert.equal(statusCode, 403);
   });
 });

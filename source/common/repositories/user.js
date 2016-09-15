@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import sequelize from 'sequelize';
+import Boom from 'boom';
 import { db } from 'connections';
 import { User, Network, NetworkUser, Integration, Team } from 'common/models';
 
@@ -41,7 +42,7 @@ export const findExternalUsers = async (externalIds) => {
 
 export async function findUserById(id) {
   const user = await User.findOne({ ...defaultIncludes, where: { id } });
-  if (!user) throw new Error(`No user found with id ${id}`);
+  if (!user) throw Boom.forbidden(`No user found with id ${id}`);
 
   return user;
 }
@@ -52,7 +53,7 @@ export function findUserByEmail(email) {
 
 export async function findUserByUsername(username) {
   const user = await User.findOne({ ...defaultIncludes, where: { username } });
-  if (!user) throw new Error(`No user found with username ${username}`);
+  if (!user) throw Boom.forbidden(`No user found with username ${username}`);
 
   return user;
 }
@@ -151,7 +152,7 @@ export async function setIntegrationToken(user, network, token) {
     where: { userId: user.id, networkId: network.id },
   });
 
-  if (!result) throw new Error('User does not belong to the network.');
+  if (!result) throw Boom.forbidden('User does not belong to the network.');
 
   return result.update({ userToken: token });
 }

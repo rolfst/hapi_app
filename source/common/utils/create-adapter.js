@@ -14,7 +14,7 @@ export default (network, authSettings = [], options = {}) => {
   integrations = integrations || availableIntegrations;
 
   const integration = find(integrations, { name: network.Integrations[0].name });
-  if (!integration) throw IntegrationNotFound;
+  if (!integration) throw new IntegrationNotFound();
 
   let token = null;
   const authSetting = find(authSettings, { name: integration.name });

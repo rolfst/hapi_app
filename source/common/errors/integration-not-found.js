@@ -1,6 +1,7 @@
 import Boom from 'boom';
-import createError from 'common/utils/create-error';
 
-const boom = Boom.forbidden('No integration setting found for network.');
-
-export default createError(boom, 'IntegrationNotFound');
+export default class IntegrationNotFound {
+  constructor() {
+    return Boom.forbidden('No integration setting found for network.');
+  }
+}

@@ -88,7 +88,7 @@ export const declineExchange = async (payload, message) => {
 export const listMyShifts = async (payload, message) => {
   const { network, artifacts } = message;
 
-  if (!networkUtil.hasIntegration(network)) throw IntegrationNotFound;
+  if (!networkUtil.hasIntegration(network)) throw new IntegrationNotFound();
 
   const adapter = createAdapter(network, artifacts.integrations);
   const shifts = await adapter.myShifts();
@@ -144,7 +144,7 @@ export const listComments = async (payload, message) => {
 export const getShift = async (payload, message) => {
   const { network, artifacts } = message;
 
-  if (!networkUtil.hasIntegration(network)) throw IntegrationNotFound;
+  if (!networkUtil.hasIntegration(network)) throw new IntegrationNotFound();
 
   const adapter = createAdapter(network, artifacts.integrations);
   const shift = await adapter.viewShift(payload.shiftId);
@@ -162,7 +162,7 @@ export const getShift = async (payload, message) => {
 export const listAvailableUsersForShift = async (payload, message) => {
   const { network, artifacts } = message;
 
-  if (!networkUtil.hasIntegration(network)) throw IntegrationNotFound;
+  if (!networkUtil.hasIntegration(network)) throw new IntegrationNotFound();
 
   const adapter = createAdapter(network, artifacts.integrations);
   const externalUsers = await adapter.usersAvailableForShift(payload.shiftId);

@@ -1,6 +1,7 @@
 import Boom from 'boom';
-import createError from 'common/utils/create-error';
 
-const boom = Boom.forbidden('No user found for given username and password.');
-
-export default createError(boom, 'WrongCredentials');
+export default class WrongCredentials {
+  constructor() {
+    return Boom.forbidden('No user found for given username and password.');
+  }
+}

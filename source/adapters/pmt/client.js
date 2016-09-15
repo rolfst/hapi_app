@@ -1,6 +1,6 @@
 import fetch from 'isomorphic-fetch';
 import Boom from 'boom';
-import ExpiredToken from 'common/errors/token-expired';
+import TokenExpired from 'common/errors/token-expired';
 
 const createFormEncodedString = (data) => {
   return Object.keys(data).map((key) => {
@@ -24,7 +24,7 @@ export async function makeRequest(endpoint, token = null, method = 'GET', data =
 
     console.info('PMT client responded with json', json);
 
-    if (response.status === 400) throw ExpiredToken;
+    if (response.status === 400) throw new TokenExpired();
     if (response.status === 401) throw Boom.badData('Wrong data send to integration.');
 
     return { payload: json, status: response.status };

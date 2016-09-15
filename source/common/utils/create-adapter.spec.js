@@ -1,6 +1,5 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import IntegrationNotFound from 'common/errors/integration-not-found';
 import * as unit from 'common/utils/create-adapter';
 
 describe('createAdapter', () => {
@@ -43,7 +42,7 @@ describe('createAdapter', () => {
   it('should fail when no adapter found', () => {
     const actual = () => unit.default(network, authSettings, { integrations: {} });
 
-    assert.throws(actual, IntegrationNotFound);
+    assert.throws(actual);
   });
 
   it('should fail when no token found', () => {

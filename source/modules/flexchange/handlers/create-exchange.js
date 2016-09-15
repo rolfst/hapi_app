@@ -50,7 +50,7 @@ export default async (req, reply) => {
     }
 
     if (data.shiftId && !networkUtil.hasIntegration(network)) {
-      throw IntegrationNotFound;
+      throw new IntegrationNotFound();
     }
 
     if (includes([exchangeTypes.TEAM, exchangeTypes.USER], data.type)) {

@@ -4,7 +4,6 @@ import Promise from 'bluebird';
 import blueprints from 'common/test-utils/blueprints';
 import * as password from 'common/utils/password';
 import * as userRepo from 'common/repositories/user';
-import WrongCredentials from 'common/errors/wrong-credentials';
 import * as checkPassword from 'modules/authentication/utils/check-password';
 import * as unit from 'modules/authentication/services/authentication/implementation';
 
@@ -33,7 +32,7 @@ describe('Authentication service', () => {
       const promise = unit.authenticateUser({ ...credentials, password: 'ihaznoswag' });
       stub.restore();
 
-      return assert.isRejected(promise, WrongCredentials);
+      return assert.isRejected(promise);
     });
   });
 
