@@ -1,30 +1,12 @@
-import { findNetworkById } from 'common/repositories/network';
-import * as userRepo from 'common/repositories/user';
-import createAdapter from 'common/utils/create-adapter';
-import importUsers from 'modules/integrations/services/import-users';
-import importTeams from 'modules/integrations/services/import-teams';
-import addUsersToTeam from 'modules/integrations/services/add-users-to-team';
+import * as networkService from '../services/network';
 
 export default async (req, reply) => {
+  const payload = { networkId: req.params.networkId };
+  const message = { ...req.pre, ...req.auth };
+
   try {
-    const network = await findNetworkById(req.params.networkId);
-
-    if (!network.externalId) throw new Error('This network has no integration.');
-
-    const adapter = createAdapter(network, [], { proceedWithoutToken: true });
-
-    const values = await Promise.all([
-      adapter.fetchTeams(),
-      adapter.fetchUsers(),
-      userRepo.findAllUsers(),
-    ]);
-
-    const [externalTeams, externalUsers, internalUsers] = values;
-    const users = await importUsers(internalUsers, externalUsers, network);
-    const teams = await importTeams(externalTeams, network);
-
-    await addUsersToTeam(users, teams, externalUsers);
-
+    await networkService.importNetwork(payload, message);
+    
     return reply({ success: true });
   } catch (err) {
     console.error('Could not import network', {
