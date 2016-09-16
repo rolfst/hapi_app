@@ -111,6 +111,8 @@ const User = model.define('User', {
         function: this.functionName,
         integration_auth: this.integrationAuth,
         email: this.email,
+        address: this.address,
+        zip_code: this.zipCode,
         phone_num: this.phoneNum,
         profile_img: `https://s3.eu-central-1.amazonaws.com/flex-appeal/${environment}/profiles/${this.profileImg}`,
         date_of_birth: this.dateOfBirth,

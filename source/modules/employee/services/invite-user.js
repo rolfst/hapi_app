@@ -1,4 +1,5 @@
 import Boom from 'boom';
+import camelCaseKeys from '../../../common/utils/camel-case-keys';
 import * as password from 'common/utils/password';
 import signupMail from 'common/mails/signup';
 import addedToNetworkMail from 'common/mails/added-to-network';
@@ -9,6 +10,8 @@ import { addUserToNetwork } from 'common/repositories/user';
 import { addUserToTeams } from 'common/repositories/team';
 import userBelongsToNetwork from 'common/utils/user-belongs-to-network';
 import userIsDeletedFromNetwork from 'common/utils/user-is-deleted-from-network';
+import * as userRepo from '../../../common/repositories/user';
+import * as networkUtil from '../../../common/utils/network';
 
 export const inviteNewUser = async (network, { firstName, lastName, email, roleType }) => {
   const plainPassword = password.plainRandom();
@@ -42,7 +45,10 @@ export const inviteExistingUser = async (network, user, roleType) => {
   return user;
 };
 
-export default async (network, { firstName, lastName, email, teamIds, roleType }) => {
+export const inviteUser = async (payload, message) => {
+  const { firstName, lastName, email, teamIds, roleType } = camelCaseKeys(payload);
+  const { network } = message;
+
   const role = roleType ? roleType.toUpperCase() : 'EMPLOYEE';
   let user = await findUserByEmail(email);
 
@@ -55,6 +61,9 @@ export default async (network, { firstName, lastName, email, teamIds, roleType }
   }
 
   if (teamIds && teamIds.length > 0) await addUserToTeams(teamIds, user.id);
+  user.reload();
 
-  return user.reload();
+  const invitedUser = await userRepo.findUserByEmail(email);
+
+  return networkUtil.addUserScope(invitedUser, network.id);
 };

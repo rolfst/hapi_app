@@ -1,27 +1,23 @@
-import nock from 'nock';
 import { assert } from 'chai';
 import { getRequest } from 'common/test-utils/request';
 
 describe('Authenticate', () => {
-  before(() => {
-    nock(global.networks.pmt.externalId)
-      .post('/login')
-      .reply(200, { logged_in_user_token: 'fake_token', user_id: 1 });
-  });
-
-  it('should return user object', async () => {
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/users/me`;
-    const { result: { data } } = await getRequest(endpoint);
-
-    assert.equal(data.id, global.users.admin.id);
-    assert.equal(data.integration_auth, false);
+  beforeEach(() => {
+    global.users.employee.reload();
   });
 
   it('should return user object when authenticated with integration', async () => {
-    const endpoint = `/v2/networks/${global.networks.pmt.id}/users/me`;
-    const { result: { data } } = await getRequest(endpoint);
+    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/users/me`;
+    const { result: { data } } = await getRequest(endpoint, global.server, global.tokens.employee);
 
-    assert.equal(data.id, global.users.admin.id);
-    assert.equal(data.integration_auth, true);
+    assert.equal(data.id, global.users.employee.id);
+    assert.equal(data.username, global.users.employee.username);
+    assert.equal(data.first_name, global.users.employee.firstName);
+    assert.equal(data.last_name, global.users.employee.lastName);
+    assert.equal(data.phone_num, global.users.employee.phoneNum);
+    assert.equal(data.email, global.users.employee.email);
+    assert.equal(data.date_of_birth, global.users.employee.dateOfBirth);
+    assert.equal(data.role_type, global.users.employee.roleType);
+    assert.equal(data.address, global.users.employee.address);
   });
 });
