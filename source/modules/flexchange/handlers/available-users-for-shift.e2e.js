@@ -1,7 +1,8 @@
 import nock from 'nock';
 import { assert } from 'chai';
-import * as networkUtil from 'common/utils/network';
-import { getRequest } from 'common/test-utils/request';
+import * as stubs from '../test-utils/stubs';
+import * as networkUtil from '../../../common/utils/network';
+import { getRequest } from '../../../common/test-utils/request';
 
 describe('Available users for shift', () => {
   before(async () => {
@@ -37,7 +38,12 @@ describe('Available users for shift', () => {
   });
 
   it('should fail when shift is not found', async () => {
-    const endpoint = `/v2/networks/${global.networks.pmt.id}/shifts/2/available`;
+    const shiftId = 2;
+
+    nock(global.networks.pmt.externalId)
+      .get(`/shift/${shiftId}/available`)
+      .reply(404, stubs.available_users_not_found_404);
+    const endpoint = `/v2/networks/${global.networks.pmt.id}/shifts/${shiftId}/available`;
     const { statusCode } = await getRequest(endpoint);
 
     assert.equal(statusCode, 404);

@@ -1,11 +1,12 @@
 import { assert } from 'chai';
 import moment from 'moment';
 import nock from 'nock';
-import { exchangeTypes } from 'modules/flexchange/models/exchange';
-import { getRequest } from 'common/test-utils/request';
-import { createExchange } from 'modules/flexchange/repositories/exchange';
+import { exchangeTypes } from '../models/exchange';
+import { getRequest } from '../../../common/test-utils/request';
+import { createExchange } from '../repositories/exchange';
+import * as stubs from '../test-utils/stubs';
 
-describe('View shift', () => {
+describe('Handler: View shift', () => {
   let network;
   let createdExchange;
 
@@ -51,6 +52,11 @@ describe('View shift', () => {
   });
 
   it('should fail when shift not found', async () => {
+    const today = moment().format('DD-MM-YYYY');
+    nock(global.networks.pmt.externalId)
+      .get(`/me/shifts/${today}`)
+      .reply(200, stubs.empty_shifts_200);
+
     const endpoint = `/v2/networks/${network.id}/shifts/1`;
     const { statusCode } = await getRequest(endpoint);
 

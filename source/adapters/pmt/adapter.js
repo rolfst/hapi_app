@@ -9,9 +9,9 @@ const pmtAdapter = ({ externalId }, token) => ({
   authenticate: authenticate(externalId),
   fetchTeams: fetchTeams(externalId),
   fetchUsers: fetchUsers(externalId),
-  usersAvailableForShift: usersAvailableForShift(token, externalId),
-  myShifts: myShifts(token, externalId),
-  viewShift: viewShift(token, externalId),
+  usersAvailableForShift: usersAvailableForShift(externalId, token),
+  myShifts: myShifts(externalId, token),
+  viewShift: viewShift(externalId, token),
 });
 
 export default pmtAdapter;

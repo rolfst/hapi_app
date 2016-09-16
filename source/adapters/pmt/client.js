@@ -1,11 +1,18 @@
 import fetch from 'isomorphic-fetch';
 import Boom from 'boom';
-import TokenExpired from 'common/errors/token-expired';
+import ExpiredToken from 'common/errors/token-expired';
 
 const createFormEncodedString = (data) => {
   return Object.keys(data).map((key) => {
     return `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`;
   }).join('&');
+};
+
+const handleError = (status, body) => {
+  if (status === 400 && body.error === 'Token is expired.') throw ExpiredToken;
+  if (status === 400) throw Boom.badData(body.error);
+  if (status === 401) throw Boom.unauthorized(body.error);
+  if (status === 403) throw Boom.forbidden(body.error);
 };
 
 export async function makeRequest(endpoint, token = null, method = 'GET', data = {}) {
@@ -22,14 +29,12 @@ export async function makeRequest(endpoint, token = null, method = 'GET', data =
 
     const json = await response.json();
 
-    console.info('PMT client responded with json', json);
-
-    if (response.status === 400) throw new TokenExpired();
-    if (response.status === 401) throw Boom.badData('Wrong data send to integration.');
+    handleError(response.status, json);
 
     return { payload: json, status: response.status };
   } catch (err) {
     console.error('PMT Client error', err);
+    throw err;
   }
 }
 

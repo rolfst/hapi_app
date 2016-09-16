@@ -1,8 +1,8 @@
 import { find } from 'lodash';
 import myShifts from './my-shifts';
 
-export default (token, baseStoreUrl) => async (shiftId) => {
-  const shifts = await myShifts(token, baseStoreUrl)();
+export default (baseStoreUrl, token) => async (shiftId) => {
+  const shifts = await myShifts(baseStoreUrl, token)();
 
   return find(shifts, { id: shiftId });
 };

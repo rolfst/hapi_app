@@ -1,12 +1,33 @@
-export default (externalUser) => ({
-  externalId: externalUser.id,
-  username: externalUser.email,
-  email: externalUser.email,
-  firstName: externalUser.first_name,
-  lastName: externalUser.last_name,
-  dateOfBirth: externalUser.date_of_birth,
-  phoneNum: externalUser.cell_phone_number,
-  isAdmin: externalUser.rolename === 'admin',
-  isActive: externalUser.active,
-  teamId: externalUser.department,
-});
+export default (externalUser) => {
+  const defaultProps = {
+    id: null,
+    department: null,
+    username: null,
+    email: null,
+    last_name: null,
+    first_name: null,
+    date_of_birth: null,
+    rolename: null,
+    active: true,
+    cell_phone_number: null,
+    home_phone_number: null,
+  };
+
+  const properUser = { ...defaultProps, ...externalUser };
+  const serializedUser = {
+    externalId: properUser.id,
+    username: properUser.username
+      ? properUser.email : properUser.username,
+    email: properUser.email,
+    firstName: properUser.first_name,
+    lastName: properUser.last_name,
+    dateOfBirth: properUser.date_of_birth,
+    phoneNum: properUser.cell_phone_number
+      ? properUser.cell_phone_number : properUser.home_phone_number,
+    isAdmin: properUser.rolename === 'admin',
+    isActive: properUser.active,
+    teamId: properUser.department,
+  };
+
+  return serializedUser;
+};

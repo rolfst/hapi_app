@@ -2,7 +2,7 @@ import Boom from 'boom';
 import client from '../client';
 import userSerializer from '../serializers/user';
 
-export default (token, baseStoreUrl) => async (shiftId) => {
+export default (baseStoreUrl, token) => async (shiftId) => {
   const endpoint = `${baseStoreUrl}/shift/${shiftId}/available`;
   const result = await client.get(endpoint, token);
 
