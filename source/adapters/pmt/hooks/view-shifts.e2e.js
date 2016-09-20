@@ -8,7 +8,7 @@ import hook from './view-shift';
 
 nock.disableNetConnect();
 
-describe('PMT view shifts hook', () => {
+describe.only('PMT view shifts hook', () => {
   const ENDPOINT = '/me/shifts';
   const TOKEN = 'aefacbadb0123456789';
   const TODAY = moment().format('DD-MM-YYYY');
@@ -19,6 +19,8 @@ describe('PMT view shifts hook', () => {
     nock(global.networks.pmt.externalId)
       .get(`${ENDPOINT}/${TODAY}`)
       .reply(200, stubs.shifts_found_200);
+
+    console.log(moment.locale());
 
     const actual = await hook(global.networks.pmt.externalId, TOKEN)(knownId);
     const expected = blueprints.found_shift;
