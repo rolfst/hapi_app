@@ -8,7 +8,7 @@ import hook from './view-shift';
 
 nock.disableNetConnect();
 
-describe.only('PMT view shifts hook', () => {
+describe('PMT view shifts hook', () => {
   const ENDPOINT = '/me/shifts';
   const TOKEN = 'aefacbadb0123456789';
   const TODAY = moment().format('DD-MM-YYYY');
