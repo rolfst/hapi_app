@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import { find } from 'lodash';
-import { getRequest } from 'common/test-utils/request';
+import { getRequest } from 'shared/test-utils/request';
 
 describe('Networks for logged user', async () => {
   let result;

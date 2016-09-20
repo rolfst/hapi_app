@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import { partial } from 'lodash';
-import { deleteRequest } from 'common/test-utils/request';
+import { deleteRequest } from 'shared/test-utils/request';
 import { createConversation } from 'modules/chat/repositories/conversation';
 
 describe('Delete conversation', () => {

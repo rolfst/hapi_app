@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import nock from 'nock';
-import createError from '../../../common/utils/create-error';
+import createError from '../../../shared/utils/create-error';
 import * as stubs from '../test-utils/stubs';
 import * as blueprints from '../test-utils/blueprints';
 import hook from './authenticate';

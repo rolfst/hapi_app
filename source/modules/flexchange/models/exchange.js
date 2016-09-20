@@ -1,7 +1,7 @@
 import Sequelize from 'sequelize';
 import moment from 'moment';
 import { db as model } from 'connections';
-import formatDate from 'common/utils/format-date';
+import formatDate from 'shared/utils/format-date';
 import makeCreatedInObject from 'modules/flexchange/utils/created-in-text';
 
 export const exchangeTypes = {

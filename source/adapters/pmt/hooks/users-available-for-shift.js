@@ -1,4 +1,4 @@
-import createError from '../../../common/utils/create-error';
+import createError from '../../../shared/utils/create-error';
 import client from '../client';
 import userSerializer from '../serializers/user';
 

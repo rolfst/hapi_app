@@ -1,4 +1,4 @@
-import notifier from 'common/services/notifier';
+import notifier from 'shared/services/notifier';
 import moment from 'moment';
 import 'moment/locale/nl';
 moment.locale('nl');

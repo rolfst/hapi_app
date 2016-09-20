@@ -1,5 +1,5 @@
 import { check } from 'hapi-acl-plugin';
-import * as responseUtil from 'common/utils/response';
+import * as responseUtil from 'shared/utils/response';
 import { findConversationById } from 'modules/chat/repositories/conversation';
 import { findAllForConversation } from 'modules/chat/repositories/message';
 

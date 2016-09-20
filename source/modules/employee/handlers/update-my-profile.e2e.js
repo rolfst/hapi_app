@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { getRequest, putRequest } from 'common/test-utils/request';
+import { getRequest, putRequest } from 'shared/test-utils/request';
 
 describe('Handler: update my profile', () => {
   it('should return an updated user', async () => {

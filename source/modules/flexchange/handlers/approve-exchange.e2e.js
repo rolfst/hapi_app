@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 import moment from 'moment';
 import { exchangeTypes } from 'modules/flexchange/models/exchange';
-import blueprints from 'common/test-utils/blueprints';
-import authenticate from 'common/test-utils/authenticate';
-import { patchRequest } from 'common/test-utils/request';
+import blueprints from 'shared/test-utils/blueprints';
+import authenticate from 'shared/test-utils/authenticate';
+import { patchRequest } from 'shared/test-utils/request';
 import * as exchangeRepo from 'modules/flexchange/repositories/exchange';
 
 describe('Approve exchange', () => {

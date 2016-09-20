@@ -1,8 +1,8 @@
 import { omit, merge } from 'lodash';
-import createError from '../../../common/utils/create-error';
-import { ActivityTypes } from '../../../common/models/activity';
-import { createActivity } from '../../../common/repositories/activity';
-import { User } from '../../../common/models';
+import createError from '../../../shared/utils/create-error';
+import { ActivityTypes } from '../../../shared/models/activity';
+import { createActivity } from '../../../shared/repositories/activity';
+import { User } from '../../../shared/models';
 import makeCreatedInObject from '../utils/created-in-text';
 import { exchangeTypes } from '../models/exchange';
 import {

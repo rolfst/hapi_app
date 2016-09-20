@@ -1,5 +1,5 @@
 import fetch from 'isomorphic-fetch';
-import createError from '../../common/utils/create-error';
+import createError from '../../shared/utils/create-error';
 
 const createFormEncodedString = (data) => {
   return Object.keys(data).map((key) => {

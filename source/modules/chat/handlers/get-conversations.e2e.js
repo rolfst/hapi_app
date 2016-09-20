@@ -1,7 +1,7 @@
 import { assert } from 'chai';
-import blueprints from 'common/test-utils/blueprints';
-import { createUser } from 'common/repositories/user';
-import { getRequest } from 'common/test-utils/request';
+import blueprints from 'shared/test-utils/blueprints';
+import { createUser } from 'shared/repositories/user';
+import { getRequest } from 'shared/test-utils/request';
 import { createMessage } from 'modules/chat/repositories/message';
 import {
   createConversation,

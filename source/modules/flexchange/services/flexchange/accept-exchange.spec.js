@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import * as exchangeRepo from 'modules/flexchange/repositories/exchange';
 import * as service from 'modules/flexchange/services/flexchange';
 import * as notification from 'modules/flexchange/notifications/accepted-exchange';
-import * as networkUtil from 'common/utils/network';
+import * as networkUtil from 'shared/utils/network';
 
 describe('Accept exchange', () => {
   let sandbox;

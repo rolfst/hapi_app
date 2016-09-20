@@ -2,8 +2,8 @@ import { assert } from 'chai';
 import Promise from 'bluebird';
 import moment from 'moment';
 import _ from 'lodash';
-import { ActivityTypes } from 'common/models/activity';
-import { getRequest } from 'common/test-utils/request';
+import { ActivityTypes } from 'shared/models/activity';
+import { getRequest } from 'shared/test-utils/request';
 import {
   createExchange,
   acceptExchange,

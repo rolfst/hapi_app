@@ -1,6 +1,6 @@
 import { includes } from 'lodash';
-import * as responseUtil from 'common/utils/response';
-import parseIncludes from 'common/utils/parse-includes';
+import * as responseUtil from 'shared/utils/response';
+import parseIncludes from 'shared/utils/parse-includes';
 import { Message } from 'modules/chat/models';
 import { findAllForUser } from 'modules/chat/repositories/conversation';
 

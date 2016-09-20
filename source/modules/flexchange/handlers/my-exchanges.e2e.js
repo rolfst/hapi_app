@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import moment from 'moment';
 import qs from 'qs';
-import { getRequest } from '../../../common/test-utils/request';
+import { getRequest } from '../../../shared/test-utils/request';
 import { exchangeTypes } from '../models/exchange';
 import { createExchange } from '../repositories/exchange';
 

@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 import nock from 'nock';
 import moment from 'moment';
-import { createTeam } from 'common/repositories/team';
+import { createTeam } from 'shared/repositories/team';
 import { exchangeTypes } from 'modules/flexchange/models/exchange';
-import { getRequest } from 'common/test-utils/request';
+import { getRequest } from 'shared/test-utils/request';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
 
 describe('My shifts', () => {

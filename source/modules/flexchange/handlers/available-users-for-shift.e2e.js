@@ -1,8 +1,8 @@
 import nock from 'nock';
 import { assert } from 'chai';
 import * as stubs from '../../../adapters/pmt/test-utils/stubs';
-import * as networkUtil from '../../../common/utils/network';
-import { getRequest } from '../../../common/test-utils/request';
+import * as networkUtil from '../../../shared/utils/network';
+import { getRequest } from '../../../shared/test-utils/request';
 
 describe('Available users for shift', () => {
   before(async () => {

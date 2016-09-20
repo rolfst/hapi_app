@@ -1,4 +1,4 @@
-import createRoutes from 'common/utils/create-routes';
+import createRoutes from 'shared/utils/create-routes';
 
 const basePath = 'modules/flexchange/handlers';
 const baseUrl = '/v2/networks/{networkId}';

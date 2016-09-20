@@ -1,6 +1,6 @@
 import { assert } from 'chai';
-import blueprints from 'common/test-utils/blueprints';
-import { postRequest } from 'common/test-utils/request';
+import blueprints from 'shared/test-utils/blueprints';
+import { postRequest } from 'shared/test-utils/request';
 
 const url = '/v2/authenticate';
 const employeeCredentials = blueprints.users.employee;

@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { getRequest } from 'common/test-utils/request';
+import { getRequest } from 'shared/test-utils/request';
 import { createConversation } from 'modules/chat/repositories/conversation';
 import { createMessage } from 'modules/chat/repositories/message';
 
