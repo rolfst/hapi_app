@@ -1,10 +1,7 @@
-import moment from 'moment-timezone';
+import moment from 'moment';
 
-const defaultTimezone = 'Europe/Amsterdam';
 const defaultDateFormat = 'YYYY-MM-DD';
 
-export const getLocalDate = (dateString, format) => moment(dateString, format).tz(defaultTimezone);
+export const toISOString = dateString => moment(dateString).toISOString();
 
-export const toISOString = dateString => getLocalDate(dateString).toISOString();
-
-export const toDateFormat = dateString => getLocalDate(dateString).format(defaultDateFormat);
+export const toDateFormat = dateString => moment(dateString).format(defaultDateFormat);

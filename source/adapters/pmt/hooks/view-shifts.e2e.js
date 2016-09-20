@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import nock from 'nock';
-import * as dateUtils from '../../../shared/utils/date';
+import moment from 'moment';
 import createError from '../../../shared/utils/create-error';
 import * as stubs from '../test-utils/stubs';
 import * as blueprints from '../test-utils/blueprints';
@@ -11,7 +11,7 @@ nock.disableNetConnect();
 describe.only('PMT view shifts hook', () => {
   const ENDPOINT = '/me/shifts';
   const TOKEN = 'aefacbadb0123456789';
-  const TODAY = dateUtils.getLocalDate().format('DD-MM-YYYY');
+  const TODAY = moment().format('DD-MM-YYYY');
 
   it('should succeed when token provided', async () => {
     const knownId = '27362216';
