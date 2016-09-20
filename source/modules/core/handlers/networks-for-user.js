@@ -1,6 +1,9 @@
-export default async (req, reply) => {
-  const data = req.auth.credentials.Networks
-    .map(network => network.toJSON());
+import * as networkService from '../services/network';
+import * as responseUtil from '../../../common/utils/response';
 
-  return reply({ data });
+export default async (req, reply) => {
+  const message = { ...req.pre, ...req.auth };
+  const data = networkService.listNetworksForCurrentUser(null, message);
+
+  return reply({ data: responseUtil.serialize(data) });
 };
