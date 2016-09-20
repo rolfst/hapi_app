@@ -1,5 +1,4 @@
-import Boom from 'boom';
-import { ExchangeResponse } from 'modules/flexchange/models';
+import { ExchangeResponse } from '../models';
 
 /**
  * Find an exchange response by exchange and user or throw Error
@@ -7,11 +6,8 @@ import { ExchangeResponse } from 'modules/flexchange/models';
  * @method findResponseWhere
  * @return {promise} Find exchange response promise
  */
-export const findResponseWhere = async (constraint) => {
-  const result = await ExchangeResponse.findOne({ where: constraint });
-
-  if (!result) throw Boom.badData('No response found for user.');
-  return result;
+export const findResponseWhere = (constraint) => {
+  return ExchangeResponse.findOne({ where: constraint });
 };
 
 export function findAcceptedExchangeResponsesForUser(userId) {

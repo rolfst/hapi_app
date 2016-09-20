@@ -1,4 +1,4 @@
-import Boom from 'boom';
+import createError from '../utils/create-error';
 import { Integration } from 'common/models';
 
 export default () => {
@@ -7,18 +7,18 @@ export default () => {
       const req = request.raw.req;
       const token = req.headers['x-api-token'];
 
-      if (!token) throw new Error('No token specified.');
+      if (!token) throw createError('401');
 
       try {
         const integration = await Integration.findOne({
           where: { token },
         });
 
-        if (!integration) throw new Error('Invalid token.');
+        if (!integration) throw createError('422', 'No integration found for the specified token.');
 
         return reply.continue({ credentials: integration });
-      } catch (e) {
-        return reply(Boom.unauthorized(e.message));
+      } catch (err) {
+        return reply(err).code(err.status_code);
       }
     },
   };

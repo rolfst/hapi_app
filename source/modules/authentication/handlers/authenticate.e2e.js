@@ -1,6 +1,5 @@
 import { assert } from 'chai';
 import blueprints from 'common/test-utils/blueprints';
-import WrongCredentials from 'common/errors/wrong-credentials';
 import { postRequest } from 'common/test-utils/request';
 
 const url = '/v2/authenticate';
@@ -38,15 +37,14 @@ describe('Authenticate', () => {
     const { username } = employeeCredentials;
     const { statusCode } = await loginRequest({ username, password: 'wrongpassword' });
 
-    assert.equal(statusCode, 403);
+    assert.equal(statusCode, 422);
   });
 
   it('should fail when username is not correct', async () => {
     const { password } = employeeCredentials;
-    const { result, statusCode } = await loginRequest({ username: 'blabla@gmail.com', password });
+    const { statusCode } = await loginRequest({ username: 'blabla@gmail.com', password });
 
-    assert.equal(statusCode, 403);
-    assert.equal(result.error.title, WrongCredentials.type);
+    assert.equal(statusCode, 422);
   });
 
   it('should fail when user does not belong to a network', async () => {

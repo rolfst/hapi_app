@@ -1,5 +1,6 @@
 import sinon from 'sinon';
 import { assert } from 'chai';
+import createError from 'common/utils/create-error';
 import * as networkUtil from 'common/utils/network';
 import tokenUtil from 'common/utils/token';
 import * as createAdapter from 'common/utils/create-adapter';
@@ -92,7 +93,7 @@ describe('Integration auth', () => {
   it('should return 401 when user could not authenticate with integration', async () => {
     createAdapter.default.restore();
     const fakeAdapter = {
-      authenticate: () => Promise.reject(new Error('Stubbed error')),
+      authenticate: () => Promise.reject(createError('401')),
     };
 
     sinon.stub(createAdapter, 'default').returns(fakeAdapter);

@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 import nock from 'nock';
+import createError from '../../../common/utils/create-error';
 import * as stubs from '../test-utils/stubs';
 import * as blueprints from '../test-utils/blueprints';
 import hook from './authenticate';
-
 
 nock.disableNetConnect();
 
@@ -30,7 +30,7 @@ describe('PMT Authenticate hook', () => {
 
     const actual = hook(global.networks.pmt.externalId)(credential);
 
-    return assert.isRejected(actual, new RegExp(stubs.incorrect_credentials_401.error));
+    return assert.isRejected(actual, createError('401'));
   });
 
   it('should fail when username is not provided', async () => {
@@ -42,6 +42,6 @@ describe('PMT Authenticate hook', () => {
 
     const actual = hook(global.networks.pmt.externalId)(credential);
 
-    return assert.isRejected(actual, new RegExp(stubs.missing_username_400.error));
+    return assert.isRejected(actual, createError('422'));
   });
 });

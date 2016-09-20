@@ -1,4 +1,3 @@
-import Boom from 'boom';
 import * as accessService from '../services/access';
 
 export default async (req, reply) => {
@@ -10,6 +9,6 @@ export default async (req, reply) => {
 
     return reply({ data: { access_token: accessToken } });
   } catch (err) {
-    return reply(Boom.unauthorized('Could not authenticate with integration'));
+    return reply(err);
   }
 };

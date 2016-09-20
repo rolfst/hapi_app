@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import nock from 'nock';
+import createError from '../../../common/utils/create-error';
 import * as stubs from '../test-utils/stubs';
 import * as blueprints from '../test-utils/blueprints';
 import hook from './users-available-for-shift';
@@ -28,7 +29,7 @@ describe('PMT available users hook', () => {
 
     const actual = hook(global.networks.pmt.externalId, TOKEN)();
 
-    return assert.isRejected(actual, new RegExp(stubs.available_users_not_found_404.error));
+    return assert.isRejected(actual, createError('404'));
   });
 
   it('should fail when credentials are incorrect', async () => {
@@ -38,6 +39,6 @@ describe('PMT available users hook', () => {
 
     const actual = hook(global.networks.pmt.externalId, TOKEN)(AVAILABLE_SHIFTID);
 
-    return assert.isRejected(actual, new RegExp(stubs.available_users_forbidden_403.error));
+    return assert.isRejected(actual, createError('403'));
   });
 });

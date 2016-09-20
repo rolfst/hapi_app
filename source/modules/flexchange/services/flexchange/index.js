@@ -1,16 +1,15 @@
-import Boom from 'boom';
 import { chain, map } from 'lodash';
 import moment from 'moment';
 import createAdapter from '../../../../common/utils/create-adapter';
 import analytics from '../../../../common/services/analytics';
 import approveExchangeEvent from '../../../../common/events/approve-exchange-event';
-import IntegrationNotFound from 'common/errors/integration-not-found';
+import createError from '../../../../common/utils/create-error';
 import * as networkUtil from '../../../../common/utils/network';
 import * as teamRepo from '../../../../common/repositories/team';
+import * as activityRepo from '../../../../common/repositories/activity';
 import * as commentRepo from '../../repositories/comment';
 import * as exchangeRepo from '../../repositories/exchange';
 import * as exchangeResponseRepo from '../../repositories/exchange-response';
-import * as activityRepo from '../../../../common/repositories/activity';
 import * as notification from '../../notifications/accepted-exchange';
 import * as creatorNotifier from '../../notifications/creator-approved';
 import * as substituteNotifier from '../../notifications/substitute-approved';
@@ -24,13 +23,13 @@ const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
 export const acceptExchange = async (payload, message) => {
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, message.credentials.id);
 
-  if (isExpired(exchange.date)) throw Boom.forbidden('Exchange has been expired.');
-  if (exchange.approvedBy) throw Boom.badData('Exchange has already been approved.');
+  if (isExpired(exchange.date)) throw createError('403', 'The exchange is expired.');
+  if (exchange.approvedBy) throw createError('403', 'The exchange is already approved.');
 
   const { ResponseStatus } = exchange;
   const approved = ResponseStatus ? ResponseStatus.approved : null;
 
-  if (approved === 0) throw Boom.badData('Your response is already rejected.');
+  if (approved === 0) throw createError('403', 'You are already rejected for the exchange.');
 
   const acceptedExchange = await exchangeRepo.acceptExchange(exchange.id, message.credentials.id);
   notification.send(message.network, acceptedExchange, message.credentials);
@@ -45,13 +44,11 @@ export const approveExchange = async (payload, message) => {
   const constraint = { exchangeId: payload.exchangeId, userId: payload.user_id };
   const exchangeResponse = await exchangeResponseRepo.findResponseWhere(constraint);
 
-  if (exchangeResponse.approved) {
-    throw Boom.badData('The user is already approved.');
-  } else if (exchangeResponse.approved === 0) {
-    throw Boom.badData('Cannot approve a rejected response.');
-  } else if (!exchangeResponse.response) {
-    throw Boom.badData('The user didn\'t accept the exchange.');
+  if (!exchangeResponse) {
+    throw createError('403', 'You cannot approve a user that did not accept the exchange.');
   }
+
+  impl.validateExchangeResponse(exchangeResponse);
 
   const approvedExchange = await exchangeRepo.approveExchange(exchange,
     message.credentials,
@@ -78,7 +75,7 @@ export const declineExchange = async (payload, message) => {
   const { ResponseStatus } = exchange;
   const approved = ResponseStatus ? ResponseStatus.approved : null;
 
-  if (approved === 0) throw Boom.badData('Your response is already rejected.');
+  if (approved === 0) throw createError('403', 'You are already rejected for the exchange.');
 
   const declinedExchange = await exchangeRepo.declineExchange(exchange.id, message.credentials.id);
 
@@ -88,7 +85,7 @@ export const declineExchange = async (payload, message) => {
 export const listMyShifts = async (payload, message) => {
   const { network, artifacts } = message;
 
-  if (!networkUtil.hasIntegration(network)) throw new IntegrationNotFound();
+  if (!networkUtil.hasIntegration(network)) throw createError('10001');
 
   const adapter = createAdapter(network, artifacts.integrations);
   const shifts = await adapter.myShifts();
@@ -113,12 +110,7 @@ export const rejectExchange = async (payload, message) => {
   const constraint = { exchangeId: exchange.id, userId: payload.user_id };
   const exchangeResponse = await exchangeResponseRepo.findResponseWhere(constraint);
 
-  if (exchangeResponse.approved) {
-    throw Boom.badData('The user is already approved.');
-  }
-  if (!exchangeResponse.response) {
-    throw Boom.badData('The user didn\'t accept the exchange.');
-  }
+  impl.validateExchangeResponse(exchangeResponse);
 
   const rejectedExchange = await exchangeRepo.rejectExchange(
     exchange, message.credentials, payload.user_id);
@@ -144,12 +136,12 @@ export const listComments = async (payload, message) => {
 export const getShift = async (payload, message) => {
   const { network, artifacts } = message;
 
-  if (!networkUtil.hasIntegration(network)) throw new IntegrationNotFound();
+  if (!networkUtil.hasIntegration(network)) throw createError('10001');
 
   const adapter = createAdapter(network, artifacts.integrations);
   const shift = await adapter.viewShift(payload.shiftId);
 
-  if (!shift) throw Boom.notFound('Shift not found.');
+  if (!shift) throw createError('404');
 
   const [exchanges, teams] = await Promise.all([
     exchangeRepo.findExchangesByShiftIds([shift.id]),
@@ -162,7 +154,7 @@ export const getShift = async (payload, message) => {
 export const listAvailableUsersForShift = async (payload, message) => {
   const { network, artifacts } = message;
 
-  if (!networkUtil.hasIntegration(network)) throw new IntegrationNotFound();
+  if (!networkUtil.hasIntegration(network)) throw createError('10001');
 
   const adapter = createAdapter(network, artifacts.integrations);
   const externalUsers = await adapter.usersAvailableForShift(payload.shiftId);

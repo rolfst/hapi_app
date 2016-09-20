@@ -1,11 +1,10 @@
-import Boom from 'boom';
 import Url from 'url';
 import Qs from 'qs';
+import { omit } from 'lodash';
 import authorizationPlugin from 'hapi-acl-plugin';
 import * as networkUtil from 'common/utils/network';
 import createError from 'common/utils/create-error';
 import createActions from 'common/utils/create-actions';
-import * as responseUtil from 'common/utils/response';
 
 export const onRequest = (req, reply) => {
   const uri = req.raw.req.url;
@@ -19,19 +18,19 @@ export const onRequest = (req, reply) => {
 };
 
 export const onPreResponse = (req, reply) => {
-  if (req.response.data && (req.response.data.isJoi || req.response.data.isBoom)) {
-    let error;
+  if ((req.response.source && req.response.source.is_error) || req.response.isBoom) {
+    let error = req.response.source;
 
     if (req.response.isBoom) {
-      error = req.response;
+      error = createError(req.response.output.statusCode, req.response.output.payload.message);
     }
 
-    if (req.response.data.isJoi) {
+    if (req.response.data && req.response.data.isJoi) {
       const errorMessage = req.response.data.details[0].message;
-      error = createError(Boom.badData(errorMessage), 'ValidationError');
+      error = createError('422', errorMessage);
     }
 
-    return reply(responseUtil.error(error)).code(error.output.statusCode);
+    return reply(omit(error, 'is_error')).code(error.status_code);
   }
 
   return reply.continue();

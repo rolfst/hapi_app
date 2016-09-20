@@ -1,0 +1,57 @@
+{
+  "400": {
+    "type": "bad_request",
+    "detail": "The request cannot be fulfilled due to bad syntax.",
+    "code": 400
+  },
+  "401": {
+    "type": "unauthorized",
+    "detail": "User authentication token has expired or is missing",
+    "code": 401
+  },
+  "403": {
+    "type": "forbidden",
+    "detail": "User does not have enough privileges to access this resource.",
+    "code": 403
+  },
+  "404": {
+    "type": "not_found",
+    "detail": "The resource could not be found.",
+    "code": 404
+  },
+  "422": {
+    "type": "validation_error",
+    "detail": "The server was unable to process the instructions contained in the request.",
+    "code": 422
+  },
+  "429": {
+    "type": "request_limit",
+    "detail": "You have sent too many requests in a given amount of time.",
+    "code": 429
+  },
+  "500": {
+    "type": "internal_error",
+    "detail": "There was an error while processing this request. There is probably something wrong with the API server.",
+    "code": 500
+  },
+  "10001": {
+    "type": "integration_not_found",
+    "detail": "The network does not have an enabled integration.",
+    "code": 403
+  },
+  "10002": {
+    "type": "not_in_network",
+    "detail": "The user does not belong to the network.",
+    "code": 403
+  },
+  "10003": {
+    "type": "deleted_from_network",
+    "detail": "The user is deleted from the network.",
+    "code": 403
+  },
+  "10004": {
+    "type": "wrong_credentials",
+    "detail": "No user found for given username and password.",
+    "code": 422
+  }
+}

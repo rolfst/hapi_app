@@ -1,14 +1,14 @@
-import Boom from 'boom';
-import analytics from 'common/services/analytics';
-import tokenUtil from 'common/utils/token';
-import * as networkUtil from 'common/utils/network';
-import { findUserById } from 'common/repositories/user';
+import analytics from '../services/analytics';
+import tokenUtil from '../utils/token';
+import createError from '../utils/create-error';
+import * as networkUtil from '../utils/network';
+import * as userRepo from '../repositories/user';
 
 export const authenticate = async (networkId, token = null) => {
-  if (!token) throw new Error('No token specified.');
+  if (!token) throw createError('401');
 
   const { sub: userId, integrations } = tokenUtil.decode(token);
-  const user = await findUserById(userId);
+  const user = await userRepo.findUserById(userId);
 
   analytics.setUser(user);
 
@@ -30,7 +30,10 @@ export default () => {
         return reply.continue(result);
       } catch (err) {
         console.error('Error in Authenticator Strategy', err);
-        return reply(Boom.unauthorized(err.message));
+
+        if (err.is_error) return reply(err).code(err.status_code);
+
+        return reply(createError('401')).code(401);
       }
     },
   };

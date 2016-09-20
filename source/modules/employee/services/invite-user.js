@@ -1,4 +1,4 @@
-import Boom from 'boom';
+import createError from '../../../common/utils/create-error';
 import camelCaseKeys from '../../../common/utils/camel-case-keys';
 import * as password from 'common/utils/password';
 import signupMail from 'common/mails/signup';
@@ -53,7 +53,7 @@ export const inviteUser = async (payload, message) => {
   let user = await findUserByEmail(email);
 
   if (user && userBelongsToNetwork(user, network.id)) {
-    throw Boom.badData('User with the same email already in this network.');
+    throw createError('403', 'User with the same email already in this network.');
   } else if (user && !userBelongsToNetwork(user, network.id)) {
     await inviteExistingUser(network, user, role);
   } else {

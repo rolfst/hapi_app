@@ -1,5 +1,4 @@
-import Boom from 'boom';
-import NotInAnyNetwork from 'common/errors/not-in-any-network';
+import createError from 'common/utils/create-error';
 import tokenUtil from 'common/utils/token';
 import userBelongsToNetwork from 'common/utils/user-belongs-to-network';
 import * as userRepo from 'common/repositories/user';
@@ -31,7 +30,7 @@ export const getAuthenticationTokens = async (payload, message) => {
     authenticatedIntegrations.concat([payload.integrationSettings]);
   }
 
-  if (!userBelongsToNetwork(user)) throw new NotInAnyNetwork();
+  if (!userBelongsToNetwork(user)) throw createError('403');
 
   const device = await authenticationRepo.findOrCreateUserDevice(user.id, message.deviceName);
   const accessToken = await createAccessToken(user.id, device.device_id, authenticatedIntegrations);
@@ -44,7 +43,7 @@ export const getAuthenticationTokens = async (payload, message) => {
 
 export const delegate = async (payload, { request }) => {
   const decodedToken = tokenUtil.decode(payload.refreshToken);
-  if (!decodedToken.sub) throw Boom.badData('No sub found in refresh token.');
+  if (!decodedToken.sub) throw createError('422', 'No sub found in refresh token.');
 
   const userId = decodedToken.sub;
   const user = await userRepo.findUserById(userId);

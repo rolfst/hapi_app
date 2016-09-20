@@ -1,8 +1,8 @@
-import _ from 'lodash';
+import { sample } from 'lodash';
 import sequelize from 'sequelize';
-import Boom from 'boom';
-import { db } from 'connections';
-import { User, Network, NetworkUser, Integration, Team } from 'common/models';
+import { db } from '../../connections';
+import createError from '../utils/create-error';
+import { User, Network, NetworkUser, Integration, Team } from '../models';
 
 const dummyProfileImgPaths = [
   'default/default-1.png',
@@ -42,7 +42,7 @@ export const findExternalUsers = async (externalIds) => {
 
 export async function findUserById(id) {
   const user = await User.findOne({ ...defaultIncludes, where: { id } });
-  if (!user) throw Boom.forbidden(`No user found with id ${id}`);
+  if (!user) throw createError('404');
 
   return user;
 }
@@ -51,11 +51,8 @@ export function findUserByEmail(email) {
   return User.findOne({ ...defaultIncludes, where: { email } });
 }
 
-export async function findUserByUsername(username) {
-  const user = await User.findOne({ ...defaultIncludes, where: { username } });
-  if (!user) throw Boom.forbidden(`No user found with username ${username}`);
-
-  return user;
+export function findUserByUsername(username) {
+  return User.findOne({ ...defaultIncludes, where: { username } });
 }
 
 export function addExternalUsersToNetwork(users, network) {
@@ -102,7 +99,7 @@ export async function updateUserByEmail(email, attributes) {
 
 export function createUser(attributes) {
   const values = Object.assign(attributes, {
-    profileImg: _.sample(dummyProfileImgPaths),
+    profileImg: sample(dummyProfileImgPaths),
   });
 
   return User.create(values).then(user => {
@@ -114,7 +111,7 @@ export function createBulkUsers(users) {
   const promises = users
     .map(user => ({
       ...user,
-      profileImg: _.sample(dummyProfileImgPaths),
+      profileImg: sample(dummyProfileImgPaths),
     }))
     .map(user => User.create(user));
 
@@ -152,7 +149,7 @@ export async function setIntegrationToken(user, network, token) {
     where: { userId: user.id, networkId: network.id },
   });
 
-  if (!result) throw Boom.forbidden('User does not belong to the network.');
+  if (!result) throw createError('10002');
 
   return result.update({ userToken: token });
 }

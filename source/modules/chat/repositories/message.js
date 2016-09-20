@@ -1,5 +1,5 @@
-import Message from 'modules/chat/models/message';
-import Boom from 'boom';
+import createError from '../../../common/utils/create-error';
+import { Message } from '../models';
 
 /**
  * Find all messages by conversation
@@ -40,7 +40,7 @@ export function findMessageById(id, includes) {
   return Message
     .findById(id, { include: includes })
     .then(message => {
-      if (!message) throw Boom.notFound('No message found.');
+      if (!message) throw createError('404');
 
       return message;
     });

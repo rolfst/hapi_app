@@ -1,5 +1,6 @@
 import { omit, map, filter, find } from 'lodash';
 import { isAdmin, isEmployee } from '../../../../common/services/permission';
+import createError from '../../../../common/utils/create-error';
 import * as networkUtil from '../../../../common/utils/network';
 import * as userRepo from '../../../../common/repositories/user';
 import * as exchangeRepo from '../../repositories/exchange';
@@ -12,6 +13,16 @@ export const matchUsersForShift = async (usersToMatch, network) => {
     .map((u) => networkUtil.addUserScope(u, network.id));
 
   return response;
+};
+
+export const validateExchangeResponse = (exchangeResponse) => {
+  if (exchangeResponse.approved) {
+    throw createError('403', 'The user is already approved for the exchange.');
+  } else if (exchangeResponse.approved === 0) {
+    throw createError('403', 'You cannot approve a user that is rejected for the exchange.');
+  } else if (!exchangeResponse.response) {
+    throw createError('403', 'You cannot approve a user that did not accept the exchange.');
+  }
 };
 
 export const filterTeamsForNetwork = (teams, networkId) => teams.

@@ -1,6 +1,5 @@
 import { find } from 'lodash';
-import Boom from 'boom';
-import IntegrationNotFound from 'common/errors/integration-not-found';
+import createError from './create-error';
 import pmtAdapter from 'adapters/pmt/adapter';
 
 const availableIntegrations = [{
@@ -14,13 +13,13 @@ export default (network, authSettings = [], options = {}) => {
   integrations = integrations || availableIntegrations;
 
   const integration = find(integrations, { name: network.Integrations[0].name });
-  if (!integration) throw new IntegrationNotFound();
+  if (!integration) throw createError('10001');
 
   let token = null;
   const authSetting = find(authSettings, { name: integration.name });
 
   if (!authSetting && !proceedWithoutToken) {
-    throw Boom.forbidden('The user has no authentication with the integration.');
+    throw createError('403');
   }
 
   token = authSetting ? authSetting.token : null;

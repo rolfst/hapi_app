@@ -1,9 +1,10 @@
 import { find } from 'lodash';
+import createError from './create-error';
 
 export const select = (networks, networkId) => {
   const network = find(networks, { id: parseInt(networkId, 10) });
 
-  if (!network) throw new Error('User does not belong to this network.');
+  if (!network) throw createError('10002');
 
   return network;
 };

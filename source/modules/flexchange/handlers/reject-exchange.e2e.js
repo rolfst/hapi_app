@@ -58,7 +58,7 @@ describe('Reject exchange', () => {
     const payload = { action: 'reject', user_id: global.users.employee.id };
     const { statusCode } = await patchRequest(endpoint, payload);
 
-    assert.equal(statusCode, 422);
+    assert.equal(statusCode, 403);
   });
 
   it('should fail when trying to reject a response from an already approved exchange', async () => {
@@ -66,7 +66,7 @@ describe('Reject exchange', () => {
     const payload = { action: 'reject', user_id: global.users.admin.id };
     const { statusCode } = await patchRequest(endpoint, payload);
 
-    assert.equal(statusCode, 422);
+    assert.equal(statusCode, 403);
   });
 
   it('should fail when user doesn\'t have permission to reject', async () => {

@@ -25,14 +25,14 @@ describe('Approve exchange', () => {
     const exchangeToReject = await exchangeRepo.createExchange(creator.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
-      title: 'Test exchange to approve',
+      title: 'Test exchange to reject',
     });
 
-    const acceptedExchangePromise = await exchangeRepo.acceptExchange(exchangeToAccept.id,
+    const acceptedExchangePromise = exchangeRepo.acceptExchange(exchangeToAccept.id,
       creator.id)
     .then(() => exchangeToAccept.reload());
 
-    const rejectedExchangePromise = await exchangeRepo.acceptExchange(exchangeToReject.id,
+    const rejectedExchangePromise = exchangeRepo.acceptExchange(exchangeToReject.id,
       creator.id)
     .then(() => exchangeRepo.rejectExchange(exchangeToReject, creator, creator.id));
 
@@ -59,7 +59,7 @@ describe('Approve exchange', () => {
     const payload = { action: 'approve', user_id: creator.id };
     const { statusCode } = await patchRequest(endpoint, payload);
 
-    assert.equal(statusCode, 422);
+    assert.equal(statusCode, 403);
   });
 
   it('should fail when there is no user_id is present', async () => {
@@ -70,12 +70,12 @@ describe('Approve exchange', () => {
     assert.equal(statusCode, 422);
   });
 
-  it('should fail if user has not accepted exchange', async () => {
+  it('should fail if user has not accepted the exchange', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${acceptedExchange.id}`;
     const payload = { action: 'approve', user_id: global.users.employee.id };
     const { statusCode } = await patchRequest(endpoint, payload);
 
-    assert.equal(statusCode, 422);
+    assert.equal(statusCode, 403);
   });
 
   it('should fail when user doesn\'t have permission to approve', async () => {

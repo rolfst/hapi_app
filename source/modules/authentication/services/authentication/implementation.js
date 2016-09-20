@@ -2,16 +2,17 @@ import { find } from 'lodash';
 import moment from 'moment';
 import Promise from 'bluebird';
 import createAdapter from 'common/utils/create-adapter';
-import WrongCredentials from 'common/errors/wrong-credentials';
+import createError from 'common/utils/create-error';
 import * as userRepo from 'common/repositories/user';
 import * as networkUtil from 'common/utils/network';
 import checkPassword from 'modules/authentication/utils/check-password';
 
 export const authenticateUser = async ({ username, password }) => {
   const user = await userRepo.findUserByUsername(username);
-  const validPassword = checkPassword(user.password, password);
+  if (!user) throw createError('10004');
 
-  if (!validPassword) throw new WrongCredentials();
+  const validPassword = checkPassword(user.password, password);
+  if (!validPassword) throw createError('10004');
 
   return user;
 };

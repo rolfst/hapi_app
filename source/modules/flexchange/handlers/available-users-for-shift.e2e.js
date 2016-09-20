@@ -46,6 +46,7 @@ describe('Available users for shift', () => {
     nock(global.networks.pmt.externalId)
       .get(`/shift/${shiftId}/available`)
       .reply(404, stubs.available_users_not_found_404);
+
     const endpoint = `/v2/networks/${global.networks.pmt.id}/shifts/${shiftId}/available`;
     const { statusCode } = await getRequest(endpoint);
 

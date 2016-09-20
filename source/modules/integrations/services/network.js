@@ -1,3 +1,4 @@
+import createError from '../../../common/utils/create-error';
 import createAdapter from '../../../common/utils/create-adapter';
 import * as networkRepo from '../../../common/repositories/network';
 import * as userRepo from '../../../common/repositories/user';
@@ -6,7 +7,7 @@ import * as impl from './impl';
 export const importNetwork = async (payload) => {
   const network = await networkRepo.findNetworkById(payload.networkId);
 
-  if (!network.externalId) throw new Error('This network has no integration.');
+  if (!network.externalId) throw createError('10001');
 
   const adapter = createAdapter(network, [], { proceedWithoutToken: true });
 

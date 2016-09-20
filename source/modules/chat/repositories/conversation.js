@@ -1,7 +1,7 @@
 import { db as Sequelize } from 'connections';
-import Boom from 'boom';
-import { User } from 'common/models';
-import { Conversation, Message } from 'modules/chat/models';
+import createError from '../../../common/utils/create-error';
+import { User } from '../../../common/models';
+import { Conversation, Message } from '../models';
 
 const defaultIncludes = [
   { model: User },
@@ -20,7 +20,7 @@ export async function findConversationById(id, includes = []) {
     include: [...includes, ...defaultIncludes],
   });
 
-  if (!conversation) throw Boom.notFound('No conversation found.');
+  if (!conversation) throw createError('404');
 
   return conversation;
 }
@@ -69,11 +69,11 @@ export async function findExistingConversationWithUser(loggedUserId, userId) {
 export async function createConversation(type, creatorId, participants) {
   // TODO: Move logic to acl
   if (participants.length < 2) {
-    throw Boom.forbidden('A conversation must have 2 or more participants');
+    throw createError('403', 'A conversation must have 2 or more participants');
   }
 
   if (participants[0] === participants[1]) {
-    throw Boom.forbidden('You cannot create a conversation with yourself');
+    throw createError('403', 'You cannot create a conversation with yourself');
   }
 
   let conversation = await findExistingConversationWithUser(creatorId, participants[0]);
@@ -97,7 +97,7 @@ export function deleteConversationById(id) {
   return Conversation
     .findById(id)
     .then(conversation => {
-      if (!conversation) throw Boom.notFound('No conversation found.');
+      if (!conversation) throw createError('404');
 
       return conversation.destroy();
     });

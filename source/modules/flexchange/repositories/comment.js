@@ -1,7 +1,7 @@
-import Boom from 'boom';
-import { ActivityTypes } from 'common/models/activity';
-import { createActivity } from 'common/repositories/activity';
-import ExchangeComment from 'modules/flexchange/models/exchange-comment';
+import createError from '../../../common/utils/create-error';
+import { ActivityTypes } from '../../../common/models/activity';
+import { createActivity } from '../../../common/repositories/activity';
+import ExchangeComment from '../models/exchange-comment';
 
 /**
  * Find a specific exchange comment by id
@@ -13,7 +13,7 @@ export function findCommentById(commentId) {
   return ExchangeComment
     .findById(commentId)
     .then(comment => {
-      if (!comment) return Boom.notFound(`No comment found with id ${commentId}.`);
+      if (!comment) throw createError('404');
 
       return comment;
     });

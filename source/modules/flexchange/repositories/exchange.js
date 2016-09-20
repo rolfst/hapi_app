@@ -1,16 +1,16 @@
-import Boom from 'boom';
 import { omit, merge } from 'lodash';
-import makeCreatedInObject from 'modules/flexchange/utils/created-in-text';
-import { ActivityTypes } from 'common/models/activity';
-import { createActivity } from 'common/repositories/activity';
-import { User } from 'common/models';
-import { exchangeTypes } from 'modules/flexchange/models/exchange';
+import createError from '../../../common/utils/create-error';
+import { ActivityTypes } from '../../../common/models/activity';
+import { createActivity } from '../../../common/repositories/activity';
+import { User } from '../../../common/models';
+import makeCreatedInObject from '../utils/created-in-text';
+import { exchangeTypes } from '../models/exchange';
 import {
   Exchange, ExchangeResponse, ExchangeComment, ExchangeValue,
-} from 'modules/flexchange/models';
-import { createExchangeResponse } from 'modules/flexchange/repositories/exchange-response';
-import { createValuesForExchange } from 'modules/flexchange/repositories/exchange-value';
-import * as exchangeResponseRepo from 'modules/flexchange/repositories/exchange-response';
+} from '../models';
+import { createExchangeResponse } from './exchange-response';
+import { createValuesForExchange } from './exchange-value';
+import * as exchangeResponseRepo from './exchange-response';
 
 const defaultIncludes = [
     { model: User },
@@ -51,7 +51,7 @@ export async function findExchangeById(exchangeId, userId) {
   const exchange = await Exchange
     .findById(exchangeId, { include: [...defaultIncludes, ...extraIncludes] });
 
-  if (!exchange) throw Boom.notFound(`No exchange found with id ${exchangeId}.`);
+  if (!exchange) throw createError('404');
 
   return exchange;
 }
@@ -282,19 +282,17 @@ export async function respondToExchange(exchangeId, userId, response) {
   if (data.response === 0) await incrementExchangeDeclineCount(exchange);
   else if (data.response === 1) await incrementExchangeAcceptCount(exchange);
 
-  try {
-    const constraint = { exchangeId: exchange.id, userId };
-    const exchangeResponse = await exchangeResponseRepo.findResponseWhere(constraint);
+  const constraint = { exchangeId: exchange.id, userId };
+  const exchangeResponse = await exchangeResponseRepo.findResponseWhere(constraint);
 
-    if (exchangeResponse) {
-      await exchangeResponse.destroy();
+  if (exchangeResponse) {
+    await exchangeResponse.destroy();
 
-      if (exchangeResponse.response === 0) await decrementExchangeDeclineCount(exchange);
-      else if (exchangeResponse.response === 1) await decrementExchangeAcceptCount(exchange);
+    if (exchangeResponse.response === 0) await decrementExchangeDeclineCount(exchange);
+    else if (exchangeResponse.response === 1) await decrementExchangeAcceptCount(exchange);
 
-      await createExchangeResponse(data);
-    }
-  } catch (err) {
+    await createExchangeResponse(data);
+  } else {
     await createExchangeResponse(data);
   }
 
@@ -351,6 +349,8 @@ export async function approveExchange(exchange, approvingUser, userIdToApprove) 
   const constraint = { exchangeId: exchange.id, userId: userIdToApprove };
   const exchangeResponse = await exchangeResponseRepo.findResponseWhere(constraint);
 
+  if (!exchangeResponse) throw createError('403', 'Cannot approve the exchange for this user.');
+
   await Promise.all([
     exchangeResponse.update({ approved: 1 }),
     exchange.update({ approved_by: approvingUser.id, approved_user: userIdToApprove }),
@@ -378,6 +378,8 @@ export async function approveExchange(exchange, approvingUser, userIdToApprove) 
 export async function rejectExchange(exchange, rejectingUser, userIdToReject) {
   const constraint = { exchangeId: exchange.id, userId: userIdToReject };
   const exchangeResponse = await exchangeResponseRepo.findResponseWhere(constraint);
+
+  if (!exchangeResponse) throw createError('403', 'Cannot reject the exchange for this user.');
 
   await exchangeResponse.update({ approved: 0 });
 

@@ -1,6 +1,5 @@
 import fetch from 'isomorphic-fetch';
-import Boom from 'boom';
-import ExpiredToken from 'common/errors/token-expired';
+import createError from '../../common/utils/create-error';
 
 const createFormEncodedString = (data) => {
   return Object.keys(data).map((key) => {
@@ -9,10 +8,13 @@ const createFormEncodedString = (data) => {
 };
 
 const handleError = (status, body) => {
-  if (status === 400 && body.error === 'Token is expired.') throw ExpiredToken;
-  if (status === 400) throw Boom.badData(body.error);
-  if (status === 401) throw Boom.unauthorized(body.error);
-  if (status === 403) throw Boom.forbidden(body.error);
+  if (status === 400 && body.error === 'Token is expired.' || status === 401) {
+    throw createError('401');
+  } else if (status === 400) {
+    throw createError('422');
+  } else if (status === 403) {
+    throw createError('403');
+  }
 };
 
 export async function makeRequest(endpoint, token = null, method = 'GET', data = {}) {

@@ -1,15 +1,14 @@
-import Boom from 'boom';
 import moment from 'moment';
 import { pick, includes } from 'lodash';
-import camelCaseKeys from 'common/utils/camel-case-keys';
-import { UserRoles } from 'common/services/permission';
-import IntegrationNotFound from 'common/errors/integration-not-found';
-import { findUsersByTeamIds, validateTeamIds } from 'common/repositories/team';
-import { findAllUsersForNetwork } from 'common/repositories/network';
-import { validateUserIds } from 'common/repositories/user';
-import * as networkUtil from 'common/utils/network';
-import analytics from 'common/services/analytics';
-import newExchangeEvent from 'common/events/new-exchange-event';
+import createError from '../../../common/utils/create-error';
+import camelCaseKeys from '../../../common/utils/camel-case-keys';
+import { UserRoles } from '../../../common/services/permission';
+import { findUsersByTeamIds, validateTeamIds } from '../../../common/repositories/team';
+import { findAllUsersForNetwork } from '../../../common/repositories/network';
+import { validateUserIds } from '../../../common/repositories/user';
+import * as networkUtil from '../../../common/utils/network';
+import analytics from '../../../common/services/analytics';
+import newExchangeEvent from '../../../common/events/new-exchange-event';
 import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import { findExchangeById, createExchange } from 'modules/flexchange/repositories/exchange';
 import * as createdByAdminNotification from '../notifications/exchange-created-by-admin';
@@ -46,11 +45,11 @@ export default async (req, reply) => {
     const data = camelCaseKeys(whitelist);
 
     if (data.startTime && data.endTime && moment(data.endTime).isBefore(data.startTime)) {
-      throw Boom.badData('end_time should be after start_time');
+      throw createError('422', 'Attribute end_time should be after start_time');
     }
 
     if (data.shiftId && !networkUtil.hasIntegration(network)) {
-      throw new IntegrationNotFound();
+      throw createError('10001');
     }
 
     if (includes([exchangeTypes.TEAM, exchangeTypes.USER], data.type)) {
@@ -59,7 +58,7 @@ export default async (req, reply) => {
       if (data.type === exchangeTypes.USER) validator = validateUserIds;
 
       const isValid = validator ? await validator(data.values, network.id) : true;
-      if (!isValid) throw Boom.badData('Incorrect values.');
+      if (!isValid) throw createError('422', 'Specified invalid ids for type.');
     }
 
     const createdExchange = await createExchange(credentials.id, network.id, {

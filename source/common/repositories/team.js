@@ -1,12 +1,12 @@
-import Boom from 'boom';
 import sequelize from 'sequelize';
+import createError from '../utils/create-error';
 import { Team, User, TeamUser } from 'common/models';
 
 export function findTeamById(id) {
   return Team
     .findById(id)
     .then(team => {
-      if (!team) throw Boom.notFound(`No team found with id ${id}.`);
+      if (!team) throw createError('404');
 
       return team;
     });

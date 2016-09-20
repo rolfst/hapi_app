@@ -1,6 +1,7 @@
 import { assert } from 'chai';
 import nock from 'nock';
 import moment from 'moment';
+import createError from '../../../common/utils/create-error';
 import * as stubs from '../test-utils/stubs';
 import * as blueprints from '../test-utils/blueprints';
 import hook from './my-shifts';
@@ -31,6 +32,6 @@ describe('PMT my shifts hook', () => {
 
     const actual = hook(global.networks.pmt.externalId)();
 
-    return assert.isRejected(actual, new RegExp(stubs.shifts_forbidden_403.error));
+    return assert.isRejected(actual, createError('403'));
   });
 });

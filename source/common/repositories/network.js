@@ -1,4 +1,4 @@
-import Boom from 'boom';
+import createError from '../utils/create-error';
 import { Network, User, NetworkUser, Integration } from 'common/models';
 
 const defaultIncludes = [
@@ -36,7 +36,7 @@ export function findNetworkById(id) {
       include: defaultIncludes,
     })
     .then(network => {
-      if (!network) return Boom.notFound(`No network found with id ${id}.`);
+      if (!network) throw createError('404');
 
       return network;
     });
@@ -46,7 +46,7 @@ export function findNetwork(data) {
   return Network
     .findOne({ where: data, include: defaultIncludes })
     .then(network => {
-      if (!network) return Boom.notFound('No network found for the given data.');
+      if (!network) throw createError('404');
 
       return network;
     });

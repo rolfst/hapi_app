@@ -1,10 +1,10 @@
 import { assert } from 'chai';
 import moment from 'moment';
 import nock from 'nock';
-import { exchangeTypes } from '../models/exchange';
-import { getRequest } from '../../../common/test-utils/request';
-import { createExchange } from '../repositories/exchange';
 import * as stubs from '../../../adapters/pmt/test-utils/stubs';
+import { getRequest } from '../../../common/test-utils/request';
+import { exchangeTypes } from '../models/exchange';
+import { createExchange } from '../repositories/exchange';
 
 describe('Handler: View shift', () => {
   let network;
@@ -55,7 +55,7 @@ describe('Handler: View shift', () => {
     const today = moment().format('DD-MM-YYYY');
     nock(global.networks.pmt.externalId)
       .get(`/me/shifts/${today}`)
-      .reply(200, stubs.empty_shifts_200);
+      .reply(200, stubs.shifts_empty_200);
 
     const endpoint = `/v2/networks/${network.id}/shifts/1`;
     const { statusCode } = await getRequest(endpoint);

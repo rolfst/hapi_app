@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
+import createError from 'common/utils/create-error';
 import tokenUtil from 'common/utils/token';
 import * as userRepo from 'common/repositories/user';
 import * as strategy from 'common/middlewares/authenticator-strategy';
@@ -50,11 +51,11 @@ describe('authenticatorStrategy', () => {
     sandbox.stub(tokenUtil, 'decode').returns({ sub: null });
     const promise = strategy.authenticate(1, 'foo');
 
-    return assert.isRejected(promise, Error);
+    return assert.isRejected(promise, createError('10004'));
   });
 
   it('should throw error when token is empty', () => {
     const promise = strategy.authenticate(1, null);
-    return assert.isRejected(promise, Error);
+    return assert.isRejected(promise, createError('401'));
   });
 });

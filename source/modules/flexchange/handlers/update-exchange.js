@@ -1,8 +1,8 @@
 import { pick } from 'lodash';
 import moment from 'moment';
-import Boom from 'boom';
-import camelCaseKeys from 'common/utils/camel-case-keys';
-import { updateExchangeById } from 'modules/flexchange/repositories/exchange';
+import createError from '../../../common/utils/create-error';
+import camelCaseKeys from '../../../common/utils/camel-case-keys';
+import { updateExchangeById } from '../repositories/exchange';
 
 export default async (req, reply) => {
   try {
@@ -10,7 +10,7 @@ export default async (req, reply) => {
     const data = camelCaseKeys(whitelist);
 
     if (data.startTime && data.endTime && moment(data.endTime).isBefore(data.startTime)) {
-      throw Boom.badData('end_time should be after start_time');
+      throw createError('422', 'Attribute end_time should be after start_time');
     }
 
     const exchange = await updateExchangeById(req.params.exchangeId, data);

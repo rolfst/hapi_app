@@ -1,4 +1,5 @@
 import { assert } from 'chai';
+import createError from '../utils/create-error';
 import { selectNetworkForUser } from 'common/middlewares/prefetch-network';
 
 describe('selectNetworkForUser', () => {
@@ -17,11 +18,11 @@ describe('selectNetworkForUser', () => {
 
   it('should fail when user doesnt belong to the selected network', () => {
     const actual = () => selectNetworkForUser(user, 3);
-    assert.throws(actual, Error);
+    assert.throws(actual, createError('10002'));
   });
 
   it('should fail when user is deleted from selected network', () => {
     const actual = () => selectNetworkForUser(user, 2);
-    assert.throws(actual, Error);
+    assert.throws(actual, createError('10003'));
   });
 });
