@@ -18,7 +18,6 @@ export default async (req, reply) => {
       data: responseUtil.serialize(invitedUser),
     });
   } catch (err) {
-    console.log(err);
     return reply(err);
   }
 };

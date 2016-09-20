@@ -1,4 +1,3 @@
-import moment from 'moment';
 import Boom from 'boom';
 import NotInAnyNetwork from 'common/errors/not-in-any-network';
 import tokenUtil from 'common/utils/token';
@@ -24,6 +23,25 @@ const authenticateWithIntegrations = async (user, credentials) => {
   return authSettings;
 };
 
+export const getAuthenticationTokens = async (payload, message) => {
+  const user = await impl.authenticateUser(payload);
+  const authenticatedIntegrations = await authenticateWithIntegrations(user, payload);
+
+  if (payload.integrationSettings) {
+    authenticatedIntegrations.concat([payload.integrationSettings]);
+  }
+
+  if (!userBelongsToNetwork(user)) throw new NotInAnyNetwork();
+
+  const device = await authenticationRepo.findOrCreateUserDevice(user.id, message.deviceName);
+  const accessToken = await createAccessToken(user.id, device.device_id, authenticatedIntegrations);
+  const refreshToken = await createRefreshToken(user.id, device.device_id);
+
+  impl.updateLastLogin(user);
+
+  return { accessToken, refreshToken };
+};
+
 export const delegate = async (payload, { request }) => {
   const decodedToken = tokenUtil.decode(payload.refreshToken);
   if (!decodedToken.sub) throw Boom.badData('No sub found in refresh token.');
@@ -41,19 +59,9 @@ export const delegate = async (payload, { request }) => {
   return { refreshedAccessToken };
 };
 
-export const authenticate = async (payload, { request }) => {
+export const authenticate = async (payload, message) => {
+  const { accessToken, refreshToken } = await getAuthenticationTokens(payload, message);
   const user = await impl.authenticateUser(payload);
-  const authenticatedIntegrations = await authenticateWithIntegrations(user, payload);
-
-  if (!userBelongsToNetwork(user)) throw new NotInAnyNetwork();
-
-  const deviceName = request.headers['user-agent'];
-
-  const device = await authenticationRepo.findOrCreateUserDevice(user.id, deviceName);
-  userRepo.updateUser(user.id, { lastLogin: moment().toISOString() });
-
-  const accessToken = createAccessToken(user.id, device.device_id, authenticatedIntegrations);
-  const refreshToken = createRefreshToken(user.id, device.device_id);
 
   analytics.registerProfile(user);
   analytics.setUser(user);

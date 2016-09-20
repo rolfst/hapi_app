@@ -1,4 +1,5 @@
 import { find } from 'lodash';
+import moment from 'moment';
 import Promise from 'bluebird';
 import createAdapter from 'common/utils/create-adapter';
 import WrongCredentials from 'common/errors/wrong-credentials';
@@ -44,4 +45,8 @@ export const authenticateIntegrations = async (user, authenticationPromises) => 
     .map(inspection => inspection.value());
 
   return authenticatedIntegrations;
+};
+
+export const updateLastLogin = async (user) => {
+  userRepo.updateUser(user.id, { lastLogin: moment().toISOString() });
 };

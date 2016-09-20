@@ -6,7 +6,7 @@ export default async (req, reply) => {
 
   try {
     await networkService.importNetwork(payload, message);
-    
+
     return reply({ success: true });
   } catch (err) {
     console.error('Could not import network', {

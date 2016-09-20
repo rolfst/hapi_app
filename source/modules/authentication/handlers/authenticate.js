@@ -14,8 +14,10 @@ export default async (request, reply) => {
   const payload = pick(request.payload, 'username', 'password');
 
   try {
-    const result = await authenticationService.authenticate(payload, { request });
+    const message = { ...request.pre, ...request.auth };
 
+    message.deviceName = request.headers['user-agent'];
+    const result = await authenticationService.authenticate(payload, message);
     const data = {
       access_token: result.accessToken,
       refresh_token: result.refreshToken,

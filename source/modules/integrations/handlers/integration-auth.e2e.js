@@ -7,6 +7,7 @@ import { postRequest } from 'common/test-utils/request';
 import { createIntegrationNetwork } from 'common/repositories/network';
 import { findUserById } from 'common/repositories/user';
 import { createIntegration } from 'common/repositories/integration';
+import blueprints from 'common/test-utils/blueprints';
 
 describe('Integration auth', () => {
   let integration;
@@ -18,6 +19,8 @@ describe('Integration auth', () => {
     token: 'auth_token',
     externalId: 1,
   };
+
+  const employeeCredentials = blueprints.users.employee;
 
   before(async () => {
     const fakeAdapter = {
@@ -52,19 +55,20 @@ describe('Integration auth', () => {
   it('hook should be called with the credentials', async () => {
     const endpoint = `/v2/networks/${network.id}/integration_auth`;
     const { statusCode } = await postRequest(endpoint, {
-      username: 'foo',
-      password: 'baz',
+      username: employeeCredentials.username,
+      password: employeeCredentials.password,
     }, global.server, global.tokens.employee);
 
     assert.equal(statusCode, 200);
-    assert.isTrue(hookStub.calledWithMatch({ username: 'foo', password: 'baz' }));
+    assert.isTrue(hookStub.calledWithMatch(
+      { username: employeeCredentials.username, password: employeeCredentials.password }));
   });
 
   it('should return new access token', async () => {
     const endpoint = `/v2/networks/${network.id}/integration_auth`;
     const { result: { data } } = await postRequest(endpoint, {
-      username: 'foo',
-      password: 'baz',
+      username: employeeCredentials.username,
+      password: employeeCredentials.password,
     }, global.server, global.tokens.employee);
 
     const actual = tokenUtil.decode(data.access_token);

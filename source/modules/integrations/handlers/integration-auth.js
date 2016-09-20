@@ -1,26 +1,14 @@
 import Boom from 'boom';
-import createAdapter from 'common/utils/create-adapter';
-import { setIntegrationToken } from 'common/repositories/user';
-import { findOrCreateUserDevice } from 'common/repositories/authentication';
-import createAccessToken from 'modules/authentication/utils/create-access-token';
+import * as accessService from '../services/access';
 
 export default async (req, reply) => {
+  const message = { ...req.pre, ...req.auth, deviceName: req.headers['user-agent'] };
+  const payload = { ...req.payload, ...req.params };
+
   try {
-    const user = req.auth.credentials;
-    const authenticatedIntegrations = req.auth.artifacts.integrations;
-    const adapter = createAdapter(req.pre.network, null, { proceedWithoutToken: true });
-    const authResult = await adapter.authenticate(req.payload);
+    const accessToken = await accessService.getAccessToken(payload, message);
 
-    const deviceName = req.headers['user-agent'];
-    const device = await findOrCreateUserDevice(user.id, deviceName);
-    const newAccessToken = createAccessToken(user.id, device.device_id, [
-      ...authenticatedIntegrations,
-      authResult,
-    ]);
-
-    await setIntegrationToken(user, req.pre.network, authResult.token);
-
-    return reply({ data: { access_token: newAccessToken } });
+    return reply({ data: { access_token: accessToken } });
   } catch (err) {
     return reply(Boom.unauthorized('Could not authenticate with integration'));
   }

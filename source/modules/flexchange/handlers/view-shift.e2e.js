@@ -4,7 +4,7 @@ import nock from 'nock';
 import { exchangeTypes } from '../models/exchange';
 import { getRequest } from '../../../common/test-utils/request';
 import { createExchange } from '../repositories/exchange';
-import * as stubs from '../test-utils/stubs';
+import * as stubs from '../../../adapters/pmt/test-utils/stubs';
 
 describe('Handler: View shift', () => {
   let network;

@@ -1,6 +1,6 @@
 import nock from 'nock';
 import { assert } from 'chai';
-import * as stubs from '../test-utils/stubs';
+import * as stubs from '../../../adapters/pmt/test-utils/stubs';
 import * as networkUtil from '../../../common/utils/network';
 import { getRequest } from '../../../common/test-utils/request';
 
@@ -25,6 +25,8 @@ describe('Available users for shift', () => {
       .reply(200, { users: fakeUsers });
   });
 
+  after(() => global.users.employee.removeNetwork(global.networks.pmt));
+
   it('should return available users', async () => {
     const endpoint = `/v2/networks/${global.networks.pmt.id}/shifts/1/available`;
     const { result, statusCode } = await getRequest(endpoint);
@@ -36,6 +38,7 @@ describe('Available users for shift', () => {
       networkUtil.addUserScope(newAdmin, global.networks.pmt.id).toJSON(),
     ]);
   });
+
 
   it('should fail when shift is not found', async () => {
     const shiftId = 2;
