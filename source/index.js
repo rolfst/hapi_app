@@ -1,5 +1,7 @@
 import 'babel-polyfill';
+import moment from 'moment-timezone';
 import dotenv from 'dotenv';
+moment.tz.setDefault('Europe/Amsterdam');
 dotenv.config();
 
 const createServer = require('server').default;

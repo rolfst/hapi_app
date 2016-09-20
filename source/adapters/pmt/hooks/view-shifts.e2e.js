@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import nock from 'nock';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import createError from '../../../common/utils/create-error';
 import * as stubs from '../test-utils/stubs';
 import * as blueprints from '../test-utils/blueprints';
