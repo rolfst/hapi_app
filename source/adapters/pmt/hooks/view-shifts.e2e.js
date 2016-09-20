@@ -23,6 +23,7 @@ describe.only('PMT view shifts hook', () => {
     const actual = await hook(global.networks.pmt.externalId, TOKEN)(knownId);
     const expected = blueprints.found_shift;
 
+    console.log('utc offset', moment().utcOffset());
     console.log('actual', actual);
     console.log('expected', expected);
 
