@@ -1,4 +1,4 @@
-import tokenUtil from 'common/utils/token';
+import tokenUtil from 'shared/utils/token';
 import _ from 'lodash';
 
 export default (userId, deviceId) => {

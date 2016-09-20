@@ -2,9 +2,9 @@ import { assert } from 'chai';
 import qs from 'qs';
 import moment from 'moment';
 import { find } from 'lodash';
-import { createTeam } from 'common/repositories/team';
+import { createTeam } from 'shared/repositories/team';
 import { exchangeTypes } from 'modules/flexchange/models/exchange';
-import { getRequest } from 'common/test-utils/request';
+import { getRequest } from 'shared/test-utils/request';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
 
 describe('Get exchanges for network', () => {

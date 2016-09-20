@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { postRequest } from 'common/test-utils/request';
+import { postRequest } from 'shared/test-utils/request';
 import {
   createConversation,
   deleteAllConversationsForUser,

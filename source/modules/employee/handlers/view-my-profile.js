@@ -1,5 +1,5 @@
 import * as service from '../services/employee';
-import * as responseUtil from '../../../common/utils/response';
+import * as responseUtil from '../../../shared/utils/response';
 
 export default async (req, reply) => {
   try {

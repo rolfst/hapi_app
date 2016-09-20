@@ -1,10 +1,10 @@
-import createError from 'common/utils/create-error';
-import tokenUtil from 'common/utils/token';
-import userBelongsToNetwork from 'common/utils/user-belongs-to-network';
-import * as userRepo from 'common/repositories/user';
-import analytics from 'common/services/analytics';
-import firstLoginEvent from 'common/events/first-login-event';
-import * as authenticationRepo from 'common/repositories/authentication';
+import createError from 'shared/utils/create-error';
+import tokenUtil from 'shared/utils/token';
+import userBelongsToNetwork from 'shared/utils/user-belongs-to-network';
+import * as userRepo from 'shared/repositories/user';
+import analytics from 'shared/services/analytics';
+import firstLoginEvent from 'shared/events/first-login-event';
+import * as authenticationRepo from 'shared/repositories/authentication';
 import createAccessToken from 'modules/authentication/utils/create-access-token';
 import createRefreshToken from 'modules/authentication/utils/create-refresh-token';
 import * as impl from 'modules/authentication/services/authentication/implementation';

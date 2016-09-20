@@ -1,10 +1,10 @@
 import { find } from 'lodash';
 import moment from 'moment';
 import Promise from 'bluebird';
-import createAdapter from 'common/utils/create-adapter';
-import createError from 'common/utils/create-error';
-import * as userRepo from 'common/repositories/user';
-import * as networkUtil from 'common/utils/network';
+import createAdapter from 'shared/utils/create-adapter';
+import createError from 'shared/utils/create-error';
+import * as userRepo from 'shared/repositories/user';
+import * as networkUtil from 'shared/utils/network';
 import checkPassword from 'modules/authentication/utils/check-password';
 
 export const authenticateUser = async ({ username, password }) => {

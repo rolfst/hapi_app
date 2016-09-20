@@ -1,8 +1,8 @@
 import moment from 'moment';
 import 'moment/locale/nl';
 moment.locale('nl');
-import notifier from 'common/services/notifier';
-import { findAdminsByNetwork } from 'common/repositories/network';
+import notifier from 'shared/services/notifier';
+import { findAdminsByNetwork } from 'shared/repositories/network';
 
 export const createNotification = (exchange, substituteUser) => {
   const substitute = substituteUser.fullName;

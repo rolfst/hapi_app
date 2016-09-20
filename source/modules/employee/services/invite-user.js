@@ -1,17 +1,17 @@
-import createError from '../../../common/utils/create-error';
-import camelCaseKeys from '../../../common/utils/camel-case-keys';
-import * as password from 'common/utils/password';
-import signupMail from 'common/mails/signup';
-import addedToNetworkMail from 'common/mails/added-to-network';
-import * as mailer from 'common/services/mailer';
-import { createUser, findUserByEmail } from 'common/repositories/user';
-import * as networkRepo from 'common/repositories/network';
-import { addUserToNetwork } from 'common/repositories/user';
-import { addUserToTeams } from 'common/repositories/team';
-import userBelongsToNetwork from 'common/utils/user-belongs-to-network';
-import userIsDeletedFromNetwork from 'common/utils/user-is-deleted-from-network';
-import * as userRepo from '../../../common/repositories/user';
-import * as networkUtil from '../../../common/utils/network';
+import createError from '../../../shared/utils/create-error';
+import camelCaseKeys from '../../../shared/utils/camel-case-keys';
+import * as password from 'shared/utils/password';
+import signupMail from 'shared/mails/signup';
+import addedToNetworkMail from 'shared/mails/added-to-network';
+import * as mailer from 'shared/services/mailer';
+import { createUser, findUserByEmail } from 'shared/repositories/user';
+import * as networkRepo from 'shared/repositories/network';
+import { addUserToNetwork } from 'shared/repositories/user';
+import { addUserToTeams } from 'shared/repositories/team';
+import userBelongsToNetwork from 'shared/utils/user-belongs-to-network';
+import userIsDeletedFromNetwork from 'shared/utils/user-is-deleted-from-network';
+import * as userRepo from '../../../shared/repositories/user';
+import * as networkUtil from '../../../shared/utils/network';
 
 export const inviteNewUser = async (network, { firstName, lastName, email, roleType }) => {
   const plainPassword = password.plainRandom();

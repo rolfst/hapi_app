@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import moment from 'moment';
-import { getRequest } from 'common/test-utils/request';
+import { getRequest } from 'shared/test-utils/request';
 import { exchangeTypes } from 'modules/flexchange/models/exchange';
 import {
   acceptExchange,

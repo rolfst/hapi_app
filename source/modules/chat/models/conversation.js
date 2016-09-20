@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 import { db as model } from 'connections';
-import formatDate from 'common/utils/format-date';
+import formatDate from 'shared/utils/format-date';
 
 const Conversation = model.define('Conversation', {
   type: {

@@ -1,14 +1,14 @@
 import sinon from 'sinon';
 import { assert } from 'chai';
-import createError from 'common/utils/create-error';
-import * as networkUtil from 'common/utils/network';
-import tokenUtil from 'common/utils/token';
-import * as createAdapter from 'common/utils/create-adapter';
-import { postRequest } from 'common/test-utils/request';
-import { createIntegrationNetwork } from 'common/repositories/network';
-import { findUserById } from 'common/repositories/user';
-import { createIntegration } from 'common/repositories/integration';
-import blueprints from 'common/test-utils/blueprints';
+import createError from 'shared/utils/create-error';
+import * as networkUtil from 'shared/utils/network';
+import tokenUtil from 'shared/utils/token';
+import * as createAdapter from 'shared/utils/create-adapter';
+import { postRequest } from 'shared/test-utils/request';
+import { createIntegrationNetwork } from 'shared/repositories/network';
+import { findUserById } from 'shared/repositories/user';
+import { createIntegration } from 'shared/repositories/integration';
+import blueprints from 'shared/test-utils/blueprints';
 
 describe('Integration auth', () => {
   let integration;

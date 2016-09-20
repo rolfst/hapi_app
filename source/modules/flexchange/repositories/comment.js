@@ -1,6 +1,6 @@
-import createError from '../../../common/utils/create-error';
-import { ActivityTypes } from '../../../common/models/activity';
-import { createActivity } from '../../../common/repositories/activity';
+import createError from '../../../shared/utils/create-error';
+import { ActivityTypes } from '../../../shared/models/activity';
+import { createActivity } from '../../../shared/repositories/activity';
 import ExchangeComment from '../models/exchange-comment';
 
 /**

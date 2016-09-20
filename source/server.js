@@ -4,9 +4,9 @@ import Hapi from 'hapi';
 import { omit } from 'lodash';
 import routes from 'create-routes';
 import raven from 'raven';
-import jwtStrategy from 'common/middlewares/authenticator-strategy';
-import integrationStrategy from 'common/middlewares/integration-strategy';
-import * as serverUtil from 'common/utils/server';
+import jwtStrategy from 'shared/middlewares/authenticator-strategy';
+import integrationStrategy from 'shared/middlewares/integration-strategy';
+import * as serverUtil from 'shared/utils/server';
 import { server as serverConnection } from 'connections';
 
 const createServer = (port) => {

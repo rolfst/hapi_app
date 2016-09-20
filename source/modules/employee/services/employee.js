@@ -1,4 +1,4 @@
-import * as userRepo from '../../../common/repositories/user';
+import * as userRepo from '../../../shared/repositories/user';
 
 export const updateEmployee = async (payload, message) => {
   const updatedUser = await userRepo.updateUser(message.credentials.id, payload.attributes);

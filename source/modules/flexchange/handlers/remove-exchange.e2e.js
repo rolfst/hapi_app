@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import moment from 'moment';
 import { exchangeTypes } from 'modules/flexchange/models/exchange';
-import { deleteRequest } from 'common/test-utils/request';
+import { deleteRequest } from 'shared/test-utils/request';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
 
 describe('Remove exchange', () => {

@@ -1,5 +1,5 @@
-import createAdapter from '../../../common/utils/create-adapter';
-import * as userRepo from '../../../common/repositories/user';
+import createAdapter from '../../../shared/utils/create-adapter';
+import * as userRepo from '../../../shared/repositories/user';
 import * as authenticationService from '../../authentication/services/authentication';
 
 export const getAccessToken = async (payload, message) => {

@@ -1,4 +1,4 @@
-import * as responseUtil from 'common/utils/response';
+import * as responseUtil from 'shared/utils/response';
 import { findConversationById, createConversation } from 'modules/chat/repositories/conversation';
 
 module.exports = async (req, reply) => {

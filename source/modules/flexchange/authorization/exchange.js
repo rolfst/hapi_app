@@ -1,4 +1,4 @@
-import { UserRoles } from 'common/services/permission';
+import { UserRoles } from 'shared/services/permission';
 
 export default {
   'accept-exchange': [UserRoles.EMPLOYEE, UserRoles.ADMIN],

@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import * as service from '../flexchange';
 import * as commentRepo from '../../repositories/comment';
-import * as networkUtil from '../../../../common/utils/network';
+import * as networkUtil from '../../../../shared/utils/network';
 
 // TODO notification send needs to be activated
 // import * as notification from '../notifications/new-exchange-comment';

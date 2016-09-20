@@ -1,9 +1,9 @@
-import { findTeamsForNetwork } from '../../../common/repositories/network';
-import { createBulkTeams } from '../../../common/repositories/team';
+import { findTeamsForNetwork } from '../../../shared/repositories/network';
+import { createBulkTeams } from '../../../shared/repositories/team';
 
 import { find, differenceBy, intersectionBy } from 'lodash';
-import { addUserToNetwork, createBulkUsers } from '../../../common/repositories/user';
-import * as teamRepo from '../../../common/repositories/team';
+import { addUserToNetwork, createBulkUsers } from '../../../shared/repositories/user';
+import * as teamRepo from '../../../shared/repositories/team';
 
 export const findExternalUser = (user, externalUsers) => {
   return find(externalUsers, { email: user.email });

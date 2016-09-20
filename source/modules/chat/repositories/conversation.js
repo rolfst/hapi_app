@@ -1,6 +1,6 @@
 import { db as Sequelize } from 'connections';
-import createError from '../../../common/utils/create-error';
-import { User } from '../../../common/models';
+import createError from '../../../shared/utils/create-error';
+import { User } from '../../../shared/models';
 import { Conversation, Message } from '../models';
 
 const defaultIncludes = [

@@ -1,6 +1,6 @@
 import { pick } from 'lodash';
 import * as flexchangeService from '../services/flexchange';
-import * as responseUtil from 'common/utils/response';
+import * as responseUtil from 'shared/utils/response';
 
 const FILTER_PROPERTIES = ['start', 'end'];
 

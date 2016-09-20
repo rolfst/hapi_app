@@ -1,7 +1,7 @@
 import { pick } from 'lodash';
 import moment from 'moment';
-import createError from '../../../common/utils/create-error';
-import camelCaseKeys from '../../../common/utils/camel-case-keys';
+import createError from '../../../shared/utils/create-error';
+import camelCaseKeys from '../../../shared/utils/camel-case-keys';
 import { updateExchangeById } from '../repositories/exchange';
 
 export default async (req, reply) => {

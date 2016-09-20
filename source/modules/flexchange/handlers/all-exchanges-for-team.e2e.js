@@ -3,8 +3,8 @@ import qs from 'qs';
 import moment from 'moment';
 import { find } from 'lodash';
 import { exchangeTypes } from 'modules/flexchange/models/exchange';
-import { getRequest } from 'common/test-utils/request';
-import { createTeam } from 'common/repositories/team';
+import { getRequest } from 'shared/test-utils/request';
+import { createTeam } from 'shared/repositories/team';
 import { createExchange } from 'modules/flexchange/repositories/exchange';
 
 describe('Get exchanges for team', () => {

@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { find } from 'lodash';
-import { findUserByEmail } from 'common/repositories/user';
-import { createTeam } from 'common/repositories/team';
+import { findUserByEmail } from 'shared/repositories/user';
+import { createTeam } from 'shared/repositories/team';
 import * as service from 'modules/employee/services/invite-user';
 
 describe('Service: invite user', () => {

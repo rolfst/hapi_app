@@ -1,6 +1,6 @@
 import ConversationModel from 'modules/chat/models/conversation';
 import MessageModel from 'modules/chat/models/message';
-import UserModel from 'common/models/user';
+import UserModel from 'shared/models/user';
 
 ConversationModel.belongsToMany(UserModel, {
   foreignKey: 'conversation_id',

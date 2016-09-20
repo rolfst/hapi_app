@@ -1,4 +1,4 @@
-import notifier from 'common/services/notifier';
+import notifier from 'shared/services/notifier';
 
 export const createNotification = (message) => {
   return {

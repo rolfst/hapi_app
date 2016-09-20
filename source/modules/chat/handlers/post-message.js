@@ -1,7 +1,7 @@
 import { check } from 'hapi-acl-plugin';
-import { User } from 'common/models';
-import socket from 'common/services/socket';
-import * as responseUtil from 'common/utils/response';
+import { User } from 'shared/models';
+import socket from 'shared/services/socket';
+import * as responseUtil from 'shared/utils/response';
 import { Conversation } from 'modules/chat/models';
 import { findConversationById } from 'modules/chat/repositories/conversation';
 import { findMessageById, createMessage } from 'modules/chat/repositories/message';

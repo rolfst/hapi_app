@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import Promise from 'bluebird';
-import blueprints from 'common/test-utils/blueprints';
-import * as password from 'common/utils/password';
-import * as userRepo from 'common/repositories/user';
+import blueprints from 'shared/test-utils/blueprints';
+import * as password from 'shared/utils/password';
+import * as userRepo from 'shared/repositories/user';
 import * as checkPassword from 'modules/authentication/utils/check-password';
 import * as unit from 'modules/authentication/services/authentication/implementation';
 

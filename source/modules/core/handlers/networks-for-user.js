@@ -1,5 +1,5 @@
 import * as networkService from '../services/network';
-import * as responseUtil from '../../../common/utils/response';
+import * as responseUtil from '../../../shared/utils/response';
 
 export default async (req, reply) => {
   const message = { ...req.pre, ...req.auth };

@@ -1,7 +1,7 @@
 import Sequelize from 'sequelize';
 import { db as model } from 'connections';
-import User from 'common/models/user';
-import formatDate from 'common/utils/format-date';
+import User from 'shared/models/user';
+import formatDate from 'shared/utils/format-date';
 
 const Message = model.define('Message', {
   text: Sequelize.TEXT,
