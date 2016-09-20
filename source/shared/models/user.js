@@ -1,7 +1,7 @@
 import Sequelize from 'sequelize';
 import { db as model } from 'connections';
 import * as password from 'shared/utils/password';
-import formatDate from 'shared/utils/format-date';
+import * as dateUtils from 'shared/utils/date';
 import Conversation from 'modules/chat/models/conversation';
 
 const User = model.define('User', {
@@ -117,8 +117,8 @@ const User = model.define('User', {
         profile_img: `https://s3.eu-central-1.amazonaws.com/flex-appeal/${environment}/profiles/${this.profileImg}`,
         date_of_birth: this.dateOfBirth,
         role_type: this.role,
-        created_at: formatDate(this.created_at),
-        last_login: formatDate(this.lastLogin),
+        created_at: dateUtils.toISOString(this.created_at),
+        last_login: dateUtils.toISOString(this.lastLogin),
       };
     },
     toSimpleJSON: function () { // eslint-disable-line func-names, object-shorthand

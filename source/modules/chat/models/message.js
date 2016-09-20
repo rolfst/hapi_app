@@ -1,7 +1,7 @@
 import Sequelize from 'sequelize';
 import { db as model } from 'connections';
 import User from 'shared/models/user';
-import formatDate from 'shared/utils/format-date';
+import * as dateUtils from 'shared/utils/date';
 
 const Message = model.define('Message', {
   text: Sequelize.TEXT,
@@ -23,8 +23,8 @@ const Message = model.define('Message', {
         type: 'conversation_message',
         id: this.id.toString(),
         text: this.text,
-        created_at: formatDate(this.created_at),
-        updated_at: formatDate(this.updated_at),
+        created_at: dateUtils.toISOString(this.created_at),
+        updated_at: dateUtils.toISOString(this.updated_at),
         conversation_id: this.parentId.toString(),
         created_by: this.User.toJSON(),
       };

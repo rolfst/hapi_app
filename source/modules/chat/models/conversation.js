@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 import { db as model } from 'connections';
-import formatDate from 'shared/utils/format-date';
+import * as dateUtils from 'shared/utils/date';
 
 const Conversation = model.define('Conversation', {
   type: {
@@ -24,7 +24,7 @@ const Conversation = model.define('Conversation', {
       let output = {
         type: 'conversation',
         id: this.dataValues.id.toString(),
-        created_at: formatDate(this.created_at),
+        created_at: dateUtils.toISOString(this.created_at),
         last_message: this.LastMessage ? this.LastMessage.toJSON() : null,
       };
 

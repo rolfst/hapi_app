@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 import { db as model } from 'connections';
-import formatDate from 'shared/utils/format-date';
+import * as dateUtils from 'shared/utils/date';
 import { User } from 'shared/models';
 
 const ExchangeResponse = model.define('ExchangeResponse', {
@@ -35,7 +35,7 @@ const ExchangeResponse = model.define('ExchangeResponse', {
         type: 'exchange_response',
         response: !!this.response,
         is_approved: this.approved !== null ? !!this.approved : null,
-        created_at: formatDate(this.created_at),
+        created_at: dateUtils.toISOString(this.created_at),
       };
 
       if (this.User) {

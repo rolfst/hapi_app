@@ -1,7 +1,7 @@
 import Sequelize from 'sequelize';
 import moment from 'moment';
 import { db as model } from 'connections';
-import formatDate from 'shared/utils/format-date';
+import * as dateUtils from 'shared/utils/date';
 import makeCreatedInObject from 'modules/flexchange/utils/created-in-text';
 
 export const exchangeTypes = {
@@ -99,13 +99,13 @@ const Exchange = model.define('Exchange', {
         id: this.id.toString(),
         title: this.title,
         description: this.description,
-        date: formatDate(this.date),
+        date: dateUtils.toISOString(this.date),
         start_time: this.startTime ? moment(this.startTime).toISOString() : null,
         end_time: this.endTime ? moment(this.endTime).toISOString() : null,
         response_status: null,
         accept_count: this.acceptCount,
         decline_count: this.declineCount,
-        created_at: formatDate(this.created_at),
+        created_at: dateUtils.toISOString(this.created_at),
         is_approved: !!this.approvedUserId,
       };
 

@@ -2,7 +2,7 @@ import Sequelize from 'sequelize';
 import { db as model } from 'connections';
 import { flatten } from 'lodash';
 import * as networkUtil from 'shared/utils/network';
-import formatDate from 'shared/utils/format-date';
+import * as dateUtils from 'shared/utils/date';
 
 const Network = model.define('Network', {
   externalId: {
@@ -60,7 +60,7 @@ const Network = model.define('Network', {
         name: this.name,
         enabled_components: flatten(this.enabledComponents.split(',').map(replaceChars)),
         has_integration: networkUtil.hasIntegration(this),
-        created_at: formatDate(this.createdAt),
+        created_at: dateUtils.toISOString(this.createdAt),
       };
     },
   },

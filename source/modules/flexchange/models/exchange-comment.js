@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 import { db as model } from 'connections';
-import formatDate from 'shared/utils/format-date';
+import * as dateUtils from 'shared/utils/date';
 import { User } from 'shared/models';
 
 const ExchangeComment = model.define('ExchangeComment', {
@@ -36,7 +36,7 @@ const ExchangeComment = model.define('ExchangeComment', {
         type: 'exchange_comment',
         id: this.id.toString(),
         text: this.text,
-        created_at: formatDate(this.created_at),
+        created_at: dateUtils.toISOString(this.created_at),
       };
 
       if (this.User) {

@@ -1,5 +1,5 @@
 import Sequelize from 'sequelize';
-import formatDate from 'shared/utils/format-date';
+import * as dateUtils from 'shared/utils/date';
 import { db as model } from 'connections';
 
 export const ActivityTypes = {
@@ -57,7 +57,7 @@ const Activity = model.define('Activity', {
           source_id: this.sourceId.toString(),
           user: this.User.toSimpleJSON(),
           meta_data: this.metaData,
-          date: formatDate(this.date),
+          date: dateUtils.toISOString(this.date),
         },
       };
     },

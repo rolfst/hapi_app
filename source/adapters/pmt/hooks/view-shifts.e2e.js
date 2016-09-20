@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import nock from 'nock';
-import moment from 'moment-timezone';
-import createError from '../../../common/utils/create-error';
+import * as dateUtils from '../../../shared/utils/date';
+import createError from '../../../shared/utils/create-error';
 import * as stubs from '../test-utils/stubs';
 import * as blueprints from '../test-utils/blueprints';
 import hook from './view-shift';
@@ -11,7 +11,7 @@ nock.disableNetConnect();
 describe('PMT view shifts hook', () => {
   const ENDPOINT = '/me/shifts';
   const TOKEN = 'aefacbadb0123456789';
-  const TODAY = moment().format('DD-MM-YYYY');
+  const TODAY = dateUtils.getLocalDate().format('DD-MM-YYYY');
 
   it('should succeed when token provided', async () => {
     const knownId = '27362216';
@@ -22,10 +22,6 @@ describe('PMT view shifts hook', () => {
 
     const actual = await hook(global.networks.pmt.externalId, TOKEN)(knownId);
     const expected = blueprints.found_shift;
-
-    console.log('utc offset', moment().utcOffset());
-    console.log('actual', actual);
-    console.log('expected', expected);
 
     assert.deepEqual(actual, expected);
   });
