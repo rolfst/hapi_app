@@ -8,7 +8,7 @@ export default async (request, reply) => {
 
     const result = await authenticationService.delegate(payload, message);
 
-    return reply({ success: true, data: { access_token: result.refreshedAccessToken } });
+    return reply({ success: true, data: { access_token: result.accessToken } });
   } catch (err) {
     return reply(err);
   }

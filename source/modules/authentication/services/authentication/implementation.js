@@ -1,11 +1,14 @@
 import { find } from 'lodash';
 import moment from 'moment';
 import Promise from 'bluebird';
-import createAdapter from 'shared/utils/create-adapter';
-import createError from 'shared/utils/create-error';
-import * as userRepo from 'shared/repositories/user';
-import * as networkUtil from 'shared/utils/network';
-import checkPassword from 'modules/authentication/utils/check-password';
+import createAdapter from '../../../../shared/utils/create-adapter';
+import createError from '../../../../shared/utils/create-error';
+import * as authenticationRepo from '../../../../shared/repositories/authentication';
+import * as userRepo from '../../../../shared/repositories/user';
+import * as networkUtil from '../../../../shared/utils/network';
+import createAccessToken from '../../utils/create-access-token';
+import createRefreshToken from '../../utils/create-refresh-token';
+import checkPassword from '../../utils/check-password';
 
 export const authenticateUser = async ({ username, password }) => {
   const user = await userRepo.findUserByUsername(username);
@@ -15,6 +18,15 @@ export const authenticateUser = async ({ username, password }) => {
   if (!validPassword) throw createError('10004');
 
   return user;
+};
+
+export const createAuthenticationTokens = async (userId, deviceName, authenticatedIntegrations) => {
+  const device = await authenticationRepo.findOrCreateUserDevice(userId, deviceName);
+  const accessToken = createAccessToken(
+    userId, device.device_id, authenticatedIntegrations);
+  const refreshToken = await createRefreshToken(userId, device.device_id);
+
+  return { accessToken, refreshToken };
 };
 
 export const makeAuthenticationPromises = (networks, credentials) => {

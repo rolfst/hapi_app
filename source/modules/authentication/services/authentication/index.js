@@ -1,14 +1,11 @@
-import createError from 'shared/utils/create-error';
-import tokenUtil from 'shared/utils/token';
-import userBelongsToNetwork from 'shared/utils/user-belongs-to-network';
-import * as userRepo from 'shared/repositories/user';
-import analytics from 'shared/services/analytics';
-import firstLoginEvent from 'shared/events/first-login-event';
-import * as authenticationRepo from 'shared/repositories/authentication';
-import createAccessToken from 'modules/authentication/utils/create-access-token';
-import createRefreshToken from 'modules/authentication/utils/create-refresh-token';
-import * as impl from 'modules/authentication/services/authentication/implementation';
-import * as integrationUtil from 'modules/authentication/utils/integration-tokens-for-user';
+import createError from '../../../../shared/utils/create-error';
+import tokenUtil from '../../../../shared/utils/token';
+import userBelongsToNetwork from '../../../../shared/utils/user-belongs-to-network';
+import * as userRepo from '../../../../shared/repositories/user';
+import analytics from '../../../../shared/services/analytics';
+import firstLoginEvent from '../../../../shared/events/first-login-event';
+import * as integrationUtil from '../../utils/integration-tokens-for-user';
+import * as impl from './implementation';
 
 // TODO: This should be moved to a Integration service
 const authenticateWithIntegrations = async (user, credentials) => {
@@ -32,35 +29,30 @@ export const getAuthenticationTokens = async (payload, message) => {
 
   if (!userBelongsToNetwork(user)) throw createError('403');
 
-  const device = await authenticationRepo.findOrCreateUserDevice(user.id, message.deviceName);
-  const accessToken = await createAccessToken(user.id, device.device_id, authenticatedIntegrations);
-  const refreshToken = await createRefreshToken(user.id, device.device_id);
+  const { accessToken, refreshToken } = await impl.createAuthenticationTokens(
+    user.id, message.deviceName, authenticatedIntegrations);
 
   impl.updateLastLogin(user);
 
   return { accessToken, refreshToken };
 };
 
-export const delegate = async (payload, { request }) => {
+export const delegate = async (payload, message) => {
   const decodedToken = tokenUtil.decode(payload.refreshToken);
-  if (!decodedToken.sub) throw createError('422', 'No sub found in refresh token.');
+  if (!decodedToken.sub) throw createError('403', 'No sub found in refresh token.');
 
-  const userId = decodedToken.sub;
-  const user = await userRepo.findUserById(userId);
+  const user = await userRepo.findUserById(decodedToken.sub);
   const authenticatedIntegrations = integrationUtil.getIntegrationTokensForUser(user);
 
-  const deviceName = request.headers['user-agent'];
-  const device = await authenticationRepo.findOrCreateUserDevice(userId, deviceName);
-  const refreshedAccessToken = createAccessToken(
-    userId, device.device_id, authenticatedIntegrations
-  );
+  const { accessToken } = await impl.createAuthenticationTokens(
+    user.id, message.deviceName, authenticatedIntegrations);
 
-  return { refreshedAccessToken };
+  return { accessToken };
 };
 
 export const authenticate = async (payload, message) => {
-  const { accessToken, refreshToken } = await getAuthenticationTokens(payload, message);
   const user = await impl.authenticateUser(payload);
+  const { accessToken, refreshToken } = await getAuthenticationTokens(payload, message);
 
   analytics.registerProfile(user);
   analytics.setUser(user);
