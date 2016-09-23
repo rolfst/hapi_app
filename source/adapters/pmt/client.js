@@ -8,10 +8,12 @@ const createFormEncodedString = (data) => {
 };
 
 const handleError = (status, body) => {
-  if (status === 400 && body.error === 'Token is expired.' || status === 401) {
+  if (status === 400 && body.error === 'Token is expired.') {
     throw createError('401');
   } else if (status === 400) {
     throw createError('422');
+  } else if (status === 401 && body.error === 'Incorrect username or password.') {
+    throw createError('10004');
   } else if (status === 403) {
     throw createError('403');
   }

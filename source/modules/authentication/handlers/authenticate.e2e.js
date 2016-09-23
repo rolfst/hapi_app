@@ -37,14 +37,14 @@ describe('Authenticate', () => {
     const { username } = employeeCredentials;
     const { statusCode } = await loginRequest({ username, password: 'wrongpassword' });
 
-    assert.equal(statusCode, 422);
+    assert.equal(statusCode, 403);
   });
 
   it('should fail when username is not correct', async () => {
     const { password } = employeeCredentials;
     const { statusCode } = await loginRequest({ username: 'blabla@gmail.com', password });
 
-    assert.equal(statusCode, 422);
+    assert.equal(statusCode, 403);
   });
 
   it('should fail when user does not belong to a network', async () => {

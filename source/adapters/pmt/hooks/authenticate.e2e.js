@@ -28,9 +28,13 @@ describe('PMT Authenticate hook', () => {
       .post('/login', credential)
       .reply('401', stubs.incorrect_credentials_401);
 
-    const actual = hook(global.networks.pmt.externalId)(credential);
+    try {
+      await hook(global.networks.pmt.externalId)(credential);
 
-    return assert.isRejected(actual, createError('401'));
+      assert.fail();
+    } catch (err) {
+      assert.deepEqual(err, createError('10004'));
+    }
   });
 
   it('should fail when username is not provided', async () => {
@@ -40,8 +44,12 @@ describe('PMT Authenticate hook', () => {
       .post('/login', credential)
       .reply('400', stubs.missing_username_400);
 
-    const actual = hook(global.networks.pmt.externalId)(credential);
+    try {
+      await hook(global.networks.pmt.externalId)(credential);
 
-    return assert.isRejected(actual, createError('422'));
+      assert.fail();
+    } catch (err) {
+      assert.deepEqual(err, createError('422'));
+    }
   });
 });

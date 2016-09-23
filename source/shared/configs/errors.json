@@ -52,6 +52,6 @@
   "10004": {
     "type": "wrong_credentials",
     "detail": "No user found for given username and password.",
-    "code": 422
+    "code": 403
   }
 }
