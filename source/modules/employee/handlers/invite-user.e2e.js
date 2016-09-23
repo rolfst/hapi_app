@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import { findUserByEmail } from 'shared/repositories/user';
 import { postRequest } from 'shared/test-utils/request';
 
-describe('Invite user', () => {
+describe('Handler: Invite user', () => {
   after(async () => {
     const admin = await findUserByEmail('admin@baz.com');
     const employee = await findUserByEmail('employee@baz.com');

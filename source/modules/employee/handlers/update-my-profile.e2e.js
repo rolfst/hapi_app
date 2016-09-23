@@ -15,7 +15,8 @@ describe('Handler: update my profile', () => {
     assert.equal(data.phone_num, global.users.employee.phoneNum);
     assert.equal(data.email, global.users.employee.email);
     assert.equal(data.date_of_birth, global.users.employee.dateOfBirth);
-    assert.equal(data.role_type, global.users.employee.roleType);
+    assert.equal(data.integration_auth, false);
+    assert.equal(data.role_type, 'EMPLOYEE');
     assert.equal(data.address, address.address);
 
     // check if data in a different call does have the updated value

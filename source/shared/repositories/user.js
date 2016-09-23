@@ -85,9 +85,9 @@ export async function addUserToNetwork(user, network, {
 
 export async function updateUser(userId, attributes) {
   const user = await User.findById(userId);
-  const updatedUser = await user.update(attributes);
+  await user.update(attributes);
 
-  return updatedUser.reload();
+  return findUserById(userId);
 }
 
 export async function updateUserByEmail(email, attributes) {
