@@ -40,6 +40,10 @@ export const findExternalUsers = async (externalIds) => {
   return result;
 };
 
+export const findUsersByIds = (userIds) => {
+  return User.findAll({ ...defaultIncludes, where: { id: { $in: userIds } } });
+};
+
 export async function findUserById(id) {
   const user = await User.findOne({ ...defaultIncludes, where: { id } });
   if (!user) throw createError('403', `The user with id '${id}' could not be found.`);

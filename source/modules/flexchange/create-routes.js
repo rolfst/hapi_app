@@ -45,6 +45,10 @@ const routes = [{
   validator: require('modules/flexchange/validators/get-exchange'),
 }, {
   method: 'GET',
+  url: `${baseUrl}/exchanges/{exchangeId}/users`,
+  handler: require(`${basePath}/users-for-exchange`),
+}, {
+  method: 'GET',
   url: `${baseUrl}/exchanges/{exchangeId}/activity_feed`,
   handler: require(`${basePath}/exchange-activity-feed`),
 }, {

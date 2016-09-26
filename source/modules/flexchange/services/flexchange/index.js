@@ -7,6 +7,10 @@ import createError from '../../../../shared/utils/create-error';
 import * as networkUtil from '../../../../shared/utils/network';
 import * as teamRepo from '../../../../shared/repositories/team';
 import * as activityRepo from '../../../../shared/repositories/activity';
+import * as userService from '../../../core/services/user';
+import * as teamService from '../../../core/services/team';
+import * as networkService from '../../../core/services/network';
+import { exchangeTypes } from '../../models/exchange';
 import * as commentRepo from '../../repositories/comment';
 import * as exchangeRepo from '../../repositories/exchange';
 import * as exchangeResponseRepo from '../../repositories/exchange-response';
@@ -19,6 +23,25 @@ import * as impl from './implementation';
 // import * as commentNotifier from '../../notifications/new-exchange-comment';
 
 const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
+
+export const listReceivers = async (payload, message) => {
+  const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, message.credentials.id);
+  const valueIds = map(exchange.ExchangeValues, 'value');
+  let receivers;
+
+  if (exchange.type === exchangeTypes.NETWORK) {
+    const networkPayload = { networkId: valueIds[0] };
+    receivers = await networkService.listActiveUsersForNetwork(networkPayload, message);
+  } else if (exchange.type === exchangeTypes.TEAM) {
+    const teamPayload = { teamIds: valueIds };
+    receivers = await teamService.listMembersForTeams(teamPayload, message);
+  } else if (exchange.type === exchangeTypes.USER) {
+    const userPayload = { userIds: valueIds };
+    receivers = await userService.listUsers(userPayload, message);
+  }
+
+  return receivers;
+};
 
 export const acceptExchange = async (payload, message) => {
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, message.credentials.id);
@@ -36,7 +59,6 @@ export const acceptExchange = async (payload, message) => {
 
   return acceptedExchange;
 };
-
 
 export const approveExchange = async (payload, message) => {
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, message.credentials.id);

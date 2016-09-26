@@ -1,7 +1,12 @@
-import { Activity, User } from 'shared/models';
+import { Activity, Team, Network, User } from 'shared/models';
 
 const defaultIncludes = [{
   model: User,
+  include: [{
+    model: Team,
+  }, {
+    model: Network,
+  }],
 }];
 
 export function findForUser(userId) {
