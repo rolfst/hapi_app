@@ -7,7 +7,7 @@ export default async (req, reply) => {
   try {
     const result = await flexchangeService.listReceivers(payload, message);
 
-    return reply({ data: result.map(r => r.toSimpleJSON()) });
+    return reply({ data: result.map(r => r.toJSON()) });
   } catch (err) {
     console.log(err);
     return reply(err);

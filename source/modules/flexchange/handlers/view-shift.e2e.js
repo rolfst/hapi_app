@@ -11,7 +11,7 @@ describe('Handler: View shift', () => {
   let createdExchange;
 
   const stubbedResult = {
-    id: '1337',
+    id: '133723',
     start_time: '21-12-2016 08:00:00',
     end_time: '21-12-2016 15:00:00',
     department: '12',
@@ -25,7 +25,7 @@ describe('Handler: View shift', () => {
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'External shift from integration',
-      shiftId: '1337',
+      shiftId: '133723',
       teamId: 14,
     });
 
@@ -39,7 +39,7 @@ describe('Handler: View shift', () => {
   after(() => createdExchange.destroy());
 
   it('should return correct result', async () => {
-    const endpoint = `/v2/networks/${network.id}/shifts/1337`;
+    const endpoint = `/v2/networks/${network.id}/shifts/133723`;
     const { result } = await getRequest(endpoint);
 
     assert.equal(result.data.id, stubbedResult.id);
