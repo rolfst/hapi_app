@@ -1,7 +1,7 @@
 import { db as Sequelize } from 'connections';
 import createError from '../../../shared/utils/create-error';
 import { User } from '../../../shared/models';
-import { Conversation, Message } from '../models';
+import { Conversation, Message, ConversationUser } from '../models';
 
 const defaultIncludes = [
   { model: User },
@@ -38,24 +38,20 @@ export function findAllForUser(user, includes = []) {
   });
 }
 
-export async function findExistingConversationWithUser(loggedUserId, userId) {
-  const extraIncludes = {
-    model: User,
-    attributes: ['id', [Sequelize.fn('COUNT', '`Users`.`id`'), 'count']],
-    where: {
-      id: { $in: [loggedUserId, userId] },
-    },
-  };
-
-  const conversations = await Conversation.findAll({
-    include: [{ model: Message, as: 'LastMessage' }, extraIncludes],
+export async function findExistingConversation(participantIds) {
+  const result = await Conversation.findAll({
+    attributes: ['id', [Sequelize.fn('COUNT', '`ConversationUser`.`id`'), 'users_in_conversation']],
+    include: [{
+      model: User,
+      where: { id: { $in: participantIds } },
+    }],
     group: ['Conversation.id'],
-    having: [
-      '`Users.count` = 2',
-    ],
+    having: ['users_in_conversation = 2'],
   });
 
-  return conversations[0];
+  if (result.length === 0) return null;
+
+  return findConversationById(result[0].id);
 }
 
 /**
@@ -66,26 +62,12 @@ export async function findExistingConversationWithUser(loggedUserId, userId) {
  * @method createConversation
  * @return {promise} - Create conversation promise
  */
-export async function createConversation(type, creatorId, participants) {
-  // TODO: Move logic to acl
-  if (participants.length < 2) {
-    throw createError('403', 'A conversation must have 2 or more participants');
-  }
+export const createConversation = async (type, creatorId, participants) => {
+  const conversation = await Conversation.create({ type, createdBy: creatorId });
+  await conversation.setUsers(participants);
 
-  if (participants[0].toString() === participants[1].toString()) {
-    throw createError('403', 'You cannot create a conversation with yourself');
-  }
-
-  let conversation = await findExistingConversationWithUser(creatorId, participants[0]);
-
-  if (!conversation) {
-    const data = { type: type.toUpperCase(), createdBy: creatorId };
-    conversation = await Conversation.create(data);
-    await conversation.addUsers(participants);
-  }
-
-  return conversation.reload();
-}
+  return findConversationById(conversation.id);
+};
 
 /**
  * Delete a specific conversation by id

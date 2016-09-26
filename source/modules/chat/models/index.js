@@ -1,11 +1,12 @@
-import ConversationModel from 'modules/chat/models/conversation';
-import MessageModel from 'modules/chat/models/message';
+import ConversationModel from './conversation';
+import ConversationUserModel from './conversation-user';
+import MessageModel from './message';
 import UserModel from 'shared/models/user';
 
 ConversationModel.belongsToMany(UserModel, {
   foreignKey: 'conversation_id',
   otherKey: 'user_id',
-  through: 'conversation_user',
+  through: ConversationUserModel,
   timestamps: false,
 });
 
@@ -38,9 +39,10 @@ UserModel.belongsToMany(ConversationModel, {
   as: 'conversations',
   foreignKey: 'user_id',
   otherKey: 'conversation_id',
-  through: 'conversation_user',
+  through: ConversationUserModel,
   timestamps: false,
 });
 
 export const Conversation = ConversationModel;
 export const Message = MessageModel;
+export const ConversationUser = ConversationUserModel;

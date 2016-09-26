@@ -1,15 +1,13 @@
 import * as responseUtil from 'shared/utils/response';
-import { findConversationById, createConversation } from 'modules/chat/repositories/conversation';
+import * as conversationService from '../services/conversation';
 
 module.exports = async (req, reply) => {
-  const { type, users } = req.payload;
-  users.push(req.auth.credentials.id);
-
   try {
-    const createdConversation = await createConversation(type, req.auth.credentials.id, users);
-    const conversation = await findConversationById(createdConversation.id);
+    const payload = { participants: req.payload.users, type: req.payload.type.toUpperCase() };
+    const message = { ...req.auth, ...req.pre };
+    const result = await conversationService.create(payload, message);
 
-    return reply({ data: responseUtil.serialize(conversation) });
+    return reply({ data: responseUtil.serialize(result) });
   } catch (err) {
     return reply(err);
   }

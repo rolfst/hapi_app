@@ -23,17 +23,19 @@ describe('Post conversation', () => {
     const payload = { type: 'private', users: [global.users.employee.id] };
     const { result, statusCode } = await postRequest(ENDPOINT_URL, payload);
 
+    assert.equal(statusCode, 200);
     assert.equal(result.data.users[0].id, global.users.employee.id);
     assert.equal(result.data.users[1].id, global.users.admin.id);
-    assert.equal(statusCode, 200);
   });
 
   it('should return the existing conversation when there is already one created', async () => {
     const payload = { type: 'private', users: [global.users.networklessUser.id] };
     const { result, statusCode } = await postRequest(ENDPOINT_URL, payload);
 
-    assert.equal(result.data.id, createdConversation.id);
     assert.equal(statusCode, 200);
+    assert.equal(result.data.id, createdConversation.id);
+    assert.equal(result.data.users[0].id, global.users.admin.id);
+    assert.equal(result.data.users[1].id, global.users.networklessUser.id);
   });
 
   it('should fail when creating conversation with yourself', async () => {

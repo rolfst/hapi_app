@@ -6,9 +6,6 @@ const Conversation = model.define('Conversation', {
   type: {
     type: Sequelize.ENUM,
     values: ['PRIVATE', 'GROUP'],
-    validate: {
-      isIn: ['PRIVATE', 'GROUP'],
-    },
   },
   createdBy: {
     type: Sequelize.INTEGER,
