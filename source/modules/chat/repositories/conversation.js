@@ -72,7 +72,7 @@ export async function createConversation(type, creatorId, participants) {
     throw createError('403', 'A conversation must have 2 or more participants');
   }
 
-  if (participants[0] === participants[1]) {
+  if (participants[0].toString() === participants[1].toString()) {
     throw createError('403', 'You cannot create a conversation with yourself');
   }
 

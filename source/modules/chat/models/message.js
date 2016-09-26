@@ -22,11 +22,11 @@ const Message = model.define('Message', {
       let output = {
         type: 'conversation_message',
         id: this.id.toString(),
+        conversation_id: this.parentId.toString(),
         text: this.text,
         created_at: dateUtils.toISOString(this.created_at),
         updated_at: dateUtils.toISOString(this.updated_at),
-        conversation_id: this.parentId.toString(),
-        created_by: this.User.toJSON(),
+        created_by: this.User.toSimpleJSON(),
       };
 
       if (this.Conversation) {

@@ -8,6 +8,8 @@ import {
 let createdConversation;
 
 describe('Post conversation', () => {
+  const ENDPOINT_URL = '/v1/chats/conversations';
+
   before(async () => {
     const { admin, networklessUser } = global.users;
     createdConversation = await createConversation(
@@ -18,9 +20,8 @@ describe('Post conversation', () => {
   after(() => deleteAllConversationsForUser(global.users.employee));
 
   it('should show new conversation data', async () => {
-    const endpoint = '/v1/chats/conversations';
     const payload = { type: 'private', users: [global.users.employee.id] };
-    const { result, statusCode } = await postRequest(endpoint, payload);
+    const { result, statusCode } = await postRequest(ENDPOINT_URL, payload);
 
     assert.equal(result.data.users[0].id, global.users.employee.id);
     assert.equal(result.data.users[1].id, global.users.admin.id);
@@ -28,11 +29,17 @@ describe('Post conversation', () => {
   });
 
   it('should return the existing conversation when there is already one created', async () => {
-    const endpoint = '/v1/chats/conversations';
     const payload = { type: 'private', users: [global.users.networklessUser.id] };
-    const { result, statusCode } = await postRequest(endpoint, payload);
+    const { result, statusCode } = await postRequest(ENDPOINT_URL, payload);
 
     assert.equal(result.data.id, createdConversation.id);
     assert.equal(statusCode, 200);
+  });
+
+  it('should fail when creating conversation with yourself', async () => {
+    const payload = { type: 'private', users: [global.users.admin.id.toString()] };
+    const { statusCode } = await postRequest(ENDPOINT_URL, payload);
+
+    assert.equal(statusCode, 403);
   });
 });

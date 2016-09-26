@@ -34,7 +34,7 @@ const Conversation = model.define('Conversation', {
       }
 
       if (this.Users && this.Users.length > 0) {
-        const users = this.Users.map(user => user.toJSON());
+        const users = this.Users.map(user => user.toSimpleJSON());
         output = Object.assign(output, { users });
       }
 
