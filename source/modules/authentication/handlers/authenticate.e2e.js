@@ -1,8 +1,10 @@
 import { assert } from 'chai';
 import blueprints from 'shared/test-utils/blueprints';
 import { postRequest } from 'shared/test-utils/request';
+import tokenUtil from 'shared/utils/token';
 
 const url = '/v2/authenticate';
+const adminCredentials = blueprints.users.admin;
 const employeeCredentials = blueprints.users.employee;
 const networklessUserCredentials = blueprints.users.networkless;
 const loginRequest = ({ username, password }) => {
@@ -21,6 +23,20 @@ describe('Authenticate', () => {
         assert.equal(responses[1].statusCode, 422);
         assert.equal(responses[2].statusCode, 422);
       });
+  });
+
+  it('should have the authenticated integrations in the access token', async () => {
+    const { username, password } = adminCredentials;
+    const { result } = await loginRequest({ username, password });
+    const decodedToken = tokenUtil.decode(result.data.access_token);
+
+    const expectedIntegrations = [{
+      name: 'PMT',
+      token: '379ce9b4176cb89354c1f74b3a2c1c7a',
+      externalId: '8023',
+    }];
+
+    assert.deepEqual(decodedToken.integrations, expectedIntegrations);
   });
 
   it('should login with correct credentials', async () => {

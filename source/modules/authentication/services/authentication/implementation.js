@@ -14,6 +14,18 @@ export const updateLastLogin = async (user) => {
   userRepo.updateUser(user.id, { lastLogin: moment().toISOString() });
 };
 
+export const getIntegrationTokensForUser = (user) => {
+  const result = user.Networks
+    .filter(network => network.NetworkUser.userToken !== null)
+    .map(network => ({
+      name: network.Integrations[0].name,
+      token: network.NetworkUser.userToken,
+      externalId: network.NetworkUser.externalId,
+    }));
+
+  return result;
+};
+
 export const authenticateUser = async ({ username, password }) => {
   const user = await userRepo.findUserByUsername(username);
   if (!user) throw createError('10004');
@@ -52,7 +64,8 @@ export const getAuthenticationTokens = async (user, deviceName) => {
     throw createError('403', 'The user does not belong to any network.');
   }
 
-  const { accessToken, refreshToken } = await createAuthenticationTokens(user.id, deviceName, []);
+  const { accessToken, refreshToken } = await createAuthenticationTokens(
+    user.id, deviceName, getIntegrationTokensForUser(user));
 
   updateLastLogin(user);
 

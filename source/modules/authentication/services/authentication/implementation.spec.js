@@ -1,10 +1,10 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import Promise from 'bluebird';
-import * as password from 'shared/utils/password';
-import * as userRepo from 'shared/repositories/user';
-import * as checkPassword from 'modules/authentication/utils/check-password';
-import * as unit from 'modules/authentication/services/authentication/implementation';
+import * as password from '../../../../shared/utils/password';
+import * as userRepo from '../../../../shared/repositories/user';
+import * as checkPassword from '../../utils/check-password';
+import * as unit from './implementation';
 
 const credentials = {
   username: 'Johnnie', firstName: 'John', lastName: 'Doe', password: 'ihazswag',
@@ -34,6 +34,28 @@ describe('Authentication service', () => {
       return assert.isRejected(promise);
     });
   });
+
+  describe('integrationTokensForUser', () => {
+    it('transform result into integration objects', async () => {
+      const user = {
+        Networks: [{
+          Integrations: [{
+            name: 'foo',
+          }],
+          NetworkUser: {
+            externalId: 1337,
+            userToken: 'my_token',
+          },
+        }],
+      };
+
+      const actual = await unit.getIntegrationTokensForUser(user);
+      const expected = [{ name: 'foo', token: 'my_token', externalId: 1337 }];
+
+      assert.deepEqual(actual, expected);
+    });
+  });
+
 
   describe('mapNetworkAndToken', () => {
     it('should return correct integration token for network', () => {
