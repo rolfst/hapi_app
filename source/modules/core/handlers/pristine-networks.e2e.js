@@ -50,12 +50,14 @@ describe('Pristine Networks', async () => {
     [jumboNetwork, justANetwork, ahNetwork] = createdNetworks;
   });
 
-  after(() => Promise.all([
-    jumboNetwork.destroy(),
-    ahNetwork.destroy(),
-    justANetwork.destroy(),
-    integration.destroy(),
-  ]));
+  after(async () => {
+    await integration.destroy();
+    await Promise.all([
+      jumboNetwork.destroy(),
+      ahNetwork.destroy(),
+      justANetwork.destroy(),
+    ]);
+  });
 
   it('should return correct network amount', async () => {
     nock(PMT_BASE_URL)
@@ -76,8 +78,8 @@ describe('Pristine Networks', async () => {
 
     const { result: { data } } = await getRequest('/v2/pristine_networks');
 
-    assert.property(data[0].network, 'externalId');
-    assert.property(data[1].network, 'name');
+    assert.property(data[0], 'externalId');
+    assert.property(data[1], 'name');
   });
 
   it('should fail when integration base endpoint is down', async () => {
