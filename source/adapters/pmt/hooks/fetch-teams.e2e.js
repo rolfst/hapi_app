@@ -10,13 +10,13 @@ const ENDPOINT = '/departments';
 
 describe('PMT fetch teams hook', () => {
   it('should succeed when credentials are correct', async () => {
-    const credential = { username: 'validUsername', password: 'validPassword' };
+    const credentials = { username: 'validUsername', password: 'validPassword' };
 
     nock(global.networks.pmt.externalId)
       .get(ENDPOINT)
       .reply('200', stubs.departments_200);
 
-    const actual = await hook(global.networks.pmt.externalId)(credential);
+    const actual = await hook(global.networks.pmt.externalId)(credentials);
     const expected = blueprints.teams;
 
     assert.deepEqual(actual, expected);

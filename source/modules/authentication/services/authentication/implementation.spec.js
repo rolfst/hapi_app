@@ -1,7 +1,6 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import Promise from 'bluebird';
-import blueprints from 'shared/test-utils/blueprints';
 import * as password from 'shared/utils/password';
 import * as userRepo from 'shared/repositories/user';
 import * as checkPassword from 'modules/authentication/utils/check-password';
@@ -33,21 +32,6 @@ describe('Authentication service', () => {
       stub.restore();
 
       return assert.isRejected(promise);
-    });
-  });
-
-  describe('authenticateIntegrations', () => {
-    it('should fail when there is no adapter found', () => {
-      const stubbedPromises = [
-        Promise.resolve('foo'),
-        Promise.reject('bar'),
-        Promise.reject('baz'),
-        Promise.resolve('qaz'),
-      ];
-
-      const actual = unit.authenticateIntegrations(blueprints.users.admin, stubbedPromises);
-
-      return assert.eventually.deepEqual(actual, ['foo', 'qaz']);
     });
   });
 

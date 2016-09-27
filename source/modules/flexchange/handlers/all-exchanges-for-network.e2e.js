@@ -121,7 +121,6 @@ describe('Get exchanges for network', () => {
       const exchangeForTeamWhereEmployeeDoesNotBelongTo = createExchange(
         global.users.admin.id, network.id, {
           date: moment().format('YYYY-MM-DD'),
-          title: 'Test shift for teams',
           type: exchangeTypes.TEAM,
           values: [team1.id],
         });

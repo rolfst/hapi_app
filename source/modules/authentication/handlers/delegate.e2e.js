@@ -1,5 +1,4 @@
 import { assert } from 'chai';
-import nock from 'nock';
 import tokenUtil from 'shared/utils/token';
 import createRefreshToken from 'modules/authentication/utils/create-refresh-token';
 import * as userRepo from 'shared/repositories/user';
@@ -19,13 +18,8 @@ describe('Delegate', () => {
       username: 'Delegate Doe',
     };
 
-    // Mock network login to add integration info for the user in the db
-    nock(global.networks.pmt.externalId)
-      .post('/login')
-      .reply(200, { logged_in_user_token: 'my_integration_token', user_id: 1088 });
-
     createdUser = await userRepo.createUser(attributes);
-    await global.networks.pmt.addUser(createdUser, { externalId: 1088 });
+    await global.networks.pmt.addUser(createdUser);
 
     // Authenticate created user to retrieve a refresh token
     const credentials = { username: createdUser.username, password: 'foo' };
@@ -44,8 +38,7 @@ describe('Delegate', () => {
     assert.equal(statusCode, 200);
     assert.equal(decodedToken.type, 'access_token');
     assert.equal(decodedToken.sub, createdUser.id);
-    assert.equal(decodedToken.integrations[0].token, 'my_integration_token');
-    assert.equal(decodedToken.integrations[0].externalId, 1088);
+    assert.property(decodedToken, 'integrations');
   });
 
   it('should return a new access token', async () => {

@@ -55,6 +55,13 @@ export function findUserByEmail(email) {
   return User.findOne({ ...defaultIncludes, where: { email } });
 }
 
+export const findUserInNetworkByExternalId = async (networkId, externalId) => {
+  const result = await NetworkUser.findOne({ where: { networkId, externalId } });
+  if (!result) return null;
+
+  return findUserById(result.userId);
+};
+
 export function findUserByUsername(username) {
   return User.findOne({ ...defaultIncludes, where: { username } });
 }
@@ -75,6 +82,12 @@ export function addExternalUsersToNetwork(users, network) {
 export function addUsersToNetwork(user, network, roleType = 'EMPLOYEE') {
   return network.addUsers(user, { roleType });
 }
+
+export const setExternalId = async (userId, networkId, externalId) => {
+  const result = await NetworkUser.findOne({ where: { userId, networkId } });
+
+  return result.update({ externalId });
+};
 
 export async function addUserToNetwork(user, network, {
   roleType = 'EMPLOYEE',

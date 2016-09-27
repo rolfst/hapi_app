@@ -1,5 +1,6 @@
 import sinon from 'sinon';
 import { assert } from 'chai';
+import nock from 'nock';
 import createError from 'shared/utils/create-error';
 import * as networkUtil from 'shared/utils/network';
 import tokenUtil from 'shared/utils/token';
@@ -44,11 +45,12 @@ describe('Integration auth', () => {
       integrationName: 'NEW_INTEGRATION',
     });
 
+    await global.networks.pmt.addUser(global.users.employee);
     await network.addUser(global.users.employee);
   });
 
   after(async () => {
-    createAdapter.default.restore();
+    await global.networks.pmt.removeUser(global.users.employee);
     await integration.destroy();
     await network.destroy();
   });
@@ -72,9 +74,10 @@ describe('Integration auth', () => {
       password: employeeCredentials.password,
     }, global.server, global.tokens.employee);
 
-    const actual = tokenUtil.decode(data.access_token);
+    const decodedToken = tokenUtil.decode(data.access_token);
 
-    assert.deepEqual(actual.integrations, [authResult]);
+    assert.deepEqual(decodedToken.integrations, [authResult]);
+    assert.equal(decodedToken.sub, global.users.employee.id);
   });
 
   it('should add integration token for user in network', async () => {
@@ -88,10 +91,26 @@ describe('Integration auth', () => {
     const { NetworkUser } = networkUtil.select(user.Networks, network.id);
 
     assert.equal(NetworkUser.userToken, 'auth_token');
+    assert.equal(NetworkUser.externalId, 1);
   });
 
-  it('should return 401 when user could not authenticate with integration', async () => {
+  it('should return 403 error when someone is already authenticated with the same account', async () => { // eslint-disable-line max-len
     createAdapter.default.restore();
+    // Mock the same request being made in the setup for the admin to force the same externalId
+    nock(global.networks.pmt.externalId)
+      .post('/login')
+      .reply(200, { logged_in_user_token: '379ce9b4176cb89354c1f74b3a2c1c7a', user_id: 8023 });
+
+    const endpoint = `/v2/networks/${global.networks.pmt.id}/integration_auth`;
+    const { statusCode } = await postRequest(endpoint, {
+      username: 'foo',
+      password: 'wrong_pass',
+    }, global.server, global.tokens.employee);
+
+    assert.equal(statusCode, 403);
+  });
+
+  it('should return 401 error when user could not authenticate with integration', async () => {
     const fakeAdapter = {
       authenticate: () => Promise.reject(createError('401')),
     };

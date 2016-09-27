@@ -10,6 +10,7 @@ import blueprints from 'shared/test-utils/blueprints';
 import { UserRoles } from 'shared/services/permission';
 import { createUser } from 'shared/repositories/user';
 import authenticate from 'shared/test-utils/authenticate';
+import * as accessService from 'modules/integrations/services/access';
 import { createNetwork, createIntegrationNetwork } from 'shared/repositories/network';
 import generateNetworkName from 'shared/test-utils/create-network-name';
 
@@ -41,10 +42,20 @@ before(async () => {
     }),
   ]);
 
+  const adminCredentials = {
+    username: blueprints.users.admin.username,
+    password: blueprints.users.admin.password,
+  };
+
+  const employeeCredentials = {
+    username: blueprints.users.employee.username,
+    password: blueprints.users.employee.password,
+  };
+
   // Mocking this because we add integration settings to the JWT token
   // after the user can authenticate to the intergration.
   nock(createdPMTNetwork.externalId)
-    .post('/login')
+    .post('/login', adminCredentials)
     .reply(200, { logged_in_user_token: '379ce9b4176cb89354c1f74b3a2c1c7a', user_id: 8023 });
 
   // Add user to the networks
@@ -69,17 +80,10 @@ before(async () => {
     employee.reload(),
   ]);
 
-  const adminCredentials = blueprints.users.admin;
-  const adminAuth = await authenticate(global.server, {
-    username: adminCredentials.username,
-    password: adminCredentials.password,
-  });
+  const employeeAuth = await authenticate(global.server, employeeCredentials);
 
-  const employeeCredentials = blueprints.users.employee;
-  const employeeAuth = await authenticate(global.server, {
-    username: employeeCredentials.username,
-    password: employeeCredentials.password,
-  });
+  const message = { credentials: admin, network: createdPMTNetwork, deviceName: 'foo' };
+  const linkedAdminToken = await accessService.getLinkedAccessToken(adminCredentials, message);
 
   global.users = {
     admin: newAdmin,
@@ -88,13 +92,8 @@ before(async () => {
   };
 
   global.tokens = {
-    admin: adminAuth.token,
+    admin: linkedAdminToken,
     employee: employeeAuth.token,
-  };
-
-  global.integrations = {
-    admin: adminAuth.integrations,
-    employee: employeeAuth.integrations,
   };
 
   global.networks = {

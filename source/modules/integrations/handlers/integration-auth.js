@@ -5,7 +5,7 @@ export default async (req, reply) => {
   const payload = { ...req.payload, ...req.params };
 
   try {
-    const accessToken = await accessService.getAccessToken(payload, message);
+    const accessToken = await accessService.getLinkedAccessToken(payload, message);
 
     return reply({ data: { access_token: accessToken } });
   } catch (err) {

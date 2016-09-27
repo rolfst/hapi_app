@@ -1,7 +1,7 @@
 import { find } from 'lodash';
 import moment from 'moment';
 import Promise from 'bluebird';
-import createAdapter from '../../../../shared/utils/create-adapter';
+import userBelongsToNetwork from '../../../../shared/utils/user-belongs-to-network';
 import createError from '../../../../shared/utils/create-error';
 import * as authenticationRepo from '../../../../shared/repositories/authentication';
 import * as userRepo from '../../../../shared/repositories/user';
@@ -9,6 +9,10 @@ import * as networkUtil from '../../../../shared/utils/network';
 import createAccessToken from '../../utils/create-access-token';
 import createRefreshToken from '../../utils/create-refresh-token';
 import checkPassword from '../../utils/check-password';
+
+export const updateLastLogin = async (user) => {
+  userRepo.updateUser(user.id, { lastLogin: moment().toISOString() });
+};
 
 export const authenticateUser = async ({ username, password }) => {
   const user = await userRepo.findUserByUsername(username);
@@ -29,14 +33,6 @@ export const createAuthenticationTokens = async (userId, deviceName, authenticat
   return { accessToken, refreshToken };
 };
 
-export const makeAuthenticationPromises = (networks, credentials) => {
-  return networks
-    .filter(networkUtil.hasIntegration)
-    .map(network => createAdapter(network, [], { proceedWithoutToken: true }))
-    .map(adapter => adapter.authenticate(credentials))
-    .map(promise => Promise.resolve(promise));
-};
-
 export const mapNetworkAndToken = (network, authenticatedIntegrations) => ({
   network,
   token: find(authenticatedIntegrations, { name: network.Integrations[0].name }).token,
@@ -51,15 +47,14 @@ export const setIntegrationTokens = (user, authenticatedIntegrations) => {
   return Promise.all(setIntegrationTokenPromises);
 };
 
-export const authenticateIntegrations = async (user, authenticationPromises) => {
-  const authenticatedIntegrations = await Promise
-    .all(authenticationPromises.map(p => p.reflect()))
-    .filter(inspection => inspection.isFulfilled())
-    .map(inspection => inspection.value());
+export const getAuthenticationTokens = async (user, deviceName) => {
+  if (!userBelongsToNetwork(user)) {
+    throw createError('403', 'The user does not belong to any network.');
+  }
 
-  return authenticatedIntegrations;
-};
+  const { accessToken, refreshToken } = await createAuthenticationTokens(user.id, deviceName, []);
 
-export const updateLastLogin = async (user) => {
-  userRepo.updateUser(user.id, { lastLogin: moment().toISOString() });
+  updateLastLogin(user);
+
+  return { accessToken, refreshToken };
 };

@@ -9,27 +9,27 @@ nock.disableNetConnect();
 
 describe('PMT Authenticate hook', () => {
   it('should succeed when credentials are correct', async () => {
-    const credential = { username: 'validUsername', password: 'validPassword' };
+    const credentials = { username: 'validUsername', password: 'validPassword' };
 
     nock(global.networks.pmt.externalId)
-      .post('/login', credential)
+      .post('/login', credentials)
       .reply('200', stubs.api_key_200);
 
-    const actual = await hook(global.networks.pmt.externalId)(credential);
+    const actual = await hook(global.networks.pmt.externalId)(credentials);
     const expected = blueprints.pmt_credentials;
 
     assert.deepEqual(actual, expected);
   });
 
   it('should fail when credentials are incorrect', async () => {
-    const credential = { username: 'invalidUsername', password: 'ValidPassword' };
+    const credentials = { username: 'invalidUsername', password: 'ValidPassword' };
 
     nock(global.networks.pmt.externalId)
-      .post('/login', credential)
+      .post('/login', credentials)
       .reply('401', stubs.incorrect_credentials_401);
 
     try {
-      await hook(global.networks.pmt.externalId)(credential);
+      await hook(global.networks.pmt.externalId)(credentials);
 
       assert.fail();
     } catch (err) {
@@ -38,14 +38,14 @@ describe('PMT Authenticate hook', () => {
   });
 
   it('should fail when username is not provided', async () => {
-    const credential = { password: 'ValidPassword' };
+    const credentials = { password: 'ValidPassword' };
 
     nock(global.networks.pmt.externalId)
-      .post('/login', credential)
+      .post('/login', credentials)
       .reply('400', stubs.missing_username_400);
 
     try {
-      await hook(global.networks.pmt.externalId)(credential);
+      await hook(global.networks.pmt.externalId)(credentials);
 
       assert.fail();
     } catch (err) {

@@ -1,12 +1,22 @@
+import { find, differenceBy, intersectionBy } from 'lodash';
+import createError from '../../../shared/utils/create-error';
 import { findTeamsForNetwork } from '../../../shared/repositories/network';
 import { createBulkTeams } from '../../../shared/repositories/team';
-
-import { find, differenceBy, intersectionBy } from 'lodash';
-import { addUserToNetwork, createBulkUsers } from '../../../shared/repositories/user';
+import * as userRepo from '../../../shared/repositories/user';
 import * as teamRepo from '../../../shared/repositories/team';
 
 export const findExternalUser = (user, externalUsers) => {
   return find(externalUsers, { email: user.email });
+};
+
+export const assertExternalIdNotPresentInNetwork = async (userId, networkId, externalId) => {
+  const user = await userRepo.findUserInNetworkByExternalId(networkId, externalId);
+
+  if (user && user.id !== userId) {
+    throw createError('403', 'Your integration account is already linked with someone else.');
+  }
+
+  return false;
 };
 
 
@@ -40,7 +50,7 @@ export const findExternalUser = (user, externalUsers) => {
  */
 export const importUsers = async (internalUsers, externalUsers, network) => {
   const newExternalUsers = differenceBy(externalUsers, internalUsers, 'email');
-  const newUsers = await createBulkUsers(newExternalUsers);
+  const newUsers = await userRepo.createBulkUsers(newExternalUsers);
   const existingUsers = intersectionBy(internalUsers, externalUsers, 'email');
 
   const usersToAddToNetwork = [...newUsers, ...existingUsers];
@@ -48,7 +58,7 @@ export const importUsers = async (internalUsers, externalUsers, network) => {
   const promises = usersToAddToNetwork.map(employee => {
     const externalUser = findExternalUser(employee, externalUsers);
 
-    return addUserToNetwork(employee, network, {
+    return userRepo.addUserToNetwork(employee, network, {
       isActive: externalUser.isActive,
       externalId: externalUser.externalId,
       roleType: externalUser.isAdmin ? 'ADMIN' : 'EMPLOYEE',
