@@ -2,7 +2,7 @@ import { find } from 'lodash';
 import sinon from 'sinon';
 import { assert } from 'chai';
 import * as createAdapter from 'shared/utils/create-adapter';
-import stubs from 'shared/test-utils/fixtures';
+import stubs from 'shared/test-utils/stubs';
 import { getRequest } from 'shared/test-utils/request';
 import * as networkRepo from 'shared/repositories/network';
 import * as userRepo from 'shared/repositories/user';
@@ -15,8 +15,8 @@ describe('Network import', () => {
 
   before(async () => {
     const fakeAdapter = {
-      fetchTeams: () => stubs.externalTeams,
-      fetchUsers: () => stubs.externalUsers,
+      fetchTeams: () => stubs.external_teams,
+      fetchUsers: () => stubs.external_users,
     };
 
     sinon.stub(createAdapter, 'default').returns(fakeAdapter);
@@ -63,11 +63,11 @@ describe('Network import', () => {
 
   it('should add new teams to network', async () => {
     const teams = await networkRepo.findTeamsForNetwork(network);
-    const actual = find(teams, { externalId: stubs.externalTeams[0].externalId });
+    const actual = find(teams, { externalId: stubs.external_teams[0].externalId });
 
-    assert.lengthOf(teams, stubs.externalTeams.length);
+    assert.lengthOf(teams, stubs.external_teams.length);
     assert.isDefined(actual);
-    assert.equal(actual.name, stubs.externalTeams[0].name);
+    assert.equal(actual.name, stubs.external_teams[0].name);
   });
 
   it('should add new admins to network', async () => {
@@ -85,7 +85,7 @@ describe('Network import', () => {
 
   it('should add new users to teams', async () => {
     const teams = await networkRepo.findTeamsForNetwork(network);
-    const actual = find(teams, { externalId: stubs.externalTeams[0].externalId });
+    const actual = find(teams, { externalId: stubs.external_teams[0].externalId });
 
     assert.lengthOf(actual.Users, 2);
   });

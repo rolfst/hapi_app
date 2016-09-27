@@ -90,6 +90,55 @@
     }],
     "active": true
   }, {
+    "id": "8036",
+    "username": "p.cuperus2@kpnplanet.nl",
+    "email": "bob+8036@rwrs.nl",
+    "department": "72",
+    "first_name": "Piet",
+    "last_name": "Doe",
+    "cell_phone_number": "0600000000",
+    "home_phone_number": "0600000000",
+    "date_of_birth": "1958-11-02",
+    "rolename": "Afdelingsmanager",
+    "scope": [{
+      "department": "72"
+    }],
+    "active": true
+  }, {
+    "id": "8025",
+    "username": "Tinie",
+    "email": "hodor@flex-appeal.nl",
+    "department": "28",
+    "first_name": "Tiny",
+    "last_name": "Doe",
+    "cell_phone_number": "0600000000",
+    "home_phone_number": "0600000000",
+    "date_of_birth": "1982-08-05",
+    "rolename": "Bedrijfsleiding",
+    "scope": [{
+      "department": "28"
+    }, {
+      "department": "73"
+    }],
+    "active": true
+  }, {
+    "id": "8111",
+    "username": "dettie.vandermeer@hotmail.com",
+    "email": "bob+8111@rwrs.nl",
+    "department": "71",
+    "first_name": "Dettie",
+    "last_name": "Doe",
+    "cell_phone_number": "0600000000",
+    "home_phone_number": "0600000000",
+    "date_of_birth": "1994-04-23",
+    "rolename": "Bedrijfsleiding",
+    "scope": [{
+      "department": "71"
+    }, {
+      "department": "72"
+    }],
+    "active": true
+  }, {
     "id": "1048773",
     "username": "Anouk.vanden.Doe",
     "email": "bob+58797@rwrs.nl",

@@ -1,0 +1,9 @@
+{
+  "chains": [{
+    "name": "Albert Heijn",
+    "base_url": "ah.personeelstool.nl"
+  }, {
+    "name": "Jumbo",
+    "base_url": "jumbo.personeelstool.nl"
+  }]
+}

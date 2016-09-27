@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import _ from 'lodash';
-import mailFixture from 'shared/test-utils/fixtures/mail';
+import mailFixture from 'shared/test-utils/stubs/mail';
 import * as mailer from 'shared/services/mailer';
 
 describe('Mailer', () => {

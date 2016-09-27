@@ -1,0 +1,55 @@
+{
+  "departments": [{
+    "department_id": "15",
+    "department_name": "Aardappelen Groente en Fruit",
+    "department_shortcode": "AGF"
+  }, {
+    "department_id": "28",
+    "department_name": "Algemeen",
+    "department_shortcode": "ALG"
+  }, {
+    "department_id": "30",
+    "department_name": "Brood",
+    "department_shortcode": "BROOD"
+  }, {
+    "department_id": "40",
+    "department_name": "Kaas",
+    "department_shortcode": "Kaas"
+  }, {
+    "department_id": "22",
+    "department_name": "Kassa",
+    "department_shortcode": "KASSA"
+  }, {
+    "department_id": "49",
+    "department_name": "Kiosk",
+    "department_shortcode": "KIOSK"
+  }, {
+    "department_id": "14",
+    "department_name": "Kruidenierswarens",
+    "department_shortcode": "KW"
+  }, {
+    "department_id": "17",
+    "department_name": "Semi Vers",
+    "department_shortcode": "SEMI"
+  }, {
+    "department_id": "72",
+    "department_name": "Verkoop",
+    "department_shortcode": "VKP"
+  }, {
+    "department_id": "73",
+    "department_name": "Verkoopafhandeling",
+    "department_shortcode": "VKA"
+  }, {
+    "department_id": "71",
+    "department_name": "Verkoopklaar",
+    "department_shortcode": "VKK"
+  }, {
+    "department_id": "24",
+    "department_name": "Vlees",
+    "department_shortcode": "VLEES"
+  }, {
+    "department_id": "29",
+    "department_name": "Vleeswaren",
+    "department_shortcode": "VLSWR"
+  }]
+}

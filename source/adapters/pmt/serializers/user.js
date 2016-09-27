@@ -1,3 +1,5 @@
+import { includes } from 'lodash';
+
 export default (externalUser) => {
   const defaultProps = {
     id: null,
@@ -24,7 +26,7 @@ export default (externalUser) => {
     dateOfBirth: properUser.date_of_birth,
     phoneNum: properUser.cell_phone_number
       ? properUser.cell_phone_number : properUser.home_phone_number,
-    isAdmin: properUser.rolename === 'admin',
+    isAdmin: includes(['Bedrijfsleiding', 'Afdelingsmanager', 'admin', 'Organisation', 'Assistent Manager'], properUser.rolename),
     isActive: properUser.active,
     teamId: properUser.department,
   };

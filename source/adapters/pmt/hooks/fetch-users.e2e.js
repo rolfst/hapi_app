@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import nock from 'nock';
-import * as stubs from '../test-utils/stubs';
+import * as stubs from '../../../shared/test-utils/stubs';
 import * as blueprints from '../test-utils/blueprints';
 import hook from './fetch-users';
 

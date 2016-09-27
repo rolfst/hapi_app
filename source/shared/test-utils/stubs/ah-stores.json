@@ -1,0 +1,17 @@
+{
+  "stores": [{
+    "id": 117,
+    "base_store_url": "https://overig.personeelstool.nl",
+    "name": "AH Nanne van der Schaaf",
+    "address": "Koophandel 7",
+    "zip": "9101 WZ",
+    "city": "Dokkum"
+  }, {
+    "id": 336,
+    "base_store_url": "https://ah.personeelstool.nl",
+    "name": "AH van Bergen",
+    "address": "Wolfskooi 49",
+    "zip": "5345 MH",
+    "city": "Oss"
+  }]
+}

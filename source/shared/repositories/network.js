@@ -6,6 +6,11 @@ const defaultIncludes = [
   { model: User, as: 'SuperAdmin' },
 ];
 
+export const findAll = async (attributes) => {
+  const networks = await Network.findAll({ attributes });
+  return networks.map((network) => network.get({ plain: true }));
+};
+
 export function findIntegrationByName(name) {
   return Integration.findOne({ where: { name } });
 }
@@ -100,3 +105,4 @@ export async function createIntegrationNetwork({
 
   return findNetworkById(network.id);
 }
+

@@ -1,0 +1,24 @@
+{
+  "stores": [{
+    "id": 116,
+    "name": "Jumbo Nanne van der Schaaf",
+    "address": "Koophandel 7",
+    "zip": "9101 WZ",
+    "city": "Dokkum",
+    "base_store_url": "https://jumboschaaf.personeelstool.nl"
+  }, {
+    "id": 335,
+    "name": "Jumbo van Bergen",
+    "address": "Wolfskooi 49",
+    "zip": "5345 MH",
+    "city": "Oss",
+    "base_store_url": "https://jumbo.personeelstool.nl"
+  }, {
+    "id": 337,
+    "name": "Jumbo van Bergen",
+    "address": "Vierhoeksingel 7",
+    "zip": "5341 PN",
+    "city": "Oss",
+    "base_store_url": "https://jumbobergen.personeelstool.nl"
+  }]
+}
