@@ -1,14 +1,14 @@
 import { includes } from 'lodash';
 
-export default (externalUser) => {
-  const ADMIN_ROLES = [
-    'admin',
-    'Bedrijfsleiding',
-    'Afdelingsmanager',
-    'Organisation',
-    'Assistent Manager',
-  ];
+const ADMIN_ROLES = [
+  'admin',
+  'Bedrijfsleiding',
+  'Afdelingsmanager',
+  'Organisation',
+  'Assistent Manager',
+];
 
+export default (externalUser) => {
   const defaultProps = {
     id: null,
     department: null,

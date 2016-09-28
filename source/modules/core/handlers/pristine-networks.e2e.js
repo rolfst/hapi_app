@@ -80,6 +80,8 @@ describe('Pristine Networks', async () => {
 
     assert.property(data[0], 'externalId');
     assert.property(data[1], 'name');
+    assert.property(data[1], 'integrationName');
+    assert.property(data[1], 'admins');
   });
 
   it('should fail when integration base endpoint is down', async () => {

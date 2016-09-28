@@ -103,6 +103,8 @@ export async function createIntegrationNetwork({
 
   await network.setIntegrations([integration]);
 
-  return findNetworkById(network.id);
+  const foundNetwork = await findNetworkById(network.id);
+
+  return foundNetwork;
 }
 

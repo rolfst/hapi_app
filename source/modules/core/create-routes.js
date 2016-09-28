@@ -10,6 +10,11 @@ const routes = [{
   url: '/v2/pristine_networks',
   handler: require('./handlers/pristine-networks'),
   prefetch: false,
+}, {
+  method: 'POST',
+  url: '/v2/pristine_networks/import',
+  handler: require('./handlers/import-pristine-network'),
+  validator: require('./validators/import-pristine-network'),
 }];
 
 export default createRoutes(routes);
