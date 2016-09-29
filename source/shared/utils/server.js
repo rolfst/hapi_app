@@ -29,6 +29,9 @@ export const onPreResponse = (req, reply) => {
 
     if (req.response.data && req.response.data.isJoi) {
       error = createError('422', req.response.data.details[0].message);
+    } else if (req.response.data === null) {
+      // Data attribute will be null when Hapi throws an internal error
+      error = createError(req.response.output.statusCode.toString());
     }
 
     const errorResponse = transformBoomToErrorResponse(error);
