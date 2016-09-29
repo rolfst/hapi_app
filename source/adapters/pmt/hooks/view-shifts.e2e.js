@@ -43,8 +43,8 @@ describe('PMT view shifts hook', () => {
       .get(`${ENDPOINT}/${TODAY}`)
       .reply(403, stubs.shifts_forbidden_403);
 
-    const actual = hook(global.networks.pmt.externalId)();
+    const viewShiftHook = hook(global.networks.pmt.externalId)();
 
-    return assert.isRejected(actual, createError('403'));
+    return assert.isRejected(viewShiftHook, new RegExp(createError('403').message));
   });
 });

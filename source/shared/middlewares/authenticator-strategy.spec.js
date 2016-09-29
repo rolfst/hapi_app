@@ -47,15 +47,17 @@ describe('authenticatorStrategy', () => {
 
   it('should throw error when user cannot be authenticated', async () => {
     userRepo.findUserById.restore();
-    sandbox.stub(userRepo, 'findUserById').throws();
+    sandbox.stub(userRepo, 'findUserById').returns(Promise.reject(createError('10004')));
     sandbox.stub(tokenUtil, 'decode').returns({ sub: null });
+
     const promise = strategy.authenticate(1, 'foo');
 
-    return assert.isRejected(promise, createError('10004'));
+    return assert.isRejected(promise, new RegExp(createError('10004').message));
   });
 
   it('should throw error when token is empty', () => {
     const promise = strategy.authenticate(1, null);
-    return assert.isRejected(promise, createError('401'));
+
+    return assert.isRejected(promise, new RegExp(createError('401').message));
   });
 });

@@ -28,13 +28,9 @@ describe('PMT Authenticate hook', () => {
       .post('/login', credentials)
       .reply('401', stubs.incorrect_credentials_401);
 
-    try {
-      await hook(global.networks.pmt.externalId)(credentials);
+    const authenticationHook = hook(global.networks.pmt.externalId)(credentials);
 
-      assert.fail();
-    } catch (err) {
-      assert.deepEqual(err, createError('10004'));
-    }
+    return assert.isRejected(authenticationHook, new RegExp(createError('10004').message));
   });
 
   it('should fail when username is not provided', async () => {
@@ -44,12 +40,8 @@ describe('PMT Authenticate hook', () => {
       .post('/login', credentials)
       .reply('400', stubs.missing_username_400);
 
-    try {
-      await hook(global.networks.pmt.externalId)(credentials);
+    const authenticationHook = hook(global.networks.pmt.externalId)(credentials);
 
-      assert.fail();
-    } catch (err) {
-      assert.deepEqual(err, createError('422'));
-    }
+    return assert.isRejected(authenticationHook, new RegExp(createError('422').message));
   });
 });

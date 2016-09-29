@@ -72,8 +72,8 @@ describe('Reject exchange', () => {
   it('should fail when user doesn\'t have permission to reject', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}`;
     const payload = { action: 'reject', user_id: global.users.admin.id };
-    const promise = patchRequest(endpoint, payload, global.server, global.tokens.employee);
-    const { statusCode } = await promise;
+    const { statusCode } = await patchRequest(
+      endpoint, payload, global.server, global.tokens.employee);
 
     assert.equal(statusCode, 403);
   });

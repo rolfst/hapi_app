@@ -1,5 +1,6 @@
 import createError from '../utils/create-error';
-import * as networkUtil from 'shared/utils/network';
+import * as serverUtil from '../utils/server';
+import * as networkUtil from '../utils/network';
 
 export const selectNetworkForUser = (user, networkIdToSelect) => {
   const selectedNetwork = networkUtil.select(user.Networks, networkIdToSelect);
@@ -19,6 +20,8 @@ export default (req, reply) => {
 
     return reply(selectedNetwork);
   } catch (err) {
-    return reply(err).code(err.status_code);
+    const errorResponse = serverUtil.transformBoomToErrorResponse(err);
+
+    return reply(errorResponse).code(errorResponse.status_code);
   }
 };

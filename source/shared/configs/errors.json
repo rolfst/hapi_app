@@ -53,5 +53,10 @@
     "type": "wrong_credentials",
     "detail": "No user found for given username and password.",
     "code": 403
+  },
+  "10005": {
+    "type": "unauthorized",
+    "detail": "The user could not authorize with the integration partner.",
+    "code": 401
   }
 }

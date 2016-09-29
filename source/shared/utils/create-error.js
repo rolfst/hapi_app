@@ -1,3 +1,4 @@
+import Boom from 'boom';
 import { pick } from 'lodash';
 import errors from '../configs/errors.json';
 
@@ -7,12 +8,10 @@ const createError = (code, developerMessage) => {
 
   if (!error) throw new Error(`Specify a valid HTTP status code, received ${code}`);
 
-  return {
-    type: error.type,
-    detail: developerMessage || error.detail,
-    is_error: true,
-    status_code: error.code,
-  };
+  return Boom.create(error.code, developerMessage || error.detail, {
+    errorType: error.type,
+    errorCode: code.toString(),
+  });
 };
 
 export default createError;

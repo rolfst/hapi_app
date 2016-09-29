@@ -26,7 +26,7 @@ describe('Authentication service', () => {
       stub.restore();
     });
 
-    it('it should fail when credentials do not match', async () => {
+    it('should fail when credentials do not match', async () => {
       const stub = sinon.stub(checkPassword, 'default').returns(false);
       const promise = unit.authenticateUser({ ...credentials, password: 'ihaznoswag' });
       stub.restore();

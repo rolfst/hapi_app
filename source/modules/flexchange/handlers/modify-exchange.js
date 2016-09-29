@@ -1,5 +1,4 @@
 import { pick } from 'lodash';
-import { check } from 'hapi-acl-plugin';
 import * as flexchangeService from 'modules/flexchange/services/flexchange';
 
 const services = {
@@ -16,8 +15,6 @@ export default async (req, reply) => {
   const { pre, auth } = req;
 
   try {
-    check(req.auth.credentials, `${payload.action}-exchange`);
-
     const actionHook = services[payload.action];
     const message = { ...pre, ...auth };
     const updatedExchange = await actionHook(payload, message);

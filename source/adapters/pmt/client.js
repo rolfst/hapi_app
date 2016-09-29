@@ -8,14 +8,14 @@ const createFormEncodedString = (data) => {
 };
 
 const handleError = (status, body) => {
-  if (status === 400 && body.error === 'Token is expired.') {
-    throw createError('401');
+  if (status === 400 && body.error.toLowerCase().match(/token|expired/g)) {
+    throw createError('10005');
+  } else if (status === 403) {
+    throw createError('403');
   } else if (status === 400) {
     throw createError('422');
   } else if (status === 401 && body.error === 'Incorrect username or password.') {
     throw createError('10004');
-  } else if (status === 403) {
-    throw createError('403');
   }
 };
 
@@ -38,6 +38,7 @@ export async function makeRequest(endpoint, token = null, method = 'GET', data =
     return { payload: json, status: response.status };
   } catch (err) {
     console.error('PMT Client error', err);
+
     throw err;
   }
 }

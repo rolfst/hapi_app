@@ -1,5 +1,6 @@
 import analytics from '../services/analytics';
 import tokenUtil from '../utils/token';
+import * as serverUtil from '../utils/server';
 import createError from '../utils/create-error';
 import * as networkUtil from '../utils/network';
 import * as userRepo from '../repositories/user';
@@ -31,9 +32,10 @@ export default () => {
       } catch (err) {
         console.error('Error in Authenticator Strategy', err);
 
-        if (err.is_error) return reply(err).code(err.status_code);
+        const errorResponse = serverUtil.transformBoomToErrorResponse(
+          !err.isBoom ? createError('401') : err);
 
-        return reply(createError('401')).code(401);
+        return reply(errorResponse).code(errorResponse.status_code);
       }
     },
   };

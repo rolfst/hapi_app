@@ -1,6 +1,5 @@
 import Url from 'url';
 import Qs from 'qs';
-import { omit } from 'lodash';
 import authorizationPlugin from 'hapi-acl-plugin';
 import * as networkUtil from 'shared/utils/network';
 import createError from 'shared/utils/create-error';
@@ -17,20 +16,24 @@ export const onRequest = (req, reply) => {
   return reply.continue();
 };
 
+export const transformBoomToErrorResponse = (boom) => ({
+  type: boom.data.errorType,
+  detail: boom.output.payload.message,
+  error_code: boom.data.errorCode || boom.output.payload.statusCode.toString(),
+  status_code: boom.output.payload.statusCode,
+});
+
 export const onPreResponse = (req, reply) => {
-  if ((req.response.source && req.response.source.is_error) || req.response.isBoom) {
-    let error = req.response.source;
+  if (req.response instanceof Error && req.response.isBoom) {
+    let error = req.response;
 
-    if (req.response.isBoom) {
-      error = createError(req.response.output.statusCode, req.response.output.payload.message);
+    if (req.response.data.isJoi) {
+      error = createError('422', req.response.data.details[0].message);
     }
 
-    if (req.response.data && req.response.data.isJoi) {
-      const errorMessage = req.response.data.details[0].message;
-      error = createError('422', errorMessage);
-    }
+    const errorResponse = transformBoomToErrorResponse(error);
 
-    return reply(omit(error, 'is_error')).code(error.status_code);
+    return reply(errorResponse).code(errorResponse.status_code);
   }
 
   return reply.continue();
