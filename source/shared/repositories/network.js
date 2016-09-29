@@ -48,13 +48,7 @@ export function findNetworkById(id) {
 }
 
 export function findNetwork(data) {
-  return Network
-    .findOne({ where: data, include: defaultIncludes })
-    .then(network => {
-      if (!network) throw createError('404');
-
-      return network;
-    });
+  return Network.findOne({ where: data, include: defaultIncludes });
 }
 
 export function findNetworksForIntegration(integrationName) {
@@ -107,4 +101,3 @@ export async function createIntegrationNetwork({
 
   return foundNetwork;
 }
-

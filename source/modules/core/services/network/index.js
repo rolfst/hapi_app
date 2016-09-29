@@ -1,6 +1,5 @@
 import Promise from 'bluebird';
-import { differenceBy, flatten, map, pick, get } from 'lodash';
-import createError from '../../../../shared/utils/create-error';
+import { flatten, map, pick, get } from 'lodash';
 import configurationMail from '../../../../shared/mails/configuration-invite';
 import * as mailer from '../../../../shared/services/mailer';
 import * as integrationsAdapter from '../../../../shared/utils/integrations-adapter';
@@ -8,6 +7,7 @@ import * as networkRepo from '../../../../shared/repositories/network';
 import * as userRepo from '../../../../shared/repositories/user';
 import * as importService from '../../../integrations/services/import';
 import * as userService from '../user';
+import * as impl from './implementation';
 
 export const listNetworksForCurrentUser = (payload, message) => {
   return message.credentials.Networks;
@@ -29,17 +29,12 @@ export const listPristineNetworks = async () => {
 
   const networksFromIntegration = flatten(await Promise.map(clients,
     (client) => getNetworks(client.externalId)));
-  const networks = await networkRepo.findAll({ attributes: ['externalId'] });
-  const pristineNetworks = differenceBy(networksFromIntegration, networks, 'externalId');
-  const pristineSelectableNetworks = await Promise.map(pristineNetworks,
-    async (pristineNetwork) => {
-      const network = { ...pristineNetwork };
-      const admins = await integrationsAdapter.adminsFromPristineNetworks(network.externalId);
-      network.admins = admins;
-      return network;
-    });
 
-  return pristineSelectableNetworks;
+  const pristineNetworks = impl.filterExistingNetworks(networksFromIntegration);
+  const pristineNetworksWithAdmins = await Promise.map(
+    pristineNetworks, impl.mergeAdminsIntoPristineNetwork);
+
+  return pristineNetworksWithAdmins;
 };
 
 /**
@@ -86,35 +81,24 @@ export const importPristineNetwork = async (payload) => {
     'lastName', 'dateOfBirth', 'email', 'phoneNum',
     'isAdmin', 'isActive', 'teamId'];
 
-  try {
-    const employee = pick(payload, USER_PROPS);
-    const networkPayload = pick(payload, ['name']);
-    const integrationName = payload.integrationName;
+  const employee = pick(payload, USER_PROPS);
+  const networkPayload = pick(payload, ['name']);
+  const integrationName = payload.integrationName;
 
-    employee.externalId = get(payload, 'userId');
-    networkPayload.externalId = get(payload, 'networkId');
+  employee.externalId = get(payload, 'userId');
+  networkPayload.externalId = get(payload, 'networkId');
 
-    const user = await userRepo.createUser({ ...employee });
-    try {
-      const network = await networkRepo.findNetwork({ ...networkPayload });
-      if (network) throw createError('401');
-    } catch (err) {
-      if (err.status_code !== 404) throw err;
-      console.log('err', err);
-    }
+  const user = await userRepo.createUser({ ...employee });
+  await impl.assertTheNetworkIsNotImportedYet(networkPayload);
 
-    const newNetwork = await networkRepo.createIntegrationNetwork({
-      userId: user.id,
-      externalId: networkPayload.externalId,
-      name: networkPayload.name,
-      integrationName,
-    });
+  const newNetwork = await networkRepo.createIntegrationNetwork({
+    userId: user.id,
+    externalId: networkPayload.externalId,
+    name: networkPayload.name,
+    integrationName,
+  });
 
-    await importService.importNetwork({ networkId: newNetwork.id });
-    mailer.send(configurationMail(newNetwork, user));
-  } catch (err) {
-    if (err.status_code !== 401) throw err;
+  await importService.importNetwork({ networkId: newNetwork.id });
 
-    throw createError('401');
-  }
+  mailer.send(configurationMail(newNetwork, user));
 };

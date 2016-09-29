@@ -34,15 +34,17 @@ describe('Import pristine network', () => {
     after(async () => {
       const network = await networkRepo.findNetwork({ name: pristineNetwork.name });
       const users = await networkRepo.findAllUsersForNetwork(network);
+      const createdUser = await userRepo.findUserByUsername(employee.username);
       createAdapter.default.restore();
 
+      await createdUser.destroy();
       await integration.destroy();
       await network.destroy();
 
       return Promise.all(users.map(u => u.destroy()));
     });
 
-    it('Should succeed', async () => {
+    it('should succeed', async () => {
       const response = await postRequest('/v2/pristine_networks/import', {
         ...employee,
         ...pick(pristineNetwork, ['name', 'networkId', 'integrationName']),
@@ -54,7 +56,6 @@ describe('Import pristine network', () => {
       const configuration = configurationMail(network, user);
 
       assert.equal(response.statusCode, 200);
-
       assert.equal(mailer.send.calledWithMatch(configuration), true);
     });
   });
@@ -82,13 +83,13 @@ describe('Import pristine network', () => {
       return network.destroy();
     });
 
-    it('Should fail on already imported network', async () => {
+    it('should fail on already imported network', async () => {
       const response = await postRequest('/v2/pristine_networks/import', {
         ...employee,
         ...pick(pristineNetwork, ['name', 'networkId', 'integrationName']),
       });
 
-      assert.equal(response.statusCode, 401);
+      assert.equal(response.statusCode, 403);
     });
   });
 });
