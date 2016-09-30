@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import Promise from 'Bluebird';
+import Promise from 'bluebird';
 import { flatten, sortBy, partialRight, flow } from 'lodash';
 import { getRequest } from '../../../shared/test-utils/request';
 import * as mailer from '../../../shared/services/mailer';
