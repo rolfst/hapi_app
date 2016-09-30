@@ -1,17 +1,19 @@
+import { map, differenceBy, sortBy } from 'lodash';
 import createError from '../../../shared/utils/create-error';
 import camelCaseKeys from '../../../shared/utils/camel-case-keys';
-import * as password from 'shared/utils/password';
-import signupMail from 'shared/mails/signup';
-import addedToNetworkMail from 'shared/mails/added-to-network';
-import * as mailer from 'shared/services/mailer';
-import { createUser, findUserByEmail } from 'shared/repositories/user';
-import * as networkRepo from 'shared/repositories/network';
-import { addUserToNetwork } from 'shared/repositories/user';
-import { addUserToTeams } from 'shared/repositories/team';
-import userBelongsToNetwork from 'shared/utils/user-belongs-to-network';
-import userIsDeletedFromNetwork from 'shared/utils/user-is-deleted-from-network';
+import * as password from '../../../shared/utils/password';
+import signupMail from '../../../shared/mails/signup';
+import addedToNetworkMail from '../../../shared/mails/added-to-network';
+import * as mailer from '../../../shared/services/mailer';
+import { createUser, findUserByEmail } from '../../../shared/repositories/user';
+import * as networkRepo from '../../../shared/repositories/network';
+import { addUserToNetwork } from '../../../shared/repositories/user';
+import { addUserToTeams } from '../../../shared/repositories/team';
+import userBelongsToNetwork from '../../../shared/utils/user-belongs-to-network';
+import userIsDeletedFromNetwork from '../../../shared/utils/user-is-deleted-from-network';
 import * as userRepo from '../../../shared/repositories/user';
 import * as networkUtil from '../../../shared/utils/network';
+import { isAdmin } from '../../../shared/services/permission';
 
 export const inviteNewUser = async (network, { firstName, lastName, email, roleType }) => {
   const plainPassword = password.plainRandom();
@@ -66,4 +68,20 @@ export const inviteUser = async (payload, message) => {
   const invitedUser = await userRepo.findUserByEmail(email);
 
   return networkUtil.addUserScope(invitedUser, network.id);
+};
+
+
+export const inviteUsers = async (payload, message) => {
+  const { network } = message;
+  const currentUser = await userRepo.findUserById(message.credentials.id);
+  const identifiedUser = networkUtil.addUserScope(currentUser, network.id);
+  if (!userBelongsToNetwork(identifiedUser, network.id)
+    || !isAdmin(identifiedUser)) throw createError('403');
+
+  const networkMembers = await networkRepo.findActiveUsersForNetwork(network);
+  const users = sortBy(differenceBy(networkMembers, [currentUser], 'email'), 'username');
+
+  map(users, (user) => mailer.send(addedToNetworkMail(network, user)));
+
+  return users;
 };

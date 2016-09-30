@@ -36,6 +36,8 @@ describe('Import pristine network', () => {
       const users = await networkRepo.findAllUsersForNetwork(network);
       const createdUser = await userRepo.findUserByUsername(employee.username);
       createAdapter.default.restore();
+      mailer.send.restore();
+      sinon.stub(mailer, 'send').returns(null);
 
       await createdUser.destroy();
       await integration.destroy();
