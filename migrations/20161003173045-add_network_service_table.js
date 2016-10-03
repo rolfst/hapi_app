@@ -22,17 +22,10 @@ module.exports = {
         },
         onDelete: 'cascade',
       },
-      created_at: Sequelize.DATE,
     });
   },
 
   down: function (queryInterface, Sequelize) {
-    /*
-      Add reverting commands here.
-      Return a promise to correctly handle asynchronicity.
-
-      Example:
-      return queryInterface.dropTable('users');
-    */
+    return queryInterface.dropTable('network_service');
   }
 };
