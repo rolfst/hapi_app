@@ -10,6 +10,7 @@ module.exports = {
       },
       network_id: {
         type: Sequelize.INTEGER.UNSIGNED,
+        allowNull: false,
         references: {
           model: 'networks',
         },
@@ -17,6 +18,7 @@ module.exports = {
       },
       service_id: {
         type: Sequelize.INTEGER.UNSIGNED,
+        allowNull: false,
         references: {
           model: 'services',
         },
