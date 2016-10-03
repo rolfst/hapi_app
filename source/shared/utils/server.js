@@ -26,6 +26,7 @@ export const transformBoomToErrorResponse = (boom) => ({
 export const onPreResponse = (req, reply) => {
   if (req.response instanceof Error && req.response.isBoom) {
     let error = req.response;
+    console.log('Uncaught error:', error);
 
     if (req.response.data && req.response.data.isJoi) {
       error = createError('422', req.response.data.details[0].message);
