@@ -1,0 +1,9 @@
+[{
+  "department_id": "1",
+  "department_name": "Aardappelen Groente en Fruit",
+  "department_shortcode": "AGF"
+}, {
+  "department_id": "2",
+  "department_name": "Algemeen",
+  "department_shortcode": "ALG"
+}]

@@ -2,8 +2,8 @@
 /.idea
 /build
 .DS_Store
-/npm-debug.log
-source/database.json
+/npm-debug.log*
+database*.json
 .eslintcache
 .env*
 
