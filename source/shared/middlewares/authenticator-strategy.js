@@ -32,6 +32,12 @@ export default () => {
       } catch (err) {
         console.error('Error in Authenticator Strategy', err);
 
+        // This is to make old API logic backwards compatible with clients
+        // that have not updated yet.
+        if (request.url.path.includes('v1/chats')) {
+          return reply(createError('403')).code(403);
+        }
+
         const errorResponse = serverUtil.transformBoomToErrorResponse(
           !err.isBoom ? createError('401') : err);
 
