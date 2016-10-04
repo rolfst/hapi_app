@@ -1,4 +1,4 @@
-import { deleteConversationById } from 'modules/chat/repositories/conversation';
+import { deleteConversationById } from '../repositories/conversation';
 
 module.exports = (req, reply) => {
   return deleteConversationById(req.params.id)

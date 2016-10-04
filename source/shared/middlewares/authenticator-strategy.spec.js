@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import createError from 'shared/utils/create-error';
-import tokenUtil from 'shared/utils/token';
-import * as userRepo from 'shared/repositories/user';
-import * as strategy from 'shared/middlewares/authenticator-strategy';
+import createError from '../utils/create-error';
+import tokenUtil from '../utils/token';
+import * as userRepo from '../../modules/core/repositories/user';
+import * as strategy from '../middlewares/authenticator-strategy';
 
 describe('authenticatorStrategy', () => {
   const networks = [

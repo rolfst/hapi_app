@@ -1,8 +1,8 @@
 import { assert } from 'chai';
 import { find } from 'lodash';
-import { findUserByEmail } from 'shared/repositories/user';
-import { createTeam } from 'shared/repositories/team';
-import * as service from 'modules/employee/services/invite-user';
+import { findUserByEmail } from '../../core/repositories/user';
+import { createTeam } from '../../core/repositories/team';
+import * as service from './invite-user';
 
 describe('Service: invite user', () => {
   let network;

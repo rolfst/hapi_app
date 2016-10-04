@@ -1,5 +1,5 @@
-import createError from '../utils/create-error';
-import { Network, User, NetworkUser, Integration } from 'shared/models';
+import createError from '../../../shared/utils/create-error';
+import { Network, User, NetworkUser, Integration } from '../../../shared/models';
 
 const defaultIncludes = [
   { model: Integration, required: false },

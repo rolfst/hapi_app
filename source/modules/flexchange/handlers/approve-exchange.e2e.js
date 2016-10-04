@@ -1,10 +1,10 @@
 import { assert } from 'chai';
 import moment from 'moment';
-import { exchangeTypes } from 'modules/flexchange/models/exchange';
-import blueprints from 'shared/test-utils/blueprints';
-import authenticate from 'shared/test-utils/authenticate';
-import { patchRequest } from 'shared/test-utils/request';
-import * as exchangeRepo from 'modules/flexchange/repositories/exchange';
+import blueprints from '../../../shared/test-utils/blueprints';
+import authenticate from '../../../shared/test-utils/authenticate';
+import { patchRequest } from '../../../shared/test-utils/request';
+import { exchangeTypes } from '../models/exchange';
+import * as exchangeRepo from '../repositories/exchange';
 
 describe('Approve exchange', () => {
   let creator;

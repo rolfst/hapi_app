@@ -1,5 +1,5 @@
 import { map } from 'lodash';
-import * as teamRepo from '../../../../shared/repositories/team';
+import * as teamRepo from '../../repositories/team';
 import * as userService from '../user';
 
 /**

@@ -1,5 +1,5 @@
 import * as service from '../services/employee.js';
-import * as responseUtil from 'shared/utils/response';
+import * as responseUtil from '../../../shared/utils/response';
 
 export default async (req, reply) => {
   const { pre, auth } = req;

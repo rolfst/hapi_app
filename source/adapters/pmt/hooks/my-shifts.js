@@ -1,6 +1,6 @@
 import moment from 'moment';
-import client from 'adapters/pmt/client';
-import shiftSerializer from 'adapters/pmt/serializers/shift';
+import client from '../client';
+import shiftSerializer from '../serializers/shift';
 
 export default (baseStoreUrl, token) => async () => {
   const date = moment().format('DD-MM-YYYY');

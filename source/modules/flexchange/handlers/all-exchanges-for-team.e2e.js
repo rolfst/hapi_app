@@ -2,10 +2,10 @@ import { assert } from 'chai';
 import qs from 'qs';
 import moment from 'moment';
 import { find } from 'lodash';
-import { exchangeTypes } from 'modules/flexchange/models/exchange';
-import { getRequest } from 'shared/test-utils/request';
-import { createTeam } from 'shared/repositories/team';
-import { createExchange } from 'modules/flexchange/repositories/exchange';
+import { exchangeTypes } from '../models/exchange';
+import { getRequest } from '../../../shared/test-utils/request';
+import { createTeam } from '../../core/repositories/team';
+import { createExchange } from '..//repositories/exchange';
 
 describe('Get exchanges for team', () => {
   let team;

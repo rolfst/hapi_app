@@ -1,10 +1,10 @@
 import { assert } from 'chai';
 import moment from 'moment';
-import * as teamRepo from '../../../shared/repositories/team';
-import * as networkRepo from '../../../shared/repositories/network';
-import { exchangeTypes } from 'modules/flexchange/models/exchange';
-import { getRequest } from 'shared/test-utils/request';
-import { createExchange } from 'modules/flexchange/repositories/exchange';
+import * as teamRepo from '../../core/repositories/team';
+import * as networkRepo from '../../core/repositories/network';
+import { exchangeTypes } from '../models/exchange';
+import { getRequest } from '../../../shared/test-utils/request';
+import { createExchange } from '../repositories/exchange';
 
 describe('View users related to exchange', () => {
   describe('Network without integration', () => {

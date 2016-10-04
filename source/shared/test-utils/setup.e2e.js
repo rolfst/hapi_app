@@ -1,6 +1,6 @@
 import { Server } from 'hapi';
 import { assert } from 'chai';
-import jwtStrategy from 'shared/middlewares/authenticator-strategy';
+import jwtStrategy from '../middlewares/authenticator-strategy';
 
 describe('Setup', () => {
   let server; // eslint-disable-line prefer-const

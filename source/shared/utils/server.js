@@ -1,9 +1,9 @@
 import Url from 'url';
 import Qs from 'qs';
 import authorizationPlugin from 'hapi-acl-plugin';
-import * as networkUtil from 'shared/utils/network';
-import createError from 'shared/utils/create-error';
-import createActions from 'shared/utils/create-actions';
+import * as networkUtil from './network';
+import createError from './create-error';
+import createActions from './create-actions';
 
 export const onRequest = (req, reply) => {
   const uri = req.raw.req.url;

@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import parseIncludes from 'shared/utils/parse-includes';
+import parseIncludes from './parse-includes';
 
 describe('parseIncludes', () => {
   it('parse includes from query object', () => {

@@ -1,4 +1,4 @@
-import createRoutes from 'shared/utils/create-routes';
+import createRoutes from '../../shared/utils/create-routes';
 
 const routes = [{
   method: 'GET',

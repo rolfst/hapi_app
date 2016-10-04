@@ -1,6 +1,6 @@
 import { assert } from 'chai';
-import { findUserByEmail } from 'shared/repositories/user';
-import { postRequest } from 'shared/test-utils/request';
+import { findUserByEmail } from '../../core/repositories/user';
+import { postRequest } from '../../../shared/test-utils/request';
 
 describe('Handler: Invite user', () => {
   after(async () => {

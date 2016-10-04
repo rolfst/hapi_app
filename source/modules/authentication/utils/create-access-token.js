@@ -1,6 +1,6 @@
-import tokenUtil from 'shared/utils/token';
 import _ from 'lodash';
 import moment from 'moment';
+import tokenUtil from '../../../shared/utils/token';
 
 export default (userId, deviceId, integrations) => {
   const payload = {

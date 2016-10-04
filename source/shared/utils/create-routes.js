@@ -1,4 +1,4 @@
-import preFetchNetwork from 'shared/middlewares/prefetch-network';
+import preFetchNetwork from '../middlewares/prefetch-network';
 
 const createDefaultConfig = (stategy, prefetch) => {
   const config = { auth: stategy };

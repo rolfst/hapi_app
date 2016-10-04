@@ -1,11 +1,11 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import { exchangeTypes } from 'modules/flexchange/models/exchange';
-import * as networkUtil from 'shared/utils/network';
-import * as exchangeRepo from 'modules/flexchange/repositories/exchange';
-import * as exchangeValueRepo from 'modules/flexchange/repositories/exchange-value';
-import * as networkRepo from 'shared/repositories/network';
-import * as handler from 'modules/flexchange/handlers/create-exchange';
+import { exchangeTypes } from '../models/exchange';
+import * as networkUtil from '../../../shared/utils/network';
+import * as exchangeRepo from '..//repositories/exchange';
+import * as exchangeValueRepo from '../repositories/exchange-value';
+import * as networkRepo from '../../core/repositories/network';
+import * as handler from '..//handlers/create-exchange';
 import * as exchangeCreatedAdminNotification from '../notifications/exchange-created-by-admin';
 import * as exchangeCreatedNotification from '../notifications/exchange-created';
 

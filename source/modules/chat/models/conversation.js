@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
-import { db as model } from 'connections';
-import * as dateUtils from 'shared/utils/date';
+import { db as model } from '../../../connections';
+import * as dateUtils from '../../../shared/utils/date';
 
 const Conversation = model.define('Conversation', {
   type: {

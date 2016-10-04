@@ -2,7 +2,7 @@ import { omit, map, filter, find } from 'lodash';
 import { isAdmin, isEmployee } from '../../../../shared/services/permission';
 import createError from '../../../../shared/utils/create-error';
 import * as networkUtil from '../../../../shared/utils/network';
-import * as userRepo from '../../../../shared/repositories/user';
+import * as userRepo from '../../../core/repositories/user';
 import * as exchangeRepo from '../../repositories/exchange';
 
 export const matchUsersForShift = async (usersToMatch, network) => {

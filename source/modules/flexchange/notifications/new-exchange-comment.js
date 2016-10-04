@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import * as exchangeRepo from 'modules/flexchange/repositories/exchange';
-import { findCommentsByExchange } from 'modules/flexchange/repositories/comment';
-import notifier from 'shared/services/notifier';
+import notifier from '../../../shared/services/notifier';
+import * as exchangeRepo from '../repositories/exchange';
+import { findCommentsByExchange } from '../repositories/comment';
 
 export const createNotification = (exchange, comment) => {
   const creator = comment.User.fullName;

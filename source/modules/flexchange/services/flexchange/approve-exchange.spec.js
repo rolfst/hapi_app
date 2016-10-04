@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import * as exchangeRepo from 'modules/flexchange/repositories/exchange';
+import * as exchangeRepo from '../../repositories/exchange';
 import * as exchangeResponseRepo from '../../repositories/exchange-response';
 import * as service from '../flexchange';
 import * as creatorApproved from '../../notifications/creator-approved';

@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import _ from 'lodash';
-import mailFixture from 'shared/test-utils/stubs/mail';
-import * as mailer from 'shared/services/mailer';
+import mailFixture from '../test-utils/stubs/mail';
+import * as mailer from './mailer';
 
 describe('Mailer', () => {
   const users = [{

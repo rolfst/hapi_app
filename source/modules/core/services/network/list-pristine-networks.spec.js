@@ -3,7 +3,7 @@ import Promise from 'bluebird';
 import sinon from 'sinon';
 import stubs from '../../../../shared/test-utils/stubs';
 import blueprints from '../../../../shared/test-utils/blueprints';
-import * as networkRepo from '../../../../shared/repositories/network';
+import * as networkRepo from '../../repositories/network';
 import * as client from '../../../../adapters/pmt/client';
 import * as service from '../network';
 

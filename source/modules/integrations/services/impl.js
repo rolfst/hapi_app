@@ -1,9 +1,9 @@
 import { find, differenceBy, intersectionBy } from 'lodash';
 import createError from '../../../shared/utils/create-error';
-import { findTeamsForNetwork } from '../../../shared/repositories/network';
-import { createBulkTeams } from '../../../shared/repositories/team';
-import * as userRepo from '../../../shared/repositories/user';
-import * as teamRepo from '../../../shared/repositories/team';
+import { findTeamsForNetwork } from '../../core/repositories/network';
+import { createBulkTeams } from '../../core/repositories/team';
+import * as userRepo from '../../core/repositories/user';
+import * as teamRepo from '../../core/repositories/team';
 
 export const findExternalUser = (user, externalUsers) => {
   return find(externalUsers, { email: user.email });

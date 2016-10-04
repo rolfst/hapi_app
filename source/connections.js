@@ -1,6 +1,6 @@
 /* eslint no-console: "off" */
 import Sequelize from 'sequelize';
-import config from 'database.json';
+import config from './database.json';
 
 export const db = (() => {
   const connectionEnvironment = process.env.NODE_ENV === 'debug' ?

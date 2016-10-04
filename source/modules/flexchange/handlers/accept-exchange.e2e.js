@@ -1,8 +1,8 @@
 import { assert } from 'chai';
 import moment from 'moment';
-import { exchangeTypes } from 'modules/flexchange/models/exchange';
-import { patchRequest } from 'shared/test-utils/request';
-import { createExchange } from 'modules/flexchange/repositories/exchange';
+import { exchangeTypes } from '../models/exchange';
+import { patchRequest } from '../../../shared/test-utils/request';
+import { createExchange } from '../repositories/exchange';
 
 describe('Accept exchange', () => {
   let network;

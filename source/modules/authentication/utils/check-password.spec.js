@@ -1,6 +1,6 @@
 import { assert } from 'chai';
-import checkPassword from 'modules/authentication/utils/check-password';
-import * as password from 'shared/utils/password';
+import checkPassword from './check-password';
+import * as password from '../../../shared/utils/password';
 
 describe('checkPassword', () => {
   it('return true when password match', () => {

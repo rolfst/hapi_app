@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import * as notifier from 'shared/services/notifier';
+import * as notifier from './notifier';
 
 describe('Notifier', () => {
   it('should return the right receivers', () => {

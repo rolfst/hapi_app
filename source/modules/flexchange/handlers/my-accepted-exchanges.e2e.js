@@ -1,13 +1,13 @@
 import { assert } from 'chai';
 import moment from 'moment';
-import { getRequest } from 'shared/test-utils/request';
-import { exchangeTypes } from 'modules/flexchange/models/exchange';
+import { getRequest } from '../../../shared/test-utils/request';
+import { exchangeTypes } from '../models/exchange';
 import {
   acceptExchange,
   declineExchange,
   createExchange,
   approveExchange,
-} from 'modules/flexchange/repositories/exchange';
+} from '../repositories/exchange';
 
 describe('My Accepted exchanges', () => {
   let network;

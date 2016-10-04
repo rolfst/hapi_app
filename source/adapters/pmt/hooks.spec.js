@@ -1,11 +1,11 @@
-import sinon from 'sinon';
-import client from 'adapters/pmt/client';
-import fetchTeams from 'adapters/pmt/hooks/fetch-teams';
-import fetchUsers from 'adapters/pmt/hooks/fetch-users';
-import teamSerializer from 'adapters/pmt/serializers/team';
-import userSerializer from 'adapters/pmt/serializers/user';
 import { assert } from 'chai';
-import blueprints from 'adapters/pmt/test-utils/blueprints';
+import sinon from 'sinon';
+import client from './client';
+import blueprints from './test-utils/blueprints';
+import fetchTeams from './hooks/fetch-teams';
+import fetchUsers from './hooks/fetch-users';
+import teamSerializer from './serializers/team';
+import userSerializer from './serializers/user';
 
 describe('PMT Hooks', () => {
   const fakeBaseStoreUrl = 'http://mypmtstore.nl';

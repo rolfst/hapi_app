@@ -1,7 +1,7 @@
 import ConversationModel from './conversation';
 import ConversationUserModel from './conversation-user';
 import MessageModel from './message';
-import UserModel from 'shared/models/user';
+import UserModel from '../../../shared/models/user';
 
 ConversationModel.belongsToMany(UserModel, {
   foreignKey: 'conversation_id',

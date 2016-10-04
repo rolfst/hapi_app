@@ -1,8 +1,8 @@
 import Sequelize from 'sequelize';
-import { db as model } from 'connections';
 import { flatten } from 'lodash';
-import * as networkUtil from 'shared/utils/network';
-import * as dateUtils from 'shared/utils/date';
+import { db as model } from '../../connections';
+import * as networkUtil from '../utils/network';
+import * as dateUtils from '../utils/date';
 
 const Network = model.define('Network', {
   externalId: {

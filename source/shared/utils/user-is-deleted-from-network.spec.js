@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import userIsDeletedFromNetwork from 'shared/utils/user-is-deleted-from-network';
+import userIsDeletedFromNetwork from './user-is-deleted-from-network';
 
 const credentials = {
   username: 'Johnnie', firstName: 'John', lastName: 'Doe', password: 'ihazswag',

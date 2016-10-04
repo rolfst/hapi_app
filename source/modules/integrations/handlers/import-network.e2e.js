@@ -1,13 +1,13 @@
 import { find } from 'lodash';
 import sinon from 'sinon';
 import { assert } from 'chai';
-import * as createAdapter from 'shared/utils/create-adapter';
-import stubs from 'shared/test-utils/stubs';
-import { getRequest } from 'shared/test-utils/request';
-import * as networkRepo from 'shared/repositories/network';
-import * as userRepo from 'shared/repositories/user';
-import * as teamRepo from 'shared/repositories/team';
-import * as integrationRepo from 'shared/repositories/integration';
+import * as createAdapter from '../../../shared/utils/create-adapter';
+import stubs from '../../../shared/test-utils/stubs';
+import { getRequest } from '../../../shared/test-utils/request';
+import * as networkRepo from '../../core/repositories/network';
+import * as userRepo from '../../core/repositories/user';
+import * as teamRepo from '../../core/repositories/team';
+import * as integrationRepo from '../../core/repositories/integration';
 
 describe('Network import', () => {
   let network;

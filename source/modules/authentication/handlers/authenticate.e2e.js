@@ -1,7 +1,7 @@
 import { assert } from 'chai';
-import blueprints from 'shared/test-utils/blueprints';
-import { postRequest } from 'shared/test-utils/request';
-import tokenUtil from 'shared/utils/token';
+import blueprints from '../../../shared/test-utils/blueprints';
+import { postRequest } from '../../../shared/test-utils/request';
+import tokenUtil from '../../../shared/utils/token';
 
 const url = '/v2/authenticate';
 const adminCredentials = blueprints.users.admin;

@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import * as networkUtil from 'shared/utils/network';
+import * as networkUtil from './network';
 
 describe('networkUtil', () => {
   describe('networkHasIntegration', () => {

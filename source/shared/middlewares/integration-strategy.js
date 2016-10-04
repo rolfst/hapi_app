@@ -1,5 +1,5 @@
 import createError from '../utils/create-error';
-import { Integration } from 'shared/models';
+import { Integration } from '../models';
 
 export default () => {
   return {

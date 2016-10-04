@@ -1,6 +1,6 @@
 import sequelize from 'sequelize';
-import createError from '../utils/create-error';
-import { Team, User, TeamUser } from 'shared/models';
+import createError from '../../../shared/utils/create-error';
+import { Team, User, TeamUser } from '../../../shared/models';
 
 export function findTeamById(id) {
   return Team

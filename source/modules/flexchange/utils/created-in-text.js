@@ -1,4 +1,4 @@
-import { exchangeTypes } from 'modules/flexchange/models/exchange';
+import { exchangeTypes } from '../models/exchange';
 
 export default (exchange) => {
   let exchangeValueOutput;

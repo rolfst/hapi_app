@@ -1,9 +1,9 @@
 import { Server } from 'hapi';
 import { assert } from 'chai';
-import jwtStrategy from 'shared/middlewares/authenticator-strategy';
-import { getRequest } from 'shared/test-utils/request';
-import { createRoute } from 'shared/utils/create-routes';
-import preFetchNetwork from 'shared/middlewares/prefetch-network';
+import jwtStrategy from './authenticator-strategy';
+import { getRequest } from '../test-utils/request';
+import { createRoute } from '../utils/create-routes';
+import preFetchNetwork from './prefetch-network';
 
 const expiredToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNDcwMzA4OTY0LCJpc3MiOiJodHRwczpcL1wvYXBpLmZsZXgtYXBwZWFsLm5sIiwiaWF0IjoxNDcwMzA1MzY0LCJzdWIiOjY0LCJkZXZpY2UiOiI2NUJGQjcwRTc3Rjg0OEVFQUQ3MzBFQ0U2RDkyRkY2NyIsImp0aSI6MzMxODg4N30.MdrwMF1VrSAhmwg0oKbQ0Tl6_Nu1WKVxrm1uMGsvR9E'; // eslint-disable-line
 let server;

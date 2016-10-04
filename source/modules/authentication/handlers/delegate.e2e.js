@@ -1,8 +1,8 @@
 import { assert } from 'chai';
-import tokenUtil from 'shared/utils/token';
-import createRefreshToken from 'modules/authentication/utils/create-refresh-token';
-import * as userRepo from 'shared/repositories/user';
-import { getRequest, postRequest } from 'shared/test-utils/request';
+import tokenUtil from '../../../shared/utils/token';
+import createRefreshToken from '../utils/create-refresh-token';
+import * as userRepo from '../../core/repositories/user';
+import { getRequest, postRequest } from '../../../shared/test-utils/request';
 
 describe('Delegate', () => {
   let createdUser;

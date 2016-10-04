@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { omit } from 'lodash';
-import preFetchNetwork from 'shared/middlewares/prefetch-network';
-import * as systemUnderTest from 'shared/utils/create-routes';
+import preFetchNetwork from '../middlewares/prefetch-network';
+import * as systemUnderTest from './create-routes';
 
 describe('createRoutes', () => {
   describe('#createRoute', () => {

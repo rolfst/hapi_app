@@ -1,5 +1,5 @@
-import tokenUtil from 'shared/utils/token';
-import { findUserById } from 'shared/repositories/user';
+import tokenUtil from '../utils/token';
+import { findUserById } from '../../modules/core/repositories/user';
 
 export default async (server, credentials) => {
   const response = await server.inject({

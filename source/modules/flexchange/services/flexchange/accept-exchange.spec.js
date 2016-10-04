@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import * as exchangeRepo from 'modules/flexchange/repositories/exchange';
-import * as service from 'modules/flexchange/services/flexchange';
-import * as notification from 'modules/flexchange/notifications/accepted-exchange';
-import * as networkUtil from 'shared/utils/network';
+import * as networkUtil from '../../../../shared/utils/network';
+import * as exchangeRepo from '../../repositories/exchange';
+import * as service from '../../services/flexchange';
+import * as notification from '../../notifications/accepted-exchange';
 
 describe('Accept exchange', () => {
   let sandbox;

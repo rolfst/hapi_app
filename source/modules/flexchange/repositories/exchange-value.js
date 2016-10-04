@@ -1,4 +1,4 @@
-import ExchangeValue from 'modules/flexchange/models/exchange-value';
+import ExchangeValue from '../models/exchange-value';
 
 /**
  * Create values for exchange

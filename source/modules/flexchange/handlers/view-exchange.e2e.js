@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 import moment from 'moment';
-import { exchangeTypes } from 'modules/flexchange/models/exchange';
-import { getRequest } from 'shared/test-utils/request';
-import { createExchange } from 'modules/flexchange/repositories/exchange';
-import { createTeam } from 'shared/repositories/team';
+import { exchangeTypes } from '../models/exchange';
+import { getRequest } from '../../../shared/test-utils/request';
+import { createExchange } from '../repositories/exchange';
+import { createTeam } from '../../core/repositories/team';
 
 describe('View exchange', () => {
   let network;

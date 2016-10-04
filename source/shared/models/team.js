@@ -1,5 +1,5 @@
 import Sequelize from 'sequelize';
-import { db } from 'connections';
+import { db } from '../../connections';
 
 const Team = db.define('Team', {
   networkId: {

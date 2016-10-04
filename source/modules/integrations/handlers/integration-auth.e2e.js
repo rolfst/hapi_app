@@ -1,15 +1,15 @@
 import sinon from 'sinon';
 import { assert } from 'chai';
 import nock from 'nock';
-import createError from 'shared/utils/create-error';
-import * as networkUtil from 'shared/utils/network';
-import tokenUtil from 'shared/utils/token';
-import * as createAdapter from 'shared/utils/create-adapter';
-import { postRequest } from 'shared/test-utils/request';
-import { createIntegrationNetwork } from 'shared/repositories/network';
-import { findUserById } from 'shared/repositories/user';
-import { createIntegration } from 'shared/repositories/integration';
-import blueprints from 'shared/test-utils/blueprints';
+import createError from '../../../shared/utils/create-error';
+import * as networkUtil from '../../../shared/utils/network';
+import tokenUtil from '../../../shared/utils/token';
+import * as createAdapter from '../../../shared/utils/create-adapter';
+import { postRequest } from '../../../shared/test-utils/request';
+import { createIntegrationNetwork } from '../../core/repositories/network';
+import { findUserById } from '../../core/repositories/user';
+import { createIntegration } from '../../core/repositories/integration';
+import blueprints from '../../../shared/test-utils/blueprints';
 
 describe('Integration auth', () => {
   let integration;

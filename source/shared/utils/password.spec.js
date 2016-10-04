@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import bcrypt from 'bcrypt';
-import * as password from 'shared/utils/password';
+import * as password from './password';
 
 describe('password', () => {
   it('should make password hash', () => {

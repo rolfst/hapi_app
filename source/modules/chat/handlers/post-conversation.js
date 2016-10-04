@@ -1,4 +1,4 @@
-import * as responseUtil from 'shared/utils/response';
+import * as responseUtil from '../../../shared/utils/response';
 import * as conversationService from '../services/conversation';
 
 module.exports = async (req, reply) => {

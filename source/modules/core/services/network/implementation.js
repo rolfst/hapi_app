@@ -1,5 +1,5 @@
 import { differenceBy } from 'lodash';
-import * as networkRepo from '../../../../shared/repositories/network';
+import * as networkRepo from '../../repositories/network';
 import createError from '../../../../shared/utils/create-error';
 import * as integrationsAdapter from '../../../../shared/utils/integrations-adapter';
 

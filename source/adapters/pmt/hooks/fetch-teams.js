@@ -1,5 +1,5 @@
-import client from 'adapters/pmt/client';
-import teamSerializer from 'adapters/pmt/serializers/team';
+import client from '../client';
+import teamSerializer from '../serializers/team';
 
 export default (baseStoreUrl) => async () => {
   const result = await client.get(`${baseStoreUrl}/departments`);

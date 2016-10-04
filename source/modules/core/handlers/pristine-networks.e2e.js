@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 import nock from 'nock';
 import * as stubs from '../../../shared/test-utils/stubs';
-import { getRequest } from 'shared/test-utils/request';
-import * as networkRepo from '../../../shared/repositories/network';
-import * as integrationRepo from '../../../shared/repositories/integration';
+import { getRequest } from '../../../shared/test-utils/request';
+import * as networkRepo from '../repositories/network';
+import * as integrationRepo from '../repositories/integration';
 
 const PMT_BASE_URL = 'https://partner2.testpmt.nl';
 const PMT_BASE_NETWORK_URL_AH = 'https://ah.personeelstool.nl';

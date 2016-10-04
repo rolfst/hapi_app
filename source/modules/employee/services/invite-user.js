@@ -5,13 +5,13 @@ import * as password from '../../../shared/utils/password';
 import signupMail from '../../../shared/mails/signup';
 import addedToNetworkMail from '../../../shared/mails/added-to-network';
 import * as mailer from '../../../shared/services/mailer';
-import { createUser, findUserByEmail } from '../../../shared/repositories/user';
-import * as networkRepo from '../../../shared/repositories/network';
-import { addUserToNetwork } from '../../../shared/repositories/user';
-import { addUserToTeams } from '../../../shared/repositories/team';
+import { createUser, findUserByEmail } from '../../core/repositories/user';
+import * as networkRepo from '../../core/repositories/network';
+import { addUserToNetwork } from '../../core/repositories/user';
+import { addUserToTeams } from '../../core/repositories/team';
 import userBelongsToNetwork from '../../../shared/utils/user-belongs-to-network';
 import userIsDeletedFromNetwork from '../../../shared/utils/user-is-deleted-from-network';
-import * as userRepo from '../../../shared/repositories/user';
+import * as userRepo from '../../core/repositories/user';
 import * as networkUtil from '../../../shared/utils/network';
 import { isAdmin } from '../../../shared/services/permission';
 

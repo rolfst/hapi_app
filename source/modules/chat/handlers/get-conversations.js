@@ -1,8 +1,8 @@
 import { includes } from 'lodash';
-import * as responseUtil from 'shared/utils/response';
-import parseIncludes from 'shared/utils/parse-includes';
-import { Message } from 'modules/chat/models';
-import { findAllForUser } from 'modules/chat/repositories/conversation';
+import * as responseUtil from '../../../shared/utils/response';
+import parseIncludes from '../../../shared/utils/parse-includes';
+import { Message } from '../models';
+import { findAllForUser } from '../repositories/conversation';
 
 module.exports = async (req, reply) => {
   const queryIncludes = parseIncludes(req.query);

@@ -1,7 +1,7 @@
 import createError from '../../../shared/utils/create-error';
 import createAdapter from '../../../shared/utils/create-adapter';
-import * as networkRepo from '../../../shared/repositories/network';
-import * as userRepo from '../../../shared/repositories/user';
+import * as networkRepo from '../../core/repositories/network';
+import * as userRepo from '../../core/repositories/user';
 import * as impl from './impl';
 
 export const importNetwork = async (payload) => {

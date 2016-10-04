@@ -6,9 +6,9 @@ import stubs from '../../../shared/test-utils/stubs';
 import * as createAdapter from '../../../shared/utils/create-adapter';
 import configurationMail from '../../../shared/mails/configuration-invite';
 import * as mailer from '../../../shared/services/mailer';
-import * as networkRepo from '../../../shared/repositories/network';
-import * as userRepo from '../../../shared/repositories/user';
-import * as integrationRepo from '../../../shared/repositories/integration';
+import * as networkRepo from '../repositories/network';
+import * as userRepo from '../repositories/user';
+import * as integrationRepo from '../repositories/integration';
 
 describe('Import pristine network', () => {
   const pristineNetwork = stubs.pristine_networks_admins[0];

@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 import moment from 'moment';
-import { findExchangeById, deleteExchangeById } from 'modules/flexchange/repositories/exchange';
-import { exchangeTypes } from 'modules/flexchange/models/exchange';
-import { postRequest } from 'shared/test-utils/request';
-import { createTeam } from 'shared/repositories/team';
+import { findExchangeById, deleteExchangeById } from '../repositories/exchange';
+import { exchangeTypes } from '../models/exchange';
+import { postRequest } from '../../../shared/test-utils/request';
+import { createTeam } from '../../core/repositories/team';
 
 let network;
 let flexAppealTeam;

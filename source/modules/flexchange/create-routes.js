@@ -1,6 +1,6 @@
-import createRoutes from 'shared/utils/create-routes';
+import createRoutes from '../../shared/utils/create-routes';
 
-const basePath = 'modules/flexchange/handlers';
+const basePath = './handlers';
 const baseUrl = '/v2/networks/{networkId}';
 
 const routes = [{
@@ -19,7 +19,7 @@ const routes = [{
   method: 'GET',
   url: `${baseUrl}/users/me/exchanges`,
   handler: require(`${basePath}/my-exchanges`),
-  validator: require('modules/flexchange/validators/get-exchange'),
+  validator: require('./validators/get-exchange'),
 }, {
   method: 'GET',
   url: `${baseUrl}/users/me/exchanges/responded_to`,
@@ -32,17 +32,17 @@ const routes = [{
   method: 'GET',
   url: `${baseUrl}/exchanges`,
   handler: require(`${basePath}/all-exchanges-for-network`),
-  validator: require('modules/flexchange/validators/get-exchange'),
+  validator: require('./validators/get-exchange'),
 }, {
   method: 'GET',
   url: `${baseUrl}/teams/{teamId}/exchanges`,
   handler: require(`${basePath}/all-exchanges-for-team`),
-  validator: require('modules/flexchange/validators/get-exchange'),
+  validator: require('./validators/get-exchange'),
 }, {
   method: 'GET',
   url: `${baseUrl}/exchanges/{exchangeId}`,
   handler: require(`${basePath}/view-exchange`),
-  validator: require('modules/flexchange/validators/get-exchange'),
+  validator: require('./validators/get-exchange'),
 }, {
   method: 'GET',
   url: `${baseUrl}/exchanges/{exchangeId}/users`,
@@ -59,22 +59,22 @@ const routes = [{
   method: 'POST',
   url: `${baseUrl}/exchanges`,
   handler: require(`${basePath}/create-exchange`),
-  validator: require('modules/flexchange/validators/create-exchange'),
+  validator: require('./validators/create-exchange'),
 }, {
   method: 'POST',
   url: `${baseUrl}/exchanges/{exchangeId}/comments`,
   handler: require(`${basePath}/create-exchange-comment`),
-  validator: require('modules/flexchange/validators/create-comment'),
+  validator: require('./validators/create-comment'),
 }, {
   method: 'PUT',
   url: `${baseUrl}/exchanges/{exchangeId}`,
   handler: require(`${basePath}/update-exchange`),
-  validator: require('modules/flexchange/validators/update-exchange'),
+  validator: require('./validators/update-exchange'),
 }, {
   method: 'PATCH',
   url: `${baseUrl}/exchanges/{exchangeId}`,
   handler: require(`${basePath}/modify-exchange`),
-  validator: require('modules/flexchange/validators/modify-exchange'),
+  validator: require('./validators/modify-exchange'),
 }, {
   method: 'DELETE',
   url: `${baseUrl}/exchanges/{exchangeId}`,

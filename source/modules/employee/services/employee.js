@@ -1,5 +1,5 @@
 import * as networkUtils from '../../../shared/utils/network';
-import * as userRepo from '../../../shared/repositories/user';
+import * as userRepo from '../../core/repositories/user';
 
 export const updateEmployee = async (payload, message) => {
   const updatedUser = await userRepo.updateUser(message.credentials.id, payload.attributes);

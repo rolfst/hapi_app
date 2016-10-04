@@ -1,8 +1,8 @@
 import { Server } from 'hapi';
 import { assert } from 'chai';
-import jwtStrategy from 'shared/middlewares/authenticator-strategy';
-import { getRequest } from 'shared/test-utils/request';
-import preFetchNetwork from 'shared/middlewares/prefetch-network';
+import jwtStrategy from './authenticator-strategy';
+import { getRequest } from '../test-utils/request';
+import preFetchNetwork from '../middlewares/prefetch-network';
 
 let server;
 

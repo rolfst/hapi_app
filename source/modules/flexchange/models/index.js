@@ -1,13 +1,13 @@
-import { exchangeTypes } from 'modules/flexchange/models/exchange';
-import { ActivityTypes } from 'shared/models/activity';
-import ExchangeModel from 'modules/flexchange/models/exchange';
-import ExchangeCommentModel from 'modules/flexchange/models/exchange-comment';
-import ExchangeResponseModel from 'modules/flexchange/models/exchange-response';
-import ExchangeValueModel from 'modules/flexchange/models/exchange-value';
-import UserModel from 'shared/models/user';
-import ActivityModel from 'shared/models/activity';
-import TeamModel from 'shared/models/team';
-import NetworkModel from 'shared/models/network';
+import { ActivityTypes } from '../../../shared/models/activity';
+import UserModel from '../../../shared/models/user';
+import ActivityModel from '../../../shared/models/activity';
+import TeamModel from '../../../shared/models/team';
+import NetworkModel from '../../../shared/models/network';
+import { exchangeTypes } from '../models/exchange';
+import ExchangeModel from '../models/exchange';
+import ExchangeCommentModel from '../models/exchange-comment';
+import ExchangeResponseModel from '../models/exchange-response';
+import ExchangeValueModel from '../models/exchange-value';
 
 ExchangeResponseModel.belongsTo(UserModel, {
   foreignKey: 'user_id',

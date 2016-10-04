@@ -2,15 +2,15 @@ import { assert } from 'chai';
 import Promise from 'bluebird';
 import moment from 'moment';
 import _ from 'lodash';
-import { ActivityTypes } from 'shared/models/activity';
-import { getRequest } from 'shared/test-utils/request';
+import { ActivityTypes } from '../../../shared/models/activity';
+import { getRequest } from '../../../shared/test-utils/request';
 import {
   createExchange,
   acceptExchange,
   rejectExchange,
   approveExchange,
-} from 'modules/flexchange/repositories/exchange';
-import { createExchangeComment } from 'modules/flexchange/repositories/comment';
+} from '../repositories/exchange';
+import { createExchangeComment } from '../repositories/comment';
 
 let network;
 let exchange;

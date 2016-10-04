@@ -2,12 +2,12 @@
 
 import Hapi from 'hapi';
 import { omit } from 'lodash';
-import routes from 'create-routes';
 import raven from 'raven';
-import jwtStrategy from 'shared/middlewares/authenticator-strategy';
-import integrationStrategy from 'shared/middlewares/integration-strategy';
-import * as serverUtil from 'shared/utils/server';
-import { server as serverConnection } from 'connections';
+import routes from './create-routes';
+import jwtStrategy from './shared/middlewares/authenticator-strategy';
+import integrationStrategy from './shared/middlewares/integration-strategy';
+import * as serverUtil from './shared/utils/server';
+import { server as serverConnection } from './connections';
 
 const createServer = (port) => {
   const ravenClient = new raven.Client(process.env.SENTRY_DSN, {

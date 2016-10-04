@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import userBelongsToNetwork from 'shared/utils/user-belongs-to-network';
+import userBelongsToNetwork from './user-belongs-to-network';
 
 const credentials = {
   username: 'Johnnie', firstName: 'John', lastName: 'Doe', password: 'ihazswag',

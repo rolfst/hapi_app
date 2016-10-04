@@ -1,6 +1,6 @@
 import { pick } from 'lodash';
 import * as service from '../services/invite-user';
-import * as responseUtil from 'shared/utils/response';
+import * as responseUtil from '../../../shared/utils/response';
 
 const FILTER_PROPERTIES = ['start', 'end'];
 

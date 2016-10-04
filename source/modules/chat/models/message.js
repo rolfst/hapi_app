@@ -1,7 +1,7 @@
 import Sequelize from 'sequelize';
-import { db as model } from 'connections';
-import User from 'shared/models/user';
-import * as dateUtils from 'shared/utils/date';
+import { db as model } from '../../../connections';
+import User from '../../../shared/models/user';
+import * as dateUtils from '../../../shared/utils/date';
 
 const Message = model.define('Message', {
   text: Sequelize.TEXT,

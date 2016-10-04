@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import Promise from 'bluebird';
 import * as password from '../../../../shared/utils/password';
-import * as userRepo from '../../../../shared/repositories/user';
+import * as userRepo from '../../../core/repositories/user';
 import * as checkPassword from '../../utils/check-password';
 import * as unit from './implementation';
 

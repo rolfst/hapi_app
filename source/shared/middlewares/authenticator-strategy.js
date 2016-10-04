@@ -3,7 +3,7 @@ import tokenUtil from '../utils/token';
 import * as serverUtil from '../utils/server';
 import createError from '../utils/create-error';
 import * as networkUtil from '../utils/network';
-import * as userRepo from '../repositories/user';
+import * as userRepo from '../../modules/core/repositories/user';
 
 export const authenticate = async (networkId, token = null) => {
   if (!token) throw createError('401');

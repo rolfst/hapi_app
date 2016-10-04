@@ -5,9 +5,9 @@ import { flatten, sortBy, partialRight, flow } from 'lodash';
 import { getRequest } from '../../../shared/test-utils/request';
 import * as mailer from '../../../shared/services/mailer';
 import * as stubs from '../../../shared/test-utils/stubs';
-import * as userRepo from '../../../shared/repositories/user';
-import * as integrationRepo from '../../../shared/repositories/integration';
-import * as networkRepo from '../../../shared/repositories/network';
+import * as userRepo from '../../core/repositories/user';
+import * as integrationRepo from '../../core/repositories/integration';
+import * as networkRepo from '../../core/repositories/network';
 import addedToNetworkMail from '../../../shared/mails/added-to-network';
 import { UserRoles } from '../../../shared/services/permission';
 

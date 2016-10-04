@@ -1,8 +1,10 @@
 import Sequelize from 'sequelize';
-import { db as model } from 'connections';
-import * as password from 'shared/utils/password';
-import * as dateUtils from 'shared/utils/date';
-import Conversation from 'modules/chat/models/conversation';
+import { db as model } from '../../connections';
+import * as password from '../utils/password';
+import * as dateUtils from '../utils/date';
+// TODO this has to be refactored a shared datamodel should not know about a more
+// specific one.
+import Conversation from '../../modules/chat/models/conversation';
 
 const User = model.define('User', {
   username: {

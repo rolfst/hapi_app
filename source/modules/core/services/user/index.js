@@ -1,5 +1,5 @@
 import * as networkUtils from '../../../../shared/utils/network';
-import * as userRepo from '../../../../shared/repositories/user';
+import * as userRepo from '../../repositories/user';
 
 /**
  * Retrieve multiple users by id.

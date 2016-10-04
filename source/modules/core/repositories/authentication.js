@@ -1,5 +1,5 @@
-import { UserDevice } from 'shared/models';
-import createDeviceId from 'shared/utils/create-device-id';
+import { UserDevice } from '../../../shared/models';
+import createDeviceId from '../../../shared/utils/create-device-id';
 
 export function findUserDevice(userId, deviceName) {
   return UserDevice.findOne({ where: { userId, deviceName } });

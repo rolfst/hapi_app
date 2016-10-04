@@ -1,12 +1,12 @@
 import { assert } from 'chai';
-import blueprints from 'shared/test-utils/blueprints';
-import { createUser } from 'shared/repositories/user';
-import { getRequest } from 'shared/test-utils/request';
-import { createMessage } from 'modules/chat/repositories/message';
+import blueprints from '../../../shared/test-utils/blueprints';
+import { createUser } from '../../../modules/core/repositories/user';
+import { getRequest } from '../../../shared/test-utils/request';
+import { createMessage } from '../repositories/message';
 import {
   createConversation,
   deleteAllConversationsForUser,
-} from 'modules/chat/repositories/conversation';
+} from '../repositories/conversation';
 
 let user;
 let conversation;

@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { getRequest } from 'shared/test-utils/request';
+import { getRequest } from '../../../shared/test-utils/request';
 
 describe('Handler: View my profile', () => {
   before(() => Promise.all([global.users.employee.reload(), global.users.admin.reload()]));

@@ -1,6 +1,8 @@
 import { find } from 'lodash';
 import createError from './create-error';
-import pmtAdapter from 'adapters/pmt/adapter';
+
+// TODO this should be moved to pmt adapter
+import pmtAdapter from '../../adapters/pmt/adapter';
 
 const availableIntegrations = [{
   name: 'PMT',

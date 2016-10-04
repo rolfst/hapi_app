@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { hasRole } from 'shared/services/permission';
+import { hasRole } from './permission';
 
 describe('Permission', () => {
   it('check if role matches', () => {

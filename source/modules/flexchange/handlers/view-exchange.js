@@ -1,5 +1,5 @@
 import * as flexchangeService from '../services/flexchange';
-import * as responseUtil from 'shared/utils/response';
+import * as responseUtil from '../../../shared/utils/response';
 
 export default async (req, reply) => {
   const payload = { exchangeId: req.params.exchangeId };

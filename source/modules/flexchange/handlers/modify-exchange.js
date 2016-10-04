@@ -1,5 +1,5 @@
 import { pick } from 'lodash';
-import * as flexchangeService from 'modules/flexchange/services/flexchange';
+import * as flexchangeService from '../services/flexchange';
 
 const services = {
   accept: flexchangeService.acceptExchange,

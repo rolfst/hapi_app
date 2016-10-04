@@ -1,6 +1,6 @@
 import createError from '../../../../shared/utils/create-error';
 import tokenUtil from '../../../../shared/utils/token';
-import * as userRepo from '../../../../shared/repositories/user';
+import * as userRepo from '../../../core/repositories/user';
 import analytics from '../../../../shared/services/analytics';
 import firstLoginEvent from '../../../../shared/events/first-login-event';
 import * as impl from './implementation';

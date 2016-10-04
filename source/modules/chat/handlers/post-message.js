@@ -1,11 +1,11 @@
 import { check } from 'hapi-acl-plugin';
-import { User } from 'shared/models';
-import socket from 'shared/services/socket';
-import * as responseUtil from 'shared/utils/response';
-import { Conversation } from 'modules/chat/models';
-import { findConversationById } from 'modules/chat/repositories/conversation';
-import { findMessageById, createMessage } from 'modules/chat/repositories/message';
-import * as newMessageNotification from 'modules/chat/notifications/new-message';
+import { User } from '../../../shared/models';
+import socket from '../../../shared/services/socket';
+import * as responseUtil from '../../../shared/utils/response';
+import { Conversation } from '../models';
+import { findConversationById } from '../repositories/conversation';
+import { findMessageById, createMessage } from '../repositories/message';
+import * as newMessageNotification from '../notifications/new-message';
 
 module.exports = async (req, reply) => {
   const loggedUser = req.auth.credentials;

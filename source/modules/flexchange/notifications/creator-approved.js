@@ -1,6 +1,7 @@
-import notifier from 'shared/services/notifier';
 import moment from 'moment';
 import 'moment/locale/nl';
+import notifier from '../../../shared/services/notifier';
+
 moment.locale('nl');
 
 export const createNotification = (exchange, substituteUser) => {

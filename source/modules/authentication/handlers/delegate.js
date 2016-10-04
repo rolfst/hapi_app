@@ -1,4 +1,4 @@
-import * as authenticationService from 'modules/authentication/services/authentication';
+import * as authenticationService from '../services/authentication';
 
 export default async (request, reply) => {
   try {

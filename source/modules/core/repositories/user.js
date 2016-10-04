@@ -1,8 +1,8 @@
 import { sample } from 'lodash';
 import sequelize from 'sequelize';
-import { db } from '../../connections';
-import createError from '../utils/create-error';
-import { User, Network, NetworkUser, Integration, Team } from '../models';
+import { db } from '../../../connections';
+import createError from '../../../shared/utils/create-error';
+import { User, Network, NetworkUser, Integration, Team } from '../../../shared/models';
 
 const dummyProfileImgPaths = [
   'default/default-1.png',

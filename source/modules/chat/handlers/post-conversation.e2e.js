@@ -1,9 +1,9 @@
 import { assert } from 'chai';
-import { postRequest } from 'shared/test-utils/request';
+import { postRequest } from '../../../shared/test-utils/request';
 import {
   createConversation,
   deleteAllConversationsForUser,
-} from 'modules/chat/repositories/conversation';
+} from '../repositories/conversation';
 
 let createdConversation;
 

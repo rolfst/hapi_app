@@ -1,12 +1,12 @@
 import sequelize from 'sequelize';
-import ActivityModel from 'shared/models/activity';
-import NetworkModel from 'shared/models/network';
-import UserModel from 'shared/models/user';
-import TeamModel from 'shared/models/team';
-import IntegrationModel from 'shared/models/integration';
-import NetworkUserModel from 'shared/models/network-user';
-import TeamUserModel from 'shared/models/team-user';
-import UserDeviceModel from 'shared/models/user-device';
+import ActivityModel from './activity';
+import NetworkModel from './network';
+import UserModel from './user';
+import TeamModel from './team';
+import IntegrationModel from './integration';
+import NetworkUserModel from './network-user';
+import TeamUserModel from './team-user';
+import UserDeviceModel from './user-device';
 
 ActivityModel.belongsTo(UserModel, {
   foreignKey: 'user_id',

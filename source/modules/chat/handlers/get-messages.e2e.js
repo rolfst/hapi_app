@@ -1,7 +1,7 @@
 import { assert } from 'chai';
-import { getRequest } from 'shared/test-utils/request';
-import { createConversation } from 'modules/chat/repositories/conversation';
-import { createMessage } from 'modules/chat/repositories/message';
+import { getRequest } from '../../../shared/test-utils/request';
+import { createConversation } from '../repositories/conversation';
+import { createMessage } from '../repositories/message';
 
 let conversation;
 

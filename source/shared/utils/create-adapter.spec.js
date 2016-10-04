@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import * as unit from 'shared/utils/create-adapter';
+import * as unit from '../utils/create-adapter';
 
 describe('createAdapter', () => {
   const network = { name: 'My network', Integrations: [{ name: 'foo' }] };
