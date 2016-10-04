@@ -1,19 +1,12 @@
-import _ from 'lodash';
 import { check } from 'hapi-acl-plugin';
-import { Message } from '../models';
-import { findConversationById } from '../repositories/conversation';
-import * as responseUtil from '../../../shared/utils/response';
-import parseIncludes from '../../../shared/utils/parse-includes';
+import { findConversationById } from 'modules/chat/repositories/conversation';
+import * as responseUtil from 'shared/utils/response';
 
 module.exports = async (req, reply) => {
   const { credentials } = req.auth;
-  const includes = parseIncludes(req.query);
-  const modelIncludes = [];
-
-  if (_.includes(includes, 'messages')) modelIncludes.push({ model: Message });
 
   try {
-    const conversation = await findConversationById(req.params.id, modelIncludes);
+    const conversation = await findConversationById(req.params.id);
 
     check(credentials, 'get-conversation', conversation, 'You\'re not part of this conversation');
 

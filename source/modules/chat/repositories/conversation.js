@@ -6,6 +6,7 @@ import { Conversation, Message } from '../models';
 const defaultIncludes = [
   { model: User },
   { model: Message, as: 'LastMessage' },
+  { model: Message },
 ];
 
 /**

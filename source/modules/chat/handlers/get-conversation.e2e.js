@@ -30,6 +30,7 @@ describe('Get conversation', () => {
     assert.equal(result.data.id, conversation.id);
     assert.equal(result.data.users[0].id, global.users.employee.id);
     assert.equal(result.data.users[1].id, global.users.admin.id);
+    assert.lengthOf(result.data.messages, 4);
     assert.equal(statusCode, 200);
   });
 

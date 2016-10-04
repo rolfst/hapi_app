@@ -31,6 +31,7 @@ describe('Get conversations for logged user', () => {
     const { result, statusCode } = await getRequest('/v1/chats/users/me/conversations');
 
     assert.lengthOf(result.data, 1);
+    assert.lengthOf(result.data[0].messages, 2);
     assert.equal(statusCode, 200);
   });
 
