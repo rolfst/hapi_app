@@ -9,10 +9,7 @@ export default async (req, reply) => {
 
     return reply({ success: true });
   } catch (err) {
-    console.error('Could not import network', {
-      stack: err.stack,
-      network_id: req.params.networkId,
-    });
+    console.error('Could not import network', err, { network_id: req.params.networkId });
 
     return reply(err);
   }

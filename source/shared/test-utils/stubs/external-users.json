@@ -8,7 +8,7 @@
   "phoneNum": "600000000",
   "isAdmin": true,
   "isActive": true,
-  "teamId": "1"
+  "teamIds": ["1", "2"]
 }, {
   "externalId": "2",
   "username": "medewerker@pmt.nl",
@@ -19,7 +19,7 @@
   "phoneNum": "612750183",
   "isAdmin": false,
   "isActive": true,
-  "teamId": "1"
+  "teamIds": ["1"]
 }, {
   "externalId": "3",
   "username": "verwijderd@pmt.nl",
@@ -30,7 +30,7 @@
   "phoneNum": "600000000",
   "isAdmin": false,
   "isActive": false,
-  "teamId": "2"
+  "teamIds": ["2", "3"]
 }, {
   "externalId": "4",
   "username": "dubbelganger@pmt.nl",
@@ -41,5 +41,5 @@
   "phoneNum": "600000000",
   "isAdmin": false,
   "isActive": true,
-  "teamId": "2"
+  "teamIds": ["1"]
 }]

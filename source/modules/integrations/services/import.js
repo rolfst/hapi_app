@@ -2,7 +2,7 @@ import createError from '../../../shared/utils/create-error';
 import createAdapter from '../../../shared/utils/create-adapter';
 import * as networkRepo from '../../core/repositories/network';
 import * as userRepo from '../../core/repositories/user';
-import * as impl from './impl';
+import * as impl from './implementation';
 
 export const importNetwork = async (payload) => {
   const network = await networkRepo.findNetworkById(payload.networkId);

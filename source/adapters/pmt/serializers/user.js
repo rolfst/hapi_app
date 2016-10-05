@@ -1,4 +1,4 @@
-import { includes } from 'lodash';
+import { map, includes } from 'lodash';
 
 const ADMIN_ROLES = [
   'admin',
@@ -18,6 +18,7 @@ export default (externalUser) => {
     first_name: null,
     date_of_birth: null,
     rolename: null,
+    scope: [],
     active: true,
     cell_phone_number: null,
     home_phone_number: null,
@@ -36,7 +37,7 @@ export default (externalUser) => {
       ? properUser.cell_phone_number : properUser.home_phone_number,
     isAdmin: includes(ADMIN_ROLES, properUser.rolename),
     isActive: properUser.active,
-    teamId: properUser.department,
+    teamIds: map(properUser.scope, 'department'),
   };
 
   return serializedUser;

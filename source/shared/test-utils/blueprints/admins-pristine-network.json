@@ -12,7 +12,7 @@
     "phoneNum": "0600000000",
     "isAdmin": true,
     "isActive": true,
-    "teamId": "72"
+    "teamIds": ["72"]
   }, {
     "externalId": "8025",
     "username": "hodor@flex-appeal.nl",
@@ -23,7 +23,7 @@
     "phoneNum": "0600000000",
     "isAdmin": true,
     "isActive": true,
-    "teamId": "28"
+    "teamIds": ["28"]
   }, {
     "externalId": "8111",
     "username": "bob+8111@rwrs.nl",
@@ -34,7 +34,7 @@
     "phoneNum": "0600000000",
     "isAdmin": true,
     "isActive": true,
-    "teamId": "71"
+    "teamIds": ["71"]
   }]
 }, {
   "integrationName": "PMT",
@@ -50,7 +50,7 @@
     "phoneNum": "0600000000",
     "isAdmin": true,
     "isActive": true,
-    "teamId": "72"
+    "teamIds": ["72"]
   }, {
     "externalId": "8025",
     "username": "hodor@flex-appeal.nl",
@@ -61,7 +61,7 @@
     "phoneNum": "0600000000",
     "isAdmin": true,
     "isActive": true,
-    "teamId": "28"
+    "teamIds": ["28"]
   }, {
     "externalId": "8111",
     "username": "bob+8111@rwrs.nl",
@@ -72,6 +72,6 @@
     "phoneNum": "0600000000",
     "isAdmin": true,
     "isActive": true,
-    "teamId": "71"
+    "teamIds": ["71"]
   }]
 }]

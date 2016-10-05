@@ -56,6 +56,9 @@ describe('Network import', () => {
       integration.destroy(),
     ]);
 
+    const leftOverUser = await userRepo.findUserByEmail('verwijderd@pmt.nl');
+    await leftOverUser.destroy();
+
     createAdapter.default.restore();
 
     return network.destroy();
@@ -87,6 +90,6 @@ describe('Network import', () => {
     const teams = await networkRepo.findTeamsForNetwork(network);
     const actual = find(teams, { externalId: stubs.external_teams[0].externalId });
 
-    assert.lengthOf(actual.Users, 2);
+    assert.lengthOf(actual.Users, 3);
   });
 });

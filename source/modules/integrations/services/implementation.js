@@ -1,4 +1,4 @@
-import { find, differenceBy, intersectionBy } from 'lodash';
+import { find, flatMap, differenceBy, intersectionBy } from 'lodash';
 import createError from '../../../shared/utils/create-error';
 import { findTeamsForNetwork } from '../../core/repositories/network';
 import { createBulkTeams } from '../../core/repositories/team';
@@ -93,11 +93,14 @@ export const importTeams = async (externalTeams, network) => {
 };
 
 export const addUsersToTeam = (users, teams, externalUsers) => {
-  const promises = users.map(user => {
-    const teamId = findExternalUser(user, externalUsers).teamId;
-    const team = find(teams, { externalId: teamId });
+  const promises = flatMap(users, user => {
+    const teamIds = findExternalUser(user, externalUsers).teamIds;
 
-    return teamRepo.addUserToTeam(team, user);
+    return teamIds.map(teamId => {
+      const team = find(teams, { externalId: teamId });
+
+      return teamRepo.addUserToTeam(team, user);
+    });
   });
 
   return Promise.all(promises);
