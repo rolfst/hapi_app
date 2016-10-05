@@ -27,7 +27,7 @@ describe('Available users for shift', () => {
 
   after(() => global.users.employee.removeNetwork(global.networks.pmt));
 
-  it('should return available users', async () => {
+  it('should return available users that are member of the network', async () => {
     const endpoint = `/v2/networks/${global.networks.pmt.id}/shifts/1/available`;
     const { result, statusCode } = await getRequest(endpoint);
 
@@ -38,7 +38,6 @@ describe('Available users for shift', () => {
       networkUtil.addUserScope(newAdmin, global.networks.pmt.id).toJSON(),
     ]);
   });
-
 
   it('should fail when shift is not found', async () => {
     const shiftId = 2;

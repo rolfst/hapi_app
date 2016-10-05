@@ -9,7 +9,7 @@ export const matchUsersForShift = async (usersToMatch, network) => {
   const externalIds = map(usersToMatch, 'externalId');
   const matchedUsers = await userRepo.findExternalUsers(externalIds);
 
-  const response = filter(matchedUsers, (u) => u)
+  const response = filter(matchedUsers, (u) => !!networkUtil.select(u.Networks, network.id))
     .map((u) => networkUtil.addUserScope(u, network.id));
 
   return response;
