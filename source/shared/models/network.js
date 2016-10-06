@@ -58,8 +58,9 @@ const Network = model.define('Network', {
         type: 'network',
         id: this.id.toString(),
         name: this.name,
-        enabled_components: flatten(this.enabledComponents.split(',').map(replaceChars)),
         has_integration: networkUtil.hasIntegration(this),
+        enabled_components: flatten(this.enabledComponents.split(',').map(replaceChars)),
+        user: this.SuperAdmin.toSimpleJSON(),
         created_at: dateUtils.toISOString(this.createdAt),
       };
     },

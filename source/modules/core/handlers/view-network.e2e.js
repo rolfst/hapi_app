@@ -18,11 +18,13 @@ describe('View network', async () => {
 
     assert.property(data, 'id');
     assert.property(data, 'name');
-    assert.property(data, 'enabled_components');
     assert.property(data, 'has_integration');
+    assert.property(data, 'enabled_components');
+    assert.property(data, 'user');
     assert.property(data, 'created_at');
     assert.isBoolean(data.has_integration);
     assert.isArray(data.enabled_components);
     assert.equal(data.type, 'network');
+    assert.equal(data.user.id, global.users.admin.id);
   });
 });
