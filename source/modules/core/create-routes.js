@@ -2,6 +2,10 @@ import createRoutes from '../../shared/utils/create-routes';
 
 const routes = [{
   method: 'GET',
+  url: '/v1/networks/{networkId}',
+  handler: require('./handlers/view-network'),
+}, {
+  method: 'GET',
   url: '/v2/users/me/networks',
   handler: require('./handlers/networks-for-user'),
   prefetch: false,

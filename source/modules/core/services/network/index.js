@@ -55,6 +55,20 @@ export const listActiveUsersForNetwork = async (payload, message) => {
 };
 
 /**
+ * Retrieve active users that belong to the network.
+ * @param {object} payload - Object containing payload data
+ * @param {object} message - Object containing meta data
+ * @param {object} message.network - The prefetched network
+ * @param {object} message.credentials - The authenticated user
+ * @param {object} message.artifacts - Artifacts containing request meta data
+ * @method listNetwork
+ * @return {Promise} Promise containing collection of users
+ */
+export const listNetwork = async (payload, message) => {
+  return message.network;
+};
+
+/**
  * imports a prinstine network into the system. it notifies the administrator of that
  * network about further action he can take.
  * @param {object} payload - Object containing payload data
