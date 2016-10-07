@@ -5,6 +5,7 @@ import config from './database.json';
 export const db = (() => {
   const connectionEnvironment = process.env.NODE_ENV === 'debug' ?
     'development' : process.env.NODE_ENV;
+
   const { host, database, username, password, dialect, port } = config[connectionEnvironment];
 
   const logging = process.env.ENABLE_LOGGING === 'true' ?

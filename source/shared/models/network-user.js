@@ -14,6 +14,10 @@ const NetworkUser = model.define('NetworkUser', {
     type: Sequelize.INTEGER,
     field: 'external_id',
   },
+  invisibleUser: {
+    type: Sequelize.BOOLEAN,
+    field: 'invisible_user',
+  },
   roleType: {
     type: Sequelize.STRING,
     field: 'role_type',
@@ -26,6 +30,10 @@ const NetworkUser = model.define('NetworkUser', {
   lastActive: {
     type: Sequelize.DATE,
     field: 'last_active',
+  },
+  isWelcomed: {
+    type: Sequelize.INTEGER,
+    field: 'is_welcomed',
   },
   deletedAt: {
     type: Sequelize.DATE,
