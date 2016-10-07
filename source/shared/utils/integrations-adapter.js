@@ -30,15 +30,28 @@ export const pristineNetworks = async (url) => {
   }
 };
 
-export const adminsFromPristineNetworks = async (url) => {
+export const usersFromPristineNetwork = async (url) => {
   try {
     const endpoint = `${url}/users`;
     const result = await client.get(endpoint);
 
-    return result.payload.data.map(userSerializer).filter((user) => user.isAdmin);
+    return result.payload.data;
+  } catch (err) {
+    console.log('Error retrieving users of pristine networks', err);
+
+    throw createError('404', `Cannot retrieve admins for pristine network ${url}.`);
+  }
+};
+
+export const adminsFromPristineNetworks = async (url) => {
+  try {
+    const data = await usersFromPristineNetwork(url);
+
+    return data.map(userSerializer).filter((user) => user.isAdmin);
   } catch (err) {
     console.log('Error retrieving users for admin selection of pristine networks', err);
 
     throw createError('404', `Cannot retrieve admins for pristine network ${url}.`);
   }
 };
+

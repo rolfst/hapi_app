@@ -1,6 +1,7 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import Promise from 'bluebird';
+import nock from 'nock';
 import { flatten, sortBy, partialRight, flow } from 'lodash';
 import { getRequest } from '../../../shared/test-utils/request';
 import * as mailer from '../../../shared/services/mailer';
@@ -8,7 +9,6 @@ import * as stubs from '../../../shared/test-utils/stubs';
 import * as userRepo from '../../core/repositories/user';
 import * as integrationRepo from '../../core/repositories/integration';
 import * as networkRepo from '../../core/repositories/network';
-import addedToNetworkMail from '../../../shared/mails/added-to-network';
 import { UserRoles } from '../../../shared/services/permission';
 
 const sortByUsername = partialRight(sortBy, 'username');
@@ -28,6 +28,10 @@ describe('Handler: Bulk invite users', () => {
 
   describe('happy path', () => {
     before(async () => {
+      const ENDPOINT = '/users';
+      nock(global.networks.pmt.externalId)
+        .get(ENDPOINT)
+        .reply('200', stubs.users_200);
       createdUsers = sortImportedUsers(await Promise.map(toBeImportedUsers, importUser));
     });
 
@@ -41,11 +45,10 @@ describe('Handler: Bulk invite users', () => {
     it('should add to the network as admin', async () => {
       const endpoint = `/v2/networks/${global.networks.pmt.id}/users/bulk_invite`;
       const { result, statusCode } = await getRequest(endpoint);
-      const mailConfiguration = addedToNetworkMail(global.networks.pmt, createdUsers[0]);
 
       assert.equal(statusCode, 200);
       assert.equal(result.data[0].email, createdUsers[0].email);
-      assert.equal(mailer.send.calledWithMatch(mailConfiguration), true);
+      assert.equal(mailer.send.called, true);
     });
   });
 

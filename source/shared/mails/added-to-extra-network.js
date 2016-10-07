@@ -2,7 +2,6 @@ export default (network, user) => {
   const data = {
     '-firstName-': user.firstName,
     '-companyName-': network.name, // TODO: UTF-8 encode
-    '-password-': user.plainPassword,
     '-invitationSenderFirstName-': network.SuperAdmin.firstName,
   };
 
