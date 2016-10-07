@@ -20,7 +20,6 @@ const createServer = (port) => {
 
   // Register plugins
   server.register(require('hapi-async-handler'));
-  server.register(serverUtil.registerAuthorizationPlugin());
 
   // Register schemes + strategies
   server.auth.scheme('jwt', jwtStrategy);

@@ -1,5 +1,5 @@
-import createError from '../../../shared/utils/create-error';
-import { Message } from '../models';
+import { User } from '../../../shared/models';
+import { Message, Conversation } from '../models';
 
 /**
  * Find all messages by conversation
@@ -36,12 +36,8 @@ export function createMessage(conversationId, creatorId, text) {
  * @method findMessageById
  * @return {promise} - Find message promise
  */
-export function findMessageById(id, includes) {
-  return Message
-    .findById(id, { include: includes })
-    .then(message => {
-      if (!message) throw createError('404');
-
-      return message;
-    });
-}
+export const findMessageById = async (id) => {
+  return Message.findById(id, {
+    include: [{ model: Conversation, include: [User] }, User],
+  });
+};

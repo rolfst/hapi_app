@@ -26,9 +26,11 @@ export default () => {
       const token = request.raw.req.headers['x-api-token'];
 
       try {
-        const result = await authenticate(networkId, token);
+        const { credentials, artifacts } = await authenticate(networkId, token);
+        artifacts.requestId = request.id;
+        artifacts.authenticationToken = token;
 
-        return reply.continue(result);
+        return reply.continue({ credentials, artifacts });
       } catch (err) {
         console.error('Error in Authenticator Strategy', err);
 

@@ -1,5 +1,7 @@
 import createError from '../../../../shared/utils/create-error';
 import * as impl from './implementation';
+import * as conversationRepo from '../../repositories/conversation';
+import * as messageRepo from '../../repositories/message';
 
 export const create = async (payload, message) => {
   const participants = [...payload.participants, message.credentials.id];
@@ -20,4 +22,82 @@ export const create = async (payload, message) => {
   }
 
   return conversation;
+};
+
+/**
+ * Retrieve a single conversation.
+ * @param {object} payload - Object containing payload data
+ * @param {number} payload.id - The id of the conversation
+ * @param {object} message - Object containing meta data
+ * @param {object} message.credentials - The authenticated user
+ * @param {object} message.artifacts - Artifacts containing request meta data
+ * @method getConversation
+ * @return {Promise} Promise containing a single conversation
+ */
+export const getConversation = async (payload, message) => {
+  const conversation = await conversationRepo.findConversationById(payload.id);
+  impl.assertThatUserIsPartOfTheConversation(conversation, message.credentials.id);
+
+  return conversation;
+};
+
+/**
+ * Retrieve the messages that are created for a conversation.
+ * @param {object} payload - Object containing payload data
+ * @param {number} payload.id - The id of the conversation
+ * @param {object} message - Object containing meta data
+ * @param {object} message.credentials - The authenticated user
+ * @param {object} message.artifacts - Artifacts containing request meta data
+ * @method getMessages
+ * @return {Promise} Promise containing collection of messages
+ */
+export const getMessages = async (payload, message) => {
+  const conversation = await getConversation(payload, message);
+
+  return messageRepo.findAllForConversation(conversation);
+};
+
+/**
+ * Retrieve a single message.
+ * @param {object} payload - Object containing payload data
+ * @param {number} payload.messageId - The id of the message
+ * @param {object} message - Object containing meta data
+ * @param {object} message.credentials - The authenticated user
+ * @param {object} message.artifacts - Artifacts containing request meta data
+ * @method getMessage
+ * @return {Promise} Promise containing a message
+ */
+export const getMessage = async (payload) => {
+  const message = await messageRepo.findMessageById(payload.messageId);
+
+  if (!message) throw createError('404');
+
+  return message;
+};
+
+/**
+ * Create a message for a conversation.
+ * @param {object} payload - Object containing payload data
+ * @param {number} payload.id - The id of the conversation
+ * @param {string} payload.text - The text of the message
+ * @param {object} message - Object containing meta data
+ * @param {object} message.credentials - The authenticated user
+ * @param {object} message.artifacts - Artifacts containing request meta data
+ * @method createMessage
+ * @return {Promise} Promise containing the created message
+ */
+export const createMessage = async (payload, message) => {
+  const { id, text } = payload;
+  const { credentials } = message;
+  const conversation = await getConversation({ id }, message);
+
+  const createdMessage = await messageRepo.createMessage(
+    conversation.id, credentials.id, text);
+
+  const refreshedMessage = await getMessage({ messageId: createdMessage.id });
+
+  impl.notifyUsersForNewMessage(
+    conversation, refreshedMessage, message.artifacts.authenticationToken);
+
+  return refreshedMessage;
 };

@@ -1,9 +1,6 @@
 import Url from 'url';
 import Qs from 'qs';
-import authorizationPlugin from 'hapi-acl-plugin';
-import * as networkUtil from './network';
 import createError from './create-error';
-import createActions from './create-actions';
 
 export const onRequest = (req, reply) => {
   const uri = req.raw.req.url;
@@ -41,19 +38,6 @@ export const onPreResponse = (req, reply) => {
 
   return reply.continue();
 };
-
-export const registerAuthorizationPlugin = () => ({
-  register: authorizationPlugin, options: {
-    actions: createActions(),
-    role: (user, params) => {
-      if (params.networkId) {
-        const network = networkUtil.select(user.Networks, params.networkId);
-
-        return network.NetworkUser.roleType;
-      }
-    },
-  },
-});
 
 export const makeConfig = () => {
   const options = {};

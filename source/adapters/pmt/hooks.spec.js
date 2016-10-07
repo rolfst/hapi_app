@@ -60,7 +60,8 @@ describe('PMT Hooks', () => {
       assert.property(hookResult[0], 'phoneNum');
       assert.property(hookResult[0], 'isAdmin');
       assert.property(hookResult[0], 'isActive');
-      assert.property(hookResult[0], 'teamId');
+      assert.property(hookResult[0], 'teamIds');
+      assert.isArray(hookResult[0].teamIds);
     });
   });
 });

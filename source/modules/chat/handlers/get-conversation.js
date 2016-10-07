@@ -1,17 +1,15 @@
-import { check } from 'hapi-acl-plugin';
-import { findConversationById } from 'modules/chat/repositories/conversation';
-import * as responseUtil from 'shared/utils/response';
+import * as responseUtil from '../../../shared/utils/response';
+import * as conversationService from '../services/conversation';
 
-module.exports = async (req, reply) => {
-  const { credentials } = req.auth;
-
+export default async (req, reply) => {
   try {
-    const conversation = await findConversationById(req.params.id);
+    const payload = { ...req.params };
+    const message = { ...req.pre, ...req.auth };
+    const result = await conversationService.getConversation(payload, message);
 
-    check(credentials, 'get-conversation', conversation, 'You\'re not part of this conversation');
-
-    return reply({ data: responseUtil.serialize(conversation) });
+    return reply({ data: responseUtil.serialize(result) });
   } catch (err) {
+    console.log('Error retrieving conversation', err);
     return reply(err);
   }
 };

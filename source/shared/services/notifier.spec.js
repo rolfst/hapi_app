@@ -15,10 +15,4 @@ describe('Notifier', () => {
     assert.equal(receivers.length, 2);
     assert.deepEqual(receivers, expected);
   });
-
-  it('should send a notification', () => {
-    notifier.default.send([], {});
-
-    assert.equal(notifier.default.send.calledOnce, true);
-  });
 });

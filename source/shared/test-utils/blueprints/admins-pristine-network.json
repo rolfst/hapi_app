@@ -23,7 +23,7 @@
     "phoneNum": "0600000000",
     "isAdmin": true,
     "isActive": true,
-    "teamIds": ["28"]
+    "teamIds": ["28", "73"]
   }, {
     "externalId": "8111",
     "username": "bob+8111@rwrs.nl",
@@ -34,7 +34,7 @@
     "phoneNum": "0600000000",
     "isAdmin": true,
     "isActive": true,
-    "teamIds": ["71"]
+    "teamIds": ["71", "72"]
   }]
 }, {
   "integrationName": "PMT",
@@ -61,7 +61,7 @@
     "phoneNum": "0600000000",
     "isAdmin": true,
     "isActive": true,
-    "teamIds": ["28"]
+    "teamIds": ["28", "73"]
   }, {
     "externalId": "8111",
     "username": "bob+8111@rwrs.nl",
@@ -72,6 +72,6 @@
     "phoneNum": "0600000000",
     "isAdmin": true,
     "isActive": true,
-    "teamIds": ["71"]
+    "teamIds": ["71", "72"]
   }]
 }]
