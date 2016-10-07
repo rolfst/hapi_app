@@ -47,8 +47,8 @@ export const getMembersfromIntegration = async (network) => {
 export const getUsersWithoutPassword = (
   existingMembers,
   matchingMembers,
-  matchingCriteria = 'username',
-  ) => {
+  matchingCriteria = 'username'
+) => {
   const whitelistedMembers = whitelistMembers(existingMembers, matchingMembers, matchingCriteria);
 
   return selectUsersWithoutPassword(whitelistedMembers);
@@ -72,7 +72,8 @@ export const getUsersWithPassword = (
   existingMembers,
   matchingMembers,
   excludedUsers = [],
-  matchingCriteria = 'username') => {
+  matchingCriteria = 'username'
+) => {
   const whitelistedMembers = whitelistMembers(existingMembers, matchingMembers, matchingCriteria);
   const availableUsers = blacklistMembers(whitelistedMembers, excludedUsers, matchingCriteria);
 

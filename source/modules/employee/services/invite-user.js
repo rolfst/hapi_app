@@ -86,15 +86,13 @@ export const inviteUsers = async (payload, message) => {
   const matchingMembersFromIntegration = await impl.getMembersfromIntegration(network);
 
   const usersWithoutPasswords = impl.getUsersWithoutPassword(
-    networkMembers,
-    matchingMembersFromIntegration,
-  );
+    networkMembers, matchingMembersFromIntegration);
   const usersToSendMailto = await impl.generatePasswordsForMembers(usersWithoutPasswords);
-  map(usersToSendMailto, (user) => mailer.send(addedToNetworkMail(network, user)));
+
   const usersWithPassword = impl.getUsersWithPassword(
-    networkMembers,
-    matchingMembersFromIntegration,
-    [identifiedUser]);
+    networkMembers, matchingMembersFromIntegration, [identifiedUser]);
+
+  map(usersToSendMailto, (user) => mailer.send(addedToNetworkMail(network, user)));
   map(usersWithPassword, (user) => mailer.send(addedToExtraNetwork(network, user)));
 
   return sortBy(concat(usersToSendMailto, usersWithPassword), 'username');
