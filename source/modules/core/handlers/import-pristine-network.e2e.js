@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
+import nock from 'nock';
 import { pick } from 'lodash';
 import { postRequest } from '../../../shared/test-utils/request';
 import stubs from '../../../shared/test-utils/stubs';
@@ -13,11 +14,17 @@ import * as integrationRepo from '../repositories/integration';
 describe('Import pristine network', () => {
   const pristineNetwork = stubs.pristine_networks_admins[0];
   const employee = pristineNetwork.admins[0];
+  let sandbox;
 
   describe('Happy path', async () => {
     let integration;
 
     before(async () => {
+      nock(pristineNetwork.externalId)
+      .get('/users')
+      .reply(200, stubs.users_200);
+
+      sandbox = sinon.sandbox.create();
       const fakeAdapter = {
         fetchTeams: () => stubs.external_teams,
         fetchUsers: () => stubs.external_users,
@@ -28,14 +35,14 @@ describe('Import pristine network', () => {
         token: 'footoken',
       });
 
-      sinon.stub(createAdapter, 'default').returns(fakeAdapter);
+      sandbox.stub(createAdapter, 'default').returns(fakeAdapter);
     });
 
     after(async () => {
       const network = await networkRepo.findNetwork({ name: pristineNetwork.name });
       const users = await networkRepo.findAllUsersForNetwork(network);
       const createdUser = await userRepo.findUserByUsername(employee.username);
-      createAdapter.default.restore();
+      sandbox.restore();
       mailer.send.restore();
       sinon.stub(mailer, 'send').returns(null);
 
@@ -48,12 +55,12 @@ describe('Import pristine network', () => {
 
     it('should succeed', async () => {
       const response = await postRequest('/v2/pristine_networks/import', {
-        ...employee,
-        ...pick(pristineNetwork, ['name', 'networkId', 'integrationName']),
+        userId: employee.userId,
+        ...pick(pristineNetwork, ['name', 'externalId', 'integrationName']),
       });
 
       const network = await networkRepo.findNetwork({
-        externalId: pristineNetwork.networkId, name: pristineNetwork.name });
+        externalId: pristineNetwork.externalId, name: pristineNetwork.name });
       const user = await userRepo.findUserByUsername(employee.username);
       const configuration = configurationMail(network, user);
 
@@ -64,31 +71,68 @@ describe('Import pristine network', () => {
 
   describe('Fault path', async () => {
     before(async () => {
+      sandbox = sinon.sandbox.create();
       const fakeAdapter = {
         fetchTeams: () => stubs.external_teams,
         fetchUsers: () => stubs.external_users,
       };
 
-      sinon.stub(createAdapter, 'default').returns(fakeAdapter);
+      sandbox.stub(createAdapter, 'default').returns(fakeAdapter);
 
       const user = await userRepo.createUser({ ...employee });
       await networkRepo.createNetwork(
         user.id,
         pristineNetwork.name,
-        pristineNetwork.networkId);
+        pristineNetwork.externalId);
     });
 
     after(async () => {
+      sandbox.restore();
       const network = await networkRepo.findNetwork({ name: pristineNetwork.name });
-      createAdapter.default.restore();
 
       return network.destroy();
     });
 
-    it('should fail on already imported network', async () => {
+    it('should fail on missing userId', async () => {
       const response = await postRequest('/v2/pristine_networks/import', {
-        ...employee,
-        ...pick(pristineNetwork, ['name', 'networkId', 'integrationName']),
+        ...pick(pristineNetwork, ['name', 'externalId', 'integrationName']),
+      });
+
+      assert.equal(response.statusCode, 422);
+    });
+
+    it('should fail on missing externalId', async () => {
+      const response = await postRequest('/v2/pristine_networks/import', {
+        userId: employee.userId,
+        ...pick(pristineNetwork, ['name', 'integrationName']),
+      });
+      assert.equal(response.statusCode, 422);
+    });
+
+    it('should fail on missing integrationName', async () => {
+      const response = await postRequest('/v2/pristine_networks/import', {
+        userId: employee.userId,
+        ...pick(pristineNetwork, ['name', 'externalId']),
+      });
+      assert.equal(response.statusCode, 422);
+    });
+
+    it('should fail on missing networkName', async () => {
+      const response = await postRequest('/v2/pristine_networks/import', {
+        userId: employee.userId,
+        ...pick(pristineNetwork, ['integrationName', 'externalId']),
+      });
+      assert.equal(response.statusCode, 422);
+    });
+
+    it('should fail on already imported network', async () => {
+      nock(pristineNetwork.externalId)
+      .get('/users')
+      .reply(200, stubs.users_200);
+
+      const response = await postRequest('/v2/pristine_networks/import', {
+        userId: employee.userId,
+        ...pick(pristineNetwork, ['name', 'externalId', 'integrationName']),
       });
 
       assert.equal(response.statusCode, 403);

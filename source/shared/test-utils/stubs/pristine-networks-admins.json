@@ -1,7 +1,7 @@
 [{
   "integrationName": "PMT",
   "name": "Jumbo Nanne van der Schaaf",
-  "networkId": "https://jumboschaaf.personeelstool.nl",
+  "externalId": "https://jumboschaaf.personeelstool.nl",
   "admins": [{
     "userId": "8036",
     "username": "bob+8036@rwrs.nl",
@@ -39,9 +39,9 @@
 }, {
   "integrationName": "PMT",
   "name": "Jumbo van Bergen",
-  "networkId": "https://jumbobergen.personeelstool.nl",
+  "externalId": "https://jumbobergen.personeelstool.nl",
   "admins": [{
-    "userId": "8036",
+    "userId": "8046",
     "username": "bob+8036@rwrs.nl",
     "email": "bob+8036@rwrs.nl",
     "firstName": "Piet",
@@ -52,7 +52,7 @@
     "isActive": true,
     "teamId": "72"
   }, {
-    "userId": "8025",
+    "userId": "8045",
     "username": "hodor@flex-appeal.nl",
     "email": "hodor@flex-appeal.nl",
     "firstName": "Tiny",
@@ -63,7 +63,7 @@
     "isActive": true,
     "teamId": "28"
   }, {
-    "userId": "8111",
+    "userId": "8141",
     "username": "bob+8111@rwrs.nl",
     "email": "bob+8111@rwrs.nl",
     "firstName": "Dettie",

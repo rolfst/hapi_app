@@ -1,5 +1,5 @@
 import Promise from 'bluebird';
-import { flatten, map, pick, get } from 'lodash';
+import { flatten, map, pick, get, find } from 'lodash';
 import configurationMail from '../../../../shared/mails/configuration-invite';
 import * as mailer from '../../../../shared/services/mailer';
 import * as integrationsAdapter from '../../../../shared/utils/integrations-adapter';
@@ -54,6 +54,8 @@ export const listActiveUsersForNetwork = async (payload, message) => {
   return userService.listUsers({ userIds: map(usersFromNetwork, 'id') }, message);
 };
 
+const selectUser = (users, userId) => find(users, (user) => user.externalId === userId);
+
 /**
  * Retrieve active users that belong to the network.
  * @param {object} payload - Object containing payload data
@@ -91,20 +93,15 @@ export const listNetwork = async (payload, message) => {
  * @throws {exception} - Exception  network already exists 401
  */
 export const importPristineNetwork = async (payload) => {
-  const USER_PROPS = ['username', 'firstName',
-    'lastName', 'dateOfBirth', 'email', 'phoneNum',
-    'isAdmin', 'isActive', 'teamId'];
-
-  const employee = pick(payload, USER_PROPS);
-  const networkPayload = pick(payload, ['name']);
+  const networkPayload = pick(payload, ['name', 'externalId']);
   const integrationName = payload.integrationName;
 
-  employee.externalId = get(payload, 'userId');
-  networkPayload.externalId = get(payload, 'networkId');
+  const usersFromNetwork = await integrationsAdapter.usersFromPristineNetwork(
+    networkPayload.externalId);
+  const admin = selectUser(usersFromNetwork, get(payload, 'userId'));
+  const user = await userRepo.createUser({ ...admin });
 
-  const user = await userRepo.createUser({ ...employee });
   await impl.assertTheNetworkIsNotImportedYet(networkPayload);
-
   const newNetwork = await networkRepo.createIntegrationNetwork({
     userId: user.id,
     externalId: networkPayload.externalId,
@@ -113,6 +110,5 @@ export const importPristineNetwork = async (payload) => {
   });
 
   await importService.importNetwork({ networkId: newNetwork.id });
-
   mailer.send(configurationMail(newNetwork, user));
 };

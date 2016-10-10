@@ -10,6 +10,11 @@ const NetworkUser = model.define('NetworkUser', {
     type: Sequelize.INTEGER,
     field: 'user_id',
   },
+  bulkAdded: {
+    type: Sequelize.INTEGER,
+    field: 'bulk_added',
+    defaultValue: 0,
+  },
   externalId: {
     type: Sequelize.INTEGER,
     field: 'external_id',
