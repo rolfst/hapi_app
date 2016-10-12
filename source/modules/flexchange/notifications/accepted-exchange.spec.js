@@ -12,7 +12,7 @@ describe('Accepted exchange notification', () => {
     const substitute = { fullName: 'User#2' };
     const actual = createNotification(exchange, substitute);
     const expected = {
-      text: 'User#2 heeft aangegeven de shift van User#1 op woensdag 29 juni over te kunnen nemen. Open de app om dit goed te keuren.', // eslint-disable-line max-len
+      text: 'User#2 heeft aangegeven de shift van User#1 te kunnen werken.',
       data: { id: 1, type: 'exchange' },
     };
 

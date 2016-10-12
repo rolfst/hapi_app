@@ -1,11 +1,15 @@
-import { chain, map } from 'lodash';
+import { chain, map, filter, includes } from 'lodash';
 import moment from 'moment';
 import createAdapter from '../../../../shared/utils/create-adapter';
 import analytics from '../../../../shared/services/analytics';
 import approveExchangeEvent from '../../../../shared/events/approve-exchange-event';
 import createError from '../../../../shared/utils/create-error';
 import * as networkUtil from '../../../../shared/utils/network';
+import { UserRoles } from '../../../../shared/services/permission';
+import newExchangeEvent from '../../../../shared/events/new-exchange-event';
 import * as teamRepo from '../../../core/repositories/team';
+import * as userRepo from '../../../core/repositories/user';
+import * as networkRepo from '../../../core/repositories/network';
 import * as activityRepo from '../../../core/repositories/activity';
 import * as userService from '../../../core/services/user';
 import * as teamService from '../../../core/services/team';
@@ -17,12 +21,25 @@ import * as exchangeResponseRepo from '../../repositories/exchange-response';
 import * as notification from '../../notifications/accepted-exchange';
 import * as creatorNotifier from '../../notifications/creator-approved';
 import * as substituteNotifier from '../../notifications/substitute-approved';
+import * as createdByAdminNotifier from '../../notifications/exchange-created-by-admin';
+import * as createdNotifier from '../../notifications/exchange-created';
 import * as impl from './implementation';
 
 // TODO activate notifications
 // import * as commentNotifier from '../../notifications/new-exchange-comment';
 
 const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
+const findUsersByType = async (exchange, network, exchangeValues, loggedUser) => {
+  let usersPromise;
+  if (exchange.type === exchangeTypes.NETWORK) {
+    usersPromise = networkRepo.findAllUsersForNetwork(network);
+  } else if (exchange.type === exchangeTypes.TEAM) {
+    usersPromise = teamRepo.findUsersByTeamIds(exchangeValues);
+  }
+  const users = await (usersPromise);
+  return filter(users, u => u.id !== loggedUser.id);
+};
+
 
 export const listReceivers = async (payload, message) => {
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, message.credentials.id);
@@ -210,6 +227,49 @@ export const listExchangesForNetwork = async (payload, message) => {
     .value();
 
   return response;
+};
+
+const createNotifier = (roleType) => {
+  if (roleType === UserRoles.EMPLOYEE) {
+    return createdNotifier;
+  } else if (roleType === UserRoles.ADMIN) {
+    return createdByAdminNotifier;
+  }
+};
+const createValidator = (exchangeType) => {
+  if (exchangeType === exchangeTypes.TEAM) return teamRepo.validateTeamIds;
+  if (exchangeType === exchangeTypes.USER) return userRepo.validateUserIds;
+};
+
+export const createExchange = async (payload, message) => {
+  const { network, credentials } = message;
+  if (payload.startTime && payload.endTime && moment(payload.endTime).isBefore(payload.startTime)) {
+    throw createError('422', 'Attribute end_time should be after start_time');
+  }
+
+  if (payload.shiftId && !networkUtil.hasIntegration(network)) {
+    throw createError('10001');
+  }
+
+  if (includes([exchangeTypes.TEAM, exchangeTypes.USER], payload.type)) {
+    const validator = createValidator(payload.type);
+    const isValid = validator ? await validator(payload.values, network.id) : true;
+
+    if (!isValid) throw createError('422', 'Specified invalid ids for type.');
+  }
+
+  const createdExchange = await exchangeRepo.createExchange(message.credentials.id, network.id, {
+    ...payload,
+    date: moment(payload.date).format('YYYY-MM-DD'),
+  });
+
+  const users = await findUsersByType(createdExchange, network, payload.values, credentials);
+
+  const notifier = createNotifier(network.NetworkUser.roleType);
+  notifier.send(users, createdExchange);
+  analytics.track(newExchangeEvent(network, createdExchange));
+
+  return exchangeRepo.findExchangeById(createdExchange.id);
 };
 
 export const listActivities = async (payload) => {

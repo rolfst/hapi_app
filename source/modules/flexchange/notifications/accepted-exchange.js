@@ -7,11 +7,10 @@ import { findAdminsByNetwork } from '../../core/repositories/network';
 export const createNotification = (exchange, substituteUser) => {
   const substitute = substituteUser.fullName;
   const creator = exchange.User.fullName;
-  const date = moment(exchange.date).format('dddd D MMMM');
 
   return {
-    text: `${substitute} heeft aangegeven de shift van ${creator} op ${date}` +
-    ' over te kunnen nemen. Open de app om dit goed te keuren.',
+    text: `${substitute} heeft aangegeven de shift van ${creator}` +
+    ' te kunnen werken.',
     data: { id: exchange.id, type: 'exchange' },
   };
 };
