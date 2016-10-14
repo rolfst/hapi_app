@@ -22,7 +22,7 @@ describe('View users related to exchange', () => {
 
       const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}/users`;
       const { result, statusCode } = await getRequest(endpoint);
-      const usersInNetwork = await networkRepo.findActiveUsersForNetwork(network);
+      const usersInNetwork = await networkRepo.findUsersForNetwork(network.id);
 
       assert.equal(statusCode, 200);
       assert.equal(result.data.length, usersInNetwork.length);
@@ -50,7 +50,7 @@ describe('View users related to exchange', () => {
 
     it('should return users for exchange created for team', async () => {
       const team = await teamRepo.createTeam({ networkId: network.id, name: 'Cool Team' });
-      await team.addUser(global.users.admin);
+      await team.addUser(global.users.admin.id);
 
       const exchange = await createExchange(global.users.admin.id, network.id, {
         date: moment().format('YYYY-MM-DD'),

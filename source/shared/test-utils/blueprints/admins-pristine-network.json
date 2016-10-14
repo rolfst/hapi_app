@@ -1,7 +1,7 @@
 [{
   "integrationName": "PMT",
   "name": "Jumbo Nanne van der Schaaf",
-  "externalId": "https://jumboschaaf.personeelstool.nl",
+  "externalId": "https://jumboschaaf_store.personeelstool.nl",
   "admins": [{
     "externalId": "8036",
     "username": "bob+8036@rwrs.nl",
@@ -39,7 +39,7 @@
 }, {
   "integrationName": "PMT",
   "name": "Jumbo van Bergen",
-  "externalId": "https://jumbobergen.personeelstool.nl",
+  "externalId": "https://jumbobergen_store.personeelstool.nl",
   "admins": [{
     "externalId": "8036",
     "username": "bob+8036@rwrs.nl",

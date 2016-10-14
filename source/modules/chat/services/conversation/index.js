@@ -1,10 +1,11 @@
+import { uniq, find, map } from 'lodash';
 import createError from '../../../../shared/utils/create-error';
 import * as impl from './implementation';
 import * as conversationRepo from '../../repositories/conversation';
 import * as messageRepo from '../../repositories/message';
 
 export const create = async (payload, message) => {
-  const participants = [...payload.participants, message.credentials.id];
+  const participants = uniq([...payload.participants, message.credentials.id]);
 
   if (participants.length < 2) {
     throw createError('403', 'A conversation must have 2 or more participants');
@@ -24,6 +25,15 @@ export const create = async (payload, message) => {
   return conversation;
 };
 
+export const listConversations = async (payload) => {
+  const conversations = await conversationRepo.findConversationsById(payload.ids);
+  const messages = await messageRepo.findLastForConversations(map(conversations, 'id'));
+
+  return map(conversations, (conversation) => ({
+    ...conversation, lastMessage: find(messages, { conversationId: conversation.id }),
+  }));
+};
+
 /**
  * Retrieve a single conversation.
  * @param {object} payload - Object containing payload data
@@ -36,25 +46,46 @@ export const create = async (payload, message) => {
  */
 export const getConversation = async (payload, message) => {
   const conversation = await conversationRepo.findConversationById(payload.id);
+  if (!conversation) throw createError('404');
+
+  const lastMessages = await messageRepo.findLastForConversations([conversation.id]);
+
   impl.assertThatUserIsPartOfTheConversation(conversation, message.credentials.id);
 
-  return conversation;
+  return { ...conversation, lastMessage: lastMessages[0] };
 };
 
 /**
- * Retrieve the messages that are created for a conversation.
+ * Retrieve conversations for specific user.
+ * @param {object} payload - Object containing payload data
+ * @param {number} payload.id - The id of the user
+ * @param {object} message - Object containing meta data
+ * @param {object} message.credentials - The authenticated user
+ * @param {object} message.artifacts - Artifacts containing request meta data
+ * @method getConversationsForUser
+ * @return {Promise} Promise containing a single conversation
+ */
+
+export const listConversationsForUser = async (payload, message) => {
+  const conversationIds = await conversationRepo.findIdsForUser(payload.id);
+
+  return listConversations({ ids: conversationIds }, message);
+};
+
+/**
+ * List the messages that are created for a conversation.
  * @param {object} payload - Object containing payload data
  * @param {number} payload.id - The id of the conversation
  * @param {object} message - Object containing meta data
  * @param {object} message.credentials - The authenticated user
  * @param {object} message.artifacts - Artifacts containing request meta data
- * @method getMessages
+ * @method listMessages
  * @return {Promise} Promise containing collection of messages
  */
-export const getMessages = async (payload, message) => {
+export const listMessages = async (payload, message) => {
   const conversation = await getConversation(payload, message);
 
-  return messageRepo.findAllForConversation(conversation);
+  return messageRepo.findAllForConversation(conversation.id);
 };
 
 /**
@@ -69,7 +100,6 @@ export const getMessages = async (payload, message) => {
  */
 export const getMessage = async (payload) => {
   const message = await messageRepo.findMessageById(payload.messageId);
-
   if (!message) throw createError('404');
 
   return message;

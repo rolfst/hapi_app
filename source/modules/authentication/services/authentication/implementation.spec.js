@@ -3,78 +3,56 @@ import sinon from 'sinon';
 import Promise from 'bluebird';
 import * as password from '../../../../shared/utils/password';
 import * as userRepo from '../../../core/repositories/user';
-import * as checkPassword from '../../utils/check-password';
 import * as unit from './implementation';
 
-const credentials = {
-  username: 'Johnnie', firstName: 'John', lastName: 'Doe', password: 'ihazswag',
-};
-
 describe('Authentication service', () => {
+  const credentials = {
+    username: 'Johnnie', firstName: 'John', lastName: 'Doe', password: 'ihazswag',
+  };
+
   describe('authenticateUser', () => {
-    it('check if credentials match', async () => {
-      sinon.stub(userRepo, 'findUserByUsername').returns(Promise.resolve({
+    before(() => {
+      sinon.stub(userRepo, 'findCredentialsForUser').returns(Promise.resolve({
         username: credentials.username,
         password: password.make(credentials.password),
       }));
+    });
 
-      const stub = sinon.stub(checkPassword, 'default').returns(true);
+    after(() => userRepo.findCredentialsForUser.restore());
 
-      const actual = await unit.authenticateUser(credentials);
-      assert.equal(actual.username, credentials.username);
+    it('check if credentials match', async () => {
+      sinon.stub(unit, 'checkPassword').returns(true);
+      const authenticationCredentials = await unit.authenticateUser(credentials);
+      unit.checkPassword.restore();
 
-      stub.restore();
+      assert.equal(authenticationCredentials.username, credentials.username);
     });
 
     it('should fail when credentials do not match', async () => {
-      const stub = sinon.stub(checkPassword, 'default').returns(false);
-      const promise = unit.authenticateUser({ ...credentials, password: 'ihaznoswag' });
-      stub.restore();
+      sinon.stub(unit, 'checkPassword').returns(false);
+      const authenticationPromise = unit.authenticateUser({
+        ...credentials, password: 'ihaznoswag' });
+      unit.checkPassword.restore();
 
-      return assert.isRejected(promise);
+      return assert.isRejected(authenticationPromise);
     });
   });
 
-  describe('integrationTokensForUser', () => {
-    it('transform result into integration objects', async () => {
-      const user = {
-        Networks: [{
-          Integrations: [{
-            name: 'foo',
-          }],
-          NetworkUser: {
-            externalId: 1337,
-            userToken: 'my_token',
-          },
-        }],
-      };
+  describe('checkPassword', () => {
+    it('return true when password match', () => {
+      const plainPassword = 'foo';
+      const hashedPassword = password.make(plainPassword);
 
-      const actual = await unit.getIntegrationTokensForUser(user);
-      const expected = [{ name: 'foo', token: 'my_token', externalId: 1337 }];
-
-      assert.deepEqual(actual, expected);
+      const actual = unit.checkPassword(hashedPassword, plainPassword);
+      assert.equal(actual, true);
     });
-  });
 
+    it('return false when password do not match', () => {
+      const plainPassword = 'foo';
+      const hashedPassword = password.make('baz');
 
-  describe('mapNetworkAndToken', () => {
-    it('should return correct integration token for network', () => {
-      const fakeNetwork = {
-        name: 'My network',
-        Integrations: [{
-          name: 'INTEGRATION_NAME',
-        }],
-      };
-
-      const fakeAuthenticatedIntegrations = [{
-        name: 'INTEGRATION_NAME',
-        token: 'cool_token',
-      }];
-
-      const actual = unit.mapNetworkAndToken(fakeNetwork, fakeAuthenticatedIntegrations);
-      const expected = { network: fakeNetwork, token: 'cool_token' };
-
-      assert.deepEqual(actual, expected);
+      const actual = unit.checkPassword(hashedPassword, plainPassword);
+      assert.equal(actual, false);
     });
   });
 });

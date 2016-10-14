@@ -13,6 +13,7 @@ export default async (req, reply) => {
     const exchangeComment = await flexchangeService.getExchangeComment(payload, message);
     return reply({ success: true, data: responseUtil.serialize(exchangeComment) });
   } catch (err) {
+    console.log(`Error creating exchange comment ${payload.exchangeId}`, err);
     return reply(err);
   }
 };

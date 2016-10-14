@@ -1,9 +1,10 @@
 import { find, flatMap, differenceBy, intersectionBy } from 'lodash';
+import Promise from 'bluebird';
 import createError from '../../../shared/utils/create-error';
-import { findTeamsForNetwork } from '../../core/repositories/network';
-import { createBulkTeams } from '../../core/repositories/team';
-import * as userRepo from '../../core/repositories/user';
+import * as networkService from '../../core/services/network';
+import * as networkRepo from '../../core/repositories/network';
 import * as teamRepo from '../../core/repositories/team';
+import * as userRepo from '../../core/repositories/user';
 
 export const findExternalUser = (user, externalUsers) => {
   return find(externalUsers, { email: user.email });
@@ -52,20 +53,21 @@ export const importUsers = async (internalUsers, externalUsers, network) => {
   const newExternalUsers = differenceBy(externalUsers, internalUsers, 'email');
   const newUsers = await userRepo.createBulkUsers(newExternalUsers);
   const existingUsers = intersectionBy(internalUsers, externalUsers, 'email');
-
   const usersToAddToNetwork = [...newUsers, ...existingUsers];
 
-  const promises = usersToAddToNetwork.map(employee => {
+  await Promise.map(usersToAddToNetwork, employee => {
     const externalUser = findExternalUser(employee, externalUsers);
 
-    return userRepo.addUserToNetwork(employee, network, {
-      isActive: externalUser.isActive,
+    return networkService.addUserToNetwork({
+      networkId: network.id,
+      userId: employee.id,
+      active: externalUser.isActive,
       externalId: externalUser.externalId,
       roleType: externalUser.isAdmin ? 'ADMIN' : 'EMPLOYEE',
     });
   });
 
-  return Promise.all(promises);
+  return usersToAddToNetwork;
 };
 
 /**
@@ -83,23 +85,24 @@ export const importUsers = async (internalUsers, externalUsers, network) => {
  * @return {Team} - Return team objects
  */
 export const importTeams = async (externalTeams, network) => {
-  const existingTeams = await findTeamsForNetwork(network);
+  const existingTeams = await networkRepo.findTeamsForNetwork(network.id);
   const teamsToCreate = differenceBy(externalTeams, existingTeams, 'externalId')
     .map(team => ({ ...team, networkId: network.id }));
-
-  const newTeams = await createBulkTeams(teamsToCreate);
+  const newTeams = await teamRepo.createBulkTeams(teamsToCreate);
 
   return [...newTeams, ...existingTeams];
 };
 
 export const addUsersToTeam = (users, teams, externalUsers) => {
   const promises = flatMap(users, user => {
-    const teamIds = findExternalUser(user, externalUsers).teamIds;
+    const externalUser = findExternalUser(user, externalUsers);
 
-    return teamIds.map(teamId => {
+    if (!externalUser) return;
+
+    return externalUser.teamIds.map(teamId => {
       const team = find(teams, { externalId: teamId });
 
-      return teamRepo.addUserToTeam(team, user);
+      return teamRepo.addUserToTeam(team.id, user.id);
     });
   });
 

@@ -55,12 +55,15 @@ describe('Get exchanges for team', () => {
       .then(response => {
         const teamExchange = find(response.result.data, { title: 'Test shift 1 for team' });
 
-        assert.deepEqual(teamExchange.created_in, { type: 'team', ids: [team.id] });
+        assert.equal(response.statusCode, 200);
+        assert.deepEqual(teamExchange.created_in, { type: 'team', ids: [team.id.toString()] });
         assert.lengthOf(response.result.data, 4);
-        assert.deepEqual(response.result.data[0].created_in, { type: 'team', ids: [team.id] });
         assert.equal(response.result.data[0].user.full_name, global.users.admin.fullName);
         assert.lengthOf(response.result.data[0].responses, 0);
-        assert.equal(response.statusCode, 200);
+        assert.deepEqual(response.result.data[0].created_in, {
+          type: 'team',
+          ids: [team.id.toString()],
+        });
       });
   });
 
@@ -77,8 +80,8 @@ describe('Get exchanges for team', () => {
     const endpoint = `/v2/networks/${network.id}/teams/${team.id}/exchanges?${query}`;
     const { result, statusCode } = await getRequest(endpoint);
 
-    assert.lengthOf(result.data, 2);
     assert.equal(statusCode, 200);
+    assert.lengthOf(result.data, 2);
   });
 
   it('should return all upcoming exchanges when start query param is set', async () => {
@@ -89,8 +92,8 @@ describe('Get exchanges for team', () => {
     const endpoint = `/v2/networks/${network.id}/teams/${team.id}/exchanges?${query}`;
     const { result, statusCode } = await getRequest(endpoint);
 
-    assert.lengthOf(result.data, 3);
     assert.equal(statusCode, 200);
+    assert.lengthOf(result.data, 3);
   });
 
   it('should return error when end query param is set without start param', async () => {

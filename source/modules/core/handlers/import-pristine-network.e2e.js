@@ -40,17 +40,17 @@ describe('Import pristine network', () => {
 
     after(async () => {
       const network = await networkRepo.findNetwork({ name: pristineNetwork.name });
-      const users = await networkRepo.findAllUsersForNetwork(network);
+      const users = await networkRepo.findAllUsersForNetwork(network.id);
       const createdUser = await userRepo.findUserByUsername(employee.username);
       sandbox.restore();
       mailer.send.restore();
       sinon.stub(mailer, 'send').returns(null);
 
-      await createdUser.destroy();
+      await userRepo.deleteById(createdUser.id);
       await integration.destroy();
-      await network.destroy();
+      await networkRepo.deleteById(network.id);
 
-      return Promise.all(users.map(u => u.destroy()));
+      return Promise.all(users.map(u => userRepo.deleteById(u.id)));
     });
 
     it('should succeed', async () => {
@@ -90,7 +90,39 @@ describe('Import pristine network', () => {
       sandbox.restore();
       const network = await networkRepo.findNetwork({ name: pristineNetwork.name });
 
-      return network.destroy();
+      return networkRepo.deleteById(network.id);
+    });
+
+    it('should fail on missing userId', async () => {
+      const response = await postRequest('/v2/pristine_networks/import', {
+        ...pick(pristineNetwork, ['name', 'externalId', 'integrationName']),
+      });
+
+      assert.equal(response.statusCode, 422);
+    });
+
+    it('should fail on missing externalId', async () => {
+      const response = await postRequest('/v2/pristine_networks/import', {
+        userId: employee.userId,
+        ...pick(pristineNetwork, ['name', 'integrationName']),
+      });
+      assert.equal(response.statusCode, 422);
+    });
+
+    it('should fail on missing integrationName', async () => {
+      const response = await postRequest('/v2/pristine_networks/import', {
+        userId: employee.userId,
+        ...pick(pristineNetwork, ['name', 'externalId']),
+      });
+      assert.equal(response.statusCode, 422);
+    });
+
+    it('should fail on missing networkName', async () => {
+      const response = await postRequest('/v2/pristine_networks/import', {
+        userId: employee.userId,
+        ...pick(pristineNetwork, ['integrationName', 'externalId']),
+      });
+      assert.equal(response.statusCode, 422);
     });
 
     it('should fail on missing userId', async () => {

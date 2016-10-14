@@ -1,43 +1,52 @@
+import { map } from 'lodash';
 import { db as Sequelize } from '../../../connections';
 import createError from '../../../shared/utils/create-error';
 import { User } from '../../../shared/models';
-import { Conversation, Message } from '../models';
+import createConversationModel from '../models/conversation';
+import { Conversation, ConversationUser } from './dao';
 
-const defaultIncludes = [
-  { model: User },
-  { model: Message, as: 'LastMessage' },
-  { model: Message },
-];
+const toModel = (dao) => createConversationModel(dao);
 
 /**
  * Find a specific conversation by id
  * @param {number} id - Id of the conversation
- * @param {array} includes - Relationships to include
  * @method findConversationById
  * @return {promise} - Find conversation promise
  */
-export async function findConversationById(id, includes = []) {
+export async function findConversationById(id) {
   const conversation = await Conversation.findById(id, {
-    include: [...includes, ...defaultIncludes],
+    include: [{ model: User }],
   });
 
-  if (!conversation) throw createError('404');
+  if (!conversation) return null;
 
-  return conversation;
+  return toModel(conversation);
 }
+
+export const findConversationsById = async (conversationIds) => {
+  const results = await Conversation.findAll({
+    where: { id: { $in: conversationIds } },
+    include: [{ model: User }],
+  });
+
+  return map(results, toModel);
+};
 
 /**
- * Find all conversations for a specific user
- * @param {User} user - User to find the conversations for
- * @param {array} includes - Relationships to include
- * @method findAllForUser
- * @return {promise} - Get conversations promise
+ * Find conversation ids for a specific user
+ * @param {number} userId - User to find the conversations for
+ * @method findIdsForUser
+ * @return {Array<number>} - Returns conversation ids
  */
-export function findAllForUser(user, includes = []) {
-  return user.getConversations({
-    include: [...includes, ...defaultIncludes],
+export const findIdsForUser = async (userId) => {
+  const pivotResult = await ConversationUser.findAll({
+    attributes: ['conversation_id'],
+    where: { userId },
+    group: ['conversation_id'],
   });
-}
+
+  return map(pivotResult, 'conversation_id');
+};
 
 export async function findExistingConversation(participantIds) {
   const result = await Conversation.findAll({
@@ -88,10 +97,10 @@ export function deleteConversationById(id) {
 
 /**
  * Delete all conversations for a user
- * @param {User} user - User to delete the conversations of
+ * @param {User} userId - User id to delete the conversations of
  * @method deleteAllConversationsForUser
  * @return {promise} - Get conversations promise
  */
-export function deleteAllConversationsForUser(user) {
-  return user.setConversations([]);
-}
+export const deleteAllConversationsForUser = (userId) => {
+  return ConversationUser.destroy({ where: { userId } });
+};

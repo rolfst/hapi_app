@@ -29,7 +29,7 @@ describe('View exchange', () => {
     assert.equal(result.data.user.fullName, global.users.admin.full_name);
     assert.equal(result.data.title, 'Test shift to view');
     assert.equal(result.data.vote_result, null);
-    assert.deepEqual(result.data.created_in, { type: 'network', id: network.id });
+    assert.deepEqual(result.data.created_in, { type: 'network', id: network.id.toString() });
     assert.equal(result.data.description, 'Test description for this cool shift');
   });
 
@@ -46,7 +46,7 @@ describe('View exchange', () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${externalShiftExchange.id}`;
     const { result } = await getRequest(endpoint);
 
-    assert.deepEqual(result.data.created_in, { type: 'team', ids: [team.id] });
+    assert.deepEqual(result.data.created_in, { type: 'team', ids: [team.id.toString()] });
   });
 
   it('should fail when exchange cannot be found', async () => {

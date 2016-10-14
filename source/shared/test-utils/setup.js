@@ -5,19 +5,19 @@ import sinon from 'sinon';
 import dotenv from 'dotenv';
 import * as mailer from '../services/mailer';
 import notifier from '../services/notifier';
-import createServer from '../../server';
 import blueprints from './blueprints';
 import { UserRoles } from '../services/permission';
-import { createUser } from '../../modules/core/repositories/user';
-import authenticate from './authenticate';
 import * as accessService from '../../modules/integrations/services/access';
-import { createNetwork, createIntegrationNetwork } from '../../modules/core/repositories/network';
+import * as networkService from '../../modules/core/services/network';
+import * as userRepo from '../../modules/core/repositories/user';
+import authenticate from './authenticate';
 import generateNetworkName from './create-network-name';
 
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 dotenv.config();
 
+const createServer = require('../../server').default;
 global.server = createServer(8000);
 
 let admin;
@@ -26,15 +26,15 @@ let networklessUser;
 
 before(async () => {
   [admin, employee, networklessUser] = await Promise.all([
-    createUser(blueprints.users.admin),
-    createUser(blueprints.users.employee),
-    createUser(blueprints.users.networkless),
+    userRepo.createUser(blueprints.users.admin),
+    userRepo.createUser(blueprints.users.employee),
+    userRepo.createUser(blueprints.users.networkless),
   ]);
 
   // Create networks
   const [createdFlexNetwork, createdPMTNetwork] = await Promise.all([
-    createNetwork(admin.id, generateNetworkName()),
-    createIntegrationNetwork({
+    networkService.create({ userId: admin.id, name: generateNetworkName() }),
+    networkService.create({
       userId: admin.id,
       externalId: 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi',
       name: generateNetworkName(),
@@ -60,34 +60,36 @@ before(async () => {
 
   // Add user to the networks
   await Promise.all([
-    createdFlexNetwork.addUser(admin, { roleType: UserRoles.ADMIN }),
-    createdFlexNetwork.addUser(employee, { roleType: UserRoles.EMPLOYEE }),
-    createdPMTNetwork.addUser(admin, {
+    networkService.addUserToNetwork({
+      networkId: createdFlexNetwork.id,
+      userId: admin.id,
       roleType: UserRoles.ADMIN,
-      externalId: 8023,
+    }),
+    networkService.addUserToNetwork({
+      networkId: createdFlexNetwork.id,
+      userId: employee.id,
+      roleType: UserRoles.EMPLOYEE,
+    }),
+    networkService.addUserToNetwork({
+      networkId: createdPMTNetwork.id,
+      userId: admin.id,
+      roleType: UserRoles.ADMIN,
+      externalId: '8023',
       userToken: '379ce9b4176cb89354c1f74b3a2c1c7a',
     }),
   ]);
 
-  // Reload networks to include added users
-  const [flexAppealNetwork, pmtNetwork] = await Promise.all([
-    createdFlexNetwork.reload(),
-    createdPMTNetwork.reload(),
+  const [adminAuth, employeeAuth] = await Promise.all([
+    authenticate(global.server, adminCredentials),
+    authenticate(global.server, employeeCredentials),
   ]);
-
-  const [newAdmin, newEmployee] = await Promise.all([
-    admin.reload(),
-    employee.reload(),
-  ]);
-
-  const employeeAuth = await authenticate(global.server, employeeCredentials);
 
   const message = { credentials: admin, network: createdPMTNetwork, deviceName: 'foo' };
   const linkedAdminToken = await accessService.getLinkedAccessToken(adminCredentials, message);
 
   global.users = {
-    admin: newAdmin,
-    employee: newEmployee,
+    admin: adminAuth,
+    employee: employeeAuth,
     networklessUser,
   };
 
@@ -97,8 +99,8 @@ before(async () => {
   };
 
   global.networks = {
-    flexAppeal: flexAppealNetwork,
-    pmt: pmtNetwork,
+    flexAppeal: createdFlexNetwork,
+    pmt: createdPMTNetwork,
   };
 
   // Disable specific services when testing
@@ -109,7 +111,10 @@ before(async () => {
 afterEach(() => nock.cleanAll());
 
 after(async () => {
-  await Promise.all([networklessUser.destroy(), employee.destroy()]);
+  await Promise.all([
+    userRepo.deleteById(networklessUser.id),
+    userRepo.deleteById(employee.id),
+  ]);
 
-  return admin.destroy();
+  await userRepo.deleteById(admin.id);
 });

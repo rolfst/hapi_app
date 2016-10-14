@@ -1,13 +1,11 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import * as userBelongsToNetwork from '../../../shared/utils/user-belongs-to-network';
-import * as permission from '../../../shared/services/permission';
 import * as passwordUtil from '../../../shared/utils/password';
 import * as mailer from '../../../shared/services/mailer';
-import * as networkUtil from '../../../shared/utils/network';
 import addedToNetworkMail from '../../../shared/mails/added-to-network';
 import addedToExtraNetworkMail from '../../../shared/mails/added-to-extra-network';
 import * as createAdapter from '../../../shared/utils/create-adapter';
+import * as userService from '../../core/services/user';
 import * as networkRepo from '../../core/repositories/network';
 import * as userRepo from '../../core/repositories/user';
 import * as service from './invite-user';
@@ -35,8 +33,8 @@ describe('Invite users', () => {
   const message = {
     credentials: { id: '' },
     network: { id: '',
-      SuperAdmin: { firstName: 'admin' },
-      Integrations: [{ name: 'PMT' }],
+      superAdmin: { firstName: 'admin' },
+      integrations: ['PMT'],
     },
   };
 
@@ -47,14 +45,12 @@ describe('Invite users', () => {
     const fakeAdapter = { fetchUsers: () => allUsersFromIntegration };
 
     sandbox.stub(mailer, 'send');
-    sandbox.stub(userRepo, 'findUserById').returns(Promise.resolve(adminUser));
+    sandbox.stub(userRepo, 'userBelongsToNetwork').returns(Promise.resolve(true));
     sandbox.stub(userRepo, 'updateUser').returns(Promise.resolve(importUser));
-    sandbox.stub(networkUtil, 'addUserScope').returns(adminUser);
+    sandbox.stub(userService, 'getUserWithNetworkScope').returns(Promise.resolve(adminUser));
     sandbox.stub(createAdapter, 'default').returns(fakeAdapter);
-    sandbox.stub(userBelongsToNetwork, 'default').returns(true);
-    sandbox.stub(permission, 'isAdmin').returns(true);
     sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
-    sandbox.stub(networkRepo, 'findActiveUsersForNetwork').returns(
+    sandbox.stub(networkRepo, 'findUsersForNetwork').returns(
       Promise.resolve(allUsersFromIntegration));
 
     const passwordMailConfig = addedToNetworkMail(message.network, importUser);

@@ -15,22 +15,14 @@ describe('Setup', () => {
 
   describe('Flex-Appeal', () => {
     it('should create network', () => {
-      const integrations = global.networks.flexAppeal.Integrations;
-
-      assert.lengthOf(integrations, 0);
+      assert.isFalse(global.networks.flexAppeal.hasIntegration);
     });
   });
 
   describe('PMT', () => {
     it('should create network', () => {
-      const integrations = global.networks.pmt.Integrations;
-
-      assert.lengthOf(integrations, 1);
-      assert.equal(integrations[0].name, 'PMT');
-    });
-
-    it('should have user token for user', () => {
-      //
+      assert.isTrue(global.networks.pmt.hasIntegration);
+      assert.equal(global.networks.pmt.integrations[0], 'PMT');
     });
   });
 });

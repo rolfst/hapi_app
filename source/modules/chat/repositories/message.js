@@ -1,15 +1,10 @@
+import { map } from 'lodash';
+import sequelize from 'sequelize';
 import { User } from '../../../shared/models';
-import { Message, Conversation } from '../models';
+import { Message, Conversation } from './dao';
+import createMessageModel from '../models/message';
 
-/**
- * Find all messages by conversation
- * @param {Conversation} conversation - Conversation we want the messages from
- * @method findAllForConversation
- * @return {promise} - Get messages promise
- */
-export function findAllForConversation(conversation) {
-  return conversation.getMessages();
-}
+const toModel = (dao) => createMessageModel(dao);
 
 /**
  * Create a new message
@@ -32,12 +27,58 @@ export function createMessage(conversationId, creatorId, text) {
 /**
  * Find a specific message by id
  * @param {number} id - Id of the message being looked for
- * @param {array} includes - Relationships to include
  * @method findMessageById
  * @return {promise} - Find message promise
  */
 export const findMessageById = async (id) => {
-  return Message.findById(id, {
+  const result = await Message.findById(id, {
     include: [{ model: Conversation, include: [User] }, User],
   });
+
+  return toModel(result);
+};
+
+/**
+ * Find messages by id
+ * @param {array<number>} messageIds - Ids of the messages being looked for
+ * @method findMessageByIds
+ * @return {promise} - Find message promise
+ */
+export const findMessageByIds = async (messageIds) => {
+  const result = await Message.findAll({
+    where: { id: { $in: messageIds } },
+    include: [{ model: Conversation, include: [User] }, User],
+  });
+
+  return map(result, toModel);
+};
+
+/**
+ * Find all messages for a conversation
+ * @param {number} conversationId - Id of theonversation we want the messages from
+ * @method findAllForConversation
+ * @return {promise} - Get messages promise
+ */
+export const findAllForConversation = async (conversationId) => {
+  const result = await Message.findAll({
+    attributes: ['id'],
+    where: { parentId: conversationId },
+  });
+
+  return findMessageByIds(map(result, 'id'));
+};
+
+export const findLastForConversations = async (conversationIds) => {
+  const result = await Message.findAll({
+    attributes: [[sequelize.fn('MAX', sequelize.col('Message.id')), 'message_id']],
+    include: [{
+      attributes: [],
+      model: Conversation,
+      where: { id: { $in: conversationIds } },
+    }],
+    group: 'Message.parent_id',
+  });
+
+  const plainObjs = map(result, (item) => item.get({ plain: true }));
+  return findMessageByIds(map(plainObjs, 'message_id'));
 };

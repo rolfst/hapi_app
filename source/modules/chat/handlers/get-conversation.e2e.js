@@ -1,45 +1,34 @@
 import { assert } from 'chai';
-import _ from 'lodash';
 import { getRequest } from '../../../shared/test-utils/request';
-import { createConversation } from '../repositories/conversation';
-import { createMessage } from '../repositories/message';
-
-let conversation;
+import * as conversationRepo from '../repositories/conversation';
+import * as messageRepo from '../repositories/message';
 
 describe('Get conversation', () => {
+  let conversation;
+
   before(async () => {
     const participants = [global.users.employee.id, global.users.admin.id];
-    const withoutParticipants = _.partial(createConversation, 'PRIVATE', global.users.admin.id);
-    const createdConversation = await withoutParticipants(participants);
-    conversation = createdConversation;
+    conversation = await conversationRepo.createConversation(
+      'PRIVATE', global.users.admin.id, participants);
 
-    return Promise.all([
-      createMessage(conversation.id, global.users.admin.id, 'Test bericht 1'),
-      createMessage(conversation.id, global.users.admin.id, 'Test bericht 2'),
-      createMessage(conversation.id, global.users.employee.id, 'Test bericht 3'),
-      createMessage(conversation.id, global.users.employee.id, 'Test bericht 4'),
+    await Promise.all([
+      messageRepo.createMessage(conversation.id, global.users.admin.id, 'Test bericht 1'),
+      messageRepo.createMessage(conversation.id, global.users.admin.id, 'Test bericht 2'),
     ]);
+
+    await messageRepo.createMessage(conversation.id, global.users.employee.id, 'Last message');
   });
 
-  after(() => conversation.destroy());
+  after(() => conversationRepo.deleteConversationById(conversation.id));
 
   it('should return correct values', async () => {
     const endpoint = `/v1/chats/conversations/${conversation.id}`;
     const { result, statusCode } = await getRequest(endpoint);
 
+    assert.equal(statusCode, 200);
     assert.equal(result.data.id, conversation.id);
     assert.equal(result.data.users[0].id, global.users.employee.id);
     assert.equal(result.data.users[1].id, global.users.admin.id);
-    assert.lengthOf(result.data.messages, 4);
-    assert.equal(statusCode, 200);
-  });
-
-  it('should include messages in conversations', async () => {
-    const endpoint = `/v1/chats/conversations/${conversation.id}?include=messages`;
-    const { result, statusCode } = await getRequest(endpoint);
-
-    assert.equal(result.data.id, conversation.id);
-    assert.lengthOf(result.data.messages, 4);
-    assert.equal(statusCode, 200);
+    assert.equal(result.data.last_message.text, 'Last message');
   });
 });

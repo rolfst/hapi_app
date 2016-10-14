@@ -10,10 +10,7 @@ export default async (req, reply) => {
     const payload = { ...req.payload, ...req.params };
     const invitedUsers = await service.inviteUsers(payload, message);
 
-    return reply({
-      success: true,
-      data: responseUtil.serialize(invitedUsers),
-    });
+    return reply({ success: true, data: responseUtil.toSnakeCase(invitedUsers) });
   } catch (err) {
     console.log('Error in bulk-invite user: ', err);
     return reply(err);

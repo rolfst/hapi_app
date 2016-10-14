@@ -19,6 +19,7 @@ const routes = [{
   url: '/v2/pristine_networks/import',
   handler: require('./handlers/import-pristine-network'),
   validator: require('./validators/import-pristine-network'),
+  prefetch: false,
 }];
 
 export default createRoutes(routes);

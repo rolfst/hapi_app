@@ -1,7 +1,8 @@
 import { assert } from 'chai';
 import { find } from 'lodash';
-import { findUserByEmail } from '../../core/repositories/user';
-import { createTeam } from '../../core/repositories/team';
+import * as networkRepo from '../../core/repositories/network';
+import * as userRepo from '../../core/repositories/user';
+import * as teamRepo from '../../core/repositories/team';
 import * as service from './invite-user';
 
 describe('Service: invite user', () => {
@@ -10,7 +11,7 @@ describe('Service: invite user', () => {
 
   before(async () => {
     network = global.networks.flexAppeal;
-    team = await createTeam({
+    team = await teamRepo.createTeam({
       networkId: network.id,
       name: 'Cool Team',
     });
@@ -22,7 +23,7 @@ describe('Service: invite user', () => {
     let existingUser;
 
     before(() => (existingUser = global.users.networklessUser));
-    afterEach(() => existingUser.setNetworks([]));
+    afterEach(() => userRepo.removeFromNetwork(existingUser.id, network.id));
 
     it('should fail when user belongs to the network', async () => {
       const { firstName, lastName, email } = global.users.employee;
@@ -44,7 +45,7 @@ describe('Service: invite user', () => {
       assert.equal(actual.lastName, lastName);
       assert.equal(actual.username, email);
       assert.equal(actual.email, email);
-      assert.equal(actual.Networks[0].NetworkUser.roleType, 'ADMIN');
+      assert.equal(actual.roleType, 'ADMIN');
     });
 
     it('should add to the network as employee', async () => {
@@ -52,39 +53,46 @@ describe('Service: invite user', () => {
       const payload = { firstName, lastName, email };
       const actual = await service.inviteUser(payload, { network });
 
-      assert.equal(actual.Networks[0].id, network.id);
-      assert.equal(actual.Networks[0].NetworkUser.roleType, 'EMPLOYEE');
+      assert.equal(actual.roleType, 'EMPLOYEE');
     });
 
     it('should add to the teams', async () => {
       const { firstName, lastName, email } = existingUser;
       const payload = { firstName, lastName, email, teamIds: [team.id] };
-      const actual = await service.inviteUser(payload, { network });
+      const serviceResult = await service.inviteUser(payload, { network });
+      const teamsLookup = await teamRepo.findTeamsForNetworkThatUserBelongsTo(
+        serviceResult.id, network.id);
 
-      assert.isDefined(find(actual.Teams, { id: team.id }));
-      assert.equal(actual.Teams.length, 1);
+      assert.isDefined(find(teamsLookup, { id: team.id.toString() }));
+      assert.equal(teamsLookup.length, 1);
     });
 
     it('should add to the multiple teams', async () => {
-      const extraTeam = await createTeam({
+      const extraTeam = await teamRepo.createTeam({
         networkId: network.id,
         name: 'Cool Team',
       });
 
       const { firstName, lastName, email } = existingUser;
       const payload = { firstName, lastName, email, teamIds: [team.id, extraTeam.id] };
-      const actual = await service.inviteUser(payload, { network });
+      const serviceResult = await service.inviteUser(payload, { network });
+      const teamsLookup = await teamRepo.findTeamsForNetworkThatUserBelongsTo(
+        serviceResult.id, network.id);
 
-      assert.equal(actual.Teams.length, 2);
+      assert.equal(teamsLookup.length, 2);
 
-      await extraTeam.destroy();
+      await teamRepo.deleteById(extraTeam.id);
     });
   });
 
   describe('New User', () => {
     const payload = { firstName: 'John', lastName: 'Doe', email: 'test-user@foo.com' };
 
-    afterEach(() => findUserByEmail(payload.email).then(u => u.destroy()));
+    afterEach(async () => {
+      const user = await userRepo.findUserByEmail(payload.email);
+
+      return userRepo.deleteById(user.id);
+    });
 
     it('should create when not exists', async () => {
       const actual = await service.inviteUser(payload, { network });
@@ -97,58 +105,77 @@ describe('Service: invite user', () => {
 
     it('should add to the network as admin', async () => {
       const actual = await service.inviteUser({ ...payload, roleType: 'admin' }, { network });
-      assert.equal(actual.Networks[0].id, network.id);
-      assert.equal(actual.Networks[0].NetworkUser.roleType, 'ADMIN');
+
+      assert.equal(actual.roleType, 'ADMIN');
     });
 
     it('should add to the network as employee', async () => {
       const actual = await service.inviteUser(payload, { network });
 
-      assert.equal(actual.Networks[0].id, network.id);
-      assert.equal(actual.Networks[0].NetworkUser.roleType, 'EMPLOYEE');
+      assert.equal(actual.roleType, 'EMPLOYEE');
     });
 
     it('should add to the teams', async () => {
-      const actual = await service.inviteUser({ ...payload, teamIds: [team.id] }, { network });
+      const serviceResult = await service.inviteUser({
+        ...payload,
+        teamIds: [team.id] },
+        { network });
 
-      assert.isDefined(find(actual.Teams, { id: team.id }));
+      const teamsLookup = await teamRepo.findTeamsForNetworkThatUserBelongsTo(
+        serviceResult.id, network.id);
+
+      assert.isDefined(find(teamsLookup, { id: team.id.toString() }));
     });
 
     it('should add to the multiple teams', async () => {
-      const extraTeam = await createTeam({
+      const extraTeam = await teamRepo.createTeam({
         networkId: network.id,
         name: 'Cool Team',
       });
 
-      const actual = await service.inviteUser(
+      const serviceResult = await service.inviteUser(
         { ...payload, teamIds: [team.id, extraTeam.id] },
         { network });
 
-      assert.equal(actual.Teams.length, 2);
+      const teamsLookup = await teamRepo.findTeamsForNetworkThatUserBelongsTo(
+        serviceResult.id, network.id);
 
-      await extraTeam.destroy();
+      assert.equal(teamsLookup.length, 2);
+
+      await teamRepo.deleteById(extraTeam.id);
     });
   });
 
   describe('Deleted User', () => {
     let deletedUser;
 
-    before(() => {
-      deletedUser = global.users.networklessUser;
+    before(async () => {
+      const attributes = {
+        username: 'removeduser@example.xyz',
+        firstName: 'Removed',
+        lastName: 'Doe',
+        email: 'removeduser@example.xyz',
+      };
 
-      return Promise.all([deletedUser.setTeams([]), deletedUser.setNetworks([])]);
+      deletedUser = await userRepo.createUser(attributes);
+
+      return networkRepo.addUser({
+        userId: deletedUser.id,
+        networkId: network.id,
+        deletedAt: new Date(),
+      });
     });
 
-    beforeEach(() => deletedUser.addNetwork(network, { deletedAt: new Date() }));
-    afterEach(() => deletedUser.setNetworks([]));
+    beforeEach(() => userRepo.removeFromNetwork(deletedUser.id, network.id));
+    after(() => userRepo.deleteById(deletedUser.id));
 
     it('should add to the network as admin', async () => {
       const { firstName, lastName, email } = deletedUser;
       const payload = { firstName, lastName, email, roleType: 'admin' };
       const actual = await service.inviteUser(payload, { network });
 
-      assert.equal(actual.Networks[0].NetworkUser.roleType, 'ADMIN');
-      assert.equal(actual.Networks[0].NetworkUser.deletedAt, null);
+      assert.equal(actual.roleType, 'ADMIN');
+      assert.equal(actual.isActive, true);
     });
 
     it('should add to the network as employee', async () => {
@@ -156,33 +183,36 @@ describe('Service: invite user', () => {
       const payload = { firstName, lastName, email };
       const actual = await service.inviteUser(payload, { network });
 
-      assert.equal(actual.Networks[0].id, network.id);
-      assert.equal(actual.Networks[0].NetworkUser.roleType, 'EMPLOYEE');
-      assert.equal(actual.Networks[0].NetworkUser.deletedAt, null);
+      assert.equal(actual.roleType, 'EMPLOYEE');
+      assert.equal(actual.isActive, true);
     });
 
     it('should add to the teams', async () => {
       const { firstName, lastName, email } = deletedUser;
       const payload = { firstName, lastName, email, teamIds: [team.id] };
-      const actual = await service.inviteUser(payload, { network });
+      const serviceResult = await service.inviteUser(payload, { network });
+      const teamsLookup = await teamRepo.findTeamsForNetworkThatUserBelongsTo(
+        serviceResult.id, network.id);
 
-      assert.isDefined(find(actual.Teams, { id: team.id }));
-      assert.equal(actual.Teams.length, 1);
+      assert.isDefined(find(teamsLookup, { id: team.id.toString() }));
+      assert.equal(teamsLookup.length, 1);
     });
 
     it('should add to the multiple teams', async () => {
-      const extraTeam = await createTeam({
+      const extraTeam = await teamRepo.createTeam({
         networkId: network.id,
         name: 'Cool Team',
       });
 
       const { firstName, lastName, email } = deletedUser;
       const payload = { firstName, lastName, email, teamIds: [team.id, extraTeam.id] };
-      const actual = await service.inviteUser(payload, { network });
+      const serviceResult = await service.inviteUser(payload, { network });
+      const teamsLookup = await teamRepo.findTeamsForNetworkThatUserBelongsTo(
+        serviceResult.id, network.id);
 
-      assert.equal(actual.Teams.length, 2);
+      assert.equal(teamsLookup.length, 2);
 
-      await extraTeam.destroy();
+      await teamRepo.deleteById(extraTeam.id);
     });
   });
 });

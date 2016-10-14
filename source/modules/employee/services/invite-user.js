@@ -1,19 +1,13 @@
-import {
-  map,
-  concat,
-  sortBy,
-} from 'lodash';
-import * as networkUtil from '../../../shared/utils/network';
+import { map } from 'lodash';
 import * as passwordUtil from '../../../shared/utils/password';
 import * as mailer from '../../../shared/services/mailer';
-import { isAdmin } from '../../../shared/services/permission';
+import { UserRoles } from '../../../shared/services/permission';
 import createError from '../../../shared/utils/create-error';
 import camelCaseKeys from '../../../shared/utils/camel-case-keys';
 import signupMail from '../../../shared/mails/signup';
 import addedToNetworkMail from '../../../shared/mails/added-to-network';
 import addedToExtraNetwork from '../../../shared/mails/added-to-extra-network';
-import userBelongsToNetwork from '../../../shared/utils/user-belongs-to-network';
-import userIsDeletedFromNetwork from '../../../shared/utils/user-is-deleted-from-network';
+import * as userService from '../../core/services/user';
 import * as networkRepo from '../../core/repositories/network';
 import * as userRepo from '../../core/repositories/user';
 import * as teamRepo from '../../core/repositories/team';
@@ -30,7 +24,7 @@ export const inviteNewUser = async (network, { firstName, lastName, email, roleT
   };
 
   const user = await userRepo.createUser(attributes);
-  await userRepo.addUserToNetwork(user, network, { roleType });
+  await networkRepo.addUser({ userId: user.id, networkId: network.id, roleType });
 
   mailer.send(signupMail(network, user, plainPassword));
 
@@ -38,10 +32,15 @@ export const inviteNewUser = async (network, { firstName, lastName, email, roleT
 };
 
 export const inviteExistingUser = async (network, user, roleType) => {
-  if (userIsDeletedFromNetwork(user, network.id)) {
+  const userBelongsToNetwork = await userRepo.userBelongsToNetwork(user.id, network.id);
+  const userIsDeletedFromNetwork = await userRepo.userIsDeletedFromNetwork(user.id, network.id);
+
+  if (userBelongsToNetwork) {
+    throw createError('403', 'User with the same email already in this network.');
+  } else if (userIsDeletedFromNetwork) {
     await networkRepo.activateUserInNetwork(network, user);
   } else {
-    await userRepo.addUserToNetwork(user, network, { roleType });
+    await networkRepo.addUser({ userId: user.id, networkId: network.id, roleType });
   }
 
   await networkRepo.setRoleTypeForUser(network, user, roleType);
@@ -58,31 +57,30 @@ export const inviteUser = async (payload, message) => {
   const role = roleType ? roleType.toUpperCase() : 'EMPLOYEE';
   let user = await userRepo.findUserByEmail(email);
 
-  if (user && userBelongsToNetwork(user, network.id)) {
-    throw createError('403', 'User with the same email already in this network.');
-  } else if (user && !userBelongsToNetwork(user, network.id)) {
+  if (user) {
     await inviteExistingUser(network, user, role);
   } else {
     user = await inviteNewUser(network, { firstName, lastName, email, roleType: role });
   }
 
   if (teamIds && teamIds.length > 0) await teamRepo.addUserToTeams(teamIds, user.id);
-  user.reload();
 
-  const invitedUser = await userRepo.findUserByEmail(email);
-
-  return networkUtil.addUserScope(invitedUser, network.id);
+  return userService.getUserWithNetworkScope({ id: user.id }, { ...message, credentials: user });
 };
 
 
 export const inviteUsers = async (payload, message) => {
   const { network } = message;
-  const currentUser = await userRepo.findUserById(message.credentials.id);
-  const identifiedUser = networkUtil.addUserScope(currentUser, network.id);
-  if (!userBelongsToNetwork(identifiedUser, network.id)
-    || !isAdmin(identifiedUser)) throw createError('403');
+  const identifiedUser = await userService.getUserWithNetworkScope({
+    id: message.credentials.id }, message);
 
-  const networkMembers = await networkRepo.findActiveUsersForNetwork(network);
+  const userBelongsToNetwork = await userRepo.userBelongsToNetwork(identifiedUser.id, network.id);
+
+  if (!userBelongsToNetwork || identifiedUser.roleType !== UserRoles.ADMIN) {
+    throw createError('403');
+  }
+
+  const networkMembers = await networkRepo.findUsersForNetwork(network.id);
   const matchingMembersFromIntegration = await impl.getMembersfromIntegration(network);
 
   const usersWithoutPasswords = impl.getUsersWithoutPassword(
@@ -94,6 +92,4 @@ export const inviteUsers = async (payload, message) => {
 
   map(usersToSendMailto, (user) => mailer.send(addedToNetworkMail(network, user)));
   map(usersWithPassword, (user) => mailer.send(addedToExtraNetwork(network, user)));
-
-  return sortBy(concat(usersToSendMailto, usersWithPassword), 'username');
 };

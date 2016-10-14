@@ -1,4 +1,4 @@
-import { omit, merge } from 'lodash';
+import { map, omit, merge } from 'lodash';
 import createError from '../../../shared/utils/create-error';
 import { ActivityTypes } from '../../../shared/models/activity';
 import { createActivity } from '../../core/repositories/activity';
@@ -92,17 +92,20 @@ export async function findExchangesByShiftIds(shiftIds) {
 
 /**
  * Find exchanges by user
- * @param {User} user - User we want the exchanges from
+ * @param {number} userId - Id of the user we want the exchanges from
  * @method findExchangesByUserAndNetwork
  * @return {Promise} Get exchanges promise
  */
-export const findExchangesByUserAndNetwork = async (user, networkId, filter = {}) => {
-  const exchanges = await user.getExchanges({ attributes: ['id'], where: { networkId } });
-  const exchangeIds = exchanges.map(e => e.id);
+export const findExchangesByUserAndNetwork = async (userId, networkId, filter = {}) => {
+  const exchanges = await Exchange.findAll({
+    attributes: ['id'],
+    where: { userId, networkId },
+  });
+
   const dateFilter = createDateFilter(filter);
   const constraint = dateFilter ? { where: { date: dateFilter } } : {};
 
-  return findExchangeByIds(exchangeIds, user.id, constraint);
+  return findExchangeByIds(map(exchanges, 'id'), userId, constraint);
 };
 
 export async function findExchangesForValues(type, networkId, values, userId, filter = {}) {
@@ -129,13 +132,16 @@ export async function findExchangesForValues(type, networkId, values, userId, fi
  * @method findExchangesByNetwork
  * @return {Promise} Get exchanges promise
  */
-export const findExchangesByNetwork = async (network, userId, filter = {}) => {
-  const exchanges = await network.getExchanges({ attributes: ['id'] });
-  const exchangeIds = exchanges.map(e => e.id);
+export const findExchangesByNetwork = async (networkId, userId, filter = {}) => {
+  const exchanges = await Exchange.findAll({
+    attributes: ['id'],
+    where: { networkId },
+  });
+
   const dateFilter = createDateFilter(filter);
   const constraint = dateFilter ? { where: { date: dateFilter } } : {};
 
-  return findExchangeByIds(exchangeIds, userId, constraint);
+  return findExchangeByIds(map(exchanges, 'id'), userId, constraint);
 };
 
 /**
@@ -156,12 +162,11 @@ export const findExchangesByTeam = async (team, userId, filter = {}) => {
 /**
  * Delete a specific exchange by id
  * @param {number} exchangeId - Id of exchange to be deleted
- * @method deleteExchangeById
+ * @method deleteById
  * @return {Promise} Delete exchange promise
  */
-export function deleteExchangeById(exchangeId) {
-  return Exchange.findById(exchangeId)
-    .then(exchange => exchange.destroy());
+export function deleteById(exchangeId) {
+  return Exchange.destroy({ where: { id: exchangeId } });
 }
 
 /**

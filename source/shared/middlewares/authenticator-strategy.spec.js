@@ -6,12 +6,7 @@ import * as userRepo from '../../modules/core/repositories/user';
 import * as strategy from '../middlewares/authenticator-strategy';
 
 describe('authenticatorStrategy', () => {
-  const networks = [
-    { id: 1, NetworkUser: { roleType: 'admin' } },
-    { id: 2, NetworkUser: { roleType: 'normal' } },
-  ];
-
-  const user = { id: 1337, firstName: 'John', lastName: 'Doe', Networks: networks };
+  const user = { id: 1337, username: 'johndoe@example.com' };
 
   let sandbox;
 

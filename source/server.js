@@ -42,7 +42,7 @@ const createServer = (port) => {
     };
 
     ravenClient.setExtraContext({ request: requestContext });
-    ravenClient.setUserContext(req.auth.credentials ? req.auth.credentials.toJSON() : null);
+    ravenClient.setUserContext(req.auth.credentials);
 
     reply.continue();
   });

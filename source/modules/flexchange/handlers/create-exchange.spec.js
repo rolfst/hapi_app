@@ -5,6 +5,7 @@ import * as networkUtil from '../../../shared/utils/network';
 import * as exchangeRepo from '../repositories/exchange';
 import * as exchangeValueRepo from '../repositories/exchange-value';
 import * as networkRepo from '../../core/repositories/network';
+import * as userRepo from '../../core/repositories/user';
 import * as service from '../services/flexchange';
 import * as exchangeCreatedAdminNotification from '../notifications/exchange-created-by-admin';
 import * as exchangeCreatedNotification from '../notifications/exchange-created';
@@ -12,7 +13,7 @@ import * as exchangeCreatedNotification from '../notifications/exchange-created'
 describe('Create exchange', () => {
   let sandbox;
 
-  before(() => {
+  beforeEach(() => {
     sandbox = sinon.sandbox.create();
 
     sandbox.stub(networkUtil, 'hasIntegration').returns(null);
@@ -22,10 +23,13 @@ describe('Create exchange', () => {
     sandbox.stub(exchangeRepo, 'createExchange')
       .returns(Promise.resolve({ type: exchangeTypes.NETWORK }));
   });
-  after(() => (sandbox.restore()));
+
+  afterEach(() => (sandbox.restore()));
 
   it('should send a notifications when user is an admin', async () => {
     sandbox.stub(exchangeCreatedAdminNotification, 'send').returns(Promise.resolve(null));
+    sandbox.stub(userRepo, 'findUserMetaDataForNetwork')
+      .returns(Promise.resolve({ roleType: 'ADMIN' }));
 
     const message = {
       network: {
@@ -46,6 +50,8 @@ describe('Create exchange', () => {
 
   it('should send a notifications when user is an employee', async () => {
     sandbox.stub(exchangeCreatedNotification, 'send').returns(Promise.resolve(null));
+    sandbox.stub(userRepo, 'findUserMetaDataForNetwork')
+      .returns(Promise.resolve({ roleType: 'EMPLOYEE' }));
 
     const message = {
       network: {

@@ -1,13 +1,16 @@
 import { assert } from 'chai';
-import { findUserByEmail } from '../../core/repositories/user';
 import { postRequest } from '../../../shared/test-utils/request';
+import * as userRepo from '../../core/repositories/user';
 
 describe('Handler: Invite user', () => {
   after(async () => {
-    const admin = await findUserByEmail('admin@baz.com');
-    const employee = await findUserByEmail('employee@baz.com');
+    const admin = await userRepo.findUserByEmail('admin@baz.com');
+    const employee = await userRepo.findUserByEmail('employee@baz.com');
 
-    return Promise.all([admin.destroy(), employee.destroy()]);
+    return Promise.all([
+      userRepo.deleteById(admin.id),
+      userRepo.deleteById(employee.id),
+    ]);
   });
 
   const user = {

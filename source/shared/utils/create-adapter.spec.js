@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import * as unit from '../utils/create-adapter';
 
 describe('createAdapter', () => {
-  const network = { name: 'My network', Integrations: [{ name: 'foo' }] };
+  const network = { name: 'My network', integrations: ['foo'] };
   const authSettings = [{ name: 'foo', token: 'footoken' }];
 
   it('should pass network and token to adapter', () => {

@@ -1,10 +1,9 @@
-import { chain, map, filter, includes } from 'lodash';
+import { sortBy, orderBy, uniqBy, map, filter, includes } from 'lodash';
 import moment from 'moment';
 import createAdapter from '../../../../shared/utils/create-adapter';
 import analytics from '../../../../shared/services/analytics';
 import approveExchangeEvent from '../../../../shared/events/approve-exchange-event';
 import createError from '../../../../shared/utils/create-error';
-import * as networkUtil from '../../../../shared/utils/network';
 import { UserRoles } from '../../../../shared/services/permission';
 import newExchangeEvent from '../../../../shared/events/new-exchange-event';
 import * as teamRepo from '../../../core/repositories/team';
@@ -25,14 +24,11 @@ import * as createdByAdminNotifier from '../../notifications/exchange-created-by
 import * as createdNotifier from '../../notifications/exchange-created';
 import * as impl from './implementation';
 
-// TODO activate notifications
-// import * as commentNotifier from '../../notifications/new-exchange-comment';
-
 const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
 const findUsersByType = async (exchange, network, exchangeValues, loggedUser) => {
   let usersPromise;
   if (exchange.type === exchangeTypes.NETWORK) {
-    usersPromise = networkRepo.findAllUsersForNetwork(network);
+    usersPromise = networkRepo.findAllUsersForNetwork(network.id);
   } else if (exchange.type === exchangeTypes.TEAM) {
     usersPromise = teamRepo.findUsersByTeamIds(exchangeValues);
   }
@@ -54,7 +50,7 @@ export const listReceivers = async (payload, message) => {
     receivers = await teamService.listMembersForTeams(teamPayload, message);
   } else if (exchange.type === exchangeTypes.USER) {
     const userPayload = { userIds: valueIds };
-    receivers = await userService.listUsers(userPayload, message);
+    receivers = await userService.listUsersWithNetworkScope(userPayload, message);
   }
 
   return receivers;
@@ -124,7 +120,7 @@ export const declineExchange = async (payload, message) => {
 export const listMyShifts = async (payload, message) => {
   const { network, artifacts } = message;
 
-  if (!networkUtil.hasIntegration(network)) throw createError('10001');
+  if (!network.hasIntegration) throw createError('10001');
 
   const adapter = createAdapter(network, artifacts.integrations);
   const shifts = await adapter.myShifts();
@@ -140,7 +136,7 @@ export const listMyShifts = async (payload, message) => {
 export const deleteExchange = async (payload) => {
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId);
 
-  return exchangeRepo.deleteExchangeById(exchange.id);
+  return exchangeRepo.deleteById(exchange.id);
 };
 
 export const rejectExchange = async (payload, message) => {
@@ -175,7 +171,7 @@ export const listComments = async (payload, message) => {
 export const getShift = async (payload, message) => {
   const { network, artifacts } = message;
 
-  if (!networkUtil.hasIntegration(network)) throw createError('10001');
+  if (!network.hasIntegration) throw createError('10001');
 
   const adapter = createAdapter(network, artifacts.integrations);
   const shift = await adapter.viewShift(payload.shiftId);
@@ -193,14 +189,13 @@ export const getShift = async (payload, message) => {
 export const listAvailableUsersForShift = async (payload, message) => {
   const { network, artifacts } = message;
 
-  if (!networkUtil.hasIntegration(network)) throw createError('10001');
+  if (!network.hasIntegration) throw createError('10001');
 
   const adapter = createAdapter(network, artifacts.integrations);
   const externalUsers = await adapter.usersAvailableForShift(payload.shiftId);
-
   const availableUsers = await impl.matchUsersForShift(externalUsers, network);
 
-  return availableUsers;
+  return userService.listUsersWithNetworkScope({ userIds: map(availableUsers, 'id') }, message);
 };
 
 export const listExchangesForTeam = async (payload, message) => {
@@ -211,22 +206,19 @@ export const listExchangesForTeam = async (payload, message) => {
   return exchanges;
 };
 
-export const listExchangesForUser = async (payload, message) => {
+export const listPersonalizedExchanges = async (payload, message) => {
   return exchangeRepo.findExchangesByUserAndNetwork(
-    message.credentials, message.network.id, payload.filter);
+    payload.userId, message.network.id, payload.filter);
 };
 
 export const listExchangesForNetwork = async (payload, message) => {
   const { credentials, network } = message;
+  const user = await userService.getUserWithNetworkScope({
+    id: credentials.id, networkId: network.id }, message);
 
-  const exchanges = await impl.findExchangesForUser(network, credentials, payload.filter);
+  const exchanges = await impl.listExchangesForUser(network, user, payload.filter);
 
-  const response = chain(exchanges)
-    .orderBy('date')
-    .uniqBy('id')
-    .value();
-
-  return response;
+  return orderBy(uniqBy(exchanges, 'id'), 'date');
 };
 
 const createNotifier = (roleType) => {
@@ -247,7 +239,7 @@ export const createExchange = async (payload, message) => {
     throw createError('422', 'Attribute end_time should be after start_time');
   }
 
-  if (payload.shiftId && !networkUtil.hasIntegration(network)) {
+  if (payload.shiftId && !network.hasIntegration) {
     throw createError('10001');
   }
 
@@ -257,7 +249,6 @@ export const createExchange = async (payload, message) => {
 
     if (!isValid) throw createError('422', 'Specified invalid ids for type.');
   }
-
   const createdExchange = await exchangeRepo.createExchange(message.credentials.id, network.id, {
     ...payload,
     date: moment(payload.date).format('YYYY-MM-DD'),
@@ -265,7 +256,8 @@ export const createExchange = async (payload, message) => {
 
   const users = await findUsersByType(createdExchange, network, payload.values, credentials);
 
-  const notifier = createNotifier(network.NetworkUser.roleType);
+  const networkUser = await userRepo.findUserMetaDataForNetwork(credentials.id, network.id);
+  const notifier = createNotifier(networkUser.roleType);
   notifier.send(users, createdExchange);
   analytics.track(newExchangeEvent(network, createdExchange));
 
@@ -276,7 +268,7 @@ export const listActivities = async (payload) => {
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId);
   const values = await activityRepo.findActivitiesForSource(exchange);
 
-  return chain(values).sortBy('date').value();
+  return sortBy(values, 'date');
 };
 
 export const getExchangeComment = async (payload, message) => {
@@ -294,7 +286,8 @@ export const getExchangeComment = async (payload, message) => {
 export const listMyAcceptedExchanges = async (payload, message) => {
   const responses = await exchangeResponseRepo.findAcceptedExchangeResponsesForUser(
     message.credentials.id);
-  const exchanges = await exchangeRepo.findExchangeByIds(responses.map(r => r.exchangeId));
+  const exchanges = await exchangeRepo.findExchangeByIds(
+    map(responses, 'exchangeId'), message.credentials.id);
 
   return exchanges;
 };

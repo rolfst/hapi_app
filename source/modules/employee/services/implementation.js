@@ -18,17 +18,6 @@ const hasNoPassword = (user) => isNil(user.password);
 const selectUsersWithoutPassword = (users) => filter(users, hasNoPassword);
 const selectUsersWithPassword = (users) => reject(users, hasNoPassword);
 
-const appendPasswordToUser = async (user) => {
-  const password = passwordUtil.plainRandom();
-  const employee = await userRepo.updateUser(user.id, { password });
-
-  // we use the same object here because we need to use the toJSON function later.
-  // therefore we cannot make a copy of this object with the spread syntax.
-  employee.plainPassword = password;
-
-  return employee;
-};
-
 export const getMembersfromIntegration = async (network) => {
   const adapter = createAdapter(network, [], { proceedWithoutToken: true });
 
@@ -52,6 +41,17 @@ export const getUsersWithoutPassword = (
   const whitelistedMembers = whitelistMembers(existingMembers, matchingMembers, matchingCriteria);
 
   return selectUsersWithoutPassword(whitelistedMembers);
+};
+
+const appendPasswordToUser = async (user) => {
+  const password = passwordUtil.plainRandom();
+  const employee = await userRepo.updateUser(user.id, { password });
+
+  // we use the same object here because we need to use the toJSON function later.
+  // therefore we cannot make a copy of this object with the spread syntax.
+  employee.plainPassword = password;
+
+  return employee;
 };
 
 export const generatePasswordsForMembers = async (members) => {

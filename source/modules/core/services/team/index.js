@@ -10,11 +10,11 @@ import * as userService from '../user';
  * @param {object} message.credentials - The authenticated user
  * @param {object} message.network - The network associated with the request
  * @param {object} message.artifacts - Artifacts containing request meta data
- * @method listUsers
+ * @method listMembersForTeams
  * @return {Promise} Promise containing collection of users
  */
 export const listMembersForTeams = async (payload, message) => {
   const users = await teamRepo.findUsersByTeamIds(payload.teamIds);
 
-  return userService.listUsers({ userIds: map(users, 'id') }, message);
+  return userService.listUsersWithNetworkScope({ userIds: map(users, 'id') }, message);
 };

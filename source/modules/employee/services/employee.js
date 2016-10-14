@@ -1,14 +1,12 @@
-import * as networkUtils from '../../../shared/utils/network';
 import * as userRepo from '../../core/repositories/user';
+import * as userService from '../../core/services/user';
 
 export const updateEmployee = async (payload, message) => {
   const updatedUser = await userRepo.updateUser(message.credentials.id, payload.attributes);
 
-  return networkUtils.addUserScope(updatedUser, message.network.id);
+  return userService.getUserWithNetworkScope({ id: updatedUser.id }, message);
 };
 
 export const getEmployee = async (payload, message) => {
-  const user = await userRepo.findUserById(message.credentials.id);
-
-  return networkUtils.addUserScope(user, message.network.id);
+  return userService.getUserWithNetworkScope({ id: message.credentials.id }, message);
 };

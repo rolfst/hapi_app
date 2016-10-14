@@ -7,10 +7,10 @@ const FILTER_PROPERTIES = ['start', 'end'];
 export default async (req, reply) => {
   const filter = pick(req.query, FILTER_PROPERTIES);
   const message = { ...req.pre, ...req.auth };
-  const payload = { filter };
+  const payload = { filter, userId: req.auth.credentials.id };
 
   try {
-    const result = await flexchangeService.listExchangesForUser(payload, message);
+    const result = await flexchangeService.listPersonalizedExchanges(payload, message);
 
     return reply({ data: responseUtil.serialize(result) });
   } catch (err) {

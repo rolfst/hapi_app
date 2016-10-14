@@ -1,7 +1,8 @@
 import { omit, map, filter, find } from 'lodash';
-import { isAdmin, isEmployee } from '../../../../shared/services/permission';
+import { UserRoles } from '../../../../shared/services/permission';
 import createError from '../../../../shared/utils/create-error';
 import * as networkUtil from '../../../../shared/utils/network';
+import * as teamRepo from '../../../core/repositories/team';
 import * as userRepo from '../../../core/repositories/user';
 import * as exchangeRepo from '../../repositories/exchange';
 
@@ -34,20 +35,20 @@ export const mergeShiftWithExchangeAndTeam = (shift, exchange, team) => ({
   teamId: team ? team.id : null,
 });
 
-export const findExchangesForAdmin = async (network, credentials, queryFilter) => {
-  return exchangeRepo.findExchangesByNetwork(network, credentials.id, queryFilter);
+export const listExchangesForAdmin = async (network, credentials, queryFilter) => {
+  return exchangeRepo.findExchangesByNetwork(network.id, credentials.id, queryFilter);
 };
 
-export const findExchangesForEmployee = async (network, credentials, queryFilter) => {
-  if (networkUtil.hasIntegration(network)) {
+export const listExchangesForEmployee = async (network, credentials, queryFilter) => {
+  if (network.hasIntegration) {
     const exchangesForUser = await exchangeRepo.findExchangesForValues(
       'USER', network.id, [credentials.id], credentials.id, queryFilter);
 
     return exchangesForUser;
   }
 
-  const teamIds = filterTeamsForNetwork(credentials.Teams, network.id)
-    .map(team => team.id);
+  const teams = await teamRepo.findTeamsForNetworkThatUserBelongsTo(credentials.id, network.id);
+  const teamIds = map(teams, 'id');
 
   const exchangesInNetwork = await exchangeRepo.findExchangesForValues(
       'ALL', network.id, [network.id], credentials.id, queryFilter);
@@ -58,17 +59,17 @@ export const findExchangesForEmployee = async (network, credentials, queryFilter
   return [...exchangesInNetwork, ...exchangesInTeams];
 };
 
-export const findExchangesForUser = async (network, credentials, queryFilter) => {
+export const listExchangesForUser = async (network, user, queryFilter) => {
   let exchanges;
 
-  if (isAdmin(credentials)) {
-    exchanges = await findExchangesForAdmin(network, credentials, queryFilter);
-  } else if (isEmployee(credentials)) {
-    exchanges = await findExchangesForEmployee(network, credentials, queryFilter);
+  if (user.roleType === UserRoles.ADMIN) {
+    exchanges = await listExchangesForAdmin(network, user, queryFilter);
+  } else if (user.roleType === UserRoles.EMPLOYEE) {
+    exchanges = await listExchangesForEmployee(network, user, queryFilter);
   }
 
   const createdExchangesByUser = await exchangeRepo.findExchangesByUserAndNetwork(
-    credentials, network.id, queryFilter);
+    user.id, network.id, queryFilter);
 
   return [...exchanges, ...createdExchangesByUser];
 };

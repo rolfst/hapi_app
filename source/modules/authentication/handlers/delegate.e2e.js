@@ -1,8 +1,9 @@
 import { assert } from 'chai';
+import { getRequest, postRequest } from '../../../shared/test-utils/request';
 import tokenUtil from '../../../shared/utils/token';
 import createRefreshToken from '../utils/create-refresh-token';
+import * as networkService from '../../core/services/network';
 import * as userRepo from '../../core/repositories/user';
-import { getRequest, postRequest } from '../../../shared/test-utils/request';
 
 describe('Delegate', () => {
   let createdUser;
@@ -19,7 +20,11 @@ describe('Delegate', () => {
     };
 
     createdUser = await userRepo.createUser(attributes);
-    await global.networks.pmt.addUser(createdUser);
+
+    await networkService.addUserToNetwork({
+      networkId: global.networks.flexAppeal.id,
+      userId: createdUser.id,
+    });
 
     // Authenticate created user to retrieve a refresh token
     const credentials = { username: createdUser.username, password: 'foo' };
@@ -28,9 +33,9 @@ describe('Delegate', () => {
     refreshToken = response.result.data.refresh_token;
   });
 
-  after(() => createdUser.destroy());
+  after(() => userRepo.deleteById(createdUser.id));
 
-  it('refresh token should contain correct', async () => {
+  it('refresh token should contain correct payload', async () => {
     const endpoint = `${DELEGATE_URL}?refresh_token=${refreshToken}`;
     const { result, statusCode } = await getRequest(endpoint);
     const decodedToken = tokenUtil.decode(result.data.access_token);

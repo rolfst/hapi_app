@@ -1,15 +1,14 @@
-import * as service from '../services/employee.js';
+import { mapKeys, camelCase } from 'lodash';
+import * as service from '../services/employee';
 import * as responseUtil from '../../../shared/utils/response';
 
 export default async (req, reply) => {
-  const { pre, auth } = req;
-  const message = { ...pre, ...auth };
-
   try {
-    const payload = { attributes: req.payload };
+    const message = { ...req.pre, ...req.auth };
+    const payload = { attributes: mapKeys(req.payload, (val, key) => camelCase(key)) };
     const updatedUser = await service.updateEmployee(payload, message);
 
-    return reply({ success: true, data: responseUtil.serialize(updatedUser) });
+    return reply({ success: true, data: responseUtil.toSnakeCase(updatedUser) });
   } catch (err) {
     return reply(err);
   }

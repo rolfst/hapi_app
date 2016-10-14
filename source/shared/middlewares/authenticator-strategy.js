@@ -1,8 +1,8 @@
+import { pick } from 'lodash';
 import analytics from '../services/analytics';
 import tokenUtil from '../utils/token';
 import * as serverUtil from '../utils/server';
 import createError from '../utils/create-error';
-import * as networkUtil from '../utils/network';
 import * as userRepo from '../../modules/core/repositories/user';
 
 export const authenticate = async (networkId, token = null) => {
@@ -14,7 +14,7 @@ export const authenticate = async (networkId, token = null) => {
   analytics.setUser(user);
 
   return {
-    credentials: networkId ? networkUtil.addUserScope(user, networkId) : user,
+    credentials: pick(user, 'id', 'username'),
     artifacts: { integrations },
   };
 };
@@ -22,10 +22,9 @@ export const authenticate = async (networkId, token = null) => {
 export default () => {
   return {
     authenticate: async (request, reply) => {
-      const { networkId } = request.params;
-      const token = request.raw.req.headers['x-api-token'];
-
       try {
+        const { networkId } = request.params;
+        const token = request.raw.req.headers['x-api-token'];
         const { credentials, artifacts } = await authenticate(networkId, token);
         artifacts.requestId = request.id;
         artifacts.authenticationToken = token;
@@ -37,13 +36,13 @@ export default () => {
         // This is to make old API logic backwards compatible with clients
         // that have not updated yet.
         if (request.url.path.includes('v1/chats')) {
-          return reply(createError('403')).code(403);
+          return reply(createError('403', 'Could not authenticate.')).takeover().code(403);
         }
 
         const errorResponse = serverUtil.transformBoomToErrorResponse(
           !err.isBoom ? createError('401') : err);
 
-        return reply(errorResponse).code(errorResponse.status_code);
+        return reply(errorResponse).takeover().code(errorResponse.status_code);
       }
     },
   };

@@ -8,10 +8,10 @@ import * as client from '../../../../adapters/pmt/client';
 import * as service from '../network';
 
 const PMT_BASE_URL = 'https://partner2.testpmt.nl/rest.php/chains';
-const AH_BASE_URL = 'https://ah.personeelstool.nl';
-const JUMBO_BASE_URL = 'https://jumbo.personeelstool.nl';
-const JUMBO_SCHAAF_URL = 'https://jumboschaaf.personeelstool.nl';
-const JUMBO_BERGEN_URL = 'https://jumbobergen.personeelstool.nl';
+const AH_CHAIN_URL = 'https://ah_chain.personeelstool.nl';
+const JUMBO_CHAIN_URL = 'https://jumbo_chain.personeelstool.nl';
+const JUMBO_SCHAAF_STORE_URL = 'https://jumboschaaf_store.personeelstool.nl';
+const JUMBO_BERGEN_STORE_URL = 'https://jumbobergen_store.personeelstool.nl';
 
 describe('listPristineNetworks', () => {
   it('should return networks', async() => {
@@ -19,29 +19,29 @@ describe('listPristineNetworks', () => {
       .withArgs(PMT_BASE_URL).returns(Promise.resolve({
         payload: stubs.pmt_clients,
       }))
-      .withArgs(`${AH_BASE_URL}/stores`).returns(Promise.resolve({
+      .withArgs(`${AH_CHAIN_URL}/stores`).returns(Promise.resolve({
         payload: stubs.ah_stores,
       }))
-      .withArgs(`${AH_BASE_URL}/users`).returns(Promise.resolve({
+      .withArgs(`${AH_CHAIN_URL}/users`).returns(Promise.resolve({
         payload: stubs.users_200,
       }))
-      .withArgs(`${JUMBO_BASE_URL}/stores`).returns(Promise.resolve({
+      .withArgs(`${JUMBO_CHAIN_URL}/stores`).returns(Promise.resolve({
         payload: stubs.jumbo_stores,
       }))
-      .withArgs(`${JUMBO_SCHAAF_URL}/users`).returns(Promise.resolve({
+      .withArgs(`${JUMBO_SCHAAF_STORE_URL}/users`).returns(Promise.resolve({
         payload: stubs.users_200,
       }))
-      .withArgs(`${JUMBO_BERGEN_URL}/users`).returns(Promise.resolve({
+      .withArgs(`${JUMBO_BERGEN_STORE_URL}/users`).returns(Promise.resolve({
         payload: stubs.users_200,
       }));
 
     sinon.stub(networkRepo, 'findAll').returns(Promise.resolve(
       [{
-        externalId: 'https://jumbo.personeelstool.nl',
+        externalId: 'https://jumbo_store.personeelstool.nl',
       }, {
-        externalId: 'https://ah.personeelstool.nl',
+        externalId: 'https://ah_store.personeelstool.nl',
       }, {
-        externalId: 'https://overig.personeelstool.nl',
+        externalId: 'https://overig_store.personeelstool.nl',
       }]
     ));
 

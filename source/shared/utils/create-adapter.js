@@ -14,7 +14,7 @@ export default (network, authSettings = [], options = {}) => {
   proceedWithoutToken = proceedWithoutToken || false;
   integrations = integrations || availableIntegrations;
 
-  const integration = find(integrations, { name: network.Integrations[0].name });
+  const integration = find(integrations, { name: network.integrations[0] });
   if (!integration) throw createError('10001');
 
   let token = null;

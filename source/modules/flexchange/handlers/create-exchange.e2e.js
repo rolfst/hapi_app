@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 import moment from 'moment';
-import { findExchangeById, deleteExchangeById } from '../repositories/exchange';
-import { exchangeTypes } from '../models/exchange';
 import { postRequest } from '../../../shared/test-utils/request';
-import { createTeam } from '../../core/repositories/team';
+import * as teamRepo from '../../core/repositories/team';
+import { exchangeTypes } from '../models/exchange';
+import * as exchangeRepo from '../repositories/exchange';
 
 let network;
 let flexAppealTeam;
@@ -14,8 +14,8 @@ describe('Create exchange', () => {
     network = global.networks.flexAppeal;
 
     [flexAppealTeam, otherNetworkTeam] = await Promise.all([
-      createTeam({ networkId: network.id, name: 'Test network' }),
-      createTeam({ networkId: 32, name: 'Test network' }),
+      teamRepo.createTeam({ networkId: network.id, name: 'Test network' }),
+      teamRepo.createTeam({ networkId: 32, name: 'Test network' }),
     ]);
   });
 
@@ -39,7 +39,7 @@ describe('Create exchange', () => {
     assert.isNotNull(result.data.start_time);
     assert.isNotNull(result.data.end_time);
 
-    return deleteExchangeById(result.data.id);
+    return exchangeRepo.deleteById(result.data.id);
   });
 
   it('should create exchange for a team', async () => {
@@ -55,12 +55,12 @@ describe('Create exchange', () => {
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.user.fullName, global.users.admin.full_name);
-    assert.deepEqual(result.data.created_in, { type: 'team', ids: [flexAppealTeam.id] });
+    assert.deepEqual(result.data.created_in, { type: 'team', ids: [flexAppealTeam.id.toString()] });
     assert.equal(result.data.title, 'Test shift for network');
     assert.isNotNull(result.data.start_time);
     assert.isNotNull(result.data.end_time);
 
-    return deleteExchangeById(result.data.id);
+    return exchangeRepo.deleteById(result.data.id);
   });
 
   it('should create exchange for external shift', async () => {
@@ -75,14 +75,14 @@ describe('Create exchange', () => {
       values: [global.users.admin.id],
     });
 
-    const actual = await findExchangeById(result.data.id);
+    const actual = await exchangeRepo.findExchangeById(result.data.id);
 
     assert.equal(actual.shiftId, 1);
     assert.equal(actual.type, 'USER');
     assert.equal(actual.teamId, flexAppealTeam.id);
     assert.equal(actual.ExchangeValues[0].value, global.users.admin.id);
 
-    return deleteExchangeById(result.data.id);
+    return exchangeRepo.deleteById(result.data.id);
   });
 
   it('should create exchange with begin and end-time', async () => {
@@ -100,7 +100,7 @@ describe('Create exchange', () => {
     assert.isTrue(moment(result.data.start_time).isSame(payload.start_time, 'minute'));
     assert.isTrue(moment(result.data.end_time).isSame(payload.end_time, 'minute'));
 
-    return deleteExchangeById(result.data.id);
+    return exchangeRepo.deleteById(result.data.id);
   });
 
   it('should fail when end_time is before start_time', async () => {

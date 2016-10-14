@@ -78,84 +78,51 @@ describe('Exchange activity feed', () => {
 
   it('should contain correct values for type: exchange_created', () => {
     const actual = _.find(result, { data: { activity_type: ActivityTypes.EXCHANGE_CREATED } });
-    const expected = {
-      type: 'activity',
-      data: {
-        activity_type: ActivityTypes.EXCHANGE_CREATED,
-        source_id: exchange.id.toString(),
-        user: global.users.employee.toSimpleJSON(),
-        meta_data: {
-          created_in: { type: 'network', id: network.id },
-        },
-      },
-    };
 
-    assert.deepEqual(actual, expected);
+    assert.equal(actual.type, 'activity');
+    assert.equal(actual.data.activity_type, ActivityTypes.EXCHANGE_CREATED);
+    assert.equal(actual.data.source_id, exchange.id.toString());
+    assert.equal(actual.data.user.id, global.users.employee.id);
+    assert.deepEqual(actual.data.meta_data, { created_in: { type: 'network', id: network.id } });
   });
 
   it('should contain correct values for type: exchange_accepted', () => {
     const actual = _.find(result, { data: { activity_type: ActivityTypes.EXCHANGE_ACCEPTED } });
-    const expected = {
-      type: 'activity',
-      data: {
-        activity_type: ActivityTypes.EXCHANGE_ACCEPTED,
-        source_id: exchange.id.toString(),
-        user: global.users.admin.toSimpleJSON(),
-        meta_data: {},
-      },
-    };
 
-    assert.deepEqual(actual, expected);
+    assert.equal(actual.type, 'activity');
+    assert.equal(actual.data.activity_type, ActivityTypes.EXCHANGE_ACCEPTED);
+    assert.equal(actual.data.source_id, exchange.id.toString());
+    assert.equal(actual.data.user.id, global.users.admin.id);
+    assert.deepEqual(actual.data.meta_data, { });
   });
 
   it('should contain correct values for type: exchange_comment', () => {
     const actual = _.find(result, { data: { activity_type: ActivityTypes.EXCHANGE_COMMENT } });
-    const expected = {
-      type: 'activity',
-      data: {
-        activity_type: ActivityTypes.EXCHANGE_COMMENT,
-        source_id: exchange.id.toString(),
-        user: global.users.employee.toSimpleJSON(),
-        meta_data: {
-          comment_id: comment.id,
-        },
-      },
-    };
 
-    assert.deepEqual(actual, expected);
+    assert.equal(actual.type, 'activity');
+    assert.equal(actual.data.activity_type, ActivityTypes.EXCHANGE_COMMENT);
+    assert.equal(actual.data.source_id, exchange.id.toString());
+    assert.equal(actual.data.user.id, global.users.employee.id);
+    assert.deepEqual(actual.data.meta_data, { comment_id: comment.id });
   });
 
   it('should contain correct values for type: exchange_rejected', () => {
     const actual = _.find(result, { data: { activity_type: ActivityTypes.EXCHANGE_REJECTED } });
-    const expected = {
-      type: 'activity',
-      data: {
-        activity_type: ActivityTypes.EXCHANGE_REJECTED,
-        source_id: exchange.id.toString(),
-        user: global.users.admin.toSimpleJSON(),
-        meta_data: {
-          rejected_user_id: global.users.employee.id,
-        },
-      },
-    };
 
-    assert.deepEqual(actual, expected);
+    assert.equal(actual.type, 'activity');
+    assert.equal(actual.data.activity_type, ActivityTypes.EXCHANGE_REJECTED);
+    assert.equal(actual.data.source_id, exchange.id.toString());
+    assert.equal(actual.data.user.id, global.users.admin.id);
+    assert.deepEqual(actual.data.meta_data, { rejected_user_id: global.users.employee.id });
   });
 
   it('should contain correct values for type: exchange_approved', () => {
     const actual = _.find(result, { data: { activity_type: ActivityTypes.EXCHANGE_APPROVED } });
-    const expected = {
-      type: 'activity',
-      data: {
-        activity_type: ActivityTypes.EXCHANGE_APPROVED,
-        source_id: exchange.id.toString(),
-        user: global.users.admin.toSimpleJSON(),
-        meta_data: {
-          approved_user_id: global.users.admin.id,
-        },
-      },
-    };
 
-    assert.deepEqual(actual, expected);
+    assert.equal(actual.type, 'activity');
+    assert.equal(actual.data.activity_type, ActivityTypes.EXCHANGE_APPROVED);
+    assert.equal(actual.data.source_id, exchange.id.toString());
+    assert.equal(actual.data.user.id, global.users.admin.id);
+    assert.deepEqual(actual.data.meta_data, { approved_user_id: global.users.admin.id });
   });
 });

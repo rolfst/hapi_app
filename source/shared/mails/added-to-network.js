@@ -3,12 +3,12 @@ export default (network, user) => {
     '-firstName-': user.firstName,
     '-companyName-': network.name, // TODO: UTF-8 encode
     '-password-': user.plainPassword,
-    '-invitationSenderFirstName-': network.SuperAdmin.firstName,
+    '-invitationSenderFirstName-': network.superAdmin.firstName,
   };
 
   const options = {
     receiver: { email: user.email },
-    sender: { name: network.SuperAdmin.fullName, email: network.SuperAdmin.email },
+    sender: { name: network.superAdmin.fullName, email: network.superAdmin.email },
     subject: 'Je bent toegevoegd aan een Flex-Appeal netwerk',
     template: '069a3507-94ce-46ad-8ee4-21c2fee3163c',
   };

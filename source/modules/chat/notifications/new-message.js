@@ -2,9 +2,9 @@ import notifier from '../../../shared/services/notifier';
 
 export const createNotification = (message) => {
   return {
-    text: `${message.User.fullName}: ${message.text}`,
+    text: `${message.createdBy.fullName}: ${message.text}`,
     data: {
-      id: message.Conversation.id,
+      id: message.conversation.id,
       type: 'conversation',
     },
   };

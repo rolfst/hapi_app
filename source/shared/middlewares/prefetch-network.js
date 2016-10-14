@@ -1,27 +1,17 @@
-import createError from '../utils/create-error';
+import * as networkService from '../../modules/core/services/network';
 import * as serverUtil from '../utils/server';
-import * as networkUtil from '../utils/network';
 
-export const selectNetworkForUser = (user, networkIdToSelect) => {
-  const selectedNetwork = networkUtil.select(user.Networks, networkIdToSelect);
-
-  if (!selectedNetwork) throw createError('10002');
-
-  const deletedFromNetwork = selectedNetwork.NetworkUser.deletedAt !== null;
-  if (deletedFromNetwork) throw createError('10003');
-
-  return selectedNetwork;
-};
-
-export default (req, reply) => {
+export default async (req, reply) => {
   try {
-    const networkId = parseInt(req.params.networkId, 10);
-    const selectedNetwork = selectNetworkForUser(req.auth.credentials, networkId);
+    const message = { ...req.auth };
+    const payload = { id: req.params.networkId };
+    const network = await networkService.getNetwork(payload, message);
 
-    return reply(selectedNetwork);
+    return reply(network);
   } catch (err) {
+    console.log('Error in the prefetch network middleware', err);
     const errorResponse = serverUtil.transformBoomToErrorResponse(err);
 
-    return reply(errorResponse).code(errorResponse.status_code);
+    return reply(errorResponse).takeover().code(403);
   }
 };

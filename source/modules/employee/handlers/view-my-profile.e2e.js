@@ -2,8 +2,6 @@ import { assert } from 'chai';
 import { getRequest } from '../../../shared/test-utils/request';
 
 describe('Handler: View my profile', () => {
-  before(() => Promise.all([global.users.employee.reload(), global.users.admin.reload()]));
-
   it('should return correct user object for default network', async () => {
     const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/users/me`;
     const { result: { data } } = await getRequest(endpoint, global.server, global.tokens.employee);

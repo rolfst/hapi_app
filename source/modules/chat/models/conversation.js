@@ -1,49 +1,13 @@
-import Sequelize from 'sequelize';
-import { db as model } from '../../../connections';
+import { map } from 'lodash';
 import * as dateUtils from '../../../shared/utils/date';
+import createMessageModel from './message';
+import createUserModel from '../../core/models/user';
 
-const Conversation = model.define('Conversation', {
-  type: {
-    type: Sequelize.ENUM,
-    values: ['PRIVATE', 'GROUP'],
-  },
-  createdBy: {
-    type: Sequelize.INTEGER,
-    field: 'created_by',
-  },
-}, {
-  tableName: 'conversations',
-  timestamps: true,
-  createdAt: 'created_at',
-  updatedAt: false,
-  instanceMethods: {
-    toJSON: function () { // eslint-disable-line func-names, object-shorthand
-      let output = {
-        type: 'conversation',
-        id: this.dataValues.id.toString(),
-        created_at: dateUtils.toISOString(this.created_at),
-        last_message: this.LastMessage ? this.LastMessage.toJSON() : null,
-      };
-
-      if (this.Messages) {
-        const messages = this.Messages.map(message => message.toJSON());
-        output = Object.assign(output, { messages });
-      }
-
-      if (this.Users && this.Users.length > 0) {
-        const users = this.Users.map(user => user.toSimpleJSON());
-        output = Object.assign(output, { users });
-      }
-
-      return output;
-    },
-  },
-  hooks: {
-    afterDestroy: function (conversation) { // eslint-disable-line func-names, object-shorthand
-      return conversation.getMessages()
-        .then(messages => messages.map(m => m.destroy()));
-    },
-  },
+export default (dao) => ({
+  type: 'conversation',
+  id: dao.id.toString(),
+  createdAt: dateUtils.toISOString(dao.created_at),
+  lastMessage: dao.LastMessage ? createMessageModel(dao.LastMessage) : null,
+  users: dao.Users.length > 0 ?
+    map(dao.Users, createUserModel) : [],
 });
-
-export default Conversation;

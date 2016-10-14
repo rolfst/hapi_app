@@ -1,12 +1,16 @@
 import nock from 'nock';
 import { assert } from 'chai';
-import * as stubs from '../../../adapters/pmt/test-utils/stubs';
-import * as networkUtil from '../../../shared/utils/network';
 import { getRequest } from '../../../shared/test-utils/request';
+import * as stubs from '../../../adapters/pmt/test-utils/stubs';
+import * as networkRepo from '../../core/repositories/network';
+import * as userRepo from '../../core/repositories/user';
 
 describe('Available users for shift', () => {
   before(async () => {
-    await global.networks.pmt.addUser(global.users.employee);
+    await networkRepo.addUser({
+      userId: global.users.employee.id,
+      networkId: global.networks.pmt.id,
+    });
 
     const adminExternalId = '8023';
 
@@ -25,18 +29,15 @@ describe('Available users for shift', () => {
       .reply(200, { users: fakeUsers });
   });
 
-  after(() => global.users.employee.removeNetwork(global.networks.pmt));
+  after(() => userRepo.removeFromNetwork(global.users.employee.id, global.networks.pmt.id));
 
   it('should return available users that are member of the network', async () => {
     const endpoint = `/v2/networks/${global.networks.pmt.id}/shifts/1/available`;
     const { result, statusCode } = await getRequest(endpoint);
 
-    const newAdmin = await global.users.admin.reload();
-
     assert.equal(statusCode, 200);
-    assert.deepEqual(result.data, [
-      networkUtil.addUserScope(newAdmin, global.networks.pmt.id).toJSON(),
-    ]);
+    assert.equal(result.data[0].external_id, '8023');
+    assert.equal(result.data[0].id, global.users.admin.id);
   });
 
   it('should fail when shift is not found', async () => {

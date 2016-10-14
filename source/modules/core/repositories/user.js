@@ -1,8 +1,10 @@
-import { sample } from 'lodash';
+import { map, sample } from 'lodash';
 import sequelize from 'sequelize';
 import { db } from '../../../connections';
 import createError from '../../../shared/utils/create-error';
-import { User, Network, NetworkUser, Integration, Team } from '../../../shared/models';
+import { User, Network, NetworkUser, Integration, Team, TeamUser } from '../../../shared/models';
+import createUserModel from '../models/user';
+import createCredentialsModel from '../models/credentials';
 
 const dummyProfileImgPaths = [
   'default/default-1.png',
@@ -25,9 +27,13 @@ const defaultIncludes = {
   }],
 };
 
-export function findAllUsers() {
-  return User.findAll(defaultIncludes);
-}
+const toModel = (dao) => createUserModel(dao);
+
+export const findAllUsers = async () => {
+  const result = await User.findAll();
+
+  return map(result, toModel);
+};
 
 export const findExternalUsers = async (externalIds) => {
   const pivotResult = await NetworkUser.findAll({ where: { externalId: { $in: externalIds } } });
@@ -40,20 +46,25 @@ export const findExternalUsers = async (externalIds) => {
   return result;
 };
 
-export const findUsersByIds = (userIds) => {
-  return User.findAll({ ...defaultIncludes, where: { id: { $in: userIds } } });
+export const findUsersByIds = async (userIds) => {
+  const result = await User.findAll({ where: { id: { $in: userIds } } });
+
+  return map(result, toModel);
 };
 
 export async function findUserById(id) {
-  const user = await User.findOne({ ...defaultIncludes, where: { id } });
+  const user = await User.findOne({ where: { id } });
   if (!user) throw createError('403', `The user with id '${id}' could not be found.`);
 
-  return user;
+  return toModel(user);
 }
 
-export function findUserByEmail(email) {
-  return User.findOne({ ...defaultIncludes, where: { email } });
-}
+export const findUserByEmail = async (email) => {
+  const result = await User.findOne({ where: { email } });
+  if (!result) return null;
+
+  return toModel(result);
+};
 
 export const findUserInNetworkByExternalId = async (networkId, externalId) => {
   const result = await NetworkUser.findOne({ where: { networkId, externalId } });
@@ -62,9 +73,36 @@ export const findUserInNetworkByExternalId = async (networkId, externalId) => {
   return findUserById(result.userId);
 };
 
-export function findUserByUsername(username) {
-  return User.findOne({ ...defaultIncludes, where: { username } });
-}
+export const findUserMetaDataForNetwork = async (userId, networkId) => {
+  const result = await NetworkUser.findOne({
+    where: { networkId, userId },
+  });
+
+  return result.get({ plain: true });
+};
+
+export const findMultipleUserMetaDataForNetwork = async (userIds, networkId) => {
+  const result = await NetworkUser.findAll({
+    where: { networkId, userId: { $in: userIds } },
+  });
+
+  return map(result, (item) => item.get({ plain: true }));
+};
+
+export const findCredentialsForUser = async (username) => {
+  const result = await User.findOne({ where: { username } });
+
+  if (!result) return null;
+
+  return createCredentialsModel(result);
+};
+
+export const findUserByUsername = async (username) => {
+  const result = await User.findOne({ where: { username } });
+  if (!result) throw createError('403', `The user with username '${username}' could not be found.`);
+
+  return toModel(result);
+};
 
 export function addExternalUsersToNetwork(users, network) {
   const promises = users
@@ -88,17 +126,6 @@ export const setExternalId = async (userId, networkId, externalId) => {
 
   return result.update({ externalId });
 };
-
-export async function addUserToNetwork(user, network, {
-  roleType = 'EMPLOYEE',
-  externalId = null,
-  isActive = true,
-}) {
-  await network
-    .addUser(user, { roleType, externalId, deletedAt: isActive ? null : new Date() });
-
-  return user.reload();
-}
 
 export async function updateUser(userId, attributes) {
   const user = await User.findById(userId);
@@ -124,16 +151,15 @@ export function createUser(attributes) {
   });
 }
 
-export function createBulkUsers(users) {
+export const createBulkUsers = async (users) => {
   const promises = users
-    .map(user => ({
-      ...user,
-      profileImg: sample(dummyProfileImgPaths),
-    }))
+    .map(user => ({ ...user, profileImg: sample(dummyProfileImgPaths) }))
     .map(user => User.create(user));
 
-  return Promise.all(promises);
-}
+  const result = await Promise.all(promises);
+
+  return map(result, toModel);
+};
 
 export async function validateUserIds(ids, networkId) {
   const usersCount = await User.count({
@@ -161,6 +187,20 @@ export function updateNetworkActivityForUser(networkId, userId, active) {
   });
 }
 
+export const addToTeam = async (userId, teamId) => {
+  return TeamUser.create({ userId, teamId });
+};
+
+export const removeFromNetwork = async (userId, networkId, forceDelete = false) => {
+  const result = await NetworkUser.findOne({
+    where: { userId, networkId },
+  });
+
+  if (!result) return;
+
+  return forceDelete ? result.destroy() : result.update({ deletedAt: new Date() });
+};
+
 export async function setIntegrationToken(user, network, token) {
   const result = await NetworkUser.findOne({
     where: { userId: user.id, networkId: network.id },
@@ -171,17 +211,22 @@ export async function setIntegrationToken(user, network, token) {
   return result.update({ userToken: token });
 }
 
-export function userBelongsToNetwork(userId, networkId) {
-  const queryString = `
-    SELECT user_id
-    FROM network_user
-    WHERE user_id = ?
-    AND network_id = ?
-    LIMIT 1
-  `;
+export const deleteById = async (userId) => {
+  return User.destroy({ where: { id: userId } });
+};
 
-  return db.query(queryString, {
-    type: sequelize.QueryTypes.SELECT,
-    replacements: [userId, networkId],
-  }).then(results => results.length === 1);
-}
+export const userBelongsToNetwork = async (userId, networkId) => {
+  const result = await NetworkUser.findOne({
+    where: { networkId, userId, deletedAt: null },
+  });
+
+  return result !== null;
+};
+
+export const userIsDeletedFromNetwork = async (userId, networkId) => {
+  const result = await NetworkUser.findOne({
+    where: { networkId, userId },
+  });
+
+  return result ? result.deletedAt !== null : false;
+};

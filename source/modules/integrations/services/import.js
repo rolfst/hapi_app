@@ -18,8 +18,8 @@ export const importNetwork = async (payload) => {
   ]);
 
   const [externalTeams, externalUsers, internalUsers] = values;
-  const users = await impl.importUsers(internalUsers, externalUsers, network);
-  const teams = await impl.importTeams(externalTeams, network);
+  const importedUsers = await impl.importUsers(internalUsers, externalUsers, network);
+  const importedTeams = await impl.importTeams(externalTeams, network);
 
-  await impl.addUsersToTeam(users, teams, externalUsers);
+  await impl.addUsersToTeam(importedUsers, importedTeams, externalUsers);
 };

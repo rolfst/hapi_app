@@ -54,7 +54,6 @@ const NetworkUser = model.define('NetworkUser', {
   timestamps: true,
   createdAt: false,
   updatedAt: false,
-  paranoid: true,
 });
 
 export default NetworkUser;

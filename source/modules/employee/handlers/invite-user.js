@@ -1,23 +1,15 @@
-import { pick } from 'lodash';
 import * as service from '../services/invite-user';
 import * as responseUtil from '../../../shared/utils/response';
 
-const FILTER_PROPERTIES = ['start', 'end'];
-
 export default async (req, reply) => {
-  const { pre, auth, query } = req;
-  const message = { ...pre, ...auth };
-  const filter = pick(query, FILTER_PROPERTIES);
-
   try {
-    const payload = { filter, ...req.payload, ...req.params };
+    const message = { ...req.pre, ...req.auth };
+    const payload = { ...req.query, ...req.payload, ...req.params };
     const invitedUser = await service.inviteUser(payload, message);
 
-    return reply({
-      success: true,
-      data: responseUtil.serialize(invitedUser),
-    });
+    return reply({ success: true, data: responseUtil.toSnakeCase(invitedUser) });
   } catch (err) {
+    console.log('Error inviting an user', err);
     return reply(err);
   }
 };

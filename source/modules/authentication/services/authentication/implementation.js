@@ -1,36 +1,43 @@
-import { find } from 'lodash';
 import moment from 'moment';
-import Promise from 'bluebird';
-import userBelongsToNetwork from '../../../../shared/utils/user-belongs-to-network';
+import bcrypt from 'bcrypt';
 import createError from '../../../../shared/utils/create-error';
 import * as authenticationRepo from '../../../core/repositories/authentication';
 import * as userRepo from '../../../core/repositories/user';
-import * as networkUtil from '../../../../shared/utils/network';
+import * as networkRepo from '../../../core/repositories/network';
 import createAccessToken from '../../utils/create-access-token';
 import createRefreshToken from '../../utils/create-refresh-token';
-import checkPassword from '../../utils/check-password';
+
+export const assertUserBelongsToANetwork = async (userId) => {
+  const networksContainingUser = await networkRepo.findAllContainingUser(userId);
+
+  if (networksContainingUser.length === 0) {
+    throw createError('403', 'The user does not belong to any network.');
+  }
+
+  return true;
+};
+
+export const checkPassword = (hash, plain) => {
+  // We have to replace the first characters because of the
+  // difference between the PHP bcrypt hasher and JavaScript's
+  return bcrypt.compareSync(plain, hash.replace('$2y$', '$2a$'));
+};
 
 export const updateLastLogin = async (user) => {
   userRepo.updateUser(user.id, { lastLogin: moment().toISOString() });
 };
 
-export const getIntegrationTokensForUser = (user) => {
-  const result = user.Networks
-    .filter(network => network.NetworkUser.userToken !== null)
-    .map(network => ({
-      name: network.Integrations[0].name,
-      token: network.NetworkUser.userToken,
-      externalId: network.NetworkUser.externalId,
-    }));
-
-  return result;
+export const getIntegrationInfoForUser = async (userId) => {
+  return networkRepo.findIntegrationInfo(userId);
 };
 
 export const authenticateUser = async ({ username, password }) => {
-  const user = await userRepo.findUserByUsername(username);
+  const user = await userRepo.findCredentialsForUser(username);
+
   if (!user) throw createError('10004');
 
   const validPassword = checkPassword(user.password, password);
+
   if (!validPassword) throw createError('10004');
 
   return user;
@@ -45,27 +52,10 @@ export const createAuthenticationTokens = async (userId, deviceName, authenticat
   return { accessToken, refreshToken };
 };
 
-export const mapNetworkAndToken = (network, authenticatedIntegrations) => ({
-  network,
-  token: find(authenticatedIntegrations, { name: network.Integrations[0].name }).token,
-});
-
-export const setIntegrationTokens = (user, authenticatedIntegrations) => {
-  const setIntegrationTokenPromises = user.Networks
-    .filter(networkUtil.hasIntegration)
-    .map(network => mapNetworkAndToken(network, authenticatedIntegrations))
-    .map(({ network, token }) => userRepo.setIntegrationToken(user, network, token));
-
-  return Promise.all(setIntegrationTokenPromises);
-};
-
 export const getAuthenticationTokens = async (user, deviceName) => {
-  if (!userBelongsToNetwork(user)) {
-    throw createError('403', 'The user does not belong to any network.');
-  }
-
+  const integrationInfo = await getIntegrationInfoForUser(user.id);
   const { accessToken, refreshToken } = await createAuthenticationTokens(
-    user.id, deviceName, getIntegrationTokensForUser(user));
+    user.id, deviceName, integrationInfo);
 
   updateLastLogin(user);
 

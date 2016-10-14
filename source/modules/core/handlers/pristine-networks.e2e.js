@@ -6,10 +6,10 @@ import * as networkRepo from '../repositories/network';
 import * as integrationRepo from '../repositories/integration';
 
 const PMT_BASE_URL = 'https://partner2.testpmt.nl';
-const PMT_BASE_NETWORK_URL_AH = 'https://ah.personeelstool.nl';
-const PMT_BASE_NETWORK_URL_JUMBO = 'https://jumbo.personeelstool.nl';
-const JUMBO_SCHAAF_URL = 'https://jumboschaaf.personeelstool.nl';
-const JUMBO_BERGEN_URL = 'https://jumbobergen.personeelstool.nl';
+const PMT_BASE_CHAIN_URL_AH = `https://${stubs.pmt_clients.chains[0].base_url}`;
+const PMT_BASE_CHAIN_URL_JUMBO = `https://${stubs.pmt_clients.chains[1].base_url}`;
+const JUMBO_SCHAAF_STORE_URL = stubs.jumbo_stores.stores[0].base_store_url;
+const JUMBO_BERGEN_STORE_URL = stubs.jumbo_stores.stores[2].base_store_url;
 
 nock.disableNetConnect();
 
@@ -27,35 +27,35 @@ describe('Pristine Networks', async () => {
 
     jumboNetwork = networkRepo.createIntegrationNetwork({
       userId: global.users.admin.id,
-      externalId: 'https://jumbo.personeelstool.nl',
+      externalId: stubs.jumbo_stores.stores[1].base_store_url,
       name: 'Jumbo van Begen Oss',
-      integrationName: 'PRISTINE_INTEGRATION',
-    });
-
-    justANetwork = networkRepo.createIntegrationNetwork({
-      userId: global.users.admin.id,
-      externalId: 'https://overig.personeelstool.nl',
-      name: 'AH Nanne van der Schaaf',
       integrationName: 'PRISTINE_INTEGRATION',
     });
 
     ahNetwork = networkRepo.createIntegrationNetwork({
       userId: global.users.admin.id,
-      externalId: 'https://ah.personeelstool.nl',
+      externalId: stubs.ah_stores.stores[1].base_store_url,
       name: 'AH van Bergen',
       integrationName: 'PRISTINE_INTEGRATION',
     });
 
-    const createdNetworks = await Promise.all([jumboNetwork, justANetwork, ahNetwork]);
-    [jumboNetwork, justANetwork, ahNetwork] = createdNetworks;
+    justANetwork = networkRepo.createIntegrationNetwork({
+      userId: global.users.admin.id,
+      externalId: stubs.ah_stores.stores[0].base_store_url,
+      name: 'AH Nanne van der Schaaf',
+      integrationName: 'PRISTINE_INTEGRATION',
+    });
+
+    [jumboNetwork, justANetwork, ahNetwork] = await Promise.all([
+      jumboNetwork, justANetwork, ahNetwork]);
   });
 
   after(async () => {
     await integration.destroy();
     await Promise.all([
-      jumboNetwork.destroy(),
-      ahNetwork.destroy(),
-      justANetwork.destroy(),
+      networkRepo.deleteById(jumboNetwork.id),
+      networkRepo.deleteById(ahNetwork.id),
+      networkRepo.deleteById(justANetwork.id),
     ]);
   });
 
@@ -63,25 +63,25 @@ describe('Pristine Networks', async () => {
     nock(PMT_BASE_URL)
       .get('/rest.php/chains')
       .reply(200, stubs.pmt_clients);
-    nock(PMT_BASE_NETWORK_URL_AH)
+    nock(PMT_BASE_CHAIN_URL_AH)
       .get('/stores')
       .reply(200, stubs.ah_stores);
-    nock(PMT_BASE_NETWORK_URL_JUMBO)
+    nock(PMT_BASE_CHAIN_URL_JUMBO)
       .get('/stores')
       .reply(200, stubs.jumbo_stores);
-    nock(JUMBO_SCHAAF_URL)
+    nock(JUMBO_SCHAAF_STORE_URL)
       .get('/users')
       .reply(200, stubs.users_200);
-    nock(JUMBO_BERGEN_URL)
+    nock(JUMBO_BERGEN_STORE_URL)
       .get('/users')
       .reply(200, stubs.users_200);
 
-    const { result: { data } } = await getRequest('/v2/pristine_networks');
+    const { result } = await getRequest('/v2/pristine_networks');
 
-    assert.property(data[0], 'externalId');
-    assert.property(data[1], 'name');
-    assert.property(data[1], 'integrationName');
-    assert.property(data[1], 'admins');
+    assert.property(result.data[0], 'externalId');
+    assert.property(result.data[1], 'name');
+    assert.property(result.data[1], 'integrationName');
+    assert.property(result.data[1], 'admins');
   });
 
   it('should fail when integration base endpoint is down', async () => {
@@ -98,10 +98,10 @@ describe('Pristine Networks', async () => {
     nock(PMT_BASE_URL)
       .get('/rest.php/chains')
       .reply(200, stubs.pmt_clients);
-    nock(PMT_BASE_NETWORK_URL_AH)
+    nock(PMT_BASE_CHAIN_URL_AH)
       .get('/stores')
       .reply(404);
-    nock(PMT_BASE_NETWORK_URL_JUMBO)
+    nock(PMT_BASE_CHAIN_URL_JUMBO)
       .get('/stores')
       .reply(200, stubs.jumbo_stores);
 

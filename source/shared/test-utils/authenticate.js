@@ -12,5 +12,9 @@ export default async (server, credentials) => {
   const decodedToken = tokenUtil.decode(accessToken);
   const user = await findUserById(decodedToken.sub);
 
-  return { user, token: accessToken, integrations: decodedToken.integrations };
+  return {
+    ...user,
+    token: accessToken,
+    integrations: decodedToken.integrations,
+  };
 };

@@ -1,11 +1,13 @@
 import { assert } from 'chai';
 import qs from 'qs';
 import moment from 'moment';
-import { find } from 'lodash';
-import { createTeam } from '../../core/repositories/team';
-import { exchangeTypes } from '../models/exchange';
+import { map, find } from 'lodash';
 import { getRequest } from '../../../shared/test-utils/request';
-import { createExchange } from '../repositories/exchange';
+import * as networkService from '../../core/services/network';
+import { createTeam } from '../../core/repositories/team';
+import * as userRepo from '../../core/repositories/user';
+import { exchangeTypes } from '../models/exchange';
+import * as exchangeRepo from '../repositories/exchange';
 
 describe('Get exchanges for network', () => {
   describe('Integrated network', () => {
@@ -14,12 +16,14 @@ describe('Get exchanges for network', () => {
 
     before(async () => {
       integratedNetwork = global.networks.pmt;
-
-      await global.users.employee.addNetwork(integratedNetwork);
-
       const { employee, admin } = global.users;
 
-      const exchangeToAdmin = createExchange(employee.id, integratedNetwork.id, {
+      await networkService.addUserToNetwork({
+        userId: employee.id,
+        networkId: integratedNetwork.id,
+      });
+
+      const exchangeToAdmin = exchangeRepo.createExchange(employee.id, integratedNetwork.id, {
         type: exchangeTypes.USER,
         date: moment().format('YYYY-MM-DD'),
         title: 'Exchange for shift 1337',
@@ -28,7 +32,7 @@ describe('Get exchanges for network', () => {
         teamId: 81,
       });
 
-      const exchangeForEmployee = createExchange(admin.id, integratedNetwork.id, {
+      const exchangeForEmployee = exchangeRepo.createExchange(admin.id, integratedNetwork.id, {
         type: exchangeTypes.USER,
         date: moment().format('YYYY-MM-DD'),
         title: 'Exchange for shift 1338',
@@ -37,21 +41,22 @@ describe('Get exchanges for network', () => {
         teamId: 80,
       });
 
-      const exchangeForOtherNetwork = createExchange(
+      const exchangeForOtherNetwork = exchangeRepo.createExchange(
         global.users.admin.id, global.networks.flexAppeal.id, {
           date: moment().format('YYYY-MM-DD'),
           type: exchangeTypes.NETWORK,
           title: 'Test shift in other network',
         });
 
-      const exchangeCreatedByEmployee = createExchange(employee.id, integratedNetwork.id, {
-        type: exchangeTypes.USER,
-        date: moment().format('YYYY-MM-DD'),
-        title: 'Exchange for shift 1339',
-        values: [admin.id],
-        shiftId: 1339,
-        teamId: 80,
-      });
+      const exchangeCreatedByEmployee = exchangeRepo.createExchange(
+        employee.id, integratedNetwork.id, {
+          type: exchangeTypes.USER,
+          date: moment().format('YYYY-MM-DD'),
+          title: 'Exchange for shift 1339',
+          values: [admin.id],
+          shiftId: 1339,
+          teamId: 80,
+        });
 
       createdExchanges = await Promise.all([
         exchangeToAdmin,
@@ -63,7 +68,7 @@ describe('Get exchanges for network', () => {
 
     after(async () => {
       await Promise.all(createdExchanges.map(e => e.destroy()));
-      await global.users.employee.removeNetwork(integratedNetwork);
+      await userRepo.removeFromNetwork(global.users.employee.id, integratedNetwork.id);
     });
 
     it('should return exchanges for admin', async () => {
@@ -74,7 +79,7 @@ describe('Get exchanges for network', () => {
 
       assert.equal(statusCode, 200);
       assert.lengthOf(result.data, 3);
-      assert.deepEqual(invidualExchange.created_in, { type: 'team', ids: [81] });
+      assert.deepEqual(invidualExchange.created_in, { type: 'team', ids: ['81'] });
     });
 
     it('should return exchanges for employee', async () => {
@@ -86,7 +91,7 @@ describe('Get exchanges for network', () => {
 
       assert.equal(statusCode, 200);
       assert.lengthOf(result.data, 3);
-      assert.deepEqual(invidualExchange.created_in, { type: 'team', ids: [80] });
+      assert.deepEqual(invidualExchange.created_in, { type: 'team', ids: ['80'] });
     });
   });
 
@@ -106,45 +111,50 @@ describe('Get exchanges for network', () => {
 
       const [team1, team2, team3] = createdTeams;
 
-      await global.users.employee.addTeams([team2, team3]);
+      await Promise.all([
+        userRepo.addToTeam(global.users.employee.id, team2.id),
+        userRepo.addToTeam(global.users.employee.id, team3.id),
+      ]);
 
-      const exchanges = await network.getExchanges();
-      await Promise.all(exchanges.map(e => e.destroy()));
+      const exchanges = await exchangeRepo.findExchangesByNetwork(
+        network.id, global.users.admin.id);
+      await Promise.all(map(exchanges, e => exchangeRepo.deleteById(e.id)));
 
-      const exchangeForTeams = createExchange(global.users.admin.id, network.id, {
+      const exchangeForTeams = exchangeRepo.createExchange(global.users.admin.id, network.id, {
         date: moment().format('YYYY-MM-DD'),
         title: 'Test shift for teams',
         type: exchangeTypes.TEAM,
         values: [team1.id, team2.id],
       });
 
-      const exchangeForTeamWhereEmployeeDoesNotBelongTo = createExchange(
+      const exchangeForTeamWhereEmployeeDoesNotBelongTo = exchangeRepo.createExchange(
         global.users.admin.id, network.id, {
           date: moment().format('YYYY-MM-DD'),
           type: exchangeTypes.TEAM,
           values: [team1.id],
         });
 
-      const exchangeForNetwork = createExchange(global.users.employee.id, network.id, {
+      const exchangeForNetwork = exchangeRepo.createExchange(global.users.employee.id, network.id, {
         date: moment().format('YYYY-MM-DD'),
         type: exchangeTypes.NETWORK,
         title: 'Test shift 2',
       });
 
-      const exchangeForOtherNetwork = createExchange(
+      const exchangeForOtherNetwork = exchangeRepo.createExchange(
         global.users.admin.id, global.networks.pmt.id, {
           date: moment().format('YYYY-MM-DD'),
           type: exchangeTypes.NETWORK,
           title: 'Test shift in other network',
         });
 
-      const exchangeInTheFutureForNetwork = createExchange(global.users.admin.id, network.id, {
-        type: exchangeTypes.NETWORK,
-        date: moment().add(2, 'weeks').format('YYYY-MM-DD'),
-        title: 'Test shift 3',
-      });
+      const exchangeInTheFutureForNetwork = exchangeRepo.createExchange(
+        global.users.admin.id, network.id, {
+          type: exchangeTypes.NETWORK,
+          date: moment().add(2, 'weeks').format('YYYY-MM-DD'),
+          title: 'Test shift 3',
+        });
 
-      const exchangeInPast = createExchange(global.users.admin.id, network.id, {
+      const exchangeInPast = exchangeRepo.createExchange(global.users.admin.id, network.id, {
         type: exchangeTypes.NETWORK,
         date: moment().subtract(2, 'weeks').format('YYYY-MM-DD'),
         title: 'Test shift in past',
@@ -171,8 +181,11 @@ describe('Get exchanges for network', () => {
 
       assert.equal(statusCode, 200);
       assert.lengthOf(result.data, 5);
-      assert.deepEqual(teamExchange.created_in, { type: 'team', ids: [team1.id, team2.id] });
       assert.lengthOf(teamExchange.responses, 0);
+      assert.deepEqual(teamExchange.created_in, {
+        type: 'team',
+        ids: [team1.id.toString(), team2.id.toString()],
+      });
     });
 
     it('should return exchanges for employee', async () => {
@@ -182,8 +195,11 @@ describe('Get exchanges for network', () => {
       const [team1, team2] = createdTeams;
       const teamExchange = find(result.data, { title: 'Test shift for teams' });
 
-      assert.deepEqual(teamExchange.created_in, { type: 'team', ids: [team1.id, team2.id] });
       assert.lengthOf(result.data, 4);
+      assert.deepEqual(teamExchange.created_in, {
+        type: 'team',
+        ids: [team1.id.toString(), team2.id.toString()],
+      });
     });
 
     it('should return exchanges between given date', async () => {

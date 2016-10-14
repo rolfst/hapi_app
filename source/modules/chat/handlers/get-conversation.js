@@ -7,7 +7,7 @@ export default async (req, reply) => {
     const message = { ...req.pre, ...req.auth };
     const result = await conversationService.getConversation(payload, message);
 
-    return reply({ data: responseUtil.serialize(result) });
+    return reply({ data: responseUtil.toSnakeCase(result) });
   } catch (err) {
     console.log('Error retrieving conversation', err);
     return reply(err);

@@ -5,7 +5,7 @@ import * as socketService from '../../../../shared/services/socket';
 import * as newMessageNotification from '../../notifications/new-message';
 
 describe('Conversation Service implementation', () => {
-  const conversationStub = { Users: [{ id: 1 }, { id: 2 }] };
+  const conversationStub = { users: [{ id: 1 }, { id: 2 }] };
 
   describe('assertThatUserIsPartOfTheConversation', () => {
     it('should return correct assertion', () => {
@@ -17,14 +17,8 @@ describe('Conversation Service implementation', () => {
   describe('notifyUsersForNewMessage', () => {
     const messageStub = {
       text: 'Foo message',
-      createdBy: 1,
-      User: {
-        fullName: 'Foo Baz',
-      },
-      Conversation: {
-        id: 1,
-      },
-      toJSON: () => ({ text: 'Foo message' }),
+      createdBy: { id: 1, fullName: 'Foo Baz' },
+      conversation: { id: 1 },
     };
 
     const expectedUsersToNotify = [{ id: 2 }];
@@ -46,7 +40,7 @@ describe('Conversation Service implementation', () => {
       impl.notifyUsersForNewMessage(conversationStub, messageStub, 'foo_token');
 
       assert.isTrue(socketService.send.calledWithMatch(
-        'send-message', expectedUsersToNotify, messageStub.toJSON(), 'foo_token'));
+        'send-message', expectedUsersToNotify, conversationStub, 'foo_token'));
 
       socketService.send.restore();
     });

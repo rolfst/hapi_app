@@ -11,27 +11,29 @@ import * as integrationRepo from '../../core/repositories/integration';
 import * as networkRepo from '../../core/repositories/network';
 import { UserRoles } from '../../../shared/services/permission';
 
-const sortByUsername = partialRight(sortBy, 'username');
-const sortImportedUsers = flow(flatten, sortByUsername);
-const importUser = async (user) => {
-  const roleType = user.isAdmin ? UserRoles.ADMIN : UserRoles.EMPLOYEE;
-  const employee = await userRepo.createUser(user);
-
-  return userRepo.addUserToNetwork(employee, global.networks.pmt, { roleType });
-};
-
 describe('Handler: Bulk invite users', () => {
+  const sortByUsername = partialRight(sortBy, 'username');
+  const sortImportedUsers = flow(flatten, sortByUsername);
   const toBeImportedUsers = stubs.import_users;
   const pristineNetwork = stubs.pristine_network;
   const admin = stubs.pristine_admin;
   let createdUsers;
 
-  describe('happy path', () => {
+  const importUser = async (user) => {
+    const roleType = user.isAdmin ? UserRoles.ADMIN : UserRoles.EMPLOYEE;
+    const employee = await userRepo.createUser(user);
+
+    return networkRepo.addUser({
+      userId: employee.id, networkId: global.networks.pmt.id, roleType });
+  };
+
+  describe('Happy path', () => {
     before(async () => {
       const ENDPOINT = '/users';
       nock(global.networks.pmt.externalId)
         .get(ENDPOINT)
         .reply('200', stubs.users_200);
+
       createdUsers = sortImportedUsers(await Promise.map(toBeImportedUsers, importUser));
     });
 
@@ -39,20 +41,19 @@ describe('Handler: Bulk invite users', () => {
       mailer.send.restore();
       sinon.stub(mailer, 'send').returns(null);
 
-      return Promise.all(createdUsers.map(employee => employee.destroy()));
+      return Promise.all(createdUsers.map(employee => userRepo.deleteById(employee.id)));
     });
 
     it('should add to the network as admin', async () => {
       const endpoint = `/v2/networks/${global.networks.pmt.id}/users/bulk_invite`;
-      const { result, statusCode } = await getRequest(endpoint);
+      const { statusCode } = await getRequest(endpoint);
 
       assert.equal(statusCode, 200);
-      assert.equal(result.data[0].email, createdUsers[0].email);
       assert.equal(mailer.send.called, true);
     });
   });
 
-  describe('faulty path', () => {
+  describe('Faulty path', () => {
     let integration;
     let adminUser;
     let network;
@@ -71,12 +72,13 @@ describe('Handler: Bulk invite users', () => {
       createdUsers = sortImportedUsers(await Promise.map(toBeImportedUsers, importUser));
     });
 
-    after(() => {
-      return Promise.all([
-        network.destroy(),
+    after(async () => {
+      await Promise.all([
         integration.destroy(),
-        adminUser.destroy(),
+        userRepo.deleteById(adminUser.id),
       ]);
+
+      return networkRepo.deleteById(network.id);
     });
 
     it('should fail because of bad network access', async () => {

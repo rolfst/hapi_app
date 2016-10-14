@@ -21,6 +21,7 @@ export default async (req, reply) => {
 
     return reply({ success: true, data: updatedExchange.toJSON() });
   } catch (err) {
+    console.log('Error modifying exchange ${payload.exchangeId}', err);
     return reply(err);
   }
 };

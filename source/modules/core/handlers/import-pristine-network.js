@@ -8,7 +8,7 @@ export default async (req, reply) => {
 
     return reply({ data: { success: true } });
   } catch (err) {
-    console.log('error importing pristine network', err);
+    console.log('Error importing pristine network', err);
     return reply(err);
   }
 };

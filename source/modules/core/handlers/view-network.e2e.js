@@ -17,14 +17,14 @@ describe('View network', async () => {
     const { result: { data } } = await getRequest(`/v1/networks/${global.networks.flexAppeal.id}`);
 
     assert.property(data, 'id');
-    assert.property(data, 'name');
+    assert.property(data, 'super_admin');
     assert.property(data, 'has_integration');
     assert.property(data, 'enabled_components');
-    assert.property(data, 'user');
     assert.property(data, 'created_at');
     assert.isBoolean(data.has_integration);
     assert.isArray(data.enabled_components);
+    assert.deepEqual(data.enabled_components, global.networks.flexAppeal.enabledComponents);
     assert.equal(data.type, 'network');
-    assert.equal(data.user.id, global.users.admin.id);
+    assert.equal(data.super_admin.id, global.users.admin.id);
   });
 });

@@ -1,9 +1,6 @@
 import { assert } from 'chai';
 import { postRequest } from '../../../shared/test-utils/request';
-import {
-  createConversation,
-  deleteAllConversationsForUser,
-} from '../repositories/conversation';
+import * as conversationRepo from '../repositories/conversation';
 
 let createdConversation;
 
@@ -12,12 +9,12 @@ describe('Post conversation', () => {
 
   before(async () => {
     const { admin, networklessUser } = global.users;
-    createdConversation = await createConversation(
+    createdConversation = await conversationRepo.createConversation(
       'private', admin.id, [admin.id, networklessUser.id]
     );
   });
 
-  after(() => deleteAllConversationsForUser(global.users.employee));
+  after(() => conversationRepo.deleteAllConversationsForUser(global.users.employee.id));
 
   it('should show new conversation data', async () => {
     const payload = { type: 'private', users: [global.users.employee.id] };

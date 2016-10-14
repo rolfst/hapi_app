@@ -50,22 +50,19 @@ describe('Network import', () => {
   });
 
   after(async () => {
-    const users = await networkRepo.findAllUsersForNetwork(network);
+    const users = await networkRepo.findAllUsersForNetwork(network.id);
     await Promise.all([
-      ...users.map(u => u.destroy()),
+      ...users.map(u => userRepo.deleteById(u.id)),
       integration.destroy(),
     ]);
 
-    const leftOverUser = await userRepo.findUserByEmail('verwijderd@pmt.nl');
-    await leftOverUser.destroy();
-
     createAdapter.default.restore();
 
-    return network.destroy();
+    return networkRepo.deleteById(network.id);
   });
 
   it('should add new teams to network', async () => {
-    const teams = await networkRepo.findTeamsForNetwork(network);
+    const teams = await networkRepo.findTeamsForNetwork(network.id);
     const actual = find(teams, { externalId: stubs.external_teams[0].externalId });
 
     assert.lengthOf(teams, stubs.external_teams.length);
@@ -74,22 +71,22 @@ describe('Network import', () => {
   });
 
   it('should add new admins to network', async () => {
-    const admins = await networkRepo.findAdminsByNetwork(network);
+    const admins = await networkRepo.findUsersForNetwork(network.id, 'ADMIN');
 
     assert.lengthOf(admins, 1);
-    assert.equal(admins[0].NetworkUser.externalId, 1);
   });
 
   it('should add new users to network', async () => {
-    const activeUsers = await networkRepo.findActiveUsersForNetwork(network);
+    const activeUsers = await networkRepo.findUsersForNetwork(network.id);
 
     assert.lengthOf(activeUsers, 3);
   });
 
   it('should add new users to teams', async () => {
-    const teams = await networkRepo.findTeamsForNetwork(network);
-    const actual = find(teams, { externalId: stubs.external_teams[0].externalId });
+    const teams = await networkRepo.findTeamsForNetwork(network.id);
+    const teamLookup = find(teams, { externalId: stubs.external_teams[0].externalId });
+    const users = await teamRepo.findMembers(teamLookup.id);
 
-    assert.lengthOf(actual.Users, 3);
+    assert.lengthOf(users, 3);
   });
 });

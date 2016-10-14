@@ -1,69 +1,60 @@
 import { assert } from 'chai';
 import blueprints from '../../../shared/test-utils/blueprints';
-import { createUser } from '../../../modules/core/repositories/user';
+import * as userRepo from '../../../modules/core/repositories/user';
 import { getRequest } from '../../../shared/test-utils/request';
-import { createMessage } from '../repositories/message';
-import {
-  createConversation,
-  deleteAllConversationsForUser,
-} from '../repositories/conversation';
-
-let user;
-let conversation;
+import * as messageRepo from '../repositories/message';
+import * as conversationRepo from '../repositories/conversation';
 
 describe('Get conversations for logged user', () => {
+  let user;
+  let conversation;
+
   before(async () => {
     const creator = global.users.admin;
     const employee = blueprints.users.employee;
-    user = await createUser({ ...employee, username: `${employee.username}3` });
-    conversation = await createConversation('PRIVATE', creator.id, [user.id, creator.id]);
+    user = await userRepo.createUser({ ...employee, username: `${employee.username}3` });
+    conversation = await conversationRepo.createConversation(
+      'PRIVATE', creator.id, [user.id, creator.id]);
 
-    await createMessage(conversation.id, user.id, 'First message');
-    await createMessage(conversation.id, user.id, 'Last message');
+    await messageRepo.createMessage(conversation.id, user.id, 'First message');
+    await messageRepo.createMessage(conversation.id, user.id, 'Last message');
   });
 
   after(async () => {
-    await conversation.destroy();
-    await user.destroy();
+    await conversationRepo.deleteConversationById(conversation.id);
+    await userRepo.deleteById(user.id);
   });
 
   it('should return conversation collection', async () => {
     const { result, statusCode } = await getRequest('/v1/chats/users/me/conversations');
 
-    assert.lengthOf(result.data, 1);
-    assert.lengthOf(result.data[0].messages, 2);
     assert.equal(statusCode, 200);
+    assert.lengthOf(result.data, 1);
+    assert.equal(result.data[0].last_message.created_by.id, user.id);
+    assert.equal(result.data[0].last_message.text, 'Last message');
   });
 
   it('should show participants of the conversation', async () => {
     const { result, statusCode } = await getRequest('/v1/chats/users/me/conversations');
 
+    assert.equal(statusCode, 200);
     assert.property(result.data[0], 'users');
     assert.lengthOf(result.data[0].users, 2);
-    assert.equal(statusCode, 200);
   });
 
-  it('should show the last placed message', async () => {
+  it('should return the last created message in conversation in response', async () => {
     const endpoint = '/v1/chats/users/me/conversations';
     const { result, statusCode } = await getRequest(endpoint);
 
-    assert.equal(result.data[0].last_message.text, 'Last message');
     assert.equal(statusCode, 200);
-  });
-
-  it('should show the last placed message with messages included', async () => {
-    const endpoint = '/v1/chats/users/me/conversations?include=messages';
-    const { result, statusCode } = await getRequest(endpoint);
-
     assert.equal(result.data[0].last_message.text, 'Last message');
-    assert.equal(statusCode, 200);
   });
 
   it('should return empty array when no conversations found', async () => {
-    await deleteAllConversationsForUser(global.users.admin);
+    await conversationRepo.deleteAllConversationsForUser(global.users.admin.id);
     const { result, statusCode } = await getRequest('/v1/chats/users/me/conversations');
 
-    assert.lengthOf(result.data, 0);
     assert.equal(statusCode, 200);
+    assert.lengthOf(result.data, 0);
   });
 });

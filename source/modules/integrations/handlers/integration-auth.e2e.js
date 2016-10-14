@@ -1,15 +1,15 @@
 import sinon from 'sinon';
 import { assert } from 'chai';
 import nock from 'nock';
-import createError from '../../../shared/utils/create-error';
-import * as networkUtil from '../../../shared/utils/network';
-import tokenUtil from '../../../shared/utils/token';
-import * as createAdapter from '../../../shared/utils/create-adapter';
 import { postRequest } from '../../../shared/test-utils/request';
-import { createIntegrationNetwork } from '../../core/repositories/network';
-import { findUserById } from '../../core/repositories/user';
-import { createIntegration } from '../../core/repositories/integration';
+import * as createAdapter from '../../../shared/utils/create-adapter';
 import blueprints from '../../../shared/test-utils/blueprints';
+import createError from '../../../shared/utils/create-error';
+import tokenUtil from '../../../shared/utils/token';
+import { createIntegration } from '../../core/repositories/integration';
+import * as networkRepo from '../../core/repositories/network';
+import * as networkService from '../../core/services/network';
+import * as userRepo from '../../core/repositories/user';
 
 describe('Integration auth', () => {
   let integration;
@@ -38,21 +38,28 @@ describe('Integration auth', () => {
       token: 'integrationtoken',
     });
 
-    network = await createIntegrationNetwork({
+    network = await networkRepo.createIntegrationNetwork({
       userId: global.users.admin.id,
       externalId: 'api.coolintegration.nl',
       name: 'Network with integration',
       integrationName: 'NEW_INTEGRATION',
     });
 
-    await global.networks.pmt.addUser(global.users.employee);
-    await network.addUser(global.users.employee);
+    await networkService.addUserToNetwork({
+      userId: global.users.employee.id,
+      networkId: global.networks.pmt.id,
+    });
+
+    await networkService.addUserToNetwork({
+      userId: global.users.employee.id,
+      networkId: network.id,
+    });
   });
 
   after(async () => {
-    await global.networks.pmt.removeUser(global.users.employee);
+    await userRepo.removeFromNetwork(global.users.employee.id, global.networks.pmt.id);
     await integration.destroy();
-    await network.destroy();
+    await networkRepo.deleteById(network.id);
   });
 
   it('hook should be called with the credentials', async () => {
@@ -87,11 +94,11 @@ describe('Integration auth', () => {
       password: 'baz',
     }, global.server, global.tokens.employee);
 
-    const user = await findUserById(global.users.employee.id);
-    const { NetworkUser } = networkUtil.select(user.Networks, network.id);
+    const metaData = await userRepo.findUserMetaDataForNetwork(
+      global.users.employee.id, network.id);
 
-    assert.equal(NetworkUser.userToken, 'auth_token');
-    assert.equal(NetworkUser.externalId, 1);
+    assert.equal(metaData.userToken, 'auth_token');
+    assert.equal(metaData.externalId, 1);
   });
 
   it('should return 403 error when someone is already authenticated with the same account', async () => { // eslint-disable-line max-len
