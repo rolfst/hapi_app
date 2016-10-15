@@ -50,6 +50,14 @@ describe('Get conversations for logged user', () => {
     assert.equal(result.data[0].last_message.text, 'Last message');
   });
 
+  it('should return messages for each converrsation', async () => {
+    const { result, statusCode } = await getRequest('/v1/chats/users/me/conversations');
+
+    assert.equal(statusCode, 200);
+    assert.property(result.data[0], 'messages');
+    assert.lengthOf(result.data[0].messages, 2);
+  });
+
   it('should return empty array when no conversations found', async () => {
     await conversationRepo.deleteAllConversationsForUser(global.users.admin.id);
     const { result, statusCode } = await getRequest('/v1/chats/users/me/conversations');

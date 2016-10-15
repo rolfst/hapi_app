@@ -1,7 +1,7 @@
 import { map } from 'lodash';
 import * as dateUtils from '../../../shared/utils/date';
-import createMessageModel from './message';
 import createUserModel from '../../core/models/user';
+import createMessageModel from './message';
 
 export default (dao) => ({
   type: 'conversation',

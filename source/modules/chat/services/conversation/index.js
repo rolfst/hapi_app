@@ -1,4 +1,4 @@
-import { uniq, find, map } from 'lodash';
+import { uniq, filter, map, omit } from 'lodash';
 import createError from '../../../../shared/utils/create-error';
 import * as impl from './implementation';
 import * as conversationRepo from '../../repositories/conversation';
@@ -27,11 +27,20 @@ export const create = async (payload, message) => {
 
 export const listConversations = async (payload) => {
   const conversations = await conversationRepo.findConversationsById(payload.ids);
-  const messages = await messageRepo.findLastForConversations(map(conversations, 'id'));
+  const messages = await messageRepo.findMessagesForConversations(map(conversations, 'id'));
 
-  return map(conversations, (conversation) => ({
-    ...conversation, lastMessage: find(messages, { conversationId: conversation.id }),
-  }));
+  return map(conversations, (conversation) => {
+    const messagesForConversation = filter(messages, { conversationId: conversation.id });
+    const conversationMessages = map(messagesForConversation,
+      (message) => omit(message, 'conversation', 'update_at')
+    );
+
+    return {
+      ...conversation,
+      lastMessage: conversationMessages[conversationMessages.length - 1],
+      messages: conversationMessages,
+    };
+  });
 };
 
 /**

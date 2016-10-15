@@ -68,6 +68,20 @@ export const findAllForConversation = async (conversationId) => {
   return findMessageByIds(map(result, 'id'));
 };
 
+// FIXME: temporary function so we don't break the apps
+export const findMessagesForConversations = async (conversationIds) => {
+  const result = await Message.findAll({
+    include: [{
+      attributes: [],
+      model: Conversation,
+      where: { id: { $in: conversationIds } },
+    }],
+  });
+
+  const plainObjs = map(result, (item) => item.get({ plain: true }));
+  return findMessageByIds(map(plainObjs, 'id'));
+};
+
 export const findLastForConversations = async (conversationIds) => {
   const result = await Message.findAll({
     attributes: [[sequelize.fn('MAX', sequelize.col('Message.id')), 'message_id']],
