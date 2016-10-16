@@ -50,7 +50,7 @@ describe('Get conversations for logged user', () => {
     assert.equal(result.data[0].last_message.text, 'Last message');
   });
 
-  it('should return messages for each converrsation', async () => {
+  it('should return messages for each conversation', async () => {
     const { result, statusCode } = await getRequest('/v1/chats/users/me/conversations');
 
     assert.equal(statusCode, 200);

@@ -30,5 +30,6 @@ describe('Get conversation', () => {
     assert.equal(result.data.users[0].id, global.users.employee.id);
     assert.equal(result.data.users[1].id, global.users.admin.id);
     assert.equal(result.data.last_message.text, 'Last message');
+    assert.equal(result.data.messages.length, 3);
   });
 });

@@ -57,11 +57,14 @@ export const getConversation = async (payload, message) => {
   const conversation = await conversationRepo.findConversationById(payload.id);
   if (!conversation) throw createError('404');
 
-  const lastMessages = await messageRepo.findLastForConversations([conversation.id]);
+  const [lastMessages, messages] = await Promise.all([
+    messageRepo.findLastForConversations([conversation.id]),
+    messageRepo.findAllForConversation(conversation.id),
+  ]);
 
   impl.assertThatUserIsPartOfTheConversation(conversation, message.credentials.id);
 
-  return { ...conversation, lastMessage: lastMessages[0] };
+  return { ...conversation, lastMessage: lastMessages[0], messages };
 };
 
 /**
