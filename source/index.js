@@ -1,16 +1,20 @@
-/* eslint no-console: "off" */
-'use strict';
-
+import 'babel-polyfill';
+import Parse from 'parse/node';
 import dotenv from 'dotenv';
-import createServer from 'server';
+dotenv.config();
+const createServer = require('./server').default;
 
-const { PORT } = process.env;
-const server = createServer(PORT || 8000);
+if (process.env.NODE_ENV === 'debug') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
+const server = createServer(process.env.PORT || 8000);
 
 server.start(err => {
   if (err) throw err;
 
-  dotenv.config();
+  const { PARSE_APP_ID, PARSE_CLIENT_KEY, PARSE_MASTER_KEY } = process.env;
+  Parse.initialize(PARSE_APP_ID, PARSE_CLIENT_KEY, PARSE_MASTER_KEY);
 
-  console.log('Server running at:', server.info.uri);
+  console.log(`Server running at ${server.info.uri}`);
 });

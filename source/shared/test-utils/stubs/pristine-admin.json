@@ -1,0 +1,13 @@
+{
+  "externalId": "8036",
+  "username": "bob+8036@rwrs.nl",
+  "email": "bob+8036@rwrs.nl",
+  "firstName": "Piet",
+  "lastName": "Doe",
+  "dateOfBirth": "1958-11-02",
+  "phoneNum": "0600000000",
+  "isAdmin": true,
+  "isActive": true,
+  "teamId": "72",
+  "password": "fakepassword"
+}

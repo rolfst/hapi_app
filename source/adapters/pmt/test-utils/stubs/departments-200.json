@@ -1,0 +1,39 @@
+{
+  "departments": [{
+    "department_id": "15",
+    "department_name": "Aardappelen Groente en Fruit",
+    "department_shortcode": "AGF"
+  }, {
+    "department_id": "104",
+    "department_name": "Administratie",
+    "department_shortcode": "Admin"
+  }, {
+    "department_id": "28",
+    "department_name": "Algemeen",
+    "department_shortcode": "ALG"
+  }, {
+    "department_id": "30",
+    "department_name": "Brood",
+    "department_shortcode": "BROOD"
+  }, {
+    "department_id": "70",
+    "department_name": "Counter",
+    "department_shortcode": "COUNT"
+  }, {
+    "department_id": "22",
+    "department_name": "Kassa",
+    "department_shortcode": "KASSA"
+  }, {
+    "department_id": "14",
+    "department_name": "Kruidenierswaren",
+    "department_shortcode": "KW"
+  }, {
+    "department_id": "89",
+    "department_name": "Slagerij",
+    "department_shortcode": "SLAG"
+  }, {
+    "department_id": "64",
+    "department_name": "Versplein",
+    "department_shortcode": "VP"
+  }]
+}

@@ -1,0 +1,45 @@
+[{
+  "externalId": "1",
+  "username": "beheerder@pmt.nl",
+  "email": "beheerder@pmt.nl",
+  "firstName": "Beheerder",
+  "lastName": "Doe",
+  "dateOfBirth": "1999-02-23",
+  "phoneNum": "600000000",
+  "isAdmin": true,
+  "isActive": true,
+  "teamIds": ["1", "2"]
+}, {
+  "externalId": "2",
+  "username": "medewerker@pmt.nl",
+  "email": "medewerker@pmt.nl",
+  "firstName": "Medewerker",
+  "lastName": "Doe",
+  "dateOfBirth": "1995-01-08",
+  "phoneNum": "612750183",
+  "isAdmin": false,
+  "isActive": true,
+  "teamIds": ["1"]
+}, {
+  "externalId": "3",
+  "username": "verwijderd@pmt.nl",
+  "email": "verwijderd@pmt.nl",
+  "firstName": "Verwijderd",
+  "lastName": "Doe",
+  "dateOfBirth": "1995-01-08",
+  "phoneNum": "600000000",
+  "isAdmin": false,
+  "isActive": false,
+  "teamIds": ["2", "3"]
+}, {
+  "externalId": "4",
+  "username": "dubbelganger@pmt.nl",
+  "email": "dubbelganger@pmt.nl",
+  "firstName": "Dubbelganger",
+  "lastName": "Doe",
+  "dateOfBirth": "1995-01-08",
+  "phoneNum": "600000000",
+  "isAdmin": false,
+  "isActive": true,
+  "teamIds": ["1"]
+}]
