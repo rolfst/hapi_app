@@ -44,9 +44,9 @@ describe('Authenticate', () => {
     const { result } = await loginRequest({ username, password });
     const { data } = result;
 
-    assert.property(data, 'access_token');
-    assert.property(data, 'refresh_token');
-    assert.property(data, 'last_login');
+    assert.isDefined(data.access_token);
+    assert.isDefined(data.refresh_token);
+    assert.isDefined(data.last_login);
   });
 
   it('should fail when password is not correct', async () => {
