@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { map, omit, merge } from 'lodash';
 import createError from '../../../shared/utils/create-error';
 import { ActivityTypes } from '../../../shared/models/activity';
@@ -32,11 +33,35 @@ const createDateFilter = (filter) => {
 };
 
 /**
+ * @param {object} [date=null] - moment, or parsable object
+ * @method findAllAcceptedExchanges
+ * @returns {Array<Exchange>} - Promise of list with Exchange objects
+ */
+export const findAllAcceptedExchanges = async (date = null) => {
+  const query = {
+    acceptCount: { $gt: 0 },
+    approvedBy: { $eq: null },
+  };
+
+  if (date) {
+    const momentObject = moment.isMoment(date) ? date : moment(date);
+    const selectedDate = momentObject.format('YYYY-MM-DD');
+    query.date = selectedDate;
+  }
+
+  const exchanges = await Exchange.findAll({
+    where: query,
+  });
+
+  return exchanges;
+};
+
+/**
  * Find a specific exchange by id
  * @param {number} exchangeId - Id of exchange being looked for
  * @param {number} userId - Id of the user to use in includes
  * @method findExchangeById
- * @return {Promise} Find exchange promise
+ * @return {Exchange} Find exchange promise
  */
 export async function findExchangeById(exchangeId, userId) {
   const extraIncludes = [{

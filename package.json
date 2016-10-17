@@ -20,7 +20,8 @@
     "coverage": "cross-env NODE_PATH=source API_ENV=testing istanbul cover _mocha -- --compilers js:babel-register source/shared/test-utils/spec-setup.js './source/**/*.spec.js' -s 10",
     "flow": "flow --help",
     "lint": "eslint source/",
-    "check": "npm run lint && npm run test && npm outdated --depth 0"
+    "check": "npm run lint && npm run test && npm outdated --depth 0",
+    "jobs": "cross-env NODE_PATH=source NODE_ENV=production babel-node ./source/modules/flexchange/scripts/createRemindersForAdmin.js"
   },
   "author": "",
   "license": "ISC",
