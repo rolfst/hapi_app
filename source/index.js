@@ -1,4 +1,5 @@
 import 'babel-polyfill';
+import 'newrelic';
 import Parse from 'parse/node';
 import dotenv from 'dotenv';
 dotenv.config();
