@@ -1,4 +1,5 @@
 import * as networkService from '../../modules/core/services/network';
+import createError from '../utils/create-error';
 import * as serverUtil from '../utils/server';
 
 export default async (req, reply) => {
@@ -10,8 +11,11 @@ export default async (req, reply) => {
     return reply(network);
   } catch (err) {
     console.log('Error in the prefetch network middleware', err);
+
+    if (!err.isBoom) return reply(createError('500'));
+
     const errorResponse = serverUtil.transformBoomToErrorResponse(err);
 
-    return reply(errorResponse).takeover().code(403);
+    return reply(errorResponse).takeover().code(errorResponse.status_code);
   }
 };

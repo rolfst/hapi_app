@@ -35,6 +35,8 @@ export const findNetworkById = async (id) => {
     include: defaultIncludes,
   });
 
+  if (!result) return null;
+
   return toModel(result);
 };
 
