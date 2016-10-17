@@ -1,6 +1,7 @@
 import Promise from 'bluebird';
 import { flatten, map, pick, get, find } from 'lodash';
 import configurationMail from '../../../../shared/mails/configuration-invite';
+import createError from '../../../../shared/utils/create-error';
 import * as mailer from '../../../../shared/services/mailer';
 import * as integrationsAdapter from '../../../../shared/utils/integrations-adapter';
 import * as networkRepo from '../../repositories/network';
@@ -113,6 +114,8 @@ const selectUser = (users, userId) => find(users, (user) => user.externalId === 
  */
 export const getNetwork = async (payload, message) => {
   const network = await networkRepo.findNetworkById(payload.id);
+
+  if (!network) throw createError('404');
 
   await impl.assertThatUserBelongsToTheNetwork(network.id, message.credentials.id);
 

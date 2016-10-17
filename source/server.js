@@ -48,7 +48,7 @@ const createServer = (port) => {
   });
 
   server.on('request-internal', (request, event, tags) => {
-    if (process.env.NODE_ENV === 'testing') return false;
+    if (process.env.NODE_ENV === 'production') return false;
 
     if (tags.error && tags.internal) {
       if (process.env.NODE_ENV === 'debug') {
