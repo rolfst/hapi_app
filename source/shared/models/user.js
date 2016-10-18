@@ -101,7 +101,9 @@ const User = model.define('User', {
       });
     },
     toJSON: function () { // eslint-disable-line func-names, object-shorthand
-      const environment = process.env.API_ENV === 'production' ? 'production' : 'staging';
+      let environment = 'production';
+      if (process.env.API_ENV === 'acceptance') environment = 'acc';
+      if (process.env.API_ENV === 'development') environment = 'staging';
 
       return {
         type: 'user',
@@ -124,7 +126,9 @@ const User = model.define('User', {
       };
     },
     toSimpleJSON: function () { // eslint-disable-line func-names, object-shorthand
-      const environment = process.env.API_ENV === 'production' ? 'production' : 'staging';
+      let environment = 'production';
+      if (process.env.API_ENV === 'acceptance') environment = 'acc';
+      if (process.env.API_ENV === 'development') environment = 'staging';
 
       return {
         type: 'user',

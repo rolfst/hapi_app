@@ -10,7 +10,9 @@ const whitelistAttrs = [
   'email',
 ];
 
-const environment = process.env.API_ENV === 'production' ? 'production' : 'staging';
+let environment = 'production';
+if (process.env.API_ENV === 'acceptance') environment = 'acc';
+if (process.env.API_ENV === 'development') environment = 'staging';
 
 export default (dao) => ({
   type: 'user',
