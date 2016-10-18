@@ -31,6 +31,43 @@ describe('View users related to exchange', () => {
       await exchange.destroy();
     });
 
+    it('should return correct properties', async () => {
+      const exchange = await createExchange(global.users.admin.id, network.id, {
+        date: moment().format('YYYY-MM-DD'),
+        type: exchangeTypes.USER,
+        values: [global.users.employee.id, global.users.admin.id],
+      });
+
+      const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}/users`;
+      const { result, statusCode } = await getRequest(endpoint);
+
+      const expectedProperties = [
+        'type',
+        'id',
+        'username',
+        'first_name',
+        'last_name',
+        'full_name',
+        'phone_num',
+        'email',
+        'external_id',
+        'integration_auth',
+        'function',
+        'role_type',
+        'profile_img',
+        'date_of_birth',
+        'created_at',
+        'is_active',
+        'last_login',
+      ];
+
+      assert.equal(statusCode, 200);
+
+      expectedProperties.forEach(property => assert.property(result.data[0], property));
+
+      await exchange.destroy();
+    });
+
     it('should return users for exchange created for user', async () => {
       const exchange = await createExchange(global.users.admin.id, network.id, {
         date: moment().format('YYYY-MM-DD'),

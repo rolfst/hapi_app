@@ -7,4 +7,5 @@ database*.json
 .eslintcache
 .env*
 
+newrelic_agent.log
 /coverage
