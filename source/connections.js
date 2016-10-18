@@ -1,6 +1,6 @@
 /* eslint no-console: "off" */
 import Sequelize from 'sequelize';
-import config from './database.json';
+import config from './database.js';
 
 export const db = (() => {
   const { host, database, username, password, dialect, port } = config[process.env.API_ENV];
