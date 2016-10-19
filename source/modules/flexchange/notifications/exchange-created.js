@@ -5,7 +5,7 @@ import notifier from '../../../shared/services/notifier';
 
 export const createNotification = (exchange) => {
   const date = moment(exchange.date).calendar(null, {
-    sameday: 'op [vandaag]',
+    sameday: '[vandaag] om HH:mm',
     nextDay: 'voor [morgen]',
     nextWeek: 'aankomende dddd',
     sameElse: 'op dddd D MMMM',

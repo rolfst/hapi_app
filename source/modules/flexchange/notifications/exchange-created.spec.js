@@ -15,4 +15,17 @@ describe('Exchange created notification', () => {
 
     assert.deepEqual(actual, expected);
   });
+
+  it('should return a correct notification object for today', () => {
+    const futureMoment = moment().add(2, 'hrs');
+    const exchange = { id: 1, date: futureMoment.format('YYYY-MM-DDTHH:mm') };
+    const actual = createNotification(exchange);
+
+    const expected = {
+      text: `Er is een nieuwe shift beschikbaar vandaag om ${futureMoment.format('HH:mm')}`,
+      data: { id: 1, type: 'exchange' },
+    };
+
+    assert.deepEqual(actual, expected);
+  });
 });
