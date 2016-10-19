@@ -7,8 +7,8 @@ export const createNotification = (exchange) => {
   const date = moment(exchange.date).calendar(null, {
     sameday: '[vandaag] om HH:mm',
     nextDay: 'voor [morgen]',
-    nextWeek: 'aankomende dddd',
-    sameElse: 'op dddd D MMMM',
+    nextWeek: 'voor dddd',
+    sameElse: 'op dddd DD MMMM',
   });
 
   return {

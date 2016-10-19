@@ -9,7 +9,7 @@ describe('Exchange created notification', () => {
     const actual = createNotification(exchange);
 
     const expected = {
-      text: `Er is een nieuwe shift beschikbaar op ${futureMoment.format('dddd D MMMM')}`,
+      text: `Er is een nieuwe shift beschikbaar op ${futureMoment.format('dddd DD MMMM')}`,
       data: { id: 1, type: 'exchange' },
     };
 
@@ -23,6 +23,19 @@ describe('Exchange created notification', () => {
 
     const expected = {
       text: `Er is een nieuwe shift beschikbaar vandaag om ${futureMoment.format('HH:mm')}`,
+      data: { id: 1, type: 'exchange' },
+    };
+
+    assert.deepEqual(actual, expected);
+  });
+
+  it('should return a correct notification object for this week', () => {
+    const futureMoment = moment().add(2, 'days');
+    const exchange = { id: 1, date: futureMoment.format('YYYY-MM-DDTHH:mm') };
+    const actual = createNotification(exchange);
+
+    const expected = {
+      text: `Er is een nieuwe shift beschikbaar voor ${futureMoment.format('dddd')}`,
       data: { id: 1, type: 'exchange' },
     };
 
