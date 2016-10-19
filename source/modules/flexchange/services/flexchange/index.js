@@ -228,6 +228,7 @@ const createNotifier = (roleType) => {
     return createdByAdminNotifier;
   }
 };
+
 const createValidator = (exchangeType) => {
   if (exchangeType === exchangeTypes.TEAM) return teamRepo.validateTeamIds;
   if (exchangeType === exchangeTypes.USER) return userRepo.validateUserIds;

@@ -1,14 +1,29 @@
 import { assert } from 'chai';
+import moment from 'moment';
 import { createNotification } from './creator-approved';
 
 describe('Your exchange approved notification', () => {
   it('should return a correct notification object', () => {
-    const exchange = { id: 1, date: '2016-06-29' };
+    const futureMoment = moment().add(2, 'weeks');
+    const exchange = { id: 1, date: futureMoment.format('YYYY-MM-DD') };
     const approvedUser = { fullName: 'User#1' };
     const actual = createNotification(exchange, approvedUser);
 
     const expected = {
-      text: 'Goed nieuws, je dienst van woensdag 29 juni is geruild met User#1. High five!',
+      text: `Er is een vervanger gevonden voor je shift op ${futureMoment.format('dddd DD MMMM')}`,
+      data: { id: 1, type: 'exchange' },
+    };
+
+    assert.deepEqual(actual, expected);
+  });
+ 
+  it('should return a correct notification object', () => {
+    const exchange = { id: 1, date: moment().add(1, 'days').format('YYYY-MM-DD') };
+    const approvedUser = { fullName: 'User#1' };
+    const actual = createNotification(exchange, approvedUser);
+
+    const expected = {
+      text: 'Er is een vervanger gevonden voor je shift voor morgen',
       data: { id: 1, type: 'exchange' },
     };
 
