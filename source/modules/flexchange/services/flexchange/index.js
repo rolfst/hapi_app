@@ -72,7 +72,7 @@ export const acceptExchange = async (payload, message) => {
     { userId: message.credentials.id },
     { networkId: message.network.id }
   );
- 
+
   notification.send(message.network, acceptedExchange, acceptanceUser);
 
   return acceptedExchange;

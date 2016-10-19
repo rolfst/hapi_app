@@ -16,7 +16,7 @@ describe('Your exchange approved notification', () => {
 
     assert.deepEqual(actual, expected);
   });
- 
+
   it('should return a correct notification object', () => {
     const exchange = { id: 1, date: moment().add(1, 'days').format('YYYY-MM-DD') };
     const approvedUser = { fullName: 'User#1' };
