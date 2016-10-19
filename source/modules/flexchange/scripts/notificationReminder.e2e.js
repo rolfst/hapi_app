@@ -28,7 +28,7 @@ describe('Reminder', () => {
 
     exchangeId = exchange.id;
   });
-  
+
   after(async () => {
     const exchange = await exchangeRepo.findExchangeById(exchangeId);
     notifier.send.restore();
@@ -37,7 +37,7 @@ describe('Reminder', () => {
   });
 
   it('should find an exchange', async () => {
-    const response = await getRequest('/v2/exchanges/reminder');
+    await getRequest('/v2/exchanges/reminder');
 
     assert.equal(notifier.send.called, true);
   });
