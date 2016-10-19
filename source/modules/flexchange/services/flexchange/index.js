@@ -68,7 +68,12 @@ export const acceptExchange = async (payload, message) => {
   if (approved === 0) throw createError('403', 'You are already rejected for the exchange.');
 
   const acceptedExchange = await exchangeRepo.acceptExchange(exchange.id, message.credentials.id);
-  notification.send(message.network, acceptedExchange, message.credentials);
+  const acceptanceUser = await userService.getUser(
+    { userId: message.credentials.id },
+    { networkId: message.network.id }
+  );
+ 
+  notification.send(message.network, acceptedExchange, acceptanceUser);
 
   return acceptedExchange;
 };

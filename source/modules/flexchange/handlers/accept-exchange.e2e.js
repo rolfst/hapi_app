@@ -1,7 +1,9 @@
 import { assert } from 'chai';
+import sinon from 'sinon';
 import moment from 'moment';
-import { exchangeTypes } from '../models/exchange';
+import notifier from '../../../shared/services/notifier';
 import { patchRequest } from '../../../shared/test-utils/request';
+import { exchangeTypes } from '../models/exchange';
 import { createExchange } from '../repositories/exchange';
 
 describe('Accept exchange', () => {
@@ -26,11 +28,11 @@ describe('Accept exchange', () => {
     const response = await patchRequest(endpoint, { action: 'accept' });
     const { data } = response.result;
 
+    assert.equal(response.statusCode, 200);
     assert.equal(data.response_status, 'ACCEPTED');
     assert.equal(data.accept_count, 1);
     assert.equal(data.responses[0].response, true);
     assert.equal(data.responses[0].user.full_name, global.users.admin.fullName);
-    assert.equal(response.statusCode, 200);
   });
 
   it('should be able to accept after declining', async () => {
@@ -44,5 +46,16 @@ describe('Accept exchange', () => {
     assert.equal(data.accept_count, 1);
     assert.equal(data.responses[0].response, true);
     assert.equal(data.responses[0].user.full_name, global.users.admin.fullName);
+  });
+
+  it('should send accept notification to admin', async () => {
+    const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}`;
+
+    await patchRequest(endpoint, { action: 'accept' });
+
+    assert.equal(notifier.send.called, true);
+
+    notifier.send.restore();
+    sinon.stub(notifier, 'send').returns(null);
   });
 });
