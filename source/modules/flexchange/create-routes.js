@@ -76,6 +76,11 @@ const routes = [{
   handler: require(`${basePath}/modify-exchange`),
   validator: require('./validators/modify-exchange'),
 }, {
+  method: 'GET',
+  url: '/v2/exchanges/reminder',
+  handler: require(`${basePath}/send-reminder`),
+  prefetch: false,
+}, {
   method: 'DELETE',
   url: `${baseUrl}/exchanges/{exchangeId}`,
   handler: require(`${basePath}/remove-exchange`),

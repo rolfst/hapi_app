@@ -13,7 +13,7 @@ const createAdminInfo = (admins) => {
 
 const createNotificationData = async (exchange) => {
   const network = await networkRepo.findNetworkById(exchange.networkId);
-  const admins = await networkRepo.findAdminsByNetwork(network);
+  const admins = await networkRepo.findUsersForNetwork(network.id, 'ADMIN');
   const usersToNotify = createAdminInfo(admins);
   const notificationData = {
     network,
@@ -23,7 +23,7 @@ const createNotificationData = async (exchange) => {
   return notificationData;
 };
 
-export const main = async () => {
+export const sendReminder = async () => {
   console.log('start send reminders for accepted exchanges');
 
   try {
@@ -44,4 +44,4 @@ export const main = async () => {
   }
 };
 
-if (require.main === module) main();
+if (require.main === module) sendReminder();
