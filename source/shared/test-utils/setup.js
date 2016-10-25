@@ -10,6 +10,7 @@ import { UserRoles } from '../services/permission';
 import * as accessService from '../../modules/integrations/services/access';
 import * as networkService from '../../modules/core/services/network';
 import * as userRepo from '../../modules/core/repositories/user';
+import * as integrationRepo from '../../modules/core/repositories/integration';
 import authenticate from './authenticate';
 import generateNetworkName from './create-network-name';
 
@@ -30,6 +31,11 @@ before(async () => {
     userRepo.createUser(blueprints.users.employee),
     userRepo.createUser(blueprints.users.networkless),
   ]);
+
+  await integrationRepo.createIntegration({
+    name: 'PMT',
+    token: 'footoken',
+  });
 
   // Create networks
   const [createdFlexNetwork, createdPMTNetwork] = await Promise.all([

@@ -15,7 +15,7 @@ describe('Create exchange', () => {
 
     [flexAppealTeam, otherNetworkTeam] = await Promise.all([
       teamRepo.createTeam({ networkId: network.id, name: 'Test network' }),
-      teamRepo.createTeam({ networkId: 32, name: 'Test network' }),
+      teamRepo.createTeam({ networkId: global.networks.pmt.id, name: 'Test other network' }),
     ]);
   });
 
