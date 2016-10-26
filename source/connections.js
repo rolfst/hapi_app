@@ -23,7 +23,7 @@ export const db = (() => {
 })();
 
 export const server = {
-  host: 'localhost',
+  host: '127.0.0.1',
   port: 8000,
   routes: {
     cors: {
