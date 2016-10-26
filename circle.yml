@@ -1,0 +1,21 @@
+machine:
+  node:
+    version: v6.7.0
+  environment:
+    API_ENV: testing
+    TEST_DB_HOST: 127.0.0.1
+    TEST_DB_NAME: circle_test
+    TEST_DB_USERNAME: ubuntu
+
+dependencies:
+  pre:
+    - npm set progress=false
+
+database:
+  post:
+    - mysql -u ubuntu -e 'SET GLOBAL sql_mode = ""'
+    - ./node_modules/.bin/sequelize db:migrate --env=testing
+
+test:
+  override:
+    - npm run check
