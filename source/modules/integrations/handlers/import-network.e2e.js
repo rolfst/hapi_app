@@ -38,6 +38,7 @@ describe('Network import', () => {
       email: 'dubbelganger@pmt.nl',
       firstName: 'Dubbelganger',
       lastName: 'Doe',
+      password: 'fakepassword',
     });
 
     await teamRepo.createTeam({

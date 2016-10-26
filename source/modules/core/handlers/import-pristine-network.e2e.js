@@ -70,6 +70,8 @@ describe('Import pristine network', () => {
   });
 
   describe('Fault path', async () => {
+    let user;
+
     before(async () => {
       sandbox = sinon.sandbox.create();
       const fakeAdapter = {
@@ -79,18 +81,16 @@ describe('Import pristine network', () => {
 
       sandbox.stub(createAdapter, 'default').returns(fakeAdapter);
 
-      const user = await userRepo.createUser({ ...employee });
+      user = await userRepo.createUser({
+        ...employee, password: 'fakepassword' });
       await networkRepo.createNetwork(
-        user.id,
-        pristineNetwork.name,
-        pristineNetwork.externalId);
+        user.id, pristineNetwork.name, pristineNetwork.externalId);
     });
 
     after(async () => {
       sandbox.restore();
-      const network = await networkRepo.findNetwork({ name: pristineNetwork.name });
 
-      return networkRepo.deleteById(network.id);
+      return userRepo.deleteById(user.id);
     });
 
     it('should fail on missing userId', async () => {

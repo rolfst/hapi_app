@@ -1,6 +1,7 @@
 import { find, flatMap, differenceBy, intersectionBy } from 'lodash';
 import Promise from 'bluebird';
 import createError from '../../../shared/utils/create-error';
+import * as passwordUtils from '../../../shared/utils/password';
 import * as networkService from '../../core/services/network';
 import * as networkRepo from '../../core/repositories/network';
 import * as teamRepo from '../../core/repositories/team';
@@ -51,7 +52,8 @@ export const assertExternalIdNotPresentInNetwork = async (userId, networkId, ext
  */
 export const importUsers = async (internalUsers, externalUsers, network) => {
   const newExternalUsers = differenceBy(externalUsers, internalUsers, 'email');
-  const newUsers = await userRepo.createBulkUsers(newExternalUsers);
+  const newUsers = await userRepo.createBulkUsers(
+    newExternalUsers.map(u => ({ ...u, password: passwordUtils.plainRandom() })));
   const existingUsers = intersectionBy(internalUsers, externalUsers, 'email');
   const usersToAddToNetwork = [...newUsers, ...existingUsers];
 

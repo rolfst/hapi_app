@@ -155,6 +155,7 @@ describe('Service: invite user', () => {
         firstName: 'Removed',
         lastName: 'Doe',
         email: 'removeduser@example.xyz',
+        password: 'foopassword',
       };
 
       deletedUser = await userRepo.createUser(attributes);

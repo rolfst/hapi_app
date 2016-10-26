@@ -20,7 +20,7 @@ export const inviteNewUser = async (network, { firstName, lastName, email, roleT
     lastName,
     username: email,
     email,
-    password: passwordUtil.make(plainPassword),
+    password: plainPassword,
   };
 
   const user = await userRepo.createUser(attributes);
