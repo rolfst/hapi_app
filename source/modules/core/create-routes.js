@@ -2,7 +2,7 @@ import createRoutes from '../../shared/utils/create-routes';
 
 const routes = [{
   method: 'GET',
-  url: '/v1/networks/{networkId}',
+  url: '/v2/networks/{networkId}',
   handler: require('./handlers/view-network'),
 }, {
   method: 'GET',
