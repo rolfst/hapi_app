@@ -2,6 +2,7 @@ import Promise from 'bluebird';
 import { flatten, map, pick, get, find } from 'lodash';
 import configurationMail from '../../../../shared/mails/configuration-invite';
 import createError from '../../../../shared/utils/create-error';
+import * as passwordUtils from '../../../../shared/utils/password';
 import * as mailer from '../../../../shared/services/mailer';
 import * as integrationsAdapter from '../../../../shared/utils/integrations-adapter';
 import * as networkRepo from '../../repositories/network';
@@ -152,14 +153,14 @@ export const listNetworksForUser = async (payload) => {
  */
 export const importPristineNetwork = async (payload) => {
   const networkPayload = pick(payload, ['name', 'externalId']);
-  const integrationName = payload.integrationName;
 
+  await impl.assertTheNetworkIsNotImportedYet(networkPayload);
+
+  const integrationName = payload.integrationName;
   const usersFromNetwork = await integrationsAdapter.usersFromPristineNetwork(
     networkPayload.externalId);
   const admin = selectUser(usersFromNetwork, get(payload, 'userId'));
-  const user = await userRepo.createUser({ ...admin });
-
-  await impl.assertTheNetworkIsNotImportedYet(networkPayload);
+  const user = await userRepo.createUser({ ...admin, password: passwordUtils.plainRandom() });
 
   const newNetwork = await networkRepo.createIntegrationNetwork({
     integrationName,

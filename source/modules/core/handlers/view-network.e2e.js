@@ -5,8 +5,8 @@ describe('View network', async () => {
   it('should return correct has_integration property value', async () => {
     const { pmt, flexAppeal } = global.networks;
     const [integratedNetwork, nonIntegratedNetwork] = await Promise.all([
-      getRequest(`/v1/networks/${pmt.id}`),
-      getRequest(`/v1/networks/${flexAppeal.id}`),
+      getRequest(`/v2/networks/${pmt.id}`),
+      getRequest(`/v2/networks/${flexAppeal.id}`),
     ]);
 
     assert.equal(integratedNetwork.result.data.has_integration, true);
@@ -14,7 +14,7 @@ describe('View network', async () => {
   });
 
   it('should return correct properties for network object', async () => {
-    const { result: { data } } = await getRequest(`/v1/networks/${global.networks.flexAppeal.id}`);
+    const { result: { data } } = await getRequest(`/v2/networks/${global.networks.flexAppeal.id}`);
 
     assert.property(data, 'id');
     assert.property(data, 'super_admin');

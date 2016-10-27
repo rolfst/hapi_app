@@ -4,11 +4,15 @@ moment.locale('nl');
 import notifier from '../../../shared/services/notifier';
 
 export const createNotification = (exchange) => {
-  const date = moment(exchange.date).format('dddd D MMMM');
-  const creator = exchange.User.fullName;
+  const date = moment(exchange.date).calendar(null, {
+    sameday: '[vandaag] om HH:mm',
+    nextDay: 'voor [morgen]',
+    nextWeek: 'voor dddd',
+    sameElse: 'op dddd DD MMMM',
+  });
 
   return {
-    text: `Ik kan niet werken op ${date}, kun jij voor mij werken? - ${creator}`,
+    text: `Er is een nieuwe shift beschikbaar ${date}`,
     data: { id: exchange.id, type: 'exchange' },
   };
 };

@@ -1,23 +1,25 @@
 'use strict';
 
 module.exports = {
-  up(queryInterface, Sequelize) {
-    return queryInterface.createTable('conversations', {
+  up: function (queryInterface, Sequelize) {
+    return queryInterface.createTable('attachments', {
       id: {
         type: Sequelize.INTEGER.UNSIGNED,
         primaryKey: true,
         autoIncrement: true,
       },
-      type: {
-        type: Sequelize.ENUM('GROUP', 'PRIVATE'),
-        defaultValue: 'PRIVATE',
-      },
-      created_by: {
+      message_id: {
         type: Sequelize.INTEGER.UNSIGNED,
+        allowNull: false,
         references: {
-          model: 'users',
+          model: 'messages',
+          key: 'id',
         },
         onDelete: 'cascade',
+      },
+      path: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       created_at: {
         type: Sequelize.DATE,
@@ -27,7 +29,7 @@ module.exports = {
     });
   },
 
-  down(queryInterface, Sequelize) {
-    return queryInterface.dropTable('conversations');
-  },
+  down: function (queryInterface, Sequelize) {
+    return queryInterface.dropTable('attachments');
+  }
 };

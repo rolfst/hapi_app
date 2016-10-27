@@ -4,6 +4,22 @@ import * as userRepo from '../../repositories/user';
 import * as networkService from '../../services/network';
 import * as impl from './implementation';
 
+
+/**
+ * Retrieve user without network scope
+ * @param {object} payload - Object containing payload data
+ * @param {number} payload.userId - The id for the user to find
+ * @param {object} message - Object containing meta data
+ * @param {object} message.credentials - The authenticated user
+ * @param {object} message.network - The network associated with the request
+ * @param {object} message.artifacts - Artifacts containing request meta data
+ * @method getUser
+ * @return {User} Returning User model
+ */
+export const getUser = async (payload) => {
+  return userRepo.findUserById(payload.userId);
+};
+
 /**
  * Retrieve multiple users by id with network scope
  * @param {object} payload - Object containing payload data

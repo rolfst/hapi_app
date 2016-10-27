@@ -4,23 +4,26 @@ import notifier from '../../../shared/services/notifier';
 
 moment.locale('nl');
 
-export const createNotification = (exchange, substituteUser) => {
-  const date = moment(exchange.date).format('dddd D MMMM');
-  const substitute = substituteUser.fullName;
+export const createNotification = (exchange) => {
+  const date = moment(exchange.date).calendar(null, {
+    sameday: 'op [vandaag]',
+    nextDay: 'voor [morgen]',
+    nextWeek: 'aankomende dddd',
+    sameElse: 'op dddd DD MMMM',
+  });
 
   return {
-    text: `Goed nieuws, je dienst van ${date} is geruild met ${substitute}. High five!`,
+    text: `Er is een vervanger gevonden voor je shift ${date}`,
     data: { id: exchange.id, type: 'exchange' },
   };
 };
 
 export const send = async (exchange) => {
-  const [exchangeUser, approvedUser] = await Promise.all([
+  const [exchangeUser] = await Promise.all([
     exchange.getUser(),
-    exchange.getApprovedUser(),
   ]);
 
-  const notification = createNotification(exchange, approvedUser);
+  const notification = createNotification(exchange);
 
   return notifier.send([exchangeUser], notification);
 };

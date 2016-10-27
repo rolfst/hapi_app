@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "migrate": "sequelize db:migrate",
     "clean": "rimraf build && mkdir build",
     "copy-config": "cp ./source/database.json ./build/",
     "start:test": "cross-env NODE_PATH=build NODE_ENV=production API_ENV=development node build/index.js",
@@ -48,7 +47,8 @@
     "raven": "0.12.1",
     "sequelize": "3.19.3",
     "smtpapi": "1.2.0",
-    "uuid-v4": "0.1.0"
+    "uuid-v4": "0.1.0",
+    "yargs": "6.3.0"
   },
   "devDependencies": {
     "babel-cli": "6.6.5",

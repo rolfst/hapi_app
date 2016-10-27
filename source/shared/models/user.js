@@ -32,7 +32,7 @@ const User = model.define('User', {
   },
   password: {
     type: Sequelize.STRING,
-    allowNull: true,
+    allowNull: false,
     set: function (val) { // eslint-disable-line object-shorthand, func-names
       this.setDataValue('password', password.make(val));
     },

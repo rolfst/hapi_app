@@ -1,6 +1,7 @@
 import { uniq, map } from 'lodash';
 import Promise from 'bluebird';
 import { Network, Team, User, NetworkUser, Integration } from '../../../shared/models';
+import createError from '../../../shared/utils/create-error';
 import createNetworkModel from '../models/network';
 import * as userRepo from './user';
 
@@ -171,6 +172,8 @@ export async function createIntegrationNetwork({
 }) {
   const network = await createNetwork(userId, name, externalId);
   const integration = await findIntegrationByName(integrationName);
+
+  if (!integration) throw createError('10001', `Integration ${integrationName} not found.`);
 
   await addIntegrationToNetwork(network.id, integration.id);
 
