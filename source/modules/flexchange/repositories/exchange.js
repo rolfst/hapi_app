@@ -223,7 +223,7 @@ export async function createExchange(userId, networkId, attributes) {
     },
   });
 
-  return exchange.reload();
+  return findExchangeById(exchange.id);
 }
 
 export const getRespondedToExchange = async (userId, networkId) => {

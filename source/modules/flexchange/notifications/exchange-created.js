@@ -2,17 +2,19 @@ import moment from 'moment';
 import 'moment/locale/nl';
 moment.locale('nl');
 import notifier from '../../../shared/services/notifier';
+import * as notificationUtils from '../utils/notification';
 
 export const createNotification = (exchange) => {
   const date = moment(exchange.date).calendar(null, {
-    sameday: '[vandaag] om HH:mm',
-    nextDay: 'voor [morgen]',
-    nextWeek: 'voor dddd',
-    sameElse: 'op dddd DD MMMM',
+    sameDay: '[voor] [vandaag]',
+    nextDay: '[voor] [morgen]',
+    nextWeek: '[voor] [aankomende] dddd',
+    sameElse: '[voor] dddd D MMMM',
   });
 
   return {
-    text: `Er is een nieuwe shift beschikbaar ${date}`,
+    text: `${exchange.User.fullName} zoekt een vervanger ${date} van ` +
+      `${notificationUtils.createTimeText(exchange)}.`,
     data: { id: exchange.id, type: 'exchange' },
   };
 };

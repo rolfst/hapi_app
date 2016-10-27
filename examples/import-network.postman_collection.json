@@ -1,0 +1,198 @@
+{
+	"variables": [],
+	"info": {
+		"name": "import network",
+		"_postman_id": "378a8727-85d8-0b0a-63db-d4a9b89b71c5",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": "var jsonData = JSON.parse(responseBody);\n\npostman.setGlobalVariable(\"token\", jsonData.data.access_token);"
+					}
+				}
+			],
+			"request": {
+				"url": "http://localhost:3000/v2/authenticate",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "username",
+							"value": "ruben@flex-appeal.nl",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "password",
+							"value": "admin",
+							"type": "text",
+							"enabled": true
+						}
+					]
+				},
+				"description": "entry point to retrieve auth token"
+			},
+			"response": [
+				{
+					"name": "login-token",
+					"originalRequest": {
+						"url": "http://localhost:3000/v2/authenticate",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"enabled": true,
+								"description": "The mime type of this content"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "ruben@flex-appeal.nl",
+									"type": "text",
+									"enabled": true
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "text",
+									"enabled": true
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "html",
+					"_postman_previewtype": "text",
+					"header": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 25 Oct 2016 08:01:02 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked",
+							"name": "Transfer-Encoding",
+							"description": "The form of encoding used to safely transfer the entity to the user. Currently defined methods are: chunked, compress, deflate, gzip, identity."
+						},
+						{
+							"key": "cache-control",
+							"value": "no-cache",
+							"name": "cache-control",
+							"description": "Tells all caching mechanisms from server to client whether they may cache this object. It is measured in seconds"
+						},
+						{
+							"key": "content-encoding",
+							"value": "gzip",
+							"name": "content-encoding",
+							"description": "The type of encoding used on the data."
+						},
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8",
+							"name": "content-type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "vary",
+							"value": "origin,accept-encoding",
+							"name": "vary",
+							"description": "Tells downstream proxies how to match future request headers to decide whether the cached response can be used rather than requesting a fresh one from the origin server."
+						}
+					],
+					"cookie": [],
+					"responseTime": 355,
+					"body": "{\"data\":{\"access_token\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoiMTQ3NzM4NjA2MiIsImlzcyI6Imh0dHBzOi8vYXBpLmZsZXgtYXBwZWFsLm5sIiwiaWF0IjoiMTQ3NzM4MjQ2MiIsInN1YiI6IjEiLCJqdGkiOjc4OTY4NDcsImludGVncmF0aW9ucyI6W119.6hluGbDOuL6-tfhXib1DozsD17SPl0bOvU51bizmzHg\",\"refresh_token\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoicmVmcmVzaF90b2tlbiIsInN1YiI6IjEiLCJqdGkiOjY3MDIxNzF9.PfAvphEwomzCE2m5JUwrpAkp_VXPu2IRZe3493VqHKM\",\"last_login\":\"2016-10-19T08:37:26.000Z\"}}"
+				}
+			]
+		},
+		{
+			"name": "list admins",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": "var jsonData = JSON.parse(responseBody);\npostman.setGlobalVariable(\"username\", jsonData.data[0].username);"
+					}
+				}
+			],
+			"request": {
+				"url": "http://localhost:3000/v2/networks/45/integration/admins",
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-Token",
+						"value": "dkEo9KLuE7BTw4xMkwwG",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "import",
+			"request": {
+				"url": "http://localhost:3000/v2/networks/45/integration/import",
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-Token",
+						"value": "dkEo9KLuE7BTw4xMkwwG",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "external_username",
+							"value": "{{username}}",
+							"type": "text",
+							"enabled": true
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
