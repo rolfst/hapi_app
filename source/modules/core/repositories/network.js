@@ -51,13 +51,10 @@ export const findNetworkByIds = async (ids) => {
 };
 
 export const findIntegrationNameForNetwork = async (networkId) => {
-  const result = await Network.findById(networkId, {
-    include: defaultIncludes,
-  });
+  const result = await findNetworkById(networkId);
+  if (!result.hasIntegration) return null;
 
-  if (!result) return null;
-
-  return result.Integrations[0].name;
+  return result.integrations[0];
 };
 
 export const findIntegrationInfo = async (userId) => {
