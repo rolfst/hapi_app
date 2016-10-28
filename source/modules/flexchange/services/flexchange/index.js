@@ -4,7 +4,6 @@ import createAdapter from '../../../../shared/utils/create-adapter';
 import analytics from '../../../../shared/services/analytics';
 import approveExchangeEvent from '../../../../shared/events/approve-exchange-event';
 import createError from '../../../../shared/utils/create-error';
-import { UserRoles } from '../../../../shared/services/permission';
 import newExchangeEvent from '../../../../shared/events/new-exchange-event';
 import * as teamRepo from '../../../core/repositories/team';
 import * as userRepo from '../../../core/repositories/user';
@@ -17,14 +16,14 @@ import { exchangeTypes } from '../../models/exchange';
 import * as commentRepo from '../../repositories/comment';
 import * as exchangeRepo from '../../repositories/exchange';
 import * as exchangeResponseRepo from '../../repositories/exchange-response';
-import * as notification from '../../notifications/accepted-exchange';
+import * as acceptanceNotifier from '../../notifications/accepted-exchange';
 import * as creatorNotifier from '../../notifications/creator-approved';
 import * as substituteNotifier from '../../notifications/substitute-approved';
-import * as createdByAdminNotifier from '../../notifications/exchange-created-by-admin';
 import * as createdNotifier from '../../notifications/exchange-created';
 import * as impl from './implementation';
 
 const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
+
 const findUsersByType = async (exchange, network, exchangeValues, loggedUser) => {
   let usersPromise;
   if (exchange.type === exchangeTypes.NETWORK) {
@@ -73,7 +72,7 @@ export const acceptExchange = async (payload, message) => {
     { networkId: message.network.id }
   );
 
-  notification.send(message.network, acceptedExchange, acceptanceUser);
+  acceptanceNotifier.send(message.network, acceptedExchange, acceptanceUser);
 
   return acceptedExchange;
 };
@@ -226,14 +225,6 @@ export const listExchangesForNetwork = async (payload, message) => {
   return orderBy(uniqBy(exchanges, 'id'), 'date');
 };
 
-const createNotifier = (roleType) => {
-  if (roleType === UserRoles.EMPLOYEE) {
-    return createdNotifier;
-  } else if (roleType === UserRoles.ADMIN) {
-    return createdByAdminNotifier;
-  }
-};
-
 const createValidator = (exchangeType) => {
   if (exchangeType === exchangeTypes.TEAM) return teamRepo.validateTeamIds;
   if (exchangeType === exchangeTypes.USER) return userRepo.validateUserIds;
@@ -262,9 +253,7 @@ export const createExchange = async (payload, message) => {
 
   const users = await findUsersByType(createdExchange, network, payload.values, credentials);
 
-  const networkUser = await userRepo.findUserMetaDataForNetwork(credentials.id, network.id);
-  const notifier = createNotifier(networkUser.roleType);
-  notifier.send(users, createdExchange);
+  await createdNotifier.send(users, createdExchange);
   analytics.track(newExchangeEvent(network, createdExchange));
 
   return exchangeRepo.findExchangeById(createdExchange.id);

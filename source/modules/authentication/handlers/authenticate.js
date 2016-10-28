@@ -26,7 +26,7 @@ export default async (request, reply) => {
 
     return reply({ data });
   } catch (err) {
-    console.log('Error while authenticating', err);
+    console.log('Error authenticating', err);
     return reply(err);
   }
 };

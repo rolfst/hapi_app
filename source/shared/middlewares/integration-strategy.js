@@ -3,7 +3,7 @@ import { Integration } from '../models';
 
 export default () => {
   return {
-    authenticate: async (request, reply) => {
+    authenticate: async(request, reply) => {
       try {
         const req = request.raw.req;
         const token = req.headers['x-api-token'];

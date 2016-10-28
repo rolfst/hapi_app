@@ -48,6 +48,8 @@ describe('Exchange activity feed', () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}/activity_feed`;
     const response = await getRequest(endpoint);
 
+    console.log('@@@@@@@ DEBUG for occasional failure @@@@@@@@', response.result);
+
     result = response.result.data.map(item => ({
       ...item,
       data: _.omit(item.data, 'date'),

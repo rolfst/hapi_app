@@ -1,0 +1,33 @@
+{
+  "data": [{
+    "id": "1048635",
+    "username": "pmt-admin@flex-appeal.xyz",
+    "email": "pmt-admin@flex-appeal.xyz",
+    "department": "14",
+    "first_name": "Flex Admin",
+    "last_name": "Doe",
+    "cell_phone_number": "600000000",
+    "home_phone_number": "600000000",
+    "date_of_birth": "1966-10-17",
+    "rolename": "Bedrijfsleiding",
+    "scope": [{
+      "department": "14"
+    }],
+    "active": true
+  }, {
+    "id": "1048633",
+    "username": "pmt-medewerker@flex-appeal.xyz",
+    "email": "pmt-medewerker@flex-appeal.xyz",
+    "department": "14",
+    "first_name": "Flex Medewerker",
+    "last_name": "Doe",
+    "cell_phone_number": "600000000",
+    "home_phone_number": "600000000",
+    "date_of_birth": "1981-01-14",
+    "rolename": "Medewerker",
+    "scope": [{
+      "department": "14"
+    }],
+    "active": true
+  }]
+}
