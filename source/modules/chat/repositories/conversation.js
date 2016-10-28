@@ -3,7 +3,15 @@ import { db as Sequelize } from '../../../connections';
 import createError from '../../../shared/utils/create-error';
 import { User } from '../../../shared/models';
 import createConversationModel from '../models/conversation';
-import { Conversation, ConversationUser } from './dao';
+import { Conversation, Message, ConversationUser } from './dao';
+
+const defaultIncludes = [{
+  model: User,
+}, {
+  model: Message,
+  required: false,
+  include: [{ model: User }],
+}];
 
 const toModel = (dao) => createConversationModel(dao);
 
@@ -15,7 +23,7 @@ const toModel = (dao) => createConversationModel(dao);
  */
 export async function findConversationById(id) {
   const conversation = await Conversation.findById(id, {
-    include: [{ model: User }],
+    include: defaultIncludes,
   });
 
   if (!conversation) return null;
@@ -26,7 +34,7 @@ export async function findConversationById(id) {
 export const findConversationsById = async (conversationIds) => {
   const results = await Conversation.findAll({
     where: { id: { $in: conversationIds } },
-    include: [{ model: User }],
+    include: defaultIncludes,
   });
 
   return map(results, toModel);

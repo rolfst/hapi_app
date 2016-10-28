@@ -16,7 +16,6 @@ export const create = async (payload, message) => {
   }
 
   const conversation = await impl.findExistingConversation(participants);
-
   if (!conversation) {
     return impl.createConversationWithParticipants(
       payload.type, message.credentials.id, participants);
