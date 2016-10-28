@@ -5,6 +5,7 @@ import UserModel from './user';
 import TeamModel from './team';
 import IntegrationModel from './integration';
 import NetworkUserModel from './network-user';
+import NetworkIntegrationModel from './network-service';
 import TeamUserModel from './team-user';
 import UserDeviceModel from './user-device';
 
@@ -73,3 +74,4 @@ export const Integration = IntegrationModel;
 export const NetworkUser = NetworkUserModel;
 export const TeamUser = TeamUserModel;
 export const UserDevice = UserDeviceModel;
+export const NetworkIntegration = NetworkIntegrationModel;

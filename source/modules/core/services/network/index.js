@@ -1,13 +1,14 @@
 import Promise from 'bluebird';
-import { flatten, map, pick, get, find } from 'lodash';
-import configurationMail from '../../../../shared/mails/configuration-invite';
+import { find, flatten, map, filter, get, pick } from 'lodash';
 import createError from '../../../../shared/utils/create-error';
-import * as passwordUtils from '../../../../shared/utils/password';
+import createAdapter from '../../../../shared/utils/create-adapter';
+import configurationMail from '../../../../shared/mails/configuration-invite';
+import configurationMailNewAdmin from '../../../../shared/mails/configuration-invite-newadmin';
 import * as mailer from '../../../../shared/services/mailer';
 import * as integrationsAdapter from '../../../../shared/utils/integrations-adapter';
+import * as passwordUtil from '../../../../shared/utils/password';
 import * as networkRepo from '../../repositories/network';
 import * as userRepo from '../../repositories/user';
-import * as importService from '../../../integrations/services/import';
 import * as userService from '../user';
 import * as impl from './implementation';
 
@@ -83,6 +84,17 @@ export const listPristineNetworks = async () => {
   return pristineNetworksWithAdmins;
 };
 
+export const listAdminsFromNetwork = async (payload) => {
+  const network = await networkRepo.findNetworkById(payload.networkId);
+
+  if (!network) throw createError('404');
+
+  const adapter = createAdapter(network, [], { proceedWithoutToken: true });
+  const externalUsers = await adapter.fetchUsers(network.externalId);
+
+  return filter(externalUsers, 'isAdmin');
+};
+
 /**
  * Retrieve active users that belong to the network.
  * @param {object} payload - Object containing payload data
@@ -100,8 +112,6 @@ export const listActiveUsersForNetwork = async (payload, message) => {
   return userService.listUsersWithNetworkScope({ userIds: map(usersFromNetwork, 'id') }, message);
 };
 
-const selectUser = (users, userId) => find(users, (user) => user.externalId === userId);
-
 /**
  * Retrieve a single network;
  * @param {object} payload - Object containing payload data
@@ -118,7 +128,10 @@ export const getNetwork = async (payload, message) => {
 
   if (!network) throw createError('404');
 
-  await impl.assertThatUserBelongsToTheNetwork(network.id, message.credentials.id);
+  await impl.assertThatUserBelongsToTheNetwork(
+    network.id,
+    message.credentials.id,
+  );
 
   return network;
 };
@@ -138,37 +151,54 @@ export const listNetworksForUser = async (payload) => {
   return networkRepo.findAllContainingUser(payload.id);
 };
 
-/**
- * imports a pristine network into the system. it notifies the administrator of that
- * network about further action he can take.
- * @param {object} payload - Object containing payload data
- * @param {string} payload.externalId - the external id of the prisinte network
- * @param {string} payload.name - the name of the pristine network
- * @param {string} payload.integrationName - the name of the integration the network
- * will be a part of
- * @param {string} payload.userId - the external userId of the administrator
- * @method importPristineNetwork
- * @return null
- * @throws {exception} - Exception  network already exists 401
+/*
+ * import network. The import will assign a user as administrator for that network.
+ * @param {object} payload = Obect containing payload data
+ * @param {string} payload.username - the username of the user in both external system
+ * @method importNetwork
+ * @return {Promise} Promise containing the imported network
  */
-export const importPristineNetwork = async (payload) => {
-  const networkPayload = pick(payload, ['name', 'externalId']);
+export const importNetwork = async (payload) => {
+  const username = get(payload, 'external_username');
+  const networkId = get(payload, 'networkId');
+  let network = await networkRepo.findNetworkById(networkId);
+  let mailConfig;
 
-  await impl.assertTheNetworkIsNotImportedYet(networkPayload);
+  await impl.assertTheNetworkIsNotImportedYet({ id: network.id });
+  if (!network.externalId) throw createError('10001');
 
-  const integrationName = payload.integrationName;
-  const usersFromNetwork = await integrationsAdapter.usersFromPristineNetwork(
-    networkPayload.externalId);
-  const admin = selectUser(usersFromNetwork, get(payload, 'userId'));
-  const user = await userRepo.createUser({ ...admin, password: passwordUtils.plainRandom() });
+  const adapter = createAdapter(network, [], { proceedWithoutToken: true });
+  const externalUsers = await adapter.fetchUsers(network.externalId);
 
-  const newNetwork = await networkRepo.createIntegrationNetwork({
-    integrationName,
-    userId: user.id,
-    name: networkPayload.name,
-    externalId: networkPayload.externalId,
-  });
+  try {
+    const admin = await userRepo.findUserByUsername(username);
 
-  await importService.importNetwork({ networkId: newNetwork.id });
-  mailer.send(configurationMail(newNetwork, user));
+    network = await impl.updateSuperUserForNetwork(admin, networkId);
+    mailConfig = configurationMail(network, admin);
+  } catch (e) {
+    const selectedAdmin = find(externalUsers, (user) => {
+      return user.email === username;
+    });
+
+    if (!selectedAdmin) throw createError('10006');
+
+    const password = passwordUtil.plainRandom();
+    const superUser = await userRepo.createUser({ ...selectedAdmin, password });
+
+    network = await impl.updateSuperUserForNetwork(superUser, networkId);
+    mailConfig = configurationMailNewAdmin(network, superUser, password);
+  }
+
+  const [externalTeams, internalUsers] = await Promise.all([
+    adapter.fetchTeams(),
+    userRepo.findAllUsers(),
+  ]);
+
+  const users = await impl.importUsers(internalUsers, externalUsers, network);
+  const teams = await impl.importTeams(externalTeams, network);
+
+  await impl.addUsersToTeam(users, teams, externalUsers);
+  await networkRepo.setImportDateOnNetworkIntegration(network.id);
+
+  mailer.send(mailConfig);
 };

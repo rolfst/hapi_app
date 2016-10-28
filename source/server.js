@@ -1,5 +1,3 @@
-'use strict';
-
 import Hapi from 'hapi';
 import { omit } from 'lodash';
 import raven from 'raven';

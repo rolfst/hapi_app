@@ -1,10 +1,16 @@
 [{
-  "externalId": "1",
+  "externalId": "14",
   "name": "Aardappelen Groente en Fruit"
 }, {
-  "externalId": "2",
+  "externalId": "28",
+  "name": "Vleeswaren"
+}, {
+  "externalId": "71",
+  "name": "Magazijn"
+}, {
+  "externalId": "72",
   "name": "Algemeen"
 }, {
-  "externalId": "3",
+  "externalId": "73",
   "name": "Kassa"
 }]

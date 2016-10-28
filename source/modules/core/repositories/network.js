@@ -1,6 +1,12 @@
 import { uniq, map } from 'lodash';
 import Promise from 'bluebird';
-import { Network, Team, User, NetworkUser, Integration } from '../../../shared/models';
+import moment from 'moment';
+import { Network,
+  Team,
+  User,
+  NetworkUser,
+  Integration,
+  NetworkIntegration } from '../../../shared/models';
 import createError from '../../../shared/utils/create-error';
 import createNetworkModel from '../models/network';
 import * as userRepo from './user';
@@ -69,9 +75,20 @@ export const findIntegrationInfo = async (userId) => {
   }));
 };
 
-export function findIntegrationByName(name) {
+export const findNetworkIntegration = async (networkId) => {
+  const result = await NetworkIntegration.findOne({ where: { networkId } });
+
+  return result;
+};
+
+export const setImportDateOnNetworkIntegration = async (networkId) => {
+  const networkIntegration = await findNetworkIntegration(networkId);
+  await networkIntegration.update({ importedAt: moment().toISOString() });
+};
+
+export const findIntegrationByName = (name) => {
   return Integration.findOne({ where: { name } });
-}
+};
 
 export const findAllContainingUser = async (userId) => {
   const pivotResult = await NetworkUser.findAll({
@@ -118,8 +135,16 @@ export const addUser = async (attributes) => {
   return NetworkUser.create({ ...attributes, user_id: attributes.userId });
 };
 
-export const findUsersForNetwork = async (networkId, roleType = null) => {
-  const whereConstraint = { networkId, deletedAt: null };
+export const setSuperAdmin = async (networkId, superUserId) => {
+  const network = await Network.findById(networkId);
+  const superUser = await userRepo.findUserById(superUserId);
+  if (!superUser) throw createError('404');
+
+  return network.update({ userId: superUser.id });
+};
+
+export const findUsersForNetwork = async (networkId, roleType = null, invisibleUser = false) => {
+  const whereConstraint = { networkId, deletedAt: null, invisibleUser };
   if (roleType) whereConstraint.roleType = roleType;
 
   const result = await NetworkUser.findAll({

@@ -40,11 +40,12 @@ describe('Handler: Bulk invite users', () => {
       nock(global.networks.pmt.externalId)
         .get('/users')
         .reply('200', stubs.users_200);
+
+      sinon.stub(mailer, 'send').returns(null);
     });
 
     after(() => {
       mailer.send.restore();
-      sinon.stub(mailer, 'send').returns(null);
     });
 
     it('should add to the network as admin', async () => {
