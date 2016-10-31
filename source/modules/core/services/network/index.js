@@ -128,10 +128,7 @@ export const getNetwork = async (payload, message) => {
 
   if (!network) throw createError('404');
 
-  await impl.assertThatUserBelongsToTheNetwork(
-    network.id,
-    message.credentials.id,
-  );
+  await impl.assertThatUserBelongsToTheNetwork(network.id, message.credentials.id);
 
   return network;
 };
