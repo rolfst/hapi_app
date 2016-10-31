@@ -2,6 +2,7 @@ import { assert } from 'chai';
 import { find } from 'lodash';
 import { postRequest } from '../../../shared/test-utils/request';
 import * as conversationRepo from '../repositories/conversation';
+import * as messageRepo from '../repositories/message';
 
 let createdConversation;
 
@@ -13,6 +14,8 @@ describe('Post conversation', () => {
     createdConversation = await conversationRepo.createConversation(
       'private', admin.id, [admin.id, networklessUser.id]
     );
+
+    return messageRepo.createMessage(createdConversation.id, networklessUser.id, 'Foo text');
   });
 
   after(() => conversationRepo.deleteAllConversationsForUser(global.users.employee.id));
@@ -22,6 +25,8 @@ describe('Post conversation', () => {
     const { result, statusCode } = await postRequest(ENDPOINT_URL, payload);
 
     assert.equal(statusCode, 200);
+    assert.property(result.data, 'messages');
+    assert.isArray(result.data.messages);
     assert.isDefined(find(result.data.users, { id: global.users.employee.id }));
     assert.isDefined(find(result.data.users, { id: global.users.admin.id }));
   });
@@ -32,6 +37,9 @@ describe('Post conversation', () => {
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.id, createdConversation.id);
+    assert.property(result.data, 'messages');
+    assert.isArray(result.data.messages);
+    assert.equal(result.data.messages[0].created_by.id, global.users.networklessUser.id);
     assert.isDefined(find(result.data.users, { id: global.users.admin.id }));
     assert.isDefined(find(result.data.users, { id: global.users.networklessUser.id }));
   });

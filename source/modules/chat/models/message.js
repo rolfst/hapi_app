@@ -6,7 +6,7 @@ export default (dao) => ({
   type: 'conversation_message',
   id: dao.id.toString(),
   conversationId: dao.parentId.toString(),
-  conversation: createConversationModel(dao.Conversation),
+  conversation: dao.Conversation ? createConversationModel(dao.Conversation) : null,
   text: dao.text,
   createdBy: createUserModel(dao.User),
   createdAt: dateUtils.toISOString(dao.created_at),

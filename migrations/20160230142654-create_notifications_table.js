@@ -12,7 +12,7 @@ module.exports = {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
         references: {
-          model: 'topics',
+          model: 'networks',
           key: 'id',
         },
         onDelete: 'cascade',
