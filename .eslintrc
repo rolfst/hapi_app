@@ -3,10 +3,12 @@
   "env": {
       "mocha": true
   },
+  "plugins": ["mocha"],
   "parser": "babel-eslint",
   "rules": {
       "arrow-body-style": ["off"],
-      "consistent-return": ["off"]
+      "consistent-return": ["off"],
+      "mocha/no-exclusive-tests": "error"
   },
   "parserOptions": {
       "ecmaFeatures": {

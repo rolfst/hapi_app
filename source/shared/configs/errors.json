@@ -58,5 +58,10 @@
     "type": "unauthorized",
     "detail": "The user could not authorize with the integration partner.",
     "code": 401
+  },
+  "10006": {
+    "type": "not_in_external_network",
+    "detail": "The user could no longer be found in external network.",
+    "code": 403
   }
 }

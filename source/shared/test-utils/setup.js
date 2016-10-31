@@ -3,7 +3,6 @@ import chai from 'chai';
 import nock from 'nock';
 import sinon from 'sinon';
 import dotenv from 'dotenv';
-import * as mailer from '../services/mailer';
 import notifier from '../services/notifier';
 import blueprints from './blueprints';
 import { UserRoles } from '../services/permission';
@@ -111,7 +110,6 @@ before(async () => {
 
   // Disable specific services when testing
   sinon.stub(notifier, 'send').returns(null);
-  sinon.stub(mailer, 'send').returns(null);
 });
 
 afterEach(() => nock.cleanAll());

@@ -33,6 +33,7 @@ describe('Reminder', () => {
     const exchange = await exchangeRepo.findExchangeById(exchangeId);
     notifier.send.restore();
     sinon.stub(notifier, 'send').returns(null);
+
     return exchange.destroy();
   });
 
