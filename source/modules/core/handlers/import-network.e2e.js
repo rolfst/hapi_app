@@ -27,6 +27,7 @@ describe('Import network', () => {
 
     before(async () => {
       sandbox = sinon.sandbox.create();
+
       nock(pristineNetwork.externalId)
         .get('/users')
         .reply(200, stubs.users_200);
@@ -137,54 +138,72 @@ describe('Import network', () => {
   describe('Fault path', async () => {
     let sandbox;
 
-    before(async () => {
-      sandbox = sinon.sandbox.create();
-      const fakeAdapter = {
-        fetchTeams: () => stubs.external_teams,
-        fetchUsers: () => externalUsers,
-      };
+    describe('setup in order', () => {
+      before(async () => {
+        sandbox = sinon.sandbox.create();
+        const fakeAdapter = {
+          fetchTeams: () => stubs.external_teams,
+          fetchUsers: () => externalUsers,
+        };
 
-      sandbox.stub(createAdapter, 'default').returns(fakeAdapter);
+        sandbox.stub(createAdapter, 'default').returns(fakeAdapter);
 
-      await integrationRepo.createIntegration({
-        name: pristineNetwork.integrationName,
-        token: 'footoken',
+        await integrationRepo.createIntegration({
+          name: pristineNetwork.integrationName,
+          token: 'footoken',
+        });
+
+        network = await networkRepo.createIntegrationNetwork({
+          userId: global.users.admin.id,
+          externalId: pristineNetwork.externalId,
+          name: pristineNetwork.name,
+          integrationName: pristineNetwork.integrationName,
+        });
+
+        return networkRepo.setImportDateOnNetworkIntegration(network.id);
       });
 
-      network = await networkRepo.createIntegrationNetwork({
-        userId: global.users.admin.id,
-        externalId: pristineNetwork.externalId,
-        name: pristineNetwork.name,
-        integrationName: pristineNetwork.integrationName,
+      after(async () => {
+        const users = await networkRepo.findAllUsersForNetwork(network.id);
+        await Promise.all(users.map(u => userRepo.deleteById(u.id)));
+
+        sandbox.restore();
+
+        return networkRepo.deleteById(network.id);
       });
 
-      return networkRepo.setImportDateOnNetworkIntegration(network.id);
-    });
+      it('should fail on missing username', async () => {
+        const res = await postRequest(`/v2/networks/${network.id}/integration/import`, {});
 
-    after(async () => {
-      const users = await networkRepo.findAllUsersForNetwork(network.id);
-      await Promise.all([
-        ...users.map(u => userRepo.deleteById(u.id)),
-      ]);
-
-      sandbox.restore();
-
-      return networkRepo.deleteById(network.id);
-    });
-
-    it('should fail on missing username', async () => {
-      const res = await postRequest(`/v2/networks/${network.id}/integration/import`, {
+        assert.equal(res.statusCode, 422);
       });
 
-      assert.equal(res.statusCode, 422);
+      it('should fail on already imported network', async () => {
+        const res = await postRequest(`/v2/networks/${network.id}/integration/import`, {
+          external_username: employee.email,
+        }, global.server, 'footoken');
+
+        assert.equal(res.statusCode, 403);
+      });
     });
 
-    it('should fail on already imported network', async () => {
-      const res = await postRequest(`/v2/networks/${network.id}/integration/import`, {
-        external_username: employee.email,
-      }, global.server, 'footoken');
+    describe('setup missing', () => {
+      before(async () => {
+        network = await networkRepo.createNetwork(
+          global.users.admin.id, pristineNetwork.name, pristineNetwork.externalId);
+      });
 
-      assert.equal(res.statusCode, 403);
+      after(async () => {
+        return networkRepo.deleteById(network.id);
+      });
+
+      it('should fail when no integration has been enabled for the network', async () => {
+        const res = await postRequest(`/v2/networks/${network.id}/integration/import`,
+          { external_username: employee.email,
+        }, global.server, 'footoken');
+
+        assert.equal(res.statusCode, 403);
+      });
     });
   });
 });
