@@ -1,56 +1,88 @@
+import { isUndefined, omit } from 'lodash';
 import bunyan from 'bunyan';
-import { omit } from 'lodash';
 
-const createMetaData = (event) => ({
-  msec: event.data.msec || null,
-  tags: event.tags,
-  stack: event.data.data ? event.data.data.stack : null,
-});
+const environment = process.env.API_ENV;
+const logConfig = require(`../configs/logs-${environment}`).default;
 
-export default (() => {
-  let _defaultMeta;
+const fetchContextObjects = (args = {}) => {
+  if (isUndefined(args.err)) return { context: args };
+
+  return { err: args.err, context: omit(args, 'err') };
+};
+
+const buildLogContext = (args = {}) => {
+  const options = args.message || {};
+  const logArgs = omit(args, 'message');
+
+  if (options.artifacts) {
+    const requestIdObject = { requestId: options.artifacts.requestId };
+
+    return { ...requestIdObject, ...fetchContextObjects(logArgs) };
+  }
+
+  return { context: logArgs };
+};
+
+/**
+ * @param {string} name - logger name
+ * @method getLogger returns a logger instance
+ */
+export const getLogger = (name) => {
+  const logger = bunyan.createLogger({
+    ...logConfig,
+    name,
+  });
 
   return {
-    init(request) {
-      if (request) {
-        _defaultMeta = {
-          user: request.auth.credentials ? request.auth.credentials.toJSON() : null,
-          artifacts: request.auth.artifacts || null,
-          request: {
-            id: request.id,
-            payload: omit(request.payload, 'password'),
-            user_agent: request.headers['user-agent'],
-            method: request.method,
-            url: request.path,
-            headers: request.headers,
-          },
-        };
-      }
+    /**
+     * @param {string} message - message
+     * @param {object} [data] - objects to log
+     * @param {object} [data.artifacts] - dataobject that contains context
+     * @param {string} [data.artifacts.requestId] - representing trace identifier
+     * @method debug - logs at a debug level
+     */
+    debug(message, data) {
+      logger.debug(buildLogContext(data), message);
     },
-    getLogger() {
-      return bunyan.createLogger({
-        name: 'node-api',
-        streams: [{
-          level: 'info',
-          stream: process.stdout,
-        }],
-        ..._defaultMeta,
-      });
+    /**
+     * @param {string} message - message
+     * @param {object} [data] - objects to log
+     * @param {object} [data.artifacts] - dataobject that contains context
+     * @param {string} [data.artifacts.requestId] - representing trace identifier
+     * @method info - logs at a info level
+     */
+    info(message, data) {
+      logger.info(buildLogContext(data), message);
     },
-    debug(message, metaData) {
-      this.getLogger().debug(metaData, message);
+    /**
+     * @param {string} message - message
+     * @param {object} [data] - objects to log
+     * @param {error} [data.error] - error object to log
+     * @param {object} [data.artifacts] - dataobject that contains context
+     * @param {string} [data.artifacts.requestId] - representing trace identifier
+     * @method warn - logs at a warning level
+     */
+    warn(message, data) {
+      logger.warn(buildLogContext(data), message);
     },
-    info(message, metaData) {
-      this.getLogger().info(metaData, message);
+    /**
+     * @param {string} message - message
+     * @param {object} [data] - objects to log
+     * @param {error} [data.error] - error object to log
+     * @param {object} [data.artifacts] - dataobject that contains context
+     * @param {string} [data.artifacts.requestId] - representing trace identifier
+     * @method error - logs at a error level
+     */
+    error(message, data) {
+      logger.error(buildLogContext(data), message);
     },
-    warning(message, metaData) {
-      this.getLogger().warn(metaData, message);
-    },
-    error(message, metaData) {
-      this.getLogger().error({ ...metaData, _defaultMeta }, message);
-    },
-    internalError(event) {
-      this.getLogger().error({ ...createMetaData(event), _defaultMeta }, 'Internal error');
+    /**
+     * @param {string} message - message
+     * @param {error} [error] - error object to log
+     * @method fatal - logs at a fatal level
+     */
+    fatal(message, error) {
+      logger.fatal(error, message);
     },
   };
-})();
+};
