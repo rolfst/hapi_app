@@ -86,6 +86,11 @@ export const setImportDateOnNetworkIntegration = async (networkId) => {
   await networkIntegration.update({ importedAt: moment().toISOString() });
 };
 
+export const unsetImportDateOnNetworkIntegration = async (networkId) => {
+  const networkIntegration = await findNetworkIntegration(networkId);
+  await networkIntegration.update({ importedAt: null });
+};
+
 export const findIntegrationByName = (name) => {
   return Integration.findOne({ where: { name } });
 };
