@@ -2,7 +2,7 @@ import 'babel-polyfill';
 import 'newrelic';
 import Parse from 'parse/node';
 import dotenv from 'dotenv';
-import * as Logger from './shared/service/logger';
+import * as Logger from './shared/services/logger';
 
 dotenv.config();
 
