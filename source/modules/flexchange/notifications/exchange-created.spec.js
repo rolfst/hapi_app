@@ -13,7 +13,7 @@ describe('Exchange created notification', () => {
 
   const localTime = {
     startTime: moment(moment().hour(10).minute(30)).tz('Europe/Amsterdam').format('HH:mm'),
-    endTime: moment(moment().hour(10).minute(30)).tz('Europe/Amsterdam').format('HH:mm'),
+    endTime: moment(moment().hour(13).minute(0)).tz('Europe/Amsterdam').format('HH:mm'),
   };
 
   it('should return a correct notification object for today', () => {
