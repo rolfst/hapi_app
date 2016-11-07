@@ -9,6 +9,9 @@ import * as teamRepo from '../../repositories/team';
 
 export const assertTheNetworkIsNotImportedYet = async (network) => {
   const networkIntegration = await networkRepo.findNetworkIntegration(network.id);
+  if (!networkIntegration) {
+    throw createError('10001');
+  }
 
   if (networkIntegration.importedAt) {
     throw createError('403', 'A network with the same external id exists.');
