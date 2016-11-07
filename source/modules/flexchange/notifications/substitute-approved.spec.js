@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { createNotification } from './substitute-approved';
 
 describe('Substitude flexchange notification', () => {
