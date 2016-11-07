@@ -12,13 +12,19 @@ describe('Your exchange approved notification', () => {
     ApprovedUser: { fullName: 'Pietje overnemer' },
   });
 
+  const localTime = {
+    startTime: moment().tz('Europe/Amsterdam').hour(10).minute(30).format('HH:mm'),
+    endTime: moment().tz('Europe/Amsterdam').hour(13).minute(0).format('HH:mm'),
+  };
+
   it('should return a correct notification object for today', () => {
     const futureMoment = moment();
     const exchange = createExchange(futureMoment);
 
     const actual = createNotification(exchange);
     const expected = {
-      text: 'Pietje overnemer heeft je shift van vandaag van 10:30 tot 13:00 overgenomen.',
+      text: `Pietje overnemer heeft je shift van vandaag van ${localTime.startTime} ` +
+        `tot ${localTime.endTime} overgenomen.`,
       data: { id: 1, type: 'exchange' },
     };
 
@@ -31,7 +37,8 @@ describe('Your exchange approved notification', () => {
 
     const actual = createNotification(exchange);
     const expected = {
-      text: 'Pietje overnemer heeft je shift van morgen van 10:30 tot 13:00 overgenomen.',
+      text: `Pietje overnemer heeft je shift van morgen van ${localTime.startTime} ` +
+        `tot ${localTime.endTime} overgenomen.`,
       data: { id: 1, type: 'exchange' },
     };
 
@@ -45,7 +52,7 @@ describe('Your exchange approved notification', () => {
     const actual = createNotification(exchange);
     const expected = {
       text: `Pietje overnemer heeft je shift van ${futureMoment.format('dddd')} ` +
-        'van 10:30 tot 13:00 overgenomen.',
+        `van ${localTime.startTime} tot ${localTime.endTime} overgenomen.`,
       data: { id: 1, type: 'exchange' },
     };
 
@@ -59,7 +66,7 @@ describe('Your exchange approved notification', () => {
     const actual = createNotification(exchange);
     const expected = {
       text: `Pietje overnemer heeft je shift op ${futureMoment.format('dddd DD MMMM')} ` +
-        'van 10:30 tot 13:00 overgenomen.',
+        `van ${localTime.startTime} tot ${localTime.endTime} overgenomen.`,
       data: { id: 1, type: 'exchange' },
     };
 

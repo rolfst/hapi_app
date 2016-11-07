@@ -11,13 +11,19 @@ describe('Substitude flexchange notification', () => {
     User: { id: 2, fullName: 'John Doe' },
   });
 
+  const localTime = {
+    startTime: moment().tz('Europe/Amsterdam').hour(10).minute(30).format('HH:mm'),
+    endTime: moment().tz('Europe/Amsterdam').hour(13).minute(0).format('HH:mm'),
+  };
+
   it('should return a correct notification object for today', () => {
     const futureMoment = moment();
     const exchange = createExchange(futureMoment);
 
     const actual = createNotification(exchange);
     const expected = {
-      text: 'Je hebt de shift van John Doe overgenomen. Je werkt vandaag van 10:30 tot 13:00.',
+      text: 'Je hebt de shift van John Doe overgenomen. Je werkt vandaag ' +
+        `van ${localTime.startTime} tot ${localTime.endTime}.`,
       data: { id: 1, type: 'exchange' },
     };
 
@@ -30,7 +36,8 @@ describe('Substitude flexchange notification', () => {
 
     const actual = createNotification(exchange);
     const expected = {
-      text: 'Je hebt de shift van John Doe overgenomen. Je werkt morgen van 10:30 tot 13:00.',
+      text: 'Je hebt de shift van John Doe overgenomen. Je werkt morgen ' +
+        `van ${localTime.startTime} tot ${localTime.endTime}.`,
       data: { id: 1, type: 'exchange' },
     };
 
@@ -44,7 +51,7 @@ describe('Substitude flexchange notification', () => {
     const actual = createNotification(exchange);
     const expected = {
       text: 'Je hebt de shift van John Doe overgenomen. Je werkt ' +
-        `${futureMoment.format('dddd')} van 10:30 tot 13:00.`,
+        `${futureMoment.format('dddd')} van ${localTime.startTime} tot ${localTime.endTime}.`,
       data: { id: 1, type: 'exchange' },
     };
 
@@ -58,7 +65,8 @@ describe('Substitude flexchange notification', () => {
     const actual = createNotification(exchange);
     const expected = {
       text: 'Je hebt de shift van John Doe overgenomen. Je werkt ' +
-        `${futureMoment.format('dddd D MMMM')} van 10:30 tot 13:00.`,
+        `${futureMoment.format('dddd D MMMM')} van ${localTime.startTime} ` +
+        `tot ${localTime.endTime}.`,
       data: { id: 1, type: 'exchange' },
     };
 
