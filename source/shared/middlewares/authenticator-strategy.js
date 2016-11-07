@@ -4,11 +4,15 @@ import tokenUtil from '../utils/token';
 import * as serverUtil from '../utils/server';
 import createError from '../utils/create-error';
 import * as userRepo from '../../modules/core/repositories/user';
+import * as Logger from '../../shared/services/logger';
+
+const logger = Logger.getLogger('SHARED/middleware/authenticatorStrategy');
 
 export const authenticate = async (networkId, token = null) => {
   if (!token) throw createError('401');
 
   const { sub: userId, integrations } = tokenUtil.decode(token);
+  // TODO the user should be retrieved via the service
   const user = await userRepo.findUserById(userId);
 
   analytics.setUser(user);
@@ -22,16 +26,20 @@ export const authenticate = async (networkId, token = null) => {
 export default () => {
   return {
     authenticate: async (request, reply) => {
+      let artifacts = { requestId: request.id };
+
       try {
         const { networkId } = request.params;
         const token = request.raw.req.headers['x-api-token'];
-        const { credentials, artifacts } = await authenticate(networkId, token);
-        artifacts.requestId = request.id;
+        const authenticationResult = await authenticate(networkId, token);
+
+        artifacts = { ...artifacts, ...authenticationResult.artifacts };
         artifacts.authenticationToken = token;
 
-        return reply.continue({ credentials, artifacts });
+        return reply.continue({ credentials: authenticationResult.credentials, artifacts });
       } catch (err) {
-        console.error('Error in Authenticator Strategy', err);
+        const message = { artifacts };
+        logger.error('Error in Authenticator Strategy', { err, message });
 
         // This is to make old API logic backwards compatible with clients
         // that have not updated yet.

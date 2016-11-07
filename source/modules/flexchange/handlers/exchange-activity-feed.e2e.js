@@ -3,6 +3,9 @@ import Promise from 'bluebird';
 import moment from 'moment';
 import _ from 'lodash';
 import { ActivityTypes } from '../../../shared/models/activity';
+import * as Logger from '../../../shared/services/logger';
+
+const logger = Logger.getLogger('FLEXCHANGE/test/exchangeActivityFeed');
 import { getRequest } from '../../../shared/test-utils/request';
 import {
   createExchange,
@@ -48,7 +51,7 @@ describe('Exchange activity feed', () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}/activity_feed`;
     const response = await getRequest(endpoint);
 
-    console.log('@@@@@@@ DEBUG for occasional failure @@@@@@@@', response.result);
+    logger.debug('@@@@@@@ DEBUG for occasional failure @@@@@@@@', response.result);
 
     result = response.result.data.map(item => ({
       ...item,

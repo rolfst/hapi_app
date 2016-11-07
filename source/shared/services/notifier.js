@@ -1,4 +1,7 @@
 import Parse from 'parse/node';
+import * as Logger from './logger';
+
+const logger = Logger.getLogger('SHARED/services/notifier');
 
 export const createEmailList = (users) => {
   return users.map(user => user.email).filter(u => u);
@@ -11,7 +14,7 @@ const createQuery = (emails) => {
   return query;
 };
 
-const send = (users, notification, networkId = null) => {
+const send = (users, notification, networkId = null, message = null) => {
   const data = {
     ...notification.data,
     alert: notification.text,
@@ -23,7 +26,7 @@ const send = (users, notification, networkId = null) => {
   const emails = createEmailList(users);
 
   Parse.Push.send({ where: createQuery(emails), data })
-    .catch(err => console.log('Error sending push notification', { stack: err.stack }));
+    .catch(err => logger.warn('Error sending push notification', { message, err }));
 };
 
 export default { send };

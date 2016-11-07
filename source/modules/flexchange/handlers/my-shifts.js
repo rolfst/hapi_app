@@ -1,5 +1,8 @@
 import { omit } from 'lodash';
+import * as Logger from '../../../shared/services/logger';
 import * as flexchangeService from '../services/flexchange';
+
+const logger = Logger.getLogger('FLEXCHANGE/handler/myShifts');
 
 const transformItem = item => ({
   ...omit(item, 'teamId', 'exchangeId'),
@@ -8,9 +11,10 @@ const transformItem = item => ({
 });
 
 export default async (req, reply) => {
-  const message = { ...req.pre, ...req.auth };
-
   try {
+    const message = { ...req.pre, ...req.auth };
+
+    logger.info('Listing personal shifts', { message });
     const items = await flexchangeService.listMyShifts({}, message);
     const response = items.map(transformItem);
 

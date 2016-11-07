@@ -121,6 +121,30 @@ describe('Logger', () => {
     assert.lengthOf(Object.keys(logMsg.context), 0);
   });
 
+  it('should log on warning level with error without artifacts', () => {
+    const logger = Logger.getLogger('warnLogger');
+    const message = { artifacts: undefined };
+    let err;
+
+    try {
+      throw createError('10006');
+    } catch (e) {
+      err = e;
+      logger.warn('warning', { message, err: e });
+    }
+
+    const output = mockConsole.flush();
+    const logMsg = JSON.parse(output.stdout[0]);
+
+    assert.equal(logMsg.name, 'warnLogger');
+    assert.property(logMsg, 'err');
+    assert.equal(logMsg.err.output.statusCode, err.output.statusCode);
+    assert.equal(logMsg.err.data.errorCode, err.data.errorCode);
+    assert.equal(logMsg.level, 40);
+    assert.equal(logMsg.msg, 'warning');
+    assert.lengthOf(Object.keys(logMsg.context), 0);
+  });
+
   it('should log on error level without error', () => {
     const logger = Logger.getLogger('errorLogger');
     const message = { artifacts: { requestId: 'rid:002' } };
@@ -158,6 +182,29 @@ describe('Logger', () => {
     assert.equal(logMsg.err.data.errorCode, err.data.errorCode);
     assert.equal(logMsg.level, 50);
     assert.equal(logMsg.requestId, 'rid:002');
+    assert.equal(logMsg.msg, 'error');
+  });
+
+  it('should log on error level with error and no artifacts', () => {
+    const logger = Logger.getLogger('errorLogger');
+    const message = { artifacts: undefined };
+    let err;
+
+    try {
+      throw createError('10006');
+    } catch (e) {
+      err = e;
+      logger.error('error', { message, err: e });
+    }
+
+    const output = mockConsole.flush();
+    const logMsg = JSON.parse(output.stdout[0]);
+
+    assert.equal(logMsg.name, 'errorLogger');
+    assert.property(logMsg, 'err');
+    assert.equal(logMsg.err.output.statusCode, err.output.statusCode);
+    assert.equal(logMsg.err.data.errorCode, err.data.errorCode);
+    assert.equal(logMsg.level, 50);
     assert.equal(logMsg.msg, 'error');
   });
 

@@ -1,5 +1,8 @@
 import { pick } from 'lodash';
 import * as authenticationService from '../services/authentication';
+import * as Logger from '../../../shared/services/logger';
+
+const logger = Logger.getLogger('AUTHENTICATION/handler/authenticate');
 
 /*
  * The authentication script first authenticates with the Flex-Appeal database
@@ -11,12 +14,12 @@ import * as authenticationService from '../services/authentication';
  * are especially designed for networks that have an integration enabled.
  */
 export default async (request, reply) => {
-  const payload = pick(request.payload, 'username', 'password');
-
   try {
     const message = { ...request.pre, ...request.auth };
+    const payload = pick(request.payload, 'username', 'password');
 
     message.deviceName = request.headers['user-agent'];
+    logger.info('Authenticating', { payload, message });
     const result = await authenticationService.authenticate(payload, message);
     const data = {
       access_token: result.accessToken,
@@ -26,7 +29,6 @@ export default async (request, reply) => {
 
     return reply({ data });
   } catch (err) {
-    console.log('Error authenticating', err);
     return reply(err);
   }
 };

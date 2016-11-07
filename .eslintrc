@@ -8,6 +8,7 @@
   "rules": {
       "arrow-body-style": ["off"],
       "consistent-return": ["off"],
+      "no-console": 2,
       "mocha/no-exclusive-tests": "error"
   },
   "parserOptions": {

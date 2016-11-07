@@ -1,12 +1,15 @@
 /* eslint no-console: "off" */
 import Sequelize from 'sequelize';
 import config from './database.js';
+import * as Logger from './shared/services/logger';
+
+const logger = Logger.getLogger('DB/query');
 
 export const db = (() => {
   const { host, database, username, password, dialect, port } = config[process.env.API_ENV];
 
   const logging = process.env.ENABLE_LOGGING === 'true' ?
-    log => console.info(log) : false;
+    log => logger.info(log) : false;
 
   const define = {
     charset: 'utf8mb4',

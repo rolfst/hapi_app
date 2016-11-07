@@ -1,11 +1,15 @@
 import { omit } from 'lodash';
+import * as Logger from '../../../shared/services/logger';
 import * as flexchangeService from '../services/flexchange';
 
-export default async (req, reply) => {
-  const payload = { shiftId: req.params.shiftId };
-  const message = { ...req.pre, ...req.auth };
+const logger = Logger.getLogger('FLEXCHANGE/handler/viewShift');
 
+export default async (req, reply) => {
   try {
+    const payload = { shiftId: req.params.shiftId };
+    const message = { ...req.pre, ...req.auth };
+
+    logger.info('View shift', { payload, message });
     const result = await flexchangeService.getShift(payload, message);
     const response = {
       ...omit(result, 'teamId', 'exchangeId'),
