@@ -1,5 +1,8 @@
 import { pick } from 'lodash';
+import * as Logger from '../../../shared/services/logger';
 import * as flexchangeService from '../services/flexchange';
+
+const logger = Logger.getLogger('FLEXCHANGE/handler/modifyExchange');
 
 const services = {
   accept: flexchangeService.acceptExchange,
@@ -9,19 +12,19 @@ const services = {
 };
 
 export default async (req, reply) => {
-  const params = pick(req.params, ['exchangeId']);
-  const reqPayload = pick(req.payload, ['action', 'user_id']);
-  const payload = { ...params, ...reqPayload };
-  const { pre, auth } = req;
-
   try {
+    const params = pick(req.params, ['exchangeId']);
+    const reqPayload = pick(req.payload, ['action', 'user_id']);
+    const payload = { ...params, ...reqPayload };
+
     const actionHook = services[payload.action];
-    const message = { ...pre, ...auth };
+    const message = { ...req.pre, ...req.auth };
+
+    logger.info('Updating exchange', { message, payload });
     const updatedExchange = await actionHook(payload, message);
 
     return reply({ success: true, data: updatedExchange.toJSON() });
   } catch (err) {
-    console.log('Error modifying exchange ${payload.exchangeId}', err);
     return reply(err);
   }
 };

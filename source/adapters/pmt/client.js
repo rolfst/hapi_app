@@ -1,5 +1,8 @@
 import fetch from 'isomorphic-fetch';
 import createError from '../../shared/utils/create-error';
+import * as Logger from '../../shared/services/logger';
+
+const logger = Logger.getLogger('PMT/adapter/client');
 
 const createFormEncodedString = (data) => {
   return Object.keys(data).map((key) => {
@@ -19,33 +22,30 @@ const handleError = (status, body) => {
   }
 };
 
-export async function makeRequest(endpoint, token = null, method = 'GET', data = {}) {
-  try {
-    const response = await fetch(endpoint, {
-      method,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'logged-in-user-token': token,
-        'api-key': 'testpmtapi',
-      },
-      body: createFormEncodedString(data),
-    });
+export async function makeRequest(endpoint, token = null, method = 'GET', data = {}, message) {
+  const options = {
+    method,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'logged-in-user-token': token,
+      'api-key': 'testpmtapi',
+    },
+    body: createFormEncodedString(data),
+  };
 
-    const json = await response.json();
+  logger.info('fetching from integration', { options, message });
+  const response = await fetch(endpoint, options);
+  const json = await response.json();
+  logger.info('Retrieved from integration', { status: response.status, json, message });
 
-    handleError(response.status, json);
+  handleError(response.status, json);
 
-    return { payload: json, status: response.status };
-  } catch (err) {
-    console.error('PMT Client error', err);
-
-    throw err;
-  }
+  return { payload: json, status: response.status };
 }
 
 export default {
-  post: (endpoint, token, data) => makeRequest(endpoint, token, 'POST', data),
-  get: (endpoint, token) => makeRequest(endpoint, token, 'GET'),
-  put: (endpoint, token, data) => makeRequest(endpoint, token, 'PUT', data),
-  delete: (endpoint, token) => makeRequest(endpoint, token, 'DELETE'),
+  post: (endpoint, token, data, message) => makeRequest(endpoint, token, 'POST', data, message),
+  get: (endpoint, token, message) => makeRequest(endpoint, token, 'GET', message),
+  put: (endpoint, token, data, message) => makeRequest(endpoint, token, 'PUT', data, message),
+  delete: (endpoint, token, message) => makeRequest(endpoint, token, 'DELETE', message),
 };

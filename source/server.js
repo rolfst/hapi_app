@@ -6,6 +6,9 @@ import jwtStrategy from './shared/middlewares/authenticator-strategy';
 import integrationStrategy from './shared/middlewares/integration-strategy';
 import * as serverUtil from './shared/utils/server';
 import { server as serverConnection } from './connections';
+import * as Logger from './shared/services/logger';
+
+const logger = Logger.getLogger('SERVER');
 
 const createServer = (port) => {
   const ravenClient = new raven.Client(process.env.SENTRY_DSN, {
@@ -50,7 +53,8 @@ const createServer = (port) => {
 
     if (tags.error && tags.internal) {
       if (process.env.NODE_ENV === 'debug') {
-        console.error(request.getLog());
+        logger.error(request.getLog());
+
         return false;
       }
 

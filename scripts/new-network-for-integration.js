@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
-const userRepo = require('../source/modules/core/repositories/user');
-const networkRepo = require('../source/modules/core/repositories/network');
+import userRepo from '../source/modules/core/repositories/user';
+import networkRepo from '../source/modules/core/repositories/network';
+import Logger from '../source/shared/services/logger';
+
 const args = require('yargs').argv;
+const logger = Logger.getLogger('SCRIPT/createNetworkForIntegration');
 
 /*
  * This script can be used to create a new network that has an integration enabled.
@@ -36,11 +39,11 @@ const main = async () => {
       integrationName: args.integration,
     });
 
-    console.log(`Successfully created network with id: ${network.id}.`);
+    logger.info(`Successfully created network with id: ${network.id}.`);
 
     process.exit(0);
   } catch (err) {
-    console.error(err);
+    logger.warn(err);
     process.exit(1);
   }
 };

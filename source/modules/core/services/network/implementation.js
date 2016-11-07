@@ -14,7 +14,7 @@ export const assertTheNetworkIsNotImportedYet = async (network) => {
   }
 
   if (networkIntegration.importedAt) {
-    throw createError('403', 'A network with the same external id exists.');
+    throw createError('10007', 'A network with the same external id exists.');
   }
 };
 

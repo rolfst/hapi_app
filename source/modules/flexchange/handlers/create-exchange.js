@@ -1,7 +1,9 @@
 import { pick } from 'lodash';
 import camelCaseKeys from '../../../shared/utils/camel-case-keys';
+import * as Logger from '../../../shared/services/logger';
 import * as service from '../services/flexchange';
 
+const logger = Logger.getLogger('FLEXCHANGE/handler/createExchange');
 
 export default async (req, reply) => {
   try {
@@ -15,11 +17,11 @@ export default async (req, reply) => {
 
     const payload = camelCaseKeys(whitelist);
 
+    logger.info('Creating an exchange', { message, payload });
     const response = await service.createExchange(payload, message);
 
     return reply({ success: true, data: response.toJSON() });
   } catch (err) {
-    console.log('Error creating an exchange', err);
     return reply(err);
   }
 };

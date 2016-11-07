@@ -5,6 +5,9 @@ import notifier from '../../../shared/services/notifier';
 import * as networkRepo from '../../core/repositories/network';
 import * as exchangeRepo from '../repositories/exchange';
 import createReminderExchangeNotification from '../notifications/accepted-exchange-reminder';
+import * as Logger from '../../../shared/services/logger';
+
+const logger = Logger.getLogger('FLEXCHANGE/service/reminder');
 
 const createAdminInfo = (admins) => {
   return map(filter(admins, (u) => u),
@@ -15,16 +18,12 @@ const createNotificationData = async (exchange) => {
   const network = await networkRepo.findNetworkById(exchange.networkId);
   const admins = await networkRepo.findUsersForNetwork(network.id, 'ADMIN');
   const usersToNotify = createAdminInfo(admins);
-  const notificationData = {
-    network,
-    admins: usersToNotify,
-  };
 
-  return notificationData;
+  return { network, admins: usersToNotify };
 };
 
 export const sendReminder = async () => {
-  console.log('start send reminders for accepted exchanges');
+  logger.info('Start send reminders for accepted exchanges');
 
   try {
     const twoDaysFromToday = moment().add(2, 'd');
@@ -38,9 +37,9 @@ export const sendReminder = async () => {
       notifier.send(value.admins, notification, value.network.id);
     });
 
-    console.log(`finished sending ${exchanges.length} reminders`);
+    logger.info(`Finished sending ${exchanges.length} reminders`);
   } catch (err) {
-    console.log('Sending reminder went wrong', err);
+    logger.warn('Sending reminder went wrong', { err });
   }
 };
 

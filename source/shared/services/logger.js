@@ -20,7 +20,7 @@ const buildLogContext = (args = {}) => {
     return { ...requestIdObject, ...fetchContextObjects(logArgs) };
   }
 
-  return { context: logArgs };
+  return { ...fetchContextObjects(logArgs) };
 };
 
 /**

@@ -63,5 +63,10 @@
     "type": "not_in_external_network",
     "detail": "The user could no longer be found in external network.",
     "code": 403
+  },
+  "10007": {
+    "type": "network_already_imported",
+    "detail": "The network has already been imported.",
+    "code": 403
   }
 }
