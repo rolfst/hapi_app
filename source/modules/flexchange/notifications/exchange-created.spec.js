@@ -1,15 +1,20 @@
 import { assert } from 'chai';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { createNotification } from './exchange-created';
 
 describe('Exchange created notification', () => {
   const createExchange = (baseMoment) => ({
     id: 1,
-    date: baseMoment.format('YYYY-MM-DD'),
-    startTime: baseMoment.hour(10).minute(30).toISOString(),
-    endTime: baseMoment.hour(13).minute(0).toISOString(),
+    date: baseMoment.utc().format('YYYY-MM-DD'),
+    startTime: baseMoment.utc().hour(10).minute(30).toISOString(),
+    endTime: baseMoment.utc().hour(13).minute(0).toISOString(),
     User: { id: 2, fullName: 'John Doe' },
   });
+
+  const localTime = {
+    startTime: moment(moment().hour(10).minute(30)).tz('Europe/Amsterdam').format('HH:mm'),
+    endTime: moment(moment().hour(13).minute(0)).tz('Europe/Amsterdam').format('HH:mm'),
+  };
 
   it('should return a correct notification object for today', () => {
     const futureMoment = moment();
@@ -17,7 +22,8 @@ describe('Exchange created notification', () => {
 
     const actual = createNotification(exchange);
     const expected = {
-      text: 'John Doe zoekt een vervanger voor vandaag van 10:30 tot 13:00.',
+      text: `John Doe zoekt een vervanger voor vandaag van ${localTime.startTime} ` +
+        `tot ${localTime.endTime}.`,
       data: { id: 1, type: 'exchange' },
     };
 
@@ -30,7 +36,8 @@ describe('Exchange created notification', () => {
 
     const actual = createNotification(exchange);
     const expected = {
-      text: 'John Doe zoekt een vervanger voor morgen van 10:30 tot 13:00.',
+      text: `John Doe zoekt een vervanger voor morgen van ${localTime.startTime} ` +
+        `tot ${localTime.endTime}.`,
       data: { id: 1, type: 'exchange' },
     };
 
@@ -44,7 +51,7 @@ describe('Exchange created notification', () => {
     const actual = createNotification(exchange);
     const expected = {
       text: `John Doe zoekt een vervanger voor aankomende ${futureMoment.format('dddd')} ` +
-        'van 10:30 tot 13:00.',
+        `van ${localTime.startTime} tot ${localTime.endTime}.`,
       data: { id: 1, type: 'exchange' },
     };
 
@@ -58,7 +65,7 @@ describe('Exchange created notification', () => {
     const actual = createNotification(exchange);
     const expected = {
       text: `John Doe zoekt een vervanger voor ${futureMoment.format('dddd D MMMM')} ` +
-        'van 10:30 tot 13:00.',
+        `van ${localTime.startTime} tot ${localTime.endTime}.`,
       data: { id: 1, type: 'exchange' },
     };
 

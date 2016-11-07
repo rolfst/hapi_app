@@ -1,16 +1,21 @@
 import { assert } from 'chai';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { createNotification } from './creator-approved';
 
 describe('Your exchange approved notification', () => {
   const createExchange = (baseMoment) => ({
     id: 1,
-    date: baseMoment.format('YYYY-MM-DD'),
-    startTime: baseMoment.hour(10).minute(30).toISOString(),
-    endTime: baseMoment.hour(13).minute(0).toISOString(),
+    date: baseMoment.utc().format('YYYY-MM-DD'),
+    startTime: baseMoment.utc().hour(10).minute(30).toISOString(),
+    endTime: baseMoment.utc().hour(13).minute(0).toISOString(),
     User: { id: 2, fullName: 'John Doe' },
     ApprovedUser: { fullName: 'Pietje overnemer' },
   });
+
+  const localTime = {
+    startTime: moment(moment().hour(10).minute(30)).tz('Europe/Amsterdam').format('HH:mm'),
+    endTime: moment(moment().hour(13).minute(0)).tz('Europe/Amsterdam').format('HH:mm'),
+  };
 
   it('should return a correct notification object for today', () => {
     const futureMoment = moment();
@@ -18,7 +23,8 @@ describe('Your exchange approved notification', () => {
 
     const actual = createNotification(exchange);
     const expected = {
-      text: 'Pietje overnemer heeft je shift van vandaag van 10:30 tot 13:00 overgenomen.',
+      text: `Pietje overnemer heeft je shift van vandaag van ${localTime.startTime} ` +
+        `tot ${localTime.endTime} overgenomen.`,
       data: { id: 1, type: 'exchange' },
     };
 
@@ -31,7 +37,8 @@ describe('Your exchange approved notification', () => {
 
     const actual = createNotification(exchange);
     const expected = {
-      text: 'Pietje overnemer heeft je shift van morgen van 10:30 tot 13:00 overgenomen.',
+      text: `Pietje overnemer heeft je shift van morgen van ${localTime.startTime} ` +
+        `tot ${localTime.endTime} overgenomen.`,
       data: { id: 1, type: 'exchange' },
     };
 
@@ -45,7 +52,7 @@ describe('Your exchange approved notification', () => {
     const actual = createNotification(exchange);
     const expected = {
       text: `Pietje overnemer heeft je shift van ${futureMoment.format('dddd')} ` +
-        'van 10:30 tot 13:00 overgenomen.',
+        `van ${localTime.startTime} tot ${localTime.endTime} overgenomen.`,
       data: { id: 1, type: 'exchange' },
     };
 
@@ -59,7 +66,7 @@ describe('Your exchange approved notification', () => {
     const actual = createNotification(exchange);
     const expected = {
       text: `Pietje overnemer heeft je shift op ${futureMoment.format('dddd DD MMMM')} ` +
-        'van 10:30 tot 13:00 overgenomen.',
+        `van ${localTime.startTime} tot ${localTime.endTime} overgenomen.`,
       data: { id: 1, type: 'exchange' },
     };
 
