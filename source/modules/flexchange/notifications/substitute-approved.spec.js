@@ -5,9 +5,9 @@ import { createNotification } from './substitute-approved';
 describe('Substitude flexchange notification', () => {
   const createExchange = (baseMoment) => ({
     id: 1,
-    date: baseMoment.format('YYYY-MM-DD'),
-    startTime: baseMoment.hour(10).minute(30).toISOString(),
-    endTime: baseMoment.hour(13).minute(0).toISOString(),
+    date: baseMoment.utc().format('YYYY-MM-DD'),
+    startTime: baseMoment.utc().hour(10).minute(30).toISOString(),
+    endTime: baseMoment.utc().hour(13).minute(0).toISOString(),
     User: { id: 2, fullName: 'John Doe' },
   });
 
