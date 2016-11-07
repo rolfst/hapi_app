@@ -1,4 +1,5 @@
 import moment from 'moment';
+moment.locale('nl');
 
 export const formatTime = (time) => moment(time).format('HH:mm');
 
