@@ -12,6 +12,8 @@ export default (exchange) => {
     exchangeValueOutput = { type: 'team', ids: [
       exchange.teamId ? exchange.teamId.toString() : null,
     ] };
+  } else if (exchange.type === exchangeTypes.USER && exchange.shiftId === null) {
+    exchangeValueOutput = { type: 'network', id: exchange.networkId.toString() };
   }
 
   return exchangeValueOutput;

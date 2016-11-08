@@ -49,6 +49,21 @@ describe('View exchange', () => {
     assert.deepEqual(result.data.created_in, { type: 'team', ids: [team.id.toString()] });
   });
 
+  it('should return created in network when exchange is created for user', async () => {
+    const exchangeForUser = await createExchange(global.users.admin.id, network.id, {
+      type: exchangeTypes.USER,
+      values: [global.users.admin.id],
+      date: moment().subtract(2, 'weeks').format('YYYY-MM-DD'),
+      title: 'Test shift in past',
+    });
+
+    const endpoint = `/v2/networks/${network.id}/exchanges/${exchangeForUser.id}`;
+    const { result, statusCode } = await getRequest(endpoint);
+
+    assert.equal(statusCode, 200);
+    assert.deepEqual(result.data.created_in, { type: 'network', id: network.id });
+  });
+
   it('should fail when exchange cannot be found', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id + 1337}`;
     const { statusCode } = await getRequest(endpoint);
