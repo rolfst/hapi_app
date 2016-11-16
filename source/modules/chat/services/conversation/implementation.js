@@ -1,4 +1,5 @@
 import { find, pick } from 'lodash';
+import * as responseUtils from '../../../../shared/utils/response';
 import * as socketService from '../../../../shared/services/socket';
 import * as conversationRepo from '../../repositories/conversation';
 import * as newMessageNotification from '../../notifications/new-message';
@@ -38,5 +39,7 @@ export const notifyUsersForNewMessage = (conversation, message, authenticationTo
   const usersToNotify = conversation.users.filter(user => user.id !== message.createdBy.id);
 
   newMessageNotification.send(message, usersToNotify);
-  socketService.send('send-message', usersToNotify, conversation, authenticationToken);
+
+  const socketPayload = { data: responseUtils.toSnakeCase(message) };
+  socketService.send('send-message', usersToNotify, socketPayload, authenticationToken);
 };
