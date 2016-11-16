@@ -39,8 +39,10 @@ describe('Conversation Service implementation', () => {
 
       impl.notifyUsersForNewMessage(conversationStub, messageStub, 'foo_token');
 
-      assert.isTrue(socketService.send.calledWithMatch(
-        'send-message', expectedUsersToNotify, conversationStub, 'foo_token'));
+      const actual = socketService.send.firstCall.args;
+      const expected = ['send-message', expectedUsersToNotify, messageStub, 'foo_token'];
+
+      assert.deepEqual(actual, expected);
 
       socketService.send.restore();
     });

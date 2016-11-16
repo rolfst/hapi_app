@@ -38,5 +38,5 @@ export const notifyUsersForNewMessage = (conversation, message, authenticationTo
   const usersToNotify = conversation.users.filter(user => user.id !== message.createdBy.id);
 
   newMessageNotification.send(message, usersToNotify);
-  socketService.send('send-message', usersToNotify, conversation, authenticationToken);
+  socketService.send('send-message', usersToNotify, message, authenticationToken);
 };
