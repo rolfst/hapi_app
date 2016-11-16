@@ -41,7 +41,7 @@ describe('Conversation Service implementation', () => {
       impl.notifyUsersForNewMessage(conversationStub, messageStub, 'foo_token');
 
       const actual = socketService.send.firstCall.args;
-      const payload = responseUtils.toSnakeCase(messageStub);
+      const payload = { data: responseUtils.toSnakeCase(messageStub) };
       const expected = ['send-message', expectedUsersToNotify, payload, 'foo_token'];
 
       assert.deepEqual(actual, expected);

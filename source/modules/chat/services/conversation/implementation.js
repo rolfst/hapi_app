@@ -40,6 +40,6 @@ export const notifyUsersForNewMessage = (conversation, message, authenticationTo
 
   newMessageNotification.send(message, usersToNotify);
 
-  const socketPayload = responseUtils.toSnakeCase(message);
+  const socketPayload = { data: responseUtils.toSnakeCase(message) };
   socketService.send('send-message', usersToNotify, socketPayload, authenticationToken);
 };
