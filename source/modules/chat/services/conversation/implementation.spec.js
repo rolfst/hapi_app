@@ -1,6 +1,7 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import * as impl from './implementation';
+import * as responseUtils from '../../../../shared/utils/response';
 import * as socketService from '../../../../shared/services/socket';
 import * as newMessageNotification from '../../notifications/new-message';
 
@@ -40,7 +41,8 @@ describe('Conversation Service implementation', () => {
       impl.notifyUsersForNewMessage(conversationStub, messageStub, 'foo_token');
 
       const actual = socketService.send.firstCall.args;
-      const expected = ['send-message', expectedUsersToNotify, messageStub, 'foo_token'];
+      const payload = responseUtils.toSnakeCase(messageStub);
+      const expected = ['send-message', expectedUsersToNotify, payload, 'foo_token'];
 
       assert.deepEqual(actual, expected);
 
