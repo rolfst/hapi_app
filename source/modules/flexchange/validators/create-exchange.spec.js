@@ -19,6 +19,23 @@ describe('Create exchange validator', () => {
     assert.ifError(actual.error[0]);
   });
 
+  it('should allow description as optional attribute', () => {
+    const payload = {
+      shift_id: 1,
+      team_id: 2,
+      type: 'USER',
+      description: null,
+      date: '2016-09-10',
+      values: [1],
+      start_time: moment().toISOString(),
+      end_time: moment().add(20, 'minutes').toISOString(),
+    };
+
+    const actual = Joi.validate({ payload }, scheme);
+
+    assert.isNull(actual.error);
+  });
+
   describe('Exchange for shift', () => {
     const defaultPayload = {
       shift_id: 1,
