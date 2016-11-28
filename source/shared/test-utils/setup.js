@@ -5,6 +5,7 @@ import sinon from 'sinon';
 import dotenv from 'dotenv';
 import notifier from '../services/notifier';
 import blueprints from './blueprints';
+import stubs from './stubs';
 import { UserRoles } from '../services/permission';
 import * as accessService from '../../modules/integrations/services/access';
 import * as networkService from '../../modules/core/services/network';
@@ -12,6 +13,7 @@ import * as userRepo from '../../modules/core/repositories/user';
 import * as integrationRepo from '../../modules/core/repositories/integration';
 import authenticate from './authenticate';
 import generateNetworkName from './create-network-name';
+import * as testHelper from './helpers';
 
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
@@ -64,7 +66,7 @@ export const initialSetup = async () => {
   // after the user can authenticate to the intergration.
   nock(createdPMTNetwork.externalId)
     .post('/login', adminCredentials)
-    .reply(200, { logged_in_user_token: '379ce9b4176cb89354c1f74b3a2c1c7a', user_id: 8023 });
+    .reply(200, stubs.defaultLoggedinUser);
 
   // Add user to the networks
   await Promise.all([
