@@ -24,6 +24,7 @@ export const getUser = async (payload) => {
  * Retrieve multiple users by id with network scope
  * @param {object} payload - Object containing payload data
  * @param {array} payload.userIds - The ids for the user to find
+ * @param {string} payload.networkId - The ids for the network to find the users in
  * @param {object} message - Object containing meta data
  * @param {object} message.credentials - The authenticated user
  * @param {object} message.network - The network associated with the request
@@ -33,7 +34,7 @@ export const getUser = async (payload) => {
  */
 export const listUsersWithNetworkScope = async (payload, message) => {
   const users = await userRepo.findUsersByIds(payload.userIds);
-  const network = await networkService.getNetwork({ id: message.network.id }, message);
+  const network = await networkService.getNetwork({ id: payload.networkId }, message);
   const metaDataList = await userRepo.findMultipleUserMetaDataForNetwork(
     map(users, 'id'), network.id);
 

@@ -1,5 +1,5 @@
 import { pick } from 'lodash';
-import createAdapter from '../../../shared/utils/create-adapter';
+import { createAdapter } from '../../../shared/utils/create-adapter';
 import * as userRepo from '../../core/repositories/user';
 import * as authenticationRepo from '../../core/repositories/authentication';
 import createAccessToken from '../../authentication/utils/create-access-token';

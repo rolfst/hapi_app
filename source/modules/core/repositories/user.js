@@ -1,6 +1,4 @@
 import { map, sample } from 'lodash';
-import sequelize from 'sequelize';
-import { db } from '../../../connections';
 import createError from '../../../shared/utils/create-error';
 import { User, Network, NetworkUser, Integration, Team, TeamUser } from '../../../shared/models';
 import createUserModel from '../models/user';
@@ -52,12 +50,12 @@ export const findUsersByIds = async (userIds) => {
   return map(result, toModel);
 };
 
-export async function findUserById(id) {
+export const findUserById = async (id) => {
   const user = await User.findOne({ where: { id } });
   if (!user) throw createError('403', `The user with id '${id}' could not be found.`);
 
   return toModel(user);
-}
+};
 
 export const findUserByEmail = async (email) => {
   const result = await User.findOne({ where: { email } });
@@ -104,7 +102,7 @@ export const findUserByUsername = async (username) => {
   return toModel(result);
 };
 
-export function addExternalUsersToNetwork(users, network) {
+export const addExternalUsersToNetwork = (users, network) => {
   const promises = users
     .map(user => NetworkUser.create({
       externalId: user.externalId,
@@ -115,11 +113,11 @@ export function addExternalUsersToNetwork(users, network) {
     }));
 
   return Promise.all(promises);
-}
+};
 
-export function addUsersToNetwork(user, network, roleType = 'EMPLOYEE') {
+export const addUsersToNetwork = (user, network, roleType = 'EMPLOYEE') => {
   return network.addUsers(user, { roleType });
-}
+};
 
 export const setExternalId = async (userId, networkId, externalId) => {
   const result = await NetworkUser.findOne({ where: { userId, networkId } });
@@ -127,29 +125,28 @@ export const setExternalId = async (userId, networkId, externalId) => {
   return result.update({ externalId });
 };
 
-export async function updateUser(userId, attributes) {
+export const updateUser = async (userId, attributes) => {
   const user = await User.findById(userId);
   await user.update(attributes);
 
   return findUserById(userId);
-}
+};
 
-export async function updateUserByEmail(email, attributes) {
+export const updateUserByEmail = async (email, attributes) => {
   const user = await User.findOne({ where: { email } });
   const updatedUser = await user.update(attributes);
 
   return updatedUser.reload();
-}
+};
 
-export function createUser(attributes) {
+export const createUser = async (attributes) => {
   const values = Object.assign(attributes, {
     profileImg: sample(dummyProfileImgPaths),
   });
+  const user = await User.create(values);
 
-  return User.create(values).then(user => {
-    return findUserById(user.id);
-  });
-}
+  return findUserById(user.id);
+};
 
 export const createBulkUsers = async (users) => {
   const promises = users
@@ -161,7 +158,7 @@ export const createBulkUsers = async (users) => {
   return map(result, toModel);
 };
 
-export async function validateUserIds(ids, networkId) {
+export const validateUserIds = async (ids, networkId) => {
   const usersCount = await User.count({
     where: {
       id: { $in: ids },
@@ -170,22 +167,7 @@ export async function validateUserIds(ids, networkId) {
   });
 
   return usersCount === ids.length;
-}
-
-export function updateNetworkActivityForUser(networkId, userId, active) {
-  const deletedAt = active ? null : sequelize.fn('NOW');
-  const queryString = `
-    UPDATE network_user
-    SET deleted_at = ?
-    WHERE user_id = ?
-    AND network_id = ?
-  `;
-
-  return db.query(queryString, {
-    type: sequelize.QueryTypes.UPDATE,
-    replacements: [deletedAt, userId, networkId],
-  });
-}
+};
 
 export const addToTeam = async (userId, teamId) => {
   return TeamUser.create({ userId, teamId });
@@ -201,7 +183,7 @@ export const removeFromNetwork = async (userId, networkId, forceDelete = false) 
   return forceDelete ? result.destroy() : result.update({ deletedAt: new Date() });
 };
 
-export async function setIntegrationToken(user, network, token) {
+export const setIntegrationToken = async (user, network, token) => {
   const result = await NetworkUser.findOne({
     where: { userId: user.id, networkId: network.id },
   });
@@ -209,7 +191,29 @@ export async function setIntegrationToken(user, network, token) {
   if (!result) throw createError('10002');
 
   return result.update({ userToken: token });
-}
+};
+
+/**
+ * updates the networkUser
+ * the user is from the external source
+ * @Param {object} user - externalInformation of user
+ * @param {object} network - network object to update the userinfo for
+ * @method updateUserForNetwork
+ * @return user object
+ */
+export const updateUserForNetwork = async (user, networkId, active = true) => {
+  const deletedAt = active ? null : new Date();
+  const roleType = user.isAdmin ? 'ADMIN' : 'EMPLOYEE';
+  const result = await NetworkUser.findOne({
+    where: { externalId: user.externalId, networkId },
+  });
+  const networkUser = await result.update({
+    deletedAt,
+    roleType,
+  });
+
+  return findUserById(networkUser.userId);
+};
 
 export const deleteById = async (userId) => {
   return User.destroy({ where: { id: userId } });

@@ -10,16 +10,30 @@ const createFormEncodedString = (data) => {
   }).join('&');
 };
 
-const handleError = (status, body) => {
-  if (status === 400 && body.error.toLowerCase().match(/token|expired/g)) {
+const handleRequest = async (response, endpoint) => {
+  let json;
+  const status = response.status;
+  const undefinedError = `${endpoint}: ${response.statusText}`;
+
+  try {
+    json = await response.json();
+  } catch (e) {
+    json = { error: undefinedError };
+  }
+
+  if (status === 400 && json.error.toLowerCase().match(/token|expired/g)) {
     throw createError('10005');
   } else if (status === 403) {
     throw createError('403');
   } else if (status === 400) {
     throw createError('422');
-  } else if (status === 401 && body.error === 'Incorrect username or password.') {
+  } else if (status === 404 && json.error === undefinedError) {
+    throw createError('10008', json.error);
+  } else if (status === 401 && json.error === 'Incorrect username or password.') {
     throw createError('10004');
   }
+
+  return { status, json };
 };
 
 export async function makeRequest(endpoint, token = null, method = 'GET', data = {}, message) {
@@ -33,14 +47,14 @@ export async function makeRequest(endpoint, token = null, method = 'GET', data =
     body: createFormEncodedString(data),
   };
 
-  logger.info('fetching from integration', { options, message });
+
+  logger.info('fetching from integration', { endpoint, options, message });
   const response = await fetch(endpoint, options);
-  const json = await response.json();
-  logger.info('Retrieved from integration', { status: response.status, json, message });
+  const { status, json } = await handleRequest(response, endpoint);
 
-  handleError(response.status, json);
+  logger.info('Retrieved from integration', { status, json, message });
 
-  return { payload: json, status: response.status };
+  return { payload: json, status };
 }
 
 export default {

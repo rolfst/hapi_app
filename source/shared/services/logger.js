@@ -6,7 +6,6 @@ const logConfig = require(`../configs/logs-${environment}`).default;
 
 const fetchContextObjects = (args = {}) => {
   if (isUndefined(args.err)) return { context: args };
-
   return { err: args.err, context: omit(args, 'err') };
 };
 

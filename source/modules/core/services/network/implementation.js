@@ -1,4 +1,4 @@
-import { find, map, flatMap, differenceBy, intersectionBy } from 'lodash';
+import { find, map, flatMap, differenceBy, intersectionBy, omit } from 'lodash';
 import Promise from 'bluebird';
 import * as integrationsAdapter from '../../../../shared/utils/integrations-adapter';
 import * as passwordUtil from '../../../../shared/utils/password';
@@ -78,21 +78,20 @@ export const findExternalUser = (user, externalUsers) => {
  * When the user is present in the db they will get added
  * to the network and not be created nor updated.
  * So we can import existing and new users here.
- * @param {array} internalUsers - List of user objects
  * @param {array} externalUsers - The serialized users that are loaded from the integration
  * @param {Network} network - The network object to import the users into
  * @method importUsers
  * @return {User} - Return user objects
  */
-export const importUsers = async (internalUsers, externalUsers, network) => {
+export const importUsers = async (externalUsers, network) => {
+  const internalUsers = await networkRepo.findAllUsersForNetwork(network.id);
   const newExternalUsers = differenceBy(externalUsers, internalUsers, 'email');
   const newUsers = await userRepo.createBulkUsers(
     map(newExternalUsers, (u) => ({ ...u, password: passwordUtil.plainRandom() })));
   const existingUsers = intersectionBy(internalUsers, externalUsers, 'email');
+  const usersToAdd = [...newUsers, ...existingUsers];
 
-  const usersToAddToNetwork = [...newUsers, ...existingUsers];
-
-  const promises = usersToAddToNetwork.map(employee => {
+  return Promise.map(usersToAdd, (employee) => {
     const externalUser = findExternalUser(employee, externalUsers);
 
     return networkRepo.addUser({
@@ -103,8 +102,17 @@ export const importUsers = async (internalUsers, externalUsers, network) => {
       roleType: externalUser.isAdmin ? 'ADMIN' : 'EMPLOYEE',
     });
   });
+};
 
-  return Promise.all(promises);
+export const updateUsersForNetwork = async (externalUsers, networkId) => {
+  const internalUsers = await networkRepo.findAllUsersForNetwork(networkId);
+  const existingUsers = intersectionBy(externalUsers, internalUsers, 'email');
+
+  return Promise.map(existingUsers, async (user) => {
+    const updatedUser = await userRepo.updateUserForNetwork(user, networkId);
+
+    return updatedUser.id;
+  });
 };
 
 /**
@@ -130,17 +138,43 @@ export const importTeams = async (externalTeams, network) => {
   return [...newTeams, ...existingTeams];
 };
 
-export const addUsersToTeam = (users, teams, externalUsers) => {
-  const promises = flatMap(users, async (user) => {
-    const employee = await userRepo.findUserById(user.userId);
+export const updateTeamsForNetwork = async (externalTeams, networkId) => {
+  const internalTeams = await networkRepo.findTeamsForNetwork(networkId);
+  const existingTeams = intersectionBy(externalTeams, internalTeams, 'externalId');
+  const existingExternalTeams = map(existingTeams, (team) => {
+    const internalTeam = find(internalTeams, (intTeam) => {
+      return (intTeam.externalId === team.externalId);
+    });
+
+    return { ...team, id: internalTeam.id };
+  });
+
+  return Promise.map(existingExternalTeams, async (team) => {
+    const updatedTeam = await teamRepo.updateTeam(team.id, omit(team, 'id'));
+
+    return updatedTeam.id;
+  });
+};
+
+export const addUsersToTeam = (usersIds, teams, externalUsers) => {
+  const promises = flatMap(usersIds, async (userId) => {
+    const employee = await userRepo.findUserById(userId);
     const externalUser = findExternalUser(employee, externalUsers);
 
     if (!externalUser) return;
 
-    return externalUser.teamIds.map(teamId => {
-      const team = find(teams, { externalId: teamId });
+    return Promise.map(externalUser.teamIds, async (teamId) => {
+      const team = await teamRepo.findBy({ externalId: teamId });
 
-      return teamRepo.addUserToTeam(team.id, user.userId);
+      if (!team) return; // already deleted team
+
+      const teamMembers = await teamRepo.findMembers(team.id);
+
+      if (find(teamMembers, (member) => (member.id === userId))) {
+        return;
+      }
+
+      return teamRepo.addUserToTeam(team.id, userId);
     });
   });
 

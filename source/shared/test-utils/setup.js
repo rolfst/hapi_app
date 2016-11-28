@@ -23,15 +23,18 @@ global.server = createServer(8000);
 let admin;
 let employee;
 let networklessUser;
+let integration;
+let sandbox;
 
-before(async () => {
+export const initialSetup = async () => {
+  sandbox = sinon.sandbox.create();
   [admin, employee, networklessUser] = await Promise.all([
     userRepo.createUser(blueprints.users.admin),
     userRepo.createUser(blueprints.users.employee),
     userRepo.createUser(blueprints.users.networkless),
   ]);
 
-  await integrationRepo.createIntegration({
+  integration = await integrationRepo.createIntegration({
     name: 'PMT',
     token: 'footoken',
   });
@@ -109,16 +112,22 @@ before(async () => {
   };
 
   // Disable specific services when testing
-  sinon.stub(notifier, 'send').returns(null);
-});
+  sandbox.stub(notifier, 'send').returns(null);
+  nock.cleanAll();
+};
 
-afterEach(() => nock.cleanAll());
-
-after(async () => {
+export const finalCleanup = async () => {
   await Promise.all([
     userRepo.deleteById(networklessUser.id),
     userRepo.deleteById(employee.id),
+    integrationRepo.deleteById(integration.id),
   ]);
 
-  await userRepo.deleteById(admin.id);
-});
+  sandbox.restore();
+  return userRepo.deleteById(admin.id);
+};
+
+after(async () => finalCleanup());
+
+before(async () => initialSetup());
+

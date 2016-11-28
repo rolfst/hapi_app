@@ -2,7 +2,7 @@ import sinon from 'sinon';
 import { assert } from 'chai';
 import nock from 'nock';
 import { postRequest } from '../../../shared/test-utils/request';
-import * as createAdapter from '../../../shared/utils/create-adapter';
+import * as adapterUtil from '../../../shared/utils/create-adapter';
 import blueprints from '../../../shared/test-utils/blueprints';
 import createError from '../../../shared/utils/create-error';
 import tokenUtil from '../../../shared/utils/token';
@@ -30,8 +30,7 @@ describe('Integration auth', () => {
     };
 
     hookStub = sinon.stub(fakeAdapter, 'authenticate').returns(Promise.resolve(authResult));
-
-    sinon.stub(createAdapter, 'default').returns(fakeAdapter);
+    sinon.stub(adapterUtil, 'createAdapter').returns(fakeAdapter);
 
     integration = await createIntegration({
       name: 'NEW_INTEGRATION',
@@ -102,7 +101,7 @@ describe('Integration auth', () => {
   });
 
   it('should return 403 error when someone is already authenticated with the same account', async () => { // eslint-disable-line max-len
-    createAdapter.default.restore();
+    adapterUtil.createAdapter.restore();
     // Mock the same request being made in the setup for the admin to force the same externalId
     nock(global.networks.pmt.externalId)
       .post('/login')
@@ -122,13 +121,15 @@ describe('Integration auth', () => {
       authenticate: () => Promise.reject(createError('401')),
     };
 
-    sinon.stub(createAdapter, 'default').returns(fakeAdapter);
+    sinon.stub(adapterUtil, 'createAdapter').returns(fakeAdapter);
 
     const endpoint = `/v2/networks/${network.id}/integration_auth`;
     const { statusCode } = await postRequest(endpoint, {
       username: 'foo',
       password: 'wrong_pass',
     }, global.server, global.tokens.employee);
+
+    adapterUtil.createAdapter.restore();
 
     assert.equal(statusCode, 401);
   });

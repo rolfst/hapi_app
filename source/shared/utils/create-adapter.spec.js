@@ -3,14 +3,15 @@ import sinon from 'sinon';
 import * as unit from '../utils/create-adapter';
 
 describe('createAdapter', () => {
-  const network = { name: 'My network', integrations: ['foo'] };
-  const authSettings = [{ name: 'foo', token: 'footoken' }];
+  const integrationName = 'foo';
+  const network = { name: 'My network', integrations: [integrationName] };
+  const authSettings = [{ name: integrationName, token: 'footoken' }];
 
   it('should pass network and token to adapter', () => {
     const adapterSpy = sinon.spy();
     const fakeIntegrations = [{ name: 'foo', adapter: adapterSpy }];
 
-    unit.default(network, authSettings, { integrations: fakeIntegrations });
+    unit.createAdapter(network, authSettings, { integrations: fakeIntegrations });
 
     assert.isTrue(adapterSpy.calledWith(network, 'footoken'));
     assert.isTrue(adapterSpy.calledOnce);
@@ -22,7 +23,7 @@ describe('createAdapter', () => {
     const fakeAdapter = () => ({ foo: 'baz' });
     const fakeIntegrations = [{ name: 'foo', adapter: fakeAdapter }];
 
-    const actual = unit.default(network, authSettings, { integrations: fakeIntegrations });
+    const actual = unit.createAdapter(network, authSettings, { integrations: fakeIntegrations });
 
     assert.deepEqual(actual, { foo: 'baz' });
   });
@@ -31,7 +32,7 @@ describe('createAdapter', () => {
     const fakeAdapter = () => ({ foo: 'baz' });
     const fakeIntegrations = [{ name: 'foo', adapter: fakeAdapter }];
 
-    const actual = unit.default(network, [], {
+    const actual = unit.createAdapter(network, [], {
       proceedWithoutToken: true,
       integrations: fakeIntegrations,
     });
@@ -40,7 +41,7 @@ describe('createAdapter', () => {
   });
 
   it('should fail when no adapter found', () => {
-    const actual = () => unit.default(network, authSettings, { integrations: {} });
+    const actual = () => unit.createAdapter(network, authSettings, { integrations: {} });
 
     assert.throws(actual);
   });
@@ -49,8 +50,36 @@ describe('createAdapter', () => {
     const fakeAdapter = () => ({ foo: 'baz' });
     const fakeIntegrations = [{ name: 'foo', adapter: fakeAdapter }];
 
-    const actual = () => unit.default(network, [], { integrations: fakeIntegrations });
+    const actual = () => unit.createAdapter(network, [], { integrations: fakeIntegrations });
 
     assert.throws(actual);
+  });
+
+  it('should create an adapter', () => {
+    const adapterSpy = sinon.spy();
+    const fakeIntegrations = [{ name: integrationName, adapter: adapterSpy }];
+
+    const factory = unit.createAdapterFactory(
+      integrationName, authSettings, { integrations: fakeIntegrations });
+    factory.create(network);
+
+    assert.isTrue(adapterSpy.calledWith(network, 'footoken'));
+    assert.isTrue(adapterSpy.calledOnce);
+
+    adapterSpy.reset();
+  });
+
+  it('should create an adapterFactory', () => {
+    const adapterSpy = sinon.spy();
+    const fakeIntegrations = [{ name: integrationName, adapter: adapterSpy }];
+
+    const factory = unit.createAdapterFactory(
+      integrationName, authSettings, { integrations: fakeIntegrations });
+
+    assert.property(factory, 'create');
+    assert.isTrue(adapterSpy.neverCalledWith(network, 'footoken'));
+    assert.equal(adapterSpy.callCount, 0);
+
+    adapterSpy.reset();
   });
 });

@@ -5,6 +5,11 @@ const routes = [{
   url: '/v2/networks/{networkId}/integration_auth',
   handler: require('./handlers/integration-auth'),
   validator: require('./validators/authenticate'),
+}, {
+  method: 'GET',
+  url: '/v2/integrations/sync',
+  handler: require('./handlers/sync-with-integration-partner'),
+  prefetch: false,
 }];
 
 export default createRoutes(routes);

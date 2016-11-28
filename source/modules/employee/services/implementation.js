@@ -7,7 +7,7 @@ import {
 } from 'lodash';
 import Promise from 'bluebird';
 import * as passwordUtil from '../../../shared/utils/password';
-import createAdapter from '../../../shared/utils/create-adapter';
+import { createAdapter } from '../../../shared/utils/create-adapter';
 import * as userRepo from '../../core/repositories/user';
 
 const whitelistMembers = (existingMembers, matchingMembers, matchingCriteria) =>

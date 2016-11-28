@@ -4,7 +4,7 @@ import * as passwordUtil from '../../../shared/utils/password';
 import * as mailer from '../../../shared/services/mailer';
 import addedToNetworkMail from '../../../shared/mails/added-to-network';
 import addedToExtraNetworkMail from '../../../shared/mails/added-to-extra-network';
-import * as createAdapter from '../../../shared/utils/create-adapter';
+import * as adapterUtil from '../../../shared/utils/create-adapter';
 import * as userService from '../../core/services/user';
 import * as networkRepo from '../../core/repositories/network';
 import * as userRepo from '../../core/repositories/user';
@@ -48,7 +48,7 @@ describe('Invite users', () => {
     sandbox.stub(userRepo, 'userBelongsToNetwork').returns(Promise.resolve(true));
     sandbox.stub(userRepo, 'updateUser').returns(Promise.resolve(importUser));
     sandbox.stub(userService, 'getUserWithNetworkScope').returns(Promise.resolve(adminUser));
-    sandbox.stub(createAdapter, 'default').returns(fakeAdapter);
+    sandbox.stub(adapterUtil, 'createAdapter').returns(fakeAdapter);
     sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
     sandbox.stub(networkRepo, 'findUsersForNetwork').returns(
       Promise.resolve(allUsersFromIntegration));

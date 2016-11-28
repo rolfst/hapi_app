@@ -11,11 +11,15 @@ export function findTeamById(id) {
   return Team
     .findById(id)
     .then(team => {
-      if (!team) throw createError('404');
+      if (!team) throw createError('404', `teamId: ${id}`);
 
       return team;
     });
 }
+
+export const findBy = async (attributes) => {
+  return Team.findOne({ where: { ...attributes } });
+};
 
 export function addUserToTeams(teamIds, userId) {
   const values = teamIds.map(teamId => ({ teamId, userId }));
@@ -94,3 +98,10 @@ export function findUsersByTeamIds(ids) {
       where: sequelize.where(sequelize.col('Teams.id'), { $in: ids }),
     });
 }
+
+export const updateTeam = async (teamId, attributes) => {
+  const team = await Team.findById(teamId);
+  await team.update(attributes);
+
+  return findTeamById(team.id);
+};

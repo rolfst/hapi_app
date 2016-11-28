@@ -68,5 +68,10 @@
     "type": "network_already_imported",
     "detail": "The network has already been imported.",
     "code": 403
+  },
+  "10008": {
+    "type": "integration_not_available",
+    "detail": "The integration partner does not provide expected endpoint",
+    "code": 403
   }
 }

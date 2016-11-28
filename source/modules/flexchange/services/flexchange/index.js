@@ -1,6 +1,6 @@
 import { sortBy, orderBy, uniqBy, map, filter, includes } from 'lodash';
 import moment from 'moment';
-import createAdapter from '../../../../shared/utils/create-adapter';
+import { createAdapter } from '../../../../shared/utils/create-adapter';
 import analytics from '../../../../shared/services/analytics';
 import approveExchangeEvent from '../../../../shared/events/approve-exchange-event';
 import createError from '../../../../shared/utils/create-error';
@@ -48,7 +48,7 @@ export const listReceivers = async (payload, message) => {
     const teamPayload = { teamIds: valueIds };
     receivers = await teamService.listMembersForTeams(teamPayload, message);
   } else if (exchange.type === exchangeTypes.USER) {
-    const userPayload = { userIds: valueIds };
+    const userPayload = { userIds: valueIds, networkId: message.network.id };
     receivers = await userService.listUsersWithNetworkScope(userPayload, message);
   }
 
@@ -199,7 +199,10 @@ export const listAvailableUsersForShift = async (payload, message) => {
   const externalUsers = await adapter.usersAvailableForShift(payload.shiftId);
   const availableUsers = await impl.matchUsersForShift(externalUsers, network);
 
-  return userService.listUsersWithNetworkScope({ userIds: map(availableUsers, 'id') }, message);
+  return userService.listUsersWithNetworkScope({
+    userIds: map(availableUsers, 'id'),
+    networkId: message.network.id,
+  }, message);
 };
 
 export const listExchangesForTeam = async (payload, message) => {

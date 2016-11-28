@@ -4,7 +4,7 @@ import nock from 'nock';
 import { pick, find, map } from 'lodash';
 import { postRequest } from '../../../shared/test-utils/request';
 import stubs from '../../../shared/test-utils/stubs';
-import * as createAdapter from '../../../shared/utils/create-adapter';
+import * as adapterUtil from '../../../shared/utils/create-adapter';
 import * as passwordUtil from '../../../shared/utils/password';
 import configurationMail from '../../../shared/mails/configuration-invite-newadmin';
 import * as mailer from '../../../shared/services/mailer';
@@ -31,7 +31,7 @@ describe('Import network', () => {
     token: 'footoken',
   });
 
-  const createIntegrationNetwork = () => networkRepo.createIntegrationNetwork({
+  const createIntegrationNetwork = async () => networkRepo.createIntegrationNetwork({
     ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
     userId: global.users.admin.id,
   });
@@ -55,7 +55,7 @@ describe('Import network', () => {
         integration = await createIntegration();
         network = await createIntegrationNetwork();
 
-        sandbox.stub(createAdapter, 'default').returns(fakeAdapter);
+        sandbox.stub(adapterUtil, 'createAdapter').returns(fakeAdapter);
         sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
         sandbox.stub(mailer, 'send').returns(null);
 
@@ -152,7 +152,7 @@ describe('Import network', () => {
         integration = await createIntegration();
         network = await createIntegrationNetwork();
 
-        sandbox.stub(createAdapter, 'default').returns(fakeAdapter);
+        sandbox.stub(adapterUtil, 'createAdapter').returns(fakeAdapter);
         sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
         sandbox.stub(mailer, 'send').returns(null);
       });
@@ -196,7 +196,7 @@ describe('Import network', () => {
           .reply(200, stubs.users_200);
 
         sandbox = sinon.sandbox.create();
-        sandbox.stub(createAdapter, 'default').returns(fakeAdapter);
+        sandbox.stub(adapterUtil, 'createAdapter').returns(fakeAdapter);
         sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
         sandbox.stub(mailer, 'send').returns(null);
 

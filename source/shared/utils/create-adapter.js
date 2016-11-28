@@ -9,16 +9,13 @@ const availableIntegrations = [{
   adapter: pmtAdapter,
 }];
 
-export default (network, authSettings = [], options = {}) => {
+export const createAdapterFactory = (integrationName, authSettings = [], options = {}) => {
   let { integrations, proceedWithoutToken } = options;
   proceedWithoutToken = proceedWithoutToken || false;
   integrations = integrations || availableIntegrations;
 
-  const integration = find(integrations, { name: network.integrations[0] });
-  if (!integration) throw createError('10001');
-
   let token = null;
-  const authSetting = find(authSettings, { name: integration.name });
+  const authSetting = find(authSettings, { name: integrationName });
 
   if (!authSetting && !proceedWithoutToken) {
     throw createError('403');
@@ -26,5 +23,19 @@ export default (network, authSettings = [], options = {}) => {
 
   token = authSetting ? authSetting.token : null;
 
-  return integration.adapter(network, token);
+  return {
+    create: (network) => {
+      if (!network.integrations.includes(integrationName)) throw createError('10001');
+
+      const integration = find(integrations, { name: network.integrations[0] });
+
+      return integration.adapter(network, token);
+    },
+  };
+};
+
+export const createAdapter = (network, authSettings = [], options = {}) => {
+  const adapterFactory = createAdapterFactory(network.integrations[0], authSettings, options);
+
+  return adapterFactory.create(network);
 };
