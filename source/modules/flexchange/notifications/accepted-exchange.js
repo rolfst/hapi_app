@@ -1,6 +1,6 @@
 import moment from 'moment';
 import 'moment/locale/nl';
-import notifier from '../../../shared/services/notifier';
+import * as notifier from '../../../shared/services/notifier';
 import * as networkRepo from '../../core/repositories/network';
 
 moment.locale('nl');
@@ -12,7 +12,7 @@ export const createNotification = (exchange, substituteUser) => {
   return {
     text: `${substitute} heeft aangegeven de shift van ${creator}` +
     ' te kunnen werken.',
-    data: { id: exchange.id, type: 'exchange' },
+    data: { id: exchange.id, type: 'exchange', track_name: 'accepted_exchange' },
   };
 };
 

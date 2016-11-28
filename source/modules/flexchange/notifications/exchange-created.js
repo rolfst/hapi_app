@@ -1,7 +1,7 @@
 import moment from 'moment';
 import 'moment/locale/nl';
 moment.locale('nl');
-import notifier from '../../../shared/services/notifier';
+import * as notifier from '../../../shared/services/notifier';
 import * as notificationUtils from '../utils/notification';
 
 export const createNotification = (exchange) => {
@@ -15,7 +15,7 @@ export const createNotification = (exchange) => {
   return {
     text: `${exchange.User.fullName} zoekt een vervanger ${date} van ` +
       `${notificationUtils.createTimeText(exchange)}.`,
-    data: { id: exchange.id, type: 'exchange' },
+    data: { id: exchange.id, type: 'exchange', track_name: 'created_exchange' },
   };
 };
 

@@ -11,7 +11,7 @@ describe('Exchange comment created notification', () => {
     const actual = createNotification(exchange, comment);
     const expected = {
       text: 'User#1 reageerde: Testing',
-      data: { id: 1, type: 'exchange' },
+      data: { id: 1, type: 'exchange', track_name: 'exchange_comment' },
     };
 
     assert.deepEqual(actual, expected);

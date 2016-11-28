@@ -13,7 +13,7 @@ describe('Accepted exchange notification', () => {
     const actual = createNotification(exchange, substitute);
     const expected = {
       text: 'User#2 heeft aangegeven de shift van User#1 te kunnen werken.',
-      data: { id: 1, type: 'exchange' },
+      data: { id: 1, type: 'exchange', track_name: 'accepted_exchange' },
     };
 
     assert.deepEqual(actual, expected);

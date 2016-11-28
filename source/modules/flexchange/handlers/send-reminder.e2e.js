@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import moment from 'moment';
-import notifier from '../../../shared/services/notifier';
+import * as notifier from '../../../shared/services/notifier';
 import * as exchangeRepo from '../repositories/exchange';
 import { getRequest } from '../../../shared/test-utils/request';
 

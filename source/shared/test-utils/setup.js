@@ -3,7 +3,7 @@ import chai from 'chai';
 import nock from 'nock';
 import sinon from 'sinon';
 import dotenv from 'dotenv';
-import notifier from '../services/notifier';
+import * as notifier from '../services/notifier';
 import blueprints from './blueprints';
 import { UserRoles } from '../services/permission';
 import * as accessService from '../../modules/integrations/services/access';

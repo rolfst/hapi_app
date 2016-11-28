@@ -33,6 +33,8 @@ describe('serverUtil', () => {
   });
 
   describe('onPreResponse', () => {
+    after(() => mockConsole.restore());
+
     it('should log on runtimeException', () => {
       mockConsole.use();
       const reply = () => ({ code: () => {} });
@@ -42,13 +44,12 @@ describe('serverUtil', () => {
       } catch (err) {
         const req = { response: err };
         unit.onPreResponse(req, reply);
-        mockConsole.restore();
 
         const output = mockConsole.flush();
         const logMsg = JSON.parse(output.stdout[0]);
 
         assert.equal(logMsg.level, 50);
-        assert.equal(logMsg.err.message, 'i is not defined');
+        assert.isTrue(logMsg.err.includes('i is not defined'));
       }
     });
   });

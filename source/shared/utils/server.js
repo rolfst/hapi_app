@@ -37,7 +37,7 @@ export const onPreResponse = (req, reply) => {
       error = createError(req.response.output.statusCode.toString());
     }
 
-    logger.warn('Error from application', { message, payload, err: error });
+    logger.warn('Error from application', { message, payload, err: req.response });
     const errorResponse = transformBoomToErrorResponse(error);
 
     return reply(errorResponse).code(errorResponse.status_code);

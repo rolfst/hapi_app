@@ -94,7 +94,7 @@ describe('authenticatorStrategy', () => {
       mockConsole.restore();
 
       assert.equal(logMsg.name, 'SHARED/middleware/authenticatorStrategy');
-      assert.equal(logMsg.err.data.errorCode, '10004');
+      assert.equal(logMsg.errorCode, '10004');
     });
   });
 });

@@ -12,17 +12,16 @@ const loginRequest = ({ username, password }) => {
 };
 
 describe('Authenticate', () => {
-  it('should check for required input fields', () => {
+  it('should check for required input fields', async () => {
     const response1 = postRequest(url, { foo: 'bar' });
     const response2 = postRequest(url, { username: 'bar' });
     const response3 = postRequest(url, { password: 'bar' });
 
-    return Promise.all([response1, response2, response3])
-      .then(responses => {
-        assert.equal(responses[0].statusCode, 422);
-        assert.equal(responses[1].statusCode, 422);
-        assert.equal(responses[2].statusCode, 422);
-      });
+    const responses = await Promise.all([response1, response2, response3]);
+
+    assert.equal(responses[0].statusCode, 422);
+    assert.equal(responses[1].statusCode, 422);
+    assert.equal(responses[2].statusCode, 422);
   });
 
   it('should have the authenticated integrations in the access token', async () => {

@@ -113,8 +113,8 @@ describe('Logger', () => {
 
     assert.equal(logMsg.name, 'warnLogger');
     assert.property(logMsg, 'err');
-    assert.equal(logMsg.err.output.statusCode, err.output.statusCode);
-    assert.equal(logMsg.err.data.errorCode, err.data.errorCode);
+    assert.equal(logMsg.statusCode, err.output.statusCode);
+    assert.equal(logMsg.errorCode, err.data.errorCode);
     assert.equal(logMsg.level, 40);
     assert.equal(logMsg.requestId, 'rid:003');
     assert.equal(logMsg.msg, 'warning');
@@ -138,8 +138,8 @@ describe('Logger', () => {
 
     assert.equal(logMsg.name, 'warnLogger');
     assert.property(logMsg, 'err');
-    assert.equal(logMsg.err.output.statusCode, err.output.statusCode);
-    assert.equal(logMsg.err.data.errorCode, err.data.errorCode);
+    assert.equal(logMsg.statusCode, err.output.statusCode);
+    assert.equal(logMsg.errorCode, err.data.errorCode);
     assert.equal(logMsg.level, 40);
     assert.equal(logMsg.msg, 'warning');
     assert.lengthOf(Object.keys(logMsg.context), 0);
@@ -178,8 +178,8 @@ describe('Logger', () => {
 
     assert.equal(logMsg.name, 'errorLogger');
     assert.property(logMsg, 'err');
-    assert.equal(logMsg.err.output.statusCode, err.output.statusCode);
-    assert.equal(logMsg.err.data.errorCode, err.data.errorCode);
+    assert.equal(logMsg.statusCode, err.output.statusCode);
+    assert.equal(logMsg.errorCode, err.data.errorCode);
     assert.equal(logMsg.level, 50);
     assert.equal(logMsg.requestId, 'rid:002');
     assert.equal(logMsg.msg, 'error');
@@ -202,8 +202,8 @@ describe('Logger', () => {
 
     assert.equal(logMsg.name, 'errorLogger');
     assert.property(logMsg, 'err');
-    assert.equal(logMsg.err.output.statusCode, err.output.statusCode);
-    assert.equal(logMsg.err.data.errorCode, err.data.errorCode);
+    assert.equal(logMsg.statusCode, err.output.statusCode);
+    assert.equal(logMsg.errorCode, err.data.errorCode);
     assert.equal(logMsg.level, 50);
     assert.equal(logMsg.msg, 'error');
   });
@@ -232,8 +232,8 @@ describe('Logger', () => {
 
     assert.equal(logMsg.name, 'errorLogger');
     assert.property(logMsg, 'err');
-    assert.equal(logMsg.err.output.statusCode, err.output.statusCode);
-    assert.equal(logMsg.err.data.errorCode, err.data.errorCode);
+    assert.equal(logMsg.statusCode, err.output.statusCode);
+    assert.equal(logMsg.errorCode, err.data.errorCode);
     assert.equal(logMsg.level, 50);
     assert.equal(logMsg.requestId, 'rid:002');
     assert.equal(logMsg.msg, 'error');

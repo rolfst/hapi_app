@@ -1,7 +1,7 @@
 import createError from '../../../../shared/utils/create-error';
 import tokenUtil from '../../../../shared/utils/token';
 import * as userRepo from '../../../core/repositories/user';
-import analytics from '../../../../shared/services/analytics';
+import * as Analytics from '../../../../shared/services/analytics';
 import firstLoginEvent from '../../../../shared/events/first-login-event';
 import * as impl from './implementation';
 
@@ -24,10 +24,9 @@ export const authenticate = async (payload, message) => {
 
   const tokens = await impl.getAuthenticationTokens(user, message.deviceName);
 
-  analytics.registerProfile(user);
-  analytics.setUser(user);
+  Analytics.registerProfile(user);
 
-  if (user.lastLogin === null) analytics.track(firstLoginEvent());
+  if (user.lastLogin === null) Analytics.track(firstLoginEvent(), user.id);
 
   return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, user };
 };

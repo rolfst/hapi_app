@@ -1,5 +1,4 @@
 import { pick } from 'lodash';
-import analytics from '../services/analytics';
 import tokenUtil from '../utils/token';
 import * as serverUtil from '../utils/server';
 import createError from '../utils/create-error';
@@ -14,8 +13,6 @@ export const authenticate = async (networkId, token = null) => {
   const { sub: userId, integrations } = tokenUtil.decode(token);
   // TODO the user should be retrieved via the service
   const user = await userRepo.findUserById(userId);
-
-  analytics.setUser(user);
 
   return {
     credentials: pick(user, 'id', 'username'),

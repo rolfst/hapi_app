@@ -1,4 +1,4 @@
-import notifier from '../../../shared/services/notifier';
+import * as notifier from '../../../shared/services/notifier';
 
 export const createNotification = (message) => {
   return {
@@ -6,6 +6,7 @@ export const createNotification = (message) => {
     data: {
       id: message.conversation.id,
       type: 'conversation',
+      track_name: 'private_message',
     },
   };
 };

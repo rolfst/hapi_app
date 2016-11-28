@@ -1,6 +1,6 @@
 import moment from 'moment';
 import 'moment/locale/nl';
-import notifier from '../../../shared/services/notifier';
+import * as notifier from '../../../shared/services/notifier';
 import * as notificationUtils from '../utils/notification';
 
 moment.locale('nl');
@@ -16,7 +16,7 @@ export const createNotification = (exchange) => {
   return {
     text: `${exchange.ApprovedUser.fullName} heeft je shift ${date} van ` +
       `${notificationUtils.createTimeText(exchange)} overgenomen.`,
-    data: { id: exchange.id, type: 'exchange' },
+    data: { id: exchange.id, type: 'exchange', track_name: 'exchange_approved_creator' },
   };
 };
 

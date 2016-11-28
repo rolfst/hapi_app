@@ -6,7 +6,12 @@ const logConfig = require(`../configs/logs-${environment}`).default;
 
 const fetchContextObjects = (args = {}) => {
   if (isUndefined(args.err)) return { context: args };
-  return { err: args.err, context: omit(args, 'err') };
+
+  const context = { err: args.err.stack, context: omit(args, 'err') };
+  if (args.err.output) context.statusCode = args.err.output.statusCode;
+  if (args.err.data) context.errorCode = args.err.data.errorCode;
+
+  return context;
 };
 
 const buildLogContext = (args = {}) => {
@@ -56,7 +61,7 @@ export const getLogger = (name) => {
     /**
      * @param {string} message - message
      * @param {object} [data] - objects to log
-     * @param {error} [data.error] - error object to log
+     * @param {error} [data.err] - error object to log
      * @param {object} [data.artifacts] - dataobject that contains context
      * @param {string} [data.artifacts.requestId] - representing trace identifier
      * @method warn - logs at a warning level
@@ -67,7 +72,7 @@ export const getLogger = (name) => {
     /**
      * @param {string} message - message
      * @param {object} [data] - objects to log
-     * @param {error} [data.error] - error object to log
+     * @param {error} [data.err] - error object to log
      * @param {object} [data.artifacts] - dataobject that contains context
      * @param {string} [data.artifacts.requestId] - representing trace identifier
      * @method error - logs at a error level

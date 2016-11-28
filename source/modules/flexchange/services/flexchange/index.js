@@ -1,7 +1,7 @@
 import { sortBy, orderBy, uniqBy, map, filter, includes } from 'lodash';
 import moment from 'moment';
+import * as Analytics from '../../../../shared/services/analytics';
 import { createAdapter } from '../../../../shared/utils/create-adapter';
-import analytics from '../../../../shared/services/analytics';
 import approveExchangeEvent from '../../../../shared/events/approve-exchange-event';
 import createError from '../../../../shared/utils/create-error';
 import newExchangeEvent from '../../../../shared/events/new-exchange-event';
@@ -98,7 +98,7 @@ export const approveExchange = async (payload, message) => {
     substituteNotifier.send(exchange),
   ]);
 
-  analytics.track(approveExchangeEvent(message.network, approvedExchange));
+  Analytics.track(approveExchangeEvent(message.network, approvedExchange), message.credentials.id);
 
   return approvedExchange;
 };
@@ -257,7 +257,7 @@ export const createExchange = async (payload, message) => {
   const users = await findUsersByType(createdExchange, network, payload.values, credentials);
 
   await createdNotifier.send(users, createdExchange);
-  analytics.track(newExchangeEvent(network, createdExchange));
+  Analytics.track(newExchangeEvent(network, createdExchange), message.credentials.id);
 
   return exchangeRepo.findExchangeById(createdExchange.id);
 };

@@ -25,20 +25,23 @@ describe('Create exchange', () => {
 
   afterEach(() => (sandbox.restore()));
 
-  it('should send a notifications', async () => {
+  it('should send a notification', async () => {
     sandbox.stub(exchangeCreatedNotification, 'send').returns(Promise.resolve(null));
     sandbox.stub(userRepo, 'findUserMetaDataForNetwork')
       .returns(Promise.resolve({ roleType: 'EMPLOYEE' }));
 
     const message = {
       network: {
+        id: '1',
+        name: 'Foo network',
         NetworkUser: { roleType: 'EMPLOYEE' },
       },
-      credentials: {},
+      credentials: { id: '1' },
     };
+
     const payload = {
       exchangeId: null,
-      user_id: 1,
+      user_id: '1',
       type: exchangeTypes.NETWORK,
     };
 
