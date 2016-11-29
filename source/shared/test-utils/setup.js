@@ -36,21 +36,17 @@ export const initialSetup = async () => {
     userRepo.createUser(blueprints.users.networkless),
   ]);
 
-  integration = await integrationRepo.createIntegration({
-    name: 'PMT',
-    token: 'footoken',
-  });
+  integration = await testHelper.createIntegration();
 
   // Create networks
-  const [createdFlexNetwork, createdPMTNetwork] = await Promise.all([
-    networkService.create({ userId: admin.id, name: generateNetworkName() }),
-    networkService.create({
+  const [createdFlexNetwork, createdPMTNetwork] = await testHelper.createNetworks([
+    { userId: admin.id, name: generateNetworkName() },
+    {
       userId: admin.id,
       externalId: 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi',
       name: generateNetworkName(),
       integrationName: 'PMT',
-    }),
-  ]);
+  }]);
 
   const adminCredentials = {
     username: blueprints.users.admin.username,
@@ -129,7 +125,7 @@ export const finalCleanup = async () => {
   return userRepo.deleteById(admin.id);
 };
 
-after(async () => finalCleanup());
+// after(async () => finalCleanup());
 
-before(async () => initialSetup());
+// before(async () => initialSetup());
 
