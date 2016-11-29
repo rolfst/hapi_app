@@ -5,9 +5,9 @@ import tokenUtil from '../../../shared/utils/token';
 export default (userId, deviceId, integrations) => {
   const payload = {
     type: 'access_token',
-    exp: parseInt(moment().add(1, 'hour').format('X'), 10),
+    exp: moment().add(1, 'hour').unix(),
     iss: 'https://api.flex-appeal.nl',
-    iat: parseInt(moment().format('X'), 10),
+    iat: moment().unix(),
     sub: userId,
     device: deviceId,
     jti: _.random(1000000, 9999999),
