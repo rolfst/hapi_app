@@ -1,24 +1,46 @@
+import { first } from 'lodash';
 import Promise from 'bluebird';
 import blueprints from './blueprints';
 import generateNetworkName from './create-network-name';
-import * as userRepo from '../../modules/core/repositories/user';
+import { UserRoles } from '../services/permission';
 import * as networkRepo from '../../modules/core/repositories/network';
-import * as integrationRepo from '../../modules/core/repositories/integration';
 import * as networkService from '../../modules/core/services/network';
 import * as testHelper from './helpers';
 
 describe('test helper', () => {
+  describe('createUser', () => {
+    afterEach(async () => {
+      const users = await testHelper.findAllUsers();
+
+      return testHelper.deleteUsers(users);
+    });
+
+    it('should create a user', async () => {
+      await testHelper.createUser({
+        username: 'testHelper', firstName: 'test', lastName: 'Helper', email: 'testHelper@flex-appeal.nl',
+        password: 'password',
+      });
+      const users = await testHelper.findAllUsers();
+      const user = first(users);
+
+      assert.equal(users.length, 1);
+      assert.equal(user.username, 'testHelper');
+      assert.equal(user.firstName, 'test');
+      assert.equal(user.lastName, 'Helper');
+      assert.equal(user.email, 'testHelper@flex-appeal.nl');
+    });
+  });
   describe('createIntegration', () => {
     afterEach(async () => {
-      const integrations = await integrationRepo.findAll();
+      const integrations = await testHelper.findAllIntegrations();
 
-      return Promise.each(integrations, (integration) => integrationRepo.deleteById(integration.id));
+      return testHelper.deleteIntegrations(integrations);
     });
 
     it('should create a default integration', async () => {
       await testHelper.createIntegration();
 
-      const integrations = await integrationRepo.findAll();
+      const integrations = await testHelper.findAllIntegrations();
 
       assert.equal(integrations.length, 1);
       assert.equal(integrations[0].name, testHelper.DEFAULT_INTEGRATION.name);
@@ -27,7 +49,7 @@ describe('test helper', () => {
     it('should create an integration with provided params', async () => {
       await testHelper.createIntegration({ name: 'providedName', token: 'providedToken' });
 
-      const integrations = await integrationRepo.findAll();
+      const integrations = await testHelper.findAllIntegrations();
 
       assert.equal(integrations.length, 1);
       assert.equal(integrations[0].name, 'providedName');
@@ -38,7 +60,7 @@ describe('test helper', () => {
 
       assert.isRejected(promise, /notNull Violation: name cannot be null/, 'failed');
 
-      const integrations = await integrationRepo.findAll();
+      const integrations = await testHelper.findAllIntegrations();
 
       return assert.equal(integrations.length, 0);
     });
@@ -46,16 +68,16 @@ describe('test helper', () => {
 
   describe('createNetworks', () => {
     afterEach(async () => {
-      const users = await userRepo.findAllUsers();
-      const integrations = await integrationRepo.findAll();
+      const users = await testHelper.findAllUsers();
+      const integrations = await testHelper.findAllIntegrations();
       return Promise.all([
-        Promise.map(integrations, (integration) => integrationRepo.deleteById(integration.id)),
-        Promise.map(users, (user) => userRepo.deleteById(user.id)),
+        testHelper.deleteIntegrations(integrations),
+        testHelper.deleteUsers(users),
       ]);
     });
 
     it('should create 2 networks', async () => {
-      const user = await userRepo.createUser(blueprints.users.admin);
+      const user = await testHelper.createUser(blueprints.users.admin);
 
       await Promise.all([
         testHelper.createNetwork({ userId: user.id, name: generateNetworkName() }),
@@ -66,12 +88,12 @@ describe('test helper', () => {
         }),
       ]);
 
-      const networks = await networkRepo.findAll();
+      const networks = await testHelper.findAllNetworks();
 
       assert.equal(networks.length, 2);
     });
     it('should create a network with an integration', async () => {
-      const user = await userRepo.createUser(blueprints.users.admin);
+      const user = await testHelper.createUser(blueprints.users.admin);
       const integration = await testHelper.createIntegration()
       const createdNetworks = await Promise.all([
         testHelper.createNetwork({
@@ -88,6 +110,33 @@ describe('test helper', () => {
       assert.equal(networks.length, 1);
       assert.equal(integrationName, testHelper.DEFAULT_INTEGRATION.name);
       assert.equal(networks[0].id, createdNetworks[0].id);
+    });
+  });
+  describe('authenticateUser', () => {
+    afterEach(async () => {
+      const users = await testHelper.findAllUsers();
+
+      return testHelper.deleteUsers(users);
+    });
+
+    it('should authenticate a user', async () => {
+      const user = await testHelper.createUser(blueprints.users.employee);
+      const network = await testHelper.createNetwork({ userId: user.id, name: 'NetworkForAuthenticatedUser' });
+
+      await testHelper.addUserToNetwork({
+        userId: user.id,
+        networkId: network.id,
+        roleType: UserRoles.ADMIN,
+      });
+
+      const authUser = await testHelper.authenticateUser({
+        username: blueprints.users.employee.username,
+        password: blueprints.users.employee.password,
+        deviceName: 'foo',
+      });
+
+      assert.isNotNull(authUser);
+      assert.property(authUser, 'token');
     });
   });
 });
