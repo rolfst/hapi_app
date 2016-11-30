@@ -21,7 +21,7 @@ const DEFAULT_AUTHENTICATION_MESSAGE = { deviceName: 'testDevice' };
  * @param {string} attributes.name - name of the integration
  * @param {string} attributes.token - token to be used to access the integration
  * @method createIntegration
- * @return {Promise.<Integration>}
+ * @return {Promise<Integration>}
  */
 export async function createIntegration(attributes = DEFAULT_INTEGRATION) {
   return integrationRepo.createIntegration(attributes);
@@ -35,7 +35,7 @@ export async function createIntegration(attributes = DEFAULT_INTEGRATION) {
  * @param {string} networkAttributes.name
  * @param {string} [networkAttributes.integrationName]
  * @method createNetwork
- * @return {Promise.<Network>} - created network
+ * @return {Promise<Network>} - created network
  */
 export function createNetwork(networkAttributes) {
   return networkService.create(networkAttributes);
@@ -45,7 +45,7 @@ export function createNetwork(networkAttributes) {
 /**
  * finds all networks in the database
  * @method findAllNetworks
- * @return {Promise.NetworkModel[]}
+ * @return {Promise<NetworkModel[]>}
  */
 export async function findAllNetworks() {
   return networkRepo.findAll();
@@ -60,7 +60,7 @@ export async function findAllNetworks() {
  * @param {string} userAttributes.email
  * @param {string} userAttributes.password
  * @method createUser
- * @return {Promise.<User>}
+ * @return {Promise<UserModel>}
  */
 export async function createUser(userAttributes) {
   return userRepo.createUser(userAttributes);
@@ -75,7 +75,7 @@ export async function createUser(userAttributes) {
  * @param {string} networkUserAttributes.externalId
  * @param {string} networkUserAttributes.userToken
  * @method addUserToNetwork
- * @return {Promise.<NetworkUser>}
+ * @return {Promise<NetworkUserModel>}
  */
 export async function addUserToNetwork(networkUserAttributes) {
   return networkService.addUserToNetwork(networkUserAttributes);
@@ -91,7 +91,7 @@ export async function addUserToNetwork(networkUserAttributes) {
  * @param {object} [message]
  * @param {string} message.deviceName
  * @method authenticateUser
- * @return {Promise.AuthorizedUser} {@link module:shared/test-utils/authenticate.AuthorizedUser}
+ * @return {Promise<AuthorizedUser>} {@link module:shared/test-utils/authenticate.AuthorizedUser}
  */
 export async function authenticateUser(userCredentials, message = DEFAULT_AUTHENTICATION_MESSAGE) {
   return authenticate(userCredentials, message);
@@ -119,7 +119,7 @@ export async function deleteUsers(userOrUsers) {
 /**
  * finds all users in the database
  * @method findAllUsers
- * @return {Promise.UserModel[]}
+ * @return {Promise<UserModel[]>}
  */
 export async function findAllUsers() {
   return userRepo.findAllUsers();
@@ -146,7 +146,7 @@ export async function deleteIntegrations(integrationOrIntegrations) {
 /**
  * finds all integrations in the database
  * @method findAllIntegrations
- * @return {Promise.IntegrationsModel[]}
+ * @return {Promise.IntegrationsModel[]>}
  */
 export async function findAllIntegrations() {
   return integrationRepo.findAll();
