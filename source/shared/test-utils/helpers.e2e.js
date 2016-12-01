@@ -37,13 +37,13 @@ describe('test helper', () => {
     });
 
     it('should create a default integration', async () => {
-      await testHelper.createIntegration();
+      const integration = await testHelper.createIntegration();
 
       const integrations = await testHelper.findAllIntegrations();
 
       assert.equal(integrations.length, 1);
-      assert.equal(integrations[0].name, testHelper.DEFAULT_INTEGRATION.name);
-      assert.equal(integrations[0].token, testHelper.DEFAULT_INTEGRATION.token);
+      assert.equal(integrations[0].name, integration.name);
+      assert.equal(integrations[0].token, integration.token);
     });
 
     it('should create an integration with provided params', async () => {
@@ -78,7 +78,7 @@ describe('test helper', () => {
     });
 
     it('should create 2 networks', async () => {
-      const user = await testHelper.createUser(blueprints.users.admin);
+      const user = await testHelper.createUser();
 
       await Promise.all([
         testHelper.createNetwork({ userId: user.id }),
@@ -94,7 +94,7 @@ describe('test helper', () => {
     });
 
     it('should create a network with an integration', async () => {
-      const user = await testHelper.createUser(blueprints.users.admin);
+      const user = await testHelper.createUser();
       const integration = await testHelper.createIntegration()
       const createdNetworks = await Promise.all([
         testHelper.createNetwork({
@@ -113,7 +113,7 @@ describe('test helper', () => {
     });
 
     it('should create a network with a custom networkName', async () => {
-      const user = await testHelper.createUser(blueprints.users.admin);
+      const user = await testHelper.createUser();
       const integration = await testHelper.createIntegration()
       const createdNetworks = await Promise.all([
         testHelper.createNetwork({

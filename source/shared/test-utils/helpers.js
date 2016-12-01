@@ -2,6 +2,7 @@ import { flatten } from 'lodash';
 import Promise from 'bluebird';
 import authenticate from './authenticate';
 import generateNetworkName from './create-network-name';
+import blueprints from './blueprints';
 import * as networkService from '../../modules/core/services/network';
 import * as integrationRepo from '../../modules/core/repositories/integration';
 import * as userRepo from '../../modules/core/repositories/user';
@@ -64,7 +65,7 @@ export async function findAllNetworks() {
  * @method createUser
  * @return {Promise<UserModel>}
  */
-export async function createUser(userAttributes) {
+export async function createUser(userAttributes = blueprints.users.admin) {
   return userRepo.createUser(userAttributes);
 }
 
