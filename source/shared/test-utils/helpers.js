@@ -39,15 +39,14 @@ export async function createIntegration(attributes = DEFAULT_INTEGRATION) {
  * @method createNetwork
  * @return {Promise<Network>} - created network
  */
-export function createNetwork({
+export async function createNetwork({
   userId, externalId, integrationName, name = generateNetworkName() }) {
   const networkAttributes = { userId, externalId, integrationName, name };
   return networkService.create(networkAttributes);
 }
 
-
 /**
- * finds all networks in the database
+ * Finds all networks in the database
  * @method findAllNetworks
  * @return {Promise<NetworkModel[]>}
  */
@@ -87,7 +86,7 @@ export async function addUserToNetwork(networkUserAttributes) {
 
 
 /**
- * authenticates a user
+ * Authenticates a user
  * @param {object} userCredentials
  * @param {string} userCredentials.username
  * @param {string} userCredentials.password
@@ -113,7 +112,7 @@ export async function deleteUsers(...users) {
 }
 
 /**
- * finds all users in the database
+ * Finds all users in the database
  * @method findAllUsers
  * @return {Promise<UserModel[]>}
  */
@@ -132,7 +131,7 @@ export async function deleteIntegrations(...integrations) {
 }
 
 /**
- * finds all integrations in the database
+ * Finds all integrations in the database
  * @method findAllIntegrations
  * @return {Promise.IntegrationsModel[]>}
  */
