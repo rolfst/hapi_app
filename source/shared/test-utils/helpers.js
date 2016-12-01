@@ -39,7 +39,8 @@ export async function createIntegration(attributes = DEFAULT_INTEGRATION) {
  * @method createNetwork
  * @return {Promise<Network>} - created network
  */
-export function createNetwork({ userId, externalId, integrationName, name = generateNetworkName() }) { // eslint-disable-line
+export function createNetwork({
+  userId, externalId, integrationName, name = generateNetworkName() }) {
   const networkAttributes = { userId, externalId, integrationName, name };
   return networkService.create(networkAttributes);
 }

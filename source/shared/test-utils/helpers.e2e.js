@@ -16,9 +16,13 @@ describe('test helper', () => {
 
     it('should create a user', async () => {
       await testHelper.createUser({
-        username: 'testHelper', firstName: 'test', lastName: 'Helper', email: 'testHelper@flex-appeal.nl',
+        username: 'testHelper',
+        firstName: 'test',
+        lastName: 'Helper',
+        email: 'testHelper@flex-appeal.nl',
         password: 'password',
       });
+
       const users = await testHelper.findAllUsers();
       const user = first(users);
 
@@ -29,6 +33,7 @@ describe('test helper', () => {
       assert.equal(user.email, 'testHelper@flex-appeal.nl');
     });
   });
+
   describe('createIntegration', () => {
     afterEach(async () => {
       const integrations = await testHelper.findAllIntegrations();
@@ -95,7 +100,7 @@ describe('test helper', () => {
 
     it('should create a network with an integration', async () => {
       const user = await testHelper.createUser();
-      const integration = await testHelper.createIntegration()
+      const integration = await testHelper.createIntegration();
       const createdNetworks = await Promise.all([
         testHelper.createNetwork({
           userId: user.id,
@@ -105,16 +110,16 @@ describe('test helper', () => {
       ]);
 
       const integrationName = await networkRepo.findIntegrationNameForNetwork(createdNetworks[0].id);
-      const networks = await networkService.listNetworksForIntegration({ integrationName: testHelper.DEFAULT_INTEGRATION.name });
+      const networks = await networkService.listNetworksForIntegration({ integrationName: integration.name });
 
       assert.equal(networks.length, 1);
-      assert.equal(integrationName, testHelper.DEFAULT_INTEGRATION.name);
+      assert.equal(integrationName, integration.name);
       assert.equal(networks[0].id, createdNetworks[0].id);
     });
 
     it('should create a network with a custom networkName', async () => {
       const user = await testHelper.createUser();
-      const integration = await testHelper.createIntegration()
+      const integration = await testHelper.createIntegration();
       const createdNetworks = await Promise.all([
         testHelper.createNetwork({
           userId: user.id,
@@ -125,7 +130,7 @@ describe('test helper', () => {
       ]);
 
       const integrationName = await networkRepo.findIntegrationNameForNetwork(createdNetworks[0].id);
-      const networks = await networkService.listNetworksForIntegration({ integrationName: testHelper.DEFAULT_INTEGRATION.name });
+      const networks = await networkService.listNetworksForIntegration({ integrationName: integration.name });
 
       assert.equal(networks.length, 1);
       assert.equal(networks[0].name, 'customName');
