@@ -1,7 +1,8 @@
 import fetch from 'isomorphic-fetch';
 import { map } from 'lodash';
 
-export const WEBSOCKET_URL = process.env.API_ENV === 'production' ? 'http://188.226.130.15' : 'http://188.226.130.15';
+export const WEBSOCKET_URL = process.env.API_ENV === 'production' ?
+  'https://realtime.flex-appeal.nl' : 'https://test.realtime.flex-appeal.nl';
 
 export const send = (eventName, users, payload, token) => {
   if (process.env.API_ENV === 'testing') return;
