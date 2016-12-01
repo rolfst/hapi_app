@@ -1,6 +1,7 @@
-import { isArray } from 'lodash';
+import { flatten } from 'lodash';
 import Promise from 'bluebird';
 import authenticate from './authenticate';
+import generateNetworkName from './create-network-name';
 import * as networkService from '../../modules/core/services/network';
 import * as integrationRepo from '../../modules/core/repositories/integration';
 import * as userRepo from '../../modules/core/repositories/user';
@@ -37,7 +38,8 @@ export async function createIntegration(attributes = DEFAULT_INTEGRATION) {
  * @method createNetwork
  * @return {Promise<Network>} - created network
  */
-export function createNetwork(networkAttributes) {
+export function createNetwork({ userId, externalId, integrationName, name = generateNetworkName() }) { // eslint-disable-line
+  const networkAttributes = { userId, externalId, integrationName, name };
   return networkService.create(networkAttributes);
 }
 
@@ -100,20 +102,12 @@ export async function authenticateUser(userCredentials, message = DEFAULT_AUTHEN
 
 /**
  * Deletes users from database
- * @param {UserModel|UserModel[]} userOrUsers
- * @param {string} userOrUsers.id
+ * @param {User[]} users
  * @method deleteUsers
  * @return {Promise}
  */
-export async function deleteUsers(userOrUsers) {
-  let users;
-
-  if (!isArray(userOrUsers)) {
-    users = [userOrUsers];
-  } else {
-    users = userOrUsers;
-  }
-  return Promise.map(users, (user) => userRepo.deleteById(user.id));
+export async function deleteUsers(...users) {
+  return Promise.map(flatten(users), (user) => userRepo.deleteById(user.id));
 }
 
 /**
@@ -127,20 +121,12 @@ export async function findAllUsers() {
 
 /**
  * Deletes integrations from the database
- * @param {IntegrationModel|IntegrationModel[]} integrationOrIntegrations
- * @param {string} integrationOrIntegrations.id
+ * @param {Integration[]} integrations
  * @method deleteIntegrations
  * @return {Promise}
  */
-export async function deleteIntegrations(integrationOrIntegrations) {
-  let integrations;
-
-  if (!isArray(integrationOrIntegrations)) {
-    integrations = [integrationOrIntegrations];
-  } else {
-    integrations = integrationOrIntegrations;
-  }
-  return Promise.map(integrations, (integration) => integrationRepo.deleteById(integration.id));
+export async function deleteIntegrations(...integrations) {
+  return Promise.map(flatten(integrations), (integration) => integrationRepo.deleteById(integration.id));
 }
 
 /**

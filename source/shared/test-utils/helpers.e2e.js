@@ -1,7 +1,6 @@
 import { first } from 'lodash';
 import Promise from 'bluebird';
 import blueprints from './blueprints';
-import generateNetworkName from './create-network-name';
 import { UserRoles } from '../services/permission';
 import * as networkRepo from '../../modules/core/repositories/network';
 import * as networkService from '../../modules/core/services/network';
@@ -46,6 +45,7 @@ describe('test helper', () => {
       assert.equal(integrations[0].name, testHelper.DEFAULT_INTEGRATION.name);
       assert.equal(integrations[0].token, testHelper.DEFAULT_INTEGRATION.token);
     });
+
     it('should create an integration with provided params', async () => {
       await testHelper.createIntegration({ name: 'providedName', token: 'providedToken' });
 
@@ -55,6 +55,7 @@ describe('test helper', () => {
       assert.equal(integrations[0].name, 'providedName');
       assert.equal(integrations[0].token, 'providedToken');
     });
+
     it('should throw an exception during creation', async () => {
       const promise = testHelper.createIntegration({ title: 'providedName', token: 'providedToken' });
 
@@ -80,11 +81,10 @@ describe('test helper', () => {
       const user = await testHelper.createUser(blueprints.users.admin);
 
       await Promise.all([
-        testHelper.createNetwork({ userId: user.id, name: generateNetworkName() }),
+        testHelper.createNetwork({ userId: user.id }),
         testHelper.createNetwork({
           userId: user.id,
           externalId: 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi',
-          name: generateNetworkName(),
         }),
       ]);
 
@@ -92,6 +92,7 @@ describe('test helper', () => {
 
       assert.equal(networks.length, 2);
     });
+
     it('should create a network with an integration', async () => {
       const user = await testHelper.createUser(blueprints.users.admin);
       const integration = await testHelper.createIntegration()
@@ -99,7 +100,6 @@ describe('test helper', () => {
         testHelper.createNetwork({
           userId: user.id,
           externalId: 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi',
-          name: generateNetworkName(),
           integrationName: testHelper.DEFAULT_INTEGRATION.name,
         }),
       ]);
@@ -110,6 +110,25 @@ describe('test helper', () => {
       assert.equal(networks.length, 1);
       assert.equal(integrationName, testHelper.DEFAULT_INTEGRATION.name);
       assert.equal(networks[0].id, createdNetworks[0].id);
+    });
+
+    it('should create a network with a custom networkName', async () => {
+      const user = await testHelper.createUser(blueprints.users.admin);
+      const integration = await testHelper.createIntegration()
+      const createdNetworks = await Promise.all([
+        testHelper.createNetwork({
+          userId: user.id,
+          externalId: 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi',
+          name: 'customName',
+          integrationName: testHelper.DEFAULT_INTEGRATION.name,
+        }),
+      ]);
+
+      const integrationName = await networkRepo.findIntegrationNameForNetwork(createdNetworks[0].id);
+      const networks = await networkService.listNetworksForIntegration({ integrationName: testHelper.DEFAULT_INTEGRATION.name });
+
+      assert.equal(networks.length, 1);
+      assert.equal(networks[0].name, 'customName');
     });
   });
   describe('authenticateUser', () => {
