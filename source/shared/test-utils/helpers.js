@@ -124,12 +124,12 @@ export async function authenticateUser(userCredentials) {
 
 /**
  * Deletes users from database
- * @param {User[]} users
+ * @param {User|User[]} userOrUsers
  * @method deleteUser
  * @return {Promise}
  */
-export async function deleteUser(...users) {
-  return Promise.map(flatten(users), (user) => userRepo.deleteById(user.id));
+export async function deleteUser(...userOrUsers) {
+  return Promise.map(flatten(userOrUsers), (user) => userRepo.deleteById(user.id));
 }
 
 /**
@@ -143,12 +143,12 @@ export async function findAllUsers() {
 
 /**
  * Deletes integrations from the database
- * @param {Integration[]} integrations
+ * @param {Integration|Integration[]} integrationOrIntegrations
  * @method deleteIntegration
  * @return {Promise}
  */
-export async function deleteIntegration(...integrations) {
-  return Promise.map(flatten(integrations),
+export async function deleteIntegration(...integrationOrIntegrations) {
+  return Promise.map(flatten(integrationOrIntegrations),
     (integration) => integrationRepo.deleteById(integration.id));
 }
 
