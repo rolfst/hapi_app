@@ -15,8 +15,6 @@ import * as networkRepo from '../../modules/core/repositories/network';
 export const DEFAULT_INTEGRATION = { name: 'PMT', token: 'footoken' };
 export const DEFAULT_NETWORK_EXTERNALID = 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi';
 
-const DEFAULT_AUTHENTICATION_MESSAGE = { deviceName: 'testDevice' };
-
 /**
  * creates an integration in the database
  * @param {object} [attributes=DEFAULT_INTEGRATION] - attributes to user for an integration
@@ -90,24 +88,21 @@ export async function addUserToNetwork(networkUserAttributes) {
  * @param {object} userCredentials
  * @param {string} userCredentials.username
  * @param {string} userCredentials.password
- * @param {string} userCredentials.deviceName
- * @param {object} [message]
- * @param {string} message.deviceName
  * @method authenticateUser
  * @return {Promise<AuthorizedUser>} {@link module:shared/test-utils/authenticate.AuthorizedUser}
  */
-export async function authenticateUser(userCredentials, message = DEFAULT_AUTHENTICATION_MESSAGE) {
-  return authenticate(userCredentials, message);
+export async function authenticateUser(userCredentials) {
+  return authenticate(userCredentials, { deviceName: 'testDevice' });
 }
 
 
 /**
  * Deletes users from database
  * @param {User[]} users
- * @method deleteUsers
+ * @method deleteUser
  * @return {Promise}
  */
-export async function deleteUsers(...users) {
+export async function deleteUser(...users) {
   return Promise.map(flatten(users), (user) => userRepo.deleteById(user.id));
 }
 
@@ -123,10 +118,10 @@ export async function findAllUsers() {
 /**
  * Deletes integrations from the database
  * @param {Integration[]} integrations
- * @method deleteIntegrations
+ * @method deleteIntegration
  * @return {Promise}
  */
-export async function deleteIntegrations(...integrations) {
+export async function deleteIntegration(...integrations) {
   return Promise.map(flatten(integrations), (integration) => integrationRepo.deleteById(integration.id));
 }
 
