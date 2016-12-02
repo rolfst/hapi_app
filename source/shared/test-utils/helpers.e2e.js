@@ -11,7 +11,7 @@ describe('test helper', () => {
     afterEach(async () => {
       const users = await testHelper.findAllUsers();
 
-      return testHelper.deleteUsers(users);
+      return testHelper.deleteUser(users);
     });
 
     it('should create a user', async () => {
@@ -38,7 +38,7 @@ describe('test helper', () => {
     afterEach(async () => {
       const integrations = await testHelper.findAllIntegrations();
 
-      return testHelper.deleteIntegrations(integrations);
+      return testHelper.deleteIntegration(integrations);
     });
 
     it('should create a default integration', async () => {
@@ -77,8 +77,8 @@ describe('test helper', () => {
       const users = await testHelper.findAllUsers();
       const integrations = await testHelper.findAllIntegrations();
       return Promise.all([
-        testHelper.deleteIntegrations(integrations),
-        testHelper.deleteUsers(users),
+        testHelper.deleteIntegration(integrations),
+        testHelper.deleteUser(users),
       ]);
     });
 
@@ -136,11 +136,66 @@ describe('test helper', () => {
       assert.equal(networks[0].name, 'customName');
     });
   });
+
+  describe('createNetworkWithIntegration', () => {
+    afterEach(async () => {
+      const users = await testHelper.findAllUsers();
+      const integrations = await testHelper.findAllIntegrations();
+      return Promise.all([
+        testHelper.deleteIntegration(integrations),
+        testHelper.deleteUser(users),
+      ]);
+    });
+
+    it('should create both a network and an integration', async () => {
+      const integrationName = 'integration';
+      const user = await testHelper.createUser();
+      const { network, integration } = await testHelper.createNetworkWithIntegration({
+        userId: user.id,
+        externalId: 'externalId',
+        name: 'networkName',
+        integrationName,
+        token: 'testToken',
+      });
+
+      assert.isNotNull(network);
+      assert.isNotNull(integration);
+      assert.equal(network.integrations[0], integration.name);
+      assert.equal(integration.name, integrationName);
+    });
+
+    it('should throw an error when not providing an integrationName', async () => {
+      const integrationName = 'integration';
+      const user = await testHelper.createUser();
+      const promise = testHelper.createNetworkWithIntegration({
+        userId: user.id,
+        externalId: 'externalId',
+        name: 'networkName',
+        token: 'testToken',
+      });
+
+      assert.isRejected(promise, /Error: Missing Parameter: integrationName/, 'failed to create network with integration');
+    });
+
+    it('should throw an error when not providing a token', async () => {
+      const integrationName = 'integration';
+      const user = await testHelper.createUser();
+      const promise = testHelper.createNetworkWithIntegration({
+        userId: user.id,
+        externalId: 'externalId',
+        name: 'networkName',
+        integrationName,
+      });
+
+      assert.isRejected(promise, /Error: Missing Parameter: token/, 'failed to create network with integration');
+    });
+  });
+
   describe('authenticateUser', () => {
     afterEach(async () => {
       const users = await testHelper.findAllUsers();
 
-      return testHelper.deleteUsers(users);
+      return testHelper.deleteUser(users);
     });
 
     it('should authenticate a user', async () => {

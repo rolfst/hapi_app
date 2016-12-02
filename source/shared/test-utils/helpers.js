@@ -15,6 +15,10 @@ import * as networkRepo from '../../modules/core/repositories/network';
 export const DEFAULT_INTEGRATION = { name: 'PMT', token: 'footoken' };
 export const DEFAULT_NETWORK_EXTERNALID = 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi';
 
+function mandatory(paramName) {
+  throw new Error(`Missing Parameter: ${paramName}`);
+}
+
 /**
  * creates an integration in the database
  * @param {object} [attributes=DEFAULT_INTEGRATION] - attributes to user for an integration
@@ -41,6 +45,28 @@ export async function createNetwork({
   userId, externalId, integrationName, name = generateNetworkName() }) {
   const networkAttributes = { userId, externalId, integrationName, name };
   return networkService.create(networkAttributes);
+}
+
+/**
+ * Creates a network and an integration based on the attributes
+ * @param {Object} networkAttributes
+ * @param {string} networkAttributes.userId
+ * @param {string} [networkAttributes.externalId]
+ * @param {string} networkAttributes.name
+ * @param {string} [networkAttributes.integrationName]
+ * @param {string} attributes.token - token to be used to access the integration
+ * @method createNetwork
+ * @return {Promise<Network>} - created network
+ */
+export async function createNetworkWithIntegration({
+  userId, externalId, name, integrationName, token }) {
+  if (!integrationName) mandatory('integrationName');
+  if (!token) mandatory('token');
+
+  const integration = await createIntegration({ name: integrationName, token });
+  const network = await createNetwork({ userId, externalId, name, integrationName });
+
+  return { integration, network };
 }
 
 /**
@@ -122,7 +148,8 @@ export async function findAllUsers() {
  * @return {Promise}
  */
 export async function deleteIntegration(...integrations) {
-  return Promise.map(flatten(integrations), (integration) => integrationRepo.deleteById(integration.id));
+  return Promise.map(flatten(integrations),
+    (integration) => integrationRepo.deleteById(integration.id));
 }
 
 /**
