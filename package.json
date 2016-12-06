@@ -5,11 +5,10 @@
   "main": "index.js",
   "scripts": {
     "clean": "rimraf build && mkdir build",
-    "copy-config": "cp ./source/database.json ./build/",
     "start:test": "cross-env NODE_PATH=build NODE_ENV=production API_ENV=development node build/index.js",
     "start:acc": "cross-env NODE_PATH=build NODE_ENV=production API_ENV=acceptance node build/index.js",
     "start:prod": "cross-env NODE_PATH=build NODE_ENV=production API_ENV=production node build/index.js",
-    "build": "npm run clean && babel ./source -d ./build -s --copy-files --ignore spec.js,e2e.js && npm run copy-config",
+    "build": "npm run clean && babel ./source -d ./build -s --copy-files --ignore spec.js,e2e.js",
     "debug": "node-debug | npm run dev",
     "dev": "cross-env NODE_PATH=source NODE_ENV=debug API_ENV=development babel-node ./source/index.js",
     "test": "npm run test:unit && npm run test:e2e",
