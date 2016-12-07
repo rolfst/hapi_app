@@ -2,6 +2,7 @@ import { map, find } from 'lodash';
 import Promise from 'bluebird';
 import * as userRepo from '../../repositories/user';
 import * as networkService from '../../services/network';
+import * as networkRepo from '../../repositories/network';
 import * as impl from './implementation';
 
 
@@ -58,16 +59,12 @@ export const listUsersWithNetworkScope = async (payload, message) => {
  * @param {object} payload - Object containing payload data
  * @param {number} payload.id - The id for the user to find
  * @param {number} payload.networkId - The id of network to apply scope
- * @param {object} message - Object containing meta data
- * @param {object} message.credentials - The authenticated user
- * @param {object} message.network - The network associated with the request
- * @param {object} message.artifacts - Artifacts containing request meta data
  * @method getUserWithNetworkScope
  * @return {Promise} Promise containing collection of users
  */
-export const getUserWithNetworkScope = async (payload, message) => {
+export const getUserWithNetworkScope = async (payload) => {
   const user = await userRepo.findUserById(payload.id);
-  const network = await networkService.getNetwork({ id: message.network.id }, message);
+  const network = await networkRepo.findNetworkById(payload.networkId);
   const metaData = await userRepo.findUserMetaDataForNetwork(user.id, network.id);
 
   return {

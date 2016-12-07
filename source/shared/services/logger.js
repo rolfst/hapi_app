@@ -2,7 +2,8 @@ import { isUndefined, omit } from 'lodash';
 import bunyan from 'bunyan';
 
 const environment = process.env.API_ENV;
-const logConfig = require(`../configs/logs-${environment}`).default;
+const defaultConfig = process.env.CI ?
+  {} : require(`../configs/logs-${environment}`).default;
 
 const fetchContextObjects = (args = {}) => {
   if (isUndefined(args.err)) return { context: args };
@@ -27,15 +28,17 @@ const buildLogContext = (args = {}) => {
   return { ...fetchContextObjects(logArgs) };
 };
 
+const defaultLogger = (name) => bunyan.createLogger({
+  ...defaultConfig,
+  name,
+});
+
 /**
  * @param {string} name - logger name
  * @method getLogger returns a logger instance
  */
-export const getLogger = (name) => {
-  const logger = bunyan.createLogger({
-    ...logConfig,
-    name,
-  });
+export const getLogger = (name, loggerInstance = defaultLogger) => {
+  const logger = loggerInstance(name);
 
   return {
     /**

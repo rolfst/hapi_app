@@ -7,13 +7,12 @@ import * as networkRepo from '../../repositories/network';
 import * as userRepo from '../../repositories/user';
 import * as teamRepo from '../../repositories/team';
 
-export const assertTheNetworkIsNotImportedYet = async (network) => {
-  const networkIntegration = await networkRepo.findNetworkIntegration(network.id);
+export const assertTheNetworkIsNotImportedYet = async (networkId) => {
+  const networkIntegration = await networkRepo.findNetworkIntegration(networkId);
+
   if (!networkIntegration) {
     throw createError('10001');
-  }
-
-  if (networkIntegration.importedAt) {
+  } else if (networkIntegration.importedAt) {
     throw createError('10007', 'A network with the same external id exists.');
   }
 };
@@ -182,11 +181,9 @@ export const addUsersToTeam = (usersIds, teams, externalUsers) => {
 };
 
 export const addAdminToNetwork = async (adminUsername, network, externalUsers) => {
-  let admin;
+  let admin = await userRepo.findUserByUsername(adminUsername);
 
-  try {
-    admin = await userRepo.findUserByUsername(adminUsername);
-  } catch (e) {
+  if (!admin) {
     const selectedAdmin = find(externalUsers, (user) => {
       return user.email === adminUsername;
     });
@@ -199,8 +196,8 @@ export const addAdminToNetwork = async (adminUsername, network, externalUsers) =
   return admin;
 };
 
-export const updateSuperUserForNetwork = async (superUser, networkId) => {
-  await networkRepo.setSuperAdmin(networkId, superUser.id);
+export const updateSuperUserForNetwork = async (userId, networkId) => {
+  await networkRepo.setSuperAdmin(networkId, userId);
 
   return networkRepo.findNetworkById(networkId);
 };

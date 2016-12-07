@@ -41,9 +41,10 @@ describe('Logger', () => {
     assert.notProperty(logMsg, 'err');
   });
 
-  it('should log on debug level', () => {
+  it.skip('should log on debug level', () => {
     const logger = Logger.getLogger('debugLogger');
     const message = { artifacts: { requestId: 'rid:002' } };
+
     logger.debug('hi', { message });
 
     const output = mockConsole.flush();
@@ -56,7 +57,7 @@ describe('Logger', () => {
     assert.notProperty(logMsg, 'err');
   });
 
-  it('should log on debug level with multiple context objects', () => {
+  it.skip('should log on debug level with multiple context objects', () => {
     const logger = Logger.getLogger('debugLogger');
     const extraObject = { extra: 'extraobject' };
     const extraObject2 = { extra: 'extraobject2', nested: { greetings: 'hello' } };

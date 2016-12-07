@@ -6,9 +6,9 @@ import hook from './fetch-users';
 
 const ENDPOINT = '/users';
 
-nock.disableNetConnect();
-
 describe('PMT fetch users hook', () => {
+  nock.disableNetConnect();
+
   it('should succeed ', async () => {
     nock(global.networks.pmt.externalId)
       .get(ENDPOINT)

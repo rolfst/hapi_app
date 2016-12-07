@@ -1,6 +1,7 @@
 import Promise from 'bluebird';
 import { find, flatten, map, filter, get, pick } from 'lodash';
 import { createAdapter } from '../../../../shared/utils/create-adapter';
+import * as Logger from '../../../../shared/services/logger';
 import createError from '../../../../shared/utils/create-error';
 import configurationMail from '../../../../shared/mails/configuration-invite';
 import configurationMailNewAdmin from '../../../../shared/mails/configuration-invite-newadmin';
@@ -11,6 +12,8 @@ import * as networkRepo from '../../repositories/network';
 import * as userRepo from '../../repositories/user';
 import * as userService from '../user';
 import * as impl from './implementation';
+
+const logger = Logger.getLogger('CORE/service/network');
 
 /**
  * Create a new network.
@@ -184,48 +187,50 @@ export const importNetwork = async (payload) => {
   let network = await networkRepo.findNetworkById(networkId);
   let mailConfig;
 
-  await impl.assertTheNetworkIsNotImportedYet({ id: network.id });
+  if (!network) throw createError('404', 'Network not found.');
   if (!network.externalId) throw createError('10001');
+  await impl.assertTheNetworkIsNotImportedYet(network.id);
 
   const adapter = createAdapter(network, [], { proceedWithoutToken: true });
   const externalUsers = await adapter.fetchUsers(network.externalId);
+  const admin = await userRepo.findUserByUsername(username);
+  const externalAdmin = find(externalUsers, (user) => {
+    return user.username === username;
+  });
 
-  try {
-    const admin = await userRepo.findUserByUsername(username);
+  if (admin) {
+    network = await impl.updateSuperUserForNetwork(admin.id, networkId);
 
-    network = await impl.updateSuperUserForNetwork(admin, networkId);
     await networkRepo.addUser({
       userId: admin.id,
       networkId: network.id,
       isActive: true,
-      externalId: admin.id,
+      externalId: externalAdmin.externalId,
       roleType: 'ADMIN',
     });
-    mailConfig = configurationMail(network, admin);
-  } catch (e) {
-    const selectedAdmin = find(externalUsers, (user) => {
-      return user.email === username;
-    });
 
-    if (!selectedAdmin) throw createError('10006');
+    mailConfig = configurationMail(network, admin);
+  } else {
+    if (!externalAdmin) throw createError('10006');
 
     const password = passwordUtil.plainRandom();
-    const superUser = await userRepo.createUser({ ...selectedAdmin, password });
+    const superUser = await userRepo.createUser({ ...externalAdmin, password });
     await networkRepo.addUser({
       userId: superUser.id,
       networkId: network.id,
       isActive: true,
-      externalId: selectedAdmin.id,
+      externalId: externalAdmin.externalId,
       roleType: 'ADMIN',
     });
 
-    network = await impl.updateSuperUserForNetwork(superUser, networkId);
+    network = await impl.updateSuperUserForNetwork(superUser.id, networkId);
     mailConfig = configurationMailNewAdmin(network, superUser, password);
   }
 
   const externalTeams = await adapter.fetchTeams();
-
+  logger.info('Importing users for network', { networkId: network.id });
   const users = await impl.importUsers(externalUsers, network);
+  logger.info('Importing teams for network', { networkId: network.id });
   const teams = await impl.importTeams(externalTeams, network);
 
   await impl.addUsersToTeam(map(users, 'userId'), teams, externalUsers);

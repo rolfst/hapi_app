@@ -97,7 +97,7 @@ export const findCredentialsForUser = async (username) => {
 
 export const findUserByUsername = async (username) => {
   const result = await User.findOne({ where: { username } });
-  if (!result) throw createError('403', `The user with username '${username}' could not be found.`);
+  if (!result) return null;
 
   return toModel(result);
 };

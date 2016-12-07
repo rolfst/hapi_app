@@ -65,14 +65,14 @@ export const inviteUser = async (payload, message) => {
 
   if (teamIds && teamIds.length > 0) await teamRepo.addUserToTeams(teamIds, user.id);
 
-  return userService.getUserWithNetworkScope({ id: user.id }, { ...message, credentials: user });
+  return userService.getUserWithNetworkScope({ id: user.id, networkId: network.id });
 };
 
 
 export const inviteUsers = async (payload, message) => {
   const { network } = message;
   const identifiedUser = await userService.getUserWithNetworkScope({
-    id: message.credentials.id }, message);
+    id: message.credentials.id, networkId: network.id }, message);
 
   const userBelongsToNetwork = await userRepo.userBelongsToNetwork(identifiedUser.id, network.id);
 

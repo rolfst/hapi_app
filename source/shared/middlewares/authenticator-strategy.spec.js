@@ -4,12 +4,11 @@ import mockConsole from 'std-mocks';
 import createError from '../utils/create-error';
 import tokenUtil from '../utils/token';
 import * as userRepo from '../../modules/core/repositories/user';
-import * as strategy from './authenticator-strategy';
+import strategy, { authenticate } from './authenticator-strategy';
 
-describe('authenticatorStrategy', () => {
-  describe('business logig', () => {
+describe('Middleware: AuthenticatorStrategy', () => {
+  describe('Business logic', () => {
     const user = { id: 1337, username: 'johndoe@example.com' };
-
     let sandbox;
 
     beforeEach(() => {
@@ -21,14 +20,14 @@ describe('authenticatorStrategy', () => {
 
     it('should return correct user credentials', async () => {
       sandbox.stub(tokenUtil, 'decode').returns({ sub: user.id });
-      const result = await strategy.authenticate(1, 'foo');
+      const result = await authenticate(1, 'foo');
 
       assert.deepEqual(result.credentials, user);
     });
 
     it('should find user by token sub', async () => {
       sandbox.stub(tokenUtil, 'decode').returns({ sub: user.id });
-      await strategy.authenticate(1, 'foo');
+      await authenticate(1, 'foo');
 
       assert(userRepo.findUserById.calledWith(user.id));
       assert(userRepo.findUserById.calledOnce);
@@ -37,7 +36,7 @@ describe('authenticatorStrategy', () => {
     it('should return integration from token as artifacts', async () => {
       const integrations = { integrations: [{ name: 'Foo' }] };
       sandbox.stub(tokenUtil, 'decode').returns({ integrations: [{ name: 'Foo' }] });
-      const result = await strategy.authenticate(1, 'foo');
+      const result = await authenticate(1, 'foo');
 
       assert.deepEqual(result.artifacts, integrations);
     });
@@ -47,19 +46,19 @@ describe('authenticatorStrategy', () => {
       sandbox.stub(userRepo, 'findUserById').returns(Promise.reject(createError('10004')));
       sandbox.stub(tokenUtil, 'decode').returns({ sub: null });
 
-      const promise = strategy.authenticate(1, 'foo');
+      const promise = authenticate(1, 'foo');
 
       return assert.isRejected(promise, new RegExp(createError('10004').message));
     });
 
     it('should throw error when token is empty', () => {
-      const promise = strategy.authenticate(1, null);
+      const promise = authenticate(1, null);
 
       return assert.isRejected(promise, new RegExp(createError('401').message));
     });
   });
 
-  describe('meta request info', () => {
+  describe('Meta request info', () => {
     const user = { id: 1337, username: 'johndoe@example.com' };
     let sandbox;
 
@@ -69,9 +68,7 @@ describe('authenticatorStrategy', () => {
       sandbox.stub(tokenUtil, 'decode').returns({ sub: user.id });
     });
 
-    afterEach(() => {
-      sandbox.restore();
-    });
+    afterEach(() => sandbox.restore());
 
     it('should log an error', async () => {
       const request = {
@@ -86,7 +83,7 @@ describe('authenticatorStrategy', () => {
 
       mockConsole.use();
 
-      await strategy.default().authenticate(request, mockReply);
+      await strategy().authenticate(request, mockReply);
 
       const output = mockConsole.flush();
       const logMsg = JSON.parse(output.stdout[0]);

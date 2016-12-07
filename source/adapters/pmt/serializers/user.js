@@ -27,14 +27,12 @@ export default (externalUser) => {
   const properUser = { ...defaultProps, ...externalUser };
   const serializedUser = {
     externalId: properUser.id,
-    username: properUser.username
-      ? properUser.email : properUser.username,
+    username: properUser.username || properUser.email,
     email: properUser.email,
     firstName: properUser.first_name,
     lastName: properUser.last_name,
     dateOfBirth: properUser.date_of_birth,
-    phoneNum: properUser.cell_phone_number
-      ? properUser.cell_phone_number : properUser.home_phone_number,
+    phoneNum: properUser.cell_phone_number || properUser.home_phone_number,
     isAdmin: includes(ADMIN_ROLES, properUser.rolename),
     isActive: properUser.active,
     teamIds: map(properUser.scope, 'department'),

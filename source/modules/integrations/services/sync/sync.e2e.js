@@ -13,12 +13,11 @@ import * as teamRepo from '../../../core/repositories/team';
 import * as integrationRepo from '../../../core/repositories/integration';
 import * as syncService from './index';
 
-describe('sync network', () => {
+describe('Sync Network Workflow', () => {
   nock.disableNetConnect();
 
   let network;
   let integration;
-  let globalAdmin;
   let alreadyImportedAdmin;
   let alreadyImportedUser;
   let importedTeam;
@@ -48,14 +47,14 @@ describe('sync network', () => {
     password: blueprints.users.admin.password,
   };
 
-  describe('importing users', () => {
+  describe('Importing users', () => {
     before(async () => {
       await setup.finalCleanup();
+
       alreadyImportedAdmin = await userRepo.createUser({
         ...initialAdmin, password: passwordUtil.plainRandom() });
       alreadyImportedUser = await userRepo.createUser({
         ...initialEmployee, password: passwordUtil.plainRandom() });
-      globalAdmin = await userRepo.createUser(blueprints.users.admin);
 
       alreadyImportedAdmin.externalId = initialAdmin.userId;
       alreadyImportedUser.externalId = initialEmployee.externalId;
@@ -76,6 +75,8 @@ describe('sync network', () => {
         roleType: 'ADMIN',
       }));
 
+      const globalAdmin = await userRepo.createUser(blueprints.users.admin);
+
       usersToAdd.push({
         userId: globalAdmin.id,
         networkId: network.id,
@@ -88,14 +89,9 @@ describe('sync network', () => {
     });
 
     after(async () => {
-      await Promise.all([
-        userRepo.deleteById(globalAdmin.id),
-        integrationRepo.deleteById(integration.id),
-        userRepo.deleteById(alreadyImportedUser.id),
-        userRepo.deleteById(alreadyImportedAdmin.id),
-      ]);
-
-      await Promise.map(userRepo.findAllUsers(), (user) => userRepo.deleteById(user.id));
+      await integrationRepo.deleteById(integration.id);
+      await userRepo.deleteById(alreadyImportedUser.id);
+      await userRepo.deleteById(alreadyImportedAdmin.id);
 
       return setup.initialSetup();
     });
@@ -106,9 +102,7 @@ describe('sync network', () => {
       const allUsers = await networkRepo.findAllUsersForNetwork(network.id);
       const users = differenceBy(allUsers, [alreadyImportedUser, alreadyImportedAdmin], 'email');
 
-      // Delete all users to reset the state of the network
-      const userIds = map(users, 'id');
-      return Promise.map(userIds, userRepo.deleteById);
+      return Promise.map(map(users, 'id'), userRepo.deleteById);
     });
 
     it('should add new users', async () => {

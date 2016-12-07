@@ -1,6 +1,6 @@
 [{
   "externalId": "1048789",
-  "username": "bob+61787@rwrs.nl",
+  "username": "Bob.Doe",
   "email": "bob+61787@rwrs.nl",
   "teamIds": ["14"],
   "firstName": "",
@@ -11,7 +11,7 @@
   "isActive": true
 }, {
   "externalId": "1048869",
-  "username": "bob+66323@rwrs.nl",
+  "username": "Amber.vanden.Doe",
   "email": "bob+66323@rwrs.nl",
   "teamIds": ["14"],
   "firstName": "Amber",
@@ -22,7 +22,7 @@
   "isActive": true
 }, {
   "externalId": "1048719",
-  "username": "bob+48340@rwrs.nl",
+  "username": "Anne.Doe",
   "email": "bob+48340@rwrs.nl",
   "teamIds": ["14"],
   "firstName": "Anne",
@@ -33,7 +33,7 @@
   "isActive": true
 }, {
   "externalId": "1048733",
-  "username": "bob+50331@rwrs.nl",
+  "username": "Annebel.Doe",
   "email": "bob+50331@rwrs.nl",
   "teamIds": ["14"],
   "firstName": "Annebel",
@@ -44,7 +44,7 @@
   "isActive": true
 }, {
   "externalId": "1048741",
-  "username": "bob+51181@rwrs.nl",
+  "username": "Anneke.Doe",
   "email": "bob+51181@rwrs.nl",
   "teamIds": ["14"],
   "firstName": "Anneke",
@@ -55,7 +55,7 @@
   "isActive": true
 }, {
   "externalId": "1048847",
-  "username": "bob+65290@rwrs.nl",
+  "username": "Anouk.Doe",
   "email": "bob+65290@rwrs.nl",
   "teamIds": ["14"],
   "firstName": "Anouk",
@@ -99,7 +99,7 @@
   "username": "bob+8111@rwrs.nl"
 }, {
   "externalId": "1048773",
-  "username": "bob+58797@rwrs.nl",
+  "username": "Anouk.vanden.Doe",
   "email": "bob+58797@rwrs.nl",
   "teamIds": ["14"],
   "firstName": "Anouk",
@@ -110,7 +110,7 @@
   "isActive": true
 }, {
   "externalId": "1048629",
-  "username": "bob+48273@rwrs.nl",
+  "username": "Ans.van.Doe",
   "email": "bob+48273@rwrs.nl",
   "teamIds": ["14"],
   "firstName": "Ans",
@@ -121,7 +121,7 @@
   "isActive": true
 }, {
   "externalId": "1048637",
-  "username": "bob+48279@rwrs.nl",
+  "username": "Audrey.Doe",
   "email": "bob+48279@rwrs.nl",
   "teamIds": ["14"],
   "firstName": "Audrey",
@@ -132,7 +132,7 @@
   "isActive": true
 }, {
   "externalId": "1048739",
-  "username": "bob+51179@rwrs.nl",
+  "username": "Aydinc.Doe",
   "email": "bob+51179@rwrs.nl",
   "teamIds": ["14"],
   "firstName": "Aydinc",
