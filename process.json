@@ -1,0 +1,24 @@
+{
+  "apps": [{
+    "name": "node-api",
+    "script": "./build/index.js",
+    "exec_mode": "cluster",
+    "instances": "max",
+    "error_file": "/var/log/api.flex-appeal.nl/error.log",
+    "out_file": "/var/log/api.flex-appeal.nl/output.log",
+    "combine_logs": true,
+    "max_restarts": 10,
+    "env": {
+      "NODE_ENV": "production",
+      "NODE_PATH": "build",
+      "API_ENV": "development",
+      "LOG_DIR": "/var/log/api.flex-appeal.nl"
+    },
+    "env_production": {
+      "NODE_ENV": "production",
+      "NODE_PATH": "build",
+      "API_ENV": "production",
+      "LOG_DIR": "/var/log/api.flex-appeal.nl"
+    }
+  }]
+}
