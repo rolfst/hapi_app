@@ -10,14 +10,14 @@ import * as Logger from './shared/services/logger';
 
 const logger = Logger.getLogger('SERVER');
 
-const createServer = (port) => {
+const createServer = () => {
   const ravenClient = new raven.Client(process.env.SENTRY_DSN, {
     release: require('../package.json').version,
     environment: process.env.NODE_ENV,
   });
 
   const server = new Hapi.Server(serverUtil.makeConfig());
-  server.connection({ ...serverConnection, port });
+  server.connection(serverConnection);
 
   // Register plugins
   server.register(require('hapi-async-handler'));
