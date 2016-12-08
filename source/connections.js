@@ -26,8 +26,8 @@ export const db = (() => {
 })();
 
 export const server = {
-  host: '127.0.0.1',
-  port: 8000,
+  host: process.env.HOST || '127.0.0.1',
+  port: process.env.PORT || 8000,
   routes: {
     cors: {
       origin: ['*'],
