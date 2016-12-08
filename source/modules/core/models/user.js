@@ -22,8 +22,9 @@ export default (dao) => ({
   integrationAuth: dao.integrationAuth || null,
   function: dao.function || null,
   roleType: dao.role || null,
-  profileImg: `https://s3.eu-central-1.amazonaws.com/flex-appeal/${environment}/profiles/${dao.profileImg}`,
+  profileImg: `https://d64vbosa7udom.cloudfront.net/${environment}/profiles/${dao.profileImg}`,
   dateOfBirth: dao.dateOfBirth ? dateUtils.toISOString(dao.dateOfBirth) : null,
   createdAt: dateUtils.toISOString(dao.created_at),
   lastLogin: dao.lastLogin ? dateUtils.toISOString(dao.lastLogin) : null,
 });
+
