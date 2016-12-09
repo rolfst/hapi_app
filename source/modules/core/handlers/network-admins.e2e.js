@@ -51,7 +51,7 @@ describe('List admins from network', () => {
 
     it('should succeed', async () => {
       assert.equal(response.statusCode, 200);
-      assert.equal(response.result.data.length, 3);
+      assert.equal(response.result.data.length, 0);
     });
   });
 

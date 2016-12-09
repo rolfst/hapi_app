@@ -43,7 +43,7 @@ describe('PMT Hooks', () => {
     });
 
     it('should set correct value for isAdmin property', async () => {
-      assert.equal(hookResult[0].isAdmin, true);
+      assert.equal(hookResult[0].isAdmin, false);
       assert.equal(hookResult[1].isAdmin, false);
     });
 

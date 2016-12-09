@@ -119,7 +119,7 @@ describe('Import network', () => {
       it('should add new admins to network', async () => {
         const admins = await networkRepo.findUsersForNetwork(network.id, 'ADMIN');
 
-        assert.lengthOf(admins, 3);
+        assert.lengthOf(admins, 1);
       });
 
       it('should add new users to network', async () => {

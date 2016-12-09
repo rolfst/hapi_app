@@ -1,12 +1,4 @@
-import { map, includes } from 'lodash';
-
-const ADMIN_ROLES = [
-  'admin',
-  'Bedrijfsleiding',
-  'Afdelingsmanager',
-  'Organisation',
-  'Assistent Manager',
-];
+import { map } from 'lodash';
 
 export default (externalUser) => {
   const defaultProps = {
@@ -33,7 +25,7 @@ export default (externalUser) => {
     lastName: properUser.last_name,
     dateOfBirth: properUser.date_of_birth,
     phoneNum: properUser.cell_phone_number || properUser.home_phone_number,
-    isAdmin: includes(ADMIN_ROLES, properUser.rolename),
+    isAdmin: false,
     isActive: properUser.active,
     teamIds: map(properUser.scope, 'department'),
   };

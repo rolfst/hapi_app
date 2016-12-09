@@ -35,6 +35,6 @@ describe('listAdminsFromNetwork', () => {
 
     const result = await service.listAdminsFromNetwork({ networkId: 32 });
 
-    assert.equal(result.length, 3);
+    assert.equal(result.length, 0);
   });
 });

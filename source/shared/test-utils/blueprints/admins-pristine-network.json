@@ -2,76 +2,10 @@
   "integrationName": "PMT",
   "name": "Jumbo Nanne van der Schaaf",
   "externalId": "https://jumboschaaf_store.personeelstool.nl",
-  "admins": [{
-    "externalId": "8036",
-    "username": "bob+8036@rwrs.nl",
-    "email": "bob+8036@rwrs.nl",
-    "firstName": "Piet",
-    "lastName": "Doe",
-    "dateOfBirth": "1958-11-02",
-    "phoneNum": "0600000000",
-    "isAdmin": true,
-    "isActive": true,
-    "teamIds": ["72"]
-  }, {
-    "externalId": "8025",
-    "username": "hodor@flex-appeal.nl",
-    "email": "hodor@flex-appeal.nl",
-    "firstName": "Tiny",
-    "lastName": "Doe",
-    "dateOfBirth": "1982-08-05",
-    "phoneNum": "0600000000",
-    "isAdmin": true,
-    "isActive": true,
-    "teamIds": ["28", "73"]
-  }, {
-    "externalId": "8111",
-    "username": "bob+8111@rwrs.nl",
-    "email": "bob+8111@rwrs.nl",
-    "firstName": "Dettie",
-    "lastName": "Doe",
-    "dateOfBirth": "1994-04-23",
-    "phoneNum": "0600000000",
-    "isAdmin": true,
-    "isActive": true,
-    "teamIds": ["71", "72"]
-  }]
+  "admins": []
 }, {
   "integrationName": "PMT",
   "name": "Jumbo van Bergen",
   "externalId": "https://jumbobergen_store.personeelstool.nl",
-  "admins": [{
-    "externalId": "8036",
-    "username": "bob+8036@rwrs.nl",
-    "email": "bob+8036@rwrs.nl",
-    "firstName": "Piet",
-    "lastName": "Doe",
-    "dateOfBirth": "1958-11-02",
-    "phoneNum": "0600000000",
-    "isAdmin": true,
-    "isActive": true,
-    "teamIds": ["72"]
-  }, {
-    "externalId": "8025",
-    "username": "hodor@flex-appeal.nl",
-    "email": "hodor@flex-appeal.nl",
-    "firstName": "Tiny",
-    "lastName": "Doe",
-    "dateOfBirth": "1982-08-05",
-    "phoneNum": "0600000000",
-    "isAdmin": true,
-    "isActive": true,
-    "teamIds": ["28", "73"]
-  }, {
-    "externalId": "8111",
-    "username": "bob+8111@rwrs.nl",
-    "email": "bob+8111@rwrs.nl",
-    "firstName": "Dettie",
-    "lastName": "Doe",
-    "dateOfBirth": "1994-04-23",
-    "phoneNum": "0600000000",
-    "isAdmin": true,
-    "isActive": true,
-    "teamIds": ["71", "72"]
-  }]
+  "admins": []
 }]
