@@ -9,9 +9,9 @@ export default async (req, reply) => {
     const payload = { ...req.payload, ...req.params };
 
     logger.info('Syncing network', { payload, message });
-    await syncService.syncWithIntegrationPartner(payload, message);
+    syncService.syncWithIntegrationPartner(payload, message);
 
-    return reply({ data: { success: true } });
+    return reply().code(202);
   } catch (err) {
     return reply(err);
   }
