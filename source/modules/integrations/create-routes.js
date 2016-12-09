@@ -9,6 +9,7 @@ const routes = [{
   method: 'GET',
   url: '/v2/integrations/sync',
   handler: require('./handlers/sync-with-integration-partner'),
+  strategy: 'integration',
   prefetch: false,
 }];
 
