@@ -1,5 +1,10 @@
 import { map } from 'lodash';
 
+function formatPhoneNumber(number) {
+  if (!number) return null;
+  return number.toString().replace(/\D/g, '');
+}
+
 export default (externalUser) => {
   const defaultProps = {
     id: null,
@@ -24,7 +29,8 @@ export default (externalUser) => {
     firstName: properUser.first_name,
     lastName: properUser.last_name,
     dateOfBirth: properUser.date_of_birth,
-    phoneNum: properUser.cell_phone_number || properUser.home_phone_number,
+    phoneNum: formatPhoneNumber(properUser.cell_phone_number)
+      || formatPhoneNumber(properUser.home_phone_number),
     isAdmin: false,
     isActive: properUser.active,
     teamIds: map(properUser.scope, 'department'),
