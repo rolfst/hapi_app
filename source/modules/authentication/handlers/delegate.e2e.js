@@ -54,6 +54,12 @@ describe('Delegate', () => {
     assert.isDefined(result.data.access_token);
   });
 
+  it('should return 403 on wrong refresh token', async () => {
+    const { statusCode } = await getRequest(`${DELEGATE_URL}?refresh_token=thisiswrong`);
+
+    assert.equal(statusCode, 403);
+  });
+
   it('should fail when no refresh token provided', async () => {
     const { statusCode } = await getRequest(DELEGATE_URL);
 

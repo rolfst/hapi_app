@@ -6,7 +6,14 @@ import firstLoginEvent from '../../../../shared/events/first-login-event';
 import * as impl from './implementation';
 
 export const delegate = async (payload, message) => {
-  const decodedToken = tokenUtil.decode(payload.refreshToken);
+  let decodedToken;
+
+  try {
+    decodedToken = tokenUtil.decode(payload.refreshToken);
+  } catch (err) {
+    throw createError('403', 'Wrong refresh token specified.');
+  }
+
   if (!decodedToken.sub) throw createError('403', 'No sub found in refresh token.');
 
   const user = await userRepo.findUserById(decodedToken.sub);
