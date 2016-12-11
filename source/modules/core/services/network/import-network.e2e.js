@@ -2,23 +2,22 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import nock from 'nock';
 import { pick, find, map } from 'lodash';
-import { postRequest } from '../../../shared/test-utils/request';
-import stubs from '../../../shared/test-utils/stubs';
-import * as adapterUtil from '../../../shared/utils/create-adapter';
-import * as passwordUtil from '../../../shared/utils/password';
-import configurationMail from '../../../shared/mails/configuration-invite-newadmin';
-import * as mailer from '../../../shared/services/mailer';
-import userSerializer from '../../../adapters/pmt/serializers/user';
-import * as networkRepo from '../repositories/network';
-import * as userService from '../services/user';
-import * as userRepo from '../repositories/user';
-import * as teamRepo from '../repositories/team';
-import * as integrationRepo from '../repositories/integration';
+import stubs from '../../../../shared/test-utils/stubs';
+import * as adapterUtil from '../../../../shared/utils/create-adapter';
+import * as passwordUtil from '../../../../shared/utils/password';
+import configurationMail from '../../../../shared/mails/configuration-invite-newadmin';
+import * as mailer from '../../../../shared/services/mailer';
+import userSerializer from '../../../../adapters/pmt/serializers/user';
+import * as networkRepo from '../../repositories/network';
+import * as networkService from './index';
+import * as userService from '../user';
+import * as userRepo from '../../repositories/user';
+import * as teamRepo from '../../repositories/team';
+import * as integrationRepo from '../../repositories/integration';
 
 describe('Import network', () => {
   let sandbox;
   let network;
-  let response;
   const pristineNetwork = stubs.pristine_networks_admins[0];
   const employee = pristineNetwork.admins[0];
   const externalUsers = map(stubs.users_200.data, userSerializer);
@@ -26,8 +25,6 @@ describe('Import network', () => {
     fetchTeams: () => stubs.external_teams,
     fetchUsers: () => externalUsers,
   };
-
-  const ENDPOINT = '/v2/networks/$$/integration/import';
 
   const createIntegration = () => integrationRepo.createIntegration({
     name: pristineNetwork.integrationName,
@@ -62,9 +59,10 @@ describe('Import network', () => {
         sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
         sandbox.stub(mailer, 'send').returns(null);
 
-        response = await postRequest(`/v2/networks/${network.id}/integration/import`, {
+        await networkService.importNetwork({
           external_username: employee.username,
-        }, global.server, 'footoken');
+          networkId: network.id,
+        }, { credentials: global.users.admin.id });
       });
 
       after(async () => {
@@ -82,9 +80,6 @@ describe('Import network', () => {
         return Promise.all(users.map(u => userRepo.deleteById(u.id)));
       });
 
-      it('should succeed', async () => {
-        assert.equal(response.statusCode, 200);
-      });
 
       it('should set external user as admin in the network', async () => {
         const foundNetwork = await networkRepo.findNetwork({
@@ -162,6 +157,11 @@ describe('Import network', () => {
         sandbox.stub(adapterUtil, 'createAdapter').returns(fakeAdapter);
         sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
         sandbox.stub(mailer, 'send').returns(null);
+
+        await networkService.importNetwork({
+          external_username: employee.username,
+          networkId: network.id,
+        }, { credentials: global.users.admin.id });
       });
 
       after(async () => {
@@ -182,9 +182,6 @@ describe('Import network', () => {
       it('should succeed on import with user in database', async () => {
         const userAttributes = { ...employee, password: passwordUtil.plainRandom() };
         const alreadyImportedUser = userRepo.createUser(userAttributes);
-        response = await postRequest(`/v2/networks/${network.id}/integration/import`, {
-          external_username: employee.username,
-        }, global.server, 'footoken');
 
         await userRepo.deleteById(alreadyImportedUser.id);
 
@@ -195,7 +192,6 @@ describe('Import network', () => {
           networkId: foundNetwork.id,
         });
 
-        assert.equal(response.statusCode, 200);
         assert.equal(foundNetwork.superAdmin.id, user.id);
         assert.equal(user.externalId, employee.userId);
       });
@@ -232,43 +228,46 @@ describe('Import network', () => {
     });
 
     it('should return 404 when network does not exists', async () => {
-      const { statusCode } = await postRequest(ENDPOINT.replace('$$', 0), {
+      const result = networkService.importNetwork({
         external_username: employee.username,
-      }, global.server, 'footoken');
+        networkId: 0,
+      }, { credentials: global.users.admin.id });
 
-      assert.equal(statusCode, 404);
+      assert.isRejected(result, /Error: Network not found./);
     });
 
     it('should return 422 when missing username', async () => {
-      const { statusCode } = await postRequest(ENDPOINT.replace('$$', network.id), {});
+      const result = networkService.importNetwork({
+        external_username: employee.username,
+        networkId: 0,
+      }, { credentials: global.users.admin.id });
 
-      assert.equal(statusCode, 422);
+      assert.isRejected(result, /Error: Network not found./);
     });
 
     it('should return 403 when network is already imported', async () => {
       await networkRepo.setImportDateOnNetworkIntegration(network.id);
 
-      const res = await postRequest(ENDPOINT.replace('$$', network.id), {
+      const result = networkService.importNetwork({
         external_username: employee.username,
-      }, global.server, 'footoken');
+        networkId: network.id,
+      }, { credentials: global.users.admin.id });
 
-      await networkRepo.unsetImportDateOnNetworkIntegration(network.id);
-
-      assert.equal(res.statusCode, 403);
+      assert.isRejected(result, /Error: A network with the same external id exists./);
     });
 
     it('should return 403 when no integration has been enabled for the network', async () => {
       const networkWithoutIntegration = await networkRepo.createNetwork(
         global.users.admin.id, pristineNetwork.name, pristineNetwork.externalId);
-      const endpoint = ENDPOINT.replace('$$', networkWithoutIntegration.id);
 
-      const { statusCode } = await postRequest(endpoint, {
+      const result = networkService.importNetwork({
         external_username: employee.username,
-      }, global.server, 'footoken');
+        networkId: networkWithoutIntegration.id,
+      }, { credentials: global.users.admin.id });
 
       await networkRepo.deleteById(network.id);
 
-      assert.equal(statusCode, 403);
+      assert.isRejected(result, /Error: The network does not have an enabled integration/);
     });
   });
 });

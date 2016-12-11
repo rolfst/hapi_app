@@ -11,7 +11,7 @@ export default async (req, reply) => {
     logger.info('Importing network', { payload, message });
     await networkService.importNetwork(payload, message);
 
-    return reply({ success: true });
+    return reply().code(202);
   } catch (err) {
     return reply(err);
   }
