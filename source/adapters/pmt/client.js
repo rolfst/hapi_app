@@ -42,7 +42,7 @@ export async function makeRequest(endpoint, token = null, method = 'GET', data =
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       'logged-in-user-token': token,
-      'api-key': 'testpmtapi',
+      'api-key': process.env.PMT_API_KEY || 'testpmtapi',
     },
     body: createFormEncodedString(data),
   };
