@@ -1,11 +1,12 @@
-import { map } from 'lodash';
+import { map, pick } from 'lodash';
 import sequelize from 'sequelize';
+import Promise from 'bluebird';
 import createError from '../../../shared/utils/create-error';
 import { Team, User, TeamUser } from '../../../shared/models';
 import * as userRepo from './user';
 import createTeamModel from '../models/team';
 
-const toModel = (dao) => createTeamModel(dao);
+export const toModel = (dao) => createTeamModel(dao);
 
 export function findTeamById(id) {
   return Team
@@ -29,6 +30,12 @@ export function addUserToTeams(teamIds, userId) {
 
 export function addUserToTeam(teamId, userId) {
   return TeamUser.create({ teamId, userId });
+}
+
+export function removeUserFromTeam(teamId, userId) {
+  return TeamUser.destroy({
+    where: { teamId, userId },
+  });
 }
 
 export const findTeamsForNetworkThatUserBelongsTo = async (userId, networkId) => {
@@ -67,13 +74,24 @@ export const findTeamsByExternalId = externalIds => {
     });
 };
 
-export function createTeam({ networkId, name, description = null, externalId }) {
-  return Team
-    .create({ networkId, name, description, externalId });
+/**
+ * Creates a new team
+ * @param {Team} team - The team to create
+ * @method createTeam
+ * @return {void}
+ */
+export function createTeam(team) {
+  return Team.create(team);
 }
 
+/**
+ * Creates multiple teams at once
+ * @param {Array<Team>} teams - The teams to create
+ * @method createBulkTeams
+ * @return {void}
+ */
 export function createBulkTeams(teams) {
-  return Promise.all(teams.map(team => Team.create(team)));
+  return Promise.map(teams, createTeam);
 }
 
 export async function validateTeamIds(ids, networkId) {
@@ -100,8 +118,10 @@ export function findUsersByTeamIds(ids) {
 }
 
 export const updateTeam = async (teamId, attributes) => {
-  const team = await Team.findById(teamId);
-  await team.update(attributes);
+  const whitelistedAttributes = pick(attributes,
+    'networkId', 'externalId', 'name', 'description');
 
-  return findTeamById(team.id);
+  return Team.update(whitelistedAttributes, {
+    where: { id: teamId },
+  });
 };

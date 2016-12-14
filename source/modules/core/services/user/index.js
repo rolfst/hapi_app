@@ -48,7 +48,7 @@ export const listUsersWithNetworkScope = async (payload, message) => {
         'Verwijderd' : await impl.createFunctionName(user.id, network),
       roleType: metaData.roleType,
       externalId: metaData.externalId,
-      isActive: metaData.deletedAt === null,
+      deletedAt: metaData.deletedAt,
       integrationAuth: !!metaData.userToken,
     };
   });

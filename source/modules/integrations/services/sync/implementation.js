@@ -1,8 +1,22 @@
 import Promise from 'bluebird';
-import { map, differenceBy } from 'lodash';
+import _, {
+  flatMap,
+  includes,
+  filter,
+  isEqual,
+  pick,
+  find,
+  omit,
+  map,
+  differenceBy,
+  intersectionBy,
+} from 'lodash';
 import * as teamService from '../../../core/services/team';
 import * as networkService from '../../../core/services/network';
+import * as networkServiceImpl from '../../../core/services/network/implementation';
+import * as networkRepo from '../../../core/repositories/network';
 import * as userRepo from '../../../core/repositories/user';
+import * as teamRepo from '../../../core/repositories/team';
 import * as Logger from '../../../../shared/services/logger';
 
 const logger = Logger.getLogger('INTEGRATIONS/services/sync');
@@ -171,3 +185,119 @@ export const addUsersToTeams = async (externalUsers, networkId, message) => {
   const externalUserIds = externalUsers;
   return networkService.addUsersToTeams({ externalUserIds, networkId }, message);
 };
+
+/**
+ * This step synchronises the teams.
+ * @param {number} networkId - The network to sync the users for
+ * @param {Array<ExternalTeam>} _externalTeams - The teams that come from the external system
+ * @method syncTeams
+ * @return {Team} - Return team objects
+ */
+export async function syncTeams(networkId, _externalTeams) {
+  const internalTeams = await networkService.listTeamsForNetwork({ networkId });
+  // We are setting the networkId here because the external team object
+  // does not contain the networkId yet.
+  const externalTeams = map(_externalTeams, t => ({ ...t, networkId }));
+
+  const nonExistingTeams = differenceBy(externalTeams, internalTeams, 'externalId');
+  const teamsToDelete = differenceBy(internalTeams, externalTeams, 'externalId');
+
+  const existingTeams = intersectionBy(internalTeams, externalTeams, 'externalId');
+  // Because existingTeams contains our internal objects. We have
+  // to get the updated values from the matching external team.
+  const teamsToUpdate = _(existingTeams)
+    .map(internalTeam => {
+      const matchingExternalTeam = find(externalTeams, { externalId: internalTeam.externalId });
+      const externalTeamValues = pick(matchingExternalTeam, 'name', 'description');
+      const internalTeamValues = pick(internalTeam, 'name', 'description');
+
+      // We return null here so we are sure that we only update the teams that
+      // are actually changed instead of updating all the teams against the database.
+      if (isEqual(externalTeamValues, internalTeamValues)) return null;
+
+      return { ...internalTeam, ...externalTeamValues };
+    })
+    .filter(_.isDefined)
+    .value();
+
+  await Promise.map(teamsToDelete, team => teamRepo.deleteById(team.id));
+  await Promise.map(teamsToUpdate, team => teamRepo.updateTeam(team.id, team));
+  await teamRepo.createBulkTeams(map(nonExistingTeams, t => omit(t, 'id')));
+
+  return true;
+}
+
+/**
+ * This step synchronises the link between an user and the network it belongs to.
+ * When an user is removed we will delete it from the network, but never delete it in our system.
+ * This is due foreign key cascading. Else all the linked messages etc will be deleted as well.
+ * This requires the users to be already imported by the import script to avoid wrong behaviour.
+ * @param {number} networkId - The network to sync the users for
+ * @param {Array<ExternalUser>} externalUsers - The users that come from the external system
+ * @method syncUsersWithNetwork
+ * @return {boolean} - Return success boolean
+ */
+export async function syncUsersWithNetwork(networkId, externalUsers) {
+  const network = await networkRepo.findNetworkById(networkId);
+  const internalUsers = await networkService.listAllUsersForNetwork({
+    networkId }, { credentials: network.superAdmin });
+  const nonExistingUsers = differenceBy(externalUsers, internalUsers, 'externalId');
+  await networkServiceImpl.importUsers(nonExistingUsers, networkId);
+
+  const usersToDelete = differenceBy(internalUsers, externalUsers, 'externalId');
+  await Promise.map(usersToDelete, user => userRepo.removeFromNetwork(user.id, networkId));
+
+  const previouslyDeletedUsers = filter(internalUsers, user => !!user.deletedAt);
+  const usersToAddToNetwork = differenceBy(previouslyDeletedUsers, externalUsers, 'deletedAt');
+  await Promise.map(usersToAddToNetwork, user =>
+    networkRepo.addUser({ networkId, userId: user.id }));
+
+  return true;
+}
+
+/**
+ * This step synchronises the link between an user and the teams it belong to.
+ * This requires the users and teams to be synced already to avoid wrong behaviour.
+ * @param {number} networkId - The network to sync the users for
+ * @param {Array<ExternalUser>} externalUsers - The users that come from the external system
+ * @method syncUsersWithTeams
+ * @return {boolean} - Return success boolean
+ */
+export async function syncUsersWithTeams(networkId, externalUsers) {
+  const network = await networkRepo.findNetworkById(networkId);
+  const internalUsers = await networkService.listAllUsersForNetwork({
+    networkId }, { credentials: network.superAdmin });
+  const internalTeams = await networkService.listTeamsForNetwork({ networkId });
+
+  // TODO: We want to make sure we only sync the users that are actually removed or added
+  // to a team so we should check if the externalUser his teamIds are different then we
+  // already have in our system.
+  const removeUserFromTeamsPromises = flatMap(internalUsers, internalUser => {
+    const matchingExternalUser = find(externalUsers, { externalId: internalUser.externalId });
+    const teamsForUser = map(internalUser.teamIds, teamId => find(internalTeams, { id: teamId }));
+    const externalTeamIdsForUser = map(teamsForUser, 'externalId');
+
+    return _(externalTeamIdsForUser)
+      .difference(matchingExternalUser.teamIds)
+      .map(externalTeamId => find(internalTeams, { externalId: externalTeamId }))
+      .map(internalTeam => teamRepo.removeUserFromTeam(internalTeam.id, internalUser.id))
+      .value();
+  });
+
+  await Promise.all(removeUserFromTeamsPromises);
+
+  // TODO: We should make sure the teams that the values of externalUser.teamIds consists
+  // of teams that are already imported.
+  const addUserToTeamsPromises = flatMap(externalUsers, externalUser => {
+    const matchingInternalUser = find(internalUsers, { externalId: externalUser.externalId });
+    const internalTeamIds = _(internalTeams)
+      .filter(internalTeam => includes(externalUser.teamIds, internalTeam.externalId))
+      .map('id')
+      .value();
+
+    return map(internalTeamIds, teamId =>
+      teamRepo.addUserToTeam(teamId, matchingInternalUser.id));
+  });
+
+  await Promise.all(addUserToTeamsPromises);
+}

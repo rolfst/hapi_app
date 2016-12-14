@@ -57,7 +57,7 @@ describe('View users related to exchange', () => {
         'profile_img',
         'date_of_birth',
         'created_at',
-        'is_active',
+        'deleted_at',
         'last_login',
       ];
 

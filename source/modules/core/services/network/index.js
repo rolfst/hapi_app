@@ -229,7 +229,7 @@ export const importNetwork = async (payload) => {
 
   const externalTeams = await adapter.fetchTeams();
   logger.info('Importing users for network', { networkId: network.id });
-  const users = await impl.importUsers(externalUsers, network);
+  const users = await impl.importUsers(externalUsers, network.id);
   logger.info('Importing teams for network', { networkId: network.id });
   const teams = await impl.importTeams(externalTeams, network);
 
@@ -253,7 +253,7 @@ export const importNetwork = async (payload) => {
 export const importUsers = async (payload, message) => {
   const { externalUsers, network } = payload;
 
-  return impl.importUsers(externalUsers, network, message);
+  return impl.importUsers(externalUsers, network.id, message);
 };
 
 /**

@@ -1,4 +1,5 @@
-import { map } from 'lodash';
+import { map, toString } from 'lodash';
+import moment from 'moment';
 
 function formatPhoneNumber(number) {
   if (!number) return null;
@@ -26,14 +27,17 @@ export default (externalUser) => {
     externalId: properUser.id,
     username: properUser.username || properUser.email,
     email: properUser.email,
+    integrationAuth: null,
+    function: null,
     firstName: properUser.first_name,
     lastName: properUser.last_name,
     dateOfBirth: properUser.date_of_birth,
     phoneNum: formatPhoneNumber(properUser.cell_phone_number)
       || formatPhoneNumber(properUser.home_phone_number),
-    isAdmin: false,
+    roleType: 'EMPLOYEE',
     isActive: properUser.active,
-    teamIds: map(properUser.scope, 'department'),
+    deletedAt: properUser.active ? null : moment().toISOString(),
+    teamIds: properUser.scope ? map(map(properUser.scope, 'department'), toString) : [],
   };
 
   return serializedUser;

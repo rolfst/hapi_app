@@ -176,7 +176,7 @@ describe('Service: invite user', () => {
       const actual = await service.inviteUser(payload, { network });
 
       assert.equal(actual.roleType, 'ADMIN');
-      assert.equal(actual.isActive, true);
+      assert.equal(actual.deletedAt, null);
     });
 
     it('should add to the network as employee', async () => {
@@ -185,7 +185,7 @@ describe('Service: invite user', () => {
       const actual = await service.inviteUser(payload, { network });
 
       assert.equal(actual.roleType, 'EMPLOYEE');
-      assert.equal(actual.isActive, true);
+      assert.equal(actual.deletedAt, null);
     });
 
     it('should add to the teams', async () => {

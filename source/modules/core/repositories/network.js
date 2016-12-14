@@ -10,6 +10,7 @@ import { Network,
 import createError from '../../../shared/utils/create-error';
 import createNetworkModel from '../models/network';
 import * as userRepo from './user';
+import { toModel as toTeamModel } from './team';
 
 const defaultIncludes = [
   { model: Integration, required: false },
@@ -177,7 +178,7 @@ export const findAllUsersForNetwork = async (networkId) => {
 };
 
 export const findTeamsForNetwork = async (networkId) => {
-  return Team.findAll({ where: { networkId } });
+  return Promise.map(Team.findAll({ where: { networkId } }), toTeamModel);
 };
 
 export const addIntegrationToNetwork = async (networkId, integrationId) => {

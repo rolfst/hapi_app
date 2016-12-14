@@ -1,4 +1,5 @@
-import { map, sample } from 'lodash';
+import { map, pick, sample } from 'lodash';
+import Promise from 'bluebird';
 import createError from '../../../shared/utils/create-error';
 import { User, Network, NetworkUser, Integration, Team, TeamUser } from '../../../shared/models';
 import createUserModel from '../models/user';
@@ -45,13 +46,13 @@ export const findExternalUsers = async (externalIds) => {
 };
 
 export const findUsersByIds = async (userIds) => {
-  const result = await User.findAll({ where: { id: { $in: userIds } } });
+  const result = await User.findAll({ ...defaultIncludes, where: { id: { $in: userIds } } });
 
   return map(result, toModel);
 };
 
 export const findUserById = async (id) => {
-  const user = await User.findOne({ where: { id } });
+  const user = await User.findOne({ ...defaultIncludes, where: { id } });
   if (!user) throw createError('403', `The user with id '${id}' could not be found.`);
 
   return toModel(user);
@@ -140,20 +141,26 @@ export const updateUserByEmail = async (email, attributes) => {
 };
 
 export const createUser = async (attributes) => {
-  const values = Object.assign(attributes, {
+  const whitelistedAttributes = [
+    'username',
+    'email',
+    'firstName',
+    'lastName',
+    'phoneNum',
+    'dateOfBirth',
+    'password',
+  ];
+
+  const user = await User.create({
+    ...pick(attributes, whitelistedAttributes),
     profileImg: sample(dummyProfileImgPaths),
   });
-  const user = await User.create(values);
 
   return findUserById(user.id);
 };
 
 export const createBulkUsers = async (users) => {
-  const promises = users
-    .map(user => ({ ...user, profileImg: sample(dummyProfileImgPaths) }))
-    .map(user => User.create(user));
-
-  const result = await Promise.all(promises);
+  const result = await Promise.map(users, createUser);
 
   return map(result, toModel);
 };

@@ -78,25 +78,27 @@ export const findExternalUser = (user, externalUsers) => {
  * to the network and not be created nor updated.
  * So we can import existing and new users here.
  * @param {array} externalUsers - The serialized users that are loaded from the integration
- * @param {Network} network - The network object to import the users into
+ * @param {number} networkId - The id of the network to import the users into
  * @method importUsers
  * @return {User} - Return user objects
  */
-export const importUsers = async (externalUsers, network) => {
-  const internalUsers = await networkRepo.findAllUsersForNetwork(network.id);
-  const newExternalUsers = differenceBy(externalUsers, internalUsers, 'email');
+export const importUsers = async (externalUsers, networkId) => {
+  const internalUsers = await networkRepo.findAllUsersForNetwork(networkId);
+  const newExternalUsers = differenceBy(externalUsers, internalUsers, 'username');
   const newUsers = await userRepo.createBulkUsers(
     map(newExternalUsers, (u) => ({ ...u, password: passwordUtil.plainRandom() })));
-  const existingUsers = intersectionBy(internalUsers, externalUsers, 'email');
+  const existingUsers = intersectionBy(internalUsers, externalUsers, 'username');
   const usersToAdd = [...newUsers, ...existingUsers];
 
   return Promise.map(usersToAdd, (employee) => {
     const externalUser = findExternalUser(employee, externalUsers);
 
+    // FIXME: This should adhere to our new external user domain object.
+    // The isActive and isAdmin will be deprecated soon.
     return networkRepo.addUser({
+      networkId,
       userId: employee.id,
-      networkId: network.id,
-      isActive: externalUser.isActive,
+      deletedAt: externalUser.isActive ? null : new Date(),
       externalId: externalUser.externalId,
       roleType: externalUser.isAdmin ? 'ADMIN' : 'EMPLOYEE',
     });
@@ -149,9 +151,9 @@ export const updateTeamsForNetwork = async (externalTeams, networkId) => {
   });
 
   return Promise.map(existingExternalTeams, async (team) => {
-    const updatedTeam = await teamRepo.updateTeam(team.id, omit(team, 'id'));
+    await teamRepo.updateTeam(team.id, omit(team, 'id'));
 
-    return updatedTeam.id;
+    return team.id;
   });
 };
 
