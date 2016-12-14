@@ -9,6 +9,7 @@ export default (dao) => ({
   id: dao.id.toString(),
   externalId: dao.externalId,
   name: dao.name,
+  importedAt: dao.Integrations[0] ? dao.Integrations[0].NetworkIntegration.importedAt : null,
   hasIntegration: dao.Integrations.length > 0,
   integrations: map(dao.Integrations, 'name'),
   superAdmin: createUserModel(dao.SuperAdmin),
