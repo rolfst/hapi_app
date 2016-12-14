@@ -19,7 +19,7 @@ const User = model.define('User', {
   firstName: {
     type: Sequelize.STRING,
     field: 'first_name',
-    allowNull: false,
+    allowNull: true,
   },
   lastName: {
     type: Sequelize.STRING,

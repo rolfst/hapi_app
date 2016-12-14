@@ -23,6 +23,14 @@ export default (externalUser) => {
   };
 
   const properUser = { ...defaultProps, ...externalUser };
+  let teamIds = [];
+
+  if (properUser.scope && properUser.scope.length > 0) {
+    teamIds = map(map(properUser.scope, 'department'), toString);
+  } else if (properUser.department) {
+    teamIds = [properUser.department];
+  }
+
   const serializedUser = {
     externalId: properUser.id,
     username: properUser.username || properUser.email,
@@ -37,7 +45,7 @@ export default (externalUser) => {
     roleType: 'EMPLOYEE',
     isActive: properUser.active,
     deletedAt: properUser.active ? null : moment().toISOString(),
-    teamIds: properUser.scope ? map(map(properUser.scope, 'department'), toString) : [],
+    teamIds,
   };
 
   return serializedUser;

@@ -17,38 +17,38 @@ const createSyncHolders = (integration) => {
   return { integration, adapterFactory };
 };
 
-/**
- * syncUsers syncs users from network with external network
- * @param {array} externalUsers - list of externalUsers to sync with
- * @param {object} network - network to sync with
- * @param {object} message - metadata for this request
- * @method syncUsers
- * return {array} all synced users
- */
-const syncUsers = async (externalUsers, network, message) => {
-  const importedUsersIds = await impl.importUsersInNetwork(externalUsers, network, message);
-  const updatedUsersIds = await impl.updateUsers(externalUsers, network, message);
-  const removedUsersIds = await impl.removeUsersFromNetwork(externalUsers, network.id, message);
-  await impl.addUsersToTeams(externalUsers, network.id, message);
-
-  return [...importedUsersIds, ...updatedUsersIds, ...removedUsersIds];
-};
-
-/**
- * syncTeams syncs teams from network with external network
- * @param {array} externalTeams - list of external teams to sync with
- * @param {object} network - network to sync with
- * @param {object} message - metadata for this request
- * @method syncTeams
- * return {array} all synced teams
- */
-const syncTeams = async (externalTeams, network, message) => {
-  const importedTeamsIds = await impl.importTeamsInNetwork(externalTeams, network, message);
-  const updatedTeamsIds = await impl.updateTeamsFromNetwork(externalTeams, network, message);
-  const removedTeamsIds = await impl.removeTeamsFromNetwork(externalTeams, network.id, message);
-
-  return [...importedTeamsIds, ...updatedTeamsIds, ...removedTeamsIds];
-};
+// /**
+//  * syncUsers syncs users from network with external network
+//  * @param {array} externalUsers - list of externalUsers to sync with
+//  * @param {object} network - network to sync with
+//  * @param {object} message - metadata for this request
+//  * @method syncUsers
+//  * return {array} all synced users
+//  */
+// const syncUsers = async (externalUsers, network, message) => {
+//   const importedUsersIds = await impl.importUsersInNetwork(externalUsers, network, message);
+//   const updatedUsersIds = await impl.updateUsers(externalUsers, network, message);
+//   const removedUsersIds = await impl.removeUsersFromNetwork(externalUsers, network.id, message);
+//   await impl.addUsersToTeams(externalUsers, network.id, message);
+//
+//   return [...importedUsersIds, ...updatedUsersIds, ...removedUsersIds];
+// };
+//
+// /**
+//  * syncTeams syncs teams from network with external network
+//  * @param {array} externalTeams - list of external teams to sync with
+//  * @param {object} network - network to sync with
+//  * @param {object} message - metadata for this request
+//  * @method syncTeams
+//  * return {array} all synced teams
+//  */
+// const syncTeams = async (externalTeams, network, message) => {
+//   const importedTeamsIds = await impl.importTeamsInNetwork(externalTeams, network, message);
+//   const updatedTeamsIds = await impl.updateTeamsFromNetwork(externalTeams, network, message);
+//   const removedTeamsIds = await impl.removeTeamsFromNetwork(externalTeams, network.id, message);
+//
+//   return [...importedTeamsIds, ...updatedTeamsIds, ...removedTeamsIds];
+// };
 
 /**
  * syncNetwork syncs users and teams from network with external network
@@ -61,12 +61,12 @@ const syncTeams = async (externalTeams, network, message) => {
 const syncNetwork = async (network, adapter, message) => {
   try {
     const externalTeams = await impl.getExternalTeams(network, adapter, message);
-    const syncedTeams = await syncTeams(externalTeams, network, message);
+    const externalUsers = await adapter.fetchUsers(network.externalId);
+    await impl.syncTeams(network.id, externalTeams);
+    await impl.syncUsersWithNetwork(network.id, externalUsers);
+    await impl.syncUsersWithTeams(network.id, externalUsers);
 
-    const externalUsers = await impl.getExternalUsers(network, adapter, message);
-    const syncedUsers = await syncUsers(externalUsers, network, message);
-
-    return { syncedTeams, syncedUsers };
+    return true;
   } catch (err) {
     logger.warn('Error syncing network', { err, message });
     throw err;

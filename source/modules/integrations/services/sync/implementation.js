@@ -255,6 +255,21 @@ export async function syncUsersWithNetwork(networkId, externalUsers) {
   return true;
 }
 
+export function getOutOfSyncUsersForTeamLinking(externalUsers, internalUsers, internalTeams) {
+  return _(externalUsers)
+    .map(externalUser => ({
+      ...externalUser,
+      teamIds: map(externalUser.teamIds, teamId => find(internalTeams, { externalId: teamId }).id),
+    }))
+    .filter(externalUser => {
+      const matchingInternalUser = find(internalUsers, { externalId: externalUser.externalId });
+
+      return !isEqual(externalUser.teamIds, matchingInternalUser.teamIds);
+    })
+    .map(externalUser => find(internalUsers, { externalId: externalUser.externalId }))
+    .value();
+}
+
 /**
  * This step synchronises the link between an user and the teams it belong to.
  * This requires the users and teams to be synced already to avoid wrong behaviour.
@@ -269,10 +284,13 @@ export async function syncUsersWithTeams(networkId, externalUsers) {
     networkId }, { credentials: network.superAdmin });
   const internalTeams = await networkService.listTeamsForNetwork({ networkId });
 
-  // TODO: We want to make sure we only sync the users that are actually removed or added
-  // to a team so we should check if the externalUser his teamIds are different then we
-  // already have in our system.
-  const removeUserFromTeamsPromises = flatMap(internalUsers, internalUser => {
+  // We want to make sure we only sync the users that are out-of-sync.
+  const usersOutOfSync = getOutOfSyncUsersForTeamLinking(
+    externalUsers, internalUsers, internalTeams);
+
+  logger.info('Syncing users that are out-of-sync', { users: usersOutOfSync });
+
+  const removeUserFromTeamsPromises = flatMap(usersOutOfSync, internalUser => {
     const matchingExternalUser = find(externalUsers, { externalId: internalUser.externalId });
     const teamsForUser = map(internalUser.teamIds, teamId => find(internalTeams, { id: teamId }));
     const externalTeamIdsForUser = map(teamsForUser, 'externalId');
