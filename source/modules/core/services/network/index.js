@@ -13,7 +13,7 @@ import * as userRepo from '../../repositories/user';
 import * as userService from '../user';
 import * as impl from './implementation';
 
-const logger = Logger.getLogger('CORE/service/network');
+const logger = Logger.createLogger('CORE/service/network');
 
 /**
  * Create a new network.
@@ -229,11 +229,12 @@ export const importNetwork = async (payload) => {
 
   const externalTeams = await adapter.fetchTeams();
   logger.info('Importing users for network', { networkId: network.id });
-  const users = await impl.importUsers(externalUsers, network.id);
+  await impl.importUsers(externalUsers, network.id);
   logger.info('Importing teams for network', { networkId: network.id });
   const teams = await impl.importTeams(externalTeams, network);
 
-  await impl.addUsersToTeam(map(users, 'userId'), teams, externalUsers);
+  const importedUsers = await networkRepo.findAllUsersForNetwork(networkId);
+  await impl.addUsersToTeam(importedUsers, teams, externalUsers);
   await networkRepo.setImportDateOnNetworkIntegration(network.id);
 
   mailer.send(mailConfig);

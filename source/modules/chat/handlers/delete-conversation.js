@@ -1,7 +1,7 @@
 import { deleteConversationById } from '../repositories/conversation';
 import * as Logger from '../../../shared/services/logger';
 
-const logger = Logger.getLogger('CHAT/handler/deleteCoversation');
+const logger = Logger.createLogger('CHAT/handler/deleteCoversation');
 
 export default async (req, reply) => {
   try {

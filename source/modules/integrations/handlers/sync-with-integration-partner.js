@@ -1,7 +1,7 @@
 import * as syncService from '../services/sync';
 import * as Logger from '../../../shared/services/logger';
 
-const logger = Logger.getLogger('INTEGRATIONS/handler/syncWithIntegrationPartner');
+const logger = Logger.createLogger('INTEGRATIONS/handler/syncWithIntegrationPartner');
 
 export default async (req, reply) => {
   try {

@@ -3,7 +3,7 @@ import camelCaseKeys from '../../../shared/utils/camel-case-keys';
 import * as Logger from '../../../shared/services/logger';
 import * as service from '../services/flexchange';
 
-const logger = Logger.getLogger('FLEXCHANGE/handler/createExchange');
+const logger = Logger.createLogger('FLEXCHANGE/handler/createExchange');
 
 export default async (req, reply) => {
   try {

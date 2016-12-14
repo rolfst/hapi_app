@@ -2,7 +2,7 @@ import * as responseUtil from '../../../shared/utils/response';
 import * as Logger from '../../../shared/services/logger';
 import * as flexchangeService from '../services/flexchange';
 
-const logger = Logger.getLogger('FLEXCHANGE/handler/usersForExchange');
+const logger = Logger.createLogger('FLEXCHANGE/handler/usersForExchange');
 
 export default async (req, reply) => {
   try {

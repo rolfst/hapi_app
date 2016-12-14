@@ -2,7 +2,7 @@ import * as responseUtil from '../../../shared/utils/response';
 import * as Logger from '../../../shared/services/logger';
 import * as employeeService from '../services/employee';
 
-const logger = Logger.getLogger('EMPLOYEE/handler/viewProfile');
+const logger = Logger.createLogger('EMPLOYEE/handler/viewProfile');
 
 export default async (req, reply) => {
   try {

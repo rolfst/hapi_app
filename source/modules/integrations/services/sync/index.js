@@ -6,7 +6,7 @@ import * as networkService from '../../../core/services/network';
 import * as integrationService from '../../../core/services/integration';
 import * as impl from './implementation';
 
-const logger = Logger.getLogger('INTEGRATIONS/service/sync');
+const logger = Logger.createLogger('INTEGRATIONS/service/sync');
 
 function createSyncHolders(integration) {
   const adapterFactory = adapterUtil.createAdapterFactory(

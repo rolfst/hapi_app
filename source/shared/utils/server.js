@@ -4,7 +4,7 @@ import { pick } from 'lodash';
 import createError from './create-error';
 import * as Logger from '../services/logger';
 
-const logger = Logger.getLogger('NODE-API/server/response');
+const logger = Logger.createLogger('NODE-API/server/response');
 
 export const onRequest = (req, reply) => {
   const uri = req.raw.req.url;

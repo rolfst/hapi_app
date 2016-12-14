@@ -2,7 +2,7 @@ import createError from '../utils/create-error';
 import { Integration } from '../models';
 import * as Logger from '../../shared/services/logger';
 
-const logger = Logger.getLogger('SHARED/middleware/integrationStrategy');
+const logger = Logger.createLogger('SHARED/middleware/integrationStrategy');
 
 export default () => {
   return {

@@ -3,7 +3,7 @@ import Sequelize from 'sequelize';
 import config from './database.js';
 import * as Logger from './shared/services/logger';
 
-const logger = Logger.getLogger('DB/query');
+const logger = Logger.createLogger('DB/query');
 
 export const db = (() => {
   const { host, database, username, password, dialect, port } = config[process.env.API_ENV];

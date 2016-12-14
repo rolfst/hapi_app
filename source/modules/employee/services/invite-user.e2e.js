@@ -17,7 +17,7 @@ describe('Service: invite user', () => {
     });
   });
 
-  after(() => team.destroy());
+  after(() => teamRepo.deleteById(team.id));
 
   describe('Existing User', () => {
     let existingUser;

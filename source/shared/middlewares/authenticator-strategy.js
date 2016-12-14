@@ -5,7 +5,7 @@ import createError from '../utils/create-error';
 import * as userRepo from '../../modules/core/repositories/user';
 import * as Logger from '../../shared/services/logger';
 
-const logger = Logger.getLogger('SHARED/middleware/authenticatorStrategy');
+const logger = Logger.createLogger('SHARED/middleware/authenticatorStrategy');
 
 export const authenticate = async (networkId, token = null) => {
   if (!token) throw createError('401');

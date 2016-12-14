@@ -1,7 +1,7 @@
 import * as Logger from '../../../shared/services/logger';
 import * as reminderService from '../services/reminder';
 
-const logger = Logger.getLogger('FLEXCHANGE/handler/sendReminder');
+const logger = Logger.createLogger('FLEXCHANGE/handler/sendReminder');
 
 
 export default async (req, reply) => {

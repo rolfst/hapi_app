@@ -5,7 +5,7 @@ import networkRepo from '../source/modules/core/repositories/network';
 import Logger from '../source/shared/services/logger';
 
 const args = require('yargs').argv;
-const logger = Logger.getLogger('SCRIPT/createNetworkForIntegration');
+const logger = Logger.createLogger('SCRIPT/createNetworkForIntegration');
 
 /*
  * This script can be used to create a new network that has an integration enabled.

@@ -19,7 +19,7 @@ import * as userRepo from '../../../core/repositories/user';
 import * as teamRepo from '../../../core/repositories/team';
 import * as Logger from '../../../../shared/services/logger';
 
-const logger = Logger.getLogger('INTEGRATIONS/services/sync');
+const logger = Logger.createLogger('INTEGRATIONS/services/sync');
 
 export const getRemovableUsersForNetwork = async (externalUsers, networkId, message) => {
   const internalUsers = await networkService.listActiveUsersForNetwork(

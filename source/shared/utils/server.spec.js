@@ -1,5 +1,6 @@
 import { assert } from 'chai';
-import mockConsole from 'std-mocks';
+import sinon from 'sinon';
+import * as loggerService from '../services/logger';
 import createError from './create-error';
 import * as unit from './server';
 
@@ -33,10 +34,10 @@ describe('serverUtil', () => {
   });
 
   describe('onPreResponse', () => {
-    after(() => mockConsole.restore());
+    it.skip('should log on runtimeException', () => {
+      const loggerStub = sinon.stub(loggerService.createLogger('Foo'));
+      sinon.stub(loggerService, 'createLogger').returns(loggerStub);
 
-    it('should log on runtimeException', () => {
-      mockConsole.use();
       const reply = () => ({ code: () => {} });
 
       try {
@@ -45,11 +46,9 @@ describe('serverUtil', () => {
         const req = { response: err };
         unit.onPreResponse(req, reply);
 
-        const output = mockConsole.flush();
-        const logMsg = JSON.parse(output.stdout[0]);
-
-        assert.equal(logMsg.level, 50);
-        assert.isTrue(logMsg.err.includes('i is not defined'));
+        assert.equal(loggerStub.error.callCount, 1);
+        assert.equal(loggerStub.error.firstCall.args[0], 'Error from application');
+        assert.equal(loggerStub.error.firstCall.args[1].err.message, 'i is not defined');
       }
     });
   });
