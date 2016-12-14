@@ -4,7 +4,7 @@ import * as teamRepo from '../../core/repositories/team';
 import * as networkRepo from '../../core/repositories/network';
 import { exchangeTypes } from '../models/exchange';
 import { getRequest } from '../../../shared/test-utils/request';
-import { createExchange } from '../repositories/exchange';
+import * as exchangeRepo from '../repositories/exchange';
 
 describe('View users related to exchange', () => {
   describe('Network without integration', () => {
@@ -15,7 +15,7 @@ describe('View users related to exchange', () => {
     });
 
     it('should return users for exchange created for network', async () => {
-      const exchange = await createExchange(global.users.admin.id, network.id, {
+      const exchange = await exchangeRepo.createExchange(global.users.admin.id, network.id, {
         date: moment().format('YYYY-MM-DD'),
         type: exchangeTypes.NETWORK,
       });
@@ -28,11 +28,11 @@ describe('View users related to exchange', () => {
       assert.equal(result.data.length, usersInNetwork.length);
       assert.isDefined(result.data[0].function);
 
-      await exchange.destroy();
+      await exchangeRepo.deleteById(exchange.id);
     });
 
     it('should return correct properties', async () => {
-      const exchange = await createExchange(global.users.admin.id, network.id, {
+      const exchange = await exchangeRepo.createExchange(global.users.admin.id, network.id, {
         date: moment().format('YYYY-MM-DD'),
         type: exchangeTypes.USER,
         values: [global.users.employee.id, global.users.admin.id],
@@ -65,11 +65,11 @@ describe('View users related to exchange', () => {
 
       expectedProperties.forEach(property => assert.property(result.data[0], property));
 
-      await exchange.destroy();
+      await exchangeRepo.deleteById(exchange.id);
     });
 
     it('should return users for exchange created for user', async () => {
-      const exchange = await createExchange(global.users.admin.id, network.id, {
+      const exchange = await exchangeRepo.createExchange(global.users.admin.id, network.id, {
         date: moment().format('YYYY-MM-DD'),
         type: exchangeTypes.USER,
         values: [global.users.employee.id, global.users.admin.id],
@@ -82,14 +82,14 @@ describe('View users related to exchange', () => {
       assert.equal(result.data.length, 2);
       assert.isDefined(result.data[0].function);
 
-      await exchange.destroy();
+      await exchangeRepo.deleteById(exchange.id);
     });
 
     it('should return users for exchange created for team', async () => {
       const team = await teamRepo.createTeam({ networkId: network.id, name: 'Cool Team' });
-      await team.addUser(global.users.admin.id);
+      await teamRepo.addUserToTeam(team.id, global.users.admin.id);
 
-      const exchange = await createExchange(global.users.admin.id, network.id, {
+      const exchange = await exchangeRepo.createExchange(global.users.admin.id, network.id, {
         date: moment().format('YYYY-MM-DD'),
         type: exchangeTypes.TEAM,
         values: [team.id],
@@ -103,8 +103,8 @@ describe('View users related to exchange', () => {
       assert.equal(result.data[0].id, global.users.admin.id);
       assert.isDefined(result.data[0].function);
 
-      await team.destroy();
-      await exchange.destroy();
+      await teamRepo.deleteById(team.id);
+      await exchangeRepo.deleteById(exchange.id);
     });
   });
 });

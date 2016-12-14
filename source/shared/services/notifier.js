@@ -2,7 +2,7 @@ import Parse from 'parse/node';
 import * as Logger from './logger';
 import * as Analytics from './analytics';
 
-const logger = Logger.getLogger('SHARED/services/notifier');
+const logger = Logger.createLogger('SHARED/services/notifier');
 
 function createQuery(emails) {
   const query = new Parse.Query(Parse.Installation);

@@ -3,7 +3,8 @@ import bunyan from 'bunyan';
 
 const environment = process.env.API_ENV;
 const defaultConfig = process.env.CI ?
-  {} : require(`../configs/logs-${environment}`).default;
+   require('../configs/logs-ci').default :
+   require(`../configs/logs-${environment}`).default;
 
 const fetchContextObjects = (args = {}) => {
   if (isUndefined(args.err)) return { context: args };
@@ -15,9 +16,9 @@ const fetchContextObjects = (args = {}) => {
   return context;
 };
 
-const buildLogContext = (args = {}) => {
-  const options = args.message || {};
-  const logArgs = omit(args, 'message');
+const buildLogContext = (data = {}) => {
+  const options = data.message || {};
+  const logArgs = omit(data, 'message');
 
   if (options.artifacts) {
     const requestIdObject = { requestId: options.artifacts.requestId };
@@ -28,17 +29,16 @@ const buildLogContext = (args = {}) => {
   return { ...fetchContextObjects(logArgs) };
 };
 
-const defaultLogger = (name) => bunyan.createLogger({
-  ...defaultConfig,
-  name,
-});
+export const getLogger = (name) => bunyan.createLogger({ name, ...defaultConfig });
 
 /**
- * @param {string} name - logger name
- * @method getLogger returns a logger instance
+ * @param {string|Logger} loggerOrName
+ * @method createLogger
+ * @return {void}
  */
-export const getLogger = (name, loggerInstance = defaultLogger) => {
-  const logger = loggerInstance(name);
+export const createLogger = (loggerOrName) => {
+  const logger = typeof loggerOrName === 'string' ?
+    getLogger(loggerOrName) : loggerOrName;
 
   return {
     /**
@@ -93,3 +93,5 @@ export const getLogger = (name, loggerInstance = defaultLogger) => {
     },
   };
 };
+
+export default createLogger;

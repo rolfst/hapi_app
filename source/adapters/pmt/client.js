@@ -2,7 +2,7 @@ import fetch from 'isomorphic-fetch';
 import createError from '../../shared/utils/create-error';
 import * as Logger from '../../shared/services/logger';
 
-const logger = Logger.getLogger('PMT/adapter/client');
+const logger = Logger.createLogger('PMT/adapter/client');
 
 const createFormEncodedString = (data) => {
   return Object.keys(data).map((key) => {

@@ -1,7 +1,7 @@
 import * as accessService from '../services/access';
 import * as Logger from '../../../shared/services/logger';
 
-const logger = Logger.getLogger('INTEGRATIONS/handler/integrationAuth');
+const logger = Logger.createLogger('INTEGRATIONS/handler/integrationAuth');
 
 export default async (req, reply) => {
   try {

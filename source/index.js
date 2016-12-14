@@ -4,7 +4,7 @@ import 'newrelic';
 import Parse from 'parse/node';
 import * as Logger from './shared/services/logger';
 
-const logger = Logger.getLogger('SERVER');
+const logger = Logger.createLogger('SERVER');
 const createServer = require('./server').default;
 
 if (process.env.NODE_ENV === 'debug') {

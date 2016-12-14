@@ -44,7 +44,6 @@ describe('Invite users', () => {
   it('should send correct emails', async () => {
     const fakeAdapter = { fetchUsers: () => allUsersFromIntegration };
 
-    sandbox.stub(mailer, 'send');
     sandbox.stub(userRepo, 'userBelongsToNetwork').returns(Promise.resolve(true));
     sandbox.stub(userRepo, 'updateUser').returns(Promise.resolve(importUser));
     sandbox.stub(userService, 'getUserWithNetworkScope').returns(Promise.resolve(adminUser));

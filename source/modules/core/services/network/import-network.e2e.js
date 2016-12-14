@@ -57,7 +57,6 @@ describe('Import network', () => {
 
         sandbox.stub(adapterUtil, 'createAdapter').returns(fakeAdapter);
         sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
-        sandbox.stub(mailer, 'send').returns(null);
 
         await networkService.importNetwork({
           external_username: employee.username,
@@ -140,62 +139,6 @@ describe('Import network', () => {
         assert.equal(actual.name, stubs.external_teams[0].name);
       });
     });
-
-    describe('double imports of users', () => {
-      let integration;
-
-      before(async () => {
-        sandbox = sinon.sandbox.create();
-
-        nock(pristineNetwork.externalId)
-          .get('/users')
-          .reply(200, stubs.users_200);
-
-        integration = await createIntegration();
-        network = await createIntegrationNetwork();
-
-        sandbox.stub(adapterUtil, 'createAdapter').returns(fakeAdapter);
-        sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
-        sandbox.stub(mailer, 'send').returns(null);
-
-        await networkService.importNetwork({
-          external_username: employee.username,
-          networkId: network.id,
-        }, { credentials: global.users.admin.id });
-      });
-
-      after(async () => {
-        network = await findNetwork();
-
-        const users = await networkRepo.findAllUsersForNetwork(network.id);
-        const createdUser = await userRepo.findUserByUsername(employee.username);
-
-        sandbox.restore();
-
-        await userRepo.deleteById(createdUser.id);
-        await integration.destroy();
-        await networkRepo.deleteById(network.id);
-
-        return Promise.all(users.map(u => userRepo.deleteById(u.id)));
-      });
-
-      it('should succeed on import with user in database', async () => {
-        const userAttributes = { ...employee, password: passwordUtil.plainRandom() };
-        const alreadyImportedUser = userRepo.createUser(userAttributes);
-
-        await userRepo.deleteById(alreadyImportedUser.id);
-
-        const foundNetwork = await networkRepo.findNetwork({
-          id: network.id });
-        const user = await userService.getUserWithNetworkScope({
-          id: foundNetwork.superAdmin.id,
-          networkId: foundNetwork.id,
-        });
-
-        assert.equal(foundNetwork.superAdmin.id, user.id);
-        assert.equal(user.externalId, employee.userId);
-      });
-    });
   });
 
   describe('Fault path', async () => {
@@ -209,7 +152,6 @@ describe('Import network', () => {
       sandbox = sinon.sandbox.create();
       sandbox.stub(adapterUtil, 'createAdapter').returns(fakeAdapter);
       sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
-      sandbox.stub(mailer, 'send').returns(null);
 
       integration = await createIntegration();
       network = await createIntegrationNetwork();

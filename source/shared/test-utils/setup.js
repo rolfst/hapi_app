@@ -3,15 +3,16 @@ import chai from 'chai';
 import nock from 'nock';
 import sinon from 'sinon';
 import dotenv from 'dotenv';
-import * as notifier from '../services/notifier';
 import blueprints from './blueprints';
+import authenticate from './authenticate';
+import generateNetworkName from './create-network-name';
+import * as notifier from '../services/notifier';
+import * as mailer from '../services/mailer';
 import { UserRoles } from '../services/permission';
 import * as accessService from '../../modules/integrations/services/access';
 import * as networkService from '../../modules/core/services/network';
 import * as userRepo from '../../modules/core/repositories/user';
 import * as integrationRepo from '../../modules/core/repositories/integration';
-import authenticate from './authenticate';
-import generateNetworkName from './create-network-name';
 
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
@@ -113,6 +114,7 @@ export const initialSetup = async () => {
 
   // Disable specific services when testing
   sandbox.stub(notifier, 'send').returns(null);
+  sandbox.stub(mailer, 'send').returns(null);
   nock.cleanAll();
 };
 

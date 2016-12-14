@@ -1,7 +1,7 @@
 import * as networkService from '../services/network';
 import * as Logger from '../../../shared/services/logger';
 
-const logger = Logger.getLogger('CORE/handler/importNetwork');
+const logger = Logger.createLogger('CORE/handler/importNetwork');
 
 export default async (req, reply) => {
   try {

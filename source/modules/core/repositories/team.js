@@ -80,8 +80,8 @@ export const findTeamsByExternalId = externalIds => {
  * @method createTeam
  * @return {void}
  */
-export function createTeam(team) {
-  return Team.create(team);
+export async function createTeam(team) {
+  return toModel(await Team.create(team));
 }
 
 /**

@@ -2,7 +2,7 @@ import { pick } from 'lodash';
 import * as authenticationService from '../services/authentication';
 import * as Logger from '../../../shared/services/logger';
 
-const logger = Logger.getLogger('AUTHENTICATION/handler/authenticate');
+const logger = Logger.createLogger('AUTHENTICATION/handler/authenticate');
 
 /*
  * The authentication script first authenticates with the Flex-Appeal database

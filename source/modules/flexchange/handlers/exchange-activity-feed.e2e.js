@@ -4,41 +4,36 @@ import moment from 'moment';
 import _ from 'lodash';
 import { ActivityTypes } from '../../../shared/models/activity';
 import * as Logger from '../../../shared/services/logger';
-
-const logger = Logger.getLogger('FLEXCHANGE/test/exchangeActivityFeed');
 import { getRequest } from '../../../shared/test-utils/request';
-import {
-  createExchange,
-  acceptExchange,
-  rejectExchange,
-  approveExchange,
-} from '../repositories/exchange';
-import { createExchangeComment } from '../repositories/comment';
+import * as exchangeRepo from '../repositories/exchange';
+import * as commentRepo from '../repositories/comment';
 
-let network;
-let exchange;
-let result;
-let comment;
+const logger = Logger.createLogger('FLEXCHANGE/test/exchangeActivityFeed');
 
 describe('Exchange activity feed', () => {
+  let network;
+  let exchange;
+  let result;
+  let comment;
+
   before(async () => {
     const { admin, employee } = global.users;
     network = global.networks.flexAppeal;
 
-    exchange = await createExchange(employee.id, network.id, {
+    exchange = await exchangeRepo.createExchange(employee.id, network.id, {
       type: 'ALL',
       title: 'Activity feed exchange',
       date: moment().format('YYYY-MM-DD'),
     });
 
     const actions = [
-      () => acceptExchange(exchange.id, admin.id),
-      () => createExchangeComment(
+      () => exchangeRepo.acceptExchange(exchange.id, admin.id),
+      () => commentRepo.createExchangeComment(
         exchange.id, { text: 'Foo comment', userId: employee.id }
       ),
-      () => acceptExchange(exchange.id, employee.id),
-      () => rejectExchange(exchange, admin, employee.id),
-      () => approveExchange(exchange, admin, admin.id),
+      () => exchangeRepo.acceptExchange(exchange.id, employee.id),
+      () => exchangeRepo.rejectExchange(exchange, admin, employee.id),
+      () => exchangeRepo.approveExchange(exchange, admin, admin.id),
     ];
 
     const values = await Promise.mapSeries(actions, async item => {

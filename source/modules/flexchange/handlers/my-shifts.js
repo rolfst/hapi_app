@@ -2,7 +2,7 @@ import { omit } from 'lodash';
 import * as Logger from '../../../shared/services/logger';
 import * as flexchangeService from '../services/flexchange';
 
-const logger = Logger.getLogger('FLEXCHANGE/handler/myShifts');
+const logger = Logger.createLogger('FLEXCHANGE/handler/myShifts');
 
 const transformItem = item => ({
   ...omit(item, 'teamId', 'exchangeId'),

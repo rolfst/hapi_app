@@ -1,11 +1,14 @@
-import { find, map, flatMap, differenceBy, intersectionBy, omit } from 'lodash';
+import _, { find, map, pick, flatMap, differenceBy, intersectionBy, omit } from 'lodash';
 import Promise from 'bluebird';
+import * as Logger from '../../../../shared/services/logger';
 import * as integrationsAdapter from '../../../../shared/utils/integrations-adapter';
 import * as passwordUtil from '../../../../shared/utils/password';
 import createError from '../../../../shared/utils/create-error';
 import * as networkRepo from '../../repositories/network';
 import * as userRepo from '../../repositories/user';
 import * as teamRepo from '../../repositories/team';
+
+const logger = Logger.createLogger('CORE/service/networkImpl');
 
 export const assertTheNetworkIsNotImportedYet = async (networkId) => {
   const networkIntegration = await networkRepo.findNetworkIntegration(networkId);
@@ -134,6 +137,12 @@ export const importTeams = async (externalTeams, network) => {
   const existingTeams = await networkRepo.findTeamsForNetwork(network.id);
   const teamsToCreate = differenceBy(externalTeams, existingTeams, 'externalId');
   const teams = map(teamsToCreate, team => ({ ...team, networkId: network.id }));
+
+  logger.info('Creating teams', {
+    networkId: network.id,
+    teams: map(teams, team => pick(team, 'externalId', 'name')),
+  });
+
   const newTeams = await teamRepo.createBulkTeams(teams);
 
   return [...newTeams, ...existingTeams];
@@ -157,25 +166,21 @@ export const updateTeamsForNetwork = async (externalTeams, networkId) => {
   });
 };
 
-export const addUsersToTeam = (usersIds, teams, externalUsers) => {
-  const promises = flatMap(usersIds, async (userId) => {
-    const employee = await userRepo.findUserById(userId);
-    const externalUser = findExternalUser(employee, externalUsers);
-
+export const addUsersToTeam = (internalUsers, internalTeams, externalUsers) => {
+  const promises = flatMap(internalUsers, async (internalUser) => {
+    const externalUser = findExternalUser(internalUser, externalUsers);
     if (!externalUser) return;
 
+    // Make sure we translate the team ids to our internal's and not by the external's
+    // and filter out null values to avoid undefined errors while adding the user to a team.
+    externalUser.teamIds = _.filter(map(externalUser.teamIds, externalTeamId => {
+      const matchingTeam = find(internalTeams, { externalId: externalTeamId });
+
+      return matchingTeam.id || null;
+    }), _.isDefined);
+
     return Promise.map(externalUser.teamIds, async (teamId) => {
-      const team = await teamRepo.findBy({ externalId: teamId });
-
-      if (!team) return; // already deleted team
-
-      const teamMembers = await teamRepo.findMembers(team.id);
-
-      if (find(teamMembers, (member) => (member.id === userId))) {
-        return;
-      }
-
-      return teamRepo.addUserToTeam(team.id, userId);
+      return teamRepo.addUserToTeam(teamId, internalUser.id);
     });
   });
 
