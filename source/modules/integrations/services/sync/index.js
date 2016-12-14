@@ -1,5 +1,5 @@
 import Promise from 'bluebird';
-import { map } from 'lodash';
+import { map, isNil } from 'lodash';
 import * as adapterUtil from '../../../../shared/utils/create-adapter';
 import * as Logger from '../../../../shared/services/logger';
 import * as networkService from '../../../core/services/network';
@@ -8,14 +8,14 @@ import * as impl from './implementation';
 
 const logger = Logger.getLogger('INTEGRATIONS/service/sync');
 
-const createSyncHolders = (integration) => {
+function createSyncHolders(integration) {
   const adapterFactory = adapterUtil.createAdapterFactory(
     integration.name,
     [],
     { proceedWithoutToken: true });
 
   return { integration, adapterFactory };
-};
+}
 
 // /**
 //  * syncUsers syncs users from network with external network
@@ -58,7 +58,7 @@ const createSyncHolders = (integration) => {
  * @method syncNetwork
  * return {map} - containing all synced users and teams
  */
-const syncNetwork = async (network, adapter, message) => {
+export async function syncNetwork(network, adapter, message) {
   try {
     const externalTeams = await impl.getExternalTeams(network, adapter, message);
     const externalUsers = await adapter.fetchUsers(network.externalId);
@@ -71,7 +71,11 @@ const syncNetwork = async (network, adapter, message) => {
     logger.warn('Error syncing network', { err, message });
     throw err;
   }
-};
+}
+
+function filterImportedNetwork(network) {
+  return !isNil(network.importedAt);
+}
 
 /**
  * Syncs all integrations in the system with the remote services
@@ -79,7 +83,7 @@ const syncNetwork = async (network, adapter, message) => {
  * @param {object} message - metadata for this request
  * @method syncWithIntegrationPartner
  */
-export const syncWithIntegrationPartner = async (payload, message) => {
+export async function syncWithIntegrationPartner(payload, message) {
   logger.info('finding all integrations', { message });
   const integrations = await integrationService.list({}, message);
   logger.info('found integrations', { integrations, message });
@@ -88,7 +92,9 @@ export const syncWithIntegrationPartner = async (payload, message) => {
   return Promise.map(syncHolders, async (syncHolder) => {
     const attributes = { integrationName: syncHolder.integration.name };
     logger.info('finding all networks for integration', { attributes, message });
-    const networks = await networkService.listNetworksForIntegration(attributes, message);
+    const networks = await Promise.filter(
+      networkService.listNetworksForIntegration(attributes, message),
+      filterImportedNetwork);
     logger.info('found networks for integration', { networks, message });
     const networksToSync = Promise.map(networks,
       (network) => {
@@ -98,4 +104,4 @@ export const syncWithIntegrationPartner = async (payload, message) => {
 
     return Promise.all(networksToSync);
   });
-};
+}

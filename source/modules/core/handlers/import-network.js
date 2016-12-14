@@ -9,7 +9,7 @@ export default async (req, reply) => {
     const message = { ...req.pre, ...req.auth };
 
     logger.info('Importing network', { payload, message });
-    await networkService.importNetwork(payload, message);
+    networkService.importNetwork(payload, message);
 
     return reply().code(202);
   } catch (err) {

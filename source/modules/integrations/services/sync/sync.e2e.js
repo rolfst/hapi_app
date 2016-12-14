@@ -9,7 +9,6 @@ import * as serviceImpl from './implementation';
 
 describe('Network synchronisation', () => {
   let network;
-
   before(async () => (network = await networkRepository
     .createNetwork(global.users.admin.id, 'Foo network for sync')));
 
