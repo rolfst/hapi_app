@@ -39,7 +39,8 @@ export default (externalUser) => {
     function: null,
     firstName: properUser.first_name,
     lastName: properUser.last_name,
-    dateOfBirth: properUser.date_of_birth,
+    dateOfBirth: moment(properUser.date_of_birth).isValid('YYYY-MM-DD') ?
+      properUser.date_of_birth : null,
     phoneNum: formatPhoneNumber(properUser.cell_phone_number)
       || formatPhoneNumber(properUser.home_phone_number),
     roleType: 'EMPLOYEE',
