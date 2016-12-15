@@ -1,8 +1,5 @@
 export default {
   streams: [{
-    level: 'debug',
-    stream: process.stdout,
-  }, {
     level: 'info',
     stream: process.stdout,
   }, {

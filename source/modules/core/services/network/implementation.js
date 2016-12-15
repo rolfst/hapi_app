@@ -8,8 +8,17 @@ import * as networkRepo from '../../repositories/network';
 import * as userRepo from '../../repositories/user';
 import * as teamRepo from '../../repositories/team';
 
+/**
+ * @module modules/core/services/network/impl
+ */
+
 const logger = Logger.createLogger('CORE/service/networkImpl');
 
+/**
+ * @param {string} networkId - network identifier
+ * @method assertTheNetworkIsNotImportedYet
+ * @throws Error - 10001, 10007
+ */
 export const assertTheNetworkIsNotImportedYet = async (networkId) => {
   const networkIntegration = await networkRepo.findNetworkIntegration(networkId);
 
@@ -58,21 +67,6 @@ export const findExternalUser = (user, externalUsers) => {
   return externalUser;
 };
 
-/**
- * The external user that is loaded from the integration
- * should contain the following properties:
- *
- * - externalId
- * - username
- * - email
- * - firstName
- * - lastName
- * - dateOfBirth
- * - phoneNum
- * - isAdmin
- * - isActive
- * - teamIds
- */
 
 /**
  * We import the users that are being loaded by the external integration.

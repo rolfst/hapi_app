@@ -1,0 +1,5 @@
+/**
+ * @module modules/employee
+ * @description This Module contains the employee domain of the Nodejs flex-appeal api
+ */
+

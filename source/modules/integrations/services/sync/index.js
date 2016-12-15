@@ -7,46 +7,13 @@ import * as impl from './implementation';
 
 const logger = Logger.createLogger('INTEGRATIONS/service/sync');
 
-// /**
-//  * syncUsers syncs users from network with external network
-//  * @param {array} externalUsers - list of externalUsers to sync with
-//  * @param {object} network - network to sync with
-//  * @param {object} message - metadata for this request
-//  * @method syncUsers
-//  * return {array} all synced users
-//  */
-// const syncUsers = async (externalUsers, network, message) => {
-//   const importedUsersIds = await impl.importUsersInNetwork(externalUsers, network, message);
-//   const updatedUsersIds = await impl.updateUsers(externalUsers, network, message);
-//   const removedUsersIds = await impl.removeUsersFromNetwork(externalUsers, network.id, message);
-//   await impl.addUsersToTeams(externalUsers, network.id, message);
-//
-//   return [...importedUsersIds, ...updatedUsersIds, ...removedUsersIds];
-// };
-//
-// /**
-//  * syncTeams syncs teams from network with external network
-//  * @param {array} externalTeams - list of external teams to sync with
-//  * @param {object} network - network to sync with
-//  * @param {object} message - metadata for this request
-//  * @method syncTeams
-//  * return {array} all synced teams
-//  */
-// const syncTeams = async (externalTeams, network, message) => {
-//   const importedTeamsIds = await impl.importTeamsInNetwork(externalTeams, network, message);
-//   const updatedTeamsIds = await impl.updateTeamsFromNetwork(externalTeams, network, message);
-//   const removedTeamsIds = await impl.removeTeamsFromNetwork(externalTeams, network.id, message);
-//
-//   return [...importedTeamsIds, ...updatedTeamsIds, ...removedTeamsIds];
-// };
-
 /**
  * syncNetwork syncs users and teams from network with external network
  * @param {object} network - network to sync with
  * @param {object} adapter - connector that connects to externalNetwork
- * @param {object} message - metadata for this request
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method syncNetwork
- * return {map} - containing all synced users and teams
+ * @return {external:Promise<object>} - containing all synced users and teams
  */
 export async function syncNetwork(network, adapter, message) {
   try {
@@ -66,8 +33,9 @@ export async function syncNetwork(network, adapter, message) {
 /**
  * Syncs all integrations in the system with the remote services
  * @param {object} payload - unused
- * @param {object} message - metadata for this request
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method syncWithIntegrationPartner
+ * @return {external:Promise<Network[]>}
  */
 export async function syncWithIntegrationPartner(payload, message) {
   logger.info('Finding all integrations', { message });

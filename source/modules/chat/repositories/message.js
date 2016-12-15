@@ -4,15 +4,19 @@ import { User } from '../../../shared/models';
 import { Message, Conversation } from './dao';
 import createMessageModel from '../models/message';
 
+/**
+ * @module modules/chat/repositories/message
+ */
+
 const toModel = (dao) => createMessageModel(dao);
 
 /**
  * Create a new message
- * @param {number} conversationId - Id of conversation to create the message in
- * @param {number} creatorId - Id of the user placing the message
+ * @param {string} conversationId - Id of conversation to create the message in
+ * @param {string} creatorId - Id of the user placing the message
  * @param {string} text - Message text
  * @method createMessage
- * @return {promise} - Create message promise
+ * @return {external:Promise} - Create message promise
  */
 export function createMessage(conversationId, creatorId, text) {
   return Message.create({
@@ -26,9 +30,9 @@ export function createMessage(conversationId, creatorId, text) {
 
 /**
  * Find a specific message by id
- * @param {number} id - Id of the message being looked for
+ * @param {string} id - Id of the message being looked for
  * @method findMessageById
- * @return {promise} - Find message promise
+ * @return {external:Promise} - Find message promise
  */
 export const findMessageById = async (id) => {
   const result = await Message.findById(id, {
@@ -40,9 +44,9 @@ export const findMessageById = async (id) => {
 
 /**
  * Find messages by id
- * @param {array<number>} messageIds - Ids of the messages being looked for
+ * @param {array<string>} messageIds - Ids of the messages being looked for
  * @method findMessageByIds
- * @return {promise} - Find message promise
+ * @return {external:Promise} - Find message promise
  */
 export const findMessageByIds = async (messageIds) => {
   const result = await Message.findAll({
@@ -55,9 +59,9 @@ export const findMessageByIds = async (messageIds) => {
 
 /**
  * Find all messages for a conversation
- * @param {number} conversationId - Id of theonversation we want the messages from
+ * @param {string} conversationId - Id of the conversation we want the messages from
  * @method findAllForConversation
- * @return {promise} - Get messages promise
+ * @return {external:Promise} - Get messages promise
  */
 export const findAllForConversation = async (conversationId) => {
   const result = await Message.findAll({
@@ -82,6 +86,12 @@ export const findMessagesForConversations = async (conversationIds) => {
   return findMessageByIds(map(plainObjs, 'id'));
 };
 
+/**
+ * Find all messages for conversations
+ * @param {string[]} conversationIds - Id of the conversation we want the messages from
+ * @method findLastForConversations
+ * @return {external:Promise} - Get messages promise
+ */
 export const findLastForConversations = async (conversationIds) => {
   const result = await Message.findAll({
     attributes: [[sequelize.fn('MAX', sequelize.col('Message.id')), 'message_id']],
