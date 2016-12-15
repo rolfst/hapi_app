@@ -1,7 +1,6 @@
 import Promise from 'bluebird';
 import _, {
   flatMap,
-  includes,
   filter,
   isEqual,
   pick,
@@ -18,8 +17,18 @@ import * as networkRepo from '../../../core/repositories/network';
 import * as userRepo from '../../../core/repositories/user';
 import * as teamRepo from '../../../core/repositories/team';
 import * as Logger from '../../../../shared/services/logger';
+import * as adapterUtil from '../../../../shared/utils/create-adapter';
 
 const logger = Logger.createLogger('INTEGRATIONS/services/sync');
+
+export function createSyncHolders(integration) {
+  const adapterFactory = adapterUtil.createAdapterFactory(
+    integration.name,
+    [],
+    { proceedWithoutToken: true });
+
+  return { integration, adapterFactory };
+}
 
 export const getRemovableUsersForNetwork = async (externalUsers, networkId, message) => {
   const internalUsers = await networkService.listActiveUsersForNetwork(
@@ -255,6 +264,14 @@ export async function syncUsersWithNetwork(networkId, externalUsers) {
   return true;
 }
 
+/**
+ * Calculate which users have to be synced.
+ * @param {Array<ExternalUser>} externalUsers - The users that come from the external system
+ * @param {Array<User>} internalUsers - The users that come from the internal system
+ * @param {Array<Team>} internalTeams - The teams that come from the external system
+ * @method getOutOfSyncUsersForTeamLinking
+ * @return {Array<User>}
+ */
 export function getOutOfSyncUsersForTeamLinking(externalUsers, internalUsers, internalTeams) {
   return _(externalUsers)
     .map(externalUser => ({
@@ -266,8 +283,45 @@ export function getOutOfSyncUsersForTeamLinking(externalUsers, internalUsers, in
 
       return !isEqual(externalUser.teamIds, matchingInternalUser.teamIds);
     })
-    .map(externalUser => find(internalUsers, { externalId: externalUser.externalId }))
     .value();
+}
+
+export function getMatchingInternalTeam(externalId, internalTeams) {
+  const matchingInternalTeam = find(internalTeams, { externalId });
+  if (!matchingInternalTeam) return null;
+
+  return matchingInternalTeam;
+}
+
+/**
+ * Replace team id from an external user by the id of our internal
+ * team matched by the externalId value
+ * @param {ExternalUser} externalUser - The user that come from the external system
+ * @param {User} internalUser - The user that come from the internal system
+ * @param {Array<Team>} internalTeams - The teams that come from the external system
+ * @method replaceExternalTeamIds
+ * @return {ExternalUser}
+ */
+export function replaceExternalTeamIds(externalUser, internalUser, internalTeams) {
+  return {
+    ...externalUser,
+    teamIds: _(externalUser.teamIds)
+      .map(teamId => getMatchingInternalTeam(teamId, internalTeams))
+      .map(internalTeam => internalTeam ? internalTeam.id : null)
+      .filter(_.isDefined)
+      .value(),
+  };
+}
+
+/**
+ * Get internal user by external id
+ * @param {number} externalId - The external id that matches the internal and external user
+ * @param {Array<User>} internalUsers - The user lookup to find the user in
+ * @method getInternalUserByExternalId
+ * @return {User}
+ */
+export function getInternalUserByExternalId(externalId, internalUsers) {
+  return find(internalUsers, { externalId });
 }
 
 /**
@@ -290,32 +344,27 @@ export async function syncUsersWithTeams(networkId, externalUsers) {
 
   logger.info('Syncing users that are out-of-sync', { users: usersOutOfSync });
 
-  const removeUserFromTeamsPromises = flatMap(usersOutOfSync, internalUser => {
-    const matchingExternalUser = find(externalUsers, { externalId: internalUser.externalId });
-    const teamsForUser = map(internalUser.teamIds, teamId => find(internalTeams, { id: teamId }));
-    const externalTeamIdsForUser = map(teamsForUser, 'externalId');
+  const removeUserFromTeamsPromises = flatMap(usersOutOfSync, externalUser => {
+    const matchingInternalUser = getInternalUserByExternalId(
+      externalUser.externalId, internalUsers);
+    const externalUserWithReplacedTeamIds = replaceExternalTeamIds(
+      externalUser, matchingInternalUser, internalTeams);
 
-    return _(externalTeamIdsForUser)
-      .difference(matchingExternalUser.teamIds)
-      .map(externalTeamId => find(internalTeams, { externalId: externalTeamId }))
-      .map(internalTeam => teamRepo.removeUserFromTeam(internalTeam.id, internalUser.id))
+    return _(matchingInternalUser.teamIds)
+      .difference(externalUserWithReplacedTeamIds.teamIds)
+      .map(teamId => teamRepo.removeUserFromTeam(teamId, matchingInternalUser.id))
       .value();
   });
 
-  await Promise.all(removeUserFromTeamsPromises);
-
-  // TODO: We should make sure the teams that the values of externalUser.teamIds consists
-  // of teams that are already imported.
   const addUserToTeamsPromises = flatMap(externalUsers, externalUser => {
-    const matchingInternalUser = find(internalUsers, { externalId: externalUser.externalId });
-    const internalTeamIds = _(internalTeams)
-      .filter(internalTeam => includes(externalUser.teamIds, internalTeam.externalId))
-      .map('id')
-      .value();
+    const matchingInternalUser = getInternalUserByExternalId(
+      externalUser.externalId, internalUsers);
+    const externalUserWithReplacedTeamIds = replaceExternalTeamIds(
+      externalUser, matchingInternalUser, internalTeams);
 
-    return map(internalTeamIds, teamId =>
+    return map(externalUserWithReplacedTeamIds.teamIds, teamId =>
       teamRepo.addUserToTeam(teamId, matchingInternalUser.id));
   });
 
-  await Promise.all(addUserToTeamsPromises);
+  await Promise.all([...addUserToTeamsPromises, ...removeUserFromTeamsPromises]);
 }

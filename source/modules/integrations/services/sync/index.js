@@ -1,21 +1,11 @@
 import Promise from 'bluebird';
 import { map, isNil } from 'lodash';
-import * as adapterUtil from '../../../../shared/utils/create-adapter';
 import * as Logger from '../../../../shared/services/logger';
 import * as networkService from '../../../core/services/network';
 import * as integrationService from '../../../core/services/integration';
 import * as impl from './implementation';
 
 const logger = Logger.createLogger('INTEGRATIONS/service/sync');
-
-function createSyncHolders(integration) {
-  const adapterFactory = adapterUtil.createAdapterFactory(
-    integration.name,
-    [],
-    { proceedWithoutToken: true });
-
-  return { integration, adapterFactory };
-}
 
 // /**
 //  * syncUsers syncs users from network with external network
@@ -73,10 +63,6 @@ export async function syncNetwork(network, adapter, message) {
   }
 }
 
-function filterImportedNetwork(network) {
-  return !isNil(network.importedAt);
-}
-
 /**
  * Syncs all integrations in the system with the remote services
  * @param {object} payload - unused
@@ -84,18 +70,19 @@ function filterImportedNetwork(network) {
  * @method syncWithIntegrationPartner
  */
 export async function syncWithIntegrationPartner(payload, message) {
-  logger.info('finding all integrations', { message });
+  logger.info('Finding all integrations', { message });
   const integrations = await integrationService.list({}, message);
-  logger.info('found integrations', { integrations, message });
-  const syncHolders = map(integrations, createSyncHolders);
+  logger.info('Found integrations', { integrations, message });
+  const syncHolders = map(integrations, impl.createSyncHolders);
 
   return Promise.map(syncHolders, async (syncHolder) => {
     const attributes = { integrationName: syncHolder.integration.name };
-    logger.info('finding all networks for integration', { attributes, message });
+    logger.info('Finding all networks for integration', { attributes, message });
     const networks = await Promise.filter(
       networkService.listNetworksForIntegration(attributes, message),
-      filterImportedNetwork);
-    logger.info('found networks for integration', { networks, message });
+      network => !isNil(network.importedAt));
+
+    logger.info('Found networks for integration', { networks, message });
     const networksToSync = Promise.map(networks,
       (network) => {
         const adapter = syncHolder.adapterFactory.create(network);
