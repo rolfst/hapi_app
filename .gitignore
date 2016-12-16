@@ -6,6 +6,10 @@
 database*.json
 .eslintcache
 .env*
+*.swp
+*.swo
+*.orig
 
 newrelic_agent.log
 /coverage
+/docs

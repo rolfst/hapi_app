@@ -1,0 +1,20 @@
+/**
+ * @module modules/authentication
+ */
+
+ /**
+  * @typedef {string} AccessToken - contains encoded values for the following:
+  * <ul>
+  *   <li>{@link module:modules/core~User User}.id</li>
+  *   <li>deviceId</li>
+  *   <li>list of strings @see {@link module:modules/core/Integrations}.name</li>
+  * </ul>
+  */
+
+/**
+ * @typedef {object} AuthenticatedUser
+ * @property {AccessToken} accessToken {@link module:modules/authentication~AccessToken accessToken}
+ * @property {string} refreshToken
+ * @property {User} user {@link module:modules/core~User user}
+ */
+

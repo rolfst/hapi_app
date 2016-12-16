@@ -4,10 +4,14 @@ import { createActivity } from '../../core/repositories/activity';
 import ExchangeComment from '../models/exchange-comment';
 
 /**
+ * @module modules/flexchange/repositories/comment
+ */
+
+/**
  * Find a specific exchange comment by id
- * @param {number} commentId - Id of the comment
+ * @param {string} commentId - Id of the comment
  * @method findCommentById
- * @return {promise} Find exchange comment promise
+ * @return {external:Promise} Find exchange comment promise
  */
 export function findCommentById(commentId) {
   return ExchangeComment
@@ -21,12 +25,12 @@ export function findCommentById(commentId) {
 
 /**
  * Create an exchange comment
- * @param {number} exchangeId - Id of exchange the comment is being placed on
- * @param {object} - Object containing payload data
-   * @param {string} text - The comment text
-   * @param {number} userId - Id of the user placing the comment
+ * @param {string} exchangeId - Id of exchange the comment is being placed on
+ * @param {object} textByUser - Object containing payload data
+ * @param {string} textByUser.text - The comment text
+ * @param {string} textByUser.userId - Id of the user placing the comment
  * @method createExchangeComment
- * @return {promise} - Create exchange comment promise
+ * @return {external:Promise} - Create exchange comment promise
  */
 export async function createExchangeComment(exchangeId, { text, userId }) {
   const exchangeComment = await ExchangeComment.create({
@@ -48,6 +52,12 @@ export async function createExchangeComment(exchangeId, { text, userId }) {
   return exchangeComment;
 }
 
+/**
+ * finds a comment for an exchange
+ * @param {Exchange} exchange - Object containing payload data
+ * @method findCommentsByExchange
+ * @return {external:Promise} - Promise with list of all comments exchange comment promise
+ */
 export function findCommentsByExchange(exchange) {
   return exchange.getComments();
 }

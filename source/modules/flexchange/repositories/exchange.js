@@ -13,6 +13,10 @@ import { createExchangeResponse } from './exchange-response';
 import { createValuesForExchange } from './exchange-value';
 import * as exchangeResponseRepo from './exchange-response';
 
+/**
+ * @module modules/flexchange/repositories/exchange
+ */
+
 const defaultIncludes = [
     { model: User },
     { model: User, as: 'Approver' },
@@ -61,7 +65,7 @@ export const findAllAcceptedExchanges = async (date = null) => {
  * @param {number} exchangeId - Id of exchange being looked for
  * @param {number} userId - Id of the user to use in includes
  * @method findExchangeById
- * @return {Exchange} Find exchange promise
+ * @return {external:Promise.<Exchange>} Find exchange promise
  */
 export async function findExchangeById(exchangeId, userId) {
   const extraIncludes = [{
@@ -83,12 +87,13 @@ export async function findExchangeById(exchangeId, userId) {
 
 /**
  * Find a specific exchange by ids
- * @param {number} exchangeIds - Id of exchange being looked for
- * @param {number} userId - Id of the user to use in includes
+ * @param {string} exchangeIds - Id of exchange being looked for
+ * @param {string} userId - Id of the user to use in includes
+ * @param {object} [extraConstraint={}] - extra query params
  * @method findExchangeByIds
- * @return {Promise} Find exchanges promise
+ * @return {external:Promise.<Exchange>} Find exchanges promise
  */
-export function findExchangeByIds(exchangeIds, userId, extraContraint = {}) {
+export function findExchangeByIds(exchangeIds, userId, extraConstraint = {}) {
   const extraIncludes = [{
     model: ExchangeResponse,
     as: 'ResponseStatus',
@@ -103,7 +108,7 @@ export function findExchangeByIds(exchangeIds, userId, extraContraint = {}) {
     include: [...defaultIncludes, ...extraIncludes],
   };
 
-  return Exchange.findAll(merge(options, extraContraint));
+  return Exchange.findAll(merge(options, extraConstraint));
 }
 
 export async function findExchangesByShiftIds(shiftIds) {
@@ -401,9 +406,10 @@ export async function approveExchange(exchange, approvingUser, userIdToApprove) 
 /**
  * Reject an exchange
  * @param {Exchange} exchange - Exchange to reject
- * @param {number} userIdToReject - User that will be rejected
+ * @param {User} rejectingUser - User that is rejecting the exchange
+ * @param {string} userIdToReject - User that will be rejected
  * @method rejectExchange
- * @return {Promise} Promise containing the updated exchange
+ * @return {external:Promise<Exchange>} Promise containing the updated exchange
  */
 export async function rejectExchange(exchange, rejectingUser, userIdToReject) {
   const constraint = { exchangeId: exchange.id, userId: userIdToReject };

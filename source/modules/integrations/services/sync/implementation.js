@@ -17,18 +17,12 @@ import * as networkRepo from '../../../core/repositories/network';
 import * as userRepo from '../../../core/repositories/user';
 import * as teamRepo from '../../../core/repositories/team';
 import * as Logger from '../../../../shared/services/logger';
-import * as adapterUtil from '../../../../shared/utils/create-adapter';
 
-const logger = Logger.createLogger('INTEGRATIONS/services/sync');
+/**
+ * @module modules/integrations/services/sync/impl
+ */
 
-export function createSyncHolders(integration) {
-  const adapterFactory = adapterUtil.createAdapterFactory(
-    integration.name,
-    [],
-    { proceedWithoutToken: true });
-
-  return { integration, adapterFactory };
-}
+const logger = Logger.getLogger('INTEGRATIONS/services/sync');
 
 export const getRemovableUsersForNetwork = async (externalUsers, networkId, message) => {
   const internalUsers = await networkService.listActiveUsersForNetwork(
@@ -38,6 +32,13 @@ export const getRemovableUsersForNetwork = async (externalUsers, networkId, mess
   return map(removableUsers, 'id');
 };
 
+/**
+ * @param {ExternalTeam[]} externalTeams - the teams in the external system that will not be used to
+ * remove the internal teams.
+ * @param {string} networkId - the networkId where to import to
+ * @method getRemovableTeamsIdsForNetwork
+ * @return {external:Promise.<string[]>} Promise containing removed teamids
+ */
 export const getRemovableTeamsIdsForNetwork = async (externalTeams, networkId, message) => {
   const internalTeams = await networkService.listTeamsForNetwork({ networkId }, message);
   const removableTeams = differenceBy(internalTeams, externalTeams, 'externalId');
@@ -46,11 +47,11 @@ export const getRemovableTeamsIdsForNetwork = async (externalTeams, networkId, m
 };
 
 /**
- * @param {array} externalUsers - the users in the external system that will not be used to
+ * @param {ExternalUsers[]} - the users in the external system that will not be used to
  * remove the internal users.
  * @param {string} networkId - the networkId where to import to
  * @method removeUserFromNetwork
- * @return {Promise} Promise containing removed userids
+ * @return {external:Promise.<string[]>} Promise containing removed userids
  */
 export const removeUsersFromNetwork = async (externalUsers, networkId, message) => {
   const removableUserIds = await getRemovableUsersForNetwork(externalUsers, networkId, message);
@@ -72,35 +73,38 @@ export const removeUsersFromNetwork = async (externalUsers, networkId, message) 
 };
 
 /**
- * fetches users from integration
+ * Fetches users from integration
  * @param {object} network - network to fetch the users for
  * @param {object} adapter - adapter that allows to comunicate with integrations network
  * @method getExternalUsers
- * @return {Promise} Promise that lists all fetched external users
+ * @return {external:Promise.<ExternalUser[]>} {@link module:modules/adapters/pmt~ExternalUser} -
+ * Promise that lists all fetched external users
 */
 export const getExternalUsers = async (network, adapter, message) => {
   return adapter.fetchUsers(network, message);
 };
 
 /**
- * fetches teams from integration
+ * Fetches teams from integration
  * @param {object} network - network to fetch the teams for
  * @param {object} adapter - adapter that allows to comunicate with integrations network
  * @method getExternalUsers
- * @return {Promise} Promise that lists all fetched external teams
+ * @return {external:Promise.<ExternalTeam[]>} {@link module:modules/adapters/pmt~ExternalTeam} -
+ * Promise that lists all fetched external teams
 */
 export const getExternalTeams = async (network, adapter, message) => {
   return adapter.fetchTeams(network, message);
 };
 
 /**
- * imports not already imported users
- * @param {array} externalUsers - list of external users to import
+ * Imports not already imported users
+ * @param {ExternalUser[]} externalUsers - list of
+ * {@link module:adapters/pmt~ExternalUser external} users to import
  * @param {object} network - network to fetch the users for
- * @param {object} message - metadata for this request
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method importUsersInNetwork
- * @return ids of all imported teams
- */
+ * @return {external:Promise.<string[]>}  - Promise ids of all imported users
+ * */
 export const importUsersInNetwork = async (externalUsers, network, message) => {
   const importedUsers = await networkService.importUsers({
     externalUsers,
@@ -113,13 +117,15 @@ export const importUsersInNetwork = async (externalUsers, network, message) => {
   return importedUsersIds;
 };
 /**
- * updates already imported users
+ * Updates already imported users
+ * @param {ExternalUser[]} externalUsers - list of
+ * {@link module:adapters/pmt~ExternalUser external} users to import
  * @param {array} externalUsers - list of external users to update
  * if required for that user
  * @param {object} network - network to fetch the teams for
- * @param {object} message - metadata for this request
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method updateUsers
- * @return ids of all updated users
+ * @return {external:Promise.<string[]>}  - Promise ids of all updated users
  */
 export const updateUsers = async (externalUsers, network, message) => {
   const updatedUsersIds = await networkService.updateUsersForNetwork({
@@ -134,11 +140,13 @@ export const updateUsers = async (externalUsers, network, message) => {
 
 /**
  * imports not already imported teams
- * @param {array} externalTeams - list of external teams to import
+ * @param {ExternalTeam[]} externalTeams - list of
+ * {@link module:adapters/pmt~ExternalTeam external} teams to import
  * @param {object} network - network to fetch the teams for
- * @param {object} message - metadata for this request
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method importTeamsInNetwork
- * @return ids of all imported teams
+ * @return {external:Promise.<ExternalTeam[]>} {@link module:modules/adapters/pmt~ExternalTeam} -
+ * Promise that lists all imported external teams ids
  */
 export const importTeamsInNetwork = async (externalTeams, network, message) => {
   const importedTeams = await networkService.importTeams({
@@ -154,10 +162,10 @@ export const importTeamsInNetwork = async (externalTeams, network, message) => {
 
 /**
  * updates already imported teams
- * @param {array} externalTeams - list of external Teams to update
- * if required for that team
+ * @param {externalTeam[]} externalTeams - list of {@link module:adapters/pmt~ExternalTeam external}
+ * teams to update if required for that team
  * @param {object} network - network to fetch the teams for
- * @param {object} message - metadata for this request
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method updateTeamsFromNetwork
  * @return ids of all updated teams
  */
@@ -173,9 +181,10 @@ export const updateTeamsFromNetwork = async (externalTeams, network, message) =>
 };
 
 /**
- * @param {array} externalTeams - the teams in the external system that will not be used to
- * remove the internal teams.
+ * @param {externalTeam[]} externalTeams - list of {@link module:adapters/pmt~ExternalTeam external}
+ * teams in the external system that will not be used to remove the internal teams.
  * @param {string} networkId - the networkId where to import to
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method removeTeamsFromNetwork
  * @return {Promise} Promise containing removed teamids
  */
@@ -190,6 +199,15 @@ export const removeTeamsFromNetwork = async (externalTeams, networkId, message) 
   return removedTeamsIds;
 };
 
+/**
+ * @param {externalUser[]} externalUsers - list of
+ * {@link module:adapters/pmt~ExternalUser external} teams
+ * in the external system that will be added
+ * @param {string} networkId - the networkId where to import to
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method addUsersToTeams
+ * @return {Promise} Promise containing removed teamids
+ */
 export const addUsersToTeams = async (externalUsers, networkId, message) => {
   const externalUserIds = externalUsers;
   return networkService.addUsersToTeams({ externalUserIds, networkId }, message);
@@ -197,7 +215,7 @@ export const addUsersToTeams = async (externalUsers, networkId, message) => {
 
 /**
  * This step synchronises the teams.
- * @param {number} networkId - The network to sync the users for
+ * @param {string} networkId - The network to sync the users for
  * @param {Array<ExternalTeam>} _externalTeams - The teams that come from the external system
  * @method syncTeams
  * @return {Team} - Return team objects
@@ -241,7 +259,7 @@ export async function syncTeams(networkId, _externalTeams) {
  * When an user is removed we will delete it from the network, but never delete it in our system.
  * This is due foreign key cascading. Else all the linked messages etc will be deleted as well.
  * This requires the users to be already imported by the import script to avoid wrong behaviour.
- * @param {number} networkId - The network to sync the users for
+ * @param {string} networkId - The network to sync the users for
  * @param {Array<ExternalUser>} externalUsers - The users that come from the external system
  * @method syncUsersWithNetwork
  * @return {boolean} - Return success boolean
@@ -327,7 +345,7 @@ export function getInternalUserByExternalId(externalId, internalUsers) {
 /**
  * This step synchronises the link between an user and the teams it belong to.
  * This requires the users and teams to be synced already to avoid wrong behaviour.
- * @param {number} networkId - The network to sync the users for
+ * @param {string} networkId - The network to sync the users for
  * @param {Array<ExternalUser>} externalUsers - The users that come from the external system
  * @method syncUsersWithTeams
  * @return {boolean} - Return success boolean

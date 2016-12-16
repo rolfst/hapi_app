@@ -1,6 +1,10 @@
 import { isUndefined, omit } from 'lodash';
 import bunyan from 'bunyan';
 
+/**
+ * @module shared/services/logger
+ */
+
 const environment = process.env.API_ENV;
 const defaultConfig = process.env.CI ?
    require('../configs/logs-ci').default :

@@ -14,7 +14,7 @@ export default async (req, reply) => {
     payload.filter = pick(req.query, FILTER_PROPERTIES);
 
     logger.info('Creating exchange comment', { message, payload });
-    const exchangeComment = await flexchangeService.getExchangeComment(payload, message);
+    const exchangeComment = await flexchangeService.createExchangeComment(payload, message);
 
     return reply({ success: true, data: responseUtil.serialize(exchangeComment) });
   } catch (err) {
