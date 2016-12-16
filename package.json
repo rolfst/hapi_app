@@ -5,13 +5,12 @@
   "main": "index.js",
   "scripts": {
     "clean": "rimraf build && mkdir build",
-    "copy-config": "cp ./source/database.json ./build/",
     "start:test": "cross-env NODE_PATH=build NODE_ENV=production API_ENV=development node build/index.js",
     "start:acc": "cross-env NODE_PATH=build NODE_ENV=production API_ENV=acceptance node build/index.js",
     "start:prod": "cross-env NODE_PATH=build NODE_ENV=production API_ENV=production node build/index.js",
-    "build": "npm run clean && babel ./source -d ./build -s --copy-files --ignore spec.js,e2e.js && npm run copy-config",
+    "build": "npm run clean && babel ./source -d ./build -s --copy-files --ignore spec.js,e2e.js",
     "debug": "node-debug | npm run dev",
-    "dev": "cross-env NODE_PATH=source NODE_ENV=debug API_ENV=testing babel-node ./source/index.js",
+    "dev": "cross-env NODE_PATH=source NODE_ENV=debug API_ENV=development babel-node ./source/index.js",
     "test": "npm run test:unit && npm run test:e2e",
     "test:integrations": "cross-env NODE_PATH=source API_ENV=testing mocha --timeout 20000 --compilers js:babel-register source/shared/test-utils/setup.js 'source/adapters/**/*.e2e.js'",
     "test:e2e": "cross-env NODE_PATH=source API_ENV=testing mocha --timeout 20000 --compilers js:babel-register source/shared/test-utils/setup.js 'source/**/*.e2e.js'",
@@ -19,6 +18,7 @@
     "coverage": "cross-env NODE_PATH=source API_ENV=testing istanbul cover _mocha -- --compilers js:babel-register source/shared/test-utils/spec-setup.js './source/**/*.spec.js' -s 10",
     "flow": "flow --help",
     "lint": "eslint source/",
+    "doc": "jsdoc -c conf.json",
     "check": "npm run lint && npm run test && npm outdated --depth 0",
     "jobs": "cross-env NODE_PATH=source NODE_ENV=production babel-node ./source/modules/flexchange/scripts/createRemindersForAdmin.js"
   },
@@ -38,7 +38,7 @@
     "lodash": "4.15.0",
     "mixpanel": "0.4.0",
     "moment": "2.12.0",
-    "moment-timezone": "^0.5.5",
+    "moment-timezone": "0.5.5",
     "mysql": "2.11.1",
     "newrelic": "1.31.0",
     "nodemailer": "2.5.0",
@@ -69,9 +69,9 @@
     "mocha": "2.4.5",
     "nock": "8.0.0",
     "node-inspector": "0.12.7",
+    "rewire": "2.5.2",
     "rimraf": "2.5.2",
     "sequelize-cli": "2.3.1",
-    "sinon": "1.17.4",
-    "std-mocks": "1.0.1"
+    "sinon": "1.17.4"
   }
 }

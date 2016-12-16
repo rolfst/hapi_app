@@ -5,9 +5,8 @@ import * as stubs from '../test-utils/stubs';
 import * as blueprints from '../test-utils/blueprints';
 import hook from './users-available-for-shift';
 
-nock.disableNetConnect();
-
 describe('PMT available users hook', () => {
+  nock.disableNetConnect();
   let network;
   const TOKEN = 'afcebc0123456789';
   const AVAILABLE_SHIFTID = '29383001';

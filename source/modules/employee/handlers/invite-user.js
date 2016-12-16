@@ -2,7 +2,7 @@ import * as service from '../services/invite-user';
 import * as responseUtil from '../../../shared/utils/response';
 import * as Logger from '../../../shared/services/logger';
 
-const logger = Logger.getLogger('EMPLOYEE/handler/inviteUser');
+const logger = Logger.createLogger('EMPLOYEE/handler/inviteUser');
 
 export default async (req, reply) => {
   try {

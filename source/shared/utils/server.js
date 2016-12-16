@@ -1,9 +1,10 @@
 import Url from 'url';
 import Qs from 'qs';
+import { pick } from 'lodash';
 import createError from './create-error';
 import * as Logger from '../services/logger';
 
-const logger = Logger.getLogger('NODE-API/server/response');
+const logger = Logger.createLogger('NODE-API/server/response');
 
 export const onRequest = (req, reply) => {
   const uri = req.raw.req.url;
@@ -25,7 +26,11 @@ export const transformBoomToErrorResponse = (boom) => ({
 
 export const onPreResponse = (req, reply) => {
   const message = { ...req.auth, ...req.credentials };
-  const payload = { ...req.payload, ...req.params, ...req.query };
+  const errorPayload = {
+    ...pick(req, 'info', 'payload', 'params', 'query'),
+    method: req.method,
+    url: req.path,
+  };
 
   if (req.response instanceof Error && req.response.isBoom) {
     let error = req.response;
@@ -37,7 +42,7 @@ export const onPreResponse = (req, reply) => {
       error = createError(req.response.output.statusCode.toString());
     }
 
-    logger.warn('Error from application', { message, payload, err: error });
+    logger.warn('Error from application', { message, payload: errorPayload, err: req.response });
     const errorResponse = transformBoomToErrorResponse(error);
 
     return reply(errorResponse).code(errorResponse.status_code);
@@ -46,7 +51,7 @@ export const onPreResponse = (req, reply) => {
   if (req.response instanceof Error) {
     logger.error('Error from application', {
       message,
-      payload,
+      payload: errorPayload,
       err: { message: req.response.message, stack: req.response.stack },
     });
 

@@ -24,7 +24,7 @@ describe('Exchange created notification', () => {
     const expected = {
       text: `John Doe zoekt een vervanger voor vandaag van ${localTime.startTime} ` +
         `tot ${localTime.endTime}.`,
-      data: { id: 1, type: 'exchange' },
+      data: { id: 1, type: 'exchange', track_name: 'created_exchange' },
     };
 
     assert.deepEqual(actual, expected);
@@ -38,7 +38,7 @@ describe('Exchange created notification', () => {
     const expected = {
       text: `John Doe zoekt een vervanger voor morgen van ${localTime.startTime} ` +
         `tot ${localTime.endTime}.`,
-      data: { id: 1, type: 'exchange' },
+      data: { id: 1, type: 'exchange', track_name: 'created_exchange' },
     };
 
     assert.deepEqual(actual, expected);
@@ -52,7 +52,7 @@ describe('Exchange created notification', () => {
     const expected = {
       text: `John Doe zoekt een vervanger voor aankomende ${futureMoment.format('dddd')} ` +
         `van ${localTime.startTime} tot ${localTime.endTime}.`,
-      data: { id: 1, type: 'exchange' },
+      data: { id: 1, type: 'exchange', track_name: 'created_exchange' },
     };
 
     assert.deepEqual(actual, expected);
@@ -66,7 +66,7 @@ describe('Exchange created notification', () => {
     const expected = {
       text: `John Doe zoekt een vervanger voor ${futureMoment.format('dddd D MMMM')} ` +
         `van ${localTime.startTime} tot ${localTime.endTime}.`,
-      data: { id: 1, type: 'exchange' },
+      data: { id: 1, type: 'exchange', track_name: 'created_exchange' },
     };
 
     assert.deepEqual(actual, expected);

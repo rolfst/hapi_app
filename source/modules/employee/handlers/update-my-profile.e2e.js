@@ -38,11 +38,11 @@ describe('Handler: update my profile', () => {
     assert.equal(data.role_type, 'EMPLOYEE');
   });
 
-  it('should fail when updating an id', async () => {
+  it('should return 422 when trying to update the id value', async () => {
     const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/users/me`;
-    const result = putRequest(
+    const { statusCode } = await putRequest(
       endpoint, { id: '0002222' }, global.server, global.tokens.employee);
 
-    assert.isRejected(result);
+    assert.equal(statusCode, 422);
   });
 });

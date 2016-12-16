@@ -2,7 +2,7 @@ import fetch from 'isomorphic-fetch';
 import createError from '../../shared/utils/create-error';
 import * as Logger from '../../shared/services/logger';
 
-const logger = Logger.getLogger('PMT/adapter/client');
+const logger = Logger.createLogger('PMT/adapter/client');
 
 const createFormEncodedString = (data) => {
   return Object.keys(data).map((key) => {
@@ -42,17 +42,24 @@ export async function makeRequest(endpoint, token = null, method = 'GET', data =
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       'logged-in-user-token': token,
-      'api-key': 'testpmtapi',
+      'api-key': process.env.PMT_API_KEY || 'testpmtapi',
     },
     body: createFormEncodedString(data),
   };
 
 
-  logger.info('fetching from integration', { endpoint, options, message });
+  logger.info('Fetching from integration', { endpoint, options, message });
   const response = await fetch(endpoint, options);
   const { status, json } = await handleRequest(response, endpoint);
 
-  logger.info('Retrieved from integration', { status, json, message });
+  if (status !== 200) {
+    logger.error('Error occured when fetching data from integration', {
+      status, json, message, endpoint });
+  } else {
+    const dataResponse = json[Object.keys(json)[0]] || [];
+    logger.info('Retrieved data from integration', {
+      status, itemCount: dataResponse.length, message, endpoint });
+  }
 
   return { payload: json, status };
 }

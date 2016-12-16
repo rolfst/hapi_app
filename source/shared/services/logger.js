@@ -1,17 +1,28 @@
 import { isUndefined, omit } from 'lodash';
 import bunyan from 'bunyan';
 
+/**
+ * @module shared/services/logger
+ */
+
 const environment = process.env.API_ENV;
-const logConfig = require(`../configs/logs-${environment}`).default;
+const defaultConfig = process.env.CI ?
+   require('../configs/logs-ci').default :
+   require(`../configs/logs-${environment}`).default;
 
 const fetchContextObjects = (args = {}) => {
   if (isUndefined(args.err)) return { context: args };
-  return { err: args.err, context: omit(args, 'err') };
+
+  const context = { err: args.err.stack, context: omit(args, 'err') };
+  if (args.err.output) context.statusCode = args.err.output.statusCode;
+  if (args.err.data) context.errorCode = args.err.data.errorCode;
+
+  return context;
 };
 
-const buildLogContext = (args = {}) => {
-  const options = args.message || {};
-  const logArgs = omit(args, 'message');
+const buildLogContext = (data = {}) => {
+  const options = data.message || {};
+  const logArgs = omit(data, 'message');
 
   if (options.artifacts) {
     const requestIdObject = { requestId: options.artifacts.requestId };
@@ -22,15 +33,16 @@ const buildLogContext = (args = {}) => {
   return { ...fetchContextObjects(logArgs) };
 };
 
+export const getLogger = (name) => bunyan.createLogger({ name, ...defaultConfig });
+
 /**
- * @param {string} name - logger name
- * @method getLogger returns a logger instance
+ * @param {string|Logger} loggerOrName
+ * @method createLogger
+ * @return {void}
  */
-export const getLogger = (name) => {
-  const logger = bunyan.createLogger({
-    ...logConfig,
-    name,
-  });
+export const createLogger = (loggerOrName) => {
+  const logger = typeof loggerOrName === 'string' ?
+    getLogger(loggerOrName) : loggerOrName;
 
   return {
     /**
@@ -56,7 +68,7 @@ export const getLogger = (name) => {
     /**
      * @param {string} message - message
      * @param {object} [data] - objects to log
-     * @param {error} [data.error] - error object to log
+     * @param {error} [data.err] - error object to log
      * @param {object} [data.artifacts] - dataobject that contains context
      * @param {string} [data.artifacts.requestId] - representing trace identifier
      * @method warn - logs at a warning level
@@ -67,7 +79,7 @@ export const getLogger = (name) => {
     /**
      * @param {string} message - message
      * @param {object} [data] - objects to log
-     * @param {error} [data.error] - error object to log
+     * @param {error} [data.err] - error object to log
      * @param {object} [data.artifacts] - dataobject that contains context
      * @param {string} [data.artifacts.requestId] - representing trace identifier
      * @method error - logs at a error level
@@ -85,3 +97,5 @@ export const getLogger = (name) => {
     },
   };
 };
+
+export default createLogger;

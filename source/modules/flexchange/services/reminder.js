@@ -1,13 +1,13 @@
 import Promise from 'bluebird';
 import moment from 'moment';
 import { filter, map, uniqBy, pick } from 'lodash';
-import notifier from '../../../shared/services/notifier';
+import * as notifier from '../../../shared/services/notifier';
 import * as networkRepo from '../../core/repositories/network';
 import * as exchangeRepo from '../repositories/exchange';
 import createReminderExchangeNotification from '../notifications/accepted-exchange-reminder';
 import * as Logger from '../../../shared/services/logger';
 
-const logger = Logger.getLogger('FLEXCHANGE/service/reminder');
+const logger = Logger.createLogger('FLEXCHANGE/service/reminder');
 
 const createAdminInfo = (admins) => {
   return map(filter(admins, (u) => u),

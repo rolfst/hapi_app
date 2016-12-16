@@ -1,5 +1,4 @@
 import { assert } from 'chai';
-import sinon from 'sinon';
 import Promise from 'bluebird';
 import nock from 'nock';
 import { flatten, find, sortBy, partialRight, flow, map } from 'lodash';
@@ -40,12 +39,6 @@ describe('Handler: Bulk invite users', () => {
       nock(global.networks.pmt.externalId)
         .get('/users')
         .reply('200', stubs.users_200);
-
-      sinon.stub(mailer, 'send').returns(null);
-    });
-
-    after(() => {
-      mailer.send.restore();
     });
 
     it('should add to the network as admin', async () => {

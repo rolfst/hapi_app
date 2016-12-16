@@ -5,6 +5,10 @@ import * as authenticationRepo from '../../core/repositories/authentication';
 import createAccessToken from '../../authentication/utils/create-access-token';
 import * as impl from './implementation';
 
+/**
+ * @module modules/integrations/services/access
+ */
+
 export const getLinkedAccessToken = async (payload, message) => {
   try {
     const credentials = pick(payload, 'username', 'password');

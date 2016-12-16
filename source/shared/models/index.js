@@ -25,7 +25,7 @@ NetworkModel.hasMany(TeamModel, {
 NetworkModel.belongsToMany(IntegrationModel, {
   foreignKey: 'network_id',
   otherKey: 'service_id',
-  through: 'network_service',
+  through: NetworkIntegrationModel,
   timestamps: false,
 });
 

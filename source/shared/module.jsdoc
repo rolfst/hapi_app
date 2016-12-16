@@ -1,0 +1,24 @@
+/**
+ * @module shared
+ */
+
+/**
+ * @typedef {object} Credentials
+ * @property {string} id - {@link module:modules/core~User User}.id
+ * @property {string} username - {@link module:modules/core~User User}.username
+ */
+
+/**
+ * @typedef {object} Artifacts
+ * @property {string} authenticationToken
+ * @property {string} requestId
+ */
+
+/**
+ * @typedef {object} Message
+ * @property {artifacts}
+ * @property {object} message.artifacts {@link module:shared~Artifacts Artifacts}- Artifacts containing request meta data
+ * @property {Network} message.network {@link module:modules/core~Network Network} - The prefetched network
+ * @property {Credentials} message.credentials {@link module:modules/shared~Credentials Credentials} - The authenticated user
+ */
+

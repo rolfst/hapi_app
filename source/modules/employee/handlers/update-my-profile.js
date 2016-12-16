@@ -3,7 +3,7 @@ import * as service from '../services/employee';
 import * as responseUtil from '../../../shared/utils/response';
 import * as Logger from '../../../shared/services/logger';
 
-const logger = Logger.getLogger('EMPLOYEE/handler/updateMyProfile');
+const logger = Logger.createLogger('EMPLOYEE/handler/updateMyProfile');
 
 export default async (req, reply) => {
   try {

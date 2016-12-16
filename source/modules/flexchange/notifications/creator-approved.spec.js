@@ -25,7 +25,7 @@ describe('Your exchange approved notification', () => {
     const expected = {
       text: `Pietje overnemer heeft je shift van vandaag van ${localTime.startTime} ` +
         `tot ${localTime.endTime} overgenomen.`,
-      data: { id: 1, type: 'exchange' },
+      data: { id: 1, type: 'exchange', track_name: 'exchange_approved_creator' },
     };
 
     assert.deepEqual(actual, expected);
@@ -39,7 +39,7 @@ describe('Your exchange approved notification', () => {
     const expected = {
       text: `Pietje overnemer heeft je shift van morgen van ${localTime.startTime} ` +
         `tot ${localTime.endTime} overgenomen.`,
-      data: { id: 1, type: 'exchange' },
+      data: { id: 1, type: 'exchange', track_name: 'exchange_approved_creator' },
     };
 
     assert.deepEqual(actual, expected);
@@ -53,7 +53,7 @@ describe('Your exchange approved notification', () => {
     const expected = {
       text: `Pietje overnemer heeft je shift van ${futureMoment.format('dddd')} ` +
         `van ${localTime.startTime} tot ${localTime.endTime} overgenomen.`,
-      data: { id: 1, type: 'exchange' },
+      data: { id: 1, type: 'exchange', track_name: 'exchange_approved_creator' },
     };
 
     assert.deepEqual(actual, expected);
@@ -67,7 +67,7 @@ describe('Your exchange approved notification', () => {
     const expected = {
       text: `Pietje overnemer heeft je shift op ${futureMoment.format('dddd DD MMMM')} ` +
         `van ${localTime.startTime} tot ${localTime.endTime} overgenomen.`,
-      data: { id: 1, type: 'exchange' },
+      data: { id: 1, type: 'exchange', track_name: 'exchange_approved_creator' },
     };
 
     assert.deepEqual(actual, expected);

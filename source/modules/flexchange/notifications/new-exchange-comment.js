@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import notifier from '../../../shared/services/notifier';
+import * as notifier from '../../../shared/services/notifier';
 import * as exchangeRepo from '../repositories/exchange';
 import { findCommentsByExchange } from '../repositories/comment';
 
@@ -9,7 +9,7 @@ export const createNotification = (exchange, comment) => {
 
   return {
     text: `${creator} reageerde: ${text}`,
-    data: { id: exchange.id, type: 'exchange' },
+    data: { id: exchange.id, type: 'exchange', track_name: 'exchange_comment' },
   };
 };
 

@@ -17,7 +17,7 @@ describe('Service: invite user', () => {
     });
   });
 
-  after(() => team.destroy());
+  after(() => teamRepo.deleteById(team.id));
 
   describe('Existing User', () => {
     let existingUser;
@@ -29,7 +29,7 @@ describe('Service: invite user', () => {
       const { firstName, lastName, email } = global.users.employee;
       const payload = { firstName, lastName, email };
 
-      assert.isRejected(service.inviteUser(payload, { network }));
+      await assert.isRejected(service.inviteUser(payload, { network }));
     });
 
     it('should fail when team doesn\'t belongs to the network', async () => {
@@ -176,7 +176,7 @@ describe('Service: invite user', () => {
       const actual = await service.inviteUser(payload, { network });
 
       assert.equal(actual.roleType, 'ADMIN');
-      assert.equal(actual.isActive, true);
+      assert.equal(actual.deletedAt, null);
     });
 
     it('should add to the network as employee', async () => {
@@ -185,7 +185,7 @@ describe('Service: invite user', () => {
       const actual = await service.inviteUser(payload, { network });
 
       assert.equal(actual.roleType, 'EMPLOYEE');
-      assert.equal(actual.isActive, true);
+      assert.equal(actual.deletedAt, null);
     });
 
     it('should add to the teams', async () => {

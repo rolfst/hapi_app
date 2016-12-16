@@ -3,7 +3,7 @@ import * as networkService from '../../modules/core/services/network';
 import createError from '../utils/create-error';
 import * as serverUtil from '../utils/server';
 
-const logger = Logger.getLogger('MIDDLEWARE/prefetchNetwork');
+const logger = Logger.createLogger('MIDDLEWARE/prefetchNetwork');
 
 export default async (req, reply) => {
   try {

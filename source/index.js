@@ -1,19 +1,17 @@
 import 'babel-polyfill';
+require('dotenv').config();
 import 'newrelic';
 import Parse from 'parse/node';
-import dotenv from 'dotenv';
 import * as Logger from './shared/services/logger';
 
-dotenv.config();
-
-const logger = Logger.getLogger('SERVER');
+const logger = Logger.createLogger('SERVER');
 const createServer = require('./server').default;
 
 if (process.env.NODE_ENV === 'debug') {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 }
 
-const server = createServer(process.env.PORT || 8000);
+const server = createServer();
 
 server.start(err => {
   if (err) throw err;

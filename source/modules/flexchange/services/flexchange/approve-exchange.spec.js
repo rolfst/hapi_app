@@ -12,7 +12,7 @@ describe('Approve exchange', () => {
   before(() => (sandbox = sinon.sandbox.create()));
   afterEach(() => (sandbox.restore()));
 
-  it('should send a notifications to the approved user and owner of the shift', async () => {
+  it('should send a notification to the approved user and owner of the shift', async () => {
     sandbox.stub(creatorApproved, 'send').returns(Promise.resolve(null));
     sandbox.stub(substituteApproved, 'send').returns(Promise.resolve(null));
     sandbox.stub(exchangeRepo, 'findExchangeById').returns({});
@@ -20,11 +20,9 @@ describe('Approve exchange', () => {
     sandbox.stub(exchangeResponseRepo, 'findResponseWhere')
       .returns({ approved: null, response: 1 });
 
-    const messageFixture = { credentials: {}, network: {} };
-    const payload = {
-      exchangeId: null,
-      user_id: 1,
-    };
+    const messageFixture = { credentials: { id: 1 }, network: {} };
+    const payload = { exchangeId: null, user_id: 1 };
+
     await service.approveExchange(payload, messageFixture);
 
     assert.equal(creatorApproved.send.calledOnce, true);

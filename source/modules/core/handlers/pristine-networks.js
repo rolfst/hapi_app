@@ -1,7 +1,7 @@
 import * as Logger from '../../../shared/services/logger';
 import * as networkService from '../services/network';
 
-const logger = Logger.getLogger('CORE/handler/pristineNetworks');
+const logger = Logger.createLogger('CORE/handler/pristineNetworks');
 
 export default async (req, reply) => {
   try {

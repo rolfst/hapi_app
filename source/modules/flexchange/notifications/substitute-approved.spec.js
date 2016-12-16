@@ -24,7 +24,7 @@ describe('Substitude flexchange notification', () => {
     const expected = {
       text: 'Je hebt de shift van John Doe overgenomen. Je werkt vandaag ' +
         `van ${localTime.startTime} tot ${localTime.endTime}.`,
-      data: { id: 1, type: 'exchange' },
+      data: { id: 1, type: 'exchange', track_name: 'exchange_approved_substitute' },
     };
 
     assert.deepEqual(actual, expected);
@@ -38,7 +38,7 @@ describe('Substitude flexchange notification', () => {
     const expected = {
       text: 'Je hebt de shift van John Doe overgenomen. Je werkt morgen ' +
         `van ${localTime.startTime} tot ${localTime.endTime}.`,
-      data: { id: 1, type: 'exchange' },
+      data: { id: 1, type: 'exchange', track_name: 'exchange_approved_substitute' },
     };
 
     assert.deepEqual(actual, expected);
@@ -52,7 +52,7 @@ describe('Substitude flexchange notification', () => {
     const expected = {
       text: 'Je hebt de shift van John Doe overgenomen. Je werkt ' +
         `${futureMoment.format('dddd')} van ${localTime.startTime} tot ${localTime.endTime}.`,
-      data: { id: 1, type: 'exchange' },
+      data: { id: 1, type: 'exchange', track_name: 'exchange_approved_substitute' },
     };
 
     assert.deepEqual(actual, expected);
@@ -67,7 +67,7 @@ describe('Substitude flexchange notification', () => {
       text: 'Je hebt de shift van John Doe overgenomen. Je werkt ' +
         `${futureMoment.format('dddd D MMMM')} van ${localTime.startTime} ` +
         `tot ${localTime.endTime}.`,
-      data: { id: 1, type: 'exchange' },
+      data: { id: 1, type: 'exchange', track_name: 'exchange_approved_substitute' },
     };
 
     assert.deepEqual(actual, expected);

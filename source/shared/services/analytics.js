@@ -1,35 +1,28 @@
 import Mixpanel from 'mixpanel';
+import * as Logger from './logger';
 
-export default (() => {
-  const client = process.env.API_ENV !== 'testing' ?
-    Mixpanel.init(process.env.MIXPANEL_TOKEN) : null;
+const logger = Logger.createLogger('SHARED/services/analytics');
 
-  let currentUser = null;
+export function getClient() {
+  return Mixpanel.init(process.env.MIXPANEL_TOKEN);
+}
 
-  return {
-    setUser(user) {
-      currentUser = user;
-    },
-    registerProfile(user) {
-      if (process.env.API_ENV === 'testing') return;
+export function registerProfile(user) {
+  if (!user.id) throw new Error('User need to have at least an identifier.');
 
-      const payload = {
-        $first_name: user.firstName,
-        $last_name: user.lastName,
-        $email: user.email,
-        $phone: user.phoneNum,
-      };
-
-      client.people.set(user.id, payload);
-    },
-    track(event) {
-      if (process.env.API_ENV === 'testing') return;
-
-      if (!currentUser) throw new Error('No user set to track events.');
-
-      const { name, data } = event;
-
-      client.track(name, { ...data, distinct_id: currentUser.id });
-    },
+  const payload = {
+    $first_name: user.firstName,
+    $last_name: user.lastName,
+    $email: user.email,
+    $phone: user.phoneNum,
   };
-})();
+
+  getClient().people.set(user.id, payload);
+}
+
+export function track(event, distinctId = null) {
+  if (!distinctId) throw new Error('Missing distinctId parameter.');
+  logger.info('Tracking event', { event, distinctId });
+
+  return getClient().track(event.name, { ...event.data, distinct_id: distinctId });
+}

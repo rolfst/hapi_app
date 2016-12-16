@@ -1,11 +1,11 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import client from './client';
+import stubs from './test-utils/stubs';
 import blueprints from './test-utils/blueprints';
 import fetchTeams from './hooks/fetch-teams';
-import fetchUsers from './hooks/fetch-users';
+import * as userConnector from './hooks/fetch-users';
 import teamSerializer from './serializers/team';
-import userSerializer from './serializers/user';
 
 describe('PMT Hooks', () => {
   const fakeBaseStoreUrl = 'http://mypmtstore.nl';
@@ -32,7 +32,7 @@ describe('PMT Hooks', () => {
     before(async () => {
       sinon.stub(client, 'get').returns(Promise.resolve({ payload: { data: blueprints.users } }));
 
-      hookResult = await fetchUsers(fakeBaseStoreUrl)();
+      hookResult = await userConnector.fetchUsers(fakeBaseStoreUrl)();
     });
 
     after(() => client.get.restore());
@@ -43,25 +43,52 @@ describe('PMT Hooks', () => {
     });
 
     it('should set correct value for isAdmin property', async () => {
-      assert.equal(hookResult[0].isAdmin, true);
-      assert.equal(hookResult[1].isAdmin, false);
+      assert.equal(hookResult[0].roleType, 'EMPLOYEE');
+      assert.equal(hookResult[1].roleType, 'EMPLOYEE');
     });
 
     it('should conform to internal user contract', async () => {
-      const expected = blueprints.users.map(userSerializer);
-
-      assert.deepEqual(hookResult, expected);
       assert.property(hookResult[0], 'externalId');
       assert.property(hookResult[0], 'username');
       assert.property(hookResult[0], 'email');
       assert.property(hookResult[0], 'firstName');
       assert.property(hookResult[0], 'lastName');
+      assert.property(hookResult[0], 'integrationAuth');
+      assert.property(hookResult[0], 'function');
       assert.property(hookResult[0], 'dateOfBirth');
       assert.property(hookResult[0], 'phoneNum');
-      assert.property(hookResult[0], 'isAdmin');
+      assert.property(hookResult[0], 'roleType');
       assert.property(hookResult[0], 'isActive');
+      assert.property(hookResult[0], 'deletedAt');
       assert.property(hookResult[0], 'teamIds');
       assert.isArray(hookResult[0].teamIds);
+    });
+  });
+
+  describe('getUsers', () => {
+    before(async () => {
+      sinon.stub(client, 'get').returns(
+      Promise.resolve({ payload: { data: stubs.unlinkedUsers } }));
+    });
+
+    after(() => client.get.restore());
+    it('should confirm to Domain model', async () => {
+      const teams = [{
+        name: 'vleeswaren',
+        id: '1',
+        externalId: '14',
+        description: '',
+      }, {
+        name: 'algemeen',
+        id: '2',
+        externalId: '20',
+        description: '',
+      }];
+      const users = await userConnector.getUsers(fakeBaseStoreUrl, teams);
+
+      assert.equal(users.length, 2);
+      assert.property(users[0], 'teamIds');
+      assert.deepEqual(users[0].teamIds, ['1', '2']);
     });
   });
 });

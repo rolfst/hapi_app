@@ -1,8 +1,7 @@
 import { assert } from 'chai';
 import nock from 'nock';
-import { map, pick, differenceBy, omit } from 'lodash';
+import { map, pick, differenceBy } from 'lodash';
 import Promise from 'bluebird';
-import authenticate from '../../../shared/test-utils/authenticate';
 import { getRequest } from '../../../shared/test-utils/request';
 import * as setup from '../../../shared/test-utils/setup';
 import * as stubs from '../../../shared/test-utils/stubs';
@@ -18,7 +17,6 @@ describe('Handle sync network', () => {
   let network;
   let integration;
   let globalAdmin;
-  let adminToken;
   let alreadyImportedAdmin;
   let alreadyImportedUser;
 
@@ -82,15 +80,17 @@ describe('Handle sync network', () => {
         roleType: 'ADMIN',
         invisibleUser: true,
       });
+
       return Promise.map(usersToAdd, networkRepo.addUser);
     });
 
     after(async () => {
+      await userRepo.deleteById(alreadyImportedAdmin.id);
+
       await Promise.all([
         integrationRepo.deleteById(integration.id),
         userRepo.deleteById(globalAdmin.id),
         userRepo.deleteById(alreadyImportedUser.id),
-        userRepo.deleteById(alreadyImportedAdmin.id),
       ]);
 
       return setup.initialSetup();
@@ -106,8 +106,6 @@ describe('Handle sync network', () => {
     });
 
     it('should return success', async () => {
-      adminToken = (await authenticate(global.server,
-        omit(adminCredentials, ['email', 'firstName', 'lastName', 'profileImg']))).token;
       nock(network.externalId)
         .get('/departments')
         .reply(200, stubs.departments)
@@ -115,24 +113,9 @@ describe('Handle sync network', () => {
         .reply(200, stubs.users_200);
 
       const endpoint = '/v2/integrations/sync';
-      const { statusCode } = await getRequest(endpoint, global.server, adminToken);
+      const { statusCode } = await getRequest(endpoint, global.server, 'footoken');
 
-      assert.equal(statusCode, 200);
-    });
-
-    it('should fail when user does not belong to network', async () => {
-      adminToken = (await authenticate(global.server,
-        omit(adminCredentials, ['email', 'firstName', 'lastName', 'profileImg']))).token;
-      nock(network.externalId)
-        .get('/departments')
-        .reply(401, { error: 'Incorrect username or password.' })
-        .get('/users')
-        .reply(401, { error: 'Incorrect username or password.' });
-
-      const endpoint = '/v2/integrations/sync';
-      const { statusCode } = await getRequest(endpoint, global.server, adminToken);
-
-      assert.equal(statusCode, 403);
+      assert.equal(statusCode, 202);
     });
   });
 });

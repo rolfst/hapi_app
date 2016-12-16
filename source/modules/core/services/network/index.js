@@ -1,31 +1,34 @@
 import Promise from 'bluebird';
-import { find, flatten, map, filter, get, pick } from 'lodash';
+import { flatten, map, filter, pick } from 'lodash';
 import { createAdapter } from '../../../../shared/utils/create-adapter';
+import * as Logger from '../../../../shared/services/logger';
 import createError from '../../../../shared/utils/create-error';
-import configurationMail from '../../../../shared/mails/configuration-invite';
-import configurationMailNewAdmin from '../../../../shared/mails/configuration-invite-newadmin';
-import * as mailer from '../../../../shared/services/mailer';
 import * as integrationsAdapter from '../../../../shared/utils/integrations-adapter';
-import * as passwordUtil from '../../../../shared/utils/password';
 import * as networkRepo from '../../repositories/network';
-import * as userRepo from '../../repositories/user';
 import * as userService from '../user';
 import * as impl from './implementation';
 
 /**
+ * @module modules/core/services/network
+ */
+
+const logger = Logger.getLogger('CORE/service/network');
+
+/**
  * Create a new network.
  * @param {object} payload - Object containing payload data
- * @param {number} payload.userId - The id of the owner of the network
- * @param {number} payload.name - The name of the network
+ * @param {string} payload.userId - The id of the owner of the network
+ * @param {string} payload.name - The name of the network
  * @param {string} payload.externalId - The external id of the network
  * @param {string} payload.integrationName - The integration that the network should have
- * @param {object} message - Object containing meta data
- * @param {object} message.credentials - The authenticated user
- * @param {object} message.artifacts - Artifacts containing request meta data
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method create
- * @return {Promise} Promise new network object
+ * @return {external:Promise.<Network>} {@link module:modules/core~Network Network} -
+ * new network object
  */
-export const create = async (payload) => {
+export const create = async (payload, message) => {
+  logger.info('Creating Network', { payload, message });
+
   const whitelistAttrs = pick(payload, 'userId', 'name', 'externalId', 'integrationName');
 
   if (payload.integrationName) {
@@ -44,13 +47,14 @@ export const create = async (payload) => {
  * @param {string} payload.externalId - The external id for the user
  * @param {string} payload.userToken - The user token of the user to add
  * @param {boolean} payload.active - Flag if the user is active
- * @param {object} message - Object containing meta data
- * @param {object} message.credentials - The authenticated user
- * @param {object} message.artifacts - Artifacts containing request meta data
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method addUserToNetwork
- * @return {Promise} Promise containing collection of users
+ * @return {external:Promise.<Network>} {@link module:modules/core~User User} -
+ * Promise containing a User
  */
-export const addUserToNetwork = async (payload) => {
+export const addUserToNetwork = async (payload, message) => {
+  logger.info('Adding user to network', { payload, message });
+
   const attrsWhitelist = ['userId', 'networkId', 'externalId', 'userToken'];
   const attributes = {
     ...pick(payload, attrsWhitelist),
@@ -67,24 +71,38 @@ const getNetworks = async (url) => {
 
 /**
  * Retrieve prisinte networks from an integration.
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method listPristineNetworks
- * @return {Promise} Promise containing collection of network
- * with integrationName and admins for the network.
+ * @return {external:Promise} -
+ * Promise containing collection of a pristine network with integrationName
+ * and admins for the network.
  */
-export const listPristineNetworks = async () => {
+export const listPristineNetworks = async (payload, message) => {
+  logger.info('Listing all pristine networks', { payload, message });
+
   const baseUrl = 'https://partner2.testpmt.nl/rest.php';
   const clients = await integrationsAdapter.clients(baseUrl);
   const externalIds = map(clients, 'externalId');
 
   const networksFromIntegration = flatten(await Promise.map(externalIds, getNetworks));
-  const pristineNetworks = impl.filterExistingNetworks(networksFromIntegration);
+  const pristineNetworks = impl.filterExistingNetworks(networksFromIntegration, message);
   const pristineNetworksWithAdmins = await Promise.map(
-    pristineNetworks, impl.mergeAdminsIntoPristineNetwork);
+    pristineNetworks,
+    (pristineNetwork) => impl.mergeAdminsIntoPristineNetwork(pristineNetwork, message));
 
   return pristineNetworksWithAdmins;
 };
 
-export const listAdminsFromNetwork = async (payload) => {
+/**
+ * retrieves Admins from network
+ * @param {object} payload
+ * @param {string} payload.networkId
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method listAdminsFromNetwork
+ * @return {external:Promise} Promise containing collection of a pristine network admins
+ */
+export const listAdminsFromNetwork = async (payload, message) => {
+  logger.info('listing Admins From Network', { payload, message });
   const network = await networkRepo.findNetworkById(payload.networkId);
 
   if (!network) throw createError('404');
@@ -99,13 +117,14 @@ export const listAdminsFromNetwork = async (payload) => {
  * Retrieve active users that belong to the network.
  * @param {object} payload - Object containing payload data
  * @param {string} payload.networkId - The id of the network to find the users in
- * @param {object} message - Object containing meta data
- * @param {object} message.credentials - The authenticated user
- * @param {object} message.artifacts - Artifacts containing request meta data
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method listActiveUsersForNetwork
- * @return {Promise} Promise containing collection of users
+ * @return {external:Promise.<User[]>} {@link module:modules/core~User User} -
+ * Promise containing collection of users
  */
 export const listActiveUsersForNetwork = async (payload, message) => {
+  logger.info('Listing active users for network', { payload, message });
+
   const network = await networkRepo.findNetworkById(payload.networkId);
   const usersFromNetwork = await networkRepo.findUsersForNetwork(network.id);
 
@@ -119,13 +138,14 @@ export const listActiveUsersForNetwork = async (payload, message) => {
  * Retrieve users that belong to the network.
  * @param {object} payload - Object containing payload data
  * @param {number} payload.networkId - The id of the network
- * @param {object} message - Object containing meta data
- * @param {object} message.credentials - The authenticated user
- * @param {object} message.artifacts - Artifacts containing request meta data
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method listAllUsersForNetwork
- * @return {Promise} Promise containing collection of users
+ * @return {external:Promise.<User[]>} {@link module:modules/core~User User} -
+ * Promise containing collection of users
  */
 export const listAllUsersForNetwork = async (payload, message) => {
+  logger.info('Listing all users for network', { payload, message });
+
   const network = await networkRepo.findNetworkById(payload.networkId);
   const usersFromNetwork = await networkRepo.findAllUsersForNetwork(network.id);
 
@@ -139,12 +159,10 @@ export const listAllUsersForNetwork = async (payload, message) => {
  * Retrieve a single network;
  * @param {object} payload - Object containing payload data
  * @param {number} payload.id - The id of the network to get
- * @param {object} message - Object containing meta data
- * @param {object} message.network - The prefetched network
- * @param {object} message.credentials - The authenticated user
- * @param {object} message.artifacts - Artifacts containing request meta data
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method getNetwork
- * @return {Promise} Promise containing collection of users
+ * @return {external:Promise.<Network>} {@link module:modules/core~Network Network} -
+ * Promise containing network
  */
 export const getNetwork = async (payload, message) => {
   const network = await networkRepo.findNetworkById(payload.id);
@@ -160,123 +178,85 @@ export const getNetwork = async (payload, message) => {
  * List network where user belongs to
  * @param {object} payload - Object containing payload data
  * @param {number} payload.id - The id of the user
- * @param {object} message - Object containing meta data
- * @param {object} message.network - The prefetched network
- * @param {object} message.credentials - The authenticated user
- * @param {object} message.artifacts - Artifacts containing request meta data
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method listNetworksForUser
- * @return {Promise} Promise containing collection of networks
+ * @return {external:Promise.<Network>} {@link module:modules/core~Network Network} -
+ * Promise containing a collections networks
  */
-export const listNetworksForUser = async (payload) => {
+export const listNetworksForUser = async (payload, message) => {
+  logger.info('Listing all networks for user', { payload, message });
+
   return networkRepo.findAllContainingUser(payload.id);
 };
 
-/*
- * import network. The import will assign a user as administrator for that network.
- * @param {object} payload = Obect containing payload data
- * @param {string} payload.username - the username of the user in both external system
+/**
+ * Importing a network via the data from the integration partner
+ * @param {object} payload - Obect containing payload data
+ * @param {string} payload.external_username - The user that'll be assigned as owner of the network
+ * @param {string} payload.networkId - The network to import
  * @method importNetwork
- * @return {Promise} Promise containing the imported network
+ * @return {external:Promise.<Network>} {@link module:modules/core~Network Network} -
+ * Promise containing the imported network
  */
 export const importNetwork = async (payload) => {
-  const username = get(payload, 'external_username');
-  const networkId = get(payload, 'networkId');
-  let network = await networkRepo.findNetworkById(networkId);
-  let mailConfig;
+  const username = payload.external_username;
+  const network = await networkRepo.findNetworkById(payload.networkId);
 
-  await impl.assertTheNetworkIsNotImportedYet({ id: network.id });
+  if (!network) throw createError('404', 'Network not found.');
   if (!network.externalId) throw createError('10001');
+  await impl.assertTheNetworkIsNotImportedYet(network.id);
 
-  const adapter = createAdapter(network, [], { proceedWithoutToken: true });
-  const externalUsers = await adapter.fetchUsers(network.externalId);
+  logger.info('Started executing import script', { ...payload });
 
-  try {
-    const admin = await userRepo.findUserByUsername(username);
-
-    network = await impl.updateSuperUserForNetwork(admin, networkId);
-    await networkRepo.addUser({
-      userId: admin.id,
-      networkId: network.id,
-      isActive: true,
-      externalId: admin.id,
-      roleType: 'ADMIN',
-    });
-    mailConfig = configurationMail(network, admin);
-  } catch (e) {
-    const selectedAdmin = find(externalUsers, (user) => {
-      return user.email === username;
-    });
-
-    if (!selectedAdmin) throw createError('10006');
-
-    const password = passwordUtil.plainRandom();
-    const superUser = await userRepo.createUser({ ...selectedAdmin, password });
-    await networkRepo.addUser({
-      userId: superUser.id,
-      networkId: network.id,
-      isActive: true,
-      externalId: selectedAdmin.id,
-      roleType: 'ADMIN',
-    });
-
-    network = await impl.updateSuperUserForNetwork(superUser, networkId);
-    mailConfig = configurationMailNewAdmin(network, superUser, password);
-  }
-
-  const externalTeams = await adapter.fetchTeams();
-
-  const users = await impl.importUsers(externalUsers, network);
-  const teams = await impl.importTeams(externalTeams, network);
-
-  await impl.addUsersToTeam(map(users, 'userId'), teams, externalUsers);
-  await networkRepo.setImportDateOnNetworkIntegration(network.id);
-
-  mailer.send(mailConfig);
+  // We are moving to the impl so we are able to execute the business logic asynchronously.
+  // Else the client will timeout. If we do not do this, our assertion/errors will not
+  // be send to the handler as response to the client.
+  impl.importNetwork(network, username);
 };
 
 /**
  * @param {object} payload - Obect containing payload data
  * @param {string} payload.externalUsers - the users in the external system
  * @param {object} payload.network - the network where to import to
- * @param {object} message - Object containing meta data
- * @param {object} message.network - The prefetched network
- * @param {object} message.credentials - The authenticated user
- * @param {object} message.artifacts - Artifacts containing request meta data
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method importUsers
- * @return {Promise} Promise containing the imported network
+ * @return {external:Promise.<User[]>} {@link module:modules/core~User User} -
+ * Promise containing the imported users
  */
 export const importUsers = async (payload, message) => {
+  logger.info('Importing external users', { payload, message });
+
   const { externalUsers, network } = payload;
 
-  return impl.importUsers(externalUsers, network, message);
+  return impl.importUsers(externalUsers, network.id, message);
 };
 
 /**
- * @param {object} payload = Obect containing payload data
+ * @param {object} payload - Object containing payload data
  * @param {string} payload.externalUsers - the username of the user in both external system
  * @param {string} payload.network - the network where to import to
- * @param {object} message - Object containing meta data
- * @param {object} message.network - The prefetched network
- * @param {object} message.credentials - The authenticated user
- * @param {object} message.artifacts - Artifacts containing request meta data
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method updateUserForNetwork
- * @return {Promise} Promise containing updated userIds
+ * @return {external:Promise.<String[]>} Promise containing updated userIds
  */
 export const updateUsersForNetwork = async (payload, message) => {
+  logger.info('Updating external users in network', { payload, message });
+
   const { externalUsers, networkId } = payload;
 
   return impl.updateUsersForNetwork(externalUsers, networkId, message);
 };
 
 /**
- * @param {object} payload = Obect containing payload data
+ * @param {object} payload - Object containing payload data
  * @param {string} payload.integrationName - the integration name where to list the networks for
- * @param {object} message - Object containing meta data
- * @param {object} message.network - The prefetched network
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method listNetworksForIntegration
- * @return {Promise} Promise containing updated userIds
+ * @return {external:Promise.<String[]>} Promise containing updated userIds
  */
-export const listNetworksForIntegration = async (payload) => {
+export const listNetworksForIntegration = async (payload, message) => {
+  logger.info('Listing the networks for the integration', { payload, message });
+
   return networkRepo.findNetworksForIntegration(payload.integrationName);
 };
 
@@ -284,32 +264,32 @@ export const listNetworksForIntegration = async (payload) => {
  * @param {object} payload - Obect containing payload data
  * @param {string} payload.externalTeams - the teams in the external system
  * @param {object} payload.network - the network where to import to
- * @param {object} message - Object containing meta data
- * @param {object} message.network - The prefetched network
- * @param {object} message.credentials - The authenticated user
- * @param {object} message.artifacts - Artifacts containing request meta data
- * @method importUsers
- * @return {Promise} Promise containing the imported network
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method importTeams
+ * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team} -
+ * Promise containing the imported teams
  */
 export const importTeams = async (payload, message) => {
+  logger.info('Importing the external teams in the network', { payload, message });
+
   const { externalTeams, network } = payload;
 
   return impl.importTeams(externalTeams, network, message);
 };
 
 /**
- * @param {object} payload = Obect containing payload data
+ * @param {object} payload - Object containing payload data
  * @param {array} payload.externalTeams - the teams in both external system and internal system
  * the relation can be put by the externalId
  * @param {string} payload.network - the network where to import to
- * @param {object} message - Object containing meta data
- * @param {object} message.network - The prefetched network
- * @param {object} message.credentials - The authenticated user
- * @param {object} message.artifacts - Artifacts containing request meta data
- * @method updateUserForNetwork
- * @return {Promise} Promise containing updated userIds
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method updateTeamForNetwork
+ * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team} -
+ * Promise containing updated teams
  */
 export const updateTeamsForNetwork = async (payload, message) => {
+  logger.info('Updating the external teams in the network', { payload, message });
+
   const { externalTeams, networkId } = payload;
 
   return impl.updateTeamsForNetwork(externalTeams, networkId, message);
@@ -319,13 +299,27 @@ export const updateTeamsForNetwork = async (payload, message) => {
  * Retrieve teams that belong to the network.
  * @param {object} payload - Object containing payload data
  * @param {number} payload.networkId - The id of the network
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method listTeamsForNetwork
- * @return {Promise} Promise containing collection of teams
+ * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team} -
+ * Promise containing updated teams
  */
-export const listTeamsForNetwork = async (payload) => {
+export const listTeamsForNetwork = async (payload, message) => {
+  logger.info('Updating the external teams in the network', { payload, message });
+
   return networkRepo.findTeamsForNetwork(payload.networkId);
 };
 
+/**
+ * Adds Users to the teams that belong to a network.
+ * @param {object} payload - Object containing payload data
+ * @param {number} payload.networkId - The id of the network
+ * @param {number} payload.externalUserIds  - The externalIds ids of the users to be added
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method addUsersToTeams
+ * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team} -
+ * Promise containing updated teams
+ */
 export const addUsersToTeams = async (payload, message) => {
   const { externalUserIds } = payload;
   const internalUsers = await listActiveUsersForNetwork(payload, message);

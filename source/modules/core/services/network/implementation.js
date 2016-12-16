@@ -1,20 +1,36 @@
-import { find, map, flatMap, differenceBy, intersectionBy, omit } from 'lodash';
+import { uniqBy, find, map, pick, flatMap, differenceBy, intersectionBy, omit } from 'lodash';
 import Promise from 'bluebird';
+import * as Logger from '../../../../shared/services/logger';
+import * as Mailer from '../../../../shared/services/mailer';
+import configurationMail from '../../../../shared/mails/configuration-invite';
+import configurationMailNewAdmin from '../../../../shared/mails/configuration-invite-newadmin';
+import { createAdapter } from '../../../../shared/utils/create-adapter';
 import * as integrationsAdapter from '../../../../shared/utils/integrations-adapter';
 import * as passwordUtil from '../../../../shared/utils/password';
 import createError from '../../../../shared/utils/create-error';
+import * as syncImpl from '../../../integrations/services/sync/implementation';
 import * as networkRepo from '../../repositories/network';
 import * as userRepo from '../../repositories/user';
 import * as teamRepo from '../../repositories/team';
 
-export const assertTheNetworkIsNotImportedYet = async (network) => {
-  const networkIntegration = await networkRepo.findNetworkIntegration(network.id);
+/**
+ * @module modules/core/services/network/impl
+ */
+
+const logger = Logger.createLogger('CORE/service/networkImpl');
+
+/**
+ * @param {string} networkId - network identifier
+ * @method assertTheNetworkIsNotImportedYet
+ * @throws Error - 10001, 10007
+ */
+export const assertTheNetworkIsNotImportedYet = async (networkId) => {
+  const networkIntegration = await networkRepo.findNetworkIntegration(networkId);
+
   if (!networkIntegration) {
     throw createError('10001');
-  }
-
-  if (networkIntegration.importedAt) {
-    throw createError('10007', 'A network with the same external id exists.');
+  } else if (networkIntegration.importedAt) {
+    throw createError('10007');
   }
 };
 
@@ -56,21 +72,6 @@ export const findExternalUser = (user, externalUsers) => {
   return externalUser;
 };
 
-/**
- * The external user that is loaded from the integration
- * should contain the following properties:
- *
- * - externalId
- * - username
- * - email
- * - firstName
- * - lastName
- * - dateOfBirth
- * - phoneNum
- * - isAdmin
- * - isActive
- * - teamIds
- */
 
 /**
  * We import the users that are being loaded by the external integration.
@@ -79,29 +80,43 @@ export const findExternalUser = (user, externalUsers) => {
  * to the network and not be created nor updated.
  * So we can import existing and new users here.
  * @param {array} externalUsers - The serialized users that are loaded from the integration
- * @param {Network} network - The network object to import the users into
+ * @param {number} networkId - The id of the network to import the users into
  * @method importUsers
  * @return {User} - Return user objects
  */
-export const importUsers = async (externalUsers, network) => {
-  const internalUsers = await networkRepo.findAllUsersForNetwork(network.id);
-  const newExternalUsers = differenceBy(externalUsers, internalUsers, 'email');
+export const importUsers = async (_externalUsers, networkId) => {
+  logger.info('Importing users for network', { networkId });
+  const externalUsers = uniqBy(_externalUsers, 'username');
+  const internalUsers = await networkRepo.findAllUsersForNetwork(networkId);
+  const newExternalUsers = differenceBy(externalUsers, internalUsers, 'username');
   const newUsers = await userRepo.createBulkUsers(
     map(newExternalUsers, (u) => ({ ...u, password: passwordUtil.plainRandom() })));
-  const existingUsers = intersectionBy(internalUsers, externalUsers, 'email');
+  const existingUsers = intersectionBy(internalUsers, externalUsers, 'username');
   const usersToAdd = [...newUsers, ...existingUsers];
 
-  return Promise.map(usersToAdd, (employee) => {
-    const externalUser = findExternalUser(employee, externalUsers);
+  await Promise.map(usersToAdd, (internalUser) => {
+    let externalUser;
 
-    return networkRepo.addUser({
-      userId: employee.id,
-      networkId: network.id,
-      isActive: externalUser.isActive,
-      externalId: externalUser.externalId,
-      roleType: externalUser.isAdmin ? 'ADMIN' : 'EMPLOYEE',
-    });
+    try {
+      externalUser = findExternalUser(internalUser, externalUsers);
+
+      // FIXME: This should adhere to our new external user domain object.
+      // The isActive and isAdmin will be deprecated soon.
+      return networkRepo.addUser({
+        networkId,
+        userId: internalUser.id,
+        deletedAt: externalUser.isActive ? null : new Date(),
+        externalId: externalUser.externalId,
+        roleType: externalUser.isAdmin ? 'ADMIN' : 'EMPLOYEE',
+      });
+    } catch (err) {
+      logger.error('Could not add user to network', { networkId, internalUser, externalUser });
+
+      throw err;
+    }
   });
+
+  return usersToAdd;
 };
 
 export const updateUsersForNetwork = async (externalUsers, networkId) => {
@@ -129,10 +144,18 @@ export const updateUsersForNetwork = async (externalUsers, networkId) => {
  * @method importTeams
  * @return {Team} - Return team objects
  */
-export const importTeams = async (externalTeams, network) => {
-  const existingTeams = await networkRepo.findTeamsForNetwork(network.id);
+export const importTeams = async (externalTeams, networkId) => {
+  logger.info('Importing teams for network', { networkId });
+  const existingTeams = await networkRepo.findTeamsForNetwork(networkId);
   const teamsToCreate = differenceBy(externalTeams, existingTeams, 'externalId');
-  const teams = map(teamsToCreate, team => ({ ...team, networkId: network.id }));
+  const teams = map(teamsToCreate, team => ({ ...team, networkId }));
+
+  logger.info('Creating teams', {
+    networkId,
+    team_count: teams.length,
+    teams: map(teams, team => pick(team, 'externalId', 'name')),
+  });
+
   const newTeams = await teamRepo.createBulkTeams(teams);
 
   return [...newTeams, ...existingTeams];
@@ -150,43 +173,43 @@ export const updateTeamsForNetwork = async (externalTeams, networkId) => {
   });
 
   return Promise.map(existingExternalTeams, async (team) => {
-    const updatedTeam = await teamRepo.updateTeam(team.id, omit(team, 'id'));
+    await teamRepo.updateTeam(team.id, omit(team, 'id'));
 
-    return updatedTeam.id;
+    return team.id;
   });
 };
 
-export const addUsersToTeam = (usersIds, teams, externalUsers) => {
-  const promises = flatMap(usersIds, async (userId) => {
-    const employee = await userRepo.findUserById(userId);
-    const externalUser = findExternalUser(employee, externalUsers);
+export const addUsersToTeam = (internalUsers, internalTeams, externalUsers) => {
+  const promises = flatMap(internalUsers, async (internalUser) => {
+    let externalUserWithReplacedTeamIds;
 
-    if (!externalUser) return;
+    try {
+      const externalUser = findExternalUser(internalUser, externalUsers);
+      if (!externalUser) return;
 
-    return Promise.map(externalUser.teamIds, async (teamId) => {
-      const team = await teamRepo.findBy({ externalId: teamId });
+      // Make sure we translate the team ids to our internal's and not by the external's
+      // and filter out null values to avoid undefined errors while adding the user to a team.
+      externalUserWithReplacedTeamIds = syncImpl.replaceExternalTeamIds(
+        externalUser, internalUser, internalTeams);
 
-      if (!team) return; // already deleted team
+      return Promise.map(externalUserWithReplacedTeamIds.teamIds, (teamId) => {
+        return teamRepo.addUserToTeam(teamId, internalUser.id);
+      });
+    } catch (err) {
+      logger.error('Error while adding using to the team', {
+        internalUser, externalUser: externalUserWithReplacedTeamIds, internalTeams });
 
-      const teamMembers = await teamRepo.findMembers(team.id);
-
-      if (find(teamMembers, (member) => (member.id === userId))) {
-        return;
-      }
-
-      return teamRepo.addUserToTeam(team.id, userId);
-    });
+      throw err;
+    }
   });
 
   return Promise.all(promises);
 };
 
 export const addAdminToNetwork = async (adminUsername, network, externalUsers) => {
-  let admin;
+  let admin = await userRepo.findUserByUsername(adminUsername);
 
-  try {
-    admin = await userRepo.findUserByUsername(adminUsername);
-  } catch (e) {
+  if (!admin) {
     const selectedAdmin = find(externalUsers, (user) => {
       return user.email === adminUsername;
     });
@@ -199,8 +222,64 @@ export const addAdminToNetwork = async (adminUsername, network, externalUsers) =
   return admin;
 };
 
-export const updateSuperUserForNetwork = async (superUser, networkId) => {
-  await networkRepo.setSuperAdmin(networkId, superUser.id);
+export const updateSuperUserForNetwork = async (userId, networkId) => {
+  await networkRepo.setSuperAdmin(networkId, userId);
 
   return networkRepo.findNetworkById(networkId);
+};
+
+export const importNetwork = async (network, username) => {
+  try {
+    let mailConfig;
+    const adapter = createAdapter(network, [], { proceedWithoutToken: true });
+    const externalUsers = await adapter.fetchUsers(network.externalId);
+    const admin = await userRepo.findUserByUsername(username);
+    const externalAdmin = find(externalUsers, (user) => {
+      return user.username === username;
+    });
+
+    if (admin) {
+      await updateSuperUserForNetwork(admin.id, network.id);
+      await networkRepo.addUser({
+        userId: admin.id,
+        networkId: network.id,
+        isActive: true,
+        externalId: externalAdmin.externalId,
+        roleType: 'ADMIN',
+      });
+
+      mailConfig = configurationMail(network, admin);
+    } else {
+      if (!externalAdmin) throw createError('10006');
+
+      const password = passwordUtil.plainRandom();
+      const superUser = await userRepo.createUser({ ...externalAdmin, password });
+      await networkRepo.addUser({
+        userId: superUser.id,
+        networkId: network.id,
+        isActive: true,
+        externalId: externalAdmin.externalId,
+        roleType: 'ADMIN',
+      });
+
+      await updateSuperUserForNetwork(superUser.id, network.id);
+      mailConfig = configurationMailNewAdmin(network, superUser, password);
+    }
+
+    const importedTeams = await importTeams(await adapter.fetchTeams(), network.id);
+    const importedUsers = await importUsers(externalUsers, network.id);
+
+    await addUsersToTeam(importedUsers, importedTeams, externalUsers);
+    await networkRepo.setImportDateOnNetworkIntegration(network.id);
+
+    logger.info('Finished importing users for network', {
+      networkId: network.id,
+      addedTeams: importedTeams.length,
+      addedUsers: importedUsers.length,
+    });
+
+    Mailer.send(mailConfig);
+  } catch (err) {
+    logger.error('Failed to import network', { err });
+  }
 };

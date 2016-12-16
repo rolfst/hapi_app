@@ -2,7 +2,7 @@ import { pick } from 'lodash';
 import * as Logger from '../../../shared/services/logger';
 import * as flexchangeService from '../services/flexchange';
 
-const logger = Logger.getLogger('FLEXCHANGE/handler/modifyExchange');
+const logger = Logger.createLogger('FLEXCHANGE/handler/modifyExchange');
 
 const services = {
   accept: flexchangeService.acceptExchange,

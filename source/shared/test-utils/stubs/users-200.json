@@ -1,11 +1,26 @@
 {
   "data": [{
     "id": "1048789",
-    "username": ".Doe",
+    "username": "Bob.Doe",
     "email": "bob+61787@rwrs.nl",
     "department": "14",
     "first_name": "",
     "last_name": "Doe",
+    "cell_phone_number": "600000000",
+    "home_phone_number": "600000000",
+    "date_of_birth": "1970-01-01",
+    "rolename": "Medewerker",
+    "scope": [{
+      "department": "14"
+    }],
+    "active": true
+  }, {
+    "id": "1048920",
+    "username": "Jessy.Pinkman",
+    "email": "bob+61787@rwrs.nl",
+    "department": "14",
+    "first_name": "Jessy",
+    "last_name": "Pinkman",
     "cell_phone_number": "600000000",
     "home_phone_number": "600000000",
     "date_of_birth": "1970-01-01",
@@ -91,7 +106,7 @@
     "active": true
   }, {
     "id": "8036",
-    "username": "p.cuperus2@kpnplanet.nl",
+    "username": "bob+8036@rwrs.nl",
     "email": "bob+8036@rwrs.nl",
     "department": "72",
     "first_name": "Piet",
@@ -106,7 +121,7 @@
     "active": true
   }, {
     "id": "8025",
-    "username": "Tinie",
+    "username": "hodor@flex-appeal.nl",
     "email": "hodor@flex-appeal.nl",
     "department": "28",
     "first_name": "Tiny",
@@ -123,7 +138,7 @@
     "active": true
   }, {
     "id": "8111",
-    "username": "dettie.vandermeer@hotmail.com",
+    "username": "bob+8111@rwrs.nl",
     "email": "bob+8111@rwrs.nl",
     "department": "71",
     "first_name": "Dettie",

@@ -2,7 +2,7 @@ import * as responseUtil from '../../../shared/utils/response';
 import * as Logger from '../../../shared/services/logger';
 import * as conversationService from '../services/conversation';
 
-const logger = Logger.getLogger('CHAT/handler/getMessages');
+const logger = Logger.createLogger('CHAT/handler/getMessages');
 
 export default async (req, reply) => {
   try {

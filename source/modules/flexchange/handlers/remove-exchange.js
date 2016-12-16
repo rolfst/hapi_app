@@ -1,7 +1,7 @@
 import * as Logger from '../../../shared/services/logger';
 import * as flexchangeService from '../services/flexchange';
 
-const logger = Logger.getLogger('FLEXCHANGE/handler/removeExchanges');
+const logger = Logger.createLogger('FLEXCHANGE/handler/removeExchanges');
 
 export default async (req, reply) => {
   try {

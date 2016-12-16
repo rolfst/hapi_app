@@ -1,436 +1,344 @@
 import { assert } from 'chai';
-import nock from 'nock';
-import { map, reject, pick, differenceBy, drop, find } from 'lodash';
+import { map, find } from 'lodash';
 import Promise from 'bluebird';
-import * as setup from '../../../../shared/test-utils/setup';
-import * as blueprints from '../../../../shared/test-utils/blueprints';
-import * as stubs from '../../../../shared/test-utils/stubs';
-import * as passwordUtil from '../../../../shared/utils/password';
-import userSerializer from '../../../../adapters/pmt/serializers/user';
-import * as networkRepo from '../../../core/repositories/network';
-import * as userRepo from '../../../core/repositories/user';
-import * as teamRepo from '../../../core/repositories/team';
-import * as integrationRepo from '../../../core/repositories/integration';
-import * as syncService from './index';
+import * as networkRepository from '../../../core/repositories/network';
+import * as teamRepository from '../../../core/repositories/team';
+import * as userRepository from '../../../core/repositories/user';
+import * as networkService from '../../../core/services/network';
+import * as serviceImpl from './implementation';
 
-describe('sync network', () => {
-  nock.disableNetConnect();
-
+describe('Network synchronisation', () => {
   let network;
-  let integration;
-  let globalAdmin;
-  let alreadyImportedAdmin;
-  let alreadyImportedUser;
-  let importedTeam;
+  before(async () => (network = await networkRepository
+    .createNetwork(global.users.admin.id, 'Foo network for sync')));
 
-  const pristineNetwork = stubs.pristine_networks_admins[0];
-  const initialAdmin = pristineNetwork.admins[0];
-  const initialEmployee = userSerializer(stubs.users_200.data[0]);
-  const NEW_TEAM_EXTERNALID = '14';
-  const EXISTING_TEAM_EXTERNALID = '28';
-  const intialTeam = {
-    externalId: EXISTING_TEAM_EXTERNALID,
-    name: 'Vleesafdeling',
-  };
+  after(() => networkRepository.deleteById(network.id));
 
-  const createIntegration = () => integrationRepo.createIntegration({
-    name: pristineNetwork.integrationName,
-    token: 'footoken',
-  });
-
-  const createIntegrationNetwork = (user) => networkRepo.createIntegrationNetwork({
-    ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
-    userId: user.id,
-  });
-
-  const adminCredentials = {
-    username: blueprints.users.admin.username,
-    password: blueprints.users.admin.password,
-  };
-
-  describe('importing users', () => {
-    before(async () => {
-      await setup.finalCleanup();
-      alreadyImportedAdmin = await userRepo.createUser({
-        ...initialAdmin, password: passwordUtil.plainRandom() });
-      alreadyImportedUser = await userRepo.createUser({
-        ...initialEmployee, password: passwordUtil.plainRandom() });
-      globalAdmin = await userRepo.createUser(blueprints.users.admin);
-
-      alreadyImportedAdmin.externalId = initialAdmin.userId;
-      alreadyImportedUser.externalId = initialEmployee.externalId;
-
-      integration = await createIntegration();
-      network = await createIntegrationNetwork(alreadyImportedAdmin);
-      importedTeam = await teamRepo.createTeam({
-        networkId: network.id,
-        name: intialTeam.name,
-        externalId: intialTeam.externalId,
-      });
-
-      const usersToAdd = map([alreadyImportedAdmin, alreadyImportedUser], (user) => ({
-        userId: user.id,
-        networkId: network.id,
-        isActive: true,
-        externalId: user.externalId,
-        roleType: 'ADMIN',
-      }));
-
-      usersToAdd.push({
-        userId: globalAdmin.id,
-        networkId: network.id,
-        isActive: true,
-        roleType: 'ADMIN',
-        invisibleUser: true,
-      });
-
-      return Promise.map(usersToAdd, networkRepo.addUser);
-    });
-
-    after(async () => {
-      await Promise.all([
-        userRepo.deleteById(globalAdmin.id),
-        integrationRepo.deleteById(integration.id),
-        userRepo.deleteById(alreadyImportedUser.id),
-        userRepo.deleteById(alreadyImportedAdmin.id),
-      ]);
-
-      await Promise.map(userRepo.findAllUsers(), (user) => userRepo.deleteById(user.id));
-
-      return setup.initialSetup();
-    });
-
+  describe('Teams synchronisation', () => {
     afterEach(async () => {
-      nock.cleanAll();
+      // Delete all the teams so we have a network without any teams in every testcase
+      const teamsForNetwork = await networkRepository.findTeamsForNetwork(network.id);
 
-      const allUsers = await networkRepo.findAllUsersForNetwork(network.id);
-      const users = differenceBy(allUsers, [alreadyImportedUser, alreadyImportedAdmin], 'email');
-
-      // Delete all users to reset the state of the network
-      const userIds = map(users, 'id');
-      return Promise.map(userIds, userRepo.deleteById);
+      return Promise.map(map(teamsForNetwork, 'id'), teamRepository.deleteById);
     });
 
-    it('should add new users', async () => {
-      const initialUserCount = (await networkRepo.findAllUsersForNetwork(network.id)).length;
+    it('should add teams to network', async () => {
+      const externalTeams = [{
+        id: null,
+        networkId: null,
+        externalId: '1',
+        name: 'Vulploeg',
+        description: null,
+      }, {
+        id: null,
+        networkId: null,
+        externalId: '2',
+        name: 'Kassa',
+        description: null,
+      }];
 
-      nock(network.externalId)
-        .post('/login', adminCredentials)
-        .reply(200, { logged_in_user_token: '379ce9b4176cb89354c1f74b3a2c1c7a', user_id: 8023 });
-      nock(network.externalId)
-        .get('/users')
-        .reply(200, stubs.users_200);
-      nock(network.externalId)
-        .get('/departments')
-        .reply(200, stubs.departments);
-
-      await syncService.syncWithIntegrationPartner({}, { credentials: alreadyImportedAdmin });
-      const users = await networkRepo.findUsersForNetwork(network.id);
-      const userCount = users.length;
-
-      assert.isAbove(userCount, initialUserCount);
-      assert.equal(userCount, 13);
-    });
-
-    it('should reactivate deleted users for network', async () => {
-      const initialUserCount = (await networkRepo.findUsersForNetwork(network.id)).length;
-      await userRepo.updateUserForNetwork(alreadyImportedUser, network.id, false);
-      const userCountAfterInitalRemoval = (await networkRepo.findUsersForNetwork(network.id))
-        .length;
-
-      assert.isBelow(userCountAfterInitalRemoval, initialUserCount);
-
-      nock(network.externalId)
-        .post('/login', adminCredentials)
-        .reply(200, { logged_in_user_token: '379ce9b4176cb89354c1f74b3a2c1c7a', user_id: 8023 });
-      nock(network.externalId)
-        .get('/users')
-        .reply(200, stubs.users_200);
-      nock(network.externalId)
-        .get('/departments')
-        .reply(200, stubs.departments);
-
-      await syncService.syncWithIntegrationPartner({}, { credentials: alreadyImportedAdmin });
-
-      const users = await networkRepo.findUsersForNetwork(network.id);
-      const userCount = users.length;
-      const networkInfoForRemovedUser = await userRepo.findUserMetaDataForNetwork(
-        alreadyImportedUser.id, network.id);
-
-      assert.isAbove(userCount, userCountAfterInitalRemoval);
-      assert.isNull(networkInfoForRemovedUser.deletedAt);
-    });
-
-    it('should update the role of existing users', async () => {
-      nock(network.externalId)
-        .get('/users')
-        .reply(200, stubs.users_200);
-      nock(network.externalId)
-        .get('/departments')
-        .reply(200, stubs.departments);
-
-      await syncService.syncWithIntegrationPartner({}, { credentials: alreadyImportedAdmin });
-
-      const updatedUser = await userRepo.findUserMetaDataForNetwork(
-        alreadyImportedUser.id, network.id);
-
-      assert.equal(updatedUser.roleType, 'EMPLOYEE');
-    });
-
-    it('should remove users from a network that are no longer present in integration partner', async () => { // eslint-disable-line
-      const listWithRemovedUser = { data: drop(stubs.users_200.data) };
-
-      nock(network.externalId)
-        .get('/users')
-        .reply(200, listWithRemovedUser);
-      nock(network.externalId)
-        .get('/departments')
-        .reply(200, stubs.departments);
-
-      await syncService.syncWithIntegrationPartner({}, {
-        credentials: alreadyImportedAdmin,
-        artifacts: { requestId: 'removeuserstest' },
-      });
-
-      const users = await networkRepo.findUsersForNetwork(network.id);
-      const userCount = users.length;
-      const removedUser = await userRepo.findUserInNetworkByExternalId(
-        network.id, stubs.users_200.data[0].id);
-      const networkInfoForRemovedUser = await userRepo.findUserMetaDataForNetwork(
-        removedUser.id, network.id);
-
-      assert.equal(listWithRemovedUser.data.length, (stubs.users_200.data.length - 1));
-      assert.equal(userCount, listWithRemovedUser.data.length);
-      assert.isNotNull(networkInfoForRemovedUser.deletedAt);
-    });
-  });
-
-  describe('importing teams', () => {
-    before(async () => {
-      await setup.finalCleanup();
-      alreadyImportedAdmin = await userRepo.createUser({
-        ...initialAdmin,
-        password: passwordUtil.plainRandom(),
-      });
-
-      alreadyImportedUser = await userRepo.createUser({
-        ...initialEmployee,
-        password: passwordUtil.plainRandom(),
-      });
-
-      alreadyImportedAdmin.externalId = initialAdmin.userId;
-      alreadyImportedUser.externalId = initialEmployee.externalId;
-      integration = await createIntegration();
-      network = await createIntegrationNetwork(alreadyImportedAdmin);
-
-      const usersToAdd = [alreadyImportedAdmin, alreadyImportedUser];
-      return Promise.map(usersToAdd, (user) => networkRepo.addUser({
-        userId: user.id,
+      const internalTeam = {
         networkId: network.id,
-        isActive: true,
-        externalId: user.externalId,
-        roleType: 'ADMIN', // on purpose both admin on initial load
-      }));
-    });
-
-    beforeEach(async() => {
-      importedTeam = await teamRepo.createTeam({
-        networkId: network.id,
-        name: intialTeam.name,
-        externalId: intialTeam.externalId,
-      });
-    });
-
-    after(async () => {
-      const teams = await networkRepo.findTeamsForNetwork(network.id);
-      await Promise.each(teams, (team) => teamRepo.deleteById(team.id));
-      await Promise.all([
-        integrationRepo.deleteById(integration.id),
-        userRepo.deleteById(alreadyImportedUser.id),
-        userRepo.deleteById(alreadyImportedAdmin.id),
-      ]);
-
-      return setup.initialSetup();
-    });
-
-    afterEach(async () => {
-      nock.cleanAll();
-
-      const allUsers = await networkRepo.findAllUsersForNetwork(network.id);
-      const users = differenceBy(allUsers, [alreadyImportedUser, alreadyImportedAdmin], 'email');
-      const promises = map(users, (user) => userRepo.deleteById(user.id));
-
-      promises.push(teamRepo.deleteById(importedTeam.id));
-
-      return Promise.all(promises);
-    });
-
-    it('should add new teams that are not present in our system', async () => {
-      nock(network.externalId)
-        .post('/login', adminCredentials)
-        .reply(200, { logged_in_user_token: '379ce9b4176cb89354c1f74b3a2c1c7a', user_id: 8023 });
-      nock(network.externalId)
-        .get('/departments')
-        .reply(200, stubs.departments);
-      nock(network.externalId)
-        .get('/users')
-        .reply(200, stubs.users_200);
-
-      const initialTeamsCount = (await networkRepo.findTeamsForNetwork(network.id)).length;
-      const message = {
-        credentials: alreadyImportedAdmin,
-        artifacts: { requestId: 'removeuserstest' },
+        externalId: '2',
+        name: 'Kassa',
+        description: null,
       };
 
-      await syncService.syncWithIntegrationPartner({}, message);
-      const teamsCount = (await networkRepo.findTeamsForNetwork(network.id)).length;
+      await teamRepository.createTeam(internalTeam);
+      await serviceImpl.syncTeams(network.id, externalTeams);
+      const teamsForNetwork = await networkRepository.findTeamsForNetwork(network.id);
+      const syncedTeam = find(teamsForNetwork, { externalId: '1' });
 
-      assert.isAbove(teamsCount, initialTeamsCount);
+      assert.lengthOf(teamsForNetwork, 2);
+      assert.isDefined(syncedTeam);
+      assert.equal(syncedTeam.name, 'Vulploeg');
     });
 
-    it('should remove teams that are no longer present in integration partner', async () => {
-      const listWithRemovedTeams = { departments: reject(stubs.departments.departments,
-        (team) => (team.department_id === EXISTING_TEAM_EXTERNALID)) };
+    it('should remove teams from network', async () => {
+      const externalTeams = [];
 
-      assert.equal(listWithRemovedTeams.departments.length, 12);
+      const internalTeam = {
+        networkId: network.id,
+        externalId: '2',
+        name: 'Kassa',
+        description: null,
+      };
 
-      nock(network.externalId)
-        .post('/login', adminCredentials)
-        .reply(200, { logged_in_user_token: '379ce9b4176cb89354c1f74b3a2c1c7a', user_id: 8023 });
-      nock(network.externalId)
-        .get('/users')
-        .reply(200, stubs.users_200);
-      nock(network.externalId)
-        .get('/departments')
-        .reply(200, listWithRemovedTeams);
+      await teamRepository.createTeam(internalTeam);
+      await serviceImpl.syncTeams(network.id, externalTeams);
+      const teamsForNetwork = await networkRepository.findTeamsForNetwork(network.id);
 
-      await Promise.all([
-        teamRepo.addUserToTeam(importedTeam.id, alreadyImportedAdmin.id),
-        teamRepo.addUserToTeam(importedTeam.id, alreadyImportedUser.id),
-      ]);
-
-      await syncService.syncWithIntegrationPartner({}, {
-        credentials: alreadyImportedAdmin,
-        artifacts: { requestId: 'removeteamstest' },
-      });
-
-      const removedTeamIdFromExternal = stubs.departments.departments[0].id;
-      const listTeams = await networkRepo.findTeamsForNetwork(network.id);
-      const foundDeletedTeamsCount = (await teamRepo.findTeamsByExternalId([
-        removedTeamIdFromExternal])).length;
-
-      assert.equal(listWithRemovedTeams.departments.length, listTeams.length);
-      assert.equal(foundDeletedTeamsCount, 0);
+      assert.lengthOf(teamsForNetwork, 0);
     });
 
-    it('should update existing team', async () => {
-      nock(network.externalId)
-        .post('/login', adminCredentials)
-        .reply(200, { logged_in_user_token: '379ce9b4176cb89354c1f74b3a2c1c7a', user_id: 8023 });
-      nock(network.externalId)
-        .get('/users')
-        .reply(200, stubs.users_200);
-      nock(network.externalId)
-        .get('/departments')
-        .reply(200, stubs.departments);
+    it('should update teams in network', async () => {
+      const externalTeams = [{
+        id: null,
+        networkId: null,
+        externalId: '2',
+        name: 'Kassa Oud',
+        description: null,
+      }];
 
-      const team = await teamRepo.findTeamById(importedTeam.id);
+      const internalTeam = {
+        networkId: network.id,
+        externalId: '2',
+        name: 'Kassa',
+        description: null,
+      };
 
-      assert.equal(team.name, 'Vleesafdeling');
+      await teamRepository.createTeam(internalTeam);
+      await serviceImpl.syncTeams(network.id, externalTeams);
+      const teamsForNetwork = await networkRepository.findTeamsForNetwork(network.id);
+      const changedTeam = find(teamsForNetwork, { externalId: '2' });
 
-      await Promise.all([
-        teamRepo.addUserToTeam(importedTeam.id, alreadyImportedAdmin.id),
-        teamRepo.addUserToTeam(importedTeam.id, alreadyImportedUser.id),
-      ]);
+      assert.lengthOf(teamsForNetwork, 1);
+      assert.isDefined(changedTeam);
+      assert.equal(changedTeam.name, 'Kassa Oud');
+    });
+  });
 
-      await syncService.syncWithIntegrationPartner({}, {
-        credentials: alreadyImportedAdmin,
-        artifacts: { requestId: 'removeuserstest' },
-      });
+  describe('Users synchronisation with network link', () => {
+    afterEach(async () => {
+      // Delete all the users so we have a network without any users in every testcase
+      const usersInNetwork = await networkRepository.findAllUsersForNetwork(network.id);
 
-      const updatedTeam = await teamRepo.findTeamById(importedTeam.id);
-      assert.equal(updatedTeam.name, 'Algemeen');
+      return Promise.map(map(usersInNetwork, 'id'), userRepository.deleteById);
     });
 
-    it('should add existing user to new team', async () => {
-      nock(network.externalId)
-        .post('/login', adminCredentials)
-        .reply(200, { logged_in_user_token: '379ce9b4176cb89354c1f74b3a2c1c7a', user_id: 8023 });
-      nock(network.externalId)
-        .get('/users')
-        .reply(200, stubs.users_200);
-      nock(network.externalId)
-        .get('/departments')
-        .reply(200, stubs.departments);
+    it('should add users to network', async () => {
+      const externalUsers = [{
+        externalId: '1',
+        username: 'bazfoo',
+        email: 'bazfoo@flex-appeal.nl',
+        firstName: 'Baz',
+        lastName: 'Foo',
+        roleType: 'EMPLOYEE',
+        isActive: true,
+        deletedAt: null,
+        teamIds: [],
+      }, {
+        externalId: '2',
+        username: 'johndoe',
+        email: 'johndoe@flex-appeal.nl',
+        firstName: 'John',
+        lastName: 'Doe',
+        roleType: 'EMPLOYEE',
+        isActive: true,
+        deletedAt: null,
+        teamIds: [],
+      }];
 
-      await Promise.all([
-        teamRepo.addUserToTeam(importedTeam.id, alreadyImportedAdmin.id),
-        teamRepo.addUserToTeam(importedTeam.id, alreadyImportedUser.id),
-      ]);
+      const internalUser = {
+        externalId: '2',
+        username: 'johndoe',
+        email: 'johndoe@flex-appeal.nl',
+        firstName: 'John',
+        lastName: 'Doe',
+        password: 'foo',
+      };
 
-      await syncService.syncWithIntegrationPartner({}, {
-        credentials: alreadyImportedAdmin,
-        artifacts: { requestId: 'removeuserstest' },
+      const createdUser = await userRepository.createUser(internalUser);
+      await networkRepository.addUser({
+        userId: createdUser.id,
+        networkId: network.id,
+        externalId: internalUser.externalId,
       });
 
-      const team = await teamRepo.findBy({ externalId: NEW_TEAM_EXTERNALID });
-      const users = await teamRepo.findMembers(team.id);
+      await serviceImpl.syncUsersWithNetwork(network.id, externalUsers);
+      const activeUsersInNetwork = await networkService.listActiveUsersForNetwork({
+        networkId: network.id }, { credentials: network.superAdmin });
+      const syncedUser = find(activeUsersInNetwork, { externalId: '1' });
 
-      assert.isOk(find(users, { id: alreadyImportedUser.id }));
+      assert.lengthOf(activeUsersInNetwork, 2);
+      assert.isDefined(syncedUser);
+      assert.equal(syncedUser.email, externalUsers[0].email);
+      assert.equal(syncedUser.username, externalUsers[0].username);
+      assert.equal(syncedUser.firstName, externalUsers[0].firstName);
+      assert.equal(syncedUser.lastName, externalUsers[0].lastName);
+      assert.equal(syncedUser.roleType, externalUsers[0].roleType);
     });
 
-    it('should add new users to new team', async () => {
-      nock(network.externalId)
-        .post('/login', adminCredentials)
-        .reply(200, { logged_in_user_token: '379ce9b4176cb89354c1f74b3a2c1c7a', user_id: 8023 });
-      nock(network.externalId)
-        .get('/users')
-        .reply(200, stubs.users_200);
-      nock(network.externalId)
-        .get('/departments')
-        .reply(200, stubs.departments);
+    it('should remove users from network', async () => {
+      const externalUsers = [];
 
-      await Promise.all([
-        teamRepo.addUserToTeam(importedTeam.id, alreadyImportedAdmin.id),
-        teamRepo.addUserToTeam(importedTeam.id, alreadyImportedUser.id),
-      ]);
+      const internalUser = {
+        externalId: '2',
+        username: 'johndoe',
+        email: 'johndoe@flex-appeal.nl',
+        firstName: 'John',
+        lastName: 'Doe',
+        password: 'foo',
+      };
 
-      await syncService.syncWithIntegrationPartner({}, {
-        credentials: alreadyImportedAdmin,
-        artifacts: { requestId: 'removeuserstest' },
+      const createdUser = await userRepository.createUser(internalUser);
+      await networkRepository.addUser({
+        userId: createdUser.id,
+        networkId: network.id,
+        externalId: internalUser.externalId,
       });
 
-      const team = await teamRepo.findBy({ externalId: NEW_TEAM_EXTERNALID });
-      const users = await teamRepo.findMembers(team.id);
+      await serviceImpl.syncUsersWithNetwork(network.id, externalUsers);
+      const activeUsersInNetwork = await networkService.listActiveUsersForNetwork({
+        networkId: network.id }, { credentials: network.superAdmin });
+      const allUsersInNetwork = await networkService.listAllUsersForNetwork({
+        networkId: network.id }, { credentials: network.superAdmin });
 
-      assert.isAbove(users.length, 1);
+      assert.lengthOf(activeUsersInNetwork, 0);
+      assert.lengthOf(allUsersInNetwork, 1);
     });
 
-    it('should add new users to existing team', async () => {
-      nock(network.externalId)
-        .post('/login', adminCredentials)
-        .reply(200, { logged_in_user_token: '379ce9b4176cb89354c1f74b3a2c1c7a', user_id: 8023 });
-      nock(network.externalId)
-        .get('/users')
-        .reply(200, stubs.users_200);
-      nock(network.externalId)
-        .get('/departments')
-        .reply(200, stubs.departments);
+    it('should add users that were previously deleted from network', async () => {
+      const externalUsers = [{
+        externalId: '2',
+        username: 'johndoe',
+        email: 'johndoe@flex-appeal.nl',
+        firstName: 'John',
+        lastName: 'Doe',
+        roleType: 'EMPLOYEE',
+        isActive: true,
+        deletedAt: null,
+        teamIds: [],
+      }];
 
-      await Promise.all([
-        teamRepo.addUserToTeam(importedTeam.id, alreadyImportedAdmin.id),
-        teamRepo.addUserToTeam(importedTeam.id, alreadyImportedUser.id),
-      ]);
+      const internalUser = {
+        externalId: '2',
+        username: 'johndoe',
+        email: 'johndoe@flex-appeal.nl',
+        firstName: 'John',
+        lastName: 'Doe',
+        password: 'foo',
+      };
 
-      await syncService.syncWithIntegrationPartner({}, {
-        credentials: alreadyImportedAdmin,
-        artifacts: { requestId: 'removeuserstest' },
+      const createdUser = await userRepository.createUser(internalUser);
+      await networkRepository.addUser({
+        userId: createdUser.id,
+        networkId: network.id,
+        deletedAt: new Date(),
+        externalId: internalUser.externalId,
       });
 
-      const team = await teamRepo.findBy({ externalId: NEW_TEAM_EXTERNALID });
-      const users = await teamRepo.findMembers(team.id);
+      await serviceImpl.syncUsersWithNetwork(network.id, externalUsers);
+      const activeUsersInNetwork = await networkService.listActiveUsersForNetwork({
+        networkId: network.id }, { credentials: network.superAdmin });
 
-      assert.isAbove(users.length, 1);
+      assert.lengthOf(activeUsersInNetwork, 1);
+    });
+  });
+
+  describe('Users synchronisation with team link', () => {
+    afterEach(async () => {
+      // Delete all the teams and users so we have a fresh network in every testcase
+      const teamsForNetwork = await networkRepository.findTeamsForNetwork(network.id);
+      const usersInNetwork = await networkRepository.findAllUsersForNetwork(network.id);
+
+      // We should delete the teams first to avoid a deadlock for at team_user pivot table
+      await Promise.map(teamsForNetwork, team => teamRepository.deleteById(team.id));
+      await Promise.map(usersInNetwork, user => userRepository.deleteById(user.id));
+    });
+
+    it('should add users to team', async () => {
+      const externalUsers = [{
+        externalId: '2',
+        username: 'johndoe',
+        email: 'johndoe@flex-appeal.nl',
+        firstName: 'John',
+        lastName: 'Doe',
+        roleType: 'EMPLOYEE',
+        isActive: true,
+        deletedAt: null,
+        teamIds: ['1', '2'], // These ids are equal to the internal team's externalId value
+      }];
+
+      const internalTeams = [{
+        networkId: network.id,
+        externalId: '1',
+        name: 'Vulploeg',
+        description: null,
+      }, {
+        networkId: network.id,
+        externalId: '2',
+        name: 'Kassa',
+        description: null,
+      }];
+
+      const internalUser = {
+        externalId: '2',
+        username: 'johndoe',
+        email: 'johndoe@flex-appeal.nl',
+        firstName: 'John',
+        lastName: 'Doe',
+        password: 'foo',
+      };
+
+      const createdTeams = await Promise.map(internalTeams, teamRepository.createTeam);
+      const createdUser = await userRepository.createUser(internalUser);
+      await teamRepository.addUserToTeam(createdTeams[0].id, createdUser.id);
+      await networkRepository.addUser({
+        userId: createdUser.id,
+        networkId: network.id,
+        deletedAt: new Date(),
+        externalId: internalUser.externalId,
+      });
+
+      await serviceImpl.syncUsersWithTeams(network.id, externalUsers);
+      const membersOfCreatedTeams = await Promise.map(createdTeams,
+        team => teamRepository.findMembers(team.id));
+
+      assert.lengthOf(membersOfCreatedTeams[0], 1);
+      assert.lengthOf(membersOfCreatedTeams[1], 1);
+    });
+
+    it('should remove users from team', async () => {
+      const externalUsers = [{
+        externalId: '2',
+        username: 'johndoe',
+        email: 'johndoe@flex-appeal.nl',
+        firstName: 'John',
+        lastName: 'Doe',
+        roleType: 'EMPLOYEE',
+        isActive: true,
+        deletedAt: null,
+        teamIds: ['2'], // These ids are equal to the internal team's externalId value
+      }];
+
+      const internalTeams = [{
+        networkId: network.id,
+        externalId: '1',
+        name: 'Vulploeg',
+        description: null,
+      }, {
+        networkId: network.id,
+        externalId: '2',
+        name: 'Kassa',
+        description: null,
+      }];
+
+      const internalUser = {
+        externalId: '2',
+        username: 'johndoe',
+        email: 'johndoe@flex-appeal.nl',
+        firstName: 'John',
+        lastName: 'Doe',
+        password: 'foo',
+      };
+
+      const createdTeams = await Promise.map(internalTeams, teamRepository.createTeam);
+      const createdUser = await userRepository.createUser(internalUser);
+      await teamRepository.addUserToTeam(createdTeams[0].id, createdUser.id);
+      await networkRepository.addUser({
+        userId: createdUser.id,
+        networkId: network.id,
+        deletedAt: new Date(),
+        externalId: internalUser.externalId,
+      });
+
+      await serviceImpl.syncUsersWithTeams(network.id, externalUsers);
+      const membersOfCreatedTeams = await Promise.map(createdTeams,
+        team => teamRepository.findMembers(team.id));
+
+      assert.lengthOf(membersOfCreatedTeams[0], 0);
+      assert.lengthOf(membersOfCreatedTeams[1], 1);
     });
   });
 });

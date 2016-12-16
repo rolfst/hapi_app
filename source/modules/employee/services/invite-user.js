@@ -13,6 +13,23 @@ import * as userRepo from '../../core/repositories/user';
 import * as teamRepo from '../../core/repositories/team';
 import * as impl from './implementation';
 
+/**
+ * @module modules/employee/services/inviteUser
+ */
+
+/**
+ * Invites a new user to a network
+ * @param {Network} network - network to invite into
+ * @param {object} payload - The user properties for the new user
+ * @param {string} payload.firstName - The first name of the user
+ * @param {string} payload.lastName - The last name of the user
+ * @param {string} payload.email - The email of the user
+ * @param {string} payload.roleType - The {@link module:shared~UserRoles roletype} of the
+ * user in the integration
+ * @method inviteNewUser
+ * @return {external:Promise.<User>} {@link module:modules/core~User} Promise containing
+ * the invited user
+ */
 export const inviteNewUser = async (network, { firstName, lastName, email, roleType }) => {
   const plainPassword = passwordUtil.plainRandom();
   const attributes = {
@@ -31,6 +48,16 @@ export const inviteNewUser = async (network, { firstName, lastName, email, roleT
   return user;
 };
 
+/**
+ * Invites an existing user to a network
+ * @param {Network} network - network to invite into
+ * @param {User} user - The {@link module:modules/core~user User} to update
+ * @param {string} payload.roleType - The {@link module:shared~UserRoles roletype} of the
+ * user in the integration
+ * @method inviteExistingUser
+ * @return {external:Promise.<User>} {@link module:modules/core~User} Promise containing
+ * the invited user
+ */
 export const inviteExistingUser = async (network, user, roleType) => {
   const userBelongsToNetwork = await userRepo.userBelongsToNetwork(user.id, network.id);
   const userIsDeletedFromNetwork = await userRepo.userIsDeletedFromNetwork(user.id, network.id);
@@ -50,6 +77,21 @@ export const inviteExistingUser = async (network, user, roleType) => {
   return user;
 };
 
+/**
+ * Invites a user to a network
+ * @param {Network} network - network to invite into
+ * @param {object} payload - The user properties for the new user
+ * @param {string} payload.firstName - The first name of the user
+ * @param {string} payload.lastName - The last name of the user
+ * @param {string} payload.email - The email of the user
+ * @param {string} payload.roleType - The {@link module:shared~UserRoles roletype} of the
+ * user in the integration
+ * @param {string[]} payload.teamIds - The teams the user will belong to
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method inviteUser
+ * @return {external:Promise.<User>} {@link module:modules/core~User} Promise containing the
+ * invited user
+ */
 export const inviteUser = async (payload, message) => {
   const { firstName, lastName, email, teamIds, roleType } = camelCaseKeys(payload);
   const { network } = message;
@@ -65,14 +107,21 @@ export const inviteUser = async (payload, message) => {
 
   if (teamIds && teamIds.length > 0) await teamRepo.addUserToTeams(teamIds, user.id);
 
-  return userService.getUserWithNetworkScope({ id: user.id }, { ...message, credentials: user });
+  return userService.getUserWithNetworkScope({ id: user.id, networkId: network.id });
 };
 
 
+/**
+ * Invites users to a network
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method inviteUser
+ * @return {external:Promise.<User>} {@link module:modules/core~User} Promise containing the
+ * invited user
+ */
 export const inviteUsers = async (payload, message) => {
   const { network } = message;
   const identifiedUser = await userService.getUserWithNetworkScope({
-    id: message.credentials.id }, message);
+    id: message.credentials.id, networkId: network.id }, message);
 
   const userBelongsToNetwork = await userRepo.userBelongsToNetwork(identifiedUser.id, network.id);
 

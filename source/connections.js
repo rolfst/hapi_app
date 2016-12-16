@@ -3,7 +3,7 @@ import Sequelize from 'sequelize';
 import config from './database.js';
 import * as Logger from './shared/services/logger';
 
-const logger = Logger.getLogger('DB/query');
+const logger = Logger.createLogger('DB/query');
 
 export const db = (() => {
   const { host, database, username, password, dialect, port } = config[process.env.API_ENV];
@@ -26,8 +26,8 @@ export const db = (() => {
 })();
 
 export const server = {
-  host: '0.0.0.0',
-  port: 8000,
+  host: process.env.HOST || '127.0.0.1',
+  port: process.env.PORT || 8000,
   routes: {
     cors: {
       origin: ['*'],

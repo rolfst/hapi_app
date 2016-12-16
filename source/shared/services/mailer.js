@@ -3,7 +3,7 @@ import SendGridSMTP from 'smtpapi';
 import { mapValues } from 'lodash';
 import * as Logger from './logger';
 
-const logger = Logger.getLogger('SHARED/services/mailer');
+const logger = Logger.createLogger('SHARED/services/mailer');
 
 const smtpConfig = {
   host: process.env.SMTP_HOST,
@@ -74,6 +74,7 @@ export const createMailOptions = (mail) => {
 
 export const send = (mail, message = null) => {
   const mailOptions = createMailOptions(mail);
+  logger.info('Sending email to Sendgrid', { mailOptions, message });
 
   return transporter.sendMail(mailOptions, (err) => {
     if (err) logger.warn('Error when sending mail', { err, message, mail_options: mailOptions });

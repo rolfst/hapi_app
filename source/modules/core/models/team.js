@@ -1,7 +1,7 @@
 export default (dao) => ({
   id: dao.id.toString(),
-  networkId: dao.networkId,
-  externalId: dao.externalId,
+  networkId: dao.networkId.toString(),
+  externalId: dao.externalId ? dao.externalId.toString() : null,
   name: dao.name,
-  description: dao.description,
+  description: dao.description || null,
 });

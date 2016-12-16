@@ -25,7 +25,7 @@ describe('Create exchange comment', () => {
       text: 'test',
     };
 
-    await service.getExchangeComment(payload, messageFixture);
+    await service.createExchangeComment(payload, messageFixture);
 
     assert.equal(commentRepo.createExchangeComment.calledOnce, true);
     assert.equal(commentRepo.createExchangeComment.calledOnce, true);
