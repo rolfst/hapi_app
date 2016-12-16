@@ -1,15 +1,17 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import nock from 'nock';
+import Promise from 'bluebird';
 import { pick, find, map } from 'lodash';
 import stubs from '../../../../shared/test-utils/stubs';
 import * as adapterUtil from '../../../../shared/utils/create-adapter';
 import * as passwordUtil from '../../../../shared/utils/password';
-import configurationMail from '../../../../shared/mails/configuration-invite-newadmin';
+import configurationMailNewAdmin from '../../../../shared/mails/configuration-invite-newadmin';
 import * as mailer from '../../../../shared/services/mailer';
 import userSerializer from '../../../../adapters/pmt/serializers/user';
 import * as networkRepo from '../../repositories/network';
 import * as networkService from './index';
+import * as networkServiceImpl from './implementation';
 import * as userService from '../user';
 import * as userRepo from '../../repositories/user';
 import * as teamRepo from '../../repositories/team';
@@ -57,11 +59,9 @@ describe('Import network', () => {
 
         sandbox.stub(adapterUtil, 'createAdapter').returns(fakeAdapter);
         sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
+        mailer.send.reset();
 
-        await networkService.importNetwork({
-          external_username: employee.username,
-          networkId: network.id,
-        }, { credentials: global.users.admin.id });
+        await networkServiceImpl.importNetwork(network, employee.username);
       });
 
       after(async () => {
@@ -76,7 +76,7 @@ describe('Import network', () => {
         await integration.destroy();
         await networkRepo.deleteById(network.id);
 
-        return Promise.all(users.map(u => userRepo.deleteById(u.id)));
+        return Promise.map(users, user => userRepo.deleteById(user.id));
       });
 
 
@@ -96,9 +96,9 @@ describe('Import network', () => {
         const foundNetwork = await networkRepo.findNetwork({
           externalId: pristineNetwork.externalId });
         const user = await userRepo.findUserByUsername(employee.username);
-        const configuration = configurationMail(foundNetwork, user, 'testpassword');
+        const configuration = configurationMailNewAdmin(foundNetwork, user, 'testpassword');
 
-        assert.equal(mailer.send.calledWithMatch(configuration), true);
+        assert.deepEqual(mailer.send.firstCall.args[0], configuration);
       });
 
       it('should add new teams to network', async () => {
@@ -175,7 +175,7 @@ describe('Import network', () => {
         networkId: 0,
       }, { credentials: global.users.admin.id });
 
-      assert.isRejected(result, /Error: Network not found./);
+      await assert.isRejected(result, /Error: Network not found./);
     });
 
     it('should return 422 when missing username', async () => {
@@ -184,7 +184,7 @@ describe('Import network', () => {
         networkId: 0,
       }, { credentials: global.users.admin.id });
 
-      assert.isRejected(result, /Error: Network not found./);
+      await assert.isRejected(result, /Error: Network not found./);
     });
 
     it('should return 403 when network is already imported', async () => {
@@ -195,7 +195,7 @@ describe('Import network', () => {
         networkId: network.id,
       }, { credentials: global.users.admin.id });
 
-      assert.isRejected(result, /Error: A network with the same external id exists./);
+      await assert.isRejected(result, /Error: The network has already been imported./);
     });
 
     it('should return 403 when no integration has been enabled for the network', async () => {
@@ -209,7 +209,7 @@ describe('Import network', () => {
 
       await networkRepo.deleteById(network.id);
 
-      assert.isRejected(result, /Error: The network does not have an enabled integration/);
+      await assert.isRejected(result, /Error: The network does not have an enabled integration/);
     });
   });
 });
