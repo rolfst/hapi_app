@@ -33,7 +33,7 @@ export default (externalUser) => {
 
   const serializedUser = {
     externalId: properUser.id,
-    username: properUser.username || properUser.email,
+    username: properUser.email,
     email: properUser.email,
     integrationAuth: null,
     function: null,

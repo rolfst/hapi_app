@@ -15,6 +15,21 @@
     }],
     "active": true
   }, {
+    "id": "1048920",
+    "username": "Jessy.Pinkman",
+    "email": "bob+61787@rwrs.nl",
+    "department": "14",
+    "first_name": "Jessy",
+    "last_name": "Pinkman",
+    "cell_phone_number": "600000000",
+    "home_phone_number": "600000000",
+    "date_of_birth": "1970-01-01",
+    "rolename": "Medewerker",
+    "scope": [{
+      "department": "14"
+    }],
+    "active": true
+  }, {
     "id": "1048869",
     "username": "Amber.vanden.Doe",
     "email": "bob+66323@rwrs.nl",

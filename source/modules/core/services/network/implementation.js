@@ -1,4 +1,4 @@
-import { find, map, pick, flatMap, differenceBy, intersectionBy, omit } from 'lodash';
+import { uniqBy, find, map, pick, flatMap, differenceBy, intersectionBy, omit } from 'lodash';
 import Promise from 'bluebird';
 import * as Logger from '../../../../shared/services/logger';
 import * as Mailer from '../../../../shared/services/mailer';
@@ -84,8 +84,9 @@ export const findExternalUser = (user, externalUsers) => {
  * @method importUsers
  * @return {User} - Return user objects
  */
-export const importUsers = async (externalUsers, networkId) => {
+export const importUsers = async (_externalUsers, networkId) => {
   logger.info('Importing users for network', { networkId });
+  const externalUsers = uniqBy(_externalUsers, 'username');
   const internalUsers = await networkRepo.findAllUsersForNetwork(networkId);
   const newExternalUsers = differenceBy(externalUsers, internalUsers, 'username');
   const newUsers = await userRepo.createBulkUsers(
