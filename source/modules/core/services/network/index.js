@@ -1,15 +1,10 @@
 import Promise from 'bluebird';
-import { find, flatten, map, filter, get, pick } from 'lodash';
+import { flatten, map, filter, pick } from 'lodash';
 import { createAdapter } from '../../../../shared/utils/create-adapter';
 import * as Logger from '../../../../shared/services/logger';
 import createError from '../../../../shared/utils/create-error';
-import configurationMail from '../../../../shared/mails/configuration-invite';
-import configurationMailNewAdmin from '../../../../shared/mails/configuration-invite-newadmin';
-import * as mailer from '../../../../shared/services/mailer';
 import * as integrationsAdapter from '../../../../shared/utils/integrations-adapter';
-import * as passwordUtil from '../../../../shared/utils/password';
 import * as networkRepo from '../../repositories/network';
-import * as userRepo from '../../repositories/user';
 import * as userService from '../user';
 import * as impl from './implementation';
 
@@ -194,74 +189,29 @@ export const listNetworksForUser = async (payload, message) => {
   return networkRepo.findAllContainingUser(payload.id);
 };
 
-/*
- * import network. The import will assign a user as administrator for that network.
- * @param {object} payload = Obect containing payload data
- * @param {string} payload.username - the username of the user in both external system
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+/**
+ * Importing a network via the data from the integration partner
+ * @param {object} payload - Obect containing payload data
+ * @param {string} payload.external_username - The user that'll be assigned as owner of the network
+ * @param {string} payload.networkId - The network to import
  * @method importNetwork
  * @return {external:Promise.<Network>} {@link module:modules/core~Network Network} -
  * Promise containing the imported network
  */
-export const importNetwork = async (payload, message) => {
-  logger.info('Importing external network', { payload, message });
-
-  const username = get(payload, 'external_username');
-  const networkId = get(payload, 'networkId');
-  let network = await networkRepo.findNetworkById(networkId);
-  let mailConfig;
+export const importNetwork = async (payload) => {
+  const username = payload.external_username;
+  const network = await networkRepo.findNetworkById(payload.networkId);
 
   if (!network) throw createError('404', 'Network not found.');
   if (!network.externalId) throw createError('10001');
   await impl.assertTheNetworkIsNotImportedYet(network.id);
 
-  const adapter = createAdapter(network, [], { proceedWithoutToken: true });
-  const externalUsers = await adapter.fetchUsers(network.externalId);
-  const admin = await userRepo.findUserByUsername(username);
-  const externalAdmin = find(externalUsers, (user) => {
-    return user.username === username;
-  });
+  logger.info('Started executing import script', { ...payload });
 
-  if (admin) {
-    network = await impl.updateSuperUserForNetwork(admin.id, networkId);
-
-    await networkRepo.addUser({
-      userId: admin.id,
-      networkId: network.id,
-      isActive: true,
-      externalId: externalAdmin.externalId,
-      roleType: 'ADMIN',
-    });
-
-    mailConfig = configurationMail(network, admin);
-  } else {
-    if (!externalAdmin) throw createError('10006');
-
-    const password = passwordUtil.plainRandom();
-    const superUser = await userRepo.createUser({ ...externalAdmin, password });
-    await networkRepo.addUser({
-      userId: superUser.id,
-      networkId: network.id,
-      isActive: true,
-      externalId: externalAdmin.externalId,
-      roleType: 'ADMIN',
-    });
-
-    network = await impl.updateSuperUserForNetwork(superUser.id, networkId);
-    mailConfig = configurationMailNewAdmin(network, superUser, password);
-  }
-
-  const externalTeams = await adapter.fetchTeams();
-  logger.info('Importing users for network', { networkId: network.id });
-  await impl.importUsers(externalUsers, network.id);
-  logger.info('Importing teams for network', { networkId: network.id });
-  const teams = await impl.importTeams(externalTeams, network);
-
-  const importedUsers = await networkRepo.findAllUsersForNetwork(networkId);
-  await impl.addUsersToTeam(importedUsers, teams, externalUsers);
-  await networkRepo.setImportDateOnNetworkIntegration(network.id);
-
-  mailer.send(mailConfig);
+  // We are moving to the impl so we are able to execute the business logic asynchronously.
+  // Else the client will timeout. If we do not do this, our assertion/errors will not
+  // be send to the handler as response to the client.
+  impl.importNetwork(network, username);
 };
 
 /**
