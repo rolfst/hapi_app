@@ -5,7 +5,7 @@ import userSerializer from './user';
 describe('PMT: User Serializer', () => {
   const defaultExternalUser = {
     id: '1048789',
-    username: 'Bob.Doe',
+    username: 'bob+61787@rwrs.nl',
     email: 'bob+61787@rwrs.nl',
     department: '14',
     first_name: '',

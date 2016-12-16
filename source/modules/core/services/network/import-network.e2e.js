@@ -116,7 +116,7 @@ describe('Import network', () => {
         assert.lengthOf(admins, 1);
       });
 
-      it('should add new users to network', async () => {
+      it('should add new unique users to network', async () => {
         const activeUsers = await networkRepo.findUsersForNetwork(network.id);
 
         assert.lengthOf(activeUsers, 13);
