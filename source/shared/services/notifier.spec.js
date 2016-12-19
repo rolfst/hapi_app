@@ -4,9 +4,13 @@ import sinon from 'sinon';
 import Parse from 'parse/node';
 import * as notifier from './notifier';
 
-describe('Notifier', () => {
-  before(() => notifier.send.restore());
-  after(() => sinon.stub(notifier, 'send').returns(null));
+describe.only('Notifier', () => {
+  let sandbox;
+  after(() => sandbox.restore());
+  before(() => {
+    sandbox = sinon.sandbox.create();
+    sandbox.stub(notifier, 'send').returns(null);
+  });
 
   describe('createEmailList', () => {
     it('should return the right receivers', () => {
@@ -26,11 +30,10 @@ describe('Notifier', () => {
 
   describe('send', () => {
     it('should track push notifications', () => {
-      Mixpanel.init.restore();
       const mixpanelClient = Mixpanel.init('foo_token');
-      sinon.stub(Mixpanel, 'init').returns(mixpanelClient);
-      const methodSpy = sinon.stub(mixpanelClient, 'track');
-      sinon.stub(Parse.Push, 'send').returns(Promise.resolve(null));
+      sandbox.stub(Mixpanel, 'init').returns(mixpanelClient);
+      const methodSpy = sandbox.stub(mixpanelClient, 'track');
+      sandbox.stub(Parse.Push, 'send').returns(Promise.resolve(null));
 
       const notificationStub = {
         text: 'Foo notification text',
@@ -43,7 +46,6 @@ describe('Notifier', () => {
       ];
 
       notifier.send(users, notificationStub);
-      methodSpy.restore();
 
       assert.equal(methodSpy.callCount, 2);
     });

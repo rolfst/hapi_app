@@ -9,6 +9,7 @@ describe('Reminder', () => {
   let exchangeId;
 
   before(async () => {
+    sinon.stub(notifier, 'send').returns(null);
     const inTwoDays = moment().add(2, 'd');
     const endTime = inTwoDays.clone();
     endTime.add(5, 'h');
@@ -32,7 +33,6 @@ describe('Reminder', () => {
   after(async () => {
     const exchange = await exchangeRepo.findExchangeById(exchangeId);
     notifier.send.restore();
-    sinon.stub(notifier, 'send').returns(null);
 
     return exchange.destroy();
   });
