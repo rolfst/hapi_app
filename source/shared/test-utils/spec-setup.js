@@ -12,11 +12,11 @@ chai.use(chaiAsPromised);
 moment.tz.setDefault('UTC');
 
 before(() => {
-  sinon.stub(notifier, 'send').returns(null);
-  sinon.stub(mailer, 'send').returns(null);
+  notifier.send.restore();
+  mailer.send.restore();
 });
 
 after(() => {
-  mailer.send.restore();
-  notifier.send.restore();
+  sinon.stub(notifier, 'send').returns(null);
+  sinon.stub(mailer, 'send').returns(null);
 });
