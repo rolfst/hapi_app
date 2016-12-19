@@ -13,3 +13,4 @@ database*.json
 newrelic_agent.log
 /coverage
 /docs
+.tern-port
