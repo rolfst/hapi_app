@@ -1,6 +1,7 @@
 import { sortBy, orderBy, uniqBy, map, filter, includes } from 'lodash';
 import moment from 'moment';
 import * as Analytics from '../../../../shared/services/analytics';
+import dispatchEvent, { EventTypes } from '../../../../shared/services/dispatch-event';
 import { createAdapter } from '../../../../shared/utils/create-adapter';
 import approveExchangeEvent from '../../../../shared/events/approve-exchange-event';
 import createError from '../../../../shared/utils/create-error';
@@ -99,6 +100,11 @@ export const approveExchange = async (payload, message) => {
   ]);
 
   Analytics.track(approveExchangeEvent(message.network, approvedExchange), message.credentials.id);
+  dispatchEvent(
+    EventTypes.EXCHANGE_APPROVED,
+    message.credentials,
+    { approvedUser: exchangeResponse.User }
+  );
 
   return approvedExchange;
 };
@@ -258,6 +264,7 @@ export const createExchange = async (payload, message) => {
 
   await createdNotifier.send(users, createdExchange);
   Analytics.track(newExchangeEvent(network, createdExchange), message.credentials.id);
+  dispatchEvent(EventTypes.EXCHANGE_CREATED, message.credentials, { exchange: createdExchange });
 
   return exchangeRepo.findExchangeById(createdExchange.id);
 };
