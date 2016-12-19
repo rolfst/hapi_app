@@ -218,4 +218,26 @@ describe('test helper', () => {
       assert.property(authUser, 'token');
     });
   });
+
+  describe.only('cleanAll', () => {
+    it('should clean the whole database', async () => {
+      const user = await testHelper.createUser(blueprints.users.employee);
+      const network = await testHelper.createNetwork({ userId: user.id, name: 'NetworkForAuthenticatedUser' });
+
+      await testHelper.addUserToNetwork({
+        userId: user.id,
+        networkId: network.id,
+        roleType: UserRoles.ADMIN,
+      });
+
+      await testHelper.cleanAll();
+      const networks = await testHelper.findAllNetworks();
+      const users = await testHelper.findAllUsers();
+      const integrations = await testHelper.findAllIntegrations();
+
+      assert.equal(networks.length, 0);
+      assert.equal(users.length, 0);
+      assert.equal(integrations.length, 0);
+    });
+  });
 });

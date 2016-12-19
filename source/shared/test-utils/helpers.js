@@ -7,6 +7,7 @@ import * as networkService from '../../modules/core/services/network';
 import * as integrationRepo from '../../modules/core/repositories/integration';
 import * as userRepo from '../../modules/core/repositories/user';
 import * as networkRepo from '../../modules/core/repositories/network';
+import * as activityRepo from '../../modules/core/repositories/activity';
 
 /**
  * @module shared/test-utils/TestHelper
@@ -25,7 +26,7 @@ function mandatory(paramName) {
  * @param {string} attributes.name - name of the integration
  * @param {string} attributes.token - token to be used to access the integration
  * @method createIntegration
- * @return {Promise<Integration>}
+ * @return {external:Promise<Integration>} {@link module:modules/core~Integration}
  */
 export async function createIntegration(attributes = DEFAULT_INTEGRATION) {
   return integrationRepo.createIntegration(attributes);
@@ -39,7 +40,7 @@ export async function createIntegration(attributes = DEFAULT_INTEGRATION) {
  * @param {string} networkAttributes.name
  * @param {string} [networkAttributes.integrationName]
  * @method createNetwork
- * @return {Promise<Network>} - created network
+ * @return {external:Promise<Network>} {@link module:modules/core~Network Network} - created network
  */
 export async function createNetwork({
   userId, externalId, integrationName, name = generateNetworkName() }) {
@@ -56,7 +57,7 @@ export async function createNetwork({
  * @param {string} [networkAttributes.integrationName]
  * @param {string} attributes.token - token to be used to access the integration
  * @method createNetwork
- * @return {Promise<Network>} - created network
+ * @return {external:Promise<Network[]>} {@link module:modules/core~Network Network}
  */
 export async function createNetworkWithIntegration({
   userId, externalId, name, integrationName, token }) {
@@ -72,7 +73,7 @@ export async function createNetworkWithIntegration({
 /**
  * Finds all networks in the database
  * @method findAllNetworks
- * @return {Promise<NetworkModel[]>}
+ * @return {external:Promise<Network[]>} {@link module:modules/core~Network Network}
  */
 export async function findAllNetworks() {
   return networkRepo.findAll();
@@ -87,7 +88,7 @@ export async function findAllNetworks() {
  * @param {string} userAttributes.email
  * @param {string} userAttributes.password
  * @method createUser
- * @return {Promise<UserModel>}
+ * @return {external:Promise<User>} {@link module:modules/core~User User}
  */
 export async function createUser(userAttributes = blueprints.users.admin) {
   return userRepo.createUser(userAttributes);
@@ -102,12 +103,11 @@ export async function createUser(userAttributes = blueprints.users.admin) {
  * @param {string} networkUserAttributes.externalId
  * @param {string} networkUserAttributes.userToken
  * @method addUserToNetwork
- * @return {Promise<NetworkUserModel>}
+ * @return {external:Promise.<NetworkUser>} {@link module:shared~NetworkUser NetworkUser}
  */
 export async function addUserToNetwork(networkUserAttributes) {
   return networkService.addUserToNetwork(networkUserAttributes);
 }
-
 
 /**
  * Authenticates a user
@@ -115,18 +115,17 @@ export async function addUserToNetwork(networkUserAttributes) {
  * @param {string} userCredentials.username
  * @param {string} userCredentials.password
  * @method authenticateUser
- * @return {Promise<AuthorizedUser>} {@link module:shared/test-utils/authenticate.AuthorizedUser}
+ * @return {external:Promise<AuthorizedUser>} {@link module:shared/test-utils/authenticate.AuthorizedUser}
  */
 export async function authenticateUser(userCredentials) {
   return authenticate(userCredentials, { deviceName: 'testDevice' });
 }
 
-
 /**
  * Deletes users from database
  * @param {User|User[]} userOrUsers
  * @method deleteUser
- * @return {Promise}
+ * @return {external:Promise.<number[]>}
  */
 export async function deleteUser(...userOrUsers) {
   return Promise.map(flatten(userOrUsers), (user) => userRepo.deleteById(user.id));
@@ -135,7 +134,7 @@ export async function deleteUser(...userOrUsers) {
 /**
  * Finds all users in the database
  * @method findAllUsers
- * @return {Promise<UserModel[]>}
+ * @return {external:Promise<User[]>} {@link module:shared~User User}
  */
 export async function findAllUsers() {
   return userRepo.findAllUsers();
@@ -145,7 +144,7 @@ export async function findAllUsers() {
  * Deletes integrations from the database
  * @param {Integration|Integration[]} integrationOrIntegrations
  * @method deleteIntegration
- * @return {Promise}
+ * @return {external:Promise}
  */
 export async function deleteIntegration(...integrationOrIntegrations) {
   return Promise.map(flatten(integrationOrIntegrations),
@@ -155,8 +154,44 @@ export async function deleteIntegration(...integrationOrIntegrations) {
 /**
  * Finds all integrations in the database
  * @method findAllIntegrations
- * @return {Promise.IntegrationsModel[]>}
+ * @return {external:Promise.IntegrationsModel[]>}
  */
 export async function findAllIntegrations() {
   return integrationRepo.findAll();
 }
+
+/**
+ * Finds all Activites in the database
+ * @method findAllActivities
+ * @return {external:Promise.<Activity[]} {@link module:shared~Activity Activity}
+ */
+export async function findAllActivities() {
+  return activityRepo.findAll();
+}
+
+/**
+ * Deletes activities from database
+ * @param {Activity|Activity[]} activityOrActivities
+ * @method deleteActivity
+ * @return {external:Promise.<number[]>} number of deleted activities
+ */
+export async function deleteActivity(...activityOrActivities) {
+  return Promise.map(flatten(activityOrActivities), (activity) => activityRepo.deleteById(activity.id));
+}
+
+/**
+ * Deletes all data in the database
+ * @method cleanAll
+ */
+export async function cleanAll() {
+  const allUsers = await findAllUsers();
+  const allIntegrations = await findAllIntegrations();
+  const allActivities = await findAllActivities();
+  return Promise.all([
+    deleteUser(allUsers),
+    deleteIntegration(allIntegrations),
+    deleteActivity(allActivities),
+  ]);
+}
+
+
