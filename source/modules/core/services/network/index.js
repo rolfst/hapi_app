@@ -49,7 +49,7 @@ export const create = async (payload, message) => {
  * @param {boolean} payload.active - Flag if the user is active
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method addUserToNetwork
- * @return {external:Promise.<Network>} {@link module:modules/core~User User} -
+ * @return {external:Promise.<NetworkUser>} {@link module:shared~NetworkUser NetworkUser}
  * Promise containing a User
  */
 export const addUserToNetwork = async (payload, message) => {

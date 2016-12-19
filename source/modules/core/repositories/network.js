@@ -226,7 +226,7 @@ export const findNetworksForIntegration = async (integrationName) => {
  * @param {string} attributes.networkId - network where user is added to.
  * @param {string} attributes.userId - user to add to the network
  * @method addUser
- * @return {external:Promise.<NetworkUser>} {@link module:modules/core~NetworkUser NetworkUser}
+ * @return {external:Promise.<NetworkUser>} {@link module:shared~NetworkUser NetworkUser}
  */
 export const addUser = async (attributes) => {
   const pivotResult = await NetworkUser.findOne({
@@ -242,7 +242,7 @@ export const addUser = async (attributes) => {
  * @param {string} networkId - network where user is added to.
  * @param {string} userId - user to add to the network
  * @method setSuperAdmin
- * @return {external:Promise.<NetworkUser>} {@link module:modules/core~NetworkUser NetworkUser}
+ * @return {external:Promise.<Network>} {@link module:modules/core~Network Network}
  */
 export const setSuperAdmin = async (networkId, superUserId) => {
   const network = await Network.findById(networkId);
