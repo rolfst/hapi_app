@@ -1,5 +1,7 @@
 import { assert } from 'chai';
-import { find } from 'lodash';
+import { find, pick } from 'lodash';
+import sinon from 'sinon';
+import * as dispatchEvent from '../../../shared/services/dispatch-event';
 import * as networkRepo from '../../core/repositories/network';
 import * as userRepo from '../../core/repositories/user';
 import * as teamRepo from '../../core/repositories/team';
@@ -86,12 +88,25 @@ describe('Service: invite user', () => {
   });
 
   describe('New User', () => {
+    const sandbox = sinon.sandbox.create();
+    let dispatchEventSpy;
+    const credentials = { id: '1', email: 'credentials@flex-appeal.nl' };
     const payload = { firstName: 'John', lastName: 'Doe', email: 'test-user@foo.com' };
 
+    before(() => {
+      dispatchEventSpy = sandbox.stub(dispatchEvent, 'dispatchEvent');
+    });
+
     afterEach(async () => {
+      dispatchEventSpy.reset();
+
       const user = await userRepo.findUserByEmail(payload.email);
 
       return userRepo.deleteById(user.id);
+    });
+
+    after(() => {
+      sandbox.restore();
     });
 
     it('should create when not exists', async () => {
@@ -101,6 +116,17 @@ describe('Service: invite user', () => {
       assert.equal(actual.lastName, payload.lastName);
       assert.equal(actual.username, payload.email);
       assert.equal(actual.email, payload.email);
+    });
+
+    it('should add user to intercom', async () => {
+      await service.inviteUser(payload, { credentials, network });
+
+      const { args } = dispatchEventSpy.firstCall;
+
+      assert.equal(args[0], dispatchEvent.EventTypes.USER_INVITED);
+      assert.equal(args[1], credentials);
+      assert.deepEqual(pick(args[2].user, 'email', 'firstName', 'lastName'), payload);
+      assert.deepEqual(args[2].network, network);
     });
 
     it('should add to the network as admin', async () => {
