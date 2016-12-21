@@ -67,5 +67,5 @@ export async function findAll() {
  * @return {external:Promise.<number>} - number of deleted activities
  */
 export async function deleteById(activityId) {
-  return Activity.destroy({ where: { id: activityId } })
+  return Activity.destroy({ where: { id: activityId } });
 }

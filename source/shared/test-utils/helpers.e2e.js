@@ -1,3 +1,4 @@
+/* global assert */
 import { first } from 'lodash';
 import Promise from 'bluebird';
 import blueprints from './blueprints';
@@ -62,7 +63,8 @@ describe('test helper', () => {
     });
 
     it('should throw an exception during creation', async () => {
-      const promise = testHelper.createIntegration({ title: 'providedName', token: 'providedToken' });
+      const promise = testHelper.createIntegration({
+        title: 'providedName', token: 'providedToken' });
 
       assert.isRejected(promise, /notNull Violation: name cannot be null/, 'failed');
 
@@ -109,8 +111,10 @@ describe('test helper', () => {
         }),
       ]);
 
-      const integrationName = await networkRepo.findIntegrationNameForNetwork(createdNetworks[0].id);
-      const networks = await networkService.listNetworksForIntegration({ integrationName: integration.name });
+      const integrationName = await networkRepo.findIntegrationNameForNetwork(
+        createdNetworks[0].id);
+      const networks = await networkService.listNetworksForIntegration({
+        integrationName: integration.name });
 
       assert.equal(networks.length, 1);
       assert.equal(integrationName, integration.name);
@@ -129,8 +133,9 @@ describe('test helper', () => {
         }),
       ]);
 
-      const integrationName = await networkRepo.findIntegrationNameForNetwork(createdNetworks[0].id);
-      const networks = await networkService.listNetworksForIntegration({ integrationName: integration.name });
+      await networkRepo.findIntegrationNameForNetwork(createdNetworks[0].id);
+      const networks = await networkService.listNetworksForIntegration({
+        integrationName: integration.name });
 
       assert.equal(networks.length, 1);
       assert.equal(networks[0].name, 'customName');
@@ -165,7 +170,6 @@ describe('test helper', () => {
     });
 
     it('should throw an error when not providing an integrationName', async () => {
-      const integrationName = 'integration';
       const user = await testHelper.createUser();
       const promise = testHelper.createNetworkWithIntegration({
         userId: user.id,
@@ -174,7 +178,8 @@ describe('test helper', () => {
         token: 'testToken',
       });
 
-      assert.isRejected(promise, /Error: Missing Parameter: integrationName/, 'failed to create network with integration');
+      assert.isRejected(promise, /Error: Missing Parameter: integrationName/,
+        'failed to create network with integration');
     });
 
     it('should throw an error when not providing a token', async () => {
@@ -187,7 +192,8 @@ describe('test helper', () => {
         integrationName,
       });
 
-      assert.isRejected(promise, /Error: Missing Parameter: token/, 'failed to create network with integration');
+      assert.isRejected(promise, /Error: Missing Parameter: token/,
+        'failed to create network with integration');
     });
   });
 
@@ -200,7 +206,8 @@ describe('test helper', () => {
 
     it('should authenticate a user', async () => {
       const user = await testHelper.createUser(blueprints.users.employee);
-      const network = await testHelper.createNetwork({ userId: user.id, name: 'NetworkForAuthenticatedUser' });
+      const network = await testHelper.createNetwork({
+        userId: user.id, name: 'NetworkForAuthenticatedUser' });
 
       await testHelper.addUserToNetwork({
         userId: user.id,
@@ -222,7 +229,8 @@ describe('test helper', () => {
   describe('cleanAll', () => {
     it('should clean the whole database', async () => {
       const user = await testHelper.createUser(blueprints.users.employee);
-      const network = await testHelper.createNetwork({ userId: user.id, name: 'NetworkForAuthenticatedUser' });
+      const network = await testHelper.createNetwork({
+        userId: user.id, name: 'NetworkForAuthenticatedUser' });
 
       await testHelper.addUserToNetwork({
         userId: user.id,

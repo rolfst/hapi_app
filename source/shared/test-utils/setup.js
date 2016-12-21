@@ -47,7 +47,8 @@ export const initialSetup = async () => {
       externalId: 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi',
       name: generateNetworkName(),
       integrationName: 'PMT',
-  }]);
+    },
+  ]);
 
   const adminCredentials = {
     username: blueprints.users.admin.username,

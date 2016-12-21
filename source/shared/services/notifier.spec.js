@@ -1,16 +1,15 @@
+/* global.assert */
 import Mixpanel from 'mixpanel';
 import { assert } from 'chai';
 import sinon from 'sinon';
 import Parse from 'parse/node';
 import * as notifier from './notifier';
 
-describe.only('Notifier', () => {
+describe('Notifier', () => {
   let sandbox;
-  after(() => sandbox.restore());
-  before(() => {
-    sandbox = sinon.sandbox.create();
-    sandbox.stub(notifier, 'send').returns(null);
-  });
+
+  afterEach(() => sandbox.restore());
+  beforeEach(() => { sandbox = sinon.sandbox.create(); });
 
   describe('createEmailList', () => {
     it('should return the right receivers', () => {

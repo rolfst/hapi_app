@@ -115,7 +115,8 @@ export async function addUserToNetwork(networkUserAttributes) {
  * @param {string} userCredentials.username
  * @param {string} userCredentials.password
  * @method authenticateUser
- * @return {external:Promise<AuthorizedUser>} {@link module:shared/test-utils/authenticate.AuthorizedUser}
+ * @return {external:Promise<AuthorizedUser>}
+ * @link module:shared/test-utils/authenticate.AuthorizedUser}
  */
 export async function authenticateUser(userCredentials) {
   return authenticate(userCredentials, { deviceName: 'testDevice' });
@@ -176,7 +177,9 @@ export async function findAllActivities() {
  * @return {external:Promise.<number[]>} number of deleted activities
  */
 export async function deleteActivity(...activityOrActivities) {
-  return Promise.map(flatten(activityOrActivities), (activity) => activityRepo.deleteById(activity.id));
+  return Promise.map(flatten(activityOrActivities), (activity) => {
+    activityRepo.deleteById(activity.id);
+  });
 }
 
 /**
@@ -193,5 +196,3 @@ export async function cleanAll() {
     deleteActivity(allActivities),
   ]);
 }
-
-

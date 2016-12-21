@@ -1,6 +1,7 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import * as passwordUtil from '../../../shared/utils/password';
+import * as notifier from '../../../shared/services/notifier';
 import * as mailer from '../../../shared/services/mailer';
 import addedToNetworkMail from '../../../shared/mails/added-to-network';
 import addedToExtraNetworkMail from '../../../shared/mails/added-to-extra-network';
@@ -44,6 +45,8 @@ describe('Invite users', () => {
   it('should send correct emails', async () => {
     const fakeAdapter = { fetchUsers: () => allUsersFromIntegration };
 
+    sandbox.stub(notifier, 'send').returns(null);
+    sandbox.stub(mailer, 'send').returns(null);
     sandbox.stub(userRepo, 'userBelongsToNetwork').returns(Promise.resolve(true));
     sandbox.stub(userRepo, 'updateUser').returns(Promise.resolve(importUser));
     sandbox.stub(userService, 'getUserWithNetworkScope').returns(Promise.resolve(adminUser));
