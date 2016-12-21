@@ -14,8 +14,16 @@ export const EventTypes = {
   MESSAGE_CREATED: 'message-created', // TODO
 };
 
+// intercom.users.create = (user) => console.log(user);
+// intercom.users.update = (user) => console.log(user);
+// intercom.events.create = (event) => console.log(event);
+
 export function getClient() {
   return new Intercom.Client({ token: process.env.INTERCOM_TOKEN });
+}
+
+export function createUnixTimestamp() {
+  return moment().unix();
 }
 
 export default async (eventType, message, payload) => {
@@ -34,17 +42,16 @@ export default async (eventType, message, payload) => {
         user_id: payload.user.id,
         email: payload.user.email,
         name: payload.user.fullName,
-        phone: payload.user.phoneNum,
+        phone: payload.user.phoneNum || null,
         companies: [{ company_id: payload.network.id }],
         custom_attributes: { role: payload.role },
       });
       break;
     case EventTypes.USER_UPDATED:
       intercom.users.update({
-        user_id: payload.user.id,
         email: payload.user.email,
         name: payload.user.fullName,
-        phone: payload.user.phoneNum,
+        phone: payload.user.phoneNum || null,
       });
       break;
     case EventTypes.USER_REMOVED:
@@ -56,7 +63,7 @@ export default async (eventType, message, payload) => {
     case EventTypes.EXCHANGE_CREATED:
       intercom.events.create({
         event_name: EventTypes.EXCHANGE_CREATED,
-        created_at: moment().unix(),
+        created_at: createUnixTimestamp(),
         email: user.email,
         metadata: pick(payload.exchange, 'networkId', 'date', 'startTime', 'endTime', 'type'),
       });
