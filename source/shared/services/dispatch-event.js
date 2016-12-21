@@ -14,10 +14,6 @@ export const EventTypes = {
   MESSAGE_CREATED: 'message-created', // TODO
 };
 
-// intercom.users.create = (user) => console.log(user);
-// intercom.users.update = (user) => console.log(user);
-// intercom.events.create = (event) => console.log(event);
-
 export function getClient() {
   return new Intercom.Client({ token: process.env.INTERCOM_TOKEN });
 }
