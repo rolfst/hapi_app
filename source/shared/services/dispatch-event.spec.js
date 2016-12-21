@@ -2,7 +2,7 @@ import * as Intercom from 'intercom-client';
 import { assert } from 'chai';
 import sinon from 'sinon';
 import moment from 'moment';
-import dispatchEvent, * as service from './dispatch-event';
+import * as service from './dispatch-event';
 const { EventTypes } = service;
 
 describe('Dispatch event', () => {
@@ -43,8 +43,9 @@ describe('Dispatch event', () => {
   describe('User invited', () => {
     it('should create an user in intercom', async () => {
       const user = { id: '2', fullName: 'Test User', phoneNum: '0641842185' };
+      const payload = { user, network, role: 'foo' };
 
-      await dispatchEvent(EventTypes.USER_INVITED, loggedUser, { user, network, role: 'foo' });
+      await service.dispatchEvent(EventTypes.USER_INVITED, loggedUser, payload);
 
       assert.deepEqual(usersCreateSpy.firstCall.args[0], {
         user_id: user.id,
@@ -60,7 +61,7 @@ describe('Dispatch event', () => {
   describe('User updated', () => {
     it('should update the user in intercom', async () => {
       const user = { ...loggedUser, name: 'Updated User' };
-      await dispatchEvent(EventTypes.USER_UPDATED, loggedUser, { user });
+      await service.dispatchEvent(EventTypes.USER_UPDATED, loggedUser, { user });
 
       assert.isTrue(usersUpdateSpy.calledOnce);
 
@@ -74,7 +75,8 @@ describe('Dispatch event', () => {
 
   describe('User removed', () => {
     it('should remove company from user', async () => {
-      await dispatchEvent(EventTypes.USER_REMOVED, loggedUser, { user: loggedUser, network });
+      const payload = { user: loggedUser, network };
+      await service.dispatchEvent(EventTypes.USER_REMOVED, loggedUser, payload);
 
       assert.isTrue(usersUpdateSpy.calledOnce);
 
@@ -92,7 +94,7 @@ describe('Dispatch event', () => {
 
       sinon.stub(service, 'createUnixTimestamp').returns(timestamp);
 
-      await dispatchEvent(EventTypes.EXCHANGE_CREATED, loggedUser, { exchange });
+      await service.dispatchEvent(EventTypes.EXCHANGE_CREATED, loggedUser, { exchange });
 
       assert.isTrue(usersUpdateSpy.calledOnce);
       assert.isTrue(eventsCreateSpy.calledOnce);
@@ -115,7 +117,7 @@ describe('Dispatch event', () => {
     it('should increment exchanged shifts count', async () => {
       const approvedUser = { id: '2', email: 'approved@flex-appeal', name: 'Approved User' };
 
-      await dispatchEvent(EventTypes.EXCHANGE_APPROVED, loggedUser, { approvedUser });
+      await service.dispatchEvent(EventTypes.EXCHANGE_APPROVED, loggedUser, { approvedUser });
 
       assert.deepEqual(usersUpdateSpy.firstCall.args[0], {
         email: approvedUser.email,

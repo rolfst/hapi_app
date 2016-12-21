@@ -5,7 +5,7 @@ import { pick } from 'lodash';
 export const EventTypes = {
   NETWORK_CREATED: 'network-created', // TODO
   NETWORK_UPDATED: 'network-updated', // TODO
-  USER_INVTED: 'user-invited',
+  USER_INVITED: 'user-invited',
   USER_UPDATED: 'user-updated', // TODO only /users/me is on node-api
   USER_UPDATED_ROLE: 'user-updated-role', // TODO
   USER_REMOVED: 'user-removed', // TODO
@@ -26,7 +26,7 @@ export function createUnixTimestamp() {
   return moment().unix();
 }
 
-export default async (eventType, message, payload) => {
+export async function dispatchEvent(eventType, message, payload) {
   const intercom = getClient();
   const { body: user } = await intercom.users.find({ email: message.username });
   const { custom_attributes } = user;

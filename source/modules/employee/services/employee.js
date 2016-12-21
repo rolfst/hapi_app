@@ -1,6 +1,6 @@
 import * as userRepo from '../../core/repositories/user';
 import * as userService from '../../core/services/user';
-import dispatchEvent, { EventTypes } from '../../../shared/services/dispatch-event';
+import { dispatchEvent, EventTypes } from '../../../shared/services/dispatch-event';
 
 export const updateEmployee = async (payload, message) => {
   const updatedUser = await userRepo.updateUser(message.credentials.id, payload.attributes);

@@ -1,7 +1,7 @@
 import { sortBy, orderBy, uniqBy, map, filter, includes } from 'lodash';
 import moment from 'moment';
 import * as Analytics from '../../../../shared/services/analytics';
-import dispatchEvent, { EventTypes } from '../../../../shared/services/dispatch-event';
+import { dispatchEvent, EventTypes } from '../../../../shared/services/dispatch-event';
 import { createAdapter } from '../../../../shared/utils/create-adapter';
 import approveExchangeEvent from '../../../../shared/events/approve-exchange-event';
 import createError from '../../../../shared/utils/create-error';

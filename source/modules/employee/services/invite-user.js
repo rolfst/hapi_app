@@ -1,7 +1,7 @@
 import { map } from 'lodash';
 import * as passwordUtil from '../../../shared/utils/password';
 import * as mailer from '../../../shared/services/mailer';
-import dispatchEvent, { EventTypes } from '../../../shared/services/dispatch-event';
+import { dispatchEvent, EventTypes } from '../../../shared/services/dispatch-event';
 import { UserRoles } from '../../../shared/services/permission';
 import createError from '../../../shared/utils/create-error';
 import camelCaseKeys from '../../../shared/utils/camel-case-keys';
