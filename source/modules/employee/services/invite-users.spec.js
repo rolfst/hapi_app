@@ -2,12 +2,14 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import * as passwordUtil from '../../../shared/utils/password';
 import * as mailer from '../../../shared/services/mailer';
+import dispatchEvent from '../../../shared/services/dispatch-event';
 import addedToNetworkMail from '../../../shared/mails/added-to-network';
 import addedToExtraNetworkMail from '../../../shared/mails/added-to-extra-network';
 import * as adapterUtil from '../../../shared/utils/create-adapter';
 import * as userService from '../../core/services/user';
 import * as networkRepo from '../../core/repositories/network';
 import * as userRepo from '../../core/repositories/user';
+import * as teamRepo from '../../core/repositories/team';
 import * as service from './invite-user';
 
 describe('Invite users', () => {
@@ -40,6 +42,18 @@ describe('Invite users', () => {
 
   before(() => (sandbox = sinon.sandbox.create()));
   after(() => sandbox.restore());
+
+  it('should dispatch user invited event', async () => {
+    sandbox.stub(userRepo, 'findUserByEmail').returns(Promise.resolve(importUser));
+    sandbox.stub(service, 'inviteNewUser').returns(Promise.resolve(importUser));
+    sandbox.stub(teamRepo, 'addUserToTeams').returns(Promise.resolve());
+    sandbox.stub(userService, 'getUserWithNetworkScope').returns(Promise.resolve());
+    sandbox.
+
+    service.inviteUser(importUser, message);
+
+    assert.equal()
+  });
 
   it('should send correct emails', async () => {
     const fakeAdapter = { fetchUsers: () => allUsersFromIntegration };
