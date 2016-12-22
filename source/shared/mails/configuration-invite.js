@@ -3,14 +3,14 @@ export default (network, user) => {
     '-firstName-': user.firstName,
     '-companyName-': network.name, // TODO: UTF-8 encode
     '-email-': user.username,
-    '-invitationSenderFirstName-': network.superAdmin.firstName,
+    '-invitationSenderFirstName-': 'Flex Appeal',
   };
 
   const options = {
     receiver: { email: user.email },
-    sender: { name: network.superAdmin.fullName, email: network.superAdmin.email },
+    sender: { name: 'Flex Appeal', email: 'uitnodigingen@flex-appeal.nl' },
     subject: `U kan uw netwerk: ${network.name} voor Flex-Appeal configureren`,
-    template: network.configurationMailTemplate || 'b1841cf3-076c-4976-9da8-11d3c5c3a1cb',
+    template: network.welcomeMailTemplate || 'b1841cf3-076c-4976-9da8-11d3c5c3a1cb',
   };
 
   return { data, options };

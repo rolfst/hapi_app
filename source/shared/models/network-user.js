@@ -16,7 +16,7 @@ const NetworkUser = model.define('NetworkUser', {
     defaultValue: 0,
   },
   externalId: {
-    type: Sequelize.INTEGER,
+    type: Sequelize.STRING,
     field: 'external_id',
   },
   invisibleUser: {

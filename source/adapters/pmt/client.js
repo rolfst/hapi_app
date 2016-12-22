@@ -48,11 +48,18 @@ export async function makeRequest(endpoint, token = null, method = 'GET', data =
   };
 
 
-  logger.info('fetching from integration', { endpoint, options, message });
+  logger.info('Fetching from integration', { endpoint, options, message });
   const response = await fetch(endpoint, options);
   const { status, json } = await handleRequest(response, endpoint);
 
-  logger.info('Retrieved from integration', { status, json, message });
+  if (status !== 200) {
+    logger.error('Error occured when fetching data from integration', {
+      status, json, message, endpoint });
+  } else {
+    const dataResponse = json[Object.keys(json)[0]] || [];
+    logger.info('Retrieved data from integration', {
+      status, itemCount: dataResponse.length, message, endpoint });
+  }
 
   return { payload: json, status };
 }

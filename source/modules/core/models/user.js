@@ -2,12 +2,10 @@ import { map, pick, toString } from 'lodash';
 import * as dateUtils from '../../../shared/utils/date';
 
 const whitelistAttrs = [
-  'username',
   'firstName',
   'lastName',
   'fullName',
   'phoneNum',
-  'email',
 ];
 
 let environment = 'production';
@@ -18,6 +16,8 @@ export default (dao) => ({
   type: 'user',
   id: dao.id.toString(),
   ...pick(dao, whitelistAttrs),
+  username: dao.username.toLowerCase(),
+  email: dao.email.toLowerCase(),
   externalId: dao.externalId ? dao.externalId.toString() : null,
   integrationAuth: dao.integrationAuth || null,
   function: dao.function || null,

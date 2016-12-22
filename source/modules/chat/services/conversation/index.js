@@ -4,6 +4,19 @@ import * as impl from './implementation';
 import * as conversationRepo from '../../repositories/conversation';
 import * as messageRepo from '../../repositories/message';
 
+/**
+ * @module modules/chat/services/conversation
+ */
+
+/**
+ * Creates a new conversation
+ * @param {object} payload - Object containing payload data
+ * @param {ConversationType} payload.type {@link module:modules/chat~ConversationType}
+ * - The type of conversation
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method list
+ * @return {external:Promise.<Integration[]>} {@link module:modules/core~Integration Integration} -
+ */
 export const create = async (payload, message) => {
   const participants = uniq([...payload.participants, message.credentials.id]);
 
@@ -24,6 +37,15 @@ export const create = async (payload, message) => {
   return conversation;
 };
 
+/**
+ * Lists all conversations
+ * @param {object} payload - Object containing payload data
+ * @param {string[]} payload.ids - all convesation ids to load
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method list
+ * @return {external:Promise.<Conversation[]>} {@link module:modules/chat~Conversation Conversation}
+ * - Promise containing a list of conversations§
+ */
 export const listConversations = async (payload) => {
   const conversations = await conversationRepo.findConversationsById(payload.ids);
   const messages = await messageRepo.findMessagesForConversations(map(conversations, 'id'));
@@ -45,12 +67,11 @@ export const listConversations = async (payload) => {
 /**
  * Retrieve a single conversation.
  * @param {object} payload - Object containing payload data
- * @param {number} payload.id - The id of the conversation
- * @param {object} message - Object containing meta data
- * @param {object} message.credentials - The authenticated user
- * @param {object} message.artifacts - Artifacts containing request meta data
+ * @param {string} payload.id - The id of the conversation
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method getConversation
- * @return {Promise} Promise containing a single conversation
+ * @return {external:Promise.<Conversation>} {@link module:modules/chat~Conversation} -
+ * Promise containing a single conversation
  */
 export const getConversation = async (payload, message) => {
   const conversation = await conversationRepo.findConversationById(payload.id);
@@ -70,11 +91,10 @@ export const getConversation = async (payload, message) => {
  * Retrieve conversations for specific user.
  * @param {object} payload - Object containing payload data
  * @param {number} payload.id - The id of the user
- * @param {object} message - Object containing meta data
- * @param {object} message.credentials - The authenticated user
- * @param {object} message.artifacts - Artifacts containing request meta data
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method getConversationsForUser
- * @return {Promise} Promise containing a single conversation
+ * @return {external:Promise.<Conversation[]>} {@link module:modules/chat~Conversation} -
+ * Promise containing a list of conversations
  */
 
 export const listConversationsForUser = async (payload, message) => {
@@ -87,11 +107,10 @@ export const listConversationsForUser = async (payload, message) => {
  * List the messages that are created for a conversation.
  * @param {object} payload - Object containing payload data
  * @param {number} payload.id - The id of the conversation
- * @param {object} message - Object containing meta data
- * @param {object} message.credentials - The authenticated user
- * @param {object} message.artifacts - Artifacts containing request meta data
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method listMessages
- * @return {Promise} Promise containing collection of messages
+ * @return {external:Promise.<Message[]>} {@link module:modules/chat~Message} -
+ * Promise containing a list of messages
  */
 export const listMessages = async (payload, message) => {
   const conversation = await getConversation(payload, message);
@@ -103,11 +122,10 @@ export const listMessages = async (payload, message) => {
  * Retrieve a single message.
  * @param {object} payload - Object containing payload data
  * @param {number} payload.messageId - The id of the message
- * @param {object} message - Object containing meta data
- * @param {object} message.credentials - The authenticated user
- * @param {object} message.artifacts - Artifacts containing request meta data
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method getMessage
- * @return {Promise} Promise containing a message
+ * @return {external:Promise.<Message>} {@link module:modules/chat~Message} -
+ * Promise containing a message
  */
 export const getMessage = async (payload) => {
   const message = await messageRepo.findMessageById(payload.messageId);
@@ -119,13 +137,12 @@ export const getMessage = async (payload) => {
 /**
  * Create a message for a conversation.
  * @param {object} payload - Object containing payload data
- * @param {number} payload.id - The id of the conversation
+ * @param {string} payload.id - The id of the conversation
  * @param {string} payload.text - The text of the message
- * @param {object} message - Object containing meta data
- * @param {object} message.credentials - The authenticated user
- * @param {object} message.artifacts - Artifacts containing request meta data
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method createMessage
- * @return {Promise} Promise containing the created message
+ * @return {external:Promise.<Message>} {@link module:modules/chat~Message} - Promise containing
+ * the created message
  */
 export const createMessage = async (payload, message) => {
   const { id, text } = payload;

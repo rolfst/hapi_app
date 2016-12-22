@@ -1,0 +1,55 @@
+
+/**
+ * @module adapters/pmt
+ */
+
+/**
+ * @description
+ * This Module contains the core domain of the adapters domain of the Nodejs flex-appeal api
+ * The external user that is loaded from the integration
+ * should contain the following properties:
+ */
+
+/**
+ * @typedef {object} ExternalUser
+ * @property {string} externalId
+ * @property {string} username
+ * @property {string} email
+ * @property {string} firstName
+ * @property {string} lastName
+ * @property {string} dateOfBirth - ISO formated date
+ * @property {string} phoneNum
+ * @property {boolean} isAdmin
+ * @property {boolean} isActive
+ * @property {string} teamIds
+ */
+
+ /**
+  * @typedef {object} ExternalNetwork
+  * @property {string} externalId
+  * @property {string} name
+  */
+
+ /**
+  * @typedef {object} ExternalShift
+  * @property {string} id
+  * @property {string} date
+  * @property {string} start_time
+  * @property {string} end_time
+  * @property {string} break
+  * @property {string} team_id
+  */
+
+ /**
+  * @typedef {object} Store
+  * @property {string} integrationName
+  * @property {string} externalId
+  * @property {string} name
+  */
+
+ /**
+  * @typedef {object} ExternalTeam
+  * @property {string} externalId
+  * @property {string} name
+  */
+

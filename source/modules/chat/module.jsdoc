@@ -1,0 +1,40 @@
+/**
+ * @module modules/chat
+ * @description This Module contains the chat domain of the Nodejs flex-appeal api
+ * It contains the functionality concering:
+ * <ul>
+ *   <li>{@link module:modules/chat~Conversation Conversation}</li>
+ *   <li>{@link module:modules/chat~Message Message}</li>
+ * </ul>
+ */
+
+
+/**
+ * @typedef {object} Conversation
+ * @property {string} type - 'conversation'
+ * @property {string} id
+ * @property {string} lastmessage
+ * @property {Message[]} message {@link module:modules/chat~Message Message}
+ * @property {User[]} users {@link module:modules/core~User User}
+ * @property {string} createdAt - ISO formated date
+ */
+
+/**
+ * @typedef {object} Message
+ * @property {string} type - 'user'
+ * @property {string} id
+ * @property {string} conversationId
+ * @property {string} text - message body
+ * @property {User} createdBy {@link module:modules/core~User User}
+ * @property {string} createdAt - ISO string date
+ * @property {string} updatedAt - ISO string date
+ */
+
+/**
+ * @typedef {string} ConversationType
+ * <ul>
+ *  <li>PRIVATE</li>
+ *  <li>GROUP</li>
+ */
+
+

@@ -1,0 +1,59 @@
+/**
+ * @module modules/core
+ * @description This Module contains the core domain of the Nodejs flex-appeal api
+ * It contains the functionality concering:
+ * <ul>
+ *   <li>{@link module:modules/core~Network Network}</li>
+ *   <li>{@link module:modules/core~User User}</li>
+ *   <li>{@link module:modules/core~Integration Integration}</li>
+ *   <li>{@link module:modules/core~Team Team}</li>
+ * </ul>
+ */
+
+
+/**
+ * @typedef {object} Network
+ * @property {string} type - 'network'
+ * @property {string} id
+ * @property {string} externalId
+ * @property {string} name
+ * @property {boolean} hasIntegrations
+ * @property {User} superAdmin {@link module:modules/core~User User}
+ * @property {string[]} enabledComponents - Products that are enabled
+ * @property {string} createdAt - user token
+ */
+
+/**
+ * @typedef {object} User
+ * @property {string} type - 'user'
+ * @property {string} id
+ * @property {string} externalId
+ * @property {string} username
+ * @property {string} firstName
+ * @property {string} lastName
+ * @property {string} fullName
+ * @property {string} phoneNum
+ * @property {string} email
+ * @property {string} integrationAuth - user token
+ * @property {string} roleType
+ * @property {string} function - team name
+ * @property {string} profileImg
+ * @property {string} dateOfBirth
+ * @property {string} createdAt
+ * @property {string} lastLogin
+ */
+
+/**
+ * @typedef {object} Integration
+ * @property {string} id
+ * @property {string} name
+ * @property {string} token - token to be used for authentication with the integration partner
+ */
+
+/**
+ * @typedef {object} Team
+ * @property {string} id
+ * @property {string} externalId
+ * @property {string} name
+ * @property {string} description
+ */

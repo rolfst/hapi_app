@@ -10,6 +10,10 @@ import * as passwordUtil from '../../../shared/utils/password';
 import { createAdapter } from '../../../shared/utils/create-adapter';
 import * as userRepo from '../../core/repositories/user';
 
+/**
+ * @module modules/employee/services/employee/impl
+ */
+
 const whitelistMembers = (existingMembers, matchingMembers, matchingCriteria) =>
   intersectionBy(existingMembers, matchingMembers, matchingCriteria);
 const blacklistMembers = (existingMembers, matchingMembers, matchingCriteria) =>
@@ -27,8 +31,8 @@ export const getMembersfromIntegration = async (network) => {
 /**
  * This method selects all users from the existing memberslist that match with
  * the matching members list.
- * @param {array} existingMembers
- * @param {array} matchingMembers - to select from the existing members
+ * @param {User[]} existingMembers
+ * @param {User[]} matchingMembers - to select from the existing members
  * @param {string} matchingCriteria optional - field to match by
  * @method getUsersWithoutPassword
  * @returns {array} all matchedMembers without a password
@@ -61,10 +65,10 @@ export const generatePasswordsForMembers = async (members) => {
 /**
  * This method selects all users from the existing memberslist that match with
  * the matching members list.
- * @param {array} existingMembers
- * @param {array} matchingMembers - to select from the existing members
- * @param {array} excludedUsers optional - members to exclude from the matching list
- * @param {string} matchingCriteria optional - field to match by
+ * @param {User[]} existingMembers
+ * @param {User[]} matchingMembers - to select from the existing members
+ * @param {User[]} [excludedUsers=[]] - members to exclude from the matching list
+ * @param {string} [matchingCriteria=username] - field to match by
  * @method getUsersWithPassword
  * @returns {array} all matchedMembers with a password
  */

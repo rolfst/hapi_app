@@ -31,7 +31,7 @@ describe('Service: invite user', () => {
       const { firstName, lastName, email } = global.users.employee;
       const payload = { firstName, lastName, email };
 
-      assert.isRejected(service.inviteUser(payload, { network }));
+      await assert.isRejected(service.inviteUser(payload, { network }));
     });
 
     it('should fail when team doesn\'t belongs to the network', async () => {

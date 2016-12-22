@@ -1,15 +1,25 @@
 import { ExchangeResponse } from '../models';
 
 /**
+ * @module modules/flexchange/repositories/exchange-response
+ */
+
+/**
  * Find an exchange response by exchange and user or throw Error
  * @param {object} constraint - object that contains fields and values for the database
  * @method findResponseWhere
- * @return {promise} Find exchange response promise
+ * @return {external:Promise} Find exchange response promise
  */
 export const findResponseWhere = (constraint) => {
   return ExchangeResponse.findOne({ where: constraint });
 };
 
+/**
+ * Find an accepted exchange response for a user
+ * @param {string} userId - user to find the response for
+ * @method findAcceptedExchangeResponsesForUser
+ * @return {external:Promise} - Promise with accepted exchange responses
+ */
 export function findAcceptedExchangeResponsesForUser(userId) {
   return ExchangeResponse.findAll({
     where: { userId, response: 1 },
@@ -18,10 +28,10 @@ export function findAcceptedExchangeResponsesForUser(userId) {
 
 /**
  * Removes an exchange response for exchange and user
- * @param {number} exchangeId - Exchange the response is send to
- * @param {number} userId - User that placed the response
+ * @param {string} exchangeId - Exchange the response is send to
+ * @param {string} userId - User that placed the response
  * @method removeExchangeResponseForExchangeAndUser
- * @return {promise} Find exchange response promise
+ * @return {external:Promise} - Promise
  */
 export function removeExchangeResponseForExchangeAndUser(exchangeId, userId) {
   return ExchangeResponse.destroy({
@@ -33,7 +43,7 @@ export function removeExchangeResponseForExchangeAndUser(exchangeId, userId) {
  * Creates an exchange response
  * @param {object} data - User that placed the response
  * @method createExchangeResponse
- * @return {promise} Find exchange response promise
+ * @return {external:Promise} Find exchange response promise
  */
 export function createExchangeResponse(data) {
   return ExchangeResponse.create(data);

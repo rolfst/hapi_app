@@ -1,0 +1,5 @@
+/**
+ * @external Promise
+ * @see {@link http://bluebirdjs.com/docs/api-reference.html Promise}
+ */
+

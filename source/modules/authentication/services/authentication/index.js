@@ -5,6 +5,20 @@ import * as Analytics from '../../../../shared/services/analytics';
 import firstLoginEvent from '../../../../shared/events/first-login-event';
 import * as impl from './implementation';
 
+/**
+ * @module modules/authentication/services/authentication
+ */
+
+/**
+ * Delegates for interaction with an integration partner
+ * @param {object} payload
+ * @param {string} payload.refreshToken
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method authenticate
+ * @return {external:Promise.<accessToken>}
+ * {@link module:/modules/authentication~AuthenticatedUser AuthenticatedUser}
+ *
+ */
 export const delegate = async (payload, message) => {
   let decodedToken;
 
@@ -24,6 +38,16 @@ export const delegate = async (payload, message) => {
   return { accessToken };
 };
 
+/**
+ * Authencticates a user
+ * @param {object} payload
+ * @param {string} payload.username
+ * @param {string} payload.password
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method authenticate
+ * @return {external:Promise.<AuthenticatedUser>}
+ * {@link module:/modules/authentication~AuthenticatedUser AuthenticatedUser}
+ */
 export const authenticate = async (payload, message) => {
   const user = await impl.authenticateUser(payload);
 
