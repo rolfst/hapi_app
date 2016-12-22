@@ -1,7 +1,7 @@
 {
   "data": [{
     "id": "1048789",
-    "username": "Bob.Doe",
+    "username": "bob+61787@rwrs.nl",
     "email": "bob+61787@rwrs.nl",
     "department": "14",
     "first_name": "",
@@ -16,7 +16,7 @@
     "active": true
   }, {
     "id": "1048920",
-    "username": "Jessy.Pinkman",
+    "username": "bob+61787@rwrs.nl",
     "email": "bob+61787@rwrs.nl",
     "department": "14",
     "first_name": "Jessy",
@@ -31,7 +31,7 @@
     "active": true
   }, {
     "id": "1048869",
-    "username": "Amber.vanden.Doe",
+    "username": "bob+66323@rwrs.nl",
     "email": "bob+66323@rwrs.nl",
     "department": "14",
     "first_name": "Amber",
@@ -46,7 +46,7 @@
     "active": true
   }, {
     "id": "1048719",
-    "username": "Anne.Doe",
+    "username": "bob+48340@rwrs.nl",
     "email": "bob+48340@rwrs.nl",
     "department": "14",
     "first_name": "Anne",
@@ -61,7 +61,7 @@
     "active": true
   }, {
     "id": "1048733",
-    "username": "Annebel.Doe",
+    "username": "bob+50331@rwrs.nl",
     "email": "bob+50331@rwrs.nl",
     "department": "14",
     "first_name": "Annebel",
@@ -76,7 +76,7 @@
     "active": true
   }, {
     "id": "1048741",
-    "username": "Anneke.Doe",
+    "username": "bob+51181@rwrs.nl",
     "email": "bob+51181@rwrs.nl",
     "department": "14",
     "first_name": "Anneke",
@@ -91,7 +91,7 @@
     "active": true
   }, {
     "id": "1048847",
-    "username": "Anouk.Doe",
+    "username": "bob+65290@rwrs.nl",
     "email": "bob+65290@rwrs.nl",
     "department": "14",
     "first_name": "Anouk",
@@ -155,7 +155,7 @@
     "active": true
   }, {
     "id": "1048773",
-    "username": "Anouk.vanden.Doe",
+    "username": "bob+58797@rwrs.nl",
     "email": "bob+58797@rwrs.nl",
     "department": "14",
     "first_name": "Anouk",
@@ -170,7 +170,7 @@
     "active": true
   }, {
     "id": "1048629",
-    "username": "Ans.van.Doe",
+    "username": "bob+48273@rwrs.nl",
     "email": "bob+48273@rwrs.nl",
     "department": "14",
     "first_name": "Ans",
@@ -185,7 +185,7 @@
     "active": true
   }, {
     "id": "1048637",
-    "username": "Audrey.Doe",
+    "username": "bob+48279@rwrs.nl",
     "email": "bob+48279@rwrs.nl",
     "department": "14",
     "first_name": "Audrey",
@@ -200,7 +200,7 @@
     "active": true
   }, {
     "id": "1048739",
-    "username": "Aydinc.Doe",
+    "username": "bob+51179@rwrs.nl",
     "email": "bob+51179@rwrs.nl",
     "department": "14",
     "first_name": "Aydinc",

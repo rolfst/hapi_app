@@ -233,7 +233,9 @@ export const addUser = async (attributes) => {
     where: { networkId: attributes.networkId, userId: attributes.userId },
   });
 
-  if (pivotResult) return pivotResult.update({ deletedAt: null });
+  if (pivotResult) {
+    return pivotResult.update({ ...attributes, deletedAt: attributes.deletedAt || null });
+  }
 
   return NetworkUser.create({ ...attributes, user_id: attributes.userId });
 };

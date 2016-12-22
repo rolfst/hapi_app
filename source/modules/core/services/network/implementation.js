@@ -1,4 +1,14 @@
-import { uniqBy, find, map, pick, flatMap, differenceBy, intersectionBy, omit } from 'lodash';
+import {
+  reject,
+  uniqBy,
+  find,
+  map,
+  pick,
+  flatMap,
+  differenceBy,
+  intersectionBy,
+  omit,
+} from 'lodash';
 import Promise from 'bluebird';
 import * as Logger from '../../../../shared/services/logger';
 import * as Mailer from '../../../../shared/services/mailer';
@@ -85,7 +95,6 @@ export const findExternalUser = (user, externalUsers) => {
  * @return {User} - Return user objects
  */
 export const importUsers = async (_externalUsers, networkId) => {
-  logger.info('Importing users for network', { networkId });
   const externalUsers = uniqBy(_externalUsers, 'username');
   const internalUsers = await networkRepo.findAllUsersForNetwork(networkId);
   const newExternalUsers = differenceBy(externalUsers, internalUsers, 'username');
@@ -93,6 +102,8 @@ export const importUsers = async (_externalUsers, networkId) => {
     map(newExternalUsers, (u) => ({ ...u, password: passwordUtil.plainRandom() })));
   const existingUsers = intersectionBy(internalUsers, externalUsers, 'username');
   const usersToAdd = [...newUsers, ...existingUsers];
+
+  logger.info('Importing users for network', { id: networkId, count: usersToAdd.length });
 
   await Promise.map(usersToAdd, (internalUser) => {
     let externalUser;
@@ -267,7 +278,8 @@ export const importNetwork = async (network, username) => {
     }
 
     const importedTeams = await importTeams(await adapter.fetchTeams(), network.id);
-    const importedUsers = await importUsers(externalUsers, network.id);
+    const importedUsers = await importUsers(
+      reject(externalUsers, { username: externalAdmin.username }), network.id);
 
     await addUsersToTeam(importedUsers, importedTeams, externalUsers);
     await networkRepo.setImportDateOnNetworkIntegration(network.id);

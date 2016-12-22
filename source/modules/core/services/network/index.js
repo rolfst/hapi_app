@@ -144,7 +144,7 @@ export const listActiveUsersForNetwork = async (payload, message) => {
  * Promise containing collection of users
  */
 export const listAllUsersForNetwork = async (payload, message) => {
-  logger.info('Listing all users for network', { payload, message });
+  logger.info('List all users for network', { payload });
 
   const network = await networkRepo.findNetworkById(payload.networkId);
   const usersFromNetwork = await networkRepo.findAllUsersForNetwork(network.id);
@@ -183,8 +183,8 @@ export const getNetwork = async (payload, message) => {
  * @return {external:Promise.<Network>} {@link module:modules/core~Network Network} -
  * Promise containing a collections networks
  */
-export const listNetworksForUser = async (payload, message) => {
-  logger.info('Listing all networks for user', { payload, message });
+export const listNetworksForUser = async (payload) => {
+  logger.info('List all networks for user', { payload });
 
   return networkRepo.findAllContainingUser(payload.id);
 };
@@ -305,9 +305,11 @@ export const updateTeamsForNetwork = async (payload, message) => {
  * Promise containing updated teams
  */
 export const listTeamsForNetwork = async (payload, message) => {
-  logger.info('Updating the external teams in the network', { payload, message });
+  const result = await networkRepo.findTeamsForNetwork(payload.networkId);
+  logger.info('List teams in the network', {
+    payload, teamCount: result.length, message: message || null });
 
-  return networkRepo.findTeamsForNetwork(payload.networkId);
+  return result;
 };
 
 /**

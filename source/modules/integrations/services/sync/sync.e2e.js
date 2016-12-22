@@ -1,3 +1,4 @@
+
 import { assert } from 'chai';
 import { map, find } from 'lodash';
 import Promise from 'bluebird';
@@ -9,10 +10,16 @@ import * as serviceImpl from './implementation';
 
 describe('Network synchronisation', () => {
   let network;
+
   before(async () => (network = await networkRepository
     .createNetwork(global.users.admin.id, 'Foo network for sync')));
 
-  after(() => networkRepository.deleteById(network.id));
+  after(async () => {
+    const users = await networkRepository.findUsersForNetwork(network.id);
+    const promises = map(users, user => userRepository.deleteById(user.id));
+
+    return Promise.all(promises);
+  });
 
   describe('Teams synchronisation', () => {
     afterEach(async () => {
@@ -145,7 +152,9 @@ describe('Network synchronisation', () => {
         externalId: internalUser.externalId,
       });
 
-      await serviceImpl.syncUsersWithNetwork(network.id, externalUsers);
+      const allUsersInSystem = await userRepository.findAllUsers();
+
+      await serviceImpl.syncUsersWithNetwork(network.id, externalUsers, allUsersInSystem);
       const activeUsersInNetwork = await networkService.listActiveUsersForNetwork({
         networkId: network.id }, { credentials: network.superAdmin });
       const syncedUser = find(activeUsersInNetwork, { externalId: '1' });
@@ -160,7 +169,17 @@ describe('Network synchronisation', () => {
     });
 
     it('should remove users from network', async () => {
-      const externalUsers = [];
+      const externalUsers = [{
+        externalId: '1',
+        username: 'johndoe',
+        email: 'johndoe@flex-appeal.nl',
+        firstName: 'John',
+        lastName: 'Doe',
+        roleType: 'EMPLOYEE',
+        isActive: false,
+        deletedAt: new Date(),
+        teamIds: [],
+      }];
 
       const internalUser = {
         externalId: '2',
@@ -178,7 +197,8 @@ describe('Network synchronisation', () => {
         externalId: internalUser.externalId,
       });
 
-      await serviceImpl.syncUsersWithNetwork(network.id, externalUsers);
+      const allUsersInSystem = await userRepository.findAllUsers();
+      await serviceImpl.syncUsersWithNetwork(network.id, externalUsers, allUsersInSystem);
       const activeUsersInNetwork = await networkService.listActiveUsersForNetwork({
         networkId: network.id }, { credentials: network.superAdmin });
       const allUsersInNetwork = await networkService.listAllUsersForNetwork({
@@ -218,11 +238,94 @@ describe('Network synchronisation', () => {
         externalId: internalUser.externalId,
       });
 
-      await serviceImpl.syncUsersWithNetwork(network.id, externalUsers);
+      const allUsersInSystem = await userRepository.findAllUsers();
+      await serviceImpl.syncUsersWithNetwork(network.id, externalUsers, allUsersInSystem);
       const activeUsersInNetwork = await networkService.listActiveUsersForNetwork({
         networkId: network.id }, { credentials: network.superAdmin });
 
       assert.lengthOf(activeUsersInNetwork, 1);
+    });
+
+    it('should transfer user from one network to another', async () => {
+      const externalUsers = [{
+        externalId: '1',
+        username: 'johndoe',
+        email: 'johndoe@flex-appeal.nl',
+        firstName: 'John',
+        lastName: 'Doe',
+        roleType: 'EMPLOYEE',
+        isActive: true,
+        deletedAt: null,
+        teamIds: [],
+      }, {
+        externalId: '3',
+        username: 'bonzo',
+        email: 'bonzo@flex-appeal.nl',
+        firstname: 'bon',
+        lastname: 'zo',
+        password: 'foobar',
+        roleType: 'EMPLOYEE',
+        isActive: true,
+        deletedAt: null,
+        teamIds: [],
+      }];
+
+      const userToTransfer = {
+        externalId: '1',
+        username: 'johndoe',
+        email: 'johndoe@flex-appeal.nl',
+        firstname: 'john',
+        lastname: 'doe',
+        password: 'foo',
+      };
+
+      const initialUsers = [userToTransfer, {
+        externalId: '2',
+        username: 'alwin',
+        email: 'alwin@flex-appeal.nl',
+        firstname: 'al',
+        lastname: 'win',
+        password: 'baz',
+      }];
+
+      const createdUsers = await userRepository.createBulkUsers(initialUsers);
+      await Promise.all([
+        networkRepository.addUser({
+          userId: createdUsers[0].id,
+          networkId: network.id,
+          deletedAt: new Date(),
+          externalId: initialUsers[0].externalId,
+        }),
+        networkRepository.addUser({
+          userId: createdUsers[1].id,
+          networkId: network.id,
+          deletedAt: null,
+          externalId: initialUsers[1].externalId,
+        }),
+      ]);
+
+      const newNetwork = await networkRepository
+        .createNetwork(global.users.admin.id, 'Foo network for transfer');
+      const activeUsersInNetwork = await networkService.listActiveUsersForNetwork({
+        networkId: network.id }, { credentials: network.superAdmin });
+      const allUsers = await userRepository.findAllUsers();
+
+      await serviceImpl.syncUsersWithNetwork(newNetwork.id, externalUsers, allUsers);
+
+      const [activeUsersInNetworkAfterUpdate, activeUsersInToTransferNetwork] = await Promise.all([
+        networkService.listActiveUsersForNetwork({
+          networkId: network.id }, { credentials: network.superAdmin }),
+        networkService.listActiveUsersForNetwork({
+          networkId: newNetwork.id }, { credentials: network.superAdmin }),
+      ]);
+
+      const transferedUser = find(activeUsersInToTransferNetwork,
+        user => user.email === initialUsers[0].email);
+
+      assert.lengthOf(activeUsersInNetwork, 1);
+      assert.lengthOf(activeUsersInNetworkAfterUpdate, 1);
+      assert.lengthOf(activeUsersInToTransferNetwork, 2);
+      assert.isDefined(transferedUser);
     });
   });
 

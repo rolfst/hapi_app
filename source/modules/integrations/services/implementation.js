@@ -51,10 +51,10 @@ export const assertExternalIdNotPresentInNetwork = async (userId, networkId, ext
  * @return {User} - Return user objects
  */
 export const importUsers = async (internalUsers, externalUsers, network) => {
-  const newExternalUsers = differenceBy(externalUsers, internalUsers, 'email');
+  const newExternalUsers = differenceBy(externalUsers, internalUsers, 'username');
   const newUsers = await userRepo.createBulkUsers(
     newExternalUsers.map(u => ({ ...u, password: passwordUtils.plainRandom() })));
-  const existingUsers = intersectionBy(internalUsers, externalUsers, 'email');
+  const existingUsers = intersectionBy(internalUsers, externalUsers, 'username');
   const usersToAddToNetwork = [...newUsers, ...existingUsers];
 
   await Promise.map(usersToAddToNetwork, employee => {
@@ -65,7 +65,7 @@ export const importUsers = async (internalUsers, externalUsers, network) => {
       userId: employee.id,
       active: externalUser.isActive,
       externalId: externalUser.externalId,
-      roleType: externalUser.isAdmin ? 'ADMIN' : 'EMPLOYEE',
+      roleType: externalUser.roleType,
     });
   });
 

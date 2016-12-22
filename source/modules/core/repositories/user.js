@@ -314,9 +314,30 @@ export const removeFromNetwork = async (userId, networkId, forceDelete = false) 
     where: { userId, networkId },
   });
 
-  if (!result) return;
+  if (!result) return NetworkUser.create({ user_id: userId, networkId, deletedAt: new Date() });
 
   return forceDelete ? result.destroy() : result.update({ deletedAt: new Date() });
+};
+
+/**
+ * Sets the network link for a user.
+ * @param {object} attributes
+ * @param {string} attributes.userId
+ * @param {string} attributes.networkId
+ * @param {string} attributes.externalId
+ * @param {string} attributes.deletedAt
+ * @method setNetworkLink
+ * @return {void}
+ */
+export const setNetworkLink = async (attributes) => {
+  const { userId, networkId, externalId, deletedAt } = attributes;
+  const result = await NetworkUser.findOne({
+    where: { userId, networkId },
+  });
+
+  if (!result) return NetworkUser.create({ user_id: userId, networkId, externalId, deletedAt });
+
+  return result.update({ externalId, deletedAt });
 };
 
 /**
