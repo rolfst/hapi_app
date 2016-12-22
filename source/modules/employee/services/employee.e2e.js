@@ -29,7 +29,7 @@ describe('Service: employee', () => {
       sandbox.restore();
     });
 
-    it('should update intercom user', async () => {
+    it('should fire USER_UPDATED event', async () => {
       await service.updateEmployee(
         { attributes: pick(credentials, 'id', 'email', 'phone') },
         { credentials, network }
