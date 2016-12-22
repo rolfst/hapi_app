@@ -1,4 +1,4 @@
-import { map } from 'lodash';
+import { map, intersectionBy, reject } from 'lodash';
 import * as passwordUtil from '../../../shared/utils/password';
 import * as mailer from '../../../shared/services/mailer';
 import { UserRoles } from '../../../shared/services/permission';
@@ -6,7 +6,6 @@ import createError from '../../../shared/utils/create-error';
 import camelCaseKeys from '../../../shared/utils/camel-case-keys';
 import signupMail from '../../../shared/mails/signup';
 import addedToNetworkMail from '../../../shared/mails/added-to-network';
-import addedToExtraNetwork from '../../../shared/mails/added-to-extra-network';
 import * as userService from '../../core/services/user';
 import * as networkRepo from '../../core/repositories/network';
 import * as userRepo from '../../core/repositories/user';
@@ -129,16 +128,12 @@ export const inviteUsers = async (payload, message) => {
     throw createError('403');
   }
 
-  const networkMembers = await networkRepo.findUsersForNetwork(network.id);
-  const matchingMembersFromIntegration = await impl.getMembersfromIntegration(network);
+  const networkMembers = await userService.listUsersWithNetworkScope({
+    userIds: payload.userIds, networkId: network.id }, message);
+  const preparedUsers = reject(networkMembers, 'invitedAt');
+  const toNotifyUsers = intersectionBy(preparedUsers, networkMembers, 'id');
 
-  const usersWithoutPasswords = impl.getUsersWithoutPassword(
-    networkMembers, matchingMembersFromIntegration);
-  const usersToSendMailto = await impl.generatePasswordsForMembers(usersWithoutPasswords);
-
-  const usersWithPassword = impl.getUsersWithPassword(
-    networkMembers, matchingMembersFromIntegration, [identifiedUser]);
+  const usersToSendMailto = await impl.generatePasswordsForMembers(toNotifyUsers);
 
   map(usersToSendMailto, (user) => mailer.send(addedToNetworkMail(network, user)));
-  map(usersWithPassword, (user) => mailer.send(addedToExtraNetwork(network, user)));
 };

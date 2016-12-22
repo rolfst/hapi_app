@@ -40,6 +40,10 @@ const NetworkUser = model.define('NetworkUser', {
     type: Sequelize.INTEGER,
     field: 'is_welcomed',
   },
+  invitedAt: {
+    type: Sequelize.DATE,
+    field: 'invited_at',
+  },
   deletedAt: {
     type: Sequelize.DATE,
     field: 'deleted_at',

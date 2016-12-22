@@ -1,5 +1,6 @@
 import * as service from '../services/invite-user';
 import * as responseUtil from '../../../shared/utils/response';
+import camelCaseKeys from '../../../shared/utils/camel-case-keys';
 import * as Logger from '../../../shared/services/logger';
 
 const logger = Logger.createLogger('EMPLOYEE/handler/bulkInviteUsers');
@@ -7,7 +8,8 @@ const logger = Logger.createLogger('EMPLOYEE/handler/bulkInviteUsers');
 
 export default async (req, reply) => {
   try {
-    const payload = { ...req.payload, ...req.params };
+    const rawPayload = { ...req.payload, ...req.params };
+    const payload = camelCaseKeys(rawPayload);
     const message = { ...req.pre, ...req.auth };
 
     logger.info('Bulk-inviting users: ', { payload, message });

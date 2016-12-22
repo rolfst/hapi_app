@@ -15,6 +15,8 @@ describe('Handler: View my profile', () => {
     assert.equal(data.date_of_birth, global.users.employee.dateOfBirth);
     assert.equal(data.integration_auth, false);
     assert.equal(data.role_type, 'EMPLOYEE');
+    assert.property(data, 'deleted_at');
+    assert.property(data, 'invited_at');
     assert.equal(data.address, global.users.employee.address);
   });
 
@@ -31,6 +33,8 @@ describe('Handler: View my profile', () => {
     assert.equal(data.date_of_birth, global.users.admin.dateOfBirth);
     assert.equal(data.integration_auth, false);
     assert.equal(data.role_type, 'ADMIN');
+    assert.property(data, 'deleted_at');
+    assert.property(data, 'invited_at');
     assert.equal(data.address, global.users.admin.address);
   });
 
@@ -47,6 +51,8 @@ describe('Handler: View my profile', () => {
     assert.equal(data.date_of_birth, global.users.admin.dateOfBirth);
     assert.equal(data.integration_auth, true);
     assert.equal(data.role_type, 'ADMIN');
+    assert.property(data, 'deleted_at');
+    assert.property(data, 'invited_at');
     assert.equal(data.address, global.users.admin.address);
   });
 });

@@ -21,6 +21,18 @@ export const getUser = async (payload) => {
   return userRepo.findUserById(payload.userId);
 };
 
+async function createScopedUser(user, metaData, network) {
+  return {
+    ...user,
+    function: !!metaData.deletedAt ?
+      'Verwijderd' : await impl.createFunctionName(user.id, network),
+    roleType: metaData.roleType,
+    externalId: metaData.externalId,
+    deletedAt: metaData.deletedAt,
+    invitedAt: metaData.invitedAt,
+    integrationAuth: !!metaData.userToken,
+  };
+}
 /**
  * Retrieve multiple users by id with network scope
  * @param {object} payload - Object containing payload data
@@ -31,7 +43,7 @@ export const getUser = async (payload) => {
  * @return {external:Promise.<User[]>} {@link module:modules/core~User} Promise containing
  * collection of users
  */
-export const listUsersWithNetworkScope = async (payload, message) => {
+export async function listUsersWithNetworkScope(payload, message) {
   const users = await userRepo.findUsersByIds(payload.userIds);
   const network = await networkService.getNetwork({ id: payload.networkId }, message);
   const metaDataList = await userRepo.findMultipleUserMetaDataForNetwork(
@@ -40,17 +52,9 @@ export const listUsersWithNetworkScope = async (payload, message) => {
   return Promise.map(users, async (user) => {
     const metaData = find(metaDataList, { userId: parseInt(user.id, 10) });
 
-    return {
-      ...user,
-      function: !!metaData.deletedAt ?
-        'Verwijderd' : await impl.createFunctionName(user.id, network),
-      roleType: metaData.roleType,
-      externalId: metaData.externalId,
-      deletedAt: metaData.deletedAt,
-      integrationAuth: !!metaData.userToken,
-    };
+    return createScopedUser(user, metaData, network);
   });
-};
+}
 
 /**
  * Retrieve user with network scope
@@ -62,18 +66,10 @@ export const listUsersWithNetworkScope = async (payload, message) => {
  * @return {external:Promise.<User[]>} {@link module:modules/core~User} Promise containing
  * collection of users
  */
-export const getUserWithNetworkScope = async (payload) => {
+export async function getUserWithNetworkScope(payload) {
   const user = await userRepo.findUserById(payload.id);
   const network = await networkRepo.findNetworkById(payload.networkId);
   const metaData = await userRepo.findUserMetaDataForNetwork(user.id, network.id);
 
-  return {
-    ...user,
-    function: !!metaData.deletedAt ?
-      'Verwijderd' : await impl.createFunctionName(user.id, network),
-    roleType: metaData.roleType,
-    externalId: metaData.externalId,
-    isActive: metaData.deletedAt === null,
-    integrationAuth: !!metaData.userToken,
-  };
-};
+  return createScopedUser(user, metaData, network);
+}

@@ -1,8 +1,7 @@
 import { assert } from 'chai';
 import Promise from 'bluebird';
-import nock from 'nock';
 import { flatten, find, sortBy, partialRight, flow, map } from 'lodash';
-import { getRequest } from '../../../shared/test-utils/request';
+import { postRequest } from '../../../shared/test-utils/request';
 import * as mailer from '../../../shared/services/mailer';
 import * as stubs from '../../../shared/test-utils/stubs';
 import * as userRepo from '../../core/repositories/user';
@@ -35,15 +34,10 @@ describe('Handler: Bulk invite users', () => {
   after(() => Promise.all(map(map(createdUsers, 'id'), userRepo.deleteById)));
 
   describe('Happy path', () => {
-    before(async () => {
-      nock(global.networks.pmt.externalId)
-        .get('/users')
-        .reply('200', stubs.users_200);
-    });
-
     it('should add to the network as admin', async () => {
-      const endpoint = `/v2/networks/${global.networks.pmt.id}/users/bulk_invite`;
-      const { statusCode } = await getRequest(endpoint);
+      const userIds = map(createdUsers, 'id');
+      const endpoint = `/v2/networks/${global.networks.pmt.id}/users/invite`;
+      const { statusCode } = await postRequest(endpoint, { user_ids: userIds });
 
       assert.equal(statusCode, 200);
       assert.equal(mailer.send.called, true);
@@ -72,8 +66,9 @@ describe('Handler: Bulk invite users', () => {
     ]));
 
     it('should fail because of bad network access', async () => {
-      const endpoint = `/v2/networks/${network.id}/users/bulk_invite`;
-      const { statusCode } = await getRequest(endpoint);
+      const endpoint = `/v2/networks/${network.id}/users/invite`;
+      const userIds = map(createdUsers, 'id');
+      const { statusCode } = await postRequest(endpoint, { user_ids: userIds });
 
       assert.equal(statusCode, 403);
     });
