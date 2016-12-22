@@ -71,4 +71,4 @@ export async function dispatchEvent(eventType, message, payload) {
       break;
     default: return null;
   }
-};
+}
