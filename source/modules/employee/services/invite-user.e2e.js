@@ -118,7 +118,7 @@ describe('Service: invite user', () => {
       assert.equal(actual.email, payload.email);
     });
 
-    it('should add user to intercom', async () => {
+    it('should dispatch USER_INVITED event', async () => {
       await service.inviteUser(payload, { credentials, network });
 
       const { args } = dispatchEventSpy.firstCall;
