@@ -1,3 +1,5 @@
+import bsyslog from 'bunyan-syslog';
+
 export default {
   streams: [{
     level: 'info',
@@ -7,6 +9,11 @@ export default {
     stream: process.stderr,
   }, {
     level: 'error',
-    stream: process.stderr,
+    stream: bsyslog.createBunyanStream({
+      type: 'sys',
+      facility: bsyslog.local0,
+      host: 'logs5.papertrailapp.com',
+      port: 47226,
+    }),
   }],
 };

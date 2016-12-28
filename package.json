@@ -48,7 +48,8 @@
     "sequelize": "3.19.3",
     "smtpapi": "1.2.0",
     "uuid-v4": "0.1.0",
-    "yargs": "6.3.0"
+    "yargs": "6.3.0",
+    "bunyan-syslog": "0.3.1"
   },
   "devDependencies": {
     "babel-cli": "6.6.5",
