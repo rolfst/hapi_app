@@ -24,7 +24,7 @@ export const transformBoomToErrorResponse = (boom) => ({
   status_code: boom.output.payload.statusCode,
 });
 
-export const onPreResponse = (req, reply) => {
+export const onPreResponse = (ravenClient) => (req, reply) => {
   const message = { ...req.auth, ...req.credentials };
   const errorPayload = {
     ...pick(req, 'info', 'payload', 'params', 'query'),
@@ -43,6 +43,7 @@ export const onPreResponse = (req, reply) => {
     }
 
     logger.warn('Error from application', { message, payload: errorPayload, err: req.response });
+    ravenClient.captureException(req.response);
     const errorResponse = transformBoomToErrorResponse(error);
 
     return reply(errorResponse).code(errorResponse.status_code);
