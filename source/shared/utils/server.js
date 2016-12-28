@@ -42,10 +42,13 @@ export const onPreResponse = (ravenClient) => (req, reply) => {
       error = createError(req.response.output.statusCode.toString());
     }
 
-    logger.warn('Error from application', { message, payload: errorPayload, err: req.response });
-    ravenClient.captureException(req.response);
-    const errorResponse = transformBoomToErrorResponse(error);
+    if (req.response.output.statusCode !== 404) {
+      logger.warn('Error from application', { message, payload: errorPayload, err: req.response });
+      ravenClient.mergeContext({ extra: { ...errorPayload } });
+      ravenClient.captureException(req.response);
+    }
 
+    const errorResponse = transformBoomToErrorResponse(error);
     return reply(errorResponse).code(errorResponse.status_code);
   }
 
