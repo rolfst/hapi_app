@@ -1,8 +1,9 @@
-import { map, pick, sample } from 'lodash';
+import { map, omit, pick, sample } from 'lodash';
 import Promise from 'bluebird';
 import createError from '../../../shared/utils/create-error';
 import { User, Network, NetworkUser, Integration, Team, TeamUser } from '../../../shared/models';
 import createUserModel from '../models/user';
+import createNetworkLinkModel from '../models/network-link';
 import createCredentialsModel from '../models/credentials';
 
 /**
@@ -31,6 +32,7 @@ const defaultIncludes = {
 };
 
 const toModel = (dao) => createUserModel(dao);
+const toNetworkLinkModel = (dao) => createNetworkLinkModel(dao);
 
 export const findAllUsers = async () => {
   const result = await User.findAll();
@@ -81,45 +83,64 @@ export const findUserById = async (id) => {
 };
 
 /**
- * Finds a user by email address
- * @param {string} email - identifier how the user is known
- * @method findUsersByEmail
+ * Finds a user by given attributes
+ * @param {object} attributes
+ * @param {string} attributes.username
+ * @param {string} attributes.email
+ * @method findUserBy
  * @return {external:Promise.<User>} {@link module:modules/core~User User}
  */
-export const findUserByEmail = async (email) => {
-  const result = await User.findOne({ where: { email } });
+export const findUserBy = async (attributes) => {
+  const result = await User.findOne({
+    where: { ...pick(attributes, 'username', 'email') },
+  });
   if (!result) return null;
 
   return toModel(result);
 };
 
 /**
- * Finds a user in a network by an externalId
- * @param {string} networkId - network identifier where the user is searched for
- * @param {string} externalId - identifier how the user is known by the integration partner
- * @method findUserInNetworkByExternalId
- * @return {external:Promise.<User>} {@link module:modules/core~User User}
- */
-export const findUserInNetworkByExternalId = async (networkId, externalId) => {
-  const result = await NetworkUser.findOne({ where: { networkId, externalId } });
-  if (!result) return null;
-
-  return findUserById(result.userId);
-};
-
-/**
  * Finds a network-user association
- * @param {string} userId - identifier how the user is known by the integration partner
- * @param {string} networkId - network identifier where the user is searched for
+ * @param {object} attributes
+ * @param {string} attributes.externalId
+ * @param {string} attributes.userId
+ * @param {string} attributes.networkId
  * @method findNetworkLink
  * @return {external:Promise.<NetworkUser>} {@link module:modules/core~NetworkUser NetworkUser}
  */
-export const findNetworkLink = async (userId, networkId) => {
+export const findNetworkLink = async (attributes) => {
   const result = await NetworkUser.findOne({
-    where: { networkId, userId },
+    where: { ...pick(attributes, 'externalId', 'userId', 'networkId') },
   });
 
-  return result.get({ plain: true });
+  if (!result) return null;
+
+  return toNetworkLinkModel(result);
+};
+
+/**
+ * Sets the network link for a user.
+ * @param {object} attributes
+ * @param {string} attributes.userId
+ * @param {string} attributes.networkId
+ * @param {string} attributes.externalId
+ * @param {string} attributes.deletedAt
+ * @param {string} attributes.userToken
+ * @param {string} attributes.roleType
+ * @method setNetworkLink
+ * @return {void}
+ */
+export const setNetworkLink = async (_attributes) => {
+  const attributes = pick(_attributes,
+    'userId', 'networkId', 'externalId', 'deletedAt', 'userToken', 'roleType');
+
+  const result = await NetworkUser.findOne({
+    where: { userId: attributes.userId, networkId: attributes.networkId },
+  });
+
+  if (!result) return NetworkUser.create({ ...attributes, user_id: attributes.userId });
+
+  return result.update({ ...omit(attributes, 'userId, networkId') });
 };
 
 /**
@@ -134,7 +155,7 @@ export const findMultipleUserMetaDataForNetwork = async (userIds, networkId) => 
     where: { networkId, userId: { $in: userIds } },
   });
 
-  return map(result, (item) => item.get({ plain: true }));
+  return map(result, toNetworkLinkModel);
 };
 
 /**
@@ -152,61 +173,14 @@ export const findCredentialsForUser = async (username) => {
 };
 
 /**
- * Finds the user by username
- * @param {string} username - identifier to search the user for
- * @method findUserByUsername
- * @return {external:Promise.<User>} {@link module:modules/core~User User}
- */
-export const findUserByUsername = async (username) => {
-  const result = await User.findOne({ where: { username } });
-  if (!result) return null;
-
-  return toModel(result);
-};
-
-/**
- * Adds externalUsers to a network
- * @param {User[]} users - users to add
- * @param {Network} network - network to add the users to
- * @method addExternalUsersToNetwork
- * @return {external:Promise.<User[]>} {@link module:modules/core~User User}
- */
-export const addExternalUsersToNetwork = (users, network) => {
-  const promises = users
-    .map(user => NetworkUser.create({
-      externalId: user.externalId,
-      networkId: network.id,
-      userId: user.id,
-      roleType: user.roleType,
-      deletedAt: user.isActive ? null : new Date(),
-    }));
-
-  return Promise.all(promises);
-};
-
-/**
  * Adds user to a network
  * @param {User} users - users to add
  * @param {Network} network - network to add the users to
- * @method addExternalUsersToNetwork
+ * @method addUsersToNetwork
  * @return {external:Promise.<User[]>} {@link module:modules/core~User User}
  */
 export const addUsersToNetwork = (user, network, roleType = 'EMPLOYEE') => {
   return network.addUsers(user, { roleType });
-};
-
-/**
- * sets the externalId on a user
- * @param {string} userId - users to to update
- * @param {string} networkId - network to find the user in
- * @param {string} externalId - identifier how the user is known in the integration partner
- * @method setExternalId
- * @return {external:Promise.<User>} {@link module:modules/core~User User}
- */
-export const setExternalId = async (userId, networkId, externalId) => {
-  const result = await NetworkUser.findOne({ where: { userId, networkId } });
-
-  return result.update({ externalId });
 };
 
 /**
@@ -220,19 +194,6 @@ export const updateUser = async (userId, attributes) => {
   await user.update(attributes);
 
   return findUserById(userId);
-};
-
-/**
- * @param {string} email - attribute to find the user with
- * @param {object} attributes - attributes to create a user with
- * @method updateUserByEmail
- * @return {external:Promise.<User>} {@link module:modules/core~User User}
- */
-export const updateUserByEmail = async (email, attributes) => {
-  const user = await User.findOne({ where: { email } });
-  const updatedUser = await user.update(attributes);
-
-  return updatedUser.reload();
 };
 
 /**
@@ -320,45 +281,6 @@ export const removeFromNetwork = async (userId, networkId, forceDelete = false) 
 };
 
 /**
- * Sets the network link for a user.
- * @param {object} attributes
- * @param {string} attributes.userId
- * @param {string} attributes.networkId
- * @param {string} attributes.externalId
- * @param {string} attributes.deletedAt
- * @method setNetworkLink
- * @return {void}
- */
-export const setNetworkLink = async (attributes) => {
-  const { userId, networkId, externalId, deletedAt } = attributes;
-  const result = await NetworkUser.findOne({
-    where: { userId, networkId },
-  });
-
-  if (!result) return NetworkUser.create({ user_id: userId, networkId, externalId, deletedAt });
-
-  return result.update({ externalId, deletedAt });
-};
-
-/**
- * sets the externalId on a user
- * @param {User} user - users to to update
- * @param {Network} network - network to find the user in
- * @param {string} token - identifier how the user is known in the integration partner
- * @method setIntegrationToken
- * @return {external:Promise.<User>} {@link module:modules/core~User User}
- */
-export const setIntegrationToken = async (user, network, token) => {
-  const result = await NetworkUser.findOne({
-    where: { userId: user.id, networkId: network.id },
-  });
-
-  if (!result) throw createError('10002');
-
-  return result.update({ userToken: token });
-};
-
-/**
  * updates the networkUser
  * the user is from the external source
  * @Param {object} user - externalInformation of user
@@ -402,18 +324,4 @@ export const userBelongsToNetwork = async (userId, networkId) => {
   });
 
   return result !== null;
-};
-
-/**
- * @param {string} userId - identifier for user to delete
- * @param {string} networkId - network to find the user in
- * @method userIsDeletedFromNetwork
- * @return {external:Promise.<boolean>} Promise whether the user is deleted in a network
- */
-export const userIsDeletedFromNetwork = async (userId, networkId) => {
-  const result = await NetworkUser.findOne({
-    where: { networkId, userId },
-  });
-
-  return result ? result.deletedAt !== null : false;
 };

@@ -59,17 +59,16 @@ export const inviteNewUser = async (network, { firstName, lastName, email, roleT
  */
 export const inviteExistingUser = async (network, user, roleType) => {
   const userBelongsToNetwork = await userRepo.userBelongsToNetwork(user.id, network.id);
-  const userIsDeletedFromNetwork = await userRepo.userIsDeletedFromNetwork(user.id, network.id);
+  const networkId = network.id;
+  const userId = user.id;
 
   if (userBelongsToNetwork) {
     throw createError('403', 'User with the same email already in this network.');
-  } else if (userIsDeletedFromNetwork) {
-    await networkRepo.activateUserInNetwork(network, user);
   } else {
-    await networkRepo.addUser({ userId: user.id, networkId: network.id, roleType });
+    await networkRepo.addUser({ userId, networkId, roleType });
   }
 
-  await networkRepo.setRoleTypeForUser(network, user, roleType);
+  await userRepo.setNetworkLink({ networkId, userId, roleType, deletedAt: null });
 
   mailer.send(addedToNetworkMail(network, user));
 
@@ -96,7 +95,7 @@ export const inviteUser = async (payload, message) => {
   const { network } = message;
 
   const role = roleType ? roleType.toUpperCase() : 'EMPLOYEE';
-  let user = await userRepo.findUserByEmail(email);
+  let user = await userRepo.findUserBy({ email });
 
   if (user) {
     await inviteExistingUser(network, user, role);

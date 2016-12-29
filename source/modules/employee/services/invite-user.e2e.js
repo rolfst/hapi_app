@@ -89,7 +89,7 @@ describe('Service: invite user', () => {
     const payload = { firstName: 'John', lastName: 'Doe', email: 'test-user@foo.com' };
 
     afterEach(async () => {
-      const user = await userRepo.findUserByEmail(payload.email);
+      const user = await userRepo.findUserBy({ email: payload.email });
 
       return userRepo.deleteById(user.id);
     });

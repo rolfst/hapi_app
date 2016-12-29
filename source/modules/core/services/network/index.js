@@ -27,7 +27,7 @@ const logger = Logger.getLogger('CORE/service/network');
  * new network object
  */
 export const create = async (payload, message) => {
-  logger.info('Creating Network', { payload, message });
+  logger.info('Creating network', { payload, message });
 
   const whitelistAttrs = pick(payload, 'userId', 'name', 'externalId', 'integrationName');
 
@@ -186,7 +186,7 @@ export const getNetwork = async (payload, message) => {
 export const listNetworksForUser = async (payload) => {
   logger.info('List all networks for user', { payload });
 
-  return networkRepo.findAllContainingUser(payload.id);
+  return networkRepo.findNetworksForUser(payload.id);
 };
 
 /**
@@ -245,19 +245,6 @@ export const updateUsersForNetwork = async (payload, message) => {
   const { externalUsers, networkId } = payload;
 
   return impl.updateUsersForNetwork(externalUsers, networkId, message);
-};
-
-/**
- * @param {object} payload - Object containing payload data
- * @param {string} payload.integrationName - the integration name where to list the networks for
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method listNetworksForIntegration
- * @return {external:Promise.<String[]>} Promise containing updated userIds
- */
-export const listNetworksForIntegration = async (payload, message) => {
-  logger.info('Listing the networks for the integration', { payload, message });
-
-  return networkRepo.findNetworksForIntegration(payload.integrationName);
 };
 
 /**

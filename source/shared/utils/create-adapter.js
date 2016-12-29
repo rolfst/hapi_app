@@ -31,7 +31,7 @@ export const createAdapter = async (network, userId, options = {}) => {
   let userToken;
 
   if (!proceedWithoutToken) {
-    userToken = (await userRepo.findNetworkLink(userId, network.id)).userToken;
+    userToken = (await userRepo.findNetworkLink({ userId, networkId: network.id })).userToken;
   }
 
   if (!userToken && !proceedWithoutToken) {

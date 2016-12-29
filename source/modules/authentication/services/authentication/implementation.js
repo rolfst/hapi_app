@@ -8,7 +8,7 @@ import createAccessToken from '../../utils/create-access-token';
 import createRefreshToken from '../../utils/create-refresh-token';
 
 export const assertUserBelongsToANetwork = async (userId) => {
-  const networksContainingUser = await networkRepo.findAllContainingUser(userId);
+  const networksContainingUser = await networkRepo.findNetworksForUser(userId);
 
   if (networksContainingUser.length === 0) {
     throw createError('403', 'The user does not belong to any network.');
@@ -25,10 +25,6 @@ export const checkPassword = (hash, plain) => {
 
 export const updateLastLogin = async (user) => {
   userRepo.updateUser(user.id, { lastLogin: moment().toISOString() });
-};
-
-export const getIntegrationInfoForUser = async (userId) => {
-  return networkRepo.findIntegrationInfo(userId);
 };
 
 export const authenticateUser = async ({ username, password }) => {

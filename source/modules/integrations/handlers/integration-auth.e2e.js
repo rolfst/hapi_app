@@ -92,8 +92,8 @@ describe('Integration auth', () => {
       password: 'baz',
     }, global.server, global.tokens.employee);
 
-    const metaData = await userRepo.findNetworkLink(
-      global.users.employee.id, network.id);
+    const metaData = await userRepo.findNetworkLink({
+      userId: global.users.employee.id, networkId: network.id });
 
     assert.equal(metaData.userToken, 'auth_token');
     assert.equal(metaData.externalId, 1);

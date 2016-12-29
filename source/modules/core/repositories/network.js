@@ -80,34 +80,12 @@ export const findNetworkByIds = async (ids) => {
   return map(result, toModel);
 };
 
-/**
- * @param {string} networkId - network id
- * @method findIntegrationNameForNetwork
- * @return {external:Promise.<string>} integration name
- */
-export const findIntegrationNameForNetwork = async (networkId) => {
-  const result = await findNetworkById(networkId);
-  if (!result.hasIntegration) return null;
-
-  return result.integrations[0];
-};
-
-/**
- * @param {string} userId - user id
- * @method findIntegrationInfo
- * @return {external:Promise.<Integration>} {@link module:modules/core~Integration Integration} -
- * integration
- */
-export const findIntegrationInfo = async (userId) => {
-  const result = await NetworkUser.findAll({
-    where: { userId, userToken: { $ne: null } },
+export const updateNetwork = async (networkId, attributes) => {
+  const result = await Network.findOne({
+    where: { id: networkId },
   });
 
-  return Promise.map(result, async (pivot) => ({
-    name: await findIntegrationNameForNetwork(pivot.networkId),
-    token: pivot.userToken,
-    externalId: pivot.externalId,
-  }));
+  return result.update(attributes);
 };
 
 /**
@@ -134,31 +112,11 @@ export const setImportDateOnNetworkIntegration = async (networkId) => {
 };
 
 /**
- * @param {string} networkId - network id
- * @method unsetImportDateOnNetworkIntegration
- * @return {external:Promise.<NetworkIntegration>}
- * {@link module:modules/core~NetworkIntegration NetworkIntegration}
- */
-export const unsetImportDateOnNetworkIntegration = async (networkId) => {
-  const networkIntegration = await findNetworkIntegration(networkId);
-  return networkIntegration.update({ importedAt: null });
-};
-
-/**
- * @param {string} name - name
- * @method findIntegrationByName
- * @return {external:Promise.<Integration>} {@link module:modules/core~Integration Integration}
- */
-export const findIntegrationByName = (name) => {
-  return Integration.findOne({ where: { name } });
-};
-
-/**
  * @param {string} userId - userId
- * @method findAllContainingUser
+ * @method findNetworksForUser
  * @return {external:Promise.<Integration>} {@link module:modules/core~Integration Integration}
  */
-export const findAllContainingUser = async (userId) => {
+export const findNetworksForUser = async (userId) => {
   const pivotResult = await NetworkUser.findAll({
     where: { userId, deletedAt: null },
   });
@@ -167,59 +125,6 @@ export const findAllContainingUser = async (userId) => {
 
   return findNetworkByIds(networkIds);
 };
-
-
-/**
- * @param {Network} network - network
- * @param {User} user - user
- * @param {boolean} [active=true] - userId
- * @method activateUserInNetwork
- * @return {external:Promise.<NetworkUser>} {@link module:modules/core~NetworkUser NetworkUser}
- */
-export const activateUserInNetwork = async (network, user, active = true) => {
-  const deletedAt = active ? null : new Date();
-  const result = await NetworkUser.findOne({
-    where: { networkId: network.id, userId: user.id },
-  });
-
-  return result.update({ deletedAt });
-};
-
-/**
- * @param {Network} network - network
- * @param {User} user - user
- * @param {string} roleType - roleType
- * @method setRoleTypeForUser
- * @return {external:Promise.<NetworkUser>} {@link module:modules/core~NetworkUser NetworkUser}
- */
-export const setRoleTypeForUser = async (network, user, roleType) => {
-  const result = await NetworkUser.findOne({
-    where: { networkId: network.id, userId: user.id },
-  });
-
-  return result.update({ roleType });
-};
-
-/**
- * @param {string} integrationName
- * @method findNetworksForIntegration
- * @return {external:Promise.<Network[]>} {@link module:modules/core~Network Network}
- */
-export const findNetworksForIntegration = async (integrationName) => {
-  const networks = await Network
-    .findAll({
-      include: [{
-        model: User,
-        as: 'SuperAdmin',
-      }, {
-        model: Integration,
-        where: { name: integrationName },
-      }],
-    });
-
-  return map(networks, toModel);
-};
-
 
 /**
  * @param {object} attributes - attributes
@@ -238,20 +143,6 @@ export const addUser = async (attributes) => {
   }
 
   return NetworkUser.create({ ...attributes, user_id: attributes.userId });
-};
-
-/**
- * @param {string} networkId - network where user is added to.
- * @param {string} userId - user to add to the network
- * @method setSuperAdmin
- * @return {external:Promise.<NetworkUser>} {@link module:modules/core~NetworkUser NetworkUser}
- */
-export const setSuperAdmin = async (networkId, superUserId) => {
-  const network = await Network.findById(networkId);
-  const superUser = await userRepo.findUserById(superUserId);
-  if (!superUser) throw createError('404');
-
-  return network.update({ userId: superUser.id });
 };
 
 /**
@@ -330,6 +221,15 @@ export const createNetwork = async (userId, name = null, externalId = null) => {
  */
 export const deleteById = (networkId) => {
   return Network.destroy({ where: { id: networkId } });
+};
+
+/**
+ * @param {string} name - name
+ * @method findIntegrationByName
+ * @return {external:Promise.<Integration>} {@link module:modules/core~Integration Integration}
+ */
+export const findIntegrationByName = (name) => {
+  return Integration.findOne({ where: { name } });
 };
 
 /**

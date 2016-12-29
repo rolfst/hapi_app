@@ -68,7 +68,7 @@ describe('Import network', () => {
         network = await findNetwork();
 
         const users = await networkRepo.findAllUsersForNetwork(network.id);
-        const createdUser = await userRepo.findUserByUsername(employee.username);
+        const createdUser = await userRepo.findUserBy({ username: employee.username });
 
         sandbox.restore();
 
@@ -95,7 +95,7 @@ describe('Import network', () => {
       it('should send configuration email', async () => {
         const foundNetwork = await networkRepo.findNetwork({
           externalId: pristineNetwork.externalId });
-        const user = await userRepo.findUserByUsername(employee.username);
+        const user = await userRepo.findUserBy({ username: employee.username });
         const configuration = configurationMailNewAdmin(foundNetwork, user, 'testpassword');
 
         assert.deepEqual(mailer.send.firstCall.args[0], configuration);

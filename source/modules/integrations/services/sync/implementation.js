@@ -55,7 +55,7 @@ export const getRemovableTeamsIdsForNetwork = async (externalTeams, networkId, m
 export const removeUsersFromNetwork = async (externalUsers, networkId, message) => {
   const removableUserIds = await getRemovableUsersForNetwork(externalUsers, networkId, message);
   const removableUsers = await Promise.map(removableUserIds, (userId) => {
-    return userRepo.findNetworkLink(userId, networkId);
+    return userRepo.findNetworkLink({ userId, networkId });
   });
   const removedUsersIds = await Promise.map(removableUsers,
     async (user) => {

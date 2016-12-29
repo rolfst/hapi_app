@@ -26,19 +26,6 @@ export const listMembersForTeams = async (payload, message) => {
 };
 
 /**
- * Retrieve teams
- * @param {object} payload - Object containing payload data
- * @param {array} payload.teamIds - The ids for the teams to find
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method listTeams
- * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team} -
- * Promise containing collection of teams
- */
-export const listTeams = async (payload) => {
-  return teamRepo.findTeamsByIds(payload.teamIds);
-};
-
-/**
  * Delete teams
  * @param {object} payload - Object containing payload data
  * @param {array} payload.teamIds - The ids for the teams to be deleted
