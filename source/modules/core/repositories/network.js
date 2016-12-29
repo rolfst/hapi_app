@@ -162,7 +162,6 @@ export const findAllContainingUser = async (userId) => {
   const pivotResult = await NetworkUser.findAll({
     where: { userId, deletedAt: null },
   });
-
   const networkIds = uniq(map(pivotResult, 'networkId'));
 
   return findNetworkByIds(networkIds);
