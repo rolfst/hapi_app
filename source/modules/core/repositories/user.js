@@ -111,10 +111,10 @@ export const findUserInNetworkByExternalId = async (networkId, externalId) => {
  * Finds a network-user association
  * @param {string} userId - identifier how the user is known by the integration partner
  * @param {string} networkId - network identifier where the user is searched for
- * @method findUserMetaDataForNetwork
+ * @method findNetworkLink
  * @return {external:Promise.<NetworkUser>} {@link module:modules/core~NetworkUser NetworkUser}
  */
-export const findUserMetaDataForNetwork = async (userId, networkId) => {
+export const findNetworkLink = async (userId, networkId) => {
   const result = await NetworkUser.findOne({
     where: { networkId, userId },
   });

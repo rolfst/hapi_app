@@ -12,7 +12,7 @@ import * as impl from './implementation';
 export const getLinkedAccessToken = async (payload, message) => {
   try {
     const credentials = pick(payload, 'username', 'password');
-    const adapter = createAdapter(message.network, null, { proceedWithoutToken: true });
+    const adapter = await createAdapter(message.network, 0, { proceedWithoutToken: true });
     const authResult = await adapter.authenticate(credentials);
 
     // Else we get different users that are connected with the
@@ -26,7 +26,7 @@ export const getLinkedAccessToken = async (payload, message) => {
     userRepo.setIntegrationToken(message.credentials, message.network, authResult.token);
     userRepo.setExternalId(message.credentials.id, message.network.id, authResult.externalId);
 
-    return createAccessToken(message.credentials.id, device.device_id, [authResult]);
+    return createAccessToken(message.credentials.id, device.device_id);
   } catch (err) {
     throw err;
   }

@@ -43,19 +43,17 @@ export const authenticateUser = async ({ username, password }) => {
   return user;
 };
 
-export const createAuthenticationTokens = async (userId, deviceName, authenticatedIntegrations) => {
+export const createAuthenticationTokens = async (userId, deviceName) => {
   const device = await authenticationRepo.findOrCreateUserDevice(userId, deviceName);
-  const accessToken = createAccessToken(
-    userId, device.device_id, authenticatedIntegrations);
+  const accessToken = createAccessToken(userId, device.device_id);
   const refreshToken = await createRefreshToken(userId, device.device_id);
 
   return { accessToken, refreshToken };
 };
 
 export const getAuthenticationTokens = async (user, deviceName) => {
-  const integrationInfo = await getIntegrationInfoForUser(user.id);
   const { accessToken, refreshToken } = await createAuthenticationTokens(
-    user.id, deviceName, integrationInfo);
+    user.id, deviceName);
 
   updateLastLogin(user);
 
