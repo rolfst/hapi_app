@@ -27,7 +27,7 @@ export const transformBoomToErrorResponse = (boom) => ({
 export const onPreResponse = (ravenClient) => (req, reply) => {
   const message = { ...req.auth, ...req.credentials };
   const errorPayload = {
-    ...pick(req, 'info', 'payload', 'params', 'query'),
+    ...pick(req, 'info', 'payload', 'headers', 'params', 'query'),
     method: req.method,
     url: req.path,
   };
