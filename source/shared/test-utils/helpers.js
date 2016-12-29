@@ -8,6 +8,8 @@ import * as integrationRepo from '../../modules/core/repositories/integration';
 import * as userRepo from '../../modules/core/repositories/user';
 import * as networkRepo from '../../modules/core/repositories/network';
 import * as activityRepo from '../../modules/core/repositories/activity';
+import { postRequest } from './request';
+import tokenUtil from '../utils/token';
 
 /**
  * @module shared/test-utils/TestHelper
@@ -110,6 +112,68 @@ export async function addUserToNetwork(networkUserAttributes) {
 }
 
 /**
+ * Creates a user and a network in the database, the user is assigned as owner
+ * @param {object} userAttributes
+ * @param {string} userAttributes.username
+ * @param {string} userAttributes.firstName
+ * @param {string} userAttributes.lastName
+ * @param {string} userAttributes.email
+ * @param {string} userAttributes.password
+ * @param {Object} networkAttributes
+ * @param {string} networkAttributes.name
+ * @method createUserForNewNetwork
+ * @return {external:Promise.<object>} {@link module:shared~User user},
+ * {@link module:shared~Network network}
+ */
+export async function createUserForNewNetwork(
+  userAttributes, { name = generateNetworkName() }) {
+  const user = await createUser(userAttributes);
+  const network = await createNetwork({ userId: user.id, name });
+  await addUserToNetwork({ networkId: network.id, userId: user.id, roleType: 'ADMIN' });
+  const domainUser = await userRepo.findUserById(user.id);
+
+  return { user: domainUser, network };
+}
+
+/**
+ * Creates a user and a network in the database, the user is assigned as owner
+ * @param {object} userAttributes
+ * @param {string} userAttributes.username
+ * @param {string} userAttributes.firstName
+ * @param {string} userAttributes.lastName
+ * @param {string} userAttributes.email
+ * @param {string} userAttributes.password
+ * @param {Object} networkAttributes
+ * @param {string} networkAttributes.name
+ * @param {Object} integrationAttributes
+ * @param {string} integrationAttributes.integrationName
+ * @param {string} integrationAttributes.token
+ * @param {string} [roleType='EMPOYEE']
+ * @method createUserForNewNetworkWithIntegration
+ * @return {external:Promise.<object>} {@link module:shared~User user},
+ * {@link module:shared~Network network}
+ */
+export async function createUserForNewNetworkWithIntegration(
+  userAttributes,
+  { name = generateNetworkName() },
+  { token, integrationName, externalId }, roleType = 'EMPLOYEE') {
+  const user = await createUser(userAttributes);
+  const integration = await createIntegration({ name: integrationName, token });
+  const network = await createNetwork({ userId: user.id, name, externalId, integrationName });
+
+  await addUserToNetwork({
+    networkId: network.id,
+    userId: user.id,
+    externalId: userAttributes.externalId,
+    roleType,
+    userToken: token,
+    integrationName });
+  const domainUser = await userRepo.findUserById(user.id);
+
+  return { user: domainUser, network, integration };
+}
+
+/**
  * Authenticates a user
  * @param {object} userCredentials
  * @param {string} userCredentials.username
@@ -190,9 +254,19 @@ export async function cleanAll() {
   const allUsers = await findAllUsers();
   const allIntegrations = await findAllIntegrations();
   const allActivities = await findAllActivities();
+  await deleteUser(allUsers);
   return Promise.all([
-    deleteUser(allUsers),
     deleteIntegration(allIntegrations),
     deleteActivity(allActivities),
   ]);
+}
+
+/**
+ *
+ */
+export async function getLoginToken({ username, password }) {
+  const url = '/v2/authenticate';
+  const { result } = await postRequest(url, { username, password });
+
+  return tokenUtil.decode(result.data.access_token);
 }

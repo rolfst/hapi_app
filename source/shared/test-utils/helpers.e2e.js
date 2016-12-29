@@ -5,6 +5,7 @@ import blueprints from './blueprints';
 import { UserRoles } from '../services/permission';
 import * as networkRepo from '../../modules/core/repositories/network';
 import * as networkService from '../../modules/core/services/network';
+import * as userRepo from '../../modules/core/repositories/user';
 import * as testHelper from './helpers';
 
 describe('test helper', () => {
@@ -194,6 +195,51 @@ describe('test helper', () => {
 
       assert.isRejected(promise, /Error: Missing Parameter: token/,
         'failed to create network with integration');
+    });
+  });
+
+  describe('createUserForNewNetwork', () => {
+    afterEach(async () => {
+      const users = await testHelper.findAllUsers();
+
+      return testHelper.deleteUser(users);
+    });
+
+    it('should create a user connected to a network', async () => {
+      const { user, network } = await testHelper.createUserForNewNetwork(
+        blueprints.users.employee, { name: 'pmt' });
+      const users = await networkRepo.findAllUsersForNetwork(network.id);
+
+      assert.isNotNull(user);
+      assert.isNotNull(network);
+      assert.equal(user.id, users[0].id);
+    });
+  });
+
+  describe('createUserForNewNetworkWithIntegration', () => {
+    afterEach(async () => {
+      const users = await testHelper.findAllUsers();
+      const integrations = await testHelper.findAllUsers();
+
+      await testHelper.deleteUser(users);
+      return testHelper.deleteIntegration(integrations);
+    });
+
+    it('should create a user connected to a network and to an integration', async () => {
+      const { user, network, integration } = await testHelper.createUserForNewNetworkWithIntegration( // eslint-disable-line max-len
+        blueprints.users.employee,
+        { name: 'pmt' },
+        { token: 'testtoken', integrationName: 'testIntegration', externalId: '8400' });
+      const users = await networkRepo.findAllUsersForNetwork(network.id);
+      const meta = await userRepo.findUserMetaDataForNetwork(user.id, network.id);
+      const networkIntegration = await networkRepo.findNetworkIntegration(network.id);
+
+      assert.isNotNull(integration);
+      assert.isNotNull(user);
+      assert.isNotNull(network);
+      assert.equal(user.id, users[0].id);
+      assert.equal(user.id, meta.userId);
+      assert.isNotNull(networkIntegration);
     });
   });
 
