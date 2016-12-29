@@ -69,7 +69,7 @@ export async function listUsersWithNetworkScope(payload, message) {
 export async function getUserWithNetworkScope(payload) {
   const user = await userRepo.findUserById(payload.id);
   const network = await networkRepo.findNetworkById(payload.networkId);
-  const metaData = await userRepo.findUserMetaDataForNetwork(user.id, network.id);
+  const metaData = await userRepo.findNetworkLink(user.id, network.id);
 
   return createScopedUser(user, metaData, network);
 }

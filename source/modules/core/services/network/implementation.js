@@ -242,7 +242,7 @@ export const updateSuperUserForNetwork = async (userId, networkId) => {
 export const importNetwork = async (network, username) => {
   try {
     let mailConfig;
-    const adapter = createAdapter(network, [], { proceedWithoutToken: true });
+    const adapter = await createAdapter(network, 0, { proceedWithoutToken: true });
     const externalUsers = await adapter.fetchUsers(network.externalId);
     const admin = await userRepo.findUserByUsername(username);
     const externalAdmin = find(externalUsers, (user) => {

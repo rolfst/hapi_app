@@ -44,12 +44,12 @@
     "nodemailer": "2.5.0",
     "parse": "1.8.1",
     "qs": "6.2.1",
+    "ramda": "0.23.0",
     "raven": "0.12.1",
     "sequelize": "3.19.3",
     "smtpapi": "1.2.0",
     "uuid-v4": "0.1.0",
-    "yargs": "6.3.0",
-    "bunyan-syslog": "0.3.1"
+    "yargs": "6.3.0"
   },
   "devDependencies": {
     "babel-cli": "6.6.5",

@@ -1,9 +1,9 @@
 import Promise from 'bluebird';
-import { map, isNil, pick } from 'lodash';
+import R from 'ramda';
+import { createAdapter } from '../../../../shared/utils/create-adapter';
 import * as Logger from '../../../../shared/services/logger';
-import * as networkService from '../../../core/services/network';
 import * as userRepository from '../../../core/repositories/user';
-import * as integrationService from '../../../core/services/integration';
+import * as networkRepository from '../../../core/repositories/network';
 import * as impl from './implementation';
 
 const logger = Logger.createLogger('INTEGRATIONS/service/sync');
@@ -48,32 +48,15 @@ export async function syncNetwork(network, allUsersInSystem = [], adapter, messa
  */
 export async function syncWithIntegrationPartner(payload, message) {
   try {
-    logger.info('Finding all integrations', { message });
-    const integrations = await integrationService.list({}, message);
-    logger.info('Found integrations', { integrations, message });
-    const syncHolders = map(integrations, impl.createSyncHolders);
     const allUsersInSystem = await userRepository.findAllUsers();
+    const allNetworksInSystem = await networkRepository.findAll();
+    const syncableNetworks = R.filter(R.and(R.prop('hasIntegration'), R.prop('importedAt')));
 
-    return Promise.map(syncHolders, async (syncHolder) => {
+    return Promise.map(syncableNetworks(allNetworksInSystem), async (network) => {
       try {
-        const attributes = { integrationName: syncHolder.integration.name };
-        logger.info('Finding all networks for integration', { attributes, message });
-        const networks = await Promise.filter(
-          networkService.listNetworksForIntegration(attributes, message),
-          network => !isNil(network.importedAt));
+        const adapter = createAdapter(network, 0, { proceedWithoutToken: true });
 
-        logger.info('Found networks for integration', {
-          ...map(networks, network => pick(network,
-            'id', 'name', 'externlId', 'importedAt', 'hasIntegration')),
-          message });
-
-        const networksToSync = Promise.map(networks,
-          (network) => {
-            const adapter = syncHolder.adapterFactory.create(network);
-            return syncNetwork(network, allUsersInSystem, adapter, message);
-          });
-
-        return Promise.all(networksToSync);
+        return syncNetwork(network, allUsersInSystem, adapter, message);
       } catch (err) {
         logger.warn('Error syncing integration partners', { err, message });
         throw err;

@@ -27,7 +27,7 @@ describe('Create exchange', () => {
 
   it('should send a notification', async () => {
     sandbox.stub(exchangeCreatedNotification, 'send').returns(Promise.resolve(null));
-    sandbox.stub(userRepo, 'findUserMetaDataForNetwork')
+    sandbox.stub(userRepo, 'findNetworkLink')
       .returns(Promise.resolve({ roleType: 'EMPLOYEE' }));
 
     const message = {

@@ -148,7 +148,7 @@ describe('Sync Network Workflow', () => {
 
       const users = await networkRepo.findUsersForNetwork(network.id);
       const userCount = users.length;
-      const networkInfoForRemovedUser = await userRepo.findUserMetaDataForNetwork(
+      const networkInfoForRemovedUser = await userRepo.findNetworkLink(
         alreadyImportedUser.id, network.id);
 
       assert.isAbove(userCount, userCountAfterInitalRemoval);
@@ -165,7 +165,7 @@ describe('Sync Network Workflow', () => {
 
       await syncService.syncWithIntegrationPartner({}, { credentials: alreadyImportedAdmin });
 
-      const updatedUser = await userRepo.findUserMetaDataForNetwork(
+      const updatedUser = await userRepo.findNetworkLink(
         alreadyImportedUser.id, network.id);
 
       assert.equal(updatedUser.roleType, 'EMPLOYEE');
@@ -190,7 +190,7 @@ describe('Sync Network Workflow', () => {
       const userCount = users.length;
       const removedUser = await userRepo.findUserInNetworkByExternalId(
         network.id, stubs.users_200.data[0].id);
-      const networkInfoForRemovedUser = await userRepo.findUserMetaDataForNetwork(
+      const networkInfoForRemovedUser = await userRepo.findNetworkLink(
         removedUser.id, network.id);
 
       assert.equal(listWithRemovedUser.data.length, (stubs.users_200.data.length - 1));
