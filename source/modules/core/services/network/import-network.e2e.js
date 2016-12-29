@@ -57,7 +57,7 @@ describe('Import network', () => {
         integration = await createIntegration();
         network = await createIntegrationNetwork();
 
-        sandbox.stub(adapterUtil, 'createAdapter').returns(fakeAdapter);
+        sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve(fakeAdapter));
         sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
         mailer.send.reset();
 
@@ -150,7 +150,7 @@ describe('Import network', () => {
         .reply(200, stubs.users_200);
 
       sandbox = sinon.sandbox.create();
-      sandbox.stub(adapterUtil, 'createAdapter').returns(fakeAdapter);
+      sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve(fakeAdapter));
       sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
 
       integration = await createIntegration();

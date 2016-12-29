@@ -107,7 +107,7 @@ export const listAdminsFromNetwork = async (payload, message) => {
 
   if (!network) throw createError('404');
 
-  const adapter = createAdapter(network, [], { proceedWithoutToken: true });
+  const adapter = await createAdapter(network, 0, { proceedWithoutToken: true });
   const externalUsers = await adapter.fetchUsers(network.externalId);
 
   return filter(externalUsers, 'isAdmin');

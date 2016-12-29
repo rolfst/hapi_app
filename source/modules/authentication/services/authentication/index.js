@@ -31,9 +31,7 @@ export const delegate = async (payload, message) => {
   if (!decodedToken.sub) throw createError('403', 'No sub found in refresh token.');
 
   const user = await userRepo.findUserById(decodedToken.sub);
-  const integrationInfo = await impl.getIntegrationInfoForUser(user.id);
-  const { accessToken } = await impl.createAuthenticationTokens(
-    user.id, message.deviceName, integrationInfo);
+  const { accessToken } = await impl.createAuthenticationTokens(user.id, message.deviceName);
 
   return { accessToken };
 };

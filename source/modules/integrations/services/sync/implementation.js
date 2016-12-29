@@ -9,7 +9,6 @@ import _, {
   differenceBy,
   intersectionBy,
 } from 'lodash';
-import * as adapterUtil from '../../../../shared/utils/create-adapter';
 import * as teamService from '../../../core/services/team';
 import * as networkService from '../../../core/services/network';
 import * as networkServiceImpl from '../../../core/services/network/implementation';
@@ -31,15 +30,6 @@ export const getRemovableUsersForNetwork = async (externalUsers, networkId, mess
 
   return map(removableUsers, 'id');
 };
-
-export function createSyncHolders(integration) {
-  const adapterFactory = adapterUtil.createAdapterFactory(
-    integration.name,
-    [],
-    { proceedWithoutToken: true });
-
-  return { integration, adapterFactory };
-}
 
 /**
  * @param {ExternalTeam[]} externalTeams - the teams in the external system that will not be used to
@@ -65,7 +55,7 @@ export const getRemovableTeamsIdsForNetwork = async (externalTeams, networkId, m
 export const removeUsersFromNetwork = async (externalUsers, networkId, message) => {
   const removableUserIds = await getRemovableUsersForNetwork(externalUsers, networkId, message);
   const removableUsers = await Promise.map(removableUserIds, (userId) => {
-    return userRepo.findUserMetaDataForNetwork(userId, networkId);
+    return userRepo.findNetworkLink(userId, networkId);
   });
   const removedUsersIds = await Promise.map(removableUsers,
     async (user) => {
