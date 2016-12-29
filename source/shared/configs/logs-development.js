@@ -9,6 +9,7 @@ export default {
     stream: process.stderr,
   }, {
     level: 'error',
+    type: 'raw',
     stream: bsyslog.createBunyanStream({
       type: 'sys',
       facility: bsyslog.local0,
