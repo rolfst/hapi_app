@@ -49,7 +49,7 @@ describe('Authenticate', () => {
       token: '379ce9b4176cb89354c1f74b3a2c1c7a',
       externalId: '8023',
     }];
-    const decodedToken = await testHelper.getLoginToken(employeeCredentials);
+    const { accessToken: decodedToken } = await testHelper.getLoginToken(employeeCredentials);
 
     assert.deepEqual(decodedToken.integrations, expectedIntegrations);
   });

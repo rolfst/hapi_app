@@ -39,7 +39,7 @@ export async function createIntegration(attributes = DEFAULT_INTEGRATION) {
  * @param {Object} networkAttributes
  * @param {string} networkAttributes.userId
  * @param {string} [networkAttributes.externalId]
- * @param {string} networkAttributes.name
+ * @param {string} [networkAttributes.name]
  * @param {string} [networkAttributes.integrationName]
  * @method createNetwork
  * @return {external:Promise<Network>} {@link module:modules/core~Network Network} - created network
@@ -268,5 +268,5 @@ export async function getLoginToken({ username, password }) {
   const url = '/v2/authenticate';
   const { result } = await postRequest(url, { username, password });
 
-  return tokenUtil.decode(result.data.access_token);
+  return { accessToken: tokenUtil.decode(result.data.access_token), tokens: result.data};
 }
