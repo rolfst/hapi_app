@@ -111,15 +111,17 @@ export function findTeamsByIds(ids) {
 }
 
 /**
- * Finds teams by the provided externalIds
+ * Finds teams by the provided externalIds. We are passing the networkId because it's
+ * possible that the externalId is duplicated. If so, it's possible to return the wrong team.
+ * @param {string} networkId - The network id
  * @param {string[]} externalIds - external teamids to search for
  * @method findTeamsByExternalId
  * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team}
  */
-export const findTeamsByExternalId = externalIds => {
+export const findTeamsByExternalId = (networkId, externalIds) => {
   return Team
     .findAll({
-      where: { externalId: { $in: externalIds } },
+      where: { externalId: { $in: externalIds }, networkId },
     });
 };
 
