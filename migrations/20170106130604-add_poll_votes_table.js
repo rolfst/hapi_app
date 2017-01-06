@@ -2,7 +2,7 @@
 
 module.exports = {
   up: function (queryInterface, Sequelize) {
-    return queryInterface.createTable('poll_answers', {
+    return queryInterface.createTable('poll_votes', {
       id: {
         type: Sequelize.INTEGER.UNSIGNED,
         primaryKey: true,
