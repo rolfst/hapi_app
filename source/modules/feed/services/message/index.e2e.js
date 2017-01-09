@@ -42,6 +42,14 @@ describe.only('Service: Message', () => {
       assert.isDefined(expected[0].sourceId);
     });
 
+    it('should create an attachment entry if resource is present', async () => {
+      // TODO
+    });
+
+    it('should create object entry for attachment if resource is present', async () => {
+      // TODO
+    });
+
     it('should create object entry for message', async () => {
       // TODO
     });
