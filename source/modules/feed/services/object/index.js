@@ -1,4 +1,6 @@
+import { pick } from 'ramda';
 import * as Logger from '../../../../shared/services/logger';
+import * as ObjectRepository from '../../repositories/object';
 
 /**
  * @module modules/feed/services/object
@@ -13,11 +15,17 @@ const logger = Logger.getLogger('FEED/service/object');
  * @param {string} payload.parentId - The id of the parent
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method listObjects
- * @return {external:Promise.<Mixed[]>}
+ * @return {external:Promise.<Object[]>}
  */
-export const listObjects = async (payload, message) => {
+export const list = async (payload, message) => {
   logger.info('Listing objects', { payload, message });
-  // TODO Listing objects and lookup the activity types
+
+  const objectResult = ObjectRepository.findBy({
+    parentType: payload.parentType,
+    parentId: payload.parentId,
+  });
+
+  return objectResult;
 };
 
 /**
@@ -32,7 +40,10 @@ export const listObjects = async (payload, message) => {
  * @method createObject
  * @return {external:Promise.<Object>}
  */
-export const createObject = async (payload, message) => {
+export const create = async (payload, message) => {
   logger.info('Creating object', { payload, message });
-  // TODO Create object
+
+  return ObjectRepository.create(
+    pick(['userId', 'parentType', 'parentId', 'objectType', 'sourceId'], payload)
+  );
 };
