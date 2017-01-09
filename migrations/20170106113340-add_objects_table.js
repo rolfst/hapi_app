@@ -47,10 +47,6 @@ module.exports = {
       return queryInterface.addIndex('objects',
         ['object_type', 'source_id'],
         { indicesType: 'UNIQUE' });
-    }).then(() => {
-      return queryInterface.addIndex('objects',
-        ['parent_type', 'parent_id'],
-        { indicesType: 'UNIQUE' });
     });
   },
 
