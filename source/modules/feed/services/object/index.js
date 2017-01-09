@@ -1,4 +1,5 @@
 import * as Logger from '../../../../shared/services/logger';
+import * as objectRepository from '../../repositories/object';
 
 /**
  * @module modules/feed/services/object
@@ -17,7 +18,13 @@ const logger = Logger.getLogger('FEED/service/object');
  */
 export const listObjects = async (payload, message) => {
   logger.info('Listing objects', { payload, message });
-  // TODO Listing objects and lookup the activity types
+
+  const objects = await objectRepository.findBy({
+    parentType: payload.parentType,
+    parentId: payload.parentId,
+  });
+
+  return objects;
 };
 
 /**
