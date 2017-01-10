@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import * as MessageService from './index';
 import * as ObjectService from '../object';
 
-describe.only('Service: Message', () => {
+describe('Service: Message', () => {
   describe('createMessage', () => {
     let createdMessage;
 

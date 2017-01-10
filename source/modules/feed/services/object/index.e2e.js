@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import * as serviceUnderTest from './index';
 
 describe('Service: Object', () => {
-  describe.only('listObjects', () => {
+  describe('listObjects', () => {
     before(async () => {
       await serviceUnderTest.create({
         userId: global.users.admin.id,
@@ -28,6 +28,16 @@ describe('Service: Object', () => {
       }, { credentials: { id: global.users.admin.id } });
 
       assert.lengthOf(actual, 2);
+      assert.equal(actual[0].userId, global.users.admin.id);
+      assert.equal(actual[0].objectType, 'poll');
+      assert.equal(actual[0].sourceId, '2');
+      assert.equal(actual[0].parentType, 'network');
+      assert.equal(actual[0].parentId, '42');
+      assert.equal(actual[1].userId, global.users.admin.id);
+      assert.equal(actual[1].objectType, 'message');
+      assert.equal(actual[1].sourceId, '2');
+      assert.equal(actual[1].parentType, 'network');
+      assert.equal(actual[1].parentId, '42');
     });
   });
 });
