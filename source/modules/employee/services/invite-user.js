@@ -1,4 +1,5 @@
 import { map, intersectionBy, reject } from 'lodash';
+import Promise from 'bluebird';
 import * as passwordUtil from '../../../shared/utils/password';
 import * as mailer from '../../../shared/services/mailer';
 import { UserRoles } from '../../../shared/services/permission';
@@ -120,7 +121,6 @@ export const inviteUsers = async (payload, message) => {
   const { network } = message;
   const identifiedUser = await userService.getUserWithNetworkScope({
     id: message.credentials.id, networkId: network.id }, message);
-
   const userBelongsToNetwork = await userRepo.userBelongsToNetwork(identifiedUser.id, network.id);
 
   if (!userBelongsToNetwork || identifiedUser.roleType !== UserRoles.ADMIN) {
@@ -131,8 +131,10 @@ export const inviteUsers = async (payload, message) => {
     userIds: payload.userIds, networkId: network.id }, message);
   const preparedUsers = reject(networkMembers, 'invitedAt');
   const toNotifyUsers = intersectionBy(preparedUsers, networkMembers, 'id');
-
   const usersToSendMailto = await impl.generatePasswordsForMembers(toNotifyUsers);
 
-  map(usersToSendMailto, (user) => mailer.send(addedToNetworkMail(network, user)));
+  await Promise.map(usersToSendMailto, user =>
+    userRepo.setNetworkLink({ userId: user.id, networkId: network.id, invitedAt: new Date() }));
+
+  map(usersToSendMailto, (user) => mailer.send(signupMail(network, user, user.plainPassword)));
 };

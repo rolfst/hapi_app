@@ -119,31 +119,6 @@ export const findNetworkLink = async (attributes) => {
 };
 
 /**
- * Sets the network link for a user.
- * @param {object} attributes
- * @param {string} attributes.userId
- * @param {string} attributes.networkId
- * @param {string} attributes.externalId
- * @param {string} attributes.deletedAt
- * @param {string} attributes.userToken
- * @param {string} attributes.roleType
- * @method setNetworkLink
- * @return {void}
- */
-export const setNetworkLink = async (_attributes) => {
-  const attributes = pick(_attributes,
-    'userId', 'networkId', 'externalId', 'deletedAt', 'userToken', 'roleType');
-
-  const result = await NetworkUser.findOne({
-    where: { userId: attributes.userId, networkId: attributes.networkId },
-  });
-
-  if (!result) return NetworkUser.create({ ...attributes, user_id: attributes.userId });
-
-  return result.update({ ...omit(attributes, 'userId, networkId') });
-};
-
-/**
  * Finds all network-user associations in a network
  * @param {string[]} userIds - identifier how the user is known by the integration partner
  * @param {string} networkId - network identifier where the user is searched for
@@ -278,6 +253,32 @@ export const removeFromNetwork = async (userId, networkId, forceDelete = false) 
   if (!result) return NetworkUser.create({ user_id: userId, networkId, deletedAt: new Date() });
 
   return forceDelete ? result.destroy() : result.update({ deletedAt: new Date() });
+};
+
+/**
+ * Sets the network link for a user.
+ * @param {object} attributes
+ * @param {string} attributes.userId
+ * @param {string} attributes.networkId
+ * @param {string} [attributes.userToken]
+ * @param {string} [attributes.roleType]
+ * @param {string} [attributes.externalId]
+ * @param {string} [attributes.deletedAt]
+ * @param {string} [attributes.invitedAt]
+ * @method setNetworkLink
+ * @return {void}
+ */
+export const setNetworkLink = async (_attributes) => {
+  const attributes = pick(_attributes,
+    'userId', 'networkId', 'externalId', 'deletedAt', 'userToken', 'roleType', 'invitedAt');
+
+  const result = await NetworkUser.findOne({
+    where: { userId: attributes.userId, networkId: attributes.networkId },
+  });
+
+  if (!result) return NetworkUser.create({ ...attributes, user_id: attributes.userId });
+
+  return result.update({ ...omit(attributes, 'userId, networkId') });
 };
 
 /**
