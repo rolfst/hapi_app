@@ -49,6 +49,7 @@ export const create = async (payload, message) => {
 /**
  * Remove object
  * @param {object} payload - Object containing payload data
+ * @param {string} payload.id - The id of the object
  * @param {string} payload.userId - The id that instantiated the object
  * @param {string} payload.parentType - The type of parent to get objects for
  * @param {string} payload.parentId - The id of the parent
