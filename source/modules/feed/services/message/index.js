@@ -1,4 +1,7 @@
+import { pipeP, any, filter, whereEq } from 'ramda';
 import * as Logger from '../../../../shared/services/logger';
+import * as messageRepository from '../../repositories/message';
+import * as objectService from '../object';
 
 /**
  * @module modules/feed/services/object
@@ -7,15 +10,31 @@ import * as Logger from '../../../../shared/services/logger';
 const logger = Logger.getLogger('FEED/service/object');
 
 /**
+ * My method description
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.messageId - The id of the message to retrieve
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method getMessage
+ * @return -
+ */
+export const get = async (payload, message) => {
+  logger.info('Finding message', { payload, message });
+  const result = await messageRepository.findById(payload.messageId);
+  // TODO find child object
+
+  return result;
+};
+
+/**
  * Listing messages
  * @param {object} payload - Object containing payload data
- * @param {string[]} payload.messageIds - The type of parent to get objects for
+ * @param {string[]} payload.messageIds - The ids of the messages to list
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method listMessages
  * @return {external:Promise.<Message[]>}
  */
-export const listMessages = async (payload, message) => {
-  logger.info('Listing messages', { payload, message });
+export const list = async (payload, message) => {
+  logger.info('Listing multiple messages', { payload, message });
   // TODO Listing messages with their children objects
 };
 
@@ -32,9 +51,43 @@ export const listMessages = async (payload, message) => {
  * @method createMessage
  * @return {external:Promise.<Message>}
  */
-export const createMessage = async (payload, message) => {
+export const create = async (payload, message) => {
   logger.info('Creating message', { payload, message });
-  // TODO
+
+  const createdMessage = await messageRepository.create({
+    userId: message.credentials.id,
+    text: payload.text,
+  });
+
+  const containsResource = (type) => any(whereEq({ type }), payload.resources);
+  const getResources = (type) => filter(whereEq({ type }), payload.resources);
+
+  await objectService.create({
+    userId: message.credentials.id,
+    parentType: payload.parentType,
+    parentId: payload.parentId,
+    objectType: 'message',
+    sourceId: createdMessage.id,
+  });
+
+  if (containsResource('poll')) {
+    const pollResources = getResources('poll');
+    const result = await pipeP(
+      // (pollResource) => pollService.create({
+      //   // TODO
+      // }),
+      (createdPoll) => objectService.create({
+        userId: message.credentials.id,
+        parentType: 'message',
+        parentId: createdMessage.id,
+        objectType: 'poll',
+        // sourceId: createdPoll.id,
+        sourceId: '123',
+      })
+    )(pollResources);
+  }
+
+  return createdMessage;
   // 1. Create message
   // 2. Create the resource for the message
   // 3. Create an object as child for the resource
