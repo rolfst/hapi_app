@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import nock from 'nock';
 import moment from 'moment';
 import { createTeam } from '../../core/repositories/team';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import { getRequest } from '../../../shared/test-utils/request';
 import { createExchange } from '..//repositories/exchange';
 

@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import moment from 'moment';
 import { postRequest } from '../../../shared/test-utils/request';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import { createExchange } from '../repositories/exchange';
 
 describe('Create exchange comment', () => {

@@ -1,4 +1,4 @@
-import { ExchangeResponse } from '../models';
+import { ExchangeResponse } from './dao';
 
 /**
  * @module modules/flexchange/repositories/exchange-response

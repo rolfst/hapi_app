@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import moment from 'moment';
 import * as notifier from '../../../shared/services/notifier';
 import { patchRequest } from '../../../shared/test-utils/request';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import { createExchange } from '../repositories/exchange';
 
 describe('Accept exchange', () => {
