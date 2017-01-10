@@ -4,12 +4,14 @@ import authenticationRoutes from './modules/authentication/create-routes';
 import employeeRoutes from './modules/employee/create-routes';
 import chatRoutes from './modules/chat/create-routes';
 import flexchangeRoutes from './modules/flexchange/create-routes';
+import pollRoutes from './modules/poll/create-routes';
 
 export default [
   ...coreRoutes,
   ...integrationsRoutes,
+  ...authenticationRoutes,
+  ...employeeRoutes,
   ...chatRoutes,
   ...flexchangeRoutes,
-  ...employeeRoutes,
-  ...authenticationRoutes,
+  ...pollRoutes,
 ];
