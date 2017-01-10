@@ -21,7 +21,7 @@ const routes = [{
   method: 'POST',
   url: `${basePath}/users/invite`,
   handler: require(`${baseImport}/bulk-invite-users`),
-  validator: require('./validators/bulkinvite'),
+  validator: require('./validators/bulk-invite'),
 }];
 
 export default createRoutes(routes);

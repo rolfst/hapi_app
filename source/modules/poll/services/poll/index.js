@@ -1,4 +1,7 @@
+import R from 'ramda';
 import * as Logger from '../../../../shared/services/logger';
+import * as pollRepository from '../../repositories/poll';
+import * as impl from './implementation';
 
 /**
  * @module modules/POLL/services/poll
@@ -9,30 +12,46 @@ const logger = Logger.getLogger('POLL/service/poll');
 /**
  * Creates a poll
  * @param {object} payload - Object containing payload data
- * @param {string} payload.userId - The id of the user that creates the poll
- * @param {array} payload.options - An array of options for the poll
+ * @param {string} payload.networkId - Id of the network the poll is placed in
+ * @param {array} payload.options - Poll options to create
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method createPoll
+ * @method create
  * @return {external:Promise.<Poll>}
  */
-export const createPoll = async (payload, message) => {
+export const create = async (payload, message) => {
   logger.info('Creating poll', { payload, message });
-  // TODO
-  // 1. Create poll
-  // 2. Create options
-  // 3. Return the poll domain model
+
+  const poll = await pollRepository.create({
+    networkId: payload.networkId,
+    userId: message.credentials.id,
+  });
+
+  const createOptions = R.addIndex(R.map)(impl.createOption(poll.id));
+  poll.options = await Promise.all(createOptions(payload.options));
+
+  return poll;
 };
 
 /**
  * Vote on a poll as authenticated user
  * @param {object} payload - Object containing payload data
- * @param {string} payload.pollId - The id of the user that creates the poll
- * @param {array} payload.optionId - The id op the option that the user voted for
+ * @param {string} payload.networkId - Id of the current network
+ * @param {string} payload.pollId - Id of the poll the user is voting on
+ * @param {array} payload.optionIds - The ids op the options that the user voted for
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method createPoll
+ * @method vote
  * @return {external:Promise.<Poll>}
  */
 export const vote = async (payload, message) => {
   logger.info('Voting on poll', { payload, message });
-  // TODO Vote on poll where the creator is the authenticated user
+
+  await impl.assertThatPollExistsAndUserHasPermission(payload.networkId, payload.pollId);
+  await pollRepository.clearVotes(payload.pollId, message.credentials.id);
+
+  const voteForOption = (optionId) => pollRepository.vote({
+    optionId, pollId: payload.pollId, userId: message.credentials.id });
+
+  await Promise.all(R.map(voteForOption, payload.optionIds));
+
+  return pollRepository.findById(payload.pollId);
 };
