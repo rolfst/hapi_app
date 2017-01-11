@@ -3,11 +3,16 @@ import * as responseUtil from '../../../shared/utils/response';
 
 export default async (req, reply) => {
   try {
-    const payload = { ...req.params };
     const message = { ...req.pre, ...req.auth };
-    const feedItems = await PollService.vote(payload, message);
+    const payload = {
+      networkId: req.params.networkId,
+      pollId: req.params.pollId,
+      optionIds: req.payload.optionIds,
+    };
 
-    return reply({ data: responseUtil.toSnakeCase(feedItems) });
+    const poll = await PollService.vote(payload, message);
+
+    return reply({ data: responseUtil.toSnakeCase(poll) });
   } catch (err) {
     return reply(err);
   }

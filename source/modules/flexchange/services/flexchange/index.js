@@ -199,7 +199,7 @@ export const listMyShifts = async (payload, message) => {
 
   const [exchanges, teams] = await Promise.all([
     exchangeRepo.findExchangesByShiftIds(map(shifts, 'id')),
-    teamRepo.findTeamsByExternalId(map(shifts, 'team_id')),
+    teamRepo.findTeamsByExternalId(network.id, map(shifts, 'team_id')),
   ]);
 
   return impl.mapShiftsWithExchangeAndTeam(shifts, exchanges, teams);
@@ -286,7 +286,7 @@ export const getShift = async (payload, message) => {
 
   const [exchanges, teams] = await Promise.all([
     exchangeRepo.findExchangesByShiftIds([shift.id]),
-    teamRepo.findTeamsByExternalId([shift.team_id]),
+    teamRepo.findTeamsByExternalId(message.network.id, [shift.team_id]),
   ]);
 
   return impl.mergeShiftWithExchangeAndTeam(shift, exchanges[0], teams[0]);

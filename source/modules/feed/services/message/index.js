@@ -1,7 +1,9 @@
-import { pipeP, any, filter, whereEq } from 'ramda';
+import { cond, propEq } from 'ramda';
+import Promise from 'bluebird';
 import * as Logger from '../../../../shared/services/logger';
 import * as messageRepository from '../../repositories/message';
 import * as objectService from '../object';
+import * as impl from './implementation';
 
 /**
  * @module modules/feed/services/object
@@ -59,9 +61,6 @@ export const create = async (payload, message) => {
     text: payload.text,
   });
 
-  const containsResource = (type) => any(whereEq({ type }), payload.resources);
-  const getResources = (type) => filter(whereEq({ type }), payload.resources);
-
   await objectService.create({
     userId: message.credentials.id,
     parentType: payload.parentType,
@@ -70,25 +69,28 @@ export const create = async (payload, message) => {
     sourceId: createdMessage.id,
   });
 
-  if (containsResource('poll')) {
-    const pollResources = getResources('poll');
-    const result = await pipeP(
-      // (pollResource) => pollService.create({
-      //   // TODO
-      // }),
-      (createdPoll) => objectService.create({
-        userId: message.credentials.id,
-        parentType: 'message',
-        parentId: createdMessage.id,
-        objectType: 'poll',
-        // sourceId: createdPoll.id,
-        sourceId: '123',
-      })
-    )(pollResources);
-  }
+  const typeEq = propEq('type');
+  const createResource = cond([
+    [typeEq('poll'), impl.createPollResource(createdMessage, message)],
+  ]);
+
+  await Promise.map(payload.resources, createResource);
 
   return createdMessage;
-  // 1. Create message
-  // 2. Create the resource for the message
-  // 3. Create an object as child for the resource
+};
+
+/**
+ * Deletes a message
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.messageId - The type of parent to create the object for
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method remove
+ * @return {external:Promise.<Boolean>}
+ */
+export const remove = async (payload, message) => {
+  logger.info('Deleting message', { payload, message });
+  // TODO remove attached objects
+  await messageRepository.destroy(payload.messageId);
+
+  return true;
 };
