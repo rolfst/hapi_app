@@ -29,3 +29,5 @@ export const create = async (attributes) => {
 
   return createDomainObject(result);
 };
+
+export const destroy = (messageId) => Message.destroy({ where: { id: messageId } });
