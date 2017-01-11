@@ -22,3 +22,14 @@ export const createPollResource = (createdMessage, message) => pipeP(
     sourceId: createdPoll.id,
   }, message)
 );
+
+/**
+ * Remove objects that are attached to a message. Either as child or as parent.
+ * @param {string} messageId - The id of the message
+ * @method removeAttachedObjects
+ * @return {Promise}
+ */
+export const removeAttachedObjects = (messageId) => Promise.all([
+  objectService.remove({ objectType: 'message', sourceId: messageId }),
+  objectService.remove({ parentType: 'message', parentId: messageId }),
+]);

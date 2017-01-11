@@ -96,8 +96,13 @@ export const create = async (payload, message) => {
  */
 export const remove = async (payload, message) => {
   logger.info('Deleting message', { payload, message });
-  // TODO remove attached objects
-  await messageRepository.destroy(payload.messageId);
+
+  // TODO ACL: Only an admin or the creator of the message can delete.
+
+  await Promise.all([
+    messageRepository.destroy(payload.messageId),
+    impl.removeAttachedObjects(payload.messageId),
+  ]);
 
   return true;
 };
