@@ -23,9 +23,9 @@ describe('Service: Poll', () => {
     const actual = poll;
 
     assert.equal(actual.type, 'poll');
-    assert.equal(actual.network_id, flexAppeal.id);
-    assert.equal(actual.user_id, employee.id);
-    assert.equal(actual.total_vote_count, 0);
+    assert.equal(actual.networkId, flexAppeal.id);
+    assert.equal(actual.userId, employee.id);
+    assert.equal(actual.totalVoteCount, 0);
     assert.lengthOf(actual.options, 3);
     assert.equal(actual.options[0].text, 'Option A');
     assert.equal(actual.options[1].text, 'Option B');
@@ -39,7 +39,7 @@ describe('Service: Poll', () => {
 
     const actual = await pollService.vote(payload, message);
 
-    assert.equal(actual.total_vote_count, 1);
+    assert.equal(actual.totalVoteCount, 1);
     assert.equal(actual.options[0].vote_count, 0);
     assert.equal(actual.options[1].vote_count, 1);
     assert.equal(actual.options[2].vote_count, 0);
@@ -51,7 +51,7 @@ describe('Service: Poll', () => {
 
     const actual = await pollService.vote(payload, message);
 
-    assert.equal(actual.total_vote_count, 1);
+    assert.equal(actual.totalVoteCount, 1);
     assert.equal(actual.options[0].vote_count, 0);
     assert.equal(actual.options[1].vote_count, 1);
     assert.equal(actual.options[2].vote_count, 1);
@@ -66,7 +66,7 @@ describe('Service: Poll', () => {
     const newVotePayload = { ...defaultVotePayload, pollId, optionIds: [options[0].id] };
     const actual = await pollService.vote(newVotePayload, message);
 
-    assert.equal(actual.total_vote_count, 1);
+    assert.equal(actual.totalVoteCount, 1);
     assert.equal(actual.options[0].vote_count, 1);
     assert.equal(actual.options[1].vote_count, 0);
     assert.equal(actual.options[2].vote_count, 0);
