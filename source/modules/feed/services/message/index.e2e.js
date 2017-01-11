@@ -3,7 +3,7 @@ import * as pollService from '../../../poll/services/poll';
 import * as messageService from './index';
 import * as objectService from '../object';
 
-describe.only('Service: Message', () => {
+describe('Service: Message', () => {
   describe('createMessage', () => {
     let createdMessage;
 
