@@ -2,6 +2,7 @@ import { flatten, chain, pipe, pick, propEq, cond, reject, isNil } from 'ramda';
 import * as Logger from '../../../../shared/services/logger';
 import * as flexchangeService from '../../../flexchange/services/flexchange';
 import * as objectService from '../object';
+import * as messageService from '../message';
 import * as impl from './implementation';
 
 /**
@@ -30,14 +31,12 @@ export const make = async (payload, message) => {
     impl.flattenObjectTypeValues,
     chain(cond([
       [typeEq('message'), (obj) =>
-        Promise.resolve([{ id: '1', foo: 'bar' }])],
+        messageService.list({ messageIds: obj.values }, message)],
       [typeEq('exchange'), (obj) =>
         flexchangeService.list({ exchangeIds: obj.values }, message)],
     ])),
     reject(isNil)
   )(relatedObjects);
 
-  // TODO add messages to feed
-
-  console.log(flatten(await Promise.all(resourcePromises)));
+  return flatten(await Promise.all(resourcePromises));
 };

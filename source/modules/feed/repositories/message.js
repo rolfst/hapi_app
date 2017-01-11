@@ -1,4 +1,4 @@
-import { pick } from 'ramda';
+import { map, pick } from 'ramda';
 import { Message } from './dao';
 import createModel from '../models/message';
 
@@ -13,6 +13,20 @@ export const findById = async (messageId) => {
   if (!result) return null;
 
   return createModel(result);
+};
+
+/**
+ * Find messages by ids
+ * @param {string[]} messageIds - The ids of the messages
+ * @method findByIds
+ * @return {Message[]}
+ */
+export const findByIds = async (messageIds) => {
+  const results = await Message.findAll({
+    where: { id: { in: messageIds } },
+  });
+
+  return map(createModel, results);
 };
 
 /**

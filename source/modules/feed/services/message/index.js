@@ -38,6 +38,11 @@ export const get = async (payload, message) => {
 export const list = async (payload, message) => {
   logger.info('Listing multiple messages', { payload, message });
   // TODO Listing messages with their children objects
+  const result = await messageRepository.findByIds(payload.messageIds);
+
+  console.log(result);
+
+  return result;
 };
 
 /**
@@ -69,12 +74,14 @@ export const create = async (payload, message) => {
     sourceId: createdMessage.id,
   });
 
-  const typeEq = propEq('type');
-  const createResource = cond([
-    [typeEq('poll'), impl.createPollResource(createdMessage, message)],
-  ]);
+  if (payload.resources) {
+    const typeEq = propEq('type');
+    const createResource = cond([
+      [typeEq('poll'), impl.createPollResource(createdMessage, message)],
+    ]);
 
-  await Promise.map(payload.resources, createResource);
+    await Promise.map(payload.resources, createResource);
+  }
 
   return createdMessage;
 };
