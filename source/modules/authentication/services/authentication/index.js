@@ -48,9 +48,6 @@ export const delegate = async (payload, message) => {
  */
 export const authenticate = async (payload, message) => {
   const user = await impl.authenticateUser(payload);
-
-  await impl.assertUserBelongsToANetwork(user.id);
-
   const tokens = await impl.getAuthenticationTokens(user, message.deviceName);
 
   Analytics.registerProfile(user);
