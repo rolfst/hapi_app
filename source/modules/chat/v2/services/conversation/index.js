@@ -47,8 +47,8 @@ export const listConversations = async (payload, message) => {
 /**
  * Retrieve conversations for specific user.
  * @param {object} payload - Object containing payload data
- * @param {String} payload.userId - The id of the user
- * @param {String} [payload.include] - The resources to directly include
+ * @param {string} payload.userId - The id of the user
+ * @param {string} [payload.include] - The resources to directly include
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method listConversationsForUser
  * @return {external:Promise.<Conversation[]>} {@link module:modules/chat~Conversation} -
@@ -64,7 +64,7 @@ export const listConversationsForUser = async (payload, message) => {
 /**
  * List the messages that are created for a conversation.
  * @param {object} payload - Object containing payload data
- * @param {number} payload.conversationId - The id of the conversation
+ * @param {string} payload.conversationId - The id of the conversation
  * @param {string} [payload.limit] - The limit for the conversations resultset
  * @param {string} [payload.offset] - The offset for the conversation resultset
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
@@ -81,12 +81,28 @@ export const listMessages = async (payload, message) => {
   return messageRepo.findForConversation(payload.conversationId, options);
 };
 
+/**
+ * Get conversation count for user to use for pagination data.
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.userId - The id of the user
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method countConversations
+ * @return {Promise<Number>}
+ */
 export async function countConversations(payload, message) {
   logger.info('Count conversation', { payload, message });
 
   return conversationRepo.countConversationsForUser(payload.userId);
 }
 
+/**
+ * Get messages count for conversation to use for pagination data.
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.conversationId - The id of the conversation
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method countMessages
+ * @return {Promise<Number>}
+ */
 export async function countMessages(payload, message) {
   logger.info('Count messages for conversation', { payload, message });
 
