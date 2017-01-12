@@ -1,25 +1,29 @@
 import { assert } from 'chai';
+import sinon from 'sinon';
+import Promise from 'bluebird';
+import * as flexchangeService from '../../../flexchange/services/flexchange';
+import * as messageService from '../message';
 import * as unitUnderTest from './implementation';
 
 describe('Service: Object Implementation', () => {
-  describe.only('flattenObjectTypeValues', () => {
+  describe('createObjectSourceLinks', () => {
     it('should return correct data', () => {
       const objects = [{
-        id: '1',
+        id: '10',
         userId: '2',
         objectType: 'message',
         sourceId: '1',
         parentType: 'network',
         parentId: '42',
       }, {
-        id: '2',
+        id: '20',
         userId: '2',
         objectType: 'message',
         sourceId: '2',
         parentType: 'network',
         parentId: '42',
       }, {
-        id: '3',
+        id: '30',
         userId: '2',
         objectType: 'exchange',
         sourceId: '3',
@@ -27,42 +31,64 @@ describe('Service: Object Implementation', () => {
         parentId: '42',
       }];
 
-      const actual = unitUnderTest.flattenObjectTypeValues(objects);
+      const actual = unitUnderTest.createObjectSourceLinks(objects);
       const expected = [{
         type: 'message',
-        values: ['1', '2'],
+        values: [{
+          objectId: '10',
+          sourceId: '1',
+        }, {
+          objectId: '20',
+          sourceId: '2',
+        }],
       }, {
         type: 'exchange',
-        values: ['3'],
+        values: [{
+          objectId: '30',
+          sourceId: '3',
+        }],
       }];
 
       assert.deepEqual(actual, expected);
     });
+  });
 
-    it('should return unique values', () => {
-      const objects = [{
+  describe('findSourcesForFeed', () => {
+    it('should merge result the correct type', async () => {
+      const flattenedObjects = [{
+        type: 'message',
+        values: ['1', '2'],
+      }, {
+        type: 'exchange',
+        values: ['13', '14'],
+      }];
+
+      sinon.stub(messageService, 'list').returns(Promise.resolve([{
         id: '1',
-        userId: '2',
-        objectType: 'message',
-        sourceId: '1',
-        parentType: 'network',
-        parentId: '42',
+        text: 'Foo text',
       }, {
         id: '2',
-        userId: '2',
-        objectType: 'message',
-        sourceId: '1',
-        parentType: 'network',
-        parentId: '42',
-      }];
+        text: 'Foo other text',
+      }]));
 
-      const actual = unitUnderTest.flattenObjectTypeValues(objects);
-      const expected = [{
+      sinon.stub(flexchangeService, 'list').returns(Promise.resolve([{
+        id: '13',
+        description: 'Blabla',
+      }, {
+        id: '14',
+        description: 'Blabla',
+      }]));
+
+      const promisedSources = flattenedObjects.map(unitUnderTest.findSourcesForFeed({}));
+      const actual = await Promise.map(promisedSources, Promise.props);
+
+      assert.deepEqual(actual, [{
         type: 'message',
-        values: ['1'],
-      }];
-
-      assert.deepEqual(actual, expected);
+        values: [{ id: '1', text: 'Foo text' }, { id: '2', text: 'Foo other text' }],
+      }, {
+        type: 'exchange',
+        values: [{ id: '13', description: 'Blabla' }, { id: '14', description: 'Blabla' }],
+      }]);
     });
   });
 });

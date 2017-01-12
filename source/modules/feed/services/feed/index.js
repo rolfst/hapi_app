@@ -1,8 +1,7 @@
-import { flatten, chain, pipe, pick, propEq, cond, reject, isNil } from 'ramda';
+import R, { map, pluck, pick } from 'ramda';
+import Promise from 'bluebird';
 import * as Logger from '../../../../shared/services/logger';
-import * as flexchangeService from '../../../flexchange/services/flexchange';
 import * as objectService from '../object';
-import * as messageService from '../message';
 import * as impl from './implementation';
 
 /**
@@ -26,17 +25,23 @@ export const make = async (payload, message) => {
   const relatedObjects = await objectService.list(
     pick(['parentType', 'parentId'], payload), message);
 
-  const typeEq = propEq('type');
-  const resourcePromises = pipe(
-    impl.flattenObjectTypeValues,
-    chain(cond([
-      [typeEq('message'), (obj) =>
-        messageService.list({ messageIds: obj.values }, message)],
-      [typeEq('exchange'), (obj) =>
-        flexchangeService.list({ exchangeIds: obj.values }, message)],
-    ])),
-    reject(isNil)
-  )(relatedObjects);
+  const findWhereType = (type, collection) => R.find(R.whereEq({ type }), collection);
+  const objectsForType = (type) => R.filter(R.whereEq({ objectType: type }), relatedObjects);
 
-  return flatten(await Promise.all(resourcePromises));
+  // Gathering the data to build the feed
+  const feedAST = impl.createObjectSourceLinks(relatedObjects);
+  const promisedSources = map(impl.findSourcesForFeed(message), feedAST);
+  const sources = await Promise.map(promisedSources, Promise.props);
+  const occurringTypes = pluck('type', feedAST);
+
+  // Linking everything together
+  return R.chain(occurringType => {
+    const sourcesForType = findWhereType(occurringType, sources);
+    const linksForType = findWhereType(occurringType, feedAST);
+
+    return impl.mergeSourceAndObject(
+      objectsForType(occurringType),
+      linksForType.values,
+      sourcesForType.values);
+  }, occurringTypes);
 };

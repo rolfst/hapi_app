@@ -7,7 +7,7 @@ import * as messageService from '../message';
 import * as serviceUnderTest from './index';
 
 describe('Service: Feed', () => {
-  describe.only('make', () => {
+  describe('make', () => {
     let createdObject;
     let createdMessages;
 
@@ -63,13 +63,16 @@ describe('Service: Feed', () => {
         parentId: global.networks.flexAppeal.id,
       }, { credentials: { id: global.users.admin.id } });
 
+      console.log(actual);
+
       assert.lengthOf(actual, 3);
-      assert.equal(actual[0].type, 'message');
-      assert.equal(actual[0].text, 'Message for feed');
-      assert.equal(actual[1].type, 'message');
-      assert.equal(actual[1].text, 'Second message for feed');
-      assert.equal(actual[2].type, 'exchange');
-      assert.deepEqual(actual[2].createdIn, { type: 'network', id: global.networks.flexAppeal.id });
+      assert.equal(actual[0].objectType, 'message');
+      assert.equal(actual[0].source.text, 'Message for feed');
+      assert.equal(actual[1].objectType, 'message');
+      assert.equal(actual[1].source.text, 'Second message for feed');
+      assert.equal(actual[2].objectType, 'exchange');
+      assert.equal(actual[2].parentType, 'network');
+      assert.equal(actual[2].parentId, global.networks.flexAppeal.id);
     });
   });
 });
