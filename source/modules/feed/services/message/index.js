@@ -40,8 +40,6 @@ export const list = async (payload, message) => {
   // TODO Listing messages with their children objects
   const result = await messageRepository.findByIds(payload.messageIds);
 
-  console.log(result);
-
   return result;
 };
 
