@@ -5,6 +5,7 @@ import employeeRoutes from './modules/employee/create-routes';
 import chatRoutes from './modules/chat/create-routes';
 import flexchangeRoutes from './modules/flexchange/create-routes';
 import pollRoutes from './modules/poll/create-routes';
+import feedRoutes from './modules/feed/create-routes';
 
 export default [
   ...coreRoutes,
@@ -14,4 +15,5 @@ export default [
   ...chatRoutes,
   ...flexchangeRoutes,
   ...pollRoutes,
+  ...feedRoutes,
 ];
