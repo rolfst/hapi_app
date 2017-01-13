@@ -38,12 +38,10 @@ export const lastMessageObjectsForConversations = async (conversationIds) => {
 
   const messagesForConversation = (conversationId) => R.filter(
     R.whereEq({ parentId: conversationId }), objects);
+  const lastMessage = R.pipe(messagesForConversation, sortedById, R.last);
 
-  return R.reduce((acc, conversationId) => {
-    const lastMessage = R.last(sortedById, messagesForConversation(conversationId));
-
-    return acc.concat(lastMessage);
-  }, [])(conversationIds);
+  return R.reduce((acc, conversationId) =>
+    acc.concat(lastMessage(conversationId)), [])(conversationIds);
 };
 
 export const mergeLastMessageWithConversation = R.curry((objects, lastMessages, conversation) => {

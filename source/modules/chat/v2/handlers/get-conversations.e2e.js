@@ -65,7 +65,7 @@ describe('Get conversations for logged user (v2)', () => {
       assert.equal(conversationUnderTest.id, createdConversation.id);
       assert.equal(conversationUnderTest.user_id, creator.id);
       assert.property(conversationUnderTest, 'last_message');
-      assert.equal(conversationUnderTest.last_message.user_id, participant.id);
+      assert.property(conversationUnderTest.last_message, 'object_id');
       assert.equal(conversationUnderTest.last_message.text, 'Last message');
       assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant.id]);
       assert.property(conversationUnderTest, 'created_at');
@@ -169,7 +169,7 @@ describe('Get conversations for logged user (v2)', () => {
       assert.equal(conversationUnderTest.id, createdConversation1.id);
       assert.equal(conversationUnderTest.user_id, creator.id);
       assert.property(conversationUnderTest, 'last_message');
-      assert.equal(conversationUnderTest.last_message.user_id, participant.id);
+      assert.property(conversationUnderTest.last_message, 'object_id');
       assert.equal(conversationUnderTest.last_message.text, 'Last message');
       assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant.id]);
       assert.property(conversationUnderTest, 'created_at');
@@ -187,7 +187,7 @@ describe('Get conversations for logged user (v2)', () => {
         assert.equal(conversationUnderTest.id, createdConversation2.id);
         assert.equal(conversationUnderTest.user_id, creator.id);
         assert.property(conversationUnderTest, 'last_message');
-        assert.equal(conversationUnderTest.last_message.user_id, participant.id);
+        assert.property(conversationUnderTest.last_message, 'object_id');
         assert.equal(conversationUnderTest.last_message.text, 'First message second conversation');
         assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant.id]);
         assert.property(conversationUnderTest, 'created_at');

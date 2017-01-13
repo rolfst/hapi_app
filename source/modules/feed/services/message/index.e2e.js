@@ -28,8 +28,9 @@ describe('Service: Message', () => {
       const expected = await messageService.get({ messageId: createdMessage.id });
 
       assert.isDefined(expected);
+      assert.property(expected, 'objectId');
       assert.equal(expected.text, 'My cool message');
-      assert.equal(expected.userId, global.users.admin.id);
+      assert.property(expected, 'createdAt');
     });
 
     it('should create a poll entry if resource is present', async () => {
