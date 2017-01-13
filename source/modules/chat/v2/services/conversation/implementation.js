@@ -1,21 +1,14 @@
 import R from 'ramda';
 import createError from '../../../../../shared/utils/create-error';
+import * as messageService from '../../../../feed/services/message';
+import * as objectRepository from '../../../../feed/repositories/object';
 import * as conversationRepo from '../../repositories/conversation';
 
 const findById = (id, collection) => R.find(R.whereEq({ id }), collection) || null;
-const byId = R.ascend(R.prop('id'));
 const parseIncludes = R.split(',');
 
 export const hasInclude = R.curry((includes, selector) =>
   R.contains(selector, parseIncludes(includes || '')));
-
-export const messagesForConversation = R.curry((messages, conversation) =>
-  R.filter(R.whereEq({ conversationId: conversation.id }), messages));
-
-export const lastMessage = R.pipe(R.sort(byId), R.last);
-
-export const conversationWithLastMessage = R.curry((getMessages, conversation) =>
-  R.merge(conversation, { lastMessage: lastMessage(getMessages(conversation)) || null }));
 
 const getParticipants = (participants, participantIds) => R.pipe(
   R.map((participantId) => findById(participantId, participants)),
@@ -35,3 +28,26 @@ export const assertThatUserIsPartOfTheConversation = async (userId, conversation
 
   if (!result || !R.contains(userId, result.participantIds)) throw createError('404');
 };
+
+export const lastMessageObjectsForConversations = async (conversationIds) => {
+  const objects = await objectRepository.findBy({
+    parentType: 'conversation',
+    parentId: { $in: conversationIds },
+  });
+
+  return R.reduce((acc, conversationId) => {
+    const messagesForConversation = R.filter(
+      R.whereEq({ parentId: conversationId }), objects);
+    const lastMessage = R.last(
+      R.sortBy(R.prop('id'), messagesForConversation));
+
+    return acc.concat(lastMessage);
+  }, [])(conversationIds);
+};
+
+export const mergeLastMessageWithConversation = R.curry((lastMessageObjects, lastMessages, conversation) => {
+  const lastMessageObject = R.find(R.whereEq({ parentId: conversation.id }), lastMessageObjects);
+  const lastMessageModel = R.find(R.propEq('id', lastMessageObject.sourceId), lastMessages);
+
+  return { ...conversation, lastMessage: lastMessageModel };
+});
