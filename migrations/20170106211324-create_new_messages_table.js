@@ -8,14 +8,14 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true,
       },
-      user_id: {
+      object_id: {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: true,
         references: {
-          model: 'users',
+          model: 'objects',
           key: 'id',
         },
-        onDelete: 'set null',
+        onDelete: 'cascade',
       },
       text: {
         type: Sequelize.STRING,
