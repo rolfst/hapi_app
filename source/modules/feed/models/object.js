@@ -8,5 +8,4 @@ export default (dataModel) => ({
   parentType: dataModel.parentType,
   parentId: dataModel.parentId.toString(),
   createdAt: dateUtils.toISOString(dataModel.created_at),
-  updatedAt: dateUtils.toISOString(dataModel.updated_at),
 });
