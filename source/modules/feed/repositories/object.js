@@ -23,11 +23,17 @@ export const create = async (attributes) => {
 /**
  * Find objects by where constraint
  * @param {object} whereConstraint - Object containing a where constraint
+ * @param {object} options - Object containing options
+ * @param {string} options.offset - The offset of the resultset
+ * @param {string} options.limit - The limit of the resultset
  * @method findBy
  * @return {Object[]}
  */
-export const findBy = async (whereConstraint) => {
-  const result = await _Object.findAll({ where: whereConstraint });
+export const findBy = async (whereConstraint, options) => {
+  const result = await _Object.findAll({
+    ...options,
+    where: whereConstraint,
+  });
 
   return map(createModel, result);
 };
@@ -42,4 +48,14 @@ export const deleteBy = async (whereConstraint) => {
   await _Object.destroy({ where: whereConstraint });
 
   return true;
+};
+
+/**
+ * Count objects by where constraint
+ * @param {object} whereConstraint - Object containing a where constraint
+ * @method count
+ * @return {boolean}
+ */
+export const count = async (whereConstraint) => {
+  return _Object.count({ where: whereConstraint });
 };

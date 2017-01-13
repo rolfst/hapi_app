@@ -21,6 +21,11 @@ describe('Service: Object', () => {
       });
     });
 
+    after(() => Promise.all([
+      serviceUnderTest.remove({ parentType: 'network', parentId: '42' }),
+      serviceUnderTest.remove({ objectType: 'poll', parentId: '2' }),
+    ]));
+
     it('should return objects', async () => {
       const actual = await serviceUnderTest.list({
         parentType: 'network',
@@ -38,6 +43,46 @@ describe('Service: Object', () => {
       assert.equal(actual[1].sourceId, '2');
       assert.equal(actual[1].parentType, 'network');
       assert.equal(actual[1].parentId, '42');
+    });
+  });
+
+  describe('count', () => {
+    before(async () => {
+      await serviceUnderTest.create({
+        userId: global.users.admin.id,
+        parentType: 'network',
+        parentId: '42',
+        objectType: 'poll',
+        sourceId: '2',
+      });
+
+      await serviceUnderTest.create({
+        userId: global.users.admin.id,
+        parentType: 'network',
+        parentId: '42',
+        objectType: 'message',
+        sourceId: '2',
+      });
+    });
+
+    after(() => Promise.all([
+      serviceUnderTest.remove({ parentType: 'network', parentId: '42' }),
+      serviceUnderTest.remove({ objectType: 'message', parentId: '2' }),
+    ]));
+
+    it('should return correct count', async () => {
+      const networkObjects = await serviceUnderTest.count({ where: {
+        parentType: 'network',
+        parentId: '42',
+      } });
+
+      const messageObjects = await serviceUnderTest.count({ where: {
+        objectType: 'message',
+        sourceId: '2',
+      } });
+
+      assert.equal(networkObjects, 2);
+      assert.equal(messageObjects, 1);
     });
   });
 });
