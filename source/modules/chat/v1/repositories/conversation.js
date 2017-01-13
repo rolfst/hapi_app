@@ -1,6 +1,5 @@
 import { map } from 'lodash';
 import { db as Sequelize } from '../../../../connections';
-import createError from '../../../../shared/utils/create-error';
 import { User } from '../../../../shared/models';
 import { Conversation, Message, ConversationUser } from './dao';
 import createConversationModel from '../models/conversation';
