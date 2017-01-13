@@ -92,12 +92,17 @@ export const listConversationsForUser = async (payload, message) => {
  */
 export const listMessages = async (payload, message) => {
   logger.info('List messages for conversation', { payload, message });
-
   const options = R.pick(PAGINATION_PROPERTIES, payload);
 
   await impl.assertThatUserIsPartOfTheConversation(message.credentials.id, payload.conversationId);
 
-  return messageRepo.findForConversation(payload.conversationId, options);
+  const objects = await objectService.list({
+    ...options,
+    parentType: 'conversation',
+    parentId: payload.conversationId,
+  }, message);
+
+  return messageService.list({ messageIds: R.pluck('sourceId', objects) }, message);
 };
 
 /**
@@ -135,5 +140,10 @@ export async function countMessages(payload, message) {
 
   await impl.assertThatUserIsPartOfTheConversation(message.credentials.id, payload.conversationId);
 
-  return messageRepo.countForConversation(payload.conversationId);
+  return objectService.count({
+    where: {
+      parentType: 'conversation',
+      parentId: payload.conversationId,
+      objectType: 'message',
+    } });
 }
