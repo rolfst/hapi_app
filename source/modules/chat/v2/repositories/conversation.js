@@ -1,6 +1,6 @@
 import R from 'ramda';
 import { User } from '../../../../shared/models';
-import { Conversation, ConversationUser } from '../../dao';
+import { Conversation, ConversationUser } from './dao';
 import createConversationModel from '../models/conversation';
 
 /**
@@ -17,7 +17,6 @@ export async function findByIds(conversationIds, options) {
     ...options,
     include: { attributes: ['id'], model: User },
     where: { id: { $in: conversationIds } },
-
   });
 
   return R.map(createConversationModel, result);
@@ -45,3 +44,26 @@ export async function findIdsForUser(userId) {
 
 export const findConversationsForUser = (userId) =>
   R.pipeP(findIdsForUser, findByIds)(userId);
+
+/**
+ * Create conversation
+ * @param {object} attributes - The options for pagination
+ * @param {string} attributes.type - The type of conversation
+ * @param {string} attributes.userId - The id of the user that created the conversation
+ * @param {string[]} attributes.participantIds - The ids of the participants
+ * @method create
+ * @return {external:Promise.<Conversation>}
+ */
+export const create = async (attributes) => {
+  const conversation = await Conversation.create({
+    type: attributes.type,
+    createdBy: attributes.userId,
+  });
+
+  await conversation.setUsers(attributes.participantIds);
+
+  const model = createConversationModel(conversation);
+  model.participantIds = attributes.participantIds;
+
+  return model;
+};
