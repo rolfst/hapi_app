@@ -44,4 +44,8 @@ export const create = async (attributes) => {
   return createModel(result);
 };
 
+export const update = async (messageId, attributes) => Message.update(attributes, {
+  where: { id: messageId },
+});
+
 export const destroy = (messageId) => Message.destroy({ where: { id: messageId } });
