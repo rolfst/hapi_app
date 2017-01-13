@@ -5,7 +5,6 @@ import * as objectService from '../../../../feed/services/object';
 import * as messageService from '../../../../feed/services/message';
 import * as conversationRepo from '../../repositories/conversation';
 import * as conversationRepoV1 from '../../../v1/repositories/conversation';
-import * as messageRepo from '../../repositories/message';
 import * as impl from './implementation';
 
 const logger = Logger.createLogger('CHAT/service/conversation');
