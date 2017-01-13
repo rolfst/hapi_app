@@ -45,7 +45,6 @@ export const create = async (payload, message) => {
   return objectRepository.create(payload);
 };
 
-
 /**
  * Remove object
  * @param {object} payload - Object containing payload data

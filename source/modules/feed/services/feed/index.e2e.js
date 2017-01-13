@@ -63,8 +63,6 @@ describe('Service: Feed', () => {
         parentId: global.networks.flexAppeal.id,
       }, { credentials: { id: global.users.admin.id } });
 
-      console.log(actual);
-
       assert.lengthOf(actual, 3);
       assert.equal(actual[0].objectType, 'message');
       assert.equal(actual[0].source.text, 'Message for feed');
