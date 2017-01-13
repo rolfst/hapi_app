@@ -1,5 +1,5 @@
 import R from 'ramda';
-import { Message } from '../../dao';
+import { Message } from './dao';
 import createMessageModel from '../models/message';
 
 /**
