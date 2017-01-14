@@ -48,5 +48,5 @@ export const mergeLastMessageWithConversation = R.curry((objects, lastMessages, 
   const lastMessageObject = findPropEq('parentId', conversation.id, objects);
   const lastMessageModel = findPropEq('id', lastMessageObject.sourceId, lastMessages);
 
-  return { ...conversation, lastMessage: lastMessageModel };
+  return { ...conversation, lastMessage: lastMessageModel || null };
 });
