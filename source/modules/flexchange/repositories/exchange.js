@@ -87,6 +87,8 @@ export async function findExchangeById(exchangeId, userId) {
   return exchange;
 }
 
+// FIXME: Should be replaced when flexchange will be used with
+// models instead of DAO's containing so many includes
 export const findPlainExchangesById = async (exchangeIds) => {
   const result = await Exchange.findAll({
     where: { id: { $in: exchangeIds } },
