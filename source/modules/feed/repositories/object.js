@@ -11,7 +11,7 @@ import createModel from '../models/object';
  * @param {string} attributes.objectType - The type of object
  * @param {string} attributes.sourceId - The id that refers to the activity
  * @method create
- * @return {Object}
+ * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
 export const create = async (attributes) => {
   const whitelist = ['userId', 'parentType', 'parentId', 'objectType', 'sourceId'];
@@ -24,7 +24,7 @@ export const create = async (attributes) => {
  * Find objects by where constraint
  * @param {object} whereConstraint - Object containing a where constraint
  * @method findBy
- * @return {Object[]}
+ * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
 export const findBy = async (whereConstraint) => {
   const result = await _Object.findAll({ where: whereConstraint });

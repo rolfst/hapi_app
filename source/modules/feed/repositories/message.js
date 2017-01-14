@@ -6,7 +6,7 @@ import createModel from '../models/message';
  * Find a message by id
  * @param {string} messageId - The id of the message
  * @method findById
- * @return {Message}
+ * @return {external:Promise.<Message>} {@link module:modules/feed~Message}
  */
 export const findById = async (messageId) => {
   const result = await Message.findById(messageId);
@@ -19,7 +19,7 @@ export const findById = async (messageId) => {
  * Find messages by ids
  * @param {string[]} messageIds - The ids of the messages
  * @method findByIds
- * @return {Message[]}
+ * @return {external:Promise.<Message[]>} {@link module:modules/feed~Message}
  */
 export const findByIds = async (messageIds) => {
   const results = await Message.findAll({
@@ -35,7 +35,7 @@ export const findByIds = async (messageIds) => {
  * @param {string} attributes.userId - The user id that creates the message
  * @param {string} attributes.text - The text that contains the message
  * @method create
- * @return {Message}
+ * @return {external:Promise.<Message>} {@link module:modules/feed~Message}
  */
 export const create = async (attributes) => {
   const attributesWhitelist = ['userId', 'text'];

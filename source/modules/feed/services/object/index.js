@@ -14,7 +14,7 @@ const logger = Logger.getLogger('FEED/service/object');
  * @param {string} payload.parentId - The id of the parent
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method list
- * @return {external:Promise.<Object[]>}
+ * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
 export const list = async (payload, message) => {
   logger.info('Listing objects', { payload, message });
@@ -37,7 +37,7 @@ export const list = async (payload, message) => {
  * @param {string} payload.sourceId - The id that refers to the activity
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method create
- * @return {external:Promise.<Object>}
+ * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
 export const create = async (payload, message) => {
   logger.info('Creating object', { payload, message });
@@ -57,7 +57,7 @@ export const create = async (payload, message) => {
  * @param {string} payload.sourceId - The id that refers to the activity
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method remove
- * @return {external:Promise.<Object>}
+ * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
 export const remove = async (payload, message) => {
   logger.info('Deleting object', { payload, message });
