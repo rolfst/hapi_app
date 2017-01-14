@@ -1,4 +1,5 @@
 import { assert } from 'chai';
+import R from 'ramda';
 import sinon from 'sinon';
 import Promise from 'bluebird';
 import * as flexchangeService from '../../../flexchange/services/flexchange';
@@ -79,7 +80,7 @@ describe('Service: Object Implementation', () => {
         description: 'Blabla',
       }]));
 
-      const promisedSources = flattenedObjects.map(unitUnderTest.findSourcesForFeed({}));
+      const promisedSources = R.map(unitUnderTest.findSourcesForFeed({}), flattenedObjects);
       const actual = await Promise.map(promisedSources, Promise.props);
 
       assert.deepEqual(actual, [{
