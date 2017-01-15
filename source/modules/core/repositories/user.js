@@ -69,6 +69,12 @@ export const findUsersByIds = async (userIds) => {
   return map(result, toModel);
 };
 
+export const findPlainUsersByIds = async (userIds) => {
+  const result = await User.findAll({ where: { id: { $in: userIds } } });
+
+  return map(result, toModel);
+};
+
 /**
  * Finds a user
  * @param {string} ids - identifier how the user is known
