@@ -54,7 +54,7 @@ export async function syncWithIntegrationPartner(payload, message) {
 
     return Promise.map(syncableNetworks(allNetworksInSystem), async (network) => {
       try {
-        const adapter = createAdapter(network, 0, { proceedWithoutToken: true });
+        const adapter = await createAdapter(network, 0, { proceedWithoutToken: true });
 
         return syncNetwork(network, allUsersInSystem, adapter, message);
       } catch (err) {
