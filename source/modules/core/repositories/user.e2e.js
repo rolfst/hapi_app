@@ -43,8 +43,8 @@ describe('User Repository', () => {
 
     it('domain object should have the correct teamIds property', async () => {
       const createdTeams = await Promise.all([
-        teamRepository.createTeam({ networkId: global.networks.flexAppeal.id, name: 'Team #1' }),
-        teamRepository.createTeam({ networkId: global.networks.flexAppeal.id, name: 'Team #2' }),
+        teamRepository.create({ networkId: global.networks.flexAppeal.id, name: 'Team #1' }),
+        teamRepository.create({ networkId: global.networks.flexAppeal.id, name: 'Team #2' }),
       ]);
 
       await teamRepository.addUserToTeams(map(createdTeams, 'id'), createdUser.id);

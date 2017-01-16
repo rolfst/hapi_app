@@ -176,7 +176,7 @@ export const updateTeamsForNetwork = async (externalTeams, networkId) => {
   });
 
   return Promise.map(existingExternalTeams, async (team) => {
-    await teamRepo.updateTeam(team.id, omit(team, 'id'));
+    await teamRepo.update(team.id, omit(team, 'id'));
 
     return team.id;
   });
