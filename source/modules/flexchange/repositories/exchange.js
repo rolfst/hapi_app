@@ -111,6 +111,10 @@ export function findExchangeByIds(exchangeIds, userId, extraConstraint = {}) {
   return Exchange.findAll(merge(options, extraConstraint));
 }
 
+export function findByIds(exchangeIds) {
+  return Exchange.findAll({ where: { id: { $in: exchangeIds } } });
+}
+
 export async function findExchangesByShiftIds(shiftIds) {
   const exchanges = await Exchange.findAll({
     include: defaultIncludes,
