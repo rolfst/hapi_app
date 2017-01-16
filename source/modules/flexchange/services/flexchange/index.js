@@ -13,7 +13,7 @@ import * as activityRepo from '../../../core/repositories/activity';
 import * as userService from '../../../core/services/user';
 import * as teamService from '../../../core/services/team';
 import * as networkService from '../../../core/services/network';
-import { exchangeTypes } from '../../models/exchange';
+import { exchangeTypes } from '../../repositories/dao/exchange';
 import * as commentRepo from '../../repositories/comment';
 import * as exchangeRepo from '../../repositories/exchange';
 import * as exchangeResponseRepo from '../../repositories/exchange-response';

@@ -6,7 +6,7 @@ import { getRequest } from '../../../shared/test-utils/request';
 import * as networkService from '../../core/services/network';
 import { createTeam } from '../../core/repositories/team';
 import * as userRepo from '../../core/repositories/user';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import * as exchangeRepo from '../repositories/exchange';
 
 describe('Get exchanges for network', () => {
@@ -188,7 +188,7 @@ describe('Get exchanges for network', () => {
       });
     });
 
-    it('should return exchanges for employee', async () => {
+    it.only('should return exchanges for employee', async () => {
       const endpoint = `/v2/networks/${network.id}/exchanges`;
       const { result } = await getRequest(endpoint, global.server, global.tokens.employee);
 

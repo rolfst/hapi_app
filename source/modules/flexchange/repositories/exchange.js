@@ -5,10 +5,10 @@ import { ActivityTypes } from '../../../shared/models/activity';
 import { createActivity } from '../../core/repositories/activity';
 import { User } from '../../../shared/models';
 import makeCreatedInObject from '../utils/created-in-text';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from './dao/exchange';
 import {
   Exchange, ExchangeResponse, ExchangeComment, ExchangeValue,
-} from '../models';
+} from './dao';
 import { createExchangeResponse } from './exchange-response';
 import { createValuesForExchange } from './exchange-value';
 import * as exchangeResponseRepo from './exchange-response';

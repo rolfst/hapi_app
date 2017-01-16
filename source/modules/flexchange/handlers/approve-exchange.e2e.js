@@ -3,7 +3,7 @@ import moment from 'moment';
 import blueprints from '../../../shared/test-utils/blueprints';
 import authenticate from '../../../shared/test-utils/authenticate';
 import { patchRequest } from '../../../shared/test-utils/request';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import * as exchangeRepo from '../repositories/exchange';
 
 describe('Approve exchange', () => {
