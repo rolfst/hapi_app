@@ -39,39 +39,20 @@ export const listExchangesForAdmin = async (network, credentials, queryFilter) =
   return exchangeRepo.findExchangesByNetwork(network.id, credentials.id, queryFilter);
 };
 
-export const listExchangesForEmployee = async (network, credentials, queryFilter) => {
+export const listExchangesForEmployee = async (network, user, queryFilter) => {
   if (network.hasIntegration) {
     const exchangesForUser = await exchangeRepo.findExchangesForValues(
-      'USER', network.id, [credentials.id], credentials.id, queryFilter);
+      'USER', network.id, [user.id], user.id, queryFilter);
 
     return exchangesForUser;
   }
 
-  const teams = await teamRepo.findTeamsForNetworkThatUserBelongsTo(credentials.id, network.id);
-  const teamIds = map(teams, 'id');
+  const [exchangesInNetwork, exchangesInTeams] = await Promise.all([
+    exchangeRepo.findExchangesForValues('ALL', network.id, [network.id], user.id, queryFilter),
+    exchangeRepo.findExchangesForValues('TEAM', network.id, user.teamIds, user.id, queryFilter),
+  ]);
 
-  const exchangesInNetwork = await exchangeRepo.findExchangesForValues(
-      'ALL', network.id, [network.id], credentials.id, queryFilter);
-
-  const exchangesInTeams = await exchangeRepo.findExchangesForValues(
-    'TEAM', network.id, teamIds, credentials.id, queryFilter);
-
-  return [...exchangesInNetwork, ...exchangesInTeams];
-};
-
-export const listExchangesForUser = async (network, user, queryFilter) => {
-  let exchanges;
-
-  if (user.roleType === UserRoles.ADMIN) {
-    exchanges = await listExchangesForAdmin(network, user, queryFilter);
-  } else if (user.roleType === UserRoles.EMPLOYEE) {
-    exchanges = await listExchangesForEmployee(network, user, queryFilter);
-  }
-
-  const createdExchangesByUser = await exchangeRepo.findExchangesByUserAndNetwork(
-    user.id, network.id, queryFilter);
-
-  return [...exchanges, ...createdExchangesByUser];
+  return exchangesInNetwork.concat(exchangesInTeams);
 };
 
 export const mapShiftsWithExchangeAndTeam = (shifts, exchanges, teams) => {

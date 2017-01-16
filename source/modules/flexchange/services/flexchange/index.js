@@ -1,4 +1,5 @@
 import { sortBy, orderBy, uniqBy, map, filter, includes } from 'lodash';
+import R from 'ramda';
 import moment from 'moment';
 import * as Analytics from '../../../../shared/services/analytics';
 import { createAdapter } from '../../../../shared/utils/create-adapter';
@@ -39,6 +40,16 @@ const findUsersByType = async (exchange, network, exchangeValues, loggedUser) =>
   return filter(users, u => u.id !== loggedUser.id);
 };
 
+export const list = async (payload, message) => {
+  const exchanges = exchangeRepo.findByIds(payload.exchangeIds);
+  const getIds = R.juxt([
+    R.pluck('approvedUser'),
+    R.pluck('approvedBy'),
+    R.pluck('userId'),
+  ]);
+
+  const usersToFind = R.pipe(getIds, R.flatten, R.uniq)(exchanges);
+};
 
 /**
  * Lists the possible receivers for an exchange
@@ -340,19 +351,28 @@ export const listPersonalizedExchanges = async (payload, message) => {
 /**
  * Lists exchanges for a network of the current current user in the current network.
  * @param {object} payload - Object containing payload data
+ * @param {object} payload.networkId - The network to list exchanges for
+ * @param {object} payload.filter - The filter
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method listExchangesForNetwork
  * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange} -
- * Promise with a list of Exchanges for a user
  */
 export const listExchangesForNetwork = async (payload, message) => {
-  const { credentials, network } = message;
   const user = await userService.getUserWithNetworkScope({
-    id: credentials.id, networkId: network.id }, message);
+    id: message.credentials.id, networkId: message.network.id }, message);
 
-  const exchanges = await impl.listExchangesForUser(network, user, payload.filter);
+  let exchanges;
 
-  return orderBy(uniqBy(exchanges, 'id'), 'date');
+  if (user.roleType === 'ADMIN') {
+    exchanges = await impl.listExchangesForAdmin(message.network, user, payload.filter);
+  } else if (user.roleType === 'EMPLOYEE') {
+    exchanges = await impl.listExchangesForEmployee(message.network, user, payload.filter);
+  }
+
+  const createdExchangesByUser = await exchangeRepo.findExchangesByUserAndNetwork(
+    user.id, message.network.id, payload.filter);
+
+  return orderBy(uniqBy([...exchanges, ...createdExchangesByUser], 'id'), 'date');
 };
 
 const createValidator = (exchangeType) => {
