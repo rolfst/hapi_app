@@ -10,11 +10,9 @@ export const createFunctionName = async (userId, network) => {
   return first(map(teamsThatUserBelongsTo, 'name'));
 };
 
-export async function createScopedUser(user, metaData, network) {
+export async function createScopedUser(user, metaData) {
   return {
     ...user,
-    function: !!metaData.deletedAt ?
-      'Verwijderd' : await createFunctionName(user.id, network),
     roleType: metaData.roleType,
     externalId: metaData.externalId,
     deletedAt: metaData.deletedAt,
