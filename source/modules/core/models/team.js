@@ -2,6 +2,7 @@ import R from 'ramda';
 import * as dateUtils from '../../../shared/utils/date';
 
 export default (dao) => ({
+  type: 'team',
   id: dao.id.toString(),
   networkId: dao.networkId.toString(),
   externalId: dao.externalId ? dao.externalId.toString() : null,
