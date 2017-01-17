@@ -4,7 +4,6 @@ import { postRequest } from '../../../shared/test-utils/request';
 
 const url = '/v2/authenticate';
 const employeeCredentials = blueprints.users.employee;
-const networklessUserCredentials = blueprints.users.networkless;
 const loginRequest = ({ username, password }) => {
   return postRequest(url, { username, password });
 };
@@ -42,13 +41,6 @@ describe('Authenticate', () => {
   it('should fail when username is not correct', async () => {
     const { password } = employeeCredentials;
     const { statusCode } = await loginRequest({ username: 'blabla@gmail.com', password });
-
-    assert.equal(statusCode, 403);
-  });
-
-  it('should fail when user does not belong to a network', async () => {
-    const { username, password } = networklessUserCredentials;
-    const { statusCode } = await loginRequest({ username, password });
 
     assert.equal(statusCode, 403);
   });

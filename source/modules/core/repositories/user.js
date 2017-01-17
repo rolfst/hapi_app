@@ -1,4 +1,5 @@
 import { map, omit, pick, sample } from 'lodash';
+import R from 'ramda';
 import Promise from 'bluebird';
 import createError from '../../../shared/utils/create-error';
 import { User, Network, NetworkUser, Integration, Team, TeamUser } from '../../../shared/models';
@@ -69,15 +70,38 @@ export const findUsersByIds = async (userIds) => {
   return map(result, toModel);
 };
 
+export const findPlainUsersByIds = async (userIds) => {
+  const result = await User.findAll({ where: { id: { $in: userIds } } });
+
+  return map(result, toModel);
+};
+
 /**
  * Finds a user
- * @param {string} ids - identifier how the user is known
+ * @param {string} userId - identifier how the user is known
+ * @param {string} networkId - identifier for what network the user need to be
+ * retrieved
+ * @param {string} [scoped=true] - flag to specifiy whether a user needs to be fetched
+ * with network scoped attributes
  * @method findUsersByIds
  * @return {external:Promise.<User>} {@link module:modules/core~User User}
  */
-export const findUserById = async (id) => {
-  const user = await User.findOne({ ...defaultIncludes, where: { id } });
-  if (!user) throw createError('403', `The user with id '${id}' could not be found.`);
+export const findUserById = async (userId, networkId, scoped = true) => {
+  if (scoped) {
+    if (R.isNil(networkId)) throw createError('20001');
+  }
+  const includes = scoped
+    ? { include: [{ model: Team,
+      attributes: ['id'],
+      where: { networkId },
+      required: false }] }
+    : {};
+  const user = await User.findOne({
+    ...includes,
+    where: { id: userId },
+  });
+
+  if (!user) throw createError('403', `The user with id '${userId}' could not be found.`);
 
   return toModel(user);
 };
@@ -168,7 +192,7 @@ export const updateUser = async (userId, attributes) => {
   const user = await User.findById(userId);
   await user.update(attributes);
 
-  return findUserById(userId);
+  return findUserById(userId, null, false);
 };
 
 /**
@@ -192,7 +216,7 @@ export const createUser = async (attributes) => {
     profileImg: sample(dummyProfileImgPaths),
   });
 
-  return findUserById(user.id);
+  return findUserById(user.id, null, false);
 };
 
 /**
@@ -301,7 +325,7 @@ export const updateUserForNetwork = async (user, networkId, active = true) => {
     roleType,
   });
 
-  return findUserById(networkUser.userId);
+  return findUserById(networkUser.userId, networkId);
 };
 
 /**

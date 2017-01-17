@@ -11,7 +11,7 @@ describe('Service: invite user', () => {
 
   before(async () => {
     network = global.networks.flexAppeal;
-    team = await teamRepo.createTeam({
+    team = await teamRepo.create({
       networkId: network.id,
       name: 'Cool Team',
     });
@@ -68,7 +68,7 @@ describe('Service: invite user', () => {
     });
 
     it('should add to the multiple teams', async () => {
-      const extraTeam = await teamRepo.createTeam({
+      const extraTeam = await teamRepo.create({
         networkId: network.id,
         name: 'Cool Team',
       });
@@ -128,7 +128,7 @@ describe('Service: invite user', () => {
     });
 
     it('should add to the multiple teams', async () => {
-      const extraTeam = await teamRepo.createTeam({
+      const extraTeam = await teamRepo.create({
         networkId: network.id,
         name: 'Cool Team',
       });
@@ -200,7 +200,7 @@ describe('Service: invite user', () => {
     });
 
     it('should add to the multiple teams', async () => {
-      const extraTeam = await teamRepo.createTeam({
+      const extraTeam = await teamRepo.create({
         networkId: network.id,
         name: 'Cool Team',
       });

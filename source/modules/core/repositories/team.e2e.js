@@ -34,11 +34,11 @@ describe('Team repository', () => {
   });
 
   it('should fail when creating team in same network with same external id', async () => {
-    await teamRepo.createTeam({ networkId: network.id, name: 'Team 1', externalId: '1' });
-    await teamRepo.createTeam({ networkId: network2.id, name: 'Team1 network2', externalId: '1' });
+    await teamRepo.create({ networkId: network.id, name: 'Team 1', externalId: '1' });
+    await teamRepo.create({ networkId: network2.id, name: 'Team1 network2', externalId: '1' });
 
     try {
-      await teamRepo.createTeam({ networkId: network.id, name: 'duplicateTeam', externalId: '1' });
+      await teamRepo.create({ networkId: network.id, name: 'duplicateTeam', externalId: '1' });
     } catch (err) {
       assert.equal(err.message, 'Validation error');
     }

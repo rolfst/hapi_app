@@ -61,7 +61,7 @@ describe('Handle sync networks', () => {
 
       integration = await createIntegration();
       network = await createIntegrationNetwork(alreadyImportedAdmin);
-      await teamRepo.createTeam({
+      await teamRepo.create({
         networkId: network.id, name: intialTeam.name, externalId: intialTeam.externalId });
 
       const usersToAdd = map([alreadyImportedAdmin, alreadyImportedUser],

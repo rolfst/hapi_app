@@ -277,7 +277,7 @@ export async function syncTeams(networkId, _externalTeams) {
     .value();
 
   await Promise.map(teamsToDelete, team => teamRepo.deleteById(team.id));
-  await Promise.map(teamsToUpdate, team => teamRepo.updateTeam(team.id, team));
+  await Promise.map(teamsToUpdate, team => teamRepo.update(team.id, team));
   await teamRepo.createBulkTeams(map(nonExistingTeams, t => omit(t, 'id')));
 
   return {

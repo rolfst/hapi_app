@@ -184,7 +184,10 @@ export const findAllUsersForNetwork = async (networkId) => {
  * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team}
  */
 export const findTeamsForNetwork = async (networkId) => {
-  return Promise.map(Team.findAll({ where: { networkId } }), toTeamModel);
+  return Promise.map(Team.findAll({
+    where: { networkId },
+    include: [{ attributes: ['id'], model: User }],
+  }), toTeamModel);
 };
 
 /**
