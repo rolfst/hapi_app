@@ -71,7 +71,7 @@ describe('Handle sync network', () => {
         isActive: true,
         externalId: user.externalId,
         roleType: 'ADMIN' }),
-       [alreadyImportedAdmin, alreadyImportedUser],
+        [alreadyImportedAdmin, alreadyImportedUser]
       );
 
       usersToAdd.push({
