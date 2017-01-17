@@ -5,7 +5,7 @@ export default async (req, reply) => {
   try {
     const payload = { ...req.params };
     const message = { ...req.pre, ...req.auth };
-    const data = await networkService.listTeams(payload, message);
+    const data = await networkService.listTeamsForNetwork(payload, message);
 
     return reply({ data: responseUtil.toSnakeCase(data) });
   } catch (err) {

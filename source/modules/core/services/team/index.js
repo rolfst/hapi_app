@@ -14,6 +14,29 @@ import * as userService from '../user';
 const logger = Logger.getLogger('CORE/service/team');
 
 /**
+ * List teams
+ * @param {object} payload
+ * @param {string} payload.teamIds
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method list
+ * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team} -
+ */
+export async function list(payload, message) {
+  logger.info('Listing teams', { payload, message });
+
+  const teams = await teamRepository.findByIds(payload.teamIds);
+  const transformTeam = (team) => ({
+    ...R.omit(['createdAt'], team),
+    memberCount: team.memberIds.length,
+    isMember: R.contains(message.credentials.id.toString(), team.memberIds),
+    isSynced: !!team.externalId,
+    createdAt: team.createdAt, // created_at should always be at the bottom of the response item
+  });
+
+  return R.map(transformTeam, teams);
+}
+
+/**
  * @description Create a new team
  * @param {object} payload - Object containing payload data
  * @param {string} payload.networkId - Id of the parent network
@@ -40,6 +63,8 @@ export const create = async (payload, message) => {
   if (payload.userIds) {
     await teamRepository.setUsersForTeam(team.id, payload.userIds);
     team.memberIds = payload.userIds;
+    team.isMember = R.contains(message.credentials.id, payload.userIds);
+    team.memberCount = payload.userIds.length;
   }
 
   return team;
@@ -71,14 +96,14 @@ export const update = async (payload, message) => {
   if (!team) throw createError('404');
 
   const attributes = R.pick(['name', 'externalId', 'description', 'isChannel'], payload);
+
   await teamRepository.update(team.id, attributes);
 
   if (payload.userIds) {
     await teamRepository.setUsersForTeam(team.id, payload.userIds);
   }
 
-  return R.merge(team, payload.userIds ?
-    { ...attributes, memberIds: payload.userIds } : attributes);
+  return (await list({ teamIds: [payload.teamId] }, message))[0];
 };
 
 /**
@@ -109,12 +134,5 @@ export const listMembersForTeams = async (payload, message) => {
  * Promise containing collection of deleted teams
  */
 export const deleteTeamsByIds = async (payload) => {
-  const { teamIds } = payload;
-  const teams = await teamRepository.findTeamsByIds(teamIds);
-
-  return Promise.map(teams, async (team) => {
-    await team.destroy();
-
-    return team.id;
-  });
+  return Promise.map(payload.teamIds, teamRepository.deleteById);
 };
