@@ -26,6 +26,8 @@ describe.only('Service: Flexchange', () => {
       }, {
         credentials: { id: global.users.admin.id },
       });
+
+      console.log(actual);
     });
   });
 });

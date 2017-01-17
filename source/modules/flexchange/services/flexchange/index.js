@@ -68,8 +68,22 @@ export const list = async (payload, message) => {
       networkId: payload.networkId, userIds }, message)
   )(exchanges);
 
-  console.log(exchanges);
-  console.log(users);
+  const findUserById = (id) => {
+    const match = R.find(R.propEq('id', id), users);
+    if (!match) return null;
+
+    return R.pick([
+      'type',
+      'id',
+      'fullName',
+      'profileImg',
+    ], match);
+  };
+
+  return R.map((exchange) => R.merge(exchange, {
+    user: findUserById(exchange.userId),
+    approvedUser: findUserById(exchange.approvedUserId),
+  }), exchanges);
 };
 
 /**
