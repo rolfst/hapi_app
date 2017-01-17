@@ -28,7 +28,8 @@ export async function list(payload, message) {
   const transformTeam = (team) => ({
     ...R.omit(['createdAt'], team),
     memberCount: team.memberIds.length,
-    isMember: R.contains(message.credentials.id.toString(), team.memberIds),
+    isMember: message ? // FIXME: Temporarily because of sync script that has no message
+      R.contains(message.credentials.id.toString(), team.memberIds) : false,
     isSynced: !!team.externalId,
     createdAt: team.createdAt, // created_at should always be at the bottom of the response item
   });
