@@ -4,7 +4,7 @@ import moment from 'moment';
 import { map, find } from 'lodash';
 import { getRequest } from '../../../shared/test-utils/request';
 import * as networkService from '../../core/services/network';
-import { createTeam } from '../../core/repositories/team';
+import { create } from '../../core/repositories/team';
 import * as userRepo from '../../core/repositories/user';
 import { exchangeTypes } from '../repositories/dao/exchange';
 import * as exchangeRepo from '../repositories/exchange';
@@ -104,9 +104,9 @@ describe('Get exchanges for network', () => {
       network = global.networks.flexAppeal;
 
       createdTeams = await Promise.all([
-        createTeam({ networkId: network.id, name: 'Test team 1' }),
-        createTeam({ networkId: network.id, name: 'Test team 2' }),
-        createTeam({ networkId: network.id, name: 'Test team 3' }),
+        create({ networkId: network.id, name: 'Test team 1' }),
+        create({ networkId: network.id, name: 'Test team 2' }),
+        create({ networkId: network.id, name: 'Test team 3' }),
       ]);
 
       const [team1, team2, team3] = createdTeams;

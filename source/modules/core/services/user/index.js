@@ -18,7 +18,7 @@ import * as impl from './implementation';
  * @return {external:Promise.<User>} {@link module:modules/core~User User} model
  */
 export const getUser = async (payload) => {
-  return userRepo.findUserById(payload.userId);
+  return userRepo.findUserById(payload.userId, null, false);
 };
 
 /**
@@ -55,7 +55,7 @@ export async function listUsersWithNetworkScope(payload, message) {
  * collection of users
  */
 export async function getUserWithNetworkScope(payload) {
-  const user = await userRepo.findUserById(payload.id);
+  const user = await userRepo.findUserById(payload.id, payload.networkId);
   const network = await networkRepo.findNetworkById(payload.networkId);
   const metaData = await userRepo.findNetworkLink({ userId: user.id, networkId: network.id });
 

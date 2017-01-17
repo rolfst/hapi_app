@@ -11,7 +11,7 @@ describe('My shifts', () => {
   afterEach(() => nock.cleanAll());
 
   it('should pair exchanges', async () => {
-    const createdTeam = await teamRepo.createTeam({
+    const createdTeam = await teamRepo.create({
       networkId: global.networks.pmt.id,
       name: 'Cool Team',
       externalId: '23424',

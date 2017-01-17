@@ -73,5 +73,10 @@
     "type": "integration_not_available",
     "detail": "The integration partner does not provide expected endpoint",
     "code": 403
+  },
+  "20001": {
+    "type": "bad_number_of_arguments",
+    "detail": "A bad number of arguments is provided for this method",
+    "code": 500
   }
 }

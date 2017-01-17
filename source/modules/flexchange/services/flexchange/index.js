@@ -349,7 +349,7 @@ export const listAvailableUsersForShift = async (payload, message) => {
 export const listExchangesForTeam = async (payload, message) => {
   const team = await teamRepo.findTeamById(payload.teamId);
   const exchanges = await exchangeRepo.findExchangesByTeam(
-    team, message.credentials.id, payload.filter);
+    team.id, message.credentials.id, payload.filter);
 
   return exchanges;
 };

@@ -4,7 +4,7 @@ import R from 'ramda';
 import createError from '../../../shared/utils/create-error';
 import { ActivityTypes } from '../../../shared/models/activity';
 import { createActivity } from '../../core/repositories/activity';
-import { User } from '../../../shared/models';
+import { User, Team } from '../../../shared/models';
 import makeCreatedInObject from '../utils/created-in-text';
 import createExchangeModel from '../models/exchange';
 import { exchangeTypes } from './dao/exchange';
@@ -188,13 +188,14 @@ export const findExchangesByNetwork = async (networkId, userId, filter = {}) => 
  * @method findExchangesByTeam
  * @return {Promise} Get exchanges promise
  */
-export const findExchangesByTeam = async (team, userId, filter = {}) => {
-  const exchanges = await team.getExchanges({ attributes: ['id'] });
-  const exchangeIds = exchanges.map(e => e.id);
+export const findExchangesByTeam = async (teamId, userId, filter = {}) => {
+  const teamDAO = await Team.findById(teamId);
+  const exchanges = await teamDAO.getExchanges();
+
   const dateFilter = createDateFilter(filter);
   const constraint = dateFilter ? { where: { date: dateFilter } } : {};
 
-  return findExchangeByIds(exchangeIds, userId, constraint);
+  return findExchangeByIds(map(exchanges, 'id'), userId, constraint);
 };
 
 /**

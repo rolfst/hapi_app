@@ -40,7 +40,7 @@ const logApplicationError = (message, payload, error) => {
 const logError = (ravenClient, message, payload, error) => {
   logApplicationError(message, payload, error);
 
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.API_ENV === 'production') {
     trackSentryError(ravenClient, payload, error);
   }
 };

@@ -86,7 +86,7 @@ describe('View users related to exchange', () => {
     });
 
     it('should return users for exchange created for team', async () => {
-      const team = await teamRepo.createTeam({ networkId: network.id, name: 'Cool Team' });
+      const team = await teamRepo.create({ networkId: network.id, name: 'Cool Team' });
       await teamRepo.addUserToTeam(team.id, global.users.admin.id);
 
       const exchange = await exchangeRepo.createExchange(global.users.admin.id, network.id, {

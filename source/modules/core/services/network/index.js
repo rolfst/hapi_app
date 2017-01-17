@@ -1,5 +1,6 @@
 import Promise from 'bluebird';
 import { flatten, map, filter, pick } from 'lodash';
+import R from 'ramda';
 import { createAdapter } from '../../../../shared/utils/create-adapter';
 import * as Logger from '../../../../shared/services/logger';
 import createError from '../../../../shared/utils/create-error';
@@ -92,6 +93,29 @@ export const listPristineNetworks = async (payload, message) => {
 
   return pristineNetworksWithAdmins;
 };
+
+/**
+ * List teams for network
+ * @param {object} payload
+ * @param {string} payload.networkId
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method listTeams
+ * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team} -
+ */
+export async function listTeams(payload, message) {
+  logger.info('Listing teams for network', { payload, message });
+
+  const teams = await networkRepo.findTeamsForNetwork(payload.networkId);
+  const transformTeam = (team) => ({
+    ...R.omit(['memberIds', 'externalId', 'createdAt'], team),
+    memberCount: team.memberIds.length,
+    isMember: R.contains(message.credentials.id.toString(), team.memberIds),
+    isSynced: !!team.externalId,
+    createdAt: team.createdAt, // created_at should always be at the bottom of the response item
+  });
+
+  return R.map(transformTeam, teams);
+}
 
 /**
  * retrieves Admins from network
