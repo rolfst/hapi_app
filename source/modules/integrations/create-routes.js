@@ -11,6 +11,10 @@ const routes = [{
   handler: require('./handlers/sync-with-integration-partner'),
   strategy: 'integration',
   prefetch: false,
+}, {
+  method: 'GET',
+  url: '/v2/network/{networkId}/sync',
+  handler: require('./handlers/sync-network-with-integration-partner'),
 }];
 
 export default createRoutes(routes);

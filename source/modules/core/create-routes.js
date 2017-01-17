@@ -27,16 +27,16 @@ const routes = [{
   handler: require('./handlers/network-admins'),
 }, {
   method: 'GET',
-  url: '/v1/networks/{networkId}/teams',
+  url: '/v2/networks/{networkId}/teams',
   handler: require('./handlers/teams-for-network'),
 }, {
   method: 'POST',
-  url: '/v1/networks/{networkId}/teams',
+  url: '/v2/networks/{networkId}/teams',
   handler: require('./handlers/create-team'),
   validator: require('./validators/create-team'),
 }, {
   method: 'PUT',
-  url: '/v1/networks/{networkId}/teams/{teamId}',
+  url: '/v2/networks/{networkId}/teams/{teamId}',
   handler: require('./handlers/update-team'),
   validator: require('./validators/update-team'),
 }];

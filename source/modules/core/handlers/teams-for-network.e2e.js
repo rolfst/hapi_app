@@ -14,7 +14,7 @@ describe('Handler: Teams for network', () => {
   });
 
   it('should return all teams in network', async () => {
-    const { result } = await getRequest(`/v1/networks/${global.networks.flexAppeal.id}/teams`);
+    const { result } = await getRequest(`/v2/networks/${global.networks.flexAppeal.id}/teams`);
 
     assert.lengthOf(result.data, 2);
     assert.equal(result.data[0].type, 'team');
