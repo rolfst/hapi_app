@@ -188,7 +188,7 @@ describe('Get exchanges for network', () => {
       });
     });
 
-    it.only('should return exchanges for employee', async () => {
+    it('should return exchanges for employee', async () => {
       const endpoint = `/v2/networks/${network.id}/exchanges`;
       const { result } = await getRequest(endpoint, global.server, global.tokens.employee);
 
