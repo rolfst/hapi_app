@@ -14,7 +14,10 @@ describe('Handler: create team', () => {
     assert.equal(statusCode, 200);
     assert.equal(result.data.network_id, global.networks.flexAppeal.id);
     assert.equal(result.data.name, 'Foo team');
+    assert.equal(result.data.member_count, 2);
     assert.equal(result.data.is_channel, true);
+    assert.equal(result.data.is_member, true);
+    assert.equal(result.data.is_synced, false);
     assert.deepEqual(result.data.member_ids, userIds);
   });
 
@@ -29,7 +32,10 @@ describe('Handler: create team', () => {
     assert.equal(result.data.type, 'team');
     assert.equal(result.data.network_id, global.networks.flexAppeal.id);
     assert.equal(result.data.name, 'Foo team');
+    assert.equal(result.data.member_count, 0);
     assert.equal(result.data.is_channel, true);
+    assert.equal(result.data.is_member, false);
+    assert.equal(result.data.is_synced, false);
   });
 
   it('should return 403 if user is not an admin', async () => {

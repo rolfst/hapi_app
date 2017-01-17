@@ -7,6 +7,7 @@ import createError from '../../../../shared/utils/create-error';
 import * as integrationsAdapter from '../../../../shared/utils/integrations-adapter';
 import * as networkRepo from '../../repositories/network';
 import * as userService from '../user';
+import * as teamService from '../team';
 import * as impl from './implementation';
 
 /**
@@ -93,29 +94,6 @@ export const listPristineNetworks = async (payload, message) => {
 
   return pristineNetworksWithAdmins;
 };
-
-/**
- * List teams for network
- * @param {object} payload
- * @param {string} payload.networkId
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method listTeams
- * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team} -
- */
-export async function listTeams(payload, message) {
-  logger.info('Listing teams for network', { payload, message });
-
-  const teams = await networkRepo.findTeamsForNetwork(payload.networkId);
-  const transformTeam = (team) => ({
-    ...R.omit(['memberIds', 'externalId', 'createdAt'], team),
-    memberCount: team.memberIds.length,
-    isMember: R.contains(message.credentials.id.toString(), team.memberIds),
-    isSynced: !!team.externalId,
-    createdAt: team.createdAt, // created_at should always be at the bottom of the response item
-  });
-
-  return R.map(transformTeam, teams);
-}
 
 /**
  * retrieves Admins from network
@@ -317,10 +295,10 @@ export const updateTeamsForNetwork = async (payload, message) => {
  */
 export const listTeamsForNetwork = async (payload, message) => {
   const result = await networkRepo.findTeamsForNetwork(payload.networkId);
-  logger.info('List teams in the network', {
+  logger.info('List teams for network', {
     payload, teamCount: result.length, message: message || null });
 
-  return result;
+  return teamService.list({ teamIds: R.pluck('id', result) }, message);
 };
 
 /**
