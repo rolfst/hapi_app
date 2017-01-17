@@ -4,14 +4,11 @@ import Promise from 'bluebird';
 import R from 'ramda';
 import { Team, User, TeamUser } from '../../../shared/models';
 import * as userRepo from './user';
-import createModel from '../models/team';
-
+import createTeamModel from '../models/team';
 
 /**
  * @module modules/core/repositories/team
  */
-
-export const toModel = (dao) => createModel(dao);
 
 /**
  * @param {string} id - team id
@@ -23,7 +20,7 @@ export async function findTeamById(teamId) {
     include: [{ attributes: ['id'], model: User }],
   });
 
-  return result ? toModel(result) : null;
+  return result ? createTeamModel(result) : null;
 }
 
 /**
@@ -42,7 +39,7 @@ export async function setUsersForTeam(teamId, userIds) {
 
   await team.setUsers(userIds);
 
-  return R.merge(toModel(team), { memberIds: userIds });
+  return R.merge(createTeamModel(team), { memberIds: userIds });
 }
 
 /**
@@ -89,7 +86,7 @@ export const findTeamsForNetworkThatUserBelongsTo = async (userId, networkId) =>
     }],
   });
 
-  return map(result, toModel);
+  return map(result, createTeamModel);
 };
 
 /**
@@ -107,16 +104,18 @@ export const findMembers = async (teamId) => {
 };
 
 /**
- * @param {string[]} ids - team to search for
- * @method findTeamsByIds
+ * @param {string[]} teamIds - Teams to find
+ * @method findByIds
  * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team}
  */
-export function findTeamsByIds(ids) {
-  return Team
-    .findAll({
-      where: { id: { $in: ids } },
-    });
-}
+export const findByIds = async (teamIds) => {
+  const result = await Team.findAll({
+    where: { id: { $in: teamIds } },
+    include: [{ attributes: ['id'], model: User }],
+  });
+
+  return R.map(createTeamModel, result);
+};
 
 /**
  * Finds teams by the provided externalIds. We are passing the networkId because it's
@@ -141,7 +140,7 @@ export const findTeamsByExternalId = (networkId, externalIds) => {
 export async function create(attributes) {
   const team = await Team.create(attributes);
 
-  return toModel(team);
+  return createTeamModel(team);
 }
 
 /**

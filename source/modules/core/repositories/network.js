@@ -9,8 +9,8 @@ import { Network,
   NetworkIntegration } from '../../../shared/models';
 import createError from '../../../shared/utils/create-error';
 import createNetworkModel from '../models/network';
+import createTeamModel from '../models/team';
 import * as userRepo from './user';
-import { toModel as toTeamModel } from './team';
 
 /**
  * @module modules/core/repositories/network
@@ -21,8 +21,6 @@ const defaultIncludes = [
   { model: User, as: 'SuperAdmin' },
 ];
 
-const toModel = (dao) => createNetworkModel(dao);
-
 /**
  * @method findAll
  * @return {external:Promise.<Network[]>} {@link module:modules/core~Network Network}
@@ -32,7 +30,7 @@ export const findAll = async () => {
     include: defaultIncludes,
   });
 
-  return map(networks, toModel);
+  return map(networks, createNetworkModel);
 };
 
 /**
@@ -48,7 +46,7 @@ export const findNetwork = async (data) => {
 
   if (!result) return null;
 
-  return toModel(result);
+  return createNetworkModel(result);
 };
 
 /**
@@ -63,7 +61,7 @@ export const findNetworkById = async (id) => {
 
   if (!result) return null;
 
-  return toModel(result);
+  return createNetworkModel(result);
 };
 
 /**
@@ -77,7 +75,7 @@ export const findNetworkByIds = async (ids) => {
     include: defaultIncludes,
   });
 
-  return map(result, toModel);
+  return map(result, createNetworkModel);
 };
 
 export const updateNetwork = async (networkId, attributes) => {
@@ -187,7 +185,7 @@ export const findTeamsForNetwork = async (networkId) => {
   return Promise.map(Team.findAll({
     where: { networkId },
     include: [{ attributes: ['id'], model: User }],
-  }), toTeamModel);
+  }), createTeamModel);
 };
 
 /**
