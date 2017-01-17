@@ -1,7 +1,8 @@
-import { sortBy, orderBy, uniqBy, map, filter, includes } from 'lodash';
+import { sortBy, orderBy, uniqBy, map, reject, includes } from 'lodash';
 import R from 'ramda';
 import moment from 'moment';
 import * as Analytics from '../../../../shared/services/analytics';
+import * as Logger from '../../../../shared/services/logger';
 import { createAdapter } from '../../../../shared/utils/create-adapter';
 import approveExchangeEvent from '../../../../shared/events/approve-exchange-event';
 import createError from '../../../../shared/utils/create-error';
@@ -26,29 +27,49 @@ import * as impl from './implementation';
 /**
  * @module modules/flexchange/services/flexchange
  */
+const logger = Logger.createLogger('FLEXCHANGE/service/exchange');
 
 const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
 
-const findUsersByType = async (exchange, network, exchangeValues, loggedUser) => {
+const findUsersByType = async (type, networkId, exchangeValues, userId) => {
   let usersPromise;
-  if (exchange.type === exchangeTypes.NETWORK) {
-    usersPromise = networkRepo.findAllUsersForNetwork(network.id);
-  } else if (exchange.type === exchangeTypes.TEAM) {
+
+  if (type === exchangeTypes.NETWORK) {
+    usersPromise = networkRepo.findAllUsersForNetwork(networkId);
+  } else if (type === exchangeTypes.TEAM) {
     usersPromise = teamRepo.findUsersByTeamIds(exchangeValues);
   }
-  const users = await (usersPromise);
-  return filter(users, u => u.id !== loggedUser.id);
+
+  return reject(await usersPromise, u => u.id === userId);
 };
 
+/**
+ * Lists exchanges for network by id
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.networkId - The id of the network to perform action
+ * @param {string[]} payload.exchangeIds - The id of the exchanges to list
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method list
+ * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange}
+ */
 export const list = async (payload, message) => {
-  const exchanges = exchangeRepo.findByIds(payload.exchangeIds);
-  const getIds = R.juxt([
+  logger.info('Listing exchanges', { payload, message });
+
+  const exchanges = await exchangeRepo.findByIds(payload.exchangeIds);
+  const occurringUserIds = R.juxt([
     R.pluck('approvedUser'),
     R.pluck('approvedBy'),
     R.pluck('userId'),
   ]);
 
-  const usersToFind = R.pipe(getIds, R.flatten, R.uniq)(exchanges);
+  const users = await R.pipe(
+    occurringUserIds, R.flatten, R.uniq,
+    (userIds) => userService.listUsersWithNetworkScope({
+      networkId: payload.networkId, userIds }, message)
+  )(exchanges);
+
+  console.log(exchanges);
+  console.log(users);
 };
 
 /**
@@ -386,10 +407,11 @@ const createValidator = (exchangeType) => {
  * @param {string} payload.date - date for the exchange
  * @param {string} payload.startTime - {@link module:modules/flexchange~Exchange Exchange.startTime}
  * @param {string} payload.endTime - {@link module:modules/flexchange~Exchange Exchange.endTime}
- * @param {string} payload.value - {@link module:modules/flexchange~Exchange Exchange.value}
+ * @param {string} payload.values - {@link module:modules/flexchange~Exchange Exchange.values}
  * @param {string} payload.type - {@link module:modules/flexchange~Exchange Exchange.type}
- * @param {string} payload.title - {@link module:modules/flexchange~Exchange Exchange.title}
- * @param {string} payload.description
+ * @param {string} [payload.shiftId] - {@link module:modules/flexchange~Exchange Exchange.shiftId}
+ * @param {string} [payload.title] - {@link module:modules/flexchange~Exchange Exchange.title}
+ * @param {string} [payload.description]
  * {@link module:modules/flexchange~Exchange Exchange.description}
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method createExchange
@@ -397,30 +419,34 @@ const createValidator = (exchangeType) => {
  * Promise with the newly created Exchange
  */
 export const createExchange = async (payload, message) => {
-  const { network, credentials } = message;
+  logger.info('Creating an exchange', { payload, message });
+
   if (payload.startTime && payload.endTime && moment(payload.endTime).isBefore(payload.startTime)) {
     throw createError('422', 'Attribute end_time should be after start_time');
   }
 
-  if (payload.shiftId && !network.hasIntegration) {
+  if (payload.shiftId && !message.network.hasIntegration) {
     throw createError('10001');
   }
 
   if (includes([exchangeTypes.TEAM, exchangeTypes.USER], payload.type)) {
     const validator = createValidator(payload.type);
-    const isValid = validator ? await validator(payload.values, network.id) : true;
+    const isValid = validator ? await validator(payload.values, message.network.id) : true;
 
     if (!isValid) throw createError('422', 'Specified invalid ids for type.');
   }
-  const createdExchange = await exchangeRepo.createExchange(message.credentials.id, network.id, {
-    ...payload,
-    date: moment(payload.date).format('YYYY-MM-DD'),
-  });
 
-  const users = await findUsersByType(createdExchange, network, payload.values, credentials);
+  const createdExchange = await exchangeRepo.createExchange(
+    message.credentials.id, message.network.id, {
+      ...payload,
+      date: moment(payload.date).format('YYYY-MM-DD'),
+    });
+
+  const users = await findUsersByType(
+    createdExchange.type, message.network.id, payload.values, message.credentials.id);
 
   await createdNotifier.send(users, createdExchange);
-  Analytics.track(newExchangeEvent(network, createdExchange), message.credentials.id);
+  Analytics.track(newExchangeEvent(message.network, createdExchange), message.credentials.id);
 
   return exchangeRepo.findExchangeById(createdExchange.id);
 };
