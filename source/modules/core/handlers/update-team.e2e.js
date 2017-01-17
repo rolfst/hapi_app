@@ -26,7 +26,10 @@ describe('Handler: update team', () => {
     assert.equal(result.data.type, 'team');
     assert.equal(result.data.network_id, global.networks.flexAppeal.id);
     assert.equal(result.data.name, 'Updated foo team');
+    assert.equal(result.data.member_count, 1);
     assert.equal(result.data.is_channel, true);
+    assert.equal(result.data.is_member, true);
+    assert.equal(result.data.is_synced, false);
     assert.deepEqual(result.data.member_ids, [global.users.admin.id]);
   });
 
@@ -39,6 +42,7 @@ describe('Handler: update team', () => {
     assert.equal(result.data.type, 'team');
     assert.equal(result.data.network_id, global.networks.flexAppeal.id);
     assert.equal(result.data.name, 'Updated foo team');
+    assert.equal(result.data.member_count, 1);
     assert.equal(result.data.is_channel, true);
     assert.deepEqual(result.data.member_ids, [global.users.employee.id]);
   });
