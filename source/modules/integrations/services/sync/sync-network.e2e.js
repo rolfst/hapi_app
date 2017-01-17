@@ -51,7 +51,7 @@ describe('Network synchronisation', () => {
         description: null,
       };
 
-      await teamRepository.createTeam(internalTeam);
+      await teamRepository.create(internalTeam);
       await serviceImpl.syncTeams(network.id, externalTeams);
       const teamsForNetwork = await networkRepository.findTeamsForNetwork(network.id);
       const syncedTeam = find(teamsForNetwork, { externalId: '1' });
@@ -71,7 +71,7 @@ describe('Network synchronisation', () => {
         description: null,
       };
 
-      await teamRepository.createTeam(internalTeam);
+      await teamRepository.create(internalTeam);
       await serviceImpl.syncTeams(network.id, externalTeams);
       const teamsForNetwork = await networkRepository.findTeamsForNetwork(network.id);
 
@@ -94,7 +94,7 @@ describe('Network synchronisation', () => {
         description: null,
       };
 
-      await teamRepository.createTeam(internalTeam);
+      await teamRepository.create(internalTeam);
       await serviceImpl.syncTeams(network.id, externalTeams);
       const teamsForNetwork = await networkRepository.findTeamsForNetwork(network.id);
       const changedTeam = find(teamsForNetwork, { externalId: '2' });
@@ -374,7 +374,7 @@ describe('Network synchronisation', () => {
         password: 'foo',
       };
 
-      const createdTeams = await Promise.map(internalTeams, teamRepository.createTeam);
+      const createdTeams = await Promise.map(internalTeams, teamRepository.create);
       const createdUser = await userRepository.createUser(internalUser);
       await teamRepository.addUserToTeam(createdTeams[0].id, createdUser.id);
       await networkRepository.addUser({
@@ -426,7 +426,7 @@ describe('Network synchronisation', () => {
         password: 'foo',
       };
 
-      const createdTeams = await Promise.map(internalTeams, teamRepository.createTeam);
+      const createdTeams = await Promise.map(internalTeams, teamRepository.create);
       const createdUser = await userRepository.createUser(internalUser);
       await teamRepository.addUserToTeam(createdTeams[0].id, createdUser.id);
       await networkRepository.addUser({
