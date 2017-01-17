@@ -9,19 +9,31 @@ import _, {
   differenceBy,
   intersectionBy,
 } from 'lodash';
+import R from 'ramda';
+import createError from '../../../../shared/utils/create-error';
+import * as Logger from '../../../../shared/services/logger';
 import * as teamService from '../../../core/services/team';
 import * as networkService from '../../../core/services/network';
 import * as networkServiceImpl from '../../../core/services/network/implementation';
 import * as networkRepo from '../../../core/repositories/network';
 import * as userRepo from '../../../core/repositories/user';
 import * as teamRepo from '../../../core/repositories/team';
-import * as Logger from '../../../../shared/services/logger';
 
 /**
  * @module modules/integrations/services/sync/impl
  */
 
 const logger = Logger.getLogger('INTEGRATIONS/services/sync');
+
+export const isSyncable = R.and(R.prop('hasIntegration'), R.prop('importedAt'));
+
+export function assertNetworkIsSyncable(network) {
+  if (!isSyncable(network)) throw createError('10009');
+}
+
+export function assertUserIsAdmin(user) {
+  if (!R.propEq('role', 'ADMIN', user)) throw createError('403');
+}
 
 export const getRemovableUsersForNetwork = async (externalUsers, networkId, message) => {
   const internalUsers = await networkService.listActiveUsersForNetwork(

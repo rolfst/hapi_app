@@ -104,7 +104,7 @@ describe('Handle sync network', () => {
         [alreadyImportedUser, alreadyImportedAdmin, globalAdmin]);
 
       // delete all users to reset the state of the network
-      return Promise.map(R.map(R.prop('id'), users), userRepo.deleteById);
+      return Promise.map(R.pluck('id', users), userRepo.deleteById);
     });
 
     it('should return success', async () => {

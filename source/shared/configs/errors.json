@@ -76,7 +76,7 @@
   },
   "10009": {
     "type": "integration_not_syncable",
-    "detail": "The network is not linked for syncing",
+    "detail": "The network has no integration or is not imported yet",
     "code": 403
   }
 }
