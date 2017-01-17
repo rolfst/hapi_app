@@ -23,6 +23,7 @@ describe('Handler: update team', () => {
     const { statusCode, result } = await putRequest(endpoint, payload);
 
     assert.equal(statusCode, 200);
+    assert.equal(result.data.type, 'team');
     assert.equal(result.data.network_id, global.networks.flexAppeal.id);
     assert.equal(result.data.name, 'Updated foo team');
     assert.equal(result.data.is_channel, true);
@@ -35,6 +36,7 @@ describe('Handler: update team', () => {
     const { statusCode, result } = await putRequest(endpoint, payload);
 
     assert.equal(statusCode, 200);
+    assert.equal(result.data.type, 'team');
     assert.equal(result.data.network_id, global.networks.flexAppeal.id);
     assert.equal(result.data.name, 'Updated foo team');
     assert.equal(result.data.is_channel, true);

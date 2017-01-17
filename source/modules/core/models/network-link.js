@@ -1,4 +1,5 @@
 export default (dao) => ({
+  type: 'network_link',
   networkId: dao.networkId.toString(),
   userId: dao.userId.toString(),
   externalId: dao.externalId ? dao.externalId.toString() : null,

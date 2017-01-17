@@ -26,6 +26,7 @@ describe('Handler: create team', () => {
     await teamRepository.deleteById(result.data.id);
 
     assert.equal(statusCode, 200);
+    assert.equal(result.data.type, 'team');
     assert.equal(result.data.network_id, global.networks.flexAppeal.id);
     assert.equal(result.data.name, 'Foo team');
     assert.equal(result.data.is_channel, true);
