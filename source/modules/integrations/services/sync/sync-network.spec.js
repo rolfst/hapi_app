@@ -28,6 +28,7 @@ describe('Single Network synchronisation', () => {
     const syncAction = service.syncNetworkWithIntegrationPartner(
        { networkId: '43' }, { credentials: { id: 'a' } });
 
-    return assert.isRejected(syncAction, /Error: The network has no integration or is not imported yet/);
+    return assert.isRejected(syncAction,
+        /Error: The network has no integration or is not imported yet/);
   });
 });
