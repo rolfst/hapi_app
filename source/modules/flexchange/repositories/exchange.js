@@ -1,10 +1,12 @@
 import moment from 'moment';
 import { map, omit, merge } from 'lodash';
+import R from 'ramda';
 import createError from '../../../shared/utils/create-error';
 import { ActivityTypes } from '../../../shared/models/activity';
 import { createActivity } from '../../core/repositories/activity';
 import { User } from '../../../shared/models';
 import makeCreatedInObject from '../utils/created-in-text';
+import createExchangeModel from '../models/exchange';
 import { exchangeTypes } from './dao/exchange';
 import {
   Exchange, ExchangeResponse, ExchangeComment, ExchangeValue,
@@ -111,8 +113,10 @@ export function findExchangeByIds(exchangeIds, userId, extraConstraint = {}) {
   return Exchange.findAll(merge(options, extraConstraint));
 }
 
-export function findByIds(exchangeIds) {
-  return Exchange.findAll({ where: { id: { $in: exchangeIds } } });
+export async function findByIds(exchangeIds) {
+  const result = await Exchange.findAll({ where: { id: { $in: exchangeIds } } });
+
+  return R.map(createExchangeModel, result);
 }
 
 export async function findExchangesByShiftIds(shiftIds) {
