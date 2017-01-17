@@ -1,8 +1,9 @@
 import { assert } from 'chai';
 import nock from 'nock';
-import { map, pick, differenceBy } from 'lodash';
+import R from 'ramda';
 import Promise from 'bluebird';
 import { getRequest } from '../../../shared/test-utils/request';
+import authenticate from '../../../shared/test-utils/authenticate';
 import * as setup from '../../../shared/test-utils/setup';
 import * as stubs from '../../../shared/test-utils/stubs';
 import * as passwordUtil from '../../../shared/utils/password';
@@ -12,7 +13,7 @@ import * as userRepo from '../../core/repositories/user';
 import * as teamRepo from '../../core/repositories/team';
 import * as integrationRepo from '../../core/repositories/integration';
 
-describe('Handle sync networks', () => {
+describe('Handle sync network', () => {
   nock.disableNetConnect();
   let network;
   let integration;
@@ -42,7 +43,7 @@ describe('Handle sync networks', () => {
   });
 
   const createIntegrationNetwork = (user) => networkRepo.createIntegrationNetwork({
-    ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
+    ...R.pick(['externalId', 'name', 'integrationName'], pristineNetwork),
     userId: user.id,
   });
 
@@ -64,13 +65,13 @@ describe('Handle sync networks', () => {
       await teamRepo.create({
         networkId: network.id, name: intialTeam.name, externalId: intialTeam.externalId });
 
-      const usersToAdd = map([alreadyImportedAdmin, alreadyImportedUser],
-        (user) => ({
-          userId: user.id,
-          networkId: network.id,
-          isActive: true,
-          externalId: user.externalId,
-          roleType: 'ADMIN' })
+      const usersToAdd = R.map((user) => ({
+        userId: user.id,
+        networkId: network.id,
+        isActive: true,
+        externalId: user.externalId,
+        roleType: 'ADMIN' }),
+       [alreadyImportedAdmin, alreadyImportedUser],
       );
 
       usersToAdd.push({
@@ -98,11 +99,12 @@ describe('Handle sync networks', () => {
 
     afterEach(async () => {
       const allUsers = await networkRepo.findAllUsersForNetwork(network.id);
-      const users = differenceBy(allUsers,
-        [alreadyImportedUser, alreadyImportedAdmin, globalAdmin], 'email');
+      const users = R.differenceWith((x, y) => x.email === y.email,
+         allUsers,
+        [alreadyImportedUser, alreadyImportedAdmin, globalAdmin]);
 
       // delete all users to reset the state of the network
-      return Promise.map(map(users, 'id'), userRepo.deleteById);
+      return Promise.map(R.pluck('id', users), userRepo.deleteById);
     });
 
     it('should return success', async () => {
@@ -112,8 +114,10 @@ describe('Handle sync networks', () => {
         .get('/users')
         .reply(200, stubs.users_200);
 
-      const endpoint = '/v2/integrations/sync';
-      const { statusCode } = await getRequest(endpoint, global.server, 'footoken');
+      const endpoint = `/v2/network/${network.id}/sync`;
+      const adminAuth = await authenticate(global.server,
+          { username: globalAdmin.username, password: adminCredentials.password });
+      const { statusCode } = await getRequest(endpoint, global.server, adminAuth.token);
 
       assert.equal(statusCode, 202);
     });
