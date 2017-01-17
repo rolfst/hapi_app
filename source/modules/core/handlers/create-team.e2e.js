@@ -5,7 +5,7 @@ import * as teamRepository from '../repositories/team';
 describe('Handler: create team', () => {
   it('should create a new team', async () => {
     const userIds = [global.users.admin.id, global.users.employee.id];
-    const endpoint = `/v1/networks/${global.networks.flexAppeal.id}/teams`;
+    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/teams`;
     const payload = { name: 'Foo team', is_channel: true, user_ids: userIds };
     const { statusCode, result } = await postRequest(endpoint, payload);
 
@@ -22,7 +22,7 @@ describe('Handler: create team', () => {
   });
 
   it('should be a channel by default', async () => {
-    const endpoint = `/v1/networks/${global.networks.flexAppeal.id}/teams`;
+    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/teams`;
     const payload = { name: 'Foo team' };
     const { statusCode, result } = await postRequest(endpoint, payload);
 
@@ -39,7 +39,7 @@ describe('Handler: create team', () => {
   });
 
   it('should return 403 if user is not an admin', async () => {
-    const endpoint = `/v1/networks/${global.networks.flexAppeal.id}/teams`;
+    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/teams`;
     const payload = { name: 'Foo team' };
     const { statusCode } = await postRequest(
       endpoint, payload, global.server, global.tokens.employee);

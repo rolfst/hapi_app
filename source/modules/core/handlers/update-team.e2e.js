@@ -18,7 +18,7 @@ describe('Handler: update team', () => {
   after(() => teamRepository.deleteById(createdTeam.id));
 
   it('should update an existing team', async () => {
-    const endpoint = `/v1/networks/${global.networks.flexAppeal.id}/teams/${createdTeam.id}`;
+    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/teams/${createdTeam.id}`;
     const payload = { name: 'Updated foo team', is_channel: true };
     const { statusCode, result } = await putRequest(endpoint, payload);
 
@@ -34,7 +34,7 @@ describe('Handler: update team', () => {
   });
 
   it('should reset the user based on the user_ids value', async () => {
-    const endpoint = `/v1/networks/${global.networks.flexAppeal.id}/teams/${createdTeam.id}`;
+    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/teams/${createdTeam.id}`;
     const payload = { user_ids: [global.users.employee.id] };
     const { statusCode, result } = await putRequest(endpoint, payload);
 
@@ -48,7 +48,7 @@ describe('Handler: update team', () => {
   });
 
   it('should return 403 if user is not an admin', async () => {
-    const endpoint = `/v1/networks/${global.networks.flexAppeal.id}/teams/${createdTeam.id}`;
+    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/teams/${createdTeam.id}`;
     const payload = { name: 'Updated again foo team' };
     const { statusCode } = await putRequest(
       endpoint, payload, global.server, global.tokens.employee);
@@ -57,7 +57,7 @@ describe('Handler: update team', () => {
   });
 
   it('should return 404 when team is not found', async () => {
-    const endpoint = `/v1/networks/${global.networks.flexAppeal.id}/teams/58429831828`;
+    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/teams/58429831828`;
     const payload = { name: 'Updated again foo team' };
     const { statusCode } = await putRequest(endpoint, payload);
 
