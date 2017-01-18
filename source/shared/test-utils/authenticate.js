@@ -23,7 +23,7 @@ import * as authenticationService from '../../modules/authentication/services/au
 export default async (credentials, message) => {
   const { accessToken } = await authenticationService.authenticate(credentials, message);
   const decodedToken = tokenUtil.decode(accessToken);
-  const user = await userRepo.findUserById(decodedToken.sub);
+  const user = await findUserById(decodedToken.sub, null, false);
 
   return {
     ...user,

@@ -9,7 +9,6 @@ import hook from './my-shifts';
 
 describe('PMT my shifts hook', () => {
   nock.disableNetConnect();
-
   const ENDPOINT = '/me/shifts';
   const TOKEN = 'aefacbadb0123456789';
   const TODAY = moment().format('DD-MM-YYYY');

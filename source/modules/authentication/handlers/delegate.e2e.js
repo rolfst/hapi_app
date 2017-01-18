@@ -40,7 +40,6 @@ describe('Delegate', () => {
     assert.equal(statusCode, 200);
     assert.equal(decodedToken.type, 'access_token');
     assert.equal(decodedToken.sub, createdUser.id);
-    assert.property(decodedToken, 'integrations');
   });
 
   it('should return a new access token', async () => {

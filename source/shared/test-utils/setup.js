@@ -10,7 +10,6 @@ import generateNetworkName from './create-network-name';
 import * as notifier from '../services/notifier';
 import * as mailer from '../services/mailer';
 import { UserRoles } from '../services/permission';
-import * as accessService from '../../modules/integrations/services/access';
 import * as networkService from '../../modules/core/services/network';
 import * as userRepo from '../../modules/core/repositories/user';
 import * as integrationRepo from '../../modules/core/repositories/integration';
@@ -92,9 +91,6 @@ export const initialSetup = async () => {
     authenticate(global.server, employeeCredentials),
   ]);
 
-  const message = { credentials: admin, network: createdPMTNetwork, deviceName: 'foo' };
-  const linkedAdminToken = await accessService.getLinkedAccessToken(adminCredentials, message);
-
   global.users = {
     admin: adminAuth,
     employee: employeeAuth,
@@ -102,7 +98,7 @@ export const initialSetup = async () => {
   };
 
   global.tokens = {
-    admin: linkedAdminToken,
+    admin: adminAuth.token,
     employee: employeeAuth.token,
   };
 

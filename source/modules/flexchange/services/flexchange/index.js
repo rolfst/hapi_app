@@ -180,16 +180,16 @@ export const declineExchange = async (payload, message) => {
  * Promise with list of shifts
  */
 export const listMyShifts = async (payload, message) => {
-  const { network, artifacts } = message;
+  const { network } = message;
 
   if (!network.hasIntegration) throw createError('10001');
 
-  const adapter = createAdapter(network, artifacts.integrations);
+  const adapter = await createAdapter(network, message.credentials.id);
   const shifts = await adapter.myShifts();
 
   const [exchanges, teams] = await Promise.all([
     exchangeRepo.findExchangesByShiftIds(map(shifts, 'id')),
-    teamRepo.findTeamsByExternalId(map(shifts, 'team_id')),
+    teamRepo.findTeamsByExternalId(network.id, map(shifts, 'team_id')),
   ]);
 
   return impl.mapShiftsWithExchangeAndTeam(shifts, exchanges, teams);
@@ -267,18 +267,16 @@ export const listComments = async (payload, message) => {
  * Promise with a Shift
  */
 export const getShift = async (payload, message) => {
-  const { network, artifacts } = message;
+  if (!message.network.hasIntegration) throw createError('10001');
 
-  if (!network.hasIntegration) throw createError('10001');
-
-  const adapter = createAdapter(network, artifacts.integrations);
+  const adapter = await createAdapter(message.network, message.credentials.id);
   const shift = await adapter.viewShift(payload.shiftId);
 
   if (!shift) throw createError('404');
 
   const [exchanges, teams] = await Promise.all([
     exchangeRepo.findExchangesByShiftIds([shift.id]),
-    teamRepo.findTeamsByExternalId([shift.team_id]),
+    teamRepo.findTeamsByExternalId(message.network.id, [shift.team_id]),
   ]);
 
   return impl.mergeShiftWithExchangeAndTeam(shift, exchanges[0], teams[0]);
@@ -294,13 +292,11 @@ export const getShift = async (payload, message) => {
  * Promise with a list of Users
  */
 export const listAvailableUsersForShift = async (payload, message) => {
-  const { network, artifacts } = message;
+  if (!message.network.hasIntegration) throw createError('10001');
 
-  if (!network.hasIntegration) throw createError('10001');
-
-  const adapter = createAdapter(network, artifacts.integrations);
+  const adapter = await createAdapter(message.network, message.credentials.id);
   const externalUsers = await adapter.usersAvailableForShift(payload.shiftId);
-  const availableUsers = await impl.matchUsersForShift(externalUsers, network);
+  const availableUsers = await impl.matchUsersForShift(externalUsers, message.network);
 
   return userService.listUsersWithNetworkScope({
     userIds: map(availableUsers, 'id'),
@@ -321,7 +317,7 @@ export const listAvailableUsersForShift = async (payload, message) => {
 export const listExchangesForTeam = async (payload, message) => {
   const team = await teamRepo.findTeamById(payload.teamId);
   const exchanges = await exchangeRepo.findExchangesByTeam(
-    team, message.credentials.id, payload.filter);
+    team.id, message.credentials.id, payload.filter);
 
   return exchanges;
 };

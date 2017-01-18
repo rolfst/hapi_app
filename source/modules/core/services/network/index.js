@@ -1,11 +1,13 @@
 import Promise from 'bluebird';
 import { flatten, map, filter, pick } from 'lodash';
+import R from 'ramda';
 import { createAdapter } from '../../../../shared/utils/create-adapter';
 import * as Logger from '../../../../shared/services/logger';
 import createError from '../../../../shared/utils/create-error';
 import * as integrationsAdapter from '../../../../shared/utils/integrations-adapter';
 import * as networkRepo from '../../repositories/network';
 import * as userService from '../user';
+import * as teamService from '../team';
 import * as impl from './implementation';
 
 /**
@@ -27,7 +29,7 @@ const logger = Logger.getLogger('CORE/service/network');
  * new network object
  */
 export const create = async (payload, message) => {
-  logger.info('Creating Network', { payload, message });
+  logger.info('Creating network', { payload, message });
 
   const whitelistAttrs = pick(payload, 'userId', 'name', 'externalId', 'integrationName');
 
@@ -107,7 +109,7 @@ export const listAdminsFromNetwork = async (payload, message) => {
 
   if (!network) throw createError('404');
 
-  const adapter = createAdapter(network, [], { proceedWithoutToken: true });
+  const adapter = await createAdapter(network, 0, { proceedWithoutToken: true });
   const externalUsers = await adapter.fetchUsers(network.externalId);
 
   return filter(externalUsers, 'isAdmin');
@@ -144,7 +146,7 @@ export const listActiveUsersForNetwork = async (payload, message) => {
  * Promise containing collection of users
  */
 export const listAllUsersForNetwork = async (payload, message) => {
-  logger.info('Listing all users for network', { payload, message });
+  logger.info('List all users for network', { payload });
 
   const network = await networkRepo.findNetworkById(payload.networkId);
   const usersFromNetwork = await networkRepo.findAllUsersForNetwork(network.id);
@@ -183,10 +185,10 @@ export const getNetwork = async (payload, message) => {
  * @return {external:Promise.<Network>} {@link module:modules/core~Network Network} -
  * Promise containing a collections networks
  */
-export const listNetworksForUser = async (payload, message) => {
-  logger.info('Listing all networks for user', { payload, message });
+export const listNetworksForUser = async (payload) => {
+  logger.info('List all networks for user', { payload });
 
-  return networkRepo.findAllContainingUser(payload.id);
+  return networkRepo.findNetworksForUser(payload.id);
 };
 
 /**
@@ -248,19 +250,6 @@ export const updateUsersForNetwork = async (payload, message) => {
 };
 
 /**
- * @param {object} payload - Object containing payload data
- * @param {string} payload.integrationName - the integration name where to list the networks for
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method listNetworksForIntegration
- * @return {external:Promise.<String[]>} Promise containing updated userIds
- */
-export const listNetworksForIntegration = async (payload, message) => {
-  logger.info('Listing the networks for the integration', { payload, message });
-
-  return networkRepo.findNetworksForIntegration(payload.integrationName);
-};
-
-/**
  * @param {object} payload - Obect containing payload data
  * @param {string} payload.externalTeams - the teams in the external system
  * @param {object} payload.network - the network where to import to
@@ -305,9 +294,11 @@ export const updateTeamsForNetwork = async (payload, message) => {
  * Promise containing updated teams
  */
 export const listTeamsForNetwork = async (payload, message) => {
-  logger.info('Updating the external teams in the network', { payload, message });
+  const result = await networkRepo.findTeamsForNetwork(payload.networkId);
+  logger.info('List teams for network', {
+    payload, teamCount: result.length, message: message || null });
 
-  return networkRepo.findTeamsForNetwork(payload.networkId);
+  return teamService.list({ teamIds: R.pluck('id', result) }, message);
 };
 
 /**

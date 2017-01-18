@@ -30,7 +30,7 @@ describe('Integration auth', () => {
     };
 
     hookStub = sinon.stub(fakeAdapter, 'authenticate').returns(Promise.resolve(authResult));
-    sinon.stub(adapterUtil, 'createAdapter').returns(fakeAdapter);
+    sinon.stub(adapterUtil, 'createAdapter').returns(Promise.resolve(fakeAdapter));
 
     integration = await createIntegration({
       name: 'NEW_INTEGRATION',
@@ -82,7 +82,6 @@ describe('Integration auth', () => {
 
     const decodedToken = tokenUtil.decode(data.access_token);
 
-    assert.deepEqual(decodedToken.integrations, [authResult]);
     assert.equal(decodedToken.sub, global.users.employee.id);
   });
 
@@ -93,8 +92,8 @@ describe('Integration auth', () => {
       password: 'baz',
     }, global.server, global.tokens.employee);
 
-    const metaData = await userRepo.findUserMetaDataForNetwork(
-      global.users.employee.id, network.id);
+    const metaData = await userRepo.findNetworkLink({
+      userId: global.users.employee.id, networkId: network.id });
 
     assert.equal(metaData.userToken, 'auth_token');
     assert.equal(metaData.externalId, 1);
@@ -121,7 +120,7 @@ describe('Integration auth', () => {
       authenticate: () => Promise.reject(createError('401')),
     };
 
-    sinon.stub(adapterUtil, 'createAdapter').returns(fakeAdapter);
+    sinon.stub(adapterUtil, 'createAdapter').returns(Promise.resolve(fakeAdapter));
 
     const endpoint = `/v2/networks/${network.id}/integration_auth`;
     const { statusCode } = await postRequest(endpoint, {

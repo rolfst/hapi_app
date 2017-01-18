@@ -1,5 +1,5 @@
+import uuid from 'uuid-v4';
 import { UserDevice } from '../../../shared/models';
-import createDeviceId from '../../../shared/utils/create-device-id';
 
 /**
  * @module modules/core/repositories/authentication
@@ -35,7 +35,8 @@ export function createUserDevice(deviceId, deviceName, userId) {
 export function findOrCreateUserDevice(userId, deviceName) {
   return findUserDevice(userId, deviceName).then(device => {
     if (!device) {
-      return createUserDevice(createDeviceId(), deviceName, userId)
+      const deviceId = uuid().toUpperCase().replace(/-/g, '');
+      return createUserDevice(deviceId, deviceName, userId)
         .then(createdDevice => createdDevice);
     }
 

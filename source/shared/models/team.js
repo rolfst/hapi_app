@@ -20,6 +20,11 @@ const Team = db.define('Team', {
     field: 'external_id',
     allowNull: true,
   },
+  isChannel: {
+    type: Sequelize.BOOLEAN,
+    field: 'is_channel',
+    defaultValue: false,
+  },
 }, {
   tableName: 'teams',
   createdAt: 'created_at',

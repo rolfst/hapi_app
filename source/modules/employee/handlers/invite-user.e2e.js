@@ -4,8 +4,8 @@ import * as userRepo from '../../core/repositories/user';
 
 describe('Handler: Invite user', () => {
   after(async () => {
-    const admin = await userRepo.findUserByEmail('admin@baz.com');
-    const employee = await userRepo.findUserByEmail('employee@baz.com');
+    const admin = await userRepo.findUserBy({ email: 'admin@baz.com' });
+    const employee = await userRepo.findUserBy({ email: 'employee@baz.com' });
 
     return Promise.all([
       userRepo.deleteById(admin.id),

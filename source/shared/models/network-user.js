@@ -16,7 +16,7 @@ const NetworkUser = model.define('NetworkUser', {
     defaultValue: 0,
   },
   externalId: {
-    type: Sequelize.INTEGER,
+    type: Sequelize.STRING,
     field: 'external_id',
   },
   invisibleUser: {
@@ -39,6 +39,10 @@ const NetworkUser = model.define('NetworkUser', {
   isWelcomed: {
     type: Sequelize.INTEGER,
     field: 'is_welcomed',
+  },
+  invitedAt: {
+    type: Sequelize.DATE,
+    field: 'invited_at',
   },
   deletedAt: {
     type: Sequelize.DATE,

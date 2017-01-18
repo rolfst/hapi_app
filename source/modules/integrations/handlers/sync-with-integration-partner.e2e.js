@@ -12,7 +12,7 @@ import * as userRepo from '../../core/repositories/user';
 import * as teamRepo from '../../core/repositories/team';
 import * as integrationRepo from '../../core/repositories/integration';
 
-describe('Handle sync network', () => {
+describe('Handle sync networks', () => {
   nock.disableNetConnect();
   let network;
   let integration;
@@ -61,7 +61,7 @@ describe('Handle sync network', () => {
 
       integration = await createIntegration();
       network = await createIntegrationNetwork(alreadyImportedAdmin);
-      await teamRepo.createTeam({
+      await teamRepo.create({
         networkId: network.id, name: intialTeam.name, externalId: intialTeam.externalId });
 
       const usersToAdd = map([alreadyImportedAdmin, alreadyImportedUser],
