@@ -43,17 +43,6 @@ describe('Authenticate', () => {
     assert.equal(responses[2].statusCode, 422);
   });
 
-  it('should have the authenticated integrations in the access token', async () => {
-    const expectedIntegrations = [{
-      name: 'PMT',
-      token: '379ce9b4176cb89354c1f74b3a2c1c7a',
-      externalId: '8023',
-    }];
-    const { accessToken: decodedToken } = await testHelper.getLoginToken(employeeCredentials);
-
-    assert.deepEqual(decodedToken.integrations, expectedIntegrations);
-  });
-
   it('should login with correct credentials', async () => {
     const { username, password } = employeeCredentials;
     const { result } = await postRequest(url, { username, password });
