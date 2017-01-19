@@ -31,10 +31,9 @@ describe('Post message', () => {
 
   after(async () => {
     sandbox.restore();
-    const conversations = await testHelper.findAllConversations();
     return Promise.all([
-        testHelper.deleteUser(user),
-        testHelper.deleteUser(admin)
+      testHelper.deleteUser(user),
+      testHelper.deleteUser(admin),
     ]);
   });
 
