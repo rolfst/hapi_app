@@ -56,26 +56,17 @@ const findUsersByType = async (type, networkId, exchangeValues, userId) => {
 export const list = async (payload, message) => {
   logger.info('Listing exchanges', { payload, message });
 
-  const exchanges = await exchangeRepo.findByIds(payload.exchangeIds);
-  const responsesForExchanges = await exchangeResponseRepo.findAllWhere({
-    exchangeId: { $in: payload.exchangeIds },
-  });
-
-  const valuesForExchanges = await exchangeValueRepo.findAllWhere({
-    exchangeId: { $in: payload.exchangeIds },
-  }).then(impl.groupValuesPerExchange);
-
-  const occurringUserIds = R.juxt([
-    R.pluck('approvedUser'),
-    R.pluck('approvedBy'),
-    R.pluck('userId'),
+  const [exchanges, responsesForExchanges, valuesForExchanges] = await Promise.all([
+    exchangeRepo.findByIds(payload.exchangeIds),
+    exchangeResponseRepo.findAllWhere({
+      exchangeId: { $in: payload.exchangeIds } }),
+    exchangeValueRepo.findAllWhere({
+      exchangeId: { $in: payload.exchangeIds },
+    }).then(impl.groupValuesPerExchange),
   ]);
 
-  const users = await R.pipe(
-    occurringUserIds,
-    R.flatten,
-    R.uniq,
-    R.reject(R.isNil),
+  const occuringUsers = await R.pipe(
+    impl.getUserIdsInObjects(['approvedUser', 'approvedBy', 'userId']),
     (userIds) => userService.listUsersWithNetworkScope({
       networkId: payload.networkId, userIds }, message)
   )(R.concat(exchanges, responsesForExchanges));
@@ -86,7 +77,7 @@ export const list = async (payload, message) => {
   const responseForUser = (userId, exchangeId) =>
     R.find(R.propEq('userId', userId), responsesForExchange(exchangeId));
 
-  const findUserById = impl.findUserById(users);
+  const findUserById = impl.findUserById(occuringUsers);
 
   return R.map((exchange) => R.merge(exchange, {
     createdIn: impl.makeCreatedInObject(
@@ -96,7 +87,7 @@ export const list = async (payload, message) => {
     responseStatus: impl.createResponseStatus(
       responseForUser(message.credentials.id, exchange.id)),
     responses: impl.replaceUsersInResponses(
-      users, responsesForExchange(exchange.id)),
+      occuringUsers, responsesForExchange(exchange.id)),
   }), exchanges);
 };
 

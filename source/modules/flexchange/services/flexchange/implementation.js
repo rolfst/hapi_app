@@ -123,6 +123,13 @@ export const addValues = R.curry((valuesLookup, exchange) => {
   return R.merge(exchange, { values: lookup ? lookup.values : [] });
 });
 
+export const getUserIdsInObjects = (selectedProperties) => R.pipe(
+  R.juxt(R.map(R.pluck, selectedProperties)),
+  R.flatten,
+  R.uniq,
+  R.reject(R.isNil)
+);
+
 export const findUserById = R.curry((users, id) => {
   const match = R.find(R.propEq('id', id), users);
 
