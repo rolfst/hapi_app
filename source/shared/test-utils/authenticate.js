@@ -1,5 +1,4 @@
 import tokenUtil from '../utils/token';
-import * as userRepo from '../../modules/core/repositories/user';
 import * as authenticationService from '../../modules/authentication/services/authentication';
 
 /**
@@ -8,8 +7,8 @@ import * as authenticationService from '../../modules/authentication/services/au
 
 /**
  * @typedef {Object} AuthorizedUser
- * @property {UserModel}
- * @property {string} token
+ * @property {User} {@link module:modules/core~User user}
+ * @property {AuthenticationToken} {@link module:shared~AuthenticationToken token}
  * @property {Object[]} integrations
  */
 
@@ -17,6 +16,7 @@ import * as authenticationService from '../../modules/authentication/services/au
  * @param {object} credentials
  * @param {string} credentials.username
  * @param {string} credentials.password
+ * @param {Message} {@link module:/shared~Message}
  * @method default
  * @returns {@link module:shared/test-utils/authenticate.AuthorizedUser}
  */

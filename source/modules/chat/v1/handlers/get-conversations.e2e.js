@@ -2,29 +2,25 @@ import { assert } from 'chai';
 import * as blueprints from '../../../../shared/test-utils/blueprints';
 import * as testHelper from '../../../../shared/test-utils/helpers';
 import { getRequest } from '../../../../shared/test-utils/request';
-import * as userRepo from '../../../../modules/core/repositories/user';
 import * as messageRepo from '../repositories/message';
 import * as conversationRepo from '../repositories/conversation';
 
 describe('Get conversations for logged user', () => {
   let user;
   let admin;
-  let userWithoutMessage;
-  let conversation;
 
   before(async () => {
     admin = await testHelper.createUser();
     user = await testHelper.createUser(blueprints.users.employee);
-    userWithoutMessage = await testHelper.createUser(blueprints.users.networkless);
+    const userWithoutMessage = await testHelper.createUser(blueprints.users.networkless);
     const network = await testHelper.createNetwork({ userId: admin.id });
-    const participants = [user.id, admin.id];
 
     await testHelper.addUserToNetwork({ networkId: network.id, userId: user.id });
     await testHelper.addUserToNetwork({ networkId: network.id, userId: userWithoutMessage.id });
     await testHelper.addUserToNetwork({
       networkId: network.id, userId: admin.id, roleType: 'ADMIN' });
-                                  
-    conversation = await conversationRepo.createConversation(
+
+    const conversation = await conversationRepo.createConversation(
       'PRIVATE', admin.id, [user.id, admin.id]);
 
     await messageRepo.createMessage(conversation.id, user.id, 'First message');
@@ -43,7 +39,6 @@ describe('Get conversations for logged user', () => {
 
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 1);
-    console.log('%j', result.data[0])
     assert.equal(result.data[0].last_message.created_by.id, user.id);
     assert.equal(result.data[0].last_message.text, 'Last message');
   });

@@ -8,7 +8,6 @@ import * as integrationRepo from '../../modules/core/repositories/integration';
 import * as userRepo from '../../modules/core/repositories/user';
 import * as networkRepo from '../../modules/core/repositories/network';
 import * as activityRepo from '../../modules/core/repositories/activity';
-import * as conversationRepo from '../../modules/chat/v1/repositories/conversation';
 import { postRequest } from './request';
 import tokenUtil from '../utils/token';
 
@@ -269,5 +268,5 @@ export async function getLoginToken({ username, password }) {
   const url = '/v2/authenticate';
   const { result } = await postRequest(url, { username, password });
 
-  return { accessToken: tokenUtil.decode(result.data.access_token), tokens: result.data};
+  return { accessToken: tokenUtil.decode(result.data.access_token), tokens: result.data };
 }

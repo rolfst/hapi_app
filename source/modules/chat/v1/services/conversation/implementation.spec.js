@@ -5,10 +5,7 @@ import * as mailer from '../../../../shared/services/mailer';
 import * as responseUtils from '../../../../shared/utils/response';
 import * as socketService from '../../../../shared/services/socket';
 import * as impl from './implementation';
-import * as responseUtils from '../../../../shared/utils/response';
-import * as socketService from '../../../../shared/services/socket';
 import * as newMessageNotification from '../../notifications/new-message';
-import * as impl from './implementation';
 
 describe('Conversation Service implementation', () => {
   let sandbox;

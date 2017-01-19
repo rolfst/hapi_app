@@ -37,7 +37,7 @@ describe('Get conversation', () => {
 
   it('should return correct values', async () => {
     const endpoint = `/v1/chats/conversations/${conversation.id}`;
-    const { tokens } = await testHelper.getLoginToken(blueprints.users.employee)
+    const { tokens } = await testHelper.getLoginToken(blueprints.users.employee);
     const { result, statusCode } = await getRequest(endpoint, tokens.access_token);
 
     assert.equal(statusCode, 200);
