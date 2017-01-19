@@ -1,3 +1,5 @@
+import R from 'ramda';
+import createExchangeResponseModel from '../models/exchange-response';
 import { ExchangeResponse } from './dao';
 
 /**
@@ -13,6 +15,11 @@ import { ExchangeResponse } from './dao';
 export const findResponseWhere = (constraint) => {
   return ExchangeResponse.findOne({ where: constraint });
 };
+
+export const findAllWhere = (whereConstraint) => ExchangeResponse
+  .unscoped()
+  .findAll({ where: whereConstraint })
+  .then(R.map(createExchangeResponseModel));
 
 /**
  * Find an accepted exchange response for a user
