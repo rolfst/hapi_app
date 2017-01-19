@@ -130,7 +130,7 @@ export async function createUserForNewNetwork(
   const user = await createUser(userAttributes);
   const network = await createNetwork({ userId: user.id, name });
   await addUserToNetwork({ networkId: network.id, userId: user.id, roleType: 'ADMIN' });
-  const domainUser = await userRepo.findUserById(user.id);
+  const domainUser = await userRepo.findUserById(user.id, network.id);
 
   return { user: domainUser, network };
 }
@@ -168,7 +168,7 @@ export async function createUserForNewNetworkWithIntegration(
     roleType,
     userToken: token,
     integrationName });
-  const domainUser = await userRepo.findUserById(user.id);
+  const domainUser = await userRepo.findUserById(user.id, network.id);
 
   return { user: domainUser, network, integration };
 }
