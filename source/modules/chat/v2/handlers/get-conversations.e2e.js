@@ -1,8 +1,7 @@
 import { assert } from 'chai';
+import * as testHelper from '../../../../shared/test-utils/helpers';
 import blueprints from '../../../../shared/test-utils/blueprints';
-import * as userRepo from '../../../../modules/core/repositories/user';
 import { getRequest } from '../../../../shared/test-utils/request';
-import authenticate from '../../../../shared/test-utils/authenticate';
 import * as messageRepo from '../../v1/repositories/message';
 import * as conversationRepo from '../../v1/repositories/conversation';
 
@@ -15,33 +14,39 @@ describe('Get conversations for logged user (v2)', () => {
 
   describe('normal flow', () => {
     before(async () => {
-      creator = await userRepo.createUser({
-        ...blueprints.users.employee,
+      creator = await testHelper.createUser({
+        ...blueprints.users.admin,
         username: 'conversation_creator' });
-
-      participant = await userRepo.createUser({
+      participant = await testHelper.createUser({
         ...blueprints.users.employee,
         username: 'conversation_participant' });
 
+      const network = await testHelper.createNetwork({ userId: creator.id });
+
+      await testHelper.addUserToNetwork({ networkId: network.id, userId: participant.id });
+      await testHelper.addUserToNetwork({ networkId: network.id, userId: creator.id });
       createdConversation = await conversationRepo.createConversation(
         'PRIVATE', creator.id, [creator.id, participant.id]);
 
-      creatorToken = (await authenticate(global.server, {
-        username: creator.username,
-        password: blueprints.users.employee.password,
-      })).token;
+      const { tokens } = await testHelper.getLoginToken(
+          { ...blueprints.users.admin,
+            username: 'conversation_creator',
+          });
+      creatorToken = tokens.access_token;
 
       await messageRepo.createMessage(createdConversation.id, participant.id, 'First message');
       await messageRepo.createMessage(createdConversation.id, participant.id, 'Last message');
     });
 
     after(async () => {
-      await conversationRepo.deleteConversationById(createdConversation.id);
-      await [creator, participant].map(user => userRepo.deleteById(user.id));
+      return Promise.all([
+        testHelper.deleteUser(participant),
+        testHelper.deleteUser(creator),
+      ]);
     });
 
     it('should return conversation collection', async () => {
-      const { result, statusCode } = await getRequest(ENDPOINT_URL, global.server, creatorToken);
+      const { result, statusCode } = await getRequest(ENDPOINT_URL, creatorToken);
       const conversationUnderTest = result.data[0];
 
       assert.equal(statusCode, 200);
@@ -64,7 +69,7 @@ describe('Get conversations for logged user (v2)', () => {
 
     it('should be able to include participants user objects', async () => {
       const { result, statusCode } = await getRequest(
-        `${ENDPOINT_URL}?include=participants`, global.server, creatorToken);
+        `${ENDPOINT_URL}?include=participants`, creatorToken);
       const conversationUnderTest = result.data[0];
 
       assert.equal(statusCode, 200);
@@ -80,23 +85,28 @@ describe('Get conversations for logged user (v2)', () => {
     let createdConversation2;
 
     before(async () => {
-      creator = await userRepo.createUser({
-        ...blueprints.users.employee,
+      creator = await testHelper.createUser({
+        ...blueprints.users.admin,
         username: 'conversation_creator' });
-
-      participant = await userRepo.createUser({
+      participant = await testHelper.createUser({
         ...blueprints.users.employee,
         username: 'conversation_participant' });
+
+      const network = await testHelper.createNetwork({ userId: creator.id });
+
+      await testHelper.addUserToNetwork({ networkId: network.id, userId: participant.id });
+      await testHelper.addUserToNetwork({ networkId: network.id, userId: creator.id });
+
+      const { tokens } = await testHelper.getLoginToken(
+          { ...blueprints.users.admin,
+            username: 'conversation_creator',
+          });
+      creatorToken = tokens.access_token;
 
       createdConversation1 = await conversationRepo.createConversation(
         'PRIVATE', creator.id, [creator.id, participant.id]);
       createdConversation2 = await conversationRepo.createConversation(
         'PRIVATE', creator.id, [creator.id, participant.id]);
-
-      creatorToken = (await authenticate(global.server, {
-        username: creator.username,
-        password: blueprints.users.employee.password,
-      })).token;
 
       await messageRepo.createMessage(createdConversation1.id, participant.id, 'First message');
       await messageRepo.createMessage(createdConversation1.id, participant.id, 'Last message');
@@ -105,13 +115,14 @@ describe('Get conversations for logged user (v2)', () => {
     });
 
     after(async () => {
-      await conversationRepo.deleteConversationById(createdConversation1.id);
-      await conversationRepo.deleteConversationById(createdConversation2.id);
-      await [creator, participant].map(user => userRepo.deleteById(user.id));
+      return Promise.all([
+        testHelper.deleteUser(participant),
+        testHelper.deleteUser(creator),
+      ]);
     });
 
     it('should limit the output entries to defaults', async () => {
-      const { result, statusCode } = await getRequest(ENDPOINT_URL, global.server, creatorToken);
+      const { result, statusCode } = await getRequest(ENDPOINT_URL, creatorToken);
 
       assert.equal(statusCode, 200);
       assert.lengthOf(result.data, 2);
@@ -120,8 +131,7 @@ describe('Get conversations for logged user (v2)', () => {
     });
 
     it('should return conversation collection with an amount of 1', async () => {
-      const { result, statusCode } = await getRequest(
-          `${ENDPOINT_URL}?limit=1`, global.server, creatorToken);
+      const { result, statusCode } = await getRequest(`${ENDPOINT_URL}?limit=1`, creatorToken);
       const conversationUnderTest = result.data[0];
 
       assert.equal(statusCode, 200);
@@ -141,7 +151,7 @@ describe('Get conversations for logged user (v2)', () => {
     it('should return conversation collection with an amount of 1 starting at the second',
       async () => {
         const { result, statusCode } = await getRequest(`${ENDPOINT_URL}?limit=1&offset=1`,
-          global.server, creatorToken);
+          creatorToken);
         const conversationUnderTest = result.data[0];
 
         assert.equal(statusCode, 200);
