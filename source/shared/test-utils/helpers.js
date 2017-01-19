@@ -248,27 +248,6 @@ export async function deleteActivity(...activityOrActivities) {
 }
 
 /**
- * Finds all Conversations in the database
- * @method findAllConversations
- * @return {external:Promise.<Conversation[]} {@link module:shared~Conversation Conversation}
- */
-export async function findAllConversations() {
-  return conversationRepo.findAll();
-}
-
-/**
- * Deletes Conversations from database
- * @param {Conversation|Conversation[]} conversationOrConversations
- * @method deleteConversation
- * @return {external:Promise.<number[]>} number of deleted activities
- */
-export async function deleteConversation(...conversationOrConversations) {
-  return Promise.map(flatten(conversationOrConversations), (conversation) => {
-    conversationRepo.deleteById(conversation.id);
-  });
-}
-
-/**
  * Deletes all data in the database
  * @method cleanAll
  */
@@ -276,11 +255,11 @@ export async function cleanAll() {
   const allUsers = await findAllUsers();
   const allIntegrations = await findAllIntegrations();
   const allActivities = await findAllActivities();
-  await deleteUser(allUsers);
-  return Promise.all([
+  await Promise.all([
     deleteIntegration(allIntegrations),
     deleteActivity(allActivities),
   ]);
+  return deleteUser(allUsers);
 }
 
 /**

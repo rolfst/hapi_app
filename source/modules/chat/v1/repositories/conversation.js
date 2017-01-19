@@ -128,3 +128,4 @@ export function deleteConversationById(id) {
 export const deleteAllConversationsForUser = (userId) => {
   return ConversationUser.destroy({ where: { userId } });
 };
+
