@@ -1,21 +1,32 @@
 import { assert } from 'chai';
+import * as blueprints from '../../../../shared/test-utils/blueprints';
+import * as testHelper from '../../../../shared/test-utils/helpers';
 import { postRequest } from '../../../../shared/test-utils/request';
 import * as conversationRepo from '../repositories/conversation';
 
-describe('Post message', () => {
+describe.only('Post message', () => {
   let conversation;
 
   before(async () => {
-    const participants = [global.users.employee.id, global.users.admin.id];
+    const admin = await testHelper.createUser();
+    const user = await testHelper.createUser(blueprints.users.employee);
+    const network = await testHelper.createNetwork({ userId: admin.id });
+
+    await testHelper.addUserToNetwork({ networkId: network.id, userId: user.id });
+    await testHelper.addUserToNetwork({
+      networkId: network.id, userId: admin.id, roleType: 'ADMIN' });
+
     conversation = await conversationRepo.createConversation(
-      'PRIVATE', global.users.admin.id, participants);
+      'PRIVATE', admin.id, [user.id, admin.id]);
   });
 
-  after(() => conversationRepo.deleteConversationById(conversation.id));
+  after(async () => testHelper.cleanAll());
 
   it('should show new message data', async () => {
     const endpoint = `/v1/chats/conversations/${conversation.id}/messages`;
-    const { result, statusCode } = await postRequest(endpoint, { text: 'Test message' });
+    const { tokens } = await testHelper.getLoginToken(blueprints.users.employee);
+    const { result, statusCode } = await postRequest(
+        endpoint, { text: 'Test message' }, tokens.access_token);
     const { data } = result;
 
     assert.equal(statusCode, 200);

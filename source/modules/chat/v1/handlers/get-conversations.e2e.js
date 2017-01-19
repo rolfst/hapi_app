@@ -1,23 +1,26 @@
 import { assert } from 'chai';
-import * as blueprints from '../../../shared/test-utils/blueprints';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import { getRequest } from '../../../shared/test-utils/request';
-import * as userRepo from '../../../modules/core/repositories/user';
+import * as blueprints from '../../../../shared/test-utils/blueprints';
+import * as testHelper from '../../../../shared/test-utils/helpers';
+import { getRequest } from '../../../../shared/test-utils/request';
+import * as userRepo from '../../../../modules/core/repositories/user';
 import * as messageRepo from '../repositories/message';
 import * as conversationRepo from '../repositories/conversation';
 
 describe('Get conversations for logged user', () => {
   let user;
   let admin;
+  let userWithoutMessage;
   let conversation;
 
   before(async () => {
-    const admin = await testHelper.createUser();
-    const user = await testHelper.createUser(blueprints.users.employee);
+    admin = await testHelper.createUser();
+    user = await testHelper.createUser(blueprints.users.employee);
+    userWithoutMessage = await testHelper.createUser(blueprints.users.networkless);
     const network = await testHelper.createNetwork({ userId: admin.id });
     const participants = [user.id, admin.id];
 
     await testHelper.addUserToNetwork({ networkId: network.id, userId: user.id });
+    await testHelper.addUserToNetwork({ networkId: network.id, userId: userWithoutMessage.id });
     await testHelper.addUserToNetwork({
       networkId: network.id, userId: admin.id, roleType: 'ADMIN' });
                                   
@@ -28,16 +31,19 @@ describe('Get conversations for logged user', () => {
     await messageRepo.createMessage(conversation.id, user.id, 'Last message');
   });
 
-  after(() => testHelper.cleanAll());
+  after(async () => {
+    const allUsers = await testHelper.findAllUsers();
+    return testHelper.deleteUser(allUsers);
+  });
 
-  it.only('should return conversation collection', async () => {
+  it('should return conversation collection', async () => {
     const { tokens } = await testHelper.getLoginToken(blueprints.users.employee);
     const { result, statusCode } = await getRequest('/v1/chats/users/me/conversations',
         tokens.access_token);
 
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 1);
-    console.log(result.data[0])
+    console.log('%j', result.data[0])
     assert.equal(result.data[0].last_message.created_by.id, user.id);
     assert.equal(result.data[0].last_message.text, 'Last message');
   });
@@ -74,7 +80,7 @@ describe('Get conversations for logged user', () => {
   it('should return empty array when no conversations found', async () => {
     await conversationRepo.deleteAllConversationsForUser(admin.id);
 
-    const { tokens } = await testHelper.getLoginToken(blueprints.users.employee);
+    const { tokens } = await testHelper.getLoginToken(blueprints.users.networkless);
     const { result, statusCode } = await getRequest('/v1/chats/users/me/conversations',
         tokens.access_token);
 

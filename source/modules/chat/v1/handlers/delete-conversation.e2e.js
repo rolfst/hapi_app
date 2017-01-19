@@ -1,7 +1,7 @@
 import { assert } from 'chai';
-import { deleteRequest, getRequest } from '../../../shared/test-utils/request';
-import * as blueprints from '../../../shared/test-utils/blueprints';
-import * as testHelper from '../../../shared/test-utils/helpers';
+import { deleteRequest, getRequest } from '../../../../shared/test-utils/request';
+import * as blueprints from '../../../../shared/test-utils/blueprints';
+import * as testHelper from '../../../../shared/test-utils/helpers';
 import * as conversationRepo from '../repositories/conversation';
 
 describe('Delete conversation', () => {

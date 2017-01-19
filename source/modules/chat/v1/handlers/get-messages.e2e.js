@@ -1,9 +1,8 @@
 import { assert } from 'chai';
 import { find } from 'lodash';
-import * as blueprints from '../../../shared/test-utils/blueprints';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import { getRequest } from '../../../shared/test-utils/request';
-import { getRequest } from '../../../../shared/test-utils/request';
+import * as blueprints from '../../../../shared/test-utils/blueprints';
+import * as testHelper from '../../../../shared/test-utils/helpers';
+import { getRequest } from '../.2,x,x./../../shared/test-utils/request';
 import * as conversationRepo from '../repositories/conversation';
 import { createMessage } from '../repositories/message';
 

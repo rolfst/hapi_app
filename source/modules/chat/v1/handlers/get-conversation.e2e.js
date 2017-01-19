@@ -1,8 +1,8 @@
 import { assert } from 'chai';
 import { getRequest } from '../../../../shared/test-utils/request';
 import * as conversationRepo from '../repositories/conversation';
-import * as blueprints from '../../../shared/test-utils/blueprints';
-import * as testHelper from '../../../shared/test-utils/helpers';
+import * as blueprints from '../../../../shared/test-utils/blueprints';
+import * as testHelper from '../../../../shared/test-utils/helpers';
 import * as messageRepo from '../repositories/message';
 
 describe('Get conversation', () => {
