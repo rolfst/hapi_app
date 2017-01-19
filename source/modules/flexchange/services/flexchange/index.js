@@ -1,4 +1,4 @@
-import { sortBy, orderBy, uniqBy, map, reject, includes } from 'lodash';
+import { sortBy, map, reject, includes } from 'lodash';
 import R from 'ramda';
 import moment from 'moment';
 import * as Analytics from '../../../../shared/services/analytics';
@@ -17,6 +17,7 @@ import * as networkService from '../../../core/services/network';
 import { exchangeTypes } from '../../repositories/dao/exchange';
 import * as commentRepo from '../../repositories/comment';
 import * as exchangeRepo from '../../repositories/exchange';
+import * as exchangeValueRepo from '../../repositories/exchange-value';
 import * as exchangeResponseRepo from '../../repositories/exchange-response';
 import * as acceptanceNotifier from '../../notifications/accepted-exchange';
 import * as creatorNotifier from '../../notifications/creator-approved';
@@ -56,6 +57,14 @@ export const list = async (payload, message) => {
   logger.info('Listing exchanges', { payload, message });
 
   const exchanges = await exchangeRepo.findByIds(payload.exchangeIds);
+  const responsesForExchanges = await exchangeResponseRepo.findAllWhere({
+    exchangeId: { $in: payload.exchangeIds },
+  });
+
+  const valuesForExchanges = await exchangeValueRepo.findAllWhere({
+    exchangeId: { $in: payload.exchangeIds },
+  }).then(impl.groupValuesPerExchange);
+
   const occurringUserIds = R.juxt([
     R.pluck('approvedUser'),
     R.pluck('approvedBy'),
@@ -63,26 +72,31 @@ export const list = async (payload, message) => {
   ]);
 
   const users = await R.pipe(
-    occurringUserIds, R.flatten, R.uniq,
+    occurringUserIds,
+    R.flatten,
+    R.uniq,
+    R.reject(R.isNil),
     (userIds) => userService.listUsersWithNetworkScope({
       networkId: payload.networkId, userIds }, message)
-  )(exchanges);
+  )(R.concat(exchanges, responsesForExchanges));
 
-  const findUserById = (id) => {
-    const match = R.find(R.propEq('id', id), users);
-    if (!match) return null;
+  const responsesForExchange = (exchangeId) =>
+    R.filter(R.propEq('exchangeId', exchangeId), responsesForExchanges) || [];
 
-    return R.pick([
-      'type',
-      'id',
-      'fullName',
-      'profileImg',
-    ], match);
-  };
+  const responseForUser = (userId, exchangeId) =>
+    R.find(R.propEq('userId', userId), responsesForExchange(exchangeId));
+
+  const findUserById = impl.findUserById(users);
 
   return R.map((exchange) => R.merge(exchange, {
+    createdIn: impl.makeCreatedInObject(
+      impl.addValues(valuesForExchanges, exchange)),
     user: findUserById(exchange.userId),
     approvedUser: findUserById(exchange.approvedUserId),
+    responseStatus: impl.createResponseStatus(
+      responseForUser(message.credentials.id, exchange.id)),
+    responses: impl.replaceUsersInResponses(
+      users, responsesForExchange(exchange.id)),
   }), exchanges);
 };
 
@@ -389,25 +403,32 @@ export const listPersonalizedExchanges = async (payload, message) => {
  * @param {object} payload.networkId - The network to list exchanges for
  * @param {object} payload.filter - The filter
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method listExchangesForNetwork
+ * @method listExchangesForUser
  * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange} -
  */
-export const listExchangesForNetwork = async (payload, message) => {
+export const listExchangesForUser = async (payload, message) => {
+  logger.info('Listing all exchanges for user', { payload, message });
+
   const user = await userService.getUserWithNetworkScope({
     id: message.credentials.id, networkId: message.network.id }, message);
 
   let exchanges;
 
   if (user.roleType === 'ADMIN') {
-    exchanges = await impl.listExchangesForAdmin(message.network, user, payload.filter);
+    exchanges = await exchangeRepo.findExchangesByNetwork(
+      message.network.id, { ...payload.filter });
   } else if (user.roleType === 'EMPLOYEE') {
     exchanges = await impl.listExchangesForEmployee(message.network, user, payload.filter);
   }
 
-  const createdExchangesByUser = await exchangeRepo.findExchangesByUserAndNetwork(
-    user.id, message.network.id, payload.filter);
+  const createdExchangesByUser = await exchangeRepo.findAllBy(R.merge({
+    userId: user.id, networkId: message.network.id,
+  }, impl.createDateWhereConstraint(payload.filter.start, payload.filter.end)));
 
-  return orderBy(uniqBy([...exchanges, ...createdExchangesByUser], 'id'), 'date');
+  return list({
+    networkId: message.network.id,
+    exchangeIds: R.pluck('id', R.concat(exchanges, createdExchangesByUser)) },
+    message);
 };
 
 const createValidator = (exchangeType) => {
