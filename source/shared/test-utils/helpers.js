@@ -8,6 +8,7 @@ import * as integrationRepo from '../../modules/core/repositories/integration';
 import * as userRepo from '../../modules/core/repositories/user';
 import * as networkRepo from '../../modules/core/repositories/network';
 import * as activityRepo from '../../modules/core/repositories/activity';
+import * as conversationRepo from '../../modules/chat/v1/repositories/conversation';
 import { postRequest } from './request';
 import tokenUtil from '../utils/token';
 
@@ -243,6 +244,27 @@ export async function findAllActivities() {
 export async function deleteActivity(...activityOrActivities) {
   return Promise.map(flatten(activityOrActivities), (activity) => {
     activityRepo.deleteById(activity.id);
+  });
+}
+
+/**
+ * Finds all Conversations in the database
+ * @method findAllConversations
+ * @return {external:Promise.<Conversation[]} {@link module:shared~Conversation Conversation}
+ */
+export async function findAllConversations() {
+  return conversationRepo.findAll();
+}
+
+/**
+ * Deletes Conversations from database
+ * @param {Conversation|Conversation[]} conversationOrConversations
+ * @method deleteConversation
+ * @return {external:Promise.<number[]>} number of deleted activities
+ */
+export async function deleteConversation(...conversationOrConversations) {
+  return Promise.map(flatten(conversationOrConversations), (conversation) => {
+    conversationRepo.deleteById(conversation.id);
   });
 }
 
