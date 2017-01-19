@@ -54,7 +54,8 @@ describe('User Repository', () => {
 
       assert.property(actual, 'teamIds');
       assert.isArray(actual.teamIds);
-      assert.deepEqual(actual.teamIds, R.pluck('id', createdTeams));
+      assert.include(actual.teamIds, createdTeams[0].id);
+      assert.include(actual.teamIds, createdTeams[1].id);
     });
 
     it('should fail when a scoped user is searched for without network id', async () => {
