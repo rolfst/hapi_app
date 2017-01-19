@@ -6,13 +6,14 @@ import { getRequest } from '../../../../shared/test-utils/request';
 import * as conversationRepo from '../repositories/conversation';
 import { createMessage } from '../repositories/message';
 
-describe('Get messages', () => {
+describe.only('Get messages', () => {
   let conversation;
   let admin;
+  let employee;
 
   before(async () => {
     admin = await testHelper.createUser();
-    const employee = await testHelper.createUser(blueprints.users.employee);
+    employee = await testHelper.createUser(blueprints.users.employee);
     const network = await testHelper.createNetwork({ userId: admin.id });
     const participants = [employee.id, admin.id];
 
@@ -30,7 +31,12 @@ describe('Get messages', () => {
     ]);
   });
 
-  after(() => testHelper.cleanAll());
+  after(() => {
+    Promise.all([
+      testHelper.deleteUser(employee),
+      testHelper.deleteUser(admin),
+    ]);
+  });
 
   it('should return messages for conversation', async () => {
     const endpoint = `/v1/chats/conversations/${conversation.id}/messages`;

@@ -4,7 +4,7 @@ import * as testHelper from '../../../../shared/test-utils/helpers';
 import { getRequest } from '../../../../shared/test-utils/request';
 import { createMessage } from '../../v1/repositories/message';
 
-describe('Get messages (v2)', () => {
+describe('HandlerV2: Get messages', () => {
   let creator;
   let creatorToken;
   let participant;
@@ -41,7 +41,7 @@ describe('Get messages (v2)', () => {
     ]);
   });
 
-  it('should return messages for conversation', async () => {
+  it('should return messages for conversation (v2)', async () => {
     const endpoint = `/v2/conversations/${createdConversation.id}/messages`;
     const { result, statusCode } = await getRequest(endpoint, creatorToken);
 
