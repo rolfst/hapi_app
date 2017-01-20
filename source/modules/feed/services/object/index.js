@@ -1,4 +1,6 @@
+import R from 'ramda';
 import * as Logger from '../../../../shared/services/logger';
+import * as ObjectRepository from '../../repositories/object';
 
 /**
  * @module modules/feed/services/object
@@ -12,12 +14,18 @@ const logger = Logger.getLogger('FEED/service/object');
  * @param {string} payload.parentType - The type of parent to get objects for
  * @param {string} payload.parentId - The id of the parent
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method listObjects
- * @return {external:Promise.<Mixed[]>}
+ * @method list
+ * @return {external:Promise.<Object[]>} {@link module:feed~Object object}
  */
-export const listObjects = async (payload, message) => {
+export const list = async (payload, message) => {
   logger.info('Listing objects', { payload, message });
-  // TODO Listing objects and lookup the activity types
+
+  const objectResult = ObjectRepository.findBy({
+    parentType: payload.parentType,
+    parentId: payload.parentId,
+  });
+
+  return objectResult;
 };
 
 /**
@@ -29,10 +37,13 @@ export const listObjects = async (payload, message) => {
  * @param {string} payload.objectType - The type of object
  * @param {string} payload.sourceId - The id that refers to the activity
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method createObject
- * @return {external:Promise.<Object>}
+ * @method create
+ * @return {external:Promise.<Object>} {@link module:feed~Object object}
  */
-export const createObject = async (payload, message) => {
+export const create = async (payload, message) => {
   logger.info('Creating object', { payload, message });
-  // TODO Create object
+
+  return ObjectRepository.create(
+    R.pick(['userId', 'parentType', 'parentId', 'objectType', 'sourceId'], payload)
+  );
 };

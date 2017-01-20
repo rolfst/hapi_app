@@ -67,7 +67,7 @@ describe('Get exchanges for team', () => {
       });
   });
 
-  it('should fail when no values are provided', () => {
+  xit('should fail when no values are provided', () => {
     // TODO
   });
 

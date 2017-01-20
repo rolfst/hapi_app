@@ -17,9 +17,9 @@ const getUniqueVoteUsers = R.pipe(
 export default (dao) => ({
   type: 'poll',
   id: dao.id.toString(),
-  createdAt: dateUtils.toISOString(dao.created_at),
-  network_id: dao.networkId ? dao.networkId.toString() : null,
-  user_id: dao.userId ? dao.userId.toString() : null,
+  networkId: dao.networkId ? dao.networkId.toString() : null,
+  userId: dao.userId ? dao.userId.toString() : null,
   options: dao.Options ? getOptions(dao.Options) : [],
-  total_vote_count: dao.Options ? getUniqueVoteUsers(dao.Options).length : 0,
+  totalVoteCount: dao.Options ? getUniqueVoteUsers(dao.Options).length : 0,
+  createdAt: dateUtils.toISOString(dao.created_at),
 });

@@ -10,6 +10,21 @@ import * as impl from './implementation';
 const logger = Logger.getLogger('POLL/service/poll');
 
 /**
+ * Gets a poll
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.pollId - Id of the poll to get
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method get
+ * @return {external:Promise.<Poll>}
+ */
+export const get = async (payload, message) => {
+  logger.info('Finding poll', { payload, message });
+  const poll = await pollRepository.findById(payload.pollId);
+
+  return poll;
+};
+
+/**
  * Creates a poll
  * @param {object} payload - Object containing payload data
  * @param {string} payload.networkId - Id of the network the poll is placed in
