@@ -29,7 +29,7 @@ describe('Post message', () => {
       'PRIVATE', admin.id, [user.id, admin.id]);
   });
 
- after(async () => {
+  after(async () => {
     sandbox.restore();
 
     return Promise.all([
