@@ -6,6 +6,7 @@ import * as exchangeService from './index';
 describe('Service: Flexchange', () => {
   describe('list', () => {
     let createdExchange1;
+    let createdExchange2;
 
     before(async () => {
       createdExchange1 = await exchangeService.createExchange({
@@ -18,12 +19,22 @@ describe('Service: Flexchange', () => {
         network: { id: global.networks.flexAppeal.id },
         credentials: { id: global.users.admin.id },
       });
+
+      createdExchange2 = await exchangeService.createExchange({
+        date: moment().toISOString(),
+        title: 'Test shift',
+        type: 'ALL',
+        values: [global.networks.flexAppeal.id],
+      }, {
+        network: { id: global.networks.flexAppeal.id },
+        credentials: { id: global.users.admin.id },
+      });
     });
 
     it('should return correct properties in exchange model', async () => {
       const actual = await exchangeService.list({
         networkId: global.networks.flexAppeal.id,
-        exchangeIds: [createdExchange1.id],
+        exchangeIds: [createdExchange1.id, createdExchange2.id],
       }, {
         credentials: { id: global.users.admin.id },
       });
@@ -49,6 +60,7 @@ describe('Service: Flexchange', () => {
       assert.strictEqual(actual[0].approvedUserId, null);
       assert.strictEqual(actual[0].approvedUser, null);
       assert.deepEqual(actual[0].responses, []);
+      assert.equal(actual[1].title, 'Test shift');
     });
 
     describe('Response statusses', () => {
