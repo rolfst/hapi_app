@@ -1,4 +1,6 @@
-import ExchangeValue from '../models/exchange-value';
+import R from 'ramda';
+import createExchangeValueModel from '../models/exchange-value';
+import ExchangeValue from './dao/exchange-value';
 
 /**
  * @module modules/flexchange/repositories/exchangeValue
@@ -16,3 +18,7 @@ export function createValuesForExchange(exchangeId, values) {
 
   return ExchangeValue.bulkCreate(data);
 }
+
+export const findAllWhere = (whereConstraint) => ExchangeValue
+  .findAll({ where: whereConstraint })
+  .then(R.map(createExchangeValueModel));

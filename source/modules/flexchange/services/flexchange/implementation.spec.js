@@ -81,4 +81,235 @@ describe('Flexchange service', () => {
       assert.deepEqual(actual, expected);
     });
   });
+
+  describe('replaceUsersInResponses', () => {
+    it('should add user objects equal to the userId value per response', () => {
+      const users = [{
+        id: '1',
+        fullName: 'John Doe',
+      }, {
+        id: '2',
+        fullName: 'Samantha Carey',
+      }, {
+        id: '3',
+        fullName: 'Liam Specter',
+      }];
+
+      const responses = [{
+        id: '232',
+        userId: '1',
+        response: true,
+      }, {
+        id: '232',
+        userId: '2',
+        response: true,
+      }];
+
+      const actual = impl.replaceUsersInResponses(users, responses);
+      const expected = [{
+        id: '232',
+        userId: '1',
+        response: true,
+        user: {
+          id: '1',
+          fullName: 'John Doe',
+        },
+      }, {
+        id: '232',
+        userId: '2',
+        response: true,
+        user: {
+          id: '2',
+          fullName: 'Samantha Carey',
+        },
+      }];
+
+      assert.deepEqual(actual, expected);
+    });
+  });
+
+  describe('groupValuesPerExchange', () => {
+    it('returns correct pairs', () => {
+      const exchangeValues = [{
+        exchangeId: '2',
+        value: '1',
+      }, {
+        exchangeId: '2',
+        value: '3',
+      }, {
+        exchangeId: '3',
+        value: '1',
+      }, {
+        exchangeId: '3',
+        value: '1',
+      }];
+
+      assert.deepEqual(impl.groupValuesPerExchange(exchangeValues), [{
+        exchangeId: '2',
+        values: ['1', '3'],
+      }, {
+        exchangeId: '3',
+        values: ['1'],
+      }]);
+    });
+  });
+
+  describe('findUserById', () => {
+    it('returns null if user not found', () => {
+      const users = [{
+        id: '2',
+        fullName: 'John Doe',
+      }];
+
+      assert.equal(impl.findUserById(users, '1'), null);
+    });
+
+    it('returns user if found', () => {
+      const users = [{
+        id: '1',
+        fullName: 'John Doe',
+      }];
+
+      assert.deepEqual(impl.findUserById(users, '1'), users[0]);
+    });
+  });
+
+  describe('addValues', () => {
+    it('should return exchange including correct values', () => {
+      const exchange = {
+        id: '1',
+      };
+
+      const valuesLookup = [{
+        exchangeId: '1',
+        values: ['1', '2'],
+      }];
+
+      assert.deepEqual(impl.addValues(valuesLookup, exchange), {
+        id: '1',
+        values: ['1', '2'],
+      });
+    });
+
+    it('should return empty array when lookup match not found', () => {
+      const exchange = {
+        id: '1',
+      };
+
+      const valuesLookup = [{
+        exchangeId: '2',
+        values: ['1', '2'],
+      }];
+
+      assert.deepEqual(impl.addValues(valuesLookup, exchange), {
+        id: '1',
+        values: [],
+      });
+    });
+  });
+
+  describe('makeCreatedInObject', () => {
+    it('should return correct object when created for network', () => {
+      const exchange = {
+        id: '1',
+        networkId: '1',
+        teamId: null,
+        shiftId: null,
+        createdFor: 'ALL',
+        values: ['1'],
+      };
+
+      assert.deepEqual(impl.makeCreatedInObject(exchange), {
+        type: 'network',
+        id: '1',
+      });
+    });
+
+    it('should return correct object when created for team', () => {
+      const exchange = {
+        id: '1',
+        networkId: '1',
+        teamId: null,
+        shiftId: null,
+        createdFor: 'TEAM',
+        values: ['1', '2'],
+      };
+
+      assert.deepEqual(impl.makeCreatedInObject(exchange), {
+        type: 'team',
+        ids: ['1', '2'],
+      });
+    });
+
+    it('should return correct object when created for user while not a shift', () => {
+      const exchange = {
+        id: '1',
+        networkId: '1',
+        teamId: null,
+        shiftId: null,
+        createdFor: 'USER',
+        values: ['1', '2'],
+      };
+
+      assert.deepEqual(impl.makeCreatedInObject(exchange), {
+        type: 'network',
+        id: '1',
+      });
+    });
+
+    it('should return correct object when created as shift', () => {
+      const exchange = {
+        id: '1',
+        networkId: '1',
+        teamId: '665',
+        shiftId: '342',
+        createdFor: 'USER',
+        values: ['1', '2'],
+      };
+
+      assert.deepEqual(impl.makeCreatedInObject(exchange), {
+        type: 'team',
+        ids: ['665'],
+      });
+    });
+  });
+
+  describe('createResponseStatus', () => {
+    it('should return ACCEPTED status', () => {
+      assert.equal(impl.createResponseStatus({
+        response: true, isApproved: null }), 'ACCEPTED');
+    });
+
+    it('should return DECLINED status', () => {
+      assert.equal(impl.createResponseStatus({
+        response: false, isApproved: null }), 'DECLINED');
+    });
+
+    it('should return APPROVED status', () => {
+      assert.equal(impl.createResponseStatus({
+        response: true, isApproved: true }), 'APPROVED');
+    });
+
+    it('should return REJECTED status', () => {
+      assert.equal(impl.createResponseStatus({
+        response: true, isApproved: false }), 'REJECTED');
+    });
+
+    it('should return null if no combination matched', () => {
+      assert.equal(impl.createResponseStatus({
+        response: null, isApproved: null }), null);
+    });
+
+    it('should return null if input is empty', () => {
+      assert.equal(impl.createResponseStatus({}), null);
+    });
+
+    it('should return null if no response or isApproved properties present', () => {
+      assert.equal(impl.createResponseStatus({
+        response: null, foo: 'baz' }), null);
+
+      assert.equal(impl.createResponseStatus({
+        foo: 'baz', isApproved: null }), null);
+    });
+  });
 });

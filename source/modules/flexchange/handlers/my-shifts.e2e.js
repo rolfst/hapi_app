@@ -3,7 +3,7 @@ import nock from 'nock';
 import moment from 'moment';
 import sinon from 'sinon';
 import * as teamRepo from '../../core/repositories/team';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import { getRequest } from '../../../shared/test-utils/request';
 import { createExchange } from '..//repositories/exchange';
 

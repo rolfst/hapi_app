@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import qs from 'qs';
 import moment from 'moment';
 import { find } from 'lodash';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import { getRequest } from '../../../shared/test-utils/request';
 import { create } from '../../core/repositories/team';
 import { createExchange } from '..//repositories/exchange';
