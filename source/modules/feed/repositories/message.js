@@ -1,6 +1,6 @@
-import { map, pick } from 'ramda';
+import R from 'ramda';
 import { Message } from './dao';
-import createModel from '../models/message';
+import createDomainObject from '../models/message';
 
 /**
  * Find a message by id
@@ -12,7 +12,7 @@ export const findById = async (messageId) => {
   const result = await Message.findById(messageId);
   if (!result) return null;
 
-  return createModel(result);
+  return createDomainObject(result);
 };
 
 /**
@@ -26,7 +26,7 @@ export const findByIds = async (messageIds) => {
     where: { id: { in: messageIds } },
   });
 
-  return map(createModel, results);
+  return R.map(createDomainObject, results);
 };
 
 /**
@@ -39,9 +39,9 @@ export const findByIds = async (messageIds) => {
  */
 export const create = async (attributes) => {
   const attributesWhitelist = ['userId', 'text'];
-  const result = await Message.create(pick(attributesWhitelist, attributes));
+  const result = await Message.create(R.pick(attributesWhitelist, attributes));
 
-  return createModel(result);
+  return createDomainObject(result);
 };
 
 export const destroy = (messageId) => Message.destroy({ where: { id: messageId } });

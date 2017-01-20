@@ -1,6 +1,6 @@
-import { map, pick } from 'ramda';
+import R from 'ramda';
 import { _Object } from './dao';
-import createModel from '../models/object';
+import createDomainObject from '../models/object';
 
 /**
  * Creating an object
@@ -15,9 +15,9 @@ import createModel from '../models/object';
  */
 export const create = async (attributes) => {
   const whitelist = ['userId', 'parentType', 'parentId', 'objectType', 'sourceId'];
-  const result = await _Object.create(pick(whitelist, attributes));
+  const result = await _Object.create(R.pick(whitelist, attributes));
 
-  return createModel(result);
+  return createDomainObject(result);
 };
 
 /**
@@ -29,7 +29,7 @@ export const create = async (attributes) => {
 export const findBy = async (whereConstraint) => {
   const result = await _Object.findAll({ where: whereConstraint });
 
-  return map(createModel, result);
+  return R.map(createDomainObject, result);
 };
 
 /**
