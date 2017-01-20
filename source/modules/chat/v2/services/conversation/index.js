@@ -110,7 +110,7 @@ export const listMessages = async (payload, message) => {
  * @param {string} payload.userId - The id of the user
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method countConversations
- * @return {Promise<Number>}
+ * @return {external:Promise<Number>}
  */
 export async function countConversations(payload, message) {
   logger.info('Count conversation', { payload, message });
@@ -132,7 +132,7 @@ export const remove = async (payload, message) => {
  * @param {string} payload.conversationId - The id of the conversation
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method countMessages
- * @return {Promise<Number>}
+ * @return {external:Promise<Number>}
  */
 export async function countMessages(payload, message) {
   logger.info('Count messages for conversation', { payload, message });
