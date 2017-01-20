@@ -14,8 +14,8 @@ const logger = Logger.getLogger('FEED/service/object');
  * @param {string} payload.parentType - The type of parent to get objects for
  * @param {string} payload.parentId - The id of the parent
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method listObjects
- * @return {external:Promise.<Object[]>}
+ * @method list
+ * @return {external:Promise.<Object[]>} {@link module:feed~Object object}
  */
 export const list = async (payload, message) => {
   logger.info('Listing objects', { payload, message });
@@ -37,8 +37,8 @@ export const list = async (payload, message) => {
  * @param {string} payload.objectType - The type of object
  * @param {string} payload.sourceId - The id that refers to the activity
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method createObject
- * @return {external:Promise.<Object>}
+ * @method create
+ * @return {external:Promise.<Object>} {@link module:feed~Object object}
  */
 export const create = async (payload, message) => {
   logger.info('Creating object', { payload, message });

@@ -6,7 +6,7 @@ import createDomainObject from '../models/message';
  * Find a message by id
  * @param {string} messageId - The id of the message
  * @method findById
- * @return {Message}
+ * @return {Message} {@link module:feed~Message message}
  */
 export const findById = async (messageId) => {
   const result = await Message.findById(messageId);
@@ -21,7 +21,7 @@ export const findById = async (messageId) => {
  * @param {string} attributes.userId - The user id that creates the message
  * @param {string} attributes.text - The text that contains the message
  * @method create
- * @return {Message}
+ * @return {Message} {@link module:feed~Message message}
  */
 export const create = async (attributes) => {
   const attributesWhitelist = ['userId', 'text'];
