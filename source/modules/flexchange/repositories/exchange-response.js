@@ -1,4 +1,6 @@
-import { ExchangeResponse } from '../models';
+import R from 'ramda';
+import createExchangeResponseModel from '../models/exchange-response';
+import { ExchangeResponse } from './dao';
 
 /**
  * @module modules/flexchange/repositories/exchange-response
@@ -13,6 +15,11 @@ import { ExchangeResponse } from '../models';
 export const findResponseWhere = (constraint) => {
   return ExchangeResponse.findOne({ where: constraint });
 };
+
+export const findAllWhere = (whereConstraint) => ExchangeResponse
+  .unscoped()
+  .findAll({ where: whereConstraint })
+  .then(R.map(createExchangeResponseModel));
 
 /**
  * Find an accepted exchange response for a user

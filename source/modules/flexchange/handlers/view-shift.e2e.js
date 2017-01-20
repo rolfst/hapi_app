@@ -3,7 +3,7 @@ import moment from 'moment';
 import nock from 'nock';
 import * as stubs from '../../../adapters/pmt/test-utils/stubs';
 import { getRequest } from '../../../shared/test-utils/request';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import { createExchange } from '../repositories/exchange';
 
 describe('Handler: View shift', () => {

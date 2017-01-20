@@ -1,7 +1,7 @@
 import createError from '../../../shared/utils/create-error';
 import { ActivityTypes } from '../../../shared/models/activity';
 import { createActivity } from '../../core/repositories/activity';
-import ExchangeComment from '../models/exchange-comment';
+import ExchangeComment from './dao/exchange-comment';
 
 /**
  * @module modules/flexchange/repositories/comment

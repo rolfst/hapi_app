@@ -3,7 +3,7 @@ import moment from 'moment';
 import Promise from 'bluebird';
 import { postRequest } from '../../../shared/test-utils/request';
 import * as teamRepo from '../../core/repositories/team';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import * as exchangeRepo from '../repositories/exchange';
 
 let network;

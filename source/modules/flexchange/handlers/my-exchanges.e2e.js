@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import moment from 'moment';
 import qs from 'qs';
 import { getRequest } from '../../../shared/test-utils/request';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import { createExchange } from '../repositories/exchange';
 
 describe('My exchanges', () => {
