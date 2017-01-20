@@ -31,8 +31,10 @@ describe('Get conversation', () => {
   });
 
   after(async () => {
-    testHelper.cleanAll();
-    conversationRepo.deleteConversationById(conversation.id);
+    return Promise.all([
+      testHelper.deleteUser(employee),
+      testHelper.deleteUser(admin),
+    ]);
   });
 
   it('should return correct values', async () => {

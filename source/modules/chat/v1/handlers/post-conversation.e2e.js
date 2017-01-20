@@ -10,10 +10,12 @@ let createdConversation;
 
 describe('Post conversation', () => {
   const ENDPOINT_URL = '/v1/chats/conversations';
+  let admin;
+  let networklessUser;
 
   before(async () => {
-    const admin = await testHelper.createUser();
-    const networklessUser = await testHelper.createUser(blueprints.users.networkless);
+    admin = await testHelper.createUser();
+    networklessUser = await testHelper.createUser(blueprints.users.networkless);
     const network = await testHelper.createNetwork({ userId: admin.id });
 
     await testHelper.addUserToNetwork({
@@ -26,22 +28,29 @@ describe('Post conversation', () => {
     return messageRepo.createMessage(createdConversation.id, networklessUser.id, 'Foo text');
   });
 
-  after(async () => testHelper.cleanAll());
+  after(async () => {
+    return Promise.all([
+      testHelper.deleteUser(networklessUser),
+      testHelper.deleteUser(admin),
+    ]);
+  });
 
   it('should show new conversation data', async () => {
-    const payload = { type: 'private', users: [global.users.employee.id] };
-    const { tokens } = await testHelper.getLoginToken(blueprints.users.admin);
+    const employee = await testHelper.createUser(blueprints.users.employee);
+    const payload = { type: 'private', users: [employee.id] };
+    const { tokens } = await testHelper.getLoginToken(blueprints.users.networkless);
     const { result, statusCode } = await postRequest(ENDPOINT_URL, payload, tokens.access_token);
+    await testHelper.deleteUser(employee);
 
     assert.equal(statusCode, 200);
     assert.property(result.data, 'messages');
     assert.isArray(result.data.messages);
-    assert.isDefined(find(result.data.users, { id: global.users.employee.id }));
-    assert.isDefined(find(result.data.users, { id: global.users.admin.id }));
+    assert.isDefined(find(result.data.users, { id: employee.id }));
+    assert.isDefined(find(result.data.users, { id: networklessUser.id }));
   });
 
   it('should return the existing conversation when there is already one created', async () => {
-    const payload = { type: 'private', users: [global.users.networklessUser.id] };
+    const payload = { type: 'private', users: [networklessUser.id] };
     const { tokens } = await testHelper.getLoginToken(blueprints.users.admin);
     const { result, statusCode } = await postRequest(ENDPOINT_URL, payload, tokens.access_token);
 
@@ -49,13 +58,13 @@ describe('Post conversation', () => {
     assert.equal(result.data.id, createdConversation.id);
     assert.property(result.data, 'messages');
     assert.isArray(result.data.messages);
-    assert.equal(result.data.messages[0].created_by.id, global.users.networklessUser.id);
-    assert.isDefined(find(result.data.users, { id: global.users.admin.id }));
-    assert.isDefined(find(result.data.users, { id: global.users.networklessUser.id }));
+    assert.equal(result.data.messages[0].created_by.id, networklessUser.id);
+    assert.isDefined(find(result.data.users, { id: admin.id }));
+    assert.isDefined(find(result.data.users, { id: networklessUser.id }));
   });
 
   it('should fail when creating conversation with yourself', async () => {
-    const payload = { type: 'private', users: [global.users.admin.id.toString()] };
+    const payload = { type: 'private', users: [admin.id.toString()] };
     const { tokens } = await testHelper.getLoginToken(blueprints.users.admin);
     const { statusCode } = await postRequest(ENDPOINT_URL, payload, tokens.access_token);
 

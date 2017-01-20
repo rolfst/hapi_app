@@ -6,7 +6,7 @@ import { getRequest } from '../../../../shared/test-utils/request';
 import * as conversationRepo from '../repositories/conversation';
 import { createMessage } from '../repositories/message';
 
-describe.only('Handler: Get messages (v1)', () => {
+describe('Handler: Get messages (v1)', () => {
   let conversation;
   let admin;
   let employee;
@@ -32,7 +32,7 @@ describe.only('Handler: Get messages (v1)', () => {
   });
 
   after(() => {
-    Promise.all([
+    return Promise.all([
       testHelper.deleteUser(employee),
       testHelper.deleteUser(admin),
     ]);

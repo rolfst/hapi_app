@@ -3,6 +3,7 @@ import blueprints from '../../../../shared/test-utils/blueprints';
 import * as testHelper from '../../../../shared/test-utils/helpers';
 import { getRequest } from '../../../../shared/test-utils/request';
 import { createMessage } from '../../v1/repositories/message';
+import { createConversation } from '../../v1/repositories/conversation';
 
 describe('Handler: Get messages (v2)', () => {
   let creator;
@@ -28,6 +29,8 @@ describe('Handler: Get messages (v2)', () => {
           username: 'conversation_creator',
         });
     creatorToken = tokens.access_token;
+    createdConversation = await createConversation(
+      'PRIVATE', creator.id, [creator.id, participant.id]);
 
     await createMessage(createdConversation.id, participant.id, 'First message');
     await createMessage(createdConversation.id, participant.id, 'Second message');

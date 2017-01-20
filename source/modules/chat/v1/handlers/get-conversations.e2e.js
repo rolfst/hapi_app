@@ -8,11 +8,12 @@ import * as conversationRepo from '../repositories/conversation';
 describe('Get conversations for logged user', () => {
   let user;
   let admin;
+  let userWithoutMessage;
 
   before(async () => {
     admin = await testHelper.createUser();
     user = await testHelper.createUser(blueprints.users.employee);
-    const userWithoutMessage = await testHelper.createUser(blueprints.users.networkless);
+    userWithoutMessage = await testHelper.createUser(blueprints.users.networkless);
     const network = await testHelper.createNetwork({ userId: admin.id });
 
     await testHelper.addUserToNetwork({ networkId: network.id, userId: user.id });
@@ -28,8 +29,11 @@ describe('Get conversations for logged user', () => {
   });
 
   after(async () => {
-    const allUsers = await testHelper.findAllUsers();
-    return testHelper.deleteUser(allUsers);
+    return Promise.all([
+      testHelper.deleteUser(user),
+      testHelper.deleteUser(userWithoutMessage),
+      testHelper.deleteUser(admin),
+    ]);
   });
 
   it('should return conversation collection', async () => {

@@ -6,10 +6,12 @@ import * as conversationRepo from '../repositories/conversation';
 
 describe('Delete conversation', () => {
   let conversation;
+  let admin;
+  let employee;
 
   before(async () => {
-    const admin = await testHelper.createUser();
-    const employee = await testHelper.createUser(blueprints.users.employee);
+    admin = await testHelper.createUser();
+    employee = await testHelper.createUser(blueprints.users.employee);
     const network = await testHelper.createNetwork({ userId: admin.id });
     const participants = [employee.id, admin.id];
 
@@ -21,7 +23,12 @@ describe('Delete conversation', () => {
       'PRIVATE', admin.id, participants);
   });
 
-  after(async () => testHelper.cleanAll());
+  after(async () => {
+    return Promise.all([
+      testHelper.deleteUser(employee),
+      testHelper.deleteUser(admin),
+    ]);
+  });
 
   it('should return correct values', async () => {
     const endpoint = `/v1/chats/conversations/${conversation.id}`;
