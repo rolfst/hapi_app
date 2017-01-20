@@ -1,6 +1,6 @@
-import { map } from 'ramda';
-import { _Object } from '../data-models';
-import createDomainObject from '../domain-objects/object';
+import R from 'ramda';
+import { _Object } from './dao';
+import createDomainObject from '../models/object';
 
 /**
  * Creating an object
@@ -23,5 +23,5 @@ export const create = async (attributes) => {
 export const findBy = async (whereConstraint) => {
   const result = await _Object.findAll({ where: whereConstraint });
 
-  return map(createDomainObject, result);
+  return R.map(createDomainObject, result);
 };

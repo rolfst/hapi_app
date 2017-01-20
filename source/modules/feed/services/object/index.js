@@ -1,4 +1,4 @@
-import { pick } from 'ramda';
+import R from 'ramda';
 import * as Logger from '../../../../shared/services/logger';
 import * as ObjectRepository from '../../repositories/object';
 
@@ -44,6 +44,6 @@ export const create = async (payload, message) => {
   logger.info('Creating object', { payload, message });
 
   return ObjectRepository.create(
-    pick(['userId', 'parentType', 'parentId', 'objectType', 'sourceId'], payload)
+    R.pick(['userId', 'parentType', 'parentId', 'objectType', 'sourceId'], payload)
   );
 };

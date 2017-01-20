@@ -1,4 +1,4 @@
-import { cond, propEq } from 'ramda';
+import R from 'ramda';
 import Promise from 'bluebird';
 import * as Logger from '../../../../shared/services/logger';
 import * as messageRepository from '../../repositories/message';
@@ -6,18 +6,18 @@ import * as objectService from '../object';
 import * as impl from './implementation';
 
 /**
- * @module modules/feed/services/object
+ * @module modules/feed/services/message
  */
 
 const logger = Logger.getLogger('FEED/service/object');
 
 /**
- * My method description
+ * Get a single message
  * @param {object} payload - Object containing payload data
  * @param {string} payload.messageId - The id of the message to retrieve
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method getMessage
- * @return -
+ * @method get
+ * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
  */
 export const get = async (payload, message) => {
   logger.info('Finding message', { payload, message });
@@ -32,8 +32,8 @@ export const get = async (payload, message) => {
  * @param {object} payload - Object containing payload data
  * @param {string[]} payload.messageIds - The ids of the messages to list
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method listMessages
- * @return {external:Promise.<Message[]>}
+ * @method list
+ * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
  */
 export const list = async (payload, message) => {
   logger.info('Listing multiple messages', { payload, message });
@@ -50,8 +50,8 @@ export const list = async (payload, message) => {
  * @param {string} payload.resources[].type - The type of the resource
  * @param {object} payload.resources[].data - The data for the resource
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method createMessage
- * @return {external:Promise.<Message>}
+ * @method create
+ * @return {external:Promise.<Message>} {@link module:feed~Message message}
  */
 export const create = async (payload, message) => {
   logger.info('Creating message', { payload, message });
@@ -69,8 +69,8 @@ export const create = async (payload, message) => {
     sourceId: createdMessage.id,
   });
 
-  const typeEq = propEq('type');
-  const createResource = cond([
+  const typeEq = R.propEq('type');
+  const createResource = R.cond([
     [typeEq('poll'), impl.createPollResource(createdMessage, message)],
   ]);
 

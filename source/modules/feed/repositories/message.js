@@ -1,6 +1,6 @@
-import { pick } from 'ramda';
-import { Message } from '../data-models';
-import createDomainObject from '../domain-objects/message';
+import R from 'ramda';
+import { Message } from './dao';
+import createDomainObject from '../models/message';
 
 /**
  * Find a message by id
@@ -25,7 +25,7 @@ export const findById = async (messageId) => {
  */
 export const create = async (attributes) => {
   const attributesWhitelist = ['userId', 'text'];
-  const result = await Message.create(pick(attributesWhitelist, attributes));
+  const result = await Message.create(R.pick(attributesWhitelist, attributes));
 
   return createDomainObject(result);
 };

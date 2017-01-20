@@ -1,4 +1,4 @@
-import { pipeP } from 'ramda';
+import R from 'ramda';
 import * as pollService from '../../../poll/services/poll';
 import * as objectService from '../object';
 
@@ -9,7 +9,7 @@ import * as objectService from '../object';
  * @method remove
  * @return {external:Promise.<Boolean>}
  */
-export const createPollResource = (createdMessage, message) => pipeP(
+export const createPollResource = (createdMessage, message) => R.pipeP(
   (pollResource) => pollService.create({
     networkId: message.network.id,
     options: pollResource.data.options,
