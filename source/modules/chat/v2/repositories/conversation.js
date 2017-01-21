@@ -42,9 +42,6 @@ export async function findIdsForUser(userId) {
   return R.pipe(R.pluck('conversation_id'), R.map(R.toString))(pivotResult);
 }
 
-export const findConversationsForUser = (userId) =>
-  R.pipeP(findIdsForUser, findByIds)(userId);
-
 /**
  * Create conversation
  * @param {object} attributes - The options for pagination
