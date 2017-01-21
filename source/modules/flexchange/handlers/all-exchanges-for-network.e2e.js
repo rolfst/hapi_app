@@ -6,7 +6,7 @@ import { getRequest } from '../../../shared/test-utils/request';
 import * as networkService from '../../core/services/network';
 import { createTeam } from '../../core/repositories/team';
 import * as userRepo from '../../core/repositories/user';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import * as exchangeRepo from '../repositories/exchange';
 
 describe('Get exchanges for network', () => {

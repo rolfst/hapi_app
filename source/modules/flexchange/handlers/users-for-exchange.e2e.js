@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import moment from 'moment';
 import * as teamRepo from '../../core/repositories/team';
 import * as networkRepo from '../../core/repositories/network';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import { getRequest } from '../../../shared/test-utils/request';
 import * as exchangeRepo from '../repositories/exchange';
 

@@ -1,3 +1,5 @@
+import * as dateUtils from '../../../shared/utils/date';
+
 export default (dataModel) => ({
   id: dataModel.id.toString(),
   userId: dataModel.userId.toString(),
@@ -5,6 +7,6 @@ export default (dataModel) => ({
   sourceId: dataModel.sourceId.toString(),
   parentType: dataModel.parentType,
   parentId: dataModel.parentId.toString(),
-  createdAt: dataModel.createdAt,
-  updatedAt: dataModel.updatedAt,
+  createdAt: dateUtils.toISOString(dataModel.created_at),
+  updatedAt: dateUtils.toISOString(dataModel.updated_at),
 });

@@ -1,6 +1,7 @@
 import { sortBy, orderBy, uniqBy, map, filter, includes } from 'lodash';
 import moment from 'moment';
 import * as Analytics from '../../../../shared/services/analytics';
+import * as Logger from '../../../../shared/services/logger';
 import { createAdapter } from '../../../../shared/utils/create-adapter';
 import approveExchangeEvent from '../../../../shared/events/approve-exchange-event';
 import createError from '../../../../shared/utils/create-error';
@@ -12,7 +13,7 @@ import * as activityRepo from '../../../core/repositories/activity';
 import * as userService from '../../../core/services/user';
 import * as teamService from '../../../core/services/team';
 import * as networkService from '../../../core/services/network';
-import { exchangeTypes } from '../../models/exchange';
+import { exchangeTypes } from '../../repositories/dao/exchange';
 import * as commentRepo from '../../repositories/comment';
 import * as exchangeRepo from '../../repositories/exchange';
 import * as exchangeResponseRepo from '../../repositories/exchange-response';
@@ -26,6 +27,7 @@ import * as impl from './implementation';
  * @module modules/flexchange/services/flexchange
  */
 
+const logger = Logger.getLogger('FLEXCHANGE/service/flexchange');
 const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
 
 const findUsersByType = async (exchange, network, exchangeValues, loggedUser) => {
@@ -37,6 +39,14 @@ const findUsersByType = async (exchange, network, exchangeValues, loggedUser) =>
   }
   const users = await (usersPromise);
   return filter(users, u => u.id !== loggedUser.id);
+};
+
+export const list = async (payload, message) => {
+  logger.info('Listing exchanges', { payload, message });
+
+  const result = await exchangeRepo.findPlainExchangesById(payload.exchangeIds);
+
+  return result;
 };
 
 
@@ -366,7 +376,7 @@ const createValidator = (exchangeType) => {
  * @param {string} payload.date - date for the exchange
  * @param {string} payload.startTime - {@link module:modules/flexchange~Exchange Exchange.startTime}
  * @param {string} payload.endTime - {@link module:modules/flexchange~Exchange Exchange.endTime}
- * @param {string} payload.value - {@link module:modules/flexchange~Exchange Exchange.value}
+ * @param {string} payload.values - {@link module:modules/flexchange~Exchange Exchange.value}
  * @param {string} payload.type - {@link module:modules/flexchange~Exchange Exchange.type}
  * @param {string} payload.title - {@link module:modules/flexchange~Exchange Exchange.title}
  * @param {string} payload.description
@@ -392,6 +402,7 @@ export const createExchange = async (payload, message) => {
 
     if (!isValid) throw createError('422', 'Specified invalid ids for type.');
   }
+
   const createdExchange = await exchangeRepo.createExchange(message.credentials.id, network.id, {
     ...payload,
     date: moment(payload.date).format('YYYY-MM-DD'),

@@ -1,5 +1,5 @@
 import Sequelize from 'sequelize';
-import { db as model } from '../../../connections';
+import { db as model } from '../../../../connections';
 
 const Message = model.define('Message', {
   userId: {

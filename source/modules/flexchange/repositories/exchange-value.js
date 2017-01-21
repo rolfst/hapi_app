@@ -1,4 +1,4 @@
-import ExchangeValue from '../models/exchange-value';
+import ExchangeValue from './dao/exchange-value';
 
 /**
  * @module modules/flexchange/repositories/exchangeValue

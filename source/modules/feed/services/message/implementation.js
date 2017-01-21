@@ -4,10 +4,10 @@ import * as objectService from '../object';
 
 /**
  * Creates a poll resource that consists of a poll object and a object object.
- * @param {object} createdMessage - The message where the poll is created for
+ * @param {Message} createdMessage - The message where the poll is created for
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method remove
- * @return {external:Promise.<Boolean>}
+ * @method createPollResource
+ * @return {external:Promise.<Object>}
  */
 export const createPollResource = (createdMessage, message) => R.pipeP(
   (pollResource) => pollService.create({
@@ -22,3 +22,14 @@ export const createPollResource = (createdMessage, message) => R.pipeP(
     sourceId: createdPoll.id,
   }, message)
 );
+
+/**
+ * Remove objects that are attached to a message. Either as child or as parent.
+ * @param {string} messageId - The id of the message
+ * @method removeAttachedObjects
+ * @return {Promise}
+ */
+export const removeAttachedObjects = (messageId) => Promise.all([
+  objectService.remove({ objectType: 'message', sourceId: messageId }),
+  objectService.remove({ parentType: 'message', parentId: messageId }),
+]);

@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import * as networkUtil from '../../../shared/utils/network';
 import * as exchangeRepo from '../repositories/exchange';
 import * as exchangeValueRepo from '../repositories/exchange-value';

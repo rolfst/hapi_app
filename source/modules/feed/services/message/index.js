@@ -38,6 +38,9 @@ export const get = async (payload, message) => {
 export const list = async (payload, message) => {
   logger.info('Listing multiple messages', { payload, message });
   // TODO Listing messages with their children objects
+  const result = await messageRepository.findByIds(payload.messageIds);
+
+  return result;
 };
 
 /**
@@ -69,12 +72,14 @@ export const create = async (payload, message) => {
     sourceId: createdMessage.id,
   });
 
-  const typeEq = R.propEq('type');
-  const createResource = R.cond([
-    [typeEq('poll'), impl.createPollResource(createdMessage, message)],
-  ]);
+  if (payload.resources) {
+    const typeEq = R.propEq('type');
+    const createResource = R.cond([
+      [typeEq('poll'), impl.createPollResource(createdMessage, message)],
+    ]);
 
-  await Promise.map(payload.resources, createResource);
+    await Promise.map(payload.resources, createResource);
+  }
 
   return createdMessage;
 };
@@ -89,8 +94,13 @@ export const create = async (payload, message) => {
  */
 export const remove = async (payload, message) => {
   logger.info('Deleting message', { payload, message });
-  // TODO remove attached objects
-  await messageRepository.destroy(payload.messageId);
+
+  // TODO ACL: Only an admin or the creator of the message can delete.
+
+  await Promise.all([
+    messageRepository.destroy(payload.messageId),
+    impl.removeAttachedObjects(payload.messageId),
+  ]);
 
   return true;
 };
