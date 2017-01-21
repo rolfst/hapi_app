@@ -21,10 +21,7 @@ describe('Service: Object', () => {
       });
     });
 
-    after(() => Promise.all([
-      serviceUnderTest.remove({ parentType: 'network', parentId: '42' }),
-      serviceUnderTest.remove({ objectType: 'poll', parentId: '2' }),
-    ]));
+    after(() => serviceUnderTest.remove({ parentType: 'network', parentId: '42' }));
 
     it('should return objects', async () => {
       const actual = await serviceUnderTest.list({
