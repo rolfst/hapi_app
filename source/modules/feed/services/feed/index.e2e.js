@@ -4,7 +4,7 @@ import Promise from 'bluebird';
 import * as flexchangeService from '../../../flexchange/services/flexchange';
 import * as objectService from '../object';
 import * as messageService from '../message';
-import * as serviceUnderTest from './index';
+import * as feedService from './index';
 
 describe('Service: Feed', () => {
   describe('make', () => {
@@ -60,7 +60,7 @@ describe('Service: Feed', () => {
     });
 
     it('should return feed models', async () => {
-      const actual = await serviceUnderTest.make({
+      const actual = await feedService.make({
         parentType: 'network',
         parentId: global.networks.flexAppeal.id,
       }, { credentials: { id: global.users.admin.id } });

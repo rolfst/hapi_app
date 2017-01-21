@@ -2,10 +2,10 @@ import Sequelize from 'sequelize';
 import { db as model } from '../../../../connections';
 
 const Message = model.define('Message', {
-  userId: {
+  objectId: {
     type: Sequelize.INTEGER,
-    field: 'user_id',
-    allowNull: false,
+    field: 'object_id',
+    allowNull: true,
   },
   text: {
     type: Sequelize.STRING,

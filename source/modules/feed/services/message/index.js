@@ -60,17 +60,19 @@ export const create = async (payload, message) => {
   logger.info('Creating message', { payload, message });
 
   const createdMessage = await messageRepository.create({
-    userId: message.credentials.id,
+    objectId: null,
     text: payload.text,
   });
 
-  await objectService.create({
+  const createdObject = await objectService.create({
     userId: message.credentials.id,
     parentType: payload.parentType,
     parentId: payload.parentId,
     objectType: 'message',
     sourceId: createdMessage.id,
   });
+
+  await messageRepository.update(createdMessage.id, { objectId: createdObject.id });
 
   if (payload.resources) {
     const typeEq = R.propEq('type');

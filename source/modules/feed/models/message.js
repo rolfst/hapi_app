@@ -1,7 +1,9 @@
+import * as dateUtils from '../../../shared/utils/date';
+
 export default (dataModel) => ({
+  type: 'message',
   id: dataModel.id.toString(),
-  userId: dataModel.userId.toString(),
+  objectId: dataModel.objectId ? dataModel.objectId.toString() : null,
   text: dataModel.text,
-  createdAt: dataModel.createdAt,
-  updatedAt: dataModel.updatedAt,
+  createdAt: dateUtils.toISOString(dataModel.created_at),
 });
