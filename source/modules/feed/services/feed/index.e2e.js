@@ -25,23 +25,25 @@ describe('Service: Feed', () => {
         values: [global.networks.flexAppeal.id],
       }, serviceMessage);
 
-      createdMessages = await Promise.all([
-        messageService.create({
-          parentType: 'network',
-          parentId: global.networks.flexAppeal.id,
-          text: 'Message for feed',
-        }, serviceMessage),
-        messageService.create({
-          parentType: 'network',
-          parentId: global.networks.flexAppeal.id,
-          text: 'Second message for feed',
-        }, serviceMessage),
-        messageService.create({
-          parentType: 'team',
-          parentId: '33',
-          text: 'Second message for other feed',
-        }, serviceMessage),
-      ]);
+      const createdMessage1 = await messageService.create({
+        parentType: 'network',
+        parentId: global.networks.flexAppeal.id,
+        text: 'Message for feed',
+      }, serviceMessage);
+
+      const createdMessage2 = await messageService.create({
+        parentType: 'network',
+        parentId: global.networks.flexAppeal.id,
+        text: 'Second message for feed',
+      }, serviceMessage);
+
+      const createdMessage3 = await messageService.create({
+        parentType: 'team',
+        parentId: '33',
+        text: 'Second message for other feed',
+      }, serviceMessage);
+
+      createdMessages = [createdMessage1, createdMessage2, createdMessage3];
 
       createdObject = await objectService.create({
         userId: global.users.admin.id,
