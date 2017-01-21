@@ -37,7 +37,7 @@ describe('Service: Feed', () => {
         text: 'Second message for feed',
       }, serviceMessage);
 
-      const createdMessage3 = messageService.create({
+      const createdMessage3 = await messageService.create({
         parentType: 'team',
         parentId: '33',
         text: 'Second message for other feed',

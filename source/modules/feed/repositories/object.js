@@ -1,6 +1,6 @@
-import { map, pick } from 'ramda';
+import R from 'ramda';
 import { _Object } from './dao';
-import createModel from '../models/object';
+import createDomainObject from '../models/object';
 
 /**
  * Creating an object
@@ -11,13 +11,13 @@ import createModel from '../models/object';
  * @param {string} attributes.objectType - The type of object
  * @param {string} attributes.sourceId - The id that refers to the activity
  * @method create
- * @return {Object}
+ * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
 export const create = async (attributes) => {
   const whitelist = ['userId', 'parentType', 'parentId', 'objectType', 'sourceId'];
-  const result = await _Object.create(pick(whitelist, attributes));
+  const result = await _Object.create(R.pick(whitelist, attributes));
 
-  return createModel(result);
+  return createDomainObject(result);
 };
 
 /**
@@ -27,7 +27,7 @@ export const create = async (attributes) => {
  * @param {string} options.offset - The offset of the resultset
  * @param {string} options.limit - The limit of the resultset
  * @method findBy
- * @return {Object[]}
+ * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
 export const findBy = async (whereConstraint, options) => {
   const result = await _Object.findAll({
@@ -35,7 +35,7 @@ export const findBy = async (whereConstraint, options) => {
     where: whereConstraint,
   });
 
-  return map(createModel, result);
+  return R.map(createDomainObject, result);
 };
 
 /**

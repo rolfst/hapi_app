@@ -1,32 +1,32 @@
-import { map, pick } from 'ramda';
+import R from 'ramda';
 import { Message } from './dao';
-import createModel from '../models/message';
+import createDomainObject from '../models/message';
 
 /**
  * Find a message by id
  * @param {string} messageId - The id of the message
  * @method findById
- * @return {Message}
+ * @return {external:Promise.<Message>} {@link module:modules/feed~Message}
  */
 export const findById = async (messageId) => {
   const result = await Message.findById(messageId);
   if (!result) return null;
 
-  return createModel(result);
+  return createDomainObject(result);
 };
 
 /**
  * Find messages by ids
  * @param {string[]} messageIds - The ids of the messages
  * @method findByIds
- * @return {Message[]}
+ * @return {external:Promise.<Message[]>} {@link module:modules/feed~Message}
  */
 export const findByIds = async (messageIds) => {
   const results = await Message.findAll({
     where: { id: { in: messageIds } },
   });
 
-  return map(createModel, results);
+  return R.map(createDomainObject, results);
 };
 
 /**
@@ -35,13 +35,13 @@ export const findByIds = async (messageIds) => {
  * @param {string} attributes.userId - The user id that creates the message
  * @param {string} attributes.text - The text that contains the message
  * @method create
- * @return {Message}
+ * @return {external:Promise.<Message>} {@link module:modules/feed~Message}
  */
 export const create = async (attributes) => {
   const attributesWhitelist = ['userId', 'text'];
-  const result = await Message.create(pick(attributesWhitelist, attributes));
+  const result = await Message.create(R.pick(attributesWhitelist, attributes));
 
-  return createModel(result);
+  return createDomainObject(result);
 };
 
 export const update = async (messageId, attributes) => Message.update(attributes, {
