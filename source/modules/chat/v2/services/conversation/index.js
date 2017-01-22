@@ -49,7 +49,7 @@ export const listConversations = async (payload, message) => {
       parentType: 'conversation', parentId: { $in: payload.conversationIds } }),
   ]);
 
-  if (objects.length === 0) return [];
+  if (objects.length === 0) return conversations;
 
   const lastMessageObjects = await impl.lastMessageObjectsForConversations(objects);
   const lastMessages = await messageService.list({
@@ -61,6 +61,8 @@ export const listConversations = async (payload, message) => {
     const participants = await userRepo.findPlainUsersByIds(userIds);
     const conversationWithParticipants = await impl.addParticipantsToConversation(
       conversations, participants);
+
+    console.log('____conversationWithParticipants', conversationWithParticipants);
 
     return R.map(mergeLastMessage, conversationWithParticipants);
   }
