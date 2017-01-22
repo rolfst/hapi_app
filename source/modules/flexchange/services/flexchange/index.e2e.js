@@ -33,9 +33,9 @@ describe('Service: Flexchange', () => {
 
     it('should return correct properties in exchange model', async () => {
       const actual = await exchangeService.list({
-        networkId: global.networks.flexAppeal.id,
         exchangeIds: [createdExchange1.id, createdExchange2.id],
       }, {
+        network: { id: global.networks.flexAppeal.id },
         credentials: { id: global.users.admin.id },
       });
 
@@ -68,9 +68,9 @@ describe('Service: Flexchange', () => {
         await exchangeRepository.acceptExchange(createdExchange1.id, global.users.admin.id);
 
         const actual = await exchangeService.list({
-          networkId: global.networks.flexAppeal.id,
           exchangeIds: [createdExchange1.id],
         }, {
+          network: { id: global.networks.flexAppeal.id },
           credentials: { id: global.users.admin.id },
         });
 
@@ -92,9 +92,9 @@ describe('Service: Flexchange', () => {
         await exchangeRepository.declineExchange(createdExchange1.id, global.users.admin.id);
 
         const actual = await exchangeService.list({
-          networkId: global.networks.flexAppeal.id,
           exchangeIds: [createdExchange1.id],
         }, {
+          network: { id: global.networks.flexAppeal.id },
           credentials: { id: global.users.admin.id },
         });
 
@@ -118,9 +118,9 @@ describe('Service: Flexchange', () => {
           createdExchange1, global.users.admin, global.users.admin.id);
 
         const actual = await exchangeService.list({
-          networkId: global.networks.flexAppeal.id,
           exchangeIds: [createdExchange1.id],
         }, {
+          network: { id: global.networks.flexAppeal.id },
           credentials: { id: global.users.admin.id },
         });
 
@@ -144,9 +144,9 @@ describe('Service: Flexchange', () => {
           createdExchange1, global.users.admin, global.users.admin.id);
 
         const actual = await exchangeService.list({
-          networkId: global.networks.flexAppeal.id,
           exchangeIds: [createdExchange1.id],
         }, {
+          network: { id: global.networks.flexAppeal.id },
           credentials: { id: global.users.admin.id },
         });
 

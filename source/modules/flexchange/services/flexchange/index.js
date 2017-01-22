@@ -47,7 +47,6 @@ const findUsersByType = async (type, networkId, exchangeValues, userId) => {
 /**
  * Lists exchanges for network by id
  * @param {object} payload - Object containing payload data
- * @param {string} payload.networkId - The id of the network to perform action
  * @param {string[]} payload.exchangeIds - The id of the exchanges to list
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method list
@@ -68,7 +67,7 @@ export const list = async (payload, message) => {
   const occuringUsers = await R.pipe(
     impl.getUserIdsInObjects(['approvedUser', 'approvedBy', 'userId']),
     (userIds) => userService.listUsersWithNetworkScope({
-      networkId: payload.networkId, userIds }, message)
+      networkId: message.network.id, userIds }, message)
   )(R.concat(exchanges, responsesForExchanges));
 
   const responsesForExchange = (exchangeId) =>
@@ -417,7 +416,6 @@ export const listExchangesForUser = async (payload, message) => {
   }, impl.createDateWhereConstraint(payload.filter.start, payload.filter.end)));
 
   return list({
-    networkId: message.network.id,
     exchangeIds: R.pluck('id', R.concat(exchanges, createdExchangesByUser)) },
     message);
 };
@@ -462,10 +460,11 @@ export const createExchange = async (payload, message) => {
     if (!isValid) throw createError('422', 'Specified invalid ids for type.');
   }
 
-  const createdExchange = await exchangeRepo.createExchange(message.credentials.id, network.id, {
-    ...payload,
-    date: moment(payload.date).format('YYYY-MM-DD'),
-  });
+  const createdExchange = await exchangeRepo.createExchange(
+    message.credentials.id, message.network.id, {
+      ...payload,
+      date: moment(payload.date).format('YYYY-MM-DD'),
+    });
 
   const users = await findUsersByType(
     createdExchange.type, message.network.id, payload.values, message.credentials.id);

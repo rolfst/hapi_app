@@ -63,7 +63,10 @@ describe('Service: Feed', () => {
       const actual = await feedService.make({
         parentType: 'network',
         parentId: global.networks.flexAppeal.id,
-      }, { credentials: { id: global.users.admin.id } });
+      }, {
+        credentials: { id: global.users.admin.id },
+        network: { id: global.networks.flexAppeal.id },
+      });
 
       assert.lengthOf(actual, 3);
       assert.equal(actual[0].objectType, 'message');
