@@ -14,8 +14,7 @@ import ExchangeValue from './dao/exchange-value';
  * @return {external:Promise} Create exchange values promise
  */
 export const createValuesForExchange = (exchangeId, values) => ExchangeValue
-  .bulkCreate(R.map(value => ({ exchangeId, value })), values)
-  .then(R.map(createExchangeValueModel));
+  .bulkCreate(R.map(value => ({ exchangeId, value }), values));
 
 export const findAllWhere = (whereConstraint) => ExchangeValue
   .findAll({ where: whereConstraint })
