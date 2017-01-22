@@ -30,6 +30,7 @@ import * as impl from './implementation';
  */
 const logger = Logger.createLogger('FLEXCHANGE/service/exchange');
 
+const logger = Logger.getLogger('FLEXCHANGE/service/flexchange');
 const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
 
 const findUsersByType = async (type, networkId, exchangeValues, userId) => {
@@ -44,6 +45,7 @@ const findUsersByType = async (type, networkId, exchangeValues, userId) => {
   return reject(await usersPromise, u => u.id === userId);
 };
 
+<<<<<<< HEAD
 /**
  * Lists exchanges for network by id
  * @param {object} payload - Object containing payload data
@@ -462,11 +464,10 @@ export const createExchange = async (payload, message) => {
     if (!isValid) throw createError('422', 'Specified invalid ids for type.');
   }
 
-  const createdExchange = await exchangeRepo.createExchange(
-    message.credentials.id, message.network.id, {
-      ...payload,
-      date: moment(payload.date).format('YYYY-MM-DD'),
-    });
+  const createdExchange = await exchangeRepo.createExchange(message.credentials.id, network.id, {
+    ...payload,
+    date: moment(payload.date).format('YYYY-MM-DD'),
+  });
 
   const users = await findUsersByType(
     createdExchange.type, message.network.id, payload.values, message.credentials.id);

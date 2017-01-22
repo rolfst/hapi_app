@@ -3,8 +3,8 @@ import blueprints from '../../../../shared/test-utils/blueprints';
 import * as userRepo from '../../../../modules/core/repositories/user';
 import { getRequest } from '../../../../shared/test-utils/request';
 import authenticate from '../../../../shared/test-utils/authenticate';
-import * as messageRepo from '../../v1/repositories/message';
-import * as conversationRepo from '../../v1/repositories/conversation';
+import * as messageService from '../../../feed/services/message';
+import * as conversationService from '../services/conversation';
 
 describe('Get conversations for logged user (v2)', () => {
   let creator;
@@ -13,7 +13,7 @@ describe('Get conversations for logged user (v2)', () => {
   let createdConversation;
   const ENDPOINT_URL = '/v2/users/me/conversations';
 
-  describe('normal flow', () => {
+  describe('Normal flow', () => {
     before(async () => {
       creator = await userRepo.createUser({
         ...blueprints.users.employee,
@@ -23,20 +23,35 @@ describe('Get conversations for logged user (v2)', () => {
         ...blueprints.users.employee,
         username: 'conversation_participant' });
 
-      createdConversation = await conversationRepo.createConversation(
-        'PRIVATE', creator.id, [creator.id, participant.id]);
+      createdConversation = await conversationService.create({
+        type: 'PRIVATE',
+        participantIds: [creator.id, participant.id],
+      }, { credentials: { id: creator.id } });
 
       creatorToken = (await authenticate(global.server, {
         username: creator.username,
         password: blueprints.users.employee.password,
       })).token;
 
-      await messageRepo.createMessage(createdConversation.id, participant.id, 'First message');
-      await messageRepo.createMessage(createdConversation.id, participant.id, 'Last message');
+      await messageService.create({
+        parentType: 'conversation',
+        parentId: createdConversation.id,
+        text: 'First message',
+      }, {
+        credentials: { id: participant.id },
+      });
+
+      await messageService.create({
+        parentType: 'conversation',
+        parentId: createdConversation.id,
+        text: 'Last message',
+      }, {
+        credentials: { id: participant.id },
+      });
     });
 
     after(async () => {
-      await conversationRepo.deleteConversationById(createdConversation.id);
+      await conversationService.remove({ conversationId: createdConversation.id });
       await [creator, participant].map(user => userRepo.deleteById(user.id));
     });
 
@@ -50,9 +65,8 @@ describe('Get conversations for logged user (v2)', () => {
       assert.equal(conversationUnderTest.id, createdConversation.id);
       assert.equal(conversationUnderTest.user_id, creator.id);
       assert.property(conversationUnderTest, 'last_message');
-      assert.equal(conversationUnderTest.last_message.user_id, participant.id);
+      assert.property(conversationUnderTest.last_message, 'object_id');
       assert.equal(conversationUnderTest.last_message.text, 'Last message');
-      assert.equal(conversationUnderTest.last_message.conversation_id, createdConversation.id);
       assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant.id]);
       assert.property(conversationUnderTest, 'created_at');
       assert.property(result, 'meta');
@@ -75,7 +89,7 @@ describe('Get conversations for logged user (v2)', () => {
     });
   });
 
-  describe('limit flow', () => {
+  describe('Limit flow', () => {
     let createdConversation1;
     let createdConversation2;
 
@@ -88,25 +102,49 @@ describe('Get conversations for logged user (v2)', () => {
         ...blueprints.users.employee,
         username: 'conversation_participant' });
 
-      createdConversation1 = await conversationRepo.createConversation(
-        'PRIVATE', creator.id, [creator.id, participant.id]);
-      createdConversation2 = await conversationRepo.createConversation(
-        'PRIVATE', creator.id, [creator.id, participant.id]);
+      createdConversation1 = await conversationService.create({
+        type: 'PRIVATE',
+        participantIds: [creator.id, participant.id],
+      }, { credentials: { id: creator.id } });
+
+      createdConversation2 = await conversationService.create({
+        type: 'PRIVATE',
+        participantIds: [creator.id, participant.id],
+      }, { credentials: { id: creator.id } });
 
       creatorToken = (await authenticate(global.server, {
         username: creator.username,
         password: blueprints.users.employee.password,
       })).token;
 
-      await messageRepo.createMessage(createdConversation1.id, participant.id, 'First message');
-      await messageRepo.createMessage(createdConversation1.id, participant.id, 'Last message');
-      await messageRepo.createMessage(createdConversation2.id, participant.id,
-          'First message second conversation');
+      await messageService.create({
+        parentType: 'conversation',
+        parentId: createdConversation1.id,
+        text: 'First message',
+      }, {
+        credentials: { id: participant.id },
+      });
+
+      await messageService.create({
+        parentType: 'conversation',
+        parentId: createdConversation1.id,
+        text: 'Last message',
+      }, {
+        credentials: { id: participant.id },
+      });
+
+      await messageService.create({
+        parentType: 'conversation',
+        parentId: createdConversation2.id,
+        text: 'First message second conversation',
+      }, {
+        credentials: { id: participant.id },
+      });
     });
 
     after(async () => {
-      await conversationRepo.deleteConversationById(createdConversation1.id);
-      await conversationRepo.deleteConversationById(createdConversation2.id);
+      await conversationService.remove({ conversationId: createdConversation1.id });
+      await conversationService.remove({ conversationId: createdConversation2.id });
       await [creator, participant].map(user => userRepo.deleteById(user.id));
     });
 
@@ -131,9 +169,8 @@ describe('Get conversations for logged user (v2)', () => {
       assert.equal(conversationUnderTest.id, createdConversation1.id);
       assert.equal(conversationUnderTest.user_id, creator.id);
       assert.property(conversationUnderTest, 'last_message');
-      assert.equal(conversationUnderTest.last_message.user_id, participant.id);
+      assert.property(conversationUnderTest.last_message, 'object_id');
       assert.equal(conversationUnderTest.last_message.text, 'Last message');
-      assert.equal(conversationUnderTest.last_message.conversation_id, createdConversation1.id);
       assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant.id]);
       assert.property(conversationUnderTest, 'created_at');
     });
@@ -150,9 +187,8 @@ describe('Get conversations for logged user (v2)', () => {
         assert.equal(conversationUnderTest.id, createdConversation2.id);
         assert.equal(conversationUnderTest.user_id, creator.id);
         assert.property(conversationUnderTest, 'last_message');
-        assert.equal(conversationUnderTest.last_message.user_id, participant.id);
+        assert.property(conversationUnderTest.last_message, 'object_id');
         assert.equal(conversationUnderTest.last_message.text, 'First message second conversation');
-        assert.equal(conversationUnderTest.last_message.conversation_id, createdConversation2.id);
         assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant.id]);
         assert.property(conversationUnderTest, 'created_at');
       });

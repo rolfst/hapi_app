@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
-import { db as model } from '../../../connections';
-import * as dateUtils from '../../../shared/utils/date';
+import { db as model } from '../../../../../connections';
+import * as dateUtils from '../../../../../shared/utils/date';
 
 const Message = model.define('Message', {
   text: Sequelize.TEXT,
@@ -9,7 +9,7 @@ const Message = model.define('Message', {
   messageType: { type: Sequelize.STRING, field: 'message_type' },
   createdBy: { type: Sequelize.INTEGER, field: 'created_by' },
 }, {
-  tableName: 'messages',
+  tableName: 'old_messages',
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',

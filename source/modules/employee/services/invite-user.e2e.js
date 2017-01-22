@@ -32,7 +32,7 @@ describe('Service: invite user', () => {
       await assert.isRejected(service.inviteUser(payload, { network }));
     });
 
-    it('should fail when team doesn\'t belongs to the network', async () => {
+    xit('should fail when team doesn\'t belongs to the network', async () => {
       // TODO
     });
 

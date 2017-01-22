@@ -3,8 +3,8 @@ import blueprints from '../../../../shared/test-utils/blueprints';
 import authenticate from '../../../../shared/test-utils/authenticate';
 import { getRequest } from '../../../../shared/test-utils/request';
 import * as userRepo from '../../../../modules/core/repositories/user';
-import { createConversation, deleteConversationById } from '../../v1/repositories/conversation';
-import { createMessage } from '../../v1/repositories/message';
+import * as messageService from '../../../feed/services/message';
+import * as conversationService from '../services/conversation';
 
 describe('Get messages (v2)', () => {
   let creator;
@@ -21,21 +21,43 @@ describe('Get messages (v2)', () => {
       ...blueprints.users.employee,
       username: 'conversation_participant' });
 
-    createdConversation = await createConversation(
-      'PRIVATE', creator.id, [creator.id, participant.id]);
+    createdConversation = await conversationService.create({
+      type: 'PRIVATE',
+      participantIds: [creator.id, participant.id],
+    }, { credentials: { id: creator.id } });
 
     creatorToken = (await authenticate(global.server, {
       username: creator.username,
       password: blueprints.users.employee.password,
     })).token;
 
-    await createMessage(createdConversation.id, participant.id, 'First message');
-    await createMessage(createdConversation.id, participant.id, 'Second message');
-    await createMessage(createdConversation.id, participant.id, 'Last message');
+    await messageService.create({
+      parentType: 'conversation',
+      parentId: createdConversation.id,
+      text: 'First message',
+    }, {
+      credentials: { id: participant.id },
+    });
+
+    await messageService.create({
+      parentType: 'conversation',
+      parentId: createdConversation.id,
+      text: 'Second message',
+    }, {
+      credentials: { id: participant.id },
+    });
+
+    await messageService.create({
+      parentType: 'conversation',
+      parentId: createdConversation.id,
+      text: 'Last message',
+    }, {
+      credentials: { id: participant.id },
+    });
   });
 
   after(async () => {
-    await deleteConversationById(createdConversation.id);
+    await conversationService.remove({ conversationId: createdConversation.id });
     await [creator, participant].map(user => userRepo.deleteById(user.id));
   });
 
@@ -45,11 +67,10 @@ describe('Get messages (v2)', () => {
 
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 3);
-    assert.equal(result.data[0].type, 'conversation_message');
+    assert.equal(result.data[0].type, 'message');
     assert.isString(result.data[0].id);
-    assert.equal(result.data[0].conversation_id, createdConversation.id);
     assert.equal(result.data[0].text, 'First message');
-    assert.equal(result.data[0].user_id, participant.id);
+    assert.property(result.data[0], 'object_id');
     assert.property(result.data[0], 'created_at');
     assert.equal(result.data[result.data.length - 1].text, 'Last message');
     assert.property(result, 'meta');
@@ -66,11 +87,10 @@ describe('Get messages (v2)', () => {
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 2);
     assert.equal(result.meta.pagination.total_count, 3);
-    assert.equal(result.data[0].type, 'conversation_message');
+    assert.equal(result.data[0].type, 'message');
     assert.isString(result.data[0].id);
-    assert.equal(result.data[0].conversation_id, createdConversation.id);
     assert.equal(result.data[0].text, 'First message');
-    assert.equal(result.data[0].user_id, participant.id);
+    assert.property(result.data[0], 'object_id');
     assert.property(result.data[0], 'created_at');
     assert.equal(result.data[1].text, 'Second message');
   });
@@ -83,11 +103,10 @@ describe('Get messages (v2)', () => {
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 2);
     assert.equal(result.meta.pagination.total_count, 3);
-    assert.equal(result.data[0].type, 'conversation_message');
+    assert.equal(result.data[0].type, 'message');
     assert.isString(result.data[0].id);
-    assert.equal(result.data[0].conversation_id, createdConversation.id);
     assert.equal(result.data[0].text, 'Second message');
-    assert.equal(result.data[0].user_id, participant.id);
+    assert.property(result.data[0], 'object_id');
     assert.property(result.data[0], 'created_at');
     assert.equal(result.data[1].text, 'Last message');
   });
