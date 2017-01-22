@@ -83,7 +83,7 @@ export const create = async (payload, message) => {
     await Promise.map(payload.resources, createResource);
   }
 
-  return createdMessage;
+  return { ...createdMessage, objectId: createdObject.id };
 };
 
 /**
