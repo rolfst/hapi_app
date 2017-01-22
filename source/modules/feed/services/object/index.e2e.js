@@ -62,10 +62,7 @@ describe('Service: Object', () => {
       });
     });
 
-    after(() => Promise.all([
-      serviceUnderTest.remove({ parentType: 'network', parentId: '42' }),
-      serviceUnderTest.remove({ objectType: 'message', parentId: '2' }),
-    ]));
+    after(() => serviceUnderTest.remove({ parentType: 'network', parentId: '42' }));
 
     it('should return correct count', async () => {
       const networkObjects = await serviceUnderTest.count({ where: {
@@ -73,13 +70,7 @@ describe('Service: Object', () => {
         parentId: '42',
       } });
 
-      const messageObjects = await serviceUnderTest.count({ where: {
-        objectType: 'message',
-        sourceId: '2',
-      } });
-
       assert.equal(networkObjects, 2);
-      assert.equal(messageObjects, 1);
     });
   });
 });
