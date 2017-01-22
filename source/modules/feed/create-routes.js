@@ -13,10 +13,13 @@ const routes = [{
   method: 'POST',
   url: '/v3/networks/{networkId}/timeline',
   handler: require('./handlers/create-network-message'),
+  validator: require('./validators/create-message'),
 }, {
   method: 'POST',
   url: '/v3/teams/{teamId}/timeline',
   handler: require('./handlers/create-team-message'),
+  validator: require('./validators/create-message'),
+  prefetch: false,
 }];
 
 export default createRoutes(routes);
