@@ -160,14 +160,14 @@ export const listAllUsersForNetwork = async (payload, message) => {
 /**
  * Retrieve a single network;
  * @param {object} payload - Object containing payload data
- * @param {number} payload.id - The id of the network to get
+ * @param {number} payload.networkId - The id of the network to get
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method getNetwork
  * @return {external:Promise.<Network>} {@link module:modules/core~Network Network} -
  * Promise containing network
  */
 export const getNetwork = async (payload, message) => {
-  const network = await networkRepo.findNetworkById(payload.id);
+  const network = await networkRepo.findNetworkById(payload.networkId);
 
   if (!network) throw createError('404');
 
