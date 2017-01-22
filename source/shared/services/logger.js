@@ -11,7 +11,7 @@ const defaultConfig = process.env.CI ?
    require(`../configs/logs-${environment}`).default;
 
 const makeMessage = R.pipe(
-  R.pick(['credentials', 'artifacts']),
+  R.pick(['credentials', 'artifacts', 'network']),
   R.reject(R.isNil)
 );
 
