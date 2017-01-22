@@ -62,8 +62,6 @@ export const listConversations = async (payload, message) => {
     const conversationWithParticipants = await impl.addParticipantsToConversation(
       conversations, participants);
 
-    console.log('____conversationWithParticipants', conversationWithParticipants);
-
     return R.map(mergeLastMessage, conversationWithParticipants);
   }
 
