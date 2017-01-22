@@ -30,7 +30,6 @@ import * as impl from './implementation';
  */
 const logger = Logger.createLogger('FLEXCHANGE/service/exchange');
 
-const logger = Logger.getLogger('FLEXCHANGE/service/flexchange');
 const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
 
 const findUsersByType = async (type, networkId, exchangeValues, userId) => {
@@ -45,7 +44,6 @@ const findUsersByType = async (type, networkId, exchangeValues, userId) => {
   return reject(await usersPromise, u => u.id === userId);
 };
 
-<<<<<<< HEAD
 /**
  * Lists exchanges for network by id
  * @param {object} payload - Object containing payload data
