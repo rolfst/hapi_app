@@ -1,6 +1,5 @@
 import R from 'ramda';
 import createError from '../../../../../shared/utils/create-error';
-import * as objectRepository from '../../../../feed/repositories/object';
 import * as conversationRepo from '../../repositories/conversation';
 
 const findPropEq = (prop, value, collection) => R.find(R.propEq(prop, value), collection);
@@ -30,18 +29,13 @@ export const assertThatUserIsPartOfTheConversation = async (userId, conversation
   if (!result || !R.contains(userId, result.participantIds)) throw createError('404');
 };
 
-export const lastMessageObjectsForConversations = async (conversationIds) => {
-  const objects = await objectRepository.findBy({
-    parentType: 'conversation',
-    parentId: { $in: conversationIds },
-  });
-
+export const lastMessageObjectsForConversations = async (objects) => {
   const messagesForConversation = (conversationId) => R.filter(
     R.whereEq({ parentId: conversationId }), objects);
   const lastMessage = R.pipe(messagesForConversation, sortedById, R.last);
 
-  return R.reduce((acc, conversationId) =>
-    acc.concat(lastMessage(conversationId)), [])(conversationIds);
+  return R.reduce((acc, object) =>
+    acc.concat(lastMessage(object.parentId)), [])(objects);
 };
 
 export const mergeLastMessageWithConversation = R.curry((objects, lastMessages, conversation) => {
