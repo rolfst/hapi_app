@@ -12,6 +12,12 @@ const routes = [{
   handler: require('./handlers/get-messages'),
   validator: require('./validators/get-messages'),
   prefetch: false,
+}, {
+  method: 'POST',
+  url: '/v2/conversations/{conversationId}/messages',
+  handler: require('./handlers/create-message'),
+  validator: require('./validators/create-message'),
+  prefetch: false,
 }];
 
 export default createRoutes(routes);
