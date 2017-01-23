@@ -44,7 +44,7 @@ describe('Service: Conversation Implementation (v2)', () => {
       assert.deepEqual(actual, expected);
     });
 
-    it('should return with last message null if there are no messages found', () => {
+    it('should return with null for lastMessage property if there are no messages found', () => {
       const objects = [{
         id: '1',
         sourceId: '2',
