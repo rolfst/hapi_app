@@ -1,10 +1,10 @@
 import { assert } from 'chai';
-import * as serviceUnderTest from './index';
+import * as objectService from './index';
 
 describe('Service: Object', () => {
-  describe('listObjects', () => {
+  describe('list', () => {
     before(async () => {
-      await serviceUnderTest.create({
+      await objectService.create({
         userId: global.users.admin.id,
         parentType: 'network',
         parentId: '42',
@@ -12,7 +12,7 @@ describe('Service: Object', () => {
         sourceId: '2',
       });
 
-      await serviceUnderTest.create({
+      await objectService.create({
         userId: global.users.admin.id,
         parentType: 'network',
         parentId: '42',
@@ -21,10 +21,10 @@ describe('Service: Object', () => {
       });
     });
 
-    after(() => serviceUnderTest.remove({ parentType: 'network', parentId: '42' }));
+    after(() => objectService.remove({ parentType: 'network', parentId: '42' }));
 
     it('should return objects', async () => {
-      const actual = await serviceUnderTest.list({
+      const actual = await objectService.list({
         parentType: 'network',
         parentId: '42',
       }, { credentials: { id: global.users.admin.id } });
@@ -41,11 +41,27 @@ describe('Service: Object', () => {
       assert.equal(actual[1].parentType, 'network');
       assert.equal(actual[1].parentId, '42');
     });
+
+    it('should be able to paginate result', async () => {
+      const actual = await objectService.list({
+        parentType: 'network',
+        parentId: '42',
+        limit: 1,
+        offset: 1,
+      }, { credentials: { id: global.users.admin.id } });
+
+      assert.lengthOf(actual, 1);
+      assert.equal(actual[0].userId, global.users.admin.id);
+      assert.equal(actual[0].objectType, 'message');
+      assert.equal(actual[0].sourceId, '2');
+      assert.equal(actual[0].parentType, 'network');
+      assert.equal(actual[0].parentId, '42');
+    });
   });
 
   describe('count', () => {
     before(async () => {
-      await serviceUnderTest.create({
+      await objectService.create({
         userId: global.users.admin.id,
         parentType: 'network',
         parentId: '42',
@@ -53,7 +69,7 @@ describe('Service: Object', () => {
         sourceId: '2',
       });
 
-      await serviceUnderTest.create({
+      await objectService.create({
         userId: global.users.admin.id,
         parentType: 'network',
         parentId: '42',
@@ -62,10 +78,10 @@ describe('Service: Object', () => {
       });
     });
 
-    after(() => serviceUnderTest.remove({ parentType: 'network', parentId: '42' }));
+    after(() => objectService.remove({ parentType: 'network', parentId: '42' }));
 
     it('should return correct count', async () => {
-      const networkObjects = await serviceUnderTest.count({ where: {
+      const networkObjects = await objectService.count({ where: {
         parentType: 'network',
         parentId: '42',
       } });
