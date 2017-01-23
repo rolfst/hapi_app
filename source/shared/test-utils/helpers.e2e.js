@@ -1,9 +1,11 @@
 /* global assert */
+import R from 'ramda';
 import { first } from 'lodash';
 import Promise from 'bluebird';
 import blueprints from './blueprints';
 import { UserRoles } from '../services/permission';
 import * as networkRepo from '../../modules/core/repositories/network';
+import * as integrationRepo from '../../modules/core/repositories/integration';
 import * as networkService from '../../modules/core/services/network';
 import * as userRepo from '../../modules/core/repositories/user';
 import * as testHelper from './helpers';
@@ -29,10 +31,10 @@ describe('test helper', () => {
       const user = first(users);
 
       assert.equal(users.length, 1);
-      assert.equal(user.username, 'testHelper');
+      assert.equal(user.username, 'testhelper');
       assert.equal(user.firstName, 'test');
       assert.equal(user.lastName, 'Helper');
-      assert.equal(user.email, 'testHelper@flex-appeal.nl');
+      assert.equal(user.email, 'testhelper@flex-appeal.nl');
     });
   });
 
@@ -103,43 +105,40 @@ describe('test helper', () => {
 
     it('should create a network with an integration', async () => {
       const user = await testHelper.createUser();
-      const integration = await testHelper.createIntegration();
-      const createdNetworks = await Promise.all([
-        testHelper.createNetwork({
-          userId: user.id,
-          externalId: 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi',
-          integrationName: testHelper.DEFAULT_INTEGRATION.name,
-        }),
-      ]);
+      const createdIntegration = await testHelper.createIntegration();
+      const createdNetwork = await testHelper.createNetwork({
+        userId: user.id,
+        externalId: 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi',
+        integrationName: testHelper.DEFAULT_INTEGRATION.name,
+      });
 
-      const integrationName = await networkRepo.findIntegrationNameForNetwork(
-        createdNetworks[0].id);
-      const networks = await networkService.listNetworksForIntegration({
-        integrationName: integration.name });
+      const network = await networkService.getNetwork({
+        id: createdNetwork.id }, { credentials: { id: user.id } });
+      const integrations = await integrationRepo.findAll();
+      const integration = R.find(R.propEq('name', testHelper.DEFAULT_INTEGRATION.name),
+          integrations);
+      console.log(network.integrations)
+      const foundIntegration = R.find((integrationName) => integrationName === integration.name,
+          network.integrations);
 
-      assert.equal(networks.length, 1);
-      assert.equal(integrationName, integration.name);
-      assert.equal(networks[0].id, createdNetworks[0].id);
+      assert.equal(foundIntegration, createdIntegration.name);
+      assert.equal(network.id, createdNetwork.id);
     });
 
     it('should create a network with a custom networkName', async () => {
       const user = await testHelper.createUser();
-      const integration = await testHelper.createIntegration();
-      const createdNetworks = await Promise.all([
-        testHelper.createNetwork({
-          userId: user.id,
-          externalId: 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi',
-          name: 'customName',
-          integrationName: testHelper.DEFAULT_INTEGRATION.name,
-        }),
-      ]);
+      await testHelper.createIntegration();
+      const createdNetwork = await testHelper.createNetwork({
+        userId: user.id,
+        externalId: 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi',
+        name: 'customName',
+        integrationName: testHelper.DEFAULT_INTEGRATION.name,
+      });
 
-      await networkRepo.findIntegrationNameForNetwork(createdNetworks[0].id);
-      const networks = await networkService.listNetworksForIntegration({
-        integrationName: integration.name });
+      const network = await networkService.getNetwork({
+        id: createdNetwork.id }, { credentials: { id: user.id } });
 
-      assert.equal(networks.length, 1);
-      assert.equal(networks[0].name, 'customName');
+      assert.equal(network.name, 'customName');
     });
   });
 
@@ -231,7 +230,7 @@ describe('test helper', () => {
         { name: 'pmt' },
         { token: 'testtoken', integrationName: 'testIntegration', externalId: '8400' });
       const users = await networkRepo.findAllUsersForNetwork(network.id);
-      const meta = await userRepo.findUserMetaDataForNetwork(user.id, network.id);
+      const meta = await userRepo.findNetworkLink({ userId: user.id, networkId: network.id });
       const networkIntegration = await networkRepo.findNetworkIntegration(network.id);
 
       assert.isNotNull(integration);
