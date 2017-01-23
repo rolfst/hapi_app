@@ -109,7 +109,7 @@ export const listMessages = async (payload, message) => {
     parentId: payload.conversationId,
   }, message);
 
-  return messageService.list({ messageIds: R.pluck('sourceId', objects) }, message);
+  return objectService.listWithSources({ objectIds: R.pluck('id', objects) }, message);
 };
 
 /**
