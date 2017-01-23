@@ -6,9 +6,8 @@ import * as stubs from '../test-utils/stubs';
 import * as blueprints from '../test-utils/blueprints';
 import hook from './view-shift';
 
-nock.disableNetConnect();
-
 describe('PMT view shifts hook', () => {
+  nock.disableNetConnect();
   const ENDPOINT = '/me/shifts';
   const TOKEN = 'aefacbadb0123456789';
   const TODAY = moment().format('DD-MM-YYYY');

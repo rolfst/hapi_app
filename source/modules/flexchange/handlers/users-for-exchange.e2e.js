@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import moment from 'moment';
 import * as teamRepo from '../../core/repositories/team';
 import * as networkRepo from '../../core/repositories/network';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import { getRequest } from '../../../shared/test-utils/request';
 import * as exchangeRepo from '../repositories/exchange';
 
@@ -86,7 +86,7 @@ describe('View users related to exchange', () => {
     });
 
     it('should return users for exchange created for team', async () => {
-      const team = await teamRepo.createTeam({ networkId: network.id, name: 'Cool Team' });
+      const team = await teamRepo.create({ networkId: network.id, name: 'Cool Team' });
       await teamRepo.addUserToTeam(team.id, global.users.admin.id);
 
       const exchange = await exchangeRepo.createExchange(global.users.admin.id, network.id, {

@@ -1,6 +1,6 @@
 import * as userRepo from '../../core/repositories/user';
 import * as userService from '../../core/services/user';
-import { dispatchEvent, EventTypes } from '../../../shared/services/dispatch-event';
+import dispatchEvent, { EventTypes } from '../../../shared/services/dispatch-event';
 
 /**
  * @module modules/employee/services/employee

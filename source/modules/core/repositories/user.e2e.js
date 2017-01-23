@@ -1,6 +1,6 @@
 import { assert } from 'chai';
+import R from 'ramda';
 import Promise from 'bluebird';
-import { map, toString } from 'lodash';
 import * as repository from './user';
 import * as teamRepository from './team';
 
@@ -21,7 +21,7 @@ describe('User Repository', () => {
 
   describe('findUserById', () => {
     it('should return the correct properties', async () => {
-      const actual = await repository.findUserById(createdUser.id);
+      const actual = await repository.findUserById(createdUser.id, null, false);
 
       assert.equal(actual.type, 'user');
       assert.equal(actual.username, 'johndoe');
@@ -32,7 +32,7 @@ describe('User Repository', () => {
       assert.equal(actual.email, 'johndoe@flex-appeal.nl');
       assert.equal(actual.externalId, null);
       assert.equal(actual.integrationAuth, null);
-      assert.equal(actual.function, null);
+      assert.equal(actual.function, 'Medewerker');
       assert.equal(actual.roleType, null);
       assert.deepEqual(actual.teamIds, []);
       assert.equal(actual.dateOfBirth, null);
@@ -43,18 +43,26 @@ describe('User Repository', () => {
 
     it('domain object should have the correct teamIds property', async () => {
       const createdTeams = await Promise.all([
-        teamRepository.createTeam({ networkId: global.networks.flexAppeal.id, name: 'Team #1' }),
-        teamRepository.createTeam({ networkId: global.networks.flexAppeal.id, name: 'Team #2' }),
+        teamRepository.create({ networkId: global.networks.flexAppeal.id, name: 'Team #1' }),
+        teamRepository.create({ networkId: global.networks.flexAppeal.id, name: 'Team #2' }),
       ]);
 
-      await teamRepository.addUserToTeams(map(createdTeams, 'id'), createdUser.id);
-      const actual = await repository.findUserById(createdUser.id);
+      await teamRepository.addUserToTeams(R.pluck('id', createdTeams), createdUser.id);
+      const actual = await repository.findUserById(createdUser.id, global.networks.flexAppeal.id);
 
       await Promise.map(createdTeams, (team) => teamRepository.deleteById(team.id));
 
       assert.property(actual, 'teamIds');
       assert.isArray(actual.teamIds);
-      assert.deepEqual(actual.teamIds, map(map(createdTeams, 'id'), toString));
+      assert.include(actual.teamIds, createdTeams[0].id);
+      assert.include(actual.teamIds, createdTeams[1].id);
+    });
+
+    it('should fail when a scoped user is searched for without network id', async () => {
+      const actual = repository.findUserById(createdUser.id);
+
+      return assert.isRejected(actual,
+          /Error: A bad number of arguments is provided for this method/);
     });
   });
 });

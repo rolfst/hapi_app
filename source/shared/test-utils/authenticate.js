@@ -10,7 +10,7 @@ export default async (server, credentials) => {
 
   const { access_token: accessToken } = response.result.data;
   const decodedToken = tokenUtil.decode(accessToken);
-  const user = await findUserById(decodedToken.sub);
+  const user = await findUserById(decodedToken.sub, null, false);
 
   return {
     ...user,

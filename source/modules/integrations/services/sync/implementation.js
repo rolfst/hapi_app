@@ -9,20 +9,31 @@ import _, {
   differenceBy,
   intersectionBy,
 } from 'lodash';
-import * as adapterUtil from '../../../../shared/utils/create-adapter';
+import R from 'ramda';
+import createError from '../../../../shared/utils/create-error';
+import * as Logger from '../../../../shared/services/logger';
 import * as teamService from '../../../core/services/team';
 import * as networkService from '../../../core/services/network';
 import * as networkServiceImpl from '../../../core/services/network/implementation';
 import * as networkRepo from '../../../core/repositories/network';
 import * as userRepo from '../../../core/repositories/user';
 import * as teamRepo from '../../../core/repositories/team';
-import * as Logger from '../../../../shared/services/logger';
 
 /**
  * @module modules/integrations/services/sync/impl
  */
 
 const logger = Logger.getLogger('INTEGRATIONS/services/sync');
+
+export const isSyncable = R.and(R.prop('hasIntegration'), R.prop('importedAt'));
+
+export function assertNetworkIsSyncable(network) {
+  if (!isSyncable(network)) throw createError('10009');
+}
+
+export function assertUserIsAdmin(user) {
+  if (!R.propEq('role', 'ADMIN', user)) throw createError('403');
+}
 
 export const getRemovableUsersForNetwork = async (externalUsers, networkId, message) => {
   const internalUsers = await networkService.listActiveUsersForNetwork(
@@ -31,15 +42,6 @@ export const getRemovableUsersForNetwork = async (externalUsers, networkId, mess
 
   return map(removableUsers, 'id');
 };
-
-export function createSyncHolders(integration) {
-  const adapterFactory = adapterUtil.createAdapterFactory(
-    integration.name,
-    [],
-    { proceedWithoutToken: true });
-
-  return { integration, adapterFactory };
-}
 
 /**
  * @param {ExternalTeam[]} externalTeams - the teams in the external system that will not be used to
@@ -65,7 +67,7 @@ export const getRemovableTeamsIdsForNetwork = async (externalTeams, networkId, m
 export const removeUsersFromNetwork = async (externalUsers, networkId, message) => {
   const removableUserIds = await getRemovableUsersForNetwork(externalUsers, networkId, message);
   const removableUsers = await Promise.map(removableUserIds, (userId) => {
-    return userRepo.findUserMetaDataForNetwork(userId, networkId);
+    return userRepo.findNetworkLink({ userId, networkId });
   });
   const removedUsersIds = await Promise.map(removableUsers,
     async (user) => {
@@ -275,7 +277,7 @@ export async function syncTeams(networkId, _externalTeams) {
     .value();
 
   await Promise.map(teamsToDelete, team => teamRepo.deleteById(team.id));
-  await Promise.map(teamsToUpdate, team => teamRepo.updateTeam(team.id, team));
+  await Promise.map(teamsToUpdate, team => teamRepo.update(team.id, team));
   await teamRepo.createBulkTeams(map(nonExistingTeams, t => omit(t, 'id')));
 
   return {
@@ -516,4 +518,35 @@ export async function syncUsersWithTeams(networkId, externalUsers) {
 
   await Promise.all(removeUserFromTeamsPromises);
   await networkServiceImpl.addUsersToTeam(internalUsers, internalTeams, usersOutOfSync);
+}
+
+/**
+ * syncNetwork syncs users and teams from network with external network
+ * @param {object} network - network to sync with
+ * @param {object} adapter - connector that connects to externalNetwork
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method syncNetwork
+ * @return {external:Promise<object>} - containing all synced users and teams
+ */
+export async function syncNetwork(network, allUsersInSystem = [], adapter, message) {
+  try {
+    const externalTeams = await getExternalTeams(network, adapter, message);
+    const externalUsers = filterExternalUserDuplications(
+      await adapter.fetchUsers(network.externalId));
+    const syncTeamsResult = await syncTeams(network.id, externalTeams);
+    const syncUsersResult = await syncUsersWithNetwork(
+      network.id, externalUsers, allUsersInSystem);
+    await syncUsersWithTeams(network.id, externalUsers);
+
+    logger.info('Finished syncing network', {
+      networkId: network.id,
+      addedTeams: syncTeamsResult.added,
+      changedTeams: syncTeamsResult.changed,
+      deletedTeams: syncTeamsResult.deleted,
+      syncedUsers: syncUsersResult,
+    });
+  } catch (err) {
+    logger.warn('Error syncing network', { err, message });
+    throw err;
+  }
 }

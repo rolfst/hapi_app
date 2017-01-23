@@ -28,7 +28,7 @@ const validateArgs = () => {
 
 const main = async () => {
   try {
-    const user = await userRepo.findUserByEmail('intern@flex-appeal.nl');
+    const user = await userRepo.findUserBy({ email: 'intern@flex-appeal.nl' });
 
     validateArgs();
 

@@ -1,7 +1,6 @@
 import { find } from 'lodash';
 import createError from './create-error';
-
-// TODO this should be moved to pmt adapter
+import * as userRepo from '../../modules/core/repositories/user';
 import pmtAdapter from '../../adapters/pmt/adapter';
 
 const availableIntegrations = [{
@@ -9,33 +8,38 @@ const availableIntegrations = [{
   adapter: pmtAdapter,
 }];
 
-export const createAdapterFactory = (integrationName, authSettings = [], options = {}) => {
+const assertNetworkHasIntegration = (network) => {
+  if (!network.hasIntegration) {
+    throw createError('10001', 'The network doesn\'t have a linked integration.');
+  }
+};
+
+const assertNetworkHasExternalId = (network) => {
+  if (!network.externalId) {
+    throw createError('403', 'Network has no externalId value.');
+  }
+};
+
+export const createAdapter = async (network, userId, options = {}) => {
+  assertNetworkHasIntegration(network);
+  assertNetworkHasExternalId(network);
+
   let { integrations, proceedWithoutToken } = options;
   proceedWithoutToken = proceedWithoutToken || false;
   integrations = integrations || availableIntegrations;
 
-  let token = null;
-  const authSetting = find(authSettings, { name: integrationName });
+  let userToken;
 
-  if (!authSetting && !proceedWithoutToken) {
-    throw createError('403');
+  if (!proceedWithoutToken) {
+    userToken = (await userRepo.findNetworkLink({ userId, networkId: network.id })).userToken;
   }
 
-  token = authSetting ? authSetting.token : null;
+  if (!userToken && !proceedWithoutToken) {
+    throw createError('403', 'User not authenticated with integration.');
+  }
 
-  return {
-    create: (network) => {
-      if (!network.integrations.includes(integrationName)) throw createError('10001');
+  const integration = find(integrations, { name: network.integrations[0] });
+  if (!integration) throw createError('403', 'Couldn\'t find integration with adapter.');
 
-      const integration = find(integrations, { name: network.integrations[0] });
-
-      return integration.adapter(network, token);
-    },
-  };
-};
-
-export const createAdapter = (network, authSettings = [], options = {}) => {
-  const adapterFactory = createAdapterFactory(network.integrations[0], authSettings, options);
-
-  return adapterFactory.create(network);
+  return integration.adapter(network, userToken);
 };

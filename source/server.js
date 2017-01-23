@@ -30,7 +30,7 @@ const createServer = () => {
 
   // Register server extensions
   server.ext('onRequest', serverUtil.onRequest);
-  server.ext('onPreResponse', serverUtil.onPreResponse);
+  server.ext('onPreResponse', serverUtil.onPreResponse(ravenClient));
 
   server.ext('onPostAuth', (req, reply) => {
     const requestContext = {

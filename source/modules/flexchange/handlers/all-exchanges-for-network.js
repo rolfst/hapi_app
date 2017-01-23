@@ -1,23 +1,16 @@
-import { pick } from 'lodash';
-import * as responseUtil from '../../../shared/utils/response';
-import * as Logger from '../../../shared/services/logger';
+import R from 'ramda';
+import * as responseUtils from '../../../shared/utils/response';
 import * as flexchangeService from '../services/flexchange';
-
-const logger = Logger.createLogger('FLEXCHANGE/handler/allExchangesForNetwork');
 
 const FILTER_PROPERTIES = ['start', 'end'];
 
 export default async (req, reply) => {
   try {
-    const { pre, auth, query } = req;
-    const message = { ...pre, ...auth };
-    const filter = pick(query, FILTER_PROPERTIES);
-    const payload = { filter };
+    const message = { ...req.pre, ...req.auth };
+    const payload = { ...req.params, filter: R.pick(FILTER_PROPERTIES, req.query) };
+    const result = await flexchangeService.listExchangesForUser(payload, message);
 
-    logger.info('Listing all exchanges for network', { message, payload });
-    const result = await flexchangeService.listExchangesForNetwork(payload, message);
-
-    return reply({ data: responseUtil.serialize(result) });
+    return reply({ data: responseUtils.toSnakeCase(result) });
   } catch (err) {
     return reply(err);
   }

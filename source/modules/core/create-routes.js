@@ -25,6 +25,20 @@ const routes = [{
   url: '/v2/networks/{networkId}/integration/admins',
   strategy: 'integration',
   handler: require('./handlers/network-admins'),
+}, {
+  method: 'GET',
+  url: '/v2/networks/{networkId}/teams',
+  handler: require('./handlers/teams-for-network'),
+}, {
+  method: 'POST',
+  url: '/v2/networks/{networkId}/teams',
+  handler: require('./handlers/create-team'),
+  validator: require('./validators/create-team'),
+}, {
+  method: 'PUT',
+  url: '/v2/networks/{networkId}/teams/{teamId}',
+  handler: require('./handlers/update-team'),
+  validator: require('./validators/update-team'),
 }];
 
 export default createRoutes(routes);

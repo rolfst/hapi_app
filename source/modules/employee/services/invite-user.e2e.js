@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { find, pick } from 'lodash';
 import sinon from 'sinon';
-import * as dispatchEvent from '../../../shared/services/dispatch-event';
+import dispatchEvent, { EventTypes } from '../../../shared/services/dispatch-event';
 import * as networkRepo from '../../core/repositories/network';
 import * as userRepo from '../../core/repositories/user';
 import * as teamRepo from '../../core/repositories/team';
@@ -13,7 +13,7 @@ describe('Service: invite user', () => {
 
   before(async () => {
     network = global.networks.flexAppeal;
-    team = await teamRepo.createTeam({
+    team = await teamRepo.create({
       networkId: network.id,
       name: 'Cool Team',
     });
@@ -34,7 +34,7 @@ describe('Service: invite user', () => {
       await assert.isRejected(service.inviteUser(payload, { network }));
     });
 
-    it('should fail when team doesn\'t belongs to the network', async () => {
+    xit('should fail when team doesn\'t belongs to the network', async () => {
       // TODO
     });
 
@@ -70,7 +70,7 @@ describe('Service: invite user', () => {
     });
 
     it('should add to the multiple teams', async () => {
-      const extraTeam = await teamRepo.createTeam({
+      const extraTeam = await teamRepo.create({
         networkId: network.id,
         name: 'Cool Team',
       });
@@ -99,8 +99,7 @@ describe('Service: invite user', () => {
 
     afterEach(async () => {
       dispatchEventSpy.reset();
-
-      const user = await userRepo.findUserByEmail(payload.email);
+      const user = await userRepo.findUserBy({ email: payload.email });
 
       return userRepo.deleteById(user.id);
     });
@@ -123,7 +122,7 @@ describe('Service: invite user', () => {
 
       const { args } = dispatchEventSpy.firstCall;
 
-      assert.equal(args[0], dispatchEvent.EventTypes.USER_INVITED);
+      assert.equal(args[0], EventTypes.USER_INVITED);
       assert.equal(args[1], credentials);
       assert.deepEqual(pick(args[2].user, 'email', 'firstName', 'lastName'), payload);
       assert.deepEqual(args[2].network, network);
@@ -154,7 +153,7 @@ describe('Service: invite user', () => {
     });
 
     it('should add to the multiple teams', async () => {
-      const extraTeam = await teamRepo.createTeam({
+      const extraTeam = await teamRepo.create({
         networkId: network.id,
         name: 'Cool Team',
       });
@@ -226,7 +225,7 @@ describe('Service: invite user', () => {
     });
 
     it('should add to the multiple teams', async () => {
-      const extraTeam = await teamRepo.createTeam({
+      const extraTeam = await teamRepo.create({
         networkId: network.id,
         name: 'Cool Team',
       });

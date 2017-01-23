@@ -1,13 +1,13 @@
-import { map } from 'lodash';
+import { map, intersectionBy, reject } from 'lodash';
+import Promise from 'bluebird';
 import * as passwordUtil from '../../../shared/utils/password';
 import * as mailer from '../../../shared/services/mailer';
-import { dispatchEvent, EventTypes } from '../../../shared/services/dispatch-event';
+import dispatchEvent, { EventTypes } from '../../../shared/services/dispatch-event';
 import { UserRoles } from '../../../shared/services/permission';
 import createError from '../../../shared/utils/create-error';
 import camelCaseKeys from '../../../shared/utils/camel-case-keys';
 import signupMail from '../../../shared/mails/signup';
 import addedToNetworkMail from '../../../shared/mails/added-to-network';
-import addedToExtraNetwork from '../../../shared/mails/added-to-extra-network';
 import * as userService from '../../core/services/user';
 import * as networkRepo from '../../core/repositories/network';
 import * as userRepo from '../../core/repositories/user';
@@ -61,17 +61,16 @@ export const inviteNewUser = async (network, { firstName, lastName, email, roleT
  */
 export const inviteExistingUser = async (network, user, roleType) => {
   const userBelongsToNetwork = await userRepo.userBelongsToNetwork(user.id, network.id);
-  const userIsDeletedFromNetwork = await userRepo.userIsDeletedFromNetwork(user.id, network.id);
+  const networkId = network.id;
+  const userId = user.id;
 
   if (userBelongsToNetwork) {
     throw createError('403', 'User with the same email already in this network.');
-  } else if (userIsDeletedFromNetwork) {
-    await networkRepo.activateUserInNetwork(network, user);
   } else {
-    await networkRepo.addUser({ userId: user.id, networkId: network.id, roleType });
+    await networkRepo.addUser({ userId, networkId, roleType });
   }
 
-  await networkRepo.setRoleTypeForUser(network, user, roleType);
+  await userRepo.setNetworkLink({ networkId, userId, roleType, deletedAt: null });
 
   mailer.send(addedToNetworkMail(network, user));
 
@@ -98,7 +97,7 @@ export const inviteUser = async (payload, message) => {
   const { network } = message;
 
   const role = roleType ? roleType.toUpperCase() : 'EMPLOYEE';
-  let user = await userRepo.findUserByEmail(email);
+  let user = await userRepo.findUserBy({ email });
 
   if (user) {
     await inviteExistingUser(network, user, role);
@@ -125,23 +124,20 @@ export const inviteUsers = async (payload, message) => {
   const { network } = message;
   const identifiedUser = await userService.getUserWithNetworkScope({
     id: message.credentials.id, networkId: network.id }, message);
-
   const userBelongsToNetwork = await userRepo.userBelongsToNetwork(identifiedUser.id, network.id);
 
   if (!userBelongsToNetwork || identifiedUser.roleType !== UserRoles.ADMIN) {
     throw createError('403');
   }
 
-  const networkMembers = await networkRepo.findUsersForNetwork(network.id);
-  const matchingMembersFromIntegration = await impl.getMembersfromIntegration(network);
+  const networkMembers = await userService.listUsersWithNetworkScope({
+    userIds: payload.userIds, networkId: network.id }, message);
+  const preparedUsers = reject(networkMembers, 'invitedAt');
+  const toNotifyUsers = intersectionBy(preparedUsers, networkMembers, 'id');
+  const usersToSendMailto = await impl.generatePasswordsForMembers(toNotifyUsers);
 
-  const usersWithoutPasswords = impl.getUsersWithoutPassword(
-    networkMembers, matchingMembersFromIntegration);
-  const usersToSendMailto = await impl.generatePasswordsForMembers(usersWithoutPasswords);
+  await Promise.map(usersToSendMailto, user =>
+    userRepo.setNetworkLink({ userId: user.id, networkId: network.id, invitedAt: new Date() }));
 
-  const usersWithPassword = impl.getUsersWithPassword(
-    networkMembers, matchingMembersFromIntegration, [identifiedUser]);
-
-  map(usersToSendMailto, (user) => mailer.send(addedToNetworkMail(network, user)));
-  map(usersWithPassword, (user) => mailer.send(addedToExtraNetwork(network, user)));
+  map(usersToSendMailto, (user) => mailer.send(signupMail(network, user, user.plainPassword)));
 };

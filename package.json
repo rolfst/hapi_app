@@ -45,6 +45,7 @@
     "nodemailer": "2.5.0",
     "parse": "1.8.1",
     "qs": "6.2.1",
+    "ramda": "0.23.0",
     "raven": "0.12.1",
     "sequelize": "3.19.3",
     "smtpapi": "1.2.0",

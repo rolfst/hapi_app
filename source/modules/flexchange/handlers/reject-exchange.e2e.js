@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import moment from 'moment';
 import { patchRequest } from '../../../shared/test-utils/request';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import {
   createExchange,
   acceptExchange,

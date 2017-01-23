@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { pick } from 'lodash';
 import sinon from 'sinon';
-import * as dispatchEvent from '../../../shared/services/dispatch-event';
+import dispatchEvent, { EventTypes } from '../../../shared/services/dispatch-event';
 import * as service from './employee';
 
 describe('Service: employee', () => {
@@ -36,7 +36,7 @@ describe('Service: employee', () => {
       );
 
       const { args } = dispatchEventSpy.firstCall;
-      assert.equal(args[0], dispatchEvent.EventTypes.USER_UPDATED);
+      assert.equal(args[0], EventTypes.USER_UPDATED);
       assert.equal(args[1], credentials);
       assert.equal(args[2].user.email, credentials.email);
     });

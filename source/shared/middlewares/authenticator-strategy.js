@@ -12,7 +12,7 @@ export const authenticate = async (networkId, token = null) => {
 
   const { sub: userId, integrations } = tokenUtil.decode(token);
   // TODO the user should be retrieved via the service
-  const user = await userRepo.findUserById(userId);
+  const user = await userRepo.findUserById(userId, null, false);
 
   return {
     credentials: pick(user, 'id', 'username'),

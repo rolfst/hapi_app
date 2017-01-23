@@ -22,7 +22,7 @@ describe('listAdminsFromNetwork', () => {
       fetchUsers: () => externalUsers,
     };
 
-    sandbox.stub(adapterUtil, 'createAdapter').returns(fakeAdapter);
+    sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve(fakeAdapter));
     sandbox.stub(client.default, 'get')
       .withArgs(`${NETWORK_URL}/users`).returns(Promise.resolve({
         payload: stubs.users_200,

@@ -54,14 +54,6 @@ export const assertThatUserBelongsToTheNetwork = async (networkId, userId) => {
   }
 };
 
-export const assertExternalIdNotPresentInNetwork = async (userId, networkId, externalId) => {
-  const user = await userRepo.findUserInNetworkByExternalId(networkId, externalId);
-
-  if (user && user.id !== userId) {
-    throw createError('403', 'Your integration account is already linked with someone else.');
-  }
-};
-
 export const filterExistingNetworks = async (networksFromIntegration) => {
   const networks = await networkRepo.findAll();
   const pristineNetworks = differenceBy(networksFromIntegration, networks, 'externalId');
@@ -184,7 +176,7 @@ export const updateTeamsForNetwork = async (externalTeams, networkId) => {
   });
 
   return Promise.map(existingExternalTeams, async (team) => {
-    await teamRepo.updateTeam(team.id, omit(team, 'id'));
+    await teamRepo.update(team.id, omit(team, 'id'));
 
     return team.id;
   });
@@ -218,7 +210,7 @@ export const addUsersToTeam = (internalUsers, internalTeams, externalUsers) => {
 };
 
 export const addAdminToNetwork = async (adminUsername, network, externalUsers) => {
-  let admin = await userRepo.findUserByUsername(adminUsername);
+  let admin = await userRepo.findUserBy({ username: adminUsername });
 
   if (!admin) {
     const selectedAdmin = find(externalUsers, (user) => {
@@ -234,7 +226,7 @@ export const addAdminToNetwork = async (adminUsername, network, externalUsers) =
 };
 
 export const updateSuperUserForNetwork = async (userId, networkId) => {
-  await networkRepo.setSuperAdmin(networkId, userId);
+  await networkRepo.updateNetwork(networkId, { userId });
 
   return networkRepo.findNetworkById(networkId);
 };
@@ -242,9 +234,9 @@ export const updateSuperUserForNetwork = async (userId, networkId) => {
 export const importNetwork = async (network, username) => {
   try {
     let mailConfig;
-    const adapter = createAdapter(network, [], { proceedWithoutToken: true });
+    const adapter = await createAdapter(network, 0, { proceedWithoutToken: true });
     const externalUsers = await adapter.fetchUsers(network.externalId);
-    const admin = await userRepo.findUserByUsername(username);
+    const admin = await userRepo.findUserBy({ username });
     const externalAdmin = find(externalUsers, (user) => {
       return user.username === username;
     });

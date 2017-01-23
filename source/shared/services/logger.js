@@ -1,4 +1,4 @@
-import { isUndefined, omit } from 'lodash';
+import R from 'ramda';
 import bunyan from 'bunyan';
 
 /**
@@ -10,27 +10,21 @@ const defaultConfig = process.env.CI ?
    require('../configs/logs-ci').default :
    require(`../configs/logs-${environment}`).default;
 
-const fetchContextObjects = (args = {}) => {
-  if (isUndefined(args.err)) return { context: args };
+const makeMessage = R.pipe(
+  R.pick(['credentials', 'artifacts', 'network']),
+  R.reject(R.isNil)
+);
 
-  const context = { err: args.err.stack, context: omit(args, 'err') };
-  if (args.err.output) context.statusCode = args.err.output.statusCode;
-  if (args.err.data) context.errorCode = args.err.data.errorCode;
+const buildLogContext = (args = {}) => {
+  const payload = R.omit(['err', 'message'], args);
+  if (args.err && args.err.output) payload.statusCode = args.err.output.statusCode;
+  if (args.err && args.err.data) payload.errorCode = args.err.data.errorCode;
 
-  return context;
-};
-
-const buildLogContext = (data = {}) => {
-  const options = data.message || {};
-  const logArgs = omit(data, 'message');
-
-  if (options.artifacts) {
-    const requestIdObject = { requestId: options.artifacts.requestId };
-
-    return { ...requestIdObject, ...fetchContextObjects(logArgs) };
-  }
-
-  return { ...fetchContextObjects(logArgs) };
+  return {
+    err: args.err ? args.err.stack : null,
+    message: args.message ? makeMessage(args.message) : {},
+    context: payload,
+  };
 };
 
 export const getLogger = (name) => bunyan.createLogger({ name, ...defaultConfig });

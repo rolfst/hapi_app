@@ -2,9 +2,9 @@ import { assert } from 'chai';
 import qs from 'qs';
 import moment from 'moment';
 import { find } from 'lodash';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import { getRequest } from '../../../shared/test-utils/request';
-import { createTeam } from '../../core/repositories/team';
+import { create } from '../../core/repositories/team';
 import { createExchange } from '..//repositories/exchange';
 
 describe('Get exchanges for team', () => {
@@ -15,7 +15,7 @@ describe('Get exchanges for team', () => {
   before(async () => {
     network = global.networks.flexAppeal;
 
-    team = await createTeam({ networkId: network.id, name: 'Team #1' });
+    team = await create({ networkId: network.id, name: 'Team #1' });
 
     const defaultArgs = {
       date: moment().format('YYYY-MM-DD'),
@@ -67,7 +67,7 @@ describe('Get exchanges for team', () => {
       });
   });
 
-  it('should fail when no values are provided', () => {
+  xit('should fail when no values are provided', () => {
     // TODO
   });
 
