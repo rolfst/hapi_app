@@ -2,6 +2,7 @@ import R from 'ramda';
 import * as Logger from '../../../../../shared/services/logger';
 import * as userRepo from '../../../../core/repositories/user';
 import * as objectService from '../../../../feed/services/object';
+import * as objectRepository from '../../../../feed/repositories/object';
 import * as messageService from '../../../../feed/services/message';
 import * as conversationRepo from '../../repositories/conversation';
 import * as conversationRepoV1 from '../../../v1/repositories/conversation';
@@ -42,8 +43,15 @@ export const listConversations = async (payload, message) => {
 
   const options = R.pick(PAGINATION_PROPERTIES, payload);
   const includes = impl.hasInclude(payload.include);
-  const conversations = await conversationRepo.findByIds(payload.conversationIds, options);
-  const lastMessageObjects = await impl.lastMessageObjectsForConversations(payload.conversationIds);
+  const [conversations, objects] = await Promise.all([
+    conversationRepo.findByIds(payload.conversationIds, options),
+    objectRepository.findBy({
+      parentType: 'conversation', parentId: { $in: payload.conversationIds } }),
+  ]);
+
+  if (objects.length === 0) return conversations;
+
+  const lastMessageObjects = await impl.lastMessageObjectsForConversations(objects);
   const lastMessages = await messageService.list({
     messageIds: R.pluck('sourceId', lastMessageObjects) });
   const mergeLastMessage = impl.mergeLastMessageWithConversation(lastMessageObjects, lastMessages);
