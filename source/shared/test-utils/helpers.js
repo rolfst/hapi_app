@@ -253,12 +253,12 @@ export async function deleteActivity(...activityOrActivities) {
  * Deletes all data in the database
  * @method cleanAll
  */
-
-export const cleanAll = async () =>
-  Promise.map(findAllNetworks(), (network) => networkRepo.deleteById(network.id))
+export async function cleanAll() {
+  return Promise.map(findAllNetworks(), (network) => networkRepo.deleteById(network.id))
   .then(() => Promise.map(findAllUsers(), deleteUser))
   .then(() => Promise.map(findAllActivities(), deleteActivity))
   .then(() => Promise.map(findAllIntegrations(), deleteIntegration));
+}
 
 /**
  *
