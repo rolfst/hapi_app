@@ -1,47 +1,63 @@
 import { assert } from 'chai';
+import * as testHelpers from '../../../shared/test-utils/helpers';
 import { getRequest, putRequest } from '../../../shared/test-utils/request';
-import * as userRepo from '../../core/repositories/user';
 
 describe('Handler: update my profile', () => {
-  after(() => userRepo.updateUser(global.users.employee.id, { firstName: 'John' }));
+  let employee;
+  let employeeToken;
+  let network;
+
+  before(async () => {
+    const admin = await testHelpers.createUser();
+    employee = await testHelpers.createUser({ password: 'baz' });
+    const employeeTokens = await testHelpers.getLoginToken({
+      username: employee.username, password: 'baz' });
+
+    employeeToken = employeeTokens.tokens.access_token;
+    network = await testHelpers.createNetwork({ userId: admin.id });
+    await testHelpers.addUserToNetwork({
+      userId: employee.id, networkId: network.id, roleType: 'EMPLOYEE' });
+  });
+
+  after(() => testHelpers.cleanAll());
 
   it('should return an updated user', async () => {
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/users/me`;
+    const endpoint = `/v2/networks/${network.id}/users/me`;
     const payload = { first_name: 'My new first name' };
     const { result: { data } } = await putRequest(
-      endpoint, payload, global.server, global.tokens.employee);
+      endpoint, payload, employeeToken);
 
-    assert.equal(data.id, global.users.employee.id);
-    assert.equal(data.username, global.users.employee.username);
+    assert.equal(data.id, employee.id);
+    assert.equal(data.username, employee.username);
     assert.equal(data.first_name, payload.first_name);
-    assert.equal(data.last_name, global.users.employee.lastName);
-    assert.equal(data.phone_num, global.users.employee.phoneNum);
-    assert.equal(data.email, global.users.employee.email);
-    assert.equal(data.date_of_birth, global.users.employee.dateOfBirth);
+    assert.equal(data.last_name, employee.lastName);
+    assert.equal(data.phone_num, employee.phoneNum);
+    assert.equal(data.email, employee.email);
+    assert.equal(data.date_of_birth, employee.dateOfBirth);
     assert.equal(data.integration_auth, false);
     assert.equal(data.role_type, 'EMPLOYEE');
   });
 
   it('should return correct attributes in GET call', async () => {
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/users/me`;
+    const endpoint = `/v2/networks/${network.id}/users/me`;
     const { result: { data } } = await getRequest(
-      endpoint, global.server, global.tokens.employee);
+      endpoint, employeeToken);
 
-    assert.equal(data.id, global.users.employee.id);
-    assert.equal(data.username, global.users.employee.username);
+    assert.equal(data.id, employee.id);
+    assert.equal(data.username, employee.username);
     assert.equal(data.first_name, 'My new first name');
-    assert.equal(data.last_name, global.users.employee.lastName);
-    assert.equal(data.phone_num, global.users.employee.phoneNum);
-    assert.equal(data.email, global.users.employee.email);
-    assert.equal(data.date_of_birth, global.users.employee.dateOfBirth);
+    assert.equal(data.last_name, employee.lastName);
+    assert.equal(data.phone_num, employee.phoneNum);
+    assert.equal(data.email, employee.email);
+    assert.equal(data.date_of_birth, employee.dateOfBirth);
     assert.equal(data.integration_auth, false);
     assert.equal(data.role_type, 'EMPLOYEE');
   });
 
   it('should return 422 when trying to update the id value', async () => {
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/users/me`;
+    const endpoint = `/v2/networks/${network.id}/users/me`;
     const { statusCode } = await putRequest(
-      endpoint, { id: '0002222' }, global.server, global.tokens.employee);
+      endpoint, { id: '0002222' }, employeeToken);
 
     assert.equal(statusCode, 422);
   });
