@@ -272,14 +272,21 @@ describe('test helper', () => {
 
   describe('cleanAll', () => {
     it('should clean the whole database', async () => {
-      const user = await testHelper.createUser(blueprints.users.employee);
+      const admin = await testHelper.createUser(blueprints.users.admin);
+      const employee = await testHelper.createUser(blueprints.users.employee);
       const network = await testHelper.createNetwork({
-        userId: user.id, name: 'NetworkForAuthenticatedUser' });
+        userId: admin.id, name: 'NetworkForAuthenticatedUser' });
 
       await testHelper.addUserToNetwork({
-        userId: user.id,
+        userId: admin.id,
         networkId: network.id,
         roleType: UserRoles.ADMIN,
+      });
+
+      await testHelper.addUserToNetwork({
+        userId: employee.id,
+        networkId: network.id,
+        roleType: UserRoles.EMPLOYEE,
       });
 
       await testHelper.cleanAll();

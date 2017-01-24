@@ -1,4 +1,5 @@
 import { flatten } from 'lodash';
+import R from 'ramda';
 import Promise from 'bluebird';
 import authenticate from './authenticate';
 import generateNetworkName from './create-network-name';
@@ -252,17 +253,12 @@ export async function deleteActivity(...activityOrActivities) {
  * Deletes all data in the database
  * @method cleanAll
  */
-export async function cleanAll() {
-  const [allUsers, allIntegrations, allActivities] = await Promise.all([
-    findAllUsers(),
-    findAllIntegrations(),
-    findAllActivities(),
-  ]);
 
-  await deleteIntegration(allIntegrations);
-  await deleteActivity(allActivities);
-  return deleteUser(allUsers);
-}
+export const cleanAll = async () =>
+  Promise.map(findAllNetworks(), (network) => networkRepo.deleteById(network.id))
+  .then(() => Promise.map(findAllUsers(), deleteUser))
+  .then(() => Promise.map(findAllActivities(), deleteActivity))
+  .then(() => Promise.map(findAllIntegrations(), deleteIntegration));
 
 /**
  *
