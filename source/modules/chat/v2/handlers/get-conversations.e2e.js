@@ -133,11 +133,6 @@ describe('Get conversations for logged user (v2)', () => {
         participantIds: [creator.id, participant.id],
       }, { credentials: { id: creator.id } });
 
-      creatorToken = (await authenticate(global.server, {
-        username: creator.username,
-        password: blueprints.users.employee.password,
-      })).token;
-
       await messageService.create({
         parentType: 'conversation',
         parentId: createdConversation1.id,
