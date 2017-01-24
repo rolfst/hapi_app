@@ -1,6 +1,6 @@
 import moment from 'moment';
-import { map, omit, merge } from 'lodash';
 import R from 'ramda';
+import { map, omit, merge } from 'lodash';
 import createError from '../../../shared/utils/create-error';
 import { ActivityTypes } from '../../../shared/models/activity';
 import { createActivity } from '../../core/repositories/activity';
@@ -99,6 +99,17 @@ export async function findExchangeById(exchangeId, userId) {
 
   return exchange;
 }
+
+// FIXME: Should be replaced when flexchange will be used with
+// models instead of DAO's containing so many includes
+export const findPlainExchangesById = async (exchangeIds) => {
+  const result = await Exchange.findAll({
+    where: { id: { $in: exchangeIds } },
+    include: [{ attributes: ['value'], model: ExchangeValue }],
+  });
+
+  return R.map(createExchangeModel, result);
+};
 
 /**
  * Find a specific exchange by ids

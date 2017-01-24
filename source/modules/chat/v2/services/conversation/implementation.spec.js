@@ -2,8 +2,22 @@ import { assert } from 'chai';
 import * as unit from './implementation';
 
 describe('Service: Conversation Implementation (v2)', () => {
-  describe('conversationWithLastMessage', () => {
+  describe('mergeLastMessageWithConversation', () => {
     it('should return conversation with last message', () => {
+      const objects = [{
+        id: '1',
+        sourceId: '2',
+        objectType: 'message',
+        parentId: '1',
+        parentType: 'conversation',
+      }, {
+        id: '1',
+        sourceId: '1',
+        objectType: 'message',
+        parentId: '1',
+        parentType: 'conversation',
+      }];
+
       const conversation = {
         id: '1',
         type: 'private',
@@ -11,28 +25,40 @@ describe('Service: Conversation Implementation (v2)', () => {
 
       const messages = [{
         id: '2',
-        conversationId: '1',
         text: 'Last message in conversation #1',
       }, {
         id: '1',
-        conversationId: '1',
         text: 'First message in conversation #1',
       }];
 
+      const actual = unit.mergeLastMessageWithConversation(objects, messages, conversation);
       const expected = {
         id: '1',
         type: 'private',
         lastMessage: {
           id: '2',
-          conversationId: '1',
           text: 'Last message in conversation #1',
         },
       };
 
-      assert.deepEqual(unit.conversationWithLastMessage(() => messages, conversation), expected);
+      assert.deepEqual(actual, expected);
     });
 
-    it('should return with last message null if there are no messages found', () => {
+    it('should return with null for lastMessage property if there are no messages found', () => {
+      const objects = [{
+        id: '1',
+        sourceId: '2',
+        objectType: 'message',
+        parentId: '1',
+        parentType: 'conversation',
+      }, {
+        id: '1',
+        sourceId: '1',
+        objectType: 'message',
+        parentId: '1',
+        parentType: 'conversation',
+      }];
+
       const conversation = {
         id: '1',
         type: 'private',
@@ -40,13 +66,14 @@ describe('Service: Conversation Implementation (v2)', () => {
 
       const messages = [];
 
+      const actual = unit.mergeLastMessageWithConversation(objects, messages, conversation);
       const expected = {
         id: '1',
         type: 'private',
         lastMessage: null,
       };
 
-      assert.deepEqual(unit.conversationWithLastMessage(() => messages, conversation), expected);
+      assert.deepEqual(actual, expected);
     });
   });
 
