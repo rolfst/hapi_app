@@ -1,4 +1,5 @@
 import { flatten } from 'lodash';
+import R from 'ramda';
 import Promise from 'bluebird';
 import authenticate from './authenticate';
 import generateNetworkName from './create-network-name';
@@ -84,16 +85,16 @@ export async function findAllNetworks() {
 /**
  * Creates a user in the database
  * @param {object} userAttributes
- * @param {string} userAttributes.username
- * @param {string} userAttributes.firstName
- * @param {string} userAttributes.lastName
- * @param {string} userAttributes.email
- * @param {string} userAttributes.password
+ * @param {string} [userAttributes.username]
+ * @param {string} [userAttributes.firstName]
+ * @param {string} [userAttributes.lastName]
+ * @param {string} [userAttributes.email]
+ * @param {string} [userAttributes.password]
  * @method createUser
  * @return {external:Promise<User>} {@link module:modules/core~User User}
  */
-export async function createUser(userAttributes = blueprints.users.admin) {
-  return userRepo.createUser(userAttributes);
+export async function createUser(userAttributes = {}) {
+  return userRepo.createUser(R.merge(blueprints.users.admin, userAttributes));
 }
 
 /**
