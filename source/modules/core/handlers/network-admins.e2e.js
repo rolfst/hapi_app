@@ -25,7 +25,6 @@ describe('Handler: List admins from network', () => {
         externalId: pristineNetwork.externalId,
         name: pristineNetwork.name,
         integrationName: pristineNetwork.integrationName,
-        token: 'footoken',
       });
       network = result;
     });
@@ -64,8 +63,6 @@ describe('Handler: List admins from network', () => {
         userId: admin.id,
         externalId: pristineNetwork.externalId,
         name: pristineNetwork.name,
-        integrationName: pristineNetwork.integrationName,
-        token: 'footoken',
       });
     });
 
