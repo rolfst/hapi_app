@@ -117,7 +117,6 @@ describe('test helper', () => {
       const integrations = await integrationRepo.findAll();
       const integration = R.find(R.propEq('name', testHelper.DEFAULT_INTEGRATION.name),
           integrations);
-      console.log(network.integrations)
       const foundIntegration = R.find((integrationName) => integrationName === integration.name,
           network.integrations);
 
