@@ -186,7 +186,7 @@ export const findAllUsersForNetwork = async (networkId) => {
     where: { networkId },
   });
 
-  return userRepo.findUsersByIds(map(result, 'userId'));
+  return userRepo.findUsersByIds(map(result, 'userId'), networkId);
 };
 
 /**
