@@ -2,7 +2,6 @@ import { flatten } from 'lodash';
 import R from 'ramda';
 import Promise from 'bluebird';
 import authenticate from './authenticate';
-import generateNetworkName from './create-network-name';
 import blueprints from './blueprints';
 import * as networkService from '../../modules/core/services/network';
 import * as integrationRepo from '../../modules/core/repositories/integration';
@@ -23,6 +22,9 @@ function mandatory(paramName) {
   throw new Error(`Missing Parameter: ${paramName}`);
 }
 
+export const randomString = (prefix = 'test-object') =>
+  `${prefix}-${Math.floor(Math.random() * 1000)}`;
+
 /**
  * creates an integration in the database
  * @param {object} [attributes=DEFAULT_INTEGRATION] - attributes to user for an integration
@@ -36,6 +38,21 @@ export async function createIntegration(attributes = DEFAULT_INTEGRATION) {
 }
 
 /**
+ * Creates a networkuser in the database
+ * @param {object} networkUserAttributes
+ * @param {string} networkUserAttributes.networkId
+ * @param {string} networkUserAttributes.userId
+ * @param {UserRoles} networkUserAttributes.roleType
+ * @param {string} networkUserAttributes.externalId
+ * @param {string} networkUserAttributes.userToken
+ * @method addUserToNetwork
+ * @return {external:Promise.<NetworkUser>} {@link module:shared~NetworkUser NetworkUser}
+ */
+export async function addUserToNetwork(networkUserAttributes) {
+  return networkService.addUserToNetwork(networkUserAttributes);
+}
+
+/**
  * Creates a network based on the attributes
  * @param {Object} networkAttributes
  * @param {string} networkAttributes.userId
@@ -46,7 +63,7 @@ export async function createIntegration(attributes = DEFAULT_INTEGRATION) {
  * @return {external:Promise<Network>} {@link module:modules/core~Network Network} - created network
  */
 export async function createNetwork({
-  userId, externalId, integrationName, name = generateNetworkName() }) {
+  userId, externalId, integrationName, name = randomString() }) {
   const networkAttributes = { userId, externalId, integrationName, name };
   return networkService.create(networkAttributes);
 }
@@ -55,19 +72,18 @@ export async function createNetwork({
  * Creates a network and an integration based on the attributes
  * @param {Object} networkAttributes
  * @param {string} networkAttributes.userId
+ * @param {string} [networkAttributes.name]
  * @param {string} [networkAttributes.externalId]
- * @param {string} networkAttributes.name
  * @param {string} [networkAttributes.integrationName]
- * @param {string} attributes.token - token to be used to access the integration
- * @method createNetwork
- * @return {external:Promise<Network[]>} {@link module:modules/core~Network Network}
+ * @param {string} [networkAttributes.integrationToken] - token to be used to access the integration
+ * @param {string} [networkAttributes.userExternalId]
+ * @param {string} [networkAttributes.userToken]
+ * @method createNetworkWithIntegration
+ * @return {external:Promise<Object>}
  */
 export async function createNetworkWithIntegration({
-  userId, externalId, name, integrationName, token, userExternalId, userToken }) {
-  if (!integrationName) mandatory('integrationName');
-  if (!token) mandatory('token');
-
-  const integration = await createIntegration({ name: integrationName, token });
+  userId, name = randomString(), externalId, integrationName = randomString(), integrationToken = randomString(), userExternalId = null, userToken = null }) {
+  const integration = await createIntegration({ name: integrationName, token: integrationToken });
   const network = await createNetwork({ userId, externalId, name, integrationName });
   await addUserToNetwork({
     networkId: network.id, userId, roleType: 'ADMIN', externalId: userExternalId, userToken });
@@ -96,22 +112,8 @@ export async function findAllNetworks() {
  * @return {external:Promise<User>} {@link module:modules/core~User User}
  */
 export async function createUser(userAttributes = {}) {
-  return userRepo.createUser(R.merge(blueprints.users.admin, userAttributes));
-}
-
-/**
- * Creates a networkuser in the database
- * @param {object} networkUserAttributes
- * @param {string} networkUserAttributes.networkId
- * @param {string} networkUserAttributes.userId
- * @param {UserRoles} networkUserAttributes.roleType
- * @param {string} networkUserAttributes.externalId
- * @param {string} networkUserAttributes.userToken
- * @method addUserToNetwork
- * @return {external:Promise.<NetworkUser>} {@link module:shared~NetworkUser NetworkUser}
- */
-export async function addUserToNetwork(networkUserAttributes) {
-  return networkService.addUserToNetwork(networkUserAttributes);
+  return userRepo.createUser(R.merge(blueprints.users.admin, {
+    ...userAttributes, username: `test-user-${Math.floor(Math.random() * 1000)}` }));
 }
 
 /**
@@ -129,7 +131,7 @@ export async function addUserToNetwork(networkUserAttributes) {
  * {@link module:shared~Network network}
  */
 export async function createUserForNewNetwork(
-  userAttributes, { name = generateNetworkName() }) {
+  userAttributes, { name = randomString() }) {
   const user = await createUser(userAttributes);
   const network = await createNetwork({ userId: user.id, name });
   await addUserToNetwork({ networkId: network.id, userId: user.id, roleType: 'ADMIN' });
@@ -158,7 +160,7 @@ export async function createUserForNewNetwork(
  */
 export async function createUserForNewNetworkWithIntegration(
   userAttributes,
-  { name = generateNetworkName() },
+  { name = randomString() },
   { token, integrationName, externalId }, roleType = 'EMPLOYEE') {
   const user = await createUser(userAttributes);
   const integration = await createIntegration({ name: integrationName, token });
