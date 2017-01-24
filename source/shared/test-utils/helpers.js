@@ -63,12 +63,14 @@ export async function createNetwork({
  * @return {external:Promise<Network[]>} {@link module:modules/core~Network Network}
  */
 export async function createNetworkWithIntegration({
-  userId, externalId, name, integrationName, token }) {
+  userId, externalId, name, integrationName, token, userExternalId, userToken }) {
   if (!integrationName) mandatory('integrationName');
   if (!token) mandatory('token');
 
   const integration = await createIntegration({ name: integrationName, token });
   const network = await createNetwork({ userId, externalId, name, integrationName });
+  await addUserToNetwork({
+    networkId: network.id, userId, roleType: 'ADMIN', externalId: userExternalId, userToken });
 
   return { integration, network };
 }
@@ -252,14 +254,10 @@ export async function deleteActivity(...activityOrActivities) {
  * @method cleanAll
  */
 export async function cleanAll() {
-  const allUsers = await findAllUsers();
-  const allIntegrations = await findAllIntegrations();
-  const allActivities = await findAllActivities();
-  await Promise.all([
-    deleteIntegration(allIntegrations),
-    deleteActivity(allActivities),
-  ]);
-  return deleteUser(allUsers);
+  return Promise.map(findAllNetworks(), (network) => networkRepo.deleteById(network.id))
+  .then(() => Promise.map(findAllUsers(), deleteUser))
+  .then(() => Promise.map(findAllActivities(), deleteActivity))
+  .then(() => Promise.map(findAllIntegrations(), deleteIntegration));
 }
 
 /**

@@ -61,11 +61,23 @@ export const findExternalUsers = async (externalIds) => {
 /**
  * Finds users based on a list of ids
  * @param {string[]} userIds - identifier how the user is known
+ * @param {string} [networkId] - identifier for a possible network
  * @method findUsersByIds
  * @return {external:Promise.<User[]>} {@link module:modules/core~User User}
  */
-export const findUsersByIds = async (userIds) => {
-  const result = await User.findAll({ ...defaultIncludes, where: { id: { $in: userIds } } });
+export const findUsersByIds = async (userIds, networkId = null) => {
+  let result;
+
+  if (networkId) {
+    result = await User.findAll({ ...defaultIncludes, where: { id: { $in: userIds } } });
+  } else {
+    const includes = {
+      include: [{ model: Team,
+      attributes: ['id'],
+      where: { networkId },
+      required: false }] };
+    result = await User.findAll({ ...includes, where: { id: { $in: userIds } } });
+  }
 
   return map(result, toModel);
 };

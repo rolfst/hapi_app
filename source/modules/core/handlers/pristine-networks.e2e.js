@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 import nock from 'nock';
 import * as stubs from '../../../shared/test-utils/stubs';
+import * as blueprints from '../../../shared/test-utils/blueprints';
+import * as testHelper from '../../../shared/test-utils/helpers';
 import { getRequest } from '../../../shared/test-utils/request';
-import * as networkRepo from '../repositories/network';
-import * as integrationRepo from '../repositories/integration';
 
 const PMT_BASE_URL = 'https://partner2.testpmt.nl';
 const PMT_BASE_CHAIN_URL_AH = `https://${stubs.pmt_clients.chains[0].base_url}`;
@@ -11,36 +11,33 @@ const PMT_BASE_CHAIN_URL_JUMBO = `https://${stubs.pmt_clients.chains[1].base_url
 const JUMBO_SCHAAF_STORE_URL = stubs.jumbo_stores.stores[0].base_store_url;
 const JUMBO_BERGEN_STORE_URL = stubs.jumbo_stores.stores[2].base_store_url;
 
-nock.disableNetConnect();
 
 describe('Pristine Networks', async () => {
-  let integration;
+  nock.disableNetConnect();
   let ahNetwork;
   let justANetwork;
   let jumboNetwork;
 
   before(async () => {
-    integration = await integrationRepo.createIntegration({
-      name: 'PRISTINE_INTEGRATION',
-      token: 'footoken',
-    });
+    const admin = await testHelper.createUser();
 
-    jumboNetwork = networkRepo.createIntegrationNetwork({
-      userId: global.users.admin.id,
+    jumboNetwork = testHelper.createNetworkWithIntegration({
+      userId: admin.id,
       externalId: stubs.jumbo_stores.stores[1].base_store_url,
       name: 'Jumbo van Begen Oss',
       integrationName: 'PRISTINE_INTEGRATION',
+      token: 'footoken',
     });
 
-    ahNetwork = networkRepo.createIntegrationNetwork({
-      userId: global.users.admin.id,
+    ahNetwork = testHelper.createNetwork({
+      userId: admin.id,
       externalId: stubs.ah_stores.stores[1].base_store_url,
       name: 'AH van Bergen',
       integrationName: 'PRISTINE_INTEGRATION',
     });
 
-    justANetwork = networkRepo.createIntegrationNetwork({
-      userId: global.users.admin.id,
+    justANetwork = testHelper.createNetwork({
+      userId: admin.id,
       externalId: stubs.ah_stores.stores[0].base_store_url,
       name: 'AH Nanne van der Schaaf',
       integrationName: 'PRISTINE_INTEGRATION',
@@ -50,14 +47,7 @@ describe('Pristine Networks', async () => {
       jumboNetwork, justANetwork, ahNetwork]);
   });
 
-  after(async () => {
-    await integration.destroy();
-    await Promise.all([
-      networkRepo.deleteById(jumboNetwork.id),
-      networkRepo.deleteById(ahNetwork.id),
-      networkRepo.deleteById(justANetwork.id),
-    ]);
-  });
+  after(async () => testHelper.cleanAll());
 
   it('should return correct network amount', async () => {
     nock(PMT_BASE_URL)
@@ -76,7 +66,9 @@ describe('Pristine Networks', async () => {
       .get('/users')
       .reply(200, stubs.users_200);
 
-    const { result } = await getRequest('/v2/pristine_networks');
+    const { tokens } = await testHelper.getLoginToken(blueprints.users.admin);
+    const accessToken = tokens.access_token;
+    const { result } = await getRequest('/v2/pristine_networks', accessToken);
 
     assert.property(result.data[0], 'externalId');
     assert.property(result.data[1], 'name');
@@ -89,7 +81,9 @@ describe('Pristine Networks', async () => {
       .get('/rest.php/chains')
       .reply('404');
 
-    const { statusCode } = await getRequest('/v2/pristine_networks');
+    const { tokens } = await testHelper.getLoginToken(blueprints.users.admin);
+    const accessToken = tokens.access_token;
+    const { statusCode } = await getRequest('/v2/pristine_networks', accessToken);
 
     assert.equal(statusCode, 500);
   });
@@ -105,7 +99,9 @@ describe('Pristine Networks', async () => {
       .get('/stores')
       .reply(200, stubs.jumbo_stores);
 
-    const { statusCode } = await getRequest('/v2/pristine_networks');
+    const { tokens } = await testHelper.getLoginToken(blueprints.users.admin);
+    const accessToken = tokens.access_token;
+    const { statusCode } = await getRequest('/v2/pristine_networks', accessToken);
 
     assert.equal(statusCode, 404);
   });

@@ -1,11 +1,13 @@
 import { assert } from 'chai';
 import R from 'ramda';
 import Promise from 'bluebird';
+import * as testHelper from '../../../shared/test-utils/helpers';
 import * as repository from './user';
 import * as teamRepository from './team';
 
 describe('User Repository', () => {
   let createdUser;
+  let network;
 
   before(async() => {
     createdUser = await repository.createUser({
@@ -15,9 +17,19 @@ describe('User Repository', () => {
       lastName: 'Doe',
       password: 'foo',
     });
+    const admin = await testHelper.createUser();
+    network = await testHelper.createNetwork({ userId: admin.id });
+
+    await testHelper.addUserToNetwork(
+        { networkId: network.id, userId: admin.id, roleType: 'ADMIN' });
   });
 
-  after(() => repository.deleteById(createdUser.id));
+  after(async () => {
+    return Promise.all([
+      testHelper.deleteUser(createdUser),
+      testHelper.cleanAll(),
+    ]);
+  });
 
   describe('findUserById', () => {
     it('should return the correct properties', async () => {
@@ -43,12 +55,12 @@ describe('User Repository', () => {
 
     it('domain object should have the correct teamIds property', async () => {
       const createdTeams = await Promise.all([
-        teamRepository.create({ networkId: global.networks.flexAppeal.id, name: 'Team #1' }),
-        teamRepository.create({ networkId: global.networks.flexAppeal.id, name: 'Team #2' }),
+        teamRepository.create({ networkId: network.id, name: 'Team #1' }),
+        teamRepository.create({ networkId: network.id, name: 'Team #2' }),
       ]);
 
       await teamRepository.addUserToTeams(R.pluck('id', createdTeams), createdUser.id);
-      const actual = await repository.findUserById(createdUser.id, global.networks.flexAppeal.id);
+      const actual = await repository.findUserById(createdUser.id, network.id);
 
       await Promise.map(createdTeams, (team) => teamRepository.deleteById(team.id));
 

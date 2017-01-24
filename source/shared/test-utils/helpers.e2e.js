@@ -117,7 +117,6 @@ describe('test helper', () => {
       const integrations = await integrationRepo.findAll();
       const integration = R.find(R.propEq('name', testHelper.DEFAULT_INTEGRATION.name),
           integrations);
-      console.log(network.integrations)
       const foundIntegration = R.find((integrationName) => integrationName === integration.name,
           network.integrations);
 
@@ -273,14 +272,21 @@ describe('test helper', () => {
 
   describe('cleanAll', () => {
     it('should clean the whole database', async () => {
-      const user = await testHelper.createUser(blueprints.users.employee);
+      const admin = await testHelper.createUser(blueprints.users.admin);
+      const employee = await testHelper.createUser(blueprints.users.employee);
       const network = await testHelper.createNetwork({
-        userId: user.id, name: 'NetworkForAuthenticatedUser' });
+        userId: admin.id, name: 'NetworkForAuthenticatedUser' });
 
       await testHelper.addUserToNetwork({
-        userId: user.id,
+        userId: admin.id,
         networkId: network.id,
         roleType: UserRoles.ADMIN,
+      });
+
+      await testHelper.addUserToNetwork({
+        userId: employee.id,
+        networkId: network.id,
+        roleType: UserRoles.EMPLOYEE,
       });
 
       await testHelper.cleanAll();
