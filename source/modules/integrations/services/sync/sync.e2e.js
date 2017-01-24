@@ -103,6 +103,43 @@ describe('Network synchronisation', () => {
       assert.isDefined(changedTeam);
       assert.equal(changedTeam.name, 'Kassa Oud');
     });
+
+    it('should only sync teams with defined externalId', async () => {
+      const externalTeams = [{
+        id: null,
+        networkId: null,
+        externalId: '1',
+        name: 'Vulploeg',
+        description: null,
+      }, {
+        id: null,
+        networkId: null,
+        externalId: '2',
+        name: 'Kassa',
+        description: null,
+      }];
+
+      const internalTeams = [{
+        networkId: network.id,
+        externalId: '2',
+        name: 'Kassa',
+        description: null,
+      }, {
+        networkId: network.id,
+        externalId: null,
+        name: 'Non syncing team',
+        description: null,
+      }];
+
+      await Promise.map(internalTeams, teamRepository.create);
+      await serviceImpl.syncTeams(network.id, externalTeams);
+      const teamsForNetwork = await networkRepository.findTeamsForNetwork(network.id);
+      const syncedTeam = find(teamsForNetwork, { externalId: '1' });
+
+      assert.lengthOf(teamsForNetwork, 3);
+      assert.isDefined(syncedTeam);
+      assert.equal(syncedTeam.name, 'Vulploeg');
+    });
   });
 
   describe('Users synchronisation with network link', () => {
