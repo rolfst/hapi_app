@@ -67,12 +67,12 @@ describe('Get messages (v2)', () => {
 
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 3);
-    assert.equal(result.data[0].type, 'message');
-    assert.isString(result.data[0].id);
-    assert.equal(result.data[0].text, 'First message');
+    assert.equal(result.data[0].source.type, 'message');
+    assert.isString(result.data[0].source.id);
+    assert.equal(result.data[0].source.text, 'First message');
     assert.property(result.data[0], 'object_id');
     assert.property(result.data[0], 'created_at');
-    assert.equal(result.data[result.data.length - 1].text, 'Last message');
+    assert.equal(result.data[result.data.length - 1].source.text, 'Last message');
     assert.property(result, 'meta');
     assert.property(result.meta.pagination, 'offset');
     assert.property(result.meta.pagination, 'limit');
@@ -87,12 +87,12 @@ describe('Get messages (v2)', () => {
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 2);
     assert.equal(result.meta.pagination.total_count, 3);
-    assert.equal(result.data[0].type, 'message');
-    assert.isString(result.data[0].id);
-    assert.equal(result.data[0].text, 'First message');
+    assert.equal(result.data[0].source.type, 'message');
+    assert.isString(result.data[0].source.id);
+    assert.equal(result.data[0].source.text, 'First message');
     assert.property(result.data[0], 'object_id');
     assert.property(result.data[0], 'created_at');
-    assert.equal(result.data[1].text, 'Second message');
+    assert.equal(result.data[1].source.text, 'Second message');
   });
 
   it('should return messages for conversation limited by 2 starting from the second message',
@@ -103,12 +103,12 @@ describe('Get messages (v2)', () => {
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 2);
     assert.equal(result.meta.pagination.total_count, 3);
-    assert.equal(result.data[0].type, 'message');
-    assert.isString(result.data[0].id);
-    assert.equal(result.data[0].text, 'Second message');
+    assert.equal(result.data[0].source.type, 'message');
+    assert.isString(result.data[0].source.id);
+    assert.equal(result.data[0].source.text, 'Second message');
     assert.property(result.data[0], 'object_id');
     assert.property(result.data[0], 'created_at');
-    assert.equal(result.data[1].text, 'Last message');
+    assert.equal(result.data[1].source.text, 'Last message');
   });
 
   it('should return 404 code when conversation does not exist', async () => {

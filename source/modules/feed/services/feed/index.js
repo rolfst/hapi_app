@@ -1,8 +1,6 @@
 import R from 'ramda';
-import Promise from 'bluebird';
 import * as Logger from '../../../../shared/services/logger';
 import * as objectService from '../object';
-import * as impl from './implementation';
 
 /**
  * @module modules/feed/services/object
@@ -25,20 +23,6 @@ export const make = async (payload, message) => {
   const relatedObjects = await objectService.list(
     R.pick(['parentType', 'parentId'], payload), message);
 
-  // Gathering the data to build the feed
-  const objectSourceLinks = impl.createObjectSourceLinks(relatedObjects);
-  const promisedSources = R.map(impl.findSourcesForFeed(message), objectSourceLinks);
-  const sources = await Promise.map(promisedSources, Promise.props);
-  const occurringTypes = R.pluck('type', objectSourceLinks);
-
-  // Linking everything together
-  return R.chain(occurringType => {
-    const sourcesForType = impl.findWhereType(occurringType, sources);
-    const linksForType = impl.findWhereType(occurringType, objectSourceLinks);
-
-    return impl.mergeSourceAndObject(
-      impl.objectsForType(occurringType, relatedObjects),
-      linksForType.values,
-      sourcesForType.values);
-  }, occurringTypes);
+  return objectService.listWithSources({
+    objectIds: R.pluck('id', relatedObjects) }, message);
 };
