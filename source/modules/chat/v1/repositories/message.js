@@ -1,7 +1,7 @@
 import { map } from 'lodash';
 import sequelize from 'sequelize';
 import { User } from '../../../../shared/models';
-import { Message, Conversation } from '../../dao';
+import { Message, Conversation } from './dao';
 import createMessageModel from '../models/message';
 
 /**

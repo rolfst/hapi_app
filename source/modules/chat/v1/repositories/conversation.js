@@ -1,8 +1,7 @@
 import { map } from 'lodash';
 import { db as Sequelize } from '../../../../connections';
-import createError from '../../../../shared/utils/create-error';
 import { User } from '../../../../shared/models';
-import { Conversation, Message, ConversationUser } from '../../dao';
+import { Conversation, Message, ConversationUser } from './dao';
 import createConversationModel from '../models/conversation';
 
 /**
@@ -110,13 +109,7 @@ export const createConversation = async (type, creatorId, participants) => {
  * @return {external:Promise} - Delete conversation promise
  */
 export function deleteConversationById(id) {
-  return Conversation
-    .findById(id)
-    .then(conversation => {
-      if (!conversation) throw createError('404');
-
-      return conversation.destroy();
-    });
+  return Conversation.destroy({ where: { id } });
 }
 
 /**

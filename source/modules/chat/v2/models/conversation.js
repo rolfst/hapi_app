@@ -8,6 +8,6 @@ export default (dao) => ({
   id: dao.id.toString(),
   userId: dao.createdBy.toString(),
   lastMessage: null, // Will be overwritten via the service
-  participantIds: R.map(toId, dao.Users),
+  participantIds: dao.Users ? R.map(toId, dao.Users) : [],
   createdAt: dateUtils.toISOString(dao.created_at),
 });

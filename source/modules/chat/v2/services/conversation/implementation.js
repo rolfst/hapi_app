@@ -2,20 +2,13 @@ import R from 'ramda';
 import createError from '../../../../../shared/utils/create-error';
 import * as conversationRepo from '../../repositories/conversation';
 
+const findPropEq = (prop, value, collection) => R.find(R.propEq(prop, value), collection);
 const findById = (id, collection) => R.find(R.whereEq({ id }), collection) || null;
-const byId = R.ascend(R.prop('id'));
 const parseIncludes = R.split(',');
+const sortedById = R.sortBy(R.prop('id'));
 
 export const hasInclude = R.curry((includes, selector) =>
   R.contains(selector, parseIncludes(includes || '')));
-
-export const messagesForConversation = R.curry((messages, conversation) =>
-  R.filter(R.whereEq({ conversationId: conversation.id }), messages));
-
-export const lastMessage = R.pipe(R.sort(byId), R.last);
-
-export const conversationWithLastMessage = R.curry((getMessages, conversation) =>
-  R.merge(conversation, { lastMessage: lastMessage(getMessages(conversation)) || null }));
 
 const getParticipants = (participants, participantIds) => R.pipe(
   R.map((participantId) => findById(participantId, participants)),
@@ -35,3 +28,20 @@ export const assertThatUserIsPartOfTheConversation = async (userId, conversation
 
   if (!result || !R.contains(userId, result.participantIds)) throw createError('404');
 };
+
+export const lastMessageObjectsForConversations = async (objects) => {
+  const messagesForConversation = (conversationId) => R.filter(
+    R.whereEq({ parentId: conversationId }), objects);
+  const lastMessage = R.pipe(messagesForConversation, sortedById, R.last);
+
+  return R.reduce((acc, object) =>
+    acc.concat(lastMessage(object.parentId)), [])(objects);
+};
+
+export const mergeLastMessageWithConversation = R.curry((objects, lastMessages, conversation) => {
+  const lastMessageObject = findPropEq('parentId', conversation.id, objects);
+  const lastMessageModel = lastMessageObject ?
+    findPropEq('id', lastMessageObject.sourceId, lastMessages) || null : null;
+
+  return { ...conversation, lastMessage: lastMessageModel };
+});
