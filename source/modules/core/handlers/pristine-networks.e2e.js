@@ -26,7 +26,7 @@ describe('Pristine Networks', async () => {
       externalId: stubs.jumbo_stores.stores[1].base_store_url,
       name: 'Jumbo van Begen Oss',
       integrationName: 'PRISTINE_INTEGRATION',
-      token: 'footoken',
+      integrationToken: 'footoken',
     });
 
     ahNetwork = testHelper.createNetwork({

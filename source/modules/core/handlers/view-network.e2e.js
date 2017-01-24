@@ -18,7 +18,7 @@ describe('View network', async () => {
       externalId: pristineNetwork.externalId,
       name: pristineNetwork.name,
       integrationName: pristineNetwork.integrationName,
-      token: 'footoken',
+      integrationToken: 'footoken',
     });
     await testHelper.addUserToNetwork(
         { networkId: network.id, userId: admin.id, roleType: 'ADMIN' });

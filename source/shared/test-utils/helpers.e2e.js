@@ -159,7 +159,7 @@ describe('test helper', () => {
         externalId: 'externalId',
         name: 'networkName',
         integrationName,
-        token: 'testToken',
+        integrationToken: 'testToken',
       });
 
       assert.isNotNull(network);
@@ -174,7 +174,6 @@ describe('test helper', () => {
         userId: user.id,
         externalId: 'externalId',
         name: 'networkName',
-        token: 'testToken',
       });
 
       assert.isRejected(promise, /Error: Missing Parameter: integrationName/,
@@ -185,10 +184,10 @@ describe('test helper', () => {
       const integrationName = 'integration';
       const user = await testHelper.createUser();
       const promise = testHelper.createNetworkWithIntegration({
+        integrationName,
         userId: user.id,
         externalId: 'externalId',
         name: 'networkName',
-        integrationName,
       });
 
       assert.isRejected(promise, /Error: Missing Parameter: token/,
