@@ -14,7 +14,6 @@ describe('Handler: Bulk invite users', () => {
   const sortByUsername = partialRight(sortBy, 'username');
   const sortImportedUsers = flow(flatten, sortByUsername);
   const toBeImportedUsers = stubs.import_users;
-  const pristineNetwork = stubs.pristine_network;
 
   // FIXME: Logic should be moved to service or repository
   const importUser = (networkId) => async (user) => {
@@ -85,8 +84,7 @@ describe('Handler: Bulk invite users', () => {
     });
   });
 
-  describe.only('Faulty path', () => {
-    let alternativeNetwork;
+  describe('Faulty path', () => {
     let alternativeAdminToken;
 
     before(async () => {
@@ -95,29 +93,6 @@ describe('Handler: Bulk invite users', () => {
 
       alternativeAdminToken = await testHelpers.getLoginToken({
         username: alternativeAdmin.username, password: 'foo' });
-
-      alternativeNetwork = await testHelpers.createNetworkWithIntegration({
-        userId: alternativeAdmin.id,
-        name: pristineNetwork.name,
-        externalId: pristineNetwork.networkId,
-        integrationName: pristineNetwork.integrationName,
-        token: 'footoken',
-      });
-    });
-
-    it('should only process user ids that belong to the network', async () => {
-      const userIds = map(createdUsers, 'id');
-      const endpoint = `/v2/networks/${network.id}/users/invite`;
-      const { statusCode } = await postRequest(
-        endpoint, { user_ids: userIds }, adminToken.tokens.access_token);
-      const invitedUser = await userService.getUserWithNetworkScope({
-        id: userIds[0], networkId: network.id });
-      const unlinkedUser = await userService.getUserWithNetworkScope({
-        id: employee.id, networkId: alternativeNetwork.id });
-
-      assert.equal(statusCode, 200);
-      assert.isTrue(invitedUser.invitedAt !== null);
-      assert.equal(unlinkedUser.invitedAt, null);
     });
 
     it('should return 403 when authenticated user is a regular user', async () => {
