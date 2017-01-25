@@ -128,12 +128,9 @@ export const listActiveUsersForNetwork = async (payload, message) => {
   logger.info('Listing active users for network', { payload, message });
 
   const network = await networkRepo.findNetworkById(payload.networkId);
-  const usersFromNetwork = await networkRepo.findUsersForNetwork(network.id);
+  if (!network) throw createError('404', 'Network not found.');
 
-  return userService.listUsersWithNetworkScope({
-    userIds: map(usersFromNetwork, 'id'),
-    networkId: payload.networkId,
-  }, message);
+  return networkRepo.findUsersForNetwork({ networkId: network.id });
 };
 
 /**

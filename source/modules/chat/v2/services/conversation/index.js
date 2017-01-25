@@ -58,7 +58,7 @@ export const listConversations = async (payload, message) => {
 
   if (includes('participants')) {
     const userIds = R.pipe(R.pluck('participantIds'), R.flatten, R.uniq)(conversations);
-    const participants = await userRepo.findPlainUsersByIds(userIds);
+    const participants = await userRepo.findByIds(userIds);
     const conversationWithParticipants = await impl.addParticipantsToConversation(
       conversations, participants);
 

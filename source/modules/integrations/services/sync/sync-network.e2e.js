@@ -15,7 +15,8 @@ describe('Network synchronisation', () => {
     .createNetwork(global.users.admin.id, 'Foo network for sync')));
 
   after(async () => {
-    const users = await networkRepository.findUsersForNetwork(network.id);
+    const users = await networkRepository.findUsersForNetwork({
+      networkId: network.id });
     const promises = map(users, user => userRepository.deleteById(user.id));
 
     return Promise.all(promises);
