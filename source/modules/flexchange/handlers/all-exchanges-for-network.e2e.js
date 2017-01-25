@@ -1,22 +1,32 @@
 import { assert } from 'chai';
 import qs from 'qs';
 import moment from 'moment';
-import { map, find } from 'lodash';
+import { map, pick, find } from 'lodash';
 import { getRequest } from '../../../shared/test-utils/request';
+import * as testHelper from '../../../shared/test-utils/helpers';
+import * as stubs from '../../../shared/test-utils/stubs';
 import * as networkService from '../../core/services/network';
 import { create } from '../../core/repositories/team';
 import * as userRepo from '../../core/repositories/user';
 import { exchangeTypes } from '../repositories/dao/exchange';
 import * as exchangeRepo from '../repositories/exchange';
 
-describe('Get exchanges for network', () => {
+describe.only('Get exchanges for network', () => {
   describe('Integrated network', () => {
     let integratedNetwork;
     let createdExchanges;
+    let admin;
+    let employee;
+    const pristineNetwork = stubs.pristine_networks_admins[0];
 
     before(async () => {
-      integratedNetwork = global.networks.pmt;
-      const { employee, admin } = global.users;
+      admin = await testHelper.createUser();
+      const { network: netw } = await testHelper.createNetworkWithIntegration({
+        userId: admin.id,
+        token: 'footoken',
+        ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
+      });
+      integratedNetwork = netw;
 
       await networkService.addUserToNetwork({
         userId: employee.id,
@@ -42,7 +52,7 @@ describe('Get exchanges for network', () => {
       });
 
       const exchangeForOtherNetwork = exchangeRepo.createExchange(
-        global.users.admin.id, global.networks.flexAppeal.id, {
+        admin.id, global.networks.flexAppeal.id, {
           date: moment().format('YYYY-MM-DD'),
           type: exchangeTypes.NETWORK,
           description: 'Test shift in other network',
