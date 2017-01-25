@@ -125,8 +125,7 @@ describe('Import network', () => {
       });
 
       it('should add new users to teams', async () => {
-        const teams = await networkRepo.findTeamsForNetwork({
-          networkId: network.id });
+        const teams = await networkRepo.findTeamsForNetwork(network.id);
         const teamLookup = find(teams, { externalId: stubs.external_teams[0].externalId });
         const users = await teamRepo.findMembers(teamLookup.id);
 

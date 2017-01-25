@@ -24,9 +24,9 @@ export const make = async (payload, message) => {
 
   const whitelistedPayload = R.pick(['parentType', 'parentId', 'limit', 'offset'], payload);
   const relatedObjects = await objectService
-    .list(whitelistedPayload, message)
-    .then(R.sort(R.descend(R.prop('createdAt'))));
+    .list(whitelistedPayload, message);
 
-  return objectService.listWithSources({
-    objectIds: R.pluck('id', relatedObjects) }, message);
+  return objectService
+    .listWithSources({ objectIds: R.pluck('id', relatedObjects) }, message)
+    .then(R.sort(R.descend(R.prop('createdAt'))));
 };
