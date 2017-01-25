@@ -17,30 +17,6 @@ import * as impl from './implementation';
 const logger = Logger.getLogger('CORE/service/network');
 
 /**
- * Create a new network.
- * @param {object} payload - Object containing payload data
- * @param {string} payload.userId - The id of the owner of the network
- * @param {string} payload.name - The name of the network
- * @param {string} payload.externalId - The external id of the network
- * @param {string} payload.integrationName - The integration that the network should have
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method create
- * @return {external:Promise.<Network>} {@link module:modules/core~Network Network} -
- * new network object
- */
-export const create = async (payload, message) => {
-  logger.info('Creating network', { payload, message });
-
-  const whitelistAttrs = pick(payload, 'userId', 'name', 'externalId', 'integrationName');
-
-  if (payload.integrationName) {
-    return networkRepo.createIntegrationNetwork(whitelistAttrs);
-  }
-
-  return networkRepo.createNetwork(payload.userId, payload.name);
-};
-
-/**
  * Adding an user to a network.
  * @param {object} payload - Object containing payload data
  * @param {number} payload.networkId - The id of the network
@@ -65,6 +41,30 @@ export const addUserToNetwork = async (payload, message) => {
   };
 
   return networkRepo.addUser(attributes);
+};
+
+/**
+ * Create a new network.
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.userId - The id of the owner of the network
+ * @param {string} payload.name - The name of the network
+ * @param {string} payload.externalId - The external id of the network
+ * @param {string} payload.integrationName - The integration that the network should have
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method create
+ * @return {external:Promise.<Network>} {@link module:modules/core~Network Network} -
+ * new network object
+ */
+export const create = async (payload, message) => {
+  logger.info('Creating network', { payload, message });
+
+  const whitelistAttrs = pick(payload, 'userId', 'name', 'externalId', 'integrationName');
+
+  if (payload.integrationName) {
+    return networkRepo.createIntegrationNetwork(whitelistAttrs);
+  }
+
+  return networkRepo.createNetwork(payload.userId, payload.name);
 };
 
 const getNetworks = async (url) => {

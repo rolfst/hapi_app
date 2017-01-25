@@ -6,14 +6,13 @@ import dotenv from 'dotenv';
 import blueprints from './blueprints';
 import stubs from './stubs';
 import authenticate from './authenticate';
-import generateNetworkName from './create-network-name';
 import * as notifier from '../services/notifier';
 import * as mailer from '../services/mailer';
 import { UserRoles } from '../services/permission';
 import * as networkService from '../../modules/core/services/network';
 import * as userRepo from '../../modules/core/repositories/user';
 import * as integrationRepo from '../../modules/core/repositories/integration';
-import * as testHelper from './helpers';
+import * as testHelpers from './helpers';
 
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
@@ -36,15 +35,15 @@ export const initialSetup = async () => {
     userRepo.createUser(blueprints.users.networkless),
   ]);
 
-  integration = await testHelper.createIntegration();
+  integration = await testHelpers.createIntegration();
 
   // Create networks
-  const [createdFlexNetwork, createdPMTNetwork] = await testHelper.createNetworks([
-    { userId: admin.id, name: generateNetworkName() },
+  const [createdFlexNetwork, createdPMTNetwork] = await testHelpers.createNetworks([
+    { userId: admin.id, name: testHelpers.randomString() },
     {
       userId: admin.id,
       externalId: 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi',
-      name: generateNetworkName(),
+      name: testHelpers.randomString(),
       integrationName: 'PMT',
     },
   ]);
@@ -127,4 +126,3 @@ export const finalCleanup = async () => {
 // after(async () => finalCleanup());
 
 // before(async () => initialSetup());
-

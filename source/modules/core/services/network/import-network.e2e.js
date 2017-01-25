@@ -42,7 +42,6 @@ describe('Import network', () => {
         admin = await testHelper.createUser();
         const { network: netw } = await testHelper.createNetworkWithIntegration({
           userId: admin.id,
-          token: 'footoken',
           ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
         });
         network = netw;
@@ -141,7 +140,6 @@ describe('Import network', () => {
       admin = await testHelper.createUser();
       const { network: netw } = await testHelper.createNetworkWithIntegration({
         userId: admin.id,
-        token: 'footoken',
         ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
       });
       network = netw;

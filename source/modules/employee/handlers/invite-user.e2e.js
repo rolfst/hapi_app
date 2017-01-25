@@ -1,17 +1,23 @@
 import { assert } from 'chai';
+import * as testHelpers from '../../../shared/test-utils/helpers';
 import { postRequest } from '../../../shared/test-utils/request';
-import * as userRepo from '../../core/repositories/user';
 
 describe('Handler: Invite user', () => {
-  after(async () => {
-    const admin = await userRepo.findUserBy({ email: 'admin@baz.com' });
-    const employee = await userRepo.findUserBy({ email: 'employee@baz.com' });
+  let network;
+  let adminToken;
 
-    return Promise.all([
-      userRepo.deleteById(admin.id),
-      userRepo.deleteById(employee.id),
-    ]);
+  before(async () => {
+    const admin = await testHelpers.createUser({
+      username: 'admin@flex-appeal.nl', password: 'foo' });
+
+    const adminTokens = await testHelpers.getLoginToken({
+      username: admin.username, password: 'foo' });
+
+    adminToken = adminTokens.tokens.access_token;
+    network = await testHelpers.createNetwork({ userId: admin.id });
   });
+
+  after(() => testHelpers.cleanAll());
 
   const user = {
     first_name: 'Foo',
@@ -25,8 +31,8 @@ describe('Handler: Invite user', () => {
       role_type: 'admin',
     };
 
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/users`;
-    const { result, statusCode } = await postRequest(endpoint, payload);
+    const endpoint = `/v2/networks/${network.id}/users`;
+    const { result, statusCode } = await postRequest(endpoint, payload, adminToken);
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.email, payload.email);
@@ -40,8 +46,8 @@ describe('Handler: Invite user', () => {
       role_type: 'employee',
     };
 
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/users`;
-    const { result, statusCode } = await postRequest(endpoint, payload);
+    const endpoint = `/v2/networks/${network.id}/users`;
+    const { result, statusCode } = await postRequest(endpoint, payload, adminToken);
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.username, payload.email);
@@ -55,8 +61,8 @@ describe('Handler: Invite user', () => {
       role_type: 'admin',
     };
 
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/users`;
-    const { statusCode } = await postRequest(endpoint, payload);
+    const endpoint = `/v2/networks/${network.id}/users`;
+    const { statusCode } = await postRequest(endpoint, payload, adminToken);
 
     assert.equal(statusCode, 422);
   });
