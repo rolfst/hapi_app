@@ -346,7 +346,7 @@ export const listAvailableUsersForShift = async (payload, message) => {
 
   const adapter = await createAdapter(message.network, message.credentials.id);
   const externalUsers = await adapter.usersAvailableForShift(payload.shiftId);
-  const availableUsers = await impl.matchUsersForShift(externalUsers, message.network);
+  const availableUsers = await userRepo.findExternalUsers(R.pluck('externalId', externalUsers));
 
   return userService.listUsersWithNetworkScope({
     userIds: map(availableUsers, 'id'),
