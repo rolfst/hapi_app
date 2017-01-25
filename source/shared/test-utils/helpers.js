@@ -101,6 +101,16 @@ export async function findAllNetworks() {
 }
 
 /**
+ *
+ */
+export async function getLoginToken({ username, password }) {
+  const url = '/v2/authenticate';
+  const { result } = await postRequest(url, { username, password });
+  console.log(result)
+  return { accessToken: tokenUtil.decode(result.data.access_token), tokens: result.data };
+}
+
+/**
  * Creates a user in the database
  * @param {object} userAttributes
  * @param {string} [userAttributes.username]
@@ -112,8 +122,14 @@ export async function findAllNetworks() {
  * @return {external:Promise<User>} {@link module:modules/core~User User}
  */
 export async function createUser(userAttributes = {}) {
-  return userRepo.createUser(R.merge(blueprints.users.admin, {
-    ...userAttributes, username: `test-user-${Math.floor(Math.random() * 1000)}` }));
+  console.log(userAttributes)
+  const attributes = { username: `test-user-${Math.floor(Math.random() * 1000)}`,
+    ...userAttributes };
+  const user = await userRepo.createUser(R.merge(blueprints.users.admin, attributes));
+  const token = await getLoginToken(attributes);
+  user.token = token.tokens.access_token;
+
+  return user;
 }
 
 /**
@@ -262,12 +278,3 @@ export async function cleanAll() {
   .then(() => Promise.map(findAllIntegrations(), deleteIntegration));
 }
 
-/**
- *
- */
-export async function getLoginToken({ username, password }) {
-  const url = '/v2/authenticate';
-  const { result } = await postRequest(url, { username, password });
-
-  return { accessToken: tokenUtil.decode(result.data.access_token), tokens: result.data };
-}
