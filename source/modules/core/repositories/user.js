@@ -2,7 +2,7 @@ import { map, omit, pick, sample } from 'lodash';
 import R from 'ramda';
 import Promise from 'bluebird';
 import createError from '../../../shared/utils/create-error';
-import { User, Network, NetworkUser, Integration, Team, TeamUser } from '../../../shared/models';
+import { User, Network, NetworkUser, Team, TeamUser } from '../../../shared/models';
 import createUserModel from '../models/user';
 import createNetworkLinkModel from '../models/network-link';
 import createCredentialsModel from '../models/credentials';
