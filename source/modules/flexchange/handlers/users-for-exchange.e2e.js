@@ -22,7 +22,7 @@ describe('View users related to exchange', () => {
 
       const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}/users`;
       const { result, statusCode } = await getRequest(endpoint);
-      const usersInNetwork = await networkRepo.findUsersForNetwork(network.id);
+      const usersInNetwork = await networkRepo.findUsersForNetwork({ networkId: network.id });
 
       assert.equal(statusCode, 200);
       assert.equal(result.data.length, usersInNetwork.length);

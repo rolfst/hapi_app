@@ -19,7 +19,7 @@ export default (dao) => ({
   username: dao.username.toLowerCase(),
   email: dao.email.toLowerCase(),
   externalId: dao.externalId ? dao.externalId.toString() : null,
-  integrationAuth: dao.integrationAuth || null,
+  integrationAuth: dao.userToken ? !!dao.userToken : dao.integrationAuth || null,
   function: dao.roleType === 'ADMIN' ? 'Beheerder' : 'Medewerker',
   roleType: dao.roleType || null,
   teamIds: dao.Teams ? map(map(dao.Teams, 'id'), toString) : [],
