@@ -24,6 +24,7 @@ import * as acceptanceNotifier from '../../notifications/accepted-exchange';
 import * as creatorNotifier from '../../notifications/creator-approved';
 import * as substituteNotifier from '../../notifications/substitute-approved';
 import * as createdNotifier from '../../notifications/exchange-created';
+import EventEmitter from '../../events';
 import * as impl from './implementation';
 
 /**
@@ -479,6 +480,8 @@ export const createExchange = async (payload, message) => {
 
   Analytics.track(newExchangeEvent(message.network, createdExchange), message.credentials.id);
   dispatchEvent(EventTypes.EXCHANGE_CREATED, message.credentials, { exchange: createdExchange });
+
+  EventEmitter.emit('exchange.create');
 
   return exchangeRepo.findExchangeById(createdExchange.id);
 };
