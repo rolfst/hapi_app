@@ -18,10 +18,6 @@ import tokenUtil from '../utils/token';
 export const DEFAULT_INTEGRATION = { name: 'PMT', token: 'footoken' };
 export const DEFAULT_NETWORK_EXTERNALID = 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi';
 
-function mandatory(paramName) {
-  throw new Error(`Missing Parameter: ${paramName}`);
-}
-
 export const randomString = (prefix = 'test-object') =>
   `${prefix}-${Math.floor(Math.random() * 1000)}`;
 
@@ -82,7 +78,13 @@ export async function createNetwork({
  * @return {external:Promise<Object>}
  */
 export async function createNetworkWithIntegration({
-  userId, name = randomString(), externalId, integrationName = randomString(), integrationToken = randomString(), userExternalId = null, userToken = null }) {
+  userId,
+  name = randomString(),
+  externalId,
+  integrationName = randomString(),
+  integrationToken = randomString(),
+  userExternalId = null,
+  userToken = null }) {
   const integration = await createIntegration({ name: integrationName, token: integrationToken });
   const network = await createNetwork({ userId, externalId, name, integrationName });
   await addUserToNetwork({
@@ -106,7 +108,6 @@ export async function findAllNetworks() {
 export async function getLoginToken({ username, password }) {
   const url = '/v2/authenticate';
   const { result } = await postRequest(url, { username, password });
-  console.log(result)
   return { accessToken: tokenUtil.decode(result.data.access_token), tokens: result.data };
 }
 
@@ -122,7 +123,6 @@ export async function getLoginToken({ username, password }) {
  * @return {external:Promise<User>} {@link module:modules/core~User User}
  */
 export async function createUser(userAttributes = {}) {
-  console.log(userAttributes)
   const attributes = { username: `test-user-${Math.floor(Math.random() * 1000)}`,
     ...userAttributes };
   const user = await userRepo.createUser(R.merge(blueprints.users.admin, attributes));

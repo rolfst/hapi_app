@@ -54,7 +54,6 @@ describe('test helper', () => {
       const integration = await testHelper.createIntegration();
 
       const integrations = await testHelper.findAllIntegrations();
-console.log(integrations)
       assert.equal(integrations.length, 1);
       assert.equal(integrations[0].name, integration.name);
       assert.equal(integrations[0].token, integration.token);
@@ -86,7 +85,7 @@ console.log(integrations)
     afterEach(async () => testHelper.cleanAll());
 
     it('should create 2 networks', async () => {
-      const user = await testHelper.createUser({password: 'test'});
+      const user = await testHelper.createUser({ password: 'test' });
 
       await Promise.all([
         testHelper.createNetwork({ userId: user.id }),
