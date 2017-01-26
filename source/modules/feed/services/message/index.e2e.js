@@ -1,13 +1,19 @@
 import { assert } from 'chai';
+import * as testHelpers from '../../../../shared/test-utils/helpers';
 import * as pollService from '../../../poll/services/poll';
 import * as messageService from './index';
 import * as objectService from '../object';
 
 describe('Service: Message', () => {
   describe('createMessage', () => {
+    let admin;
+    let network;
     let createdMessage;
 
     before(async () => {
+      admin = await testHelpers.createUser({ password: 'foo' });
+      network = await testHelpers.createNetwork({ userId: admin.id });
+
       createdMessage = await messageService.create({
         parentType: 'network',
         parentId: '42',
@@ -17,12 +23,12 @@ describe('Service: Message', () => {
           data: { options: ['Yes', 'No', 'Ok'] },
         }],
       }, {
-        credentials: { id: global.users.admin.id },
-        network: { id: global.networks.flexAppeal.id },
+        credentials: { id: admin.id },
+        network: { id: network.id },
       });
     });
 
-    after(() => messageService.remove({ messageId: createdMessage.id }));
+    after(() => testHelpers.cleanAll());
 
     it('should create a message entry', async () => {
       const expected = await messageService.get({ messageId: createdMessage.id });
@@ -42,8 +48,8 @@ describe('Service: Message', () => {
       const pollEntry = await pollService.get({ pollId: objects[0].sourceId });
 
       assert.isDefined(pollEntry);
-      assert.equal(pollEntry.networkId, global.networks.flexAppeal.id);
-      assert.equal(pollEntry.userId, global.users.admin.id);
+      assert.equal(pollEntry.networkId, network.id);
+      assert.equal(pollEntry.userId, admin.id);
     });
 
     it('should create object entry for poll if resource is present', async () => {
@@ -53,7 +59,7 @@ describe('Service: Message', () => {
       });
 
       assert.lengthOf(expected, 1);
-      assert.equal(expected[0].userId, global.users.admin.id);
+      assert.equal(expected[0].userId, admin.id);
       assert.equal(expected[0].objectType, 'poll');
       assert.isDefined(expected[0].sourceId);
     });

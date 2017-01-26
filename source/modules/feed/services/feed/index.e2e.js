@@ -1,6 +1,9 @@
 import { assert } from 'chai';
 import moment from 'moment';
+import sinon from 'sinon';
 import Promise from 'bluebird';
+import * as testHelpers from '../../../../shared/test-utils/helpers';
+import * as notifier from '../../../../shared/services/notifier';
 import * as flexchangeService from '../../../flexchange/services/flexchange';
 import * as objectService from '../object';
 import * as messageService from '../message';
@@ -8,13 +11,18 @@ import * as feedService from './index';
 
 describe('Service: Feed', () => {
   describe('make', () => {
-    let createdObject;
-    let createdMessages;
+    let network;
+    let admin;
 
     before(async () => {
+      sinon.stub(notifier, 'send');
+      admin = await testHelpers.createUser({ password: 'foo' });
+      network = await testHelpers.createNetwork({ userId: admin.id });
+      await testHelpers.addUserToNetwork({ userId: admin.id, networkId: network.id });
+
       const serviceMessage = {
-        credentials: { id: global.users.admin.id },
-        network: { id: global.networks.flexAppeal.id },
+        credentials: { id: admin.id },
+        network: { id: network.id },
       };
 
       const createdExchange = await flexchangeService.createExchange({
@@ -22,62 +30,59 @@ describe('Service: Feed', () => {
         startTime: moment().toISOString(),
         endTime: moment().add(3, 'hours').toISOString(),
         type: 'ALL',
-        values: [global.networks.flexAppeal.id],
+        values: [network.id],
       }, serviceMessage);
 
       await Promise.delay(1000);
 
-      const createdMessage1 = await messageService.create({
+      await messageService.create({
         parentType: 'network',
-        parentId: global.networks.flexAppeal.id,
+        parentId: network.id,
         text: 'Message for feed',
       }, serviceMessage);
 
       await Promise.delay(1000);
 
-      const createdMessage2 = await messageService.create({
+      await messageService.create({
         parentType: 'network',
-        parentId: global.networks.flexAppeal.id,
+        parentId: network.id,
         text: 'Second message for feed',
       }, serviceMessage);
 
       await Promise.delay(1000);
 
-      const createdMessage3 = await messageService.create({
+      await messageService.create({
         parentType: 'team',
         parentId: '33',
         text: 'Second message for other feed',
       }, serviceMessage);
 
-      createdMessages = [createdMessage1, createdMessage2, createdMessage3];
-
-      createdObject = await objectService.create({
-        userId: global.users.admin.id,
+      await objectService.create({
+        userId: admin.id,
         parentType: 'network',
-        parentId: global.networks.flexAppeal.id,
+        parentId: network.id,
         objectType: 'exchange',
         sourceId: createdExchange.id,
       });
     });
 
-    after(async () => {
-      await objectService.remove({ id: createdObject.id });
-      await Promise.map(createdMessages, (m) => messageService.remove({ messageId: m.id }));
-    });
+    after(() => testHelpers.cleanAll());
 
     it('should return feed models in descending order by creation date', async () => {
       const actual = await feedService.make({
         parentType: 'network',
-        parentId: global.networks.flexAppeal.id,
+        parentId: network.id,
       }, {
-        credentials: { id: global.users.admin.id },
-        network: { id: global.networks.flexAppeal.id },
+        credentials: { id: admin.id },
+        network: { id: network.id },
       });
+
+      console.log(actual);
 
       assert.lengthOf(actual, 3);
       assert.equal(actual[0].objectType, 'exchange');
       assert.equal(actual[0].parentType, 'network');
-      assert.equal(actual[0].parentId, global.networks.flexAppeal.id);
+      assert.equal(actual[0].parentId, network.id);
       assert.equal(actual[1].objectType, 'message');
       assert.equal(actual[1].source.text, 'Second message for feed');
       assert.equal(actual[2].objectType, 'message');
@@ -87,12 +92,12 @@ describe('Service: Feed', () => {
     it('should return feed models for subset with limit and offset query', async () => {
       const actual = await feedService.make({
         parentType: 'network',
-        parentId: global.networks.flexAppeal.id,
+        parentId: network.id,
         offset: 1,
         limit: 1,
       }, {
-        credentials: { id: global.users.admin.id },
-        network: { id: global.networks.flexAppeal.id },
+        credentials: { id: admin.id },
+        network: { id: network.id },
       });
 
       assert.lengthOf(actual, 1);

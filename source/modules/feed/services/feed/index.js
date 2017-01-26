@@ -23,10 +23,11 @@ export const make = async (payload, message) => {
   logger.info(`Making feed for ${payload.parentType}`, { payload, message });
 
   const whitelistedPayload = R.pick(['parentType', 'parentId', 'limit', 'offset'], payload);
-  const relatedObjects = await objectService
-    .list(whitelistedPayload, message)
-    .then(R.sort(R.descend(R.prop('createdAt'))));
 
-  return objectService.listWithSources({
-    objectIds: R.pluck('id', relatedObjects) }, message);
+  return R.pipeP(
+    (_payload) => objectService.list(_payload, message),
+    (relatedObjects) => objectService.listWithSources({
+      objectIds: R.pluck('id', relatedObjects) }, message),
+    R.sort(R.descend(R.prop('createdAt')))
+  )(whitelistedPayload);
 };
