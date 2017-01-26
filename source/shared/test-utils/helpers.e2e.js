@@ -164,32 +164,6 @@ describe('test helper', () => {
       assert.equal(network.integrations[0], integration.name);
       assert.equal(integration.name, integrationName);
     });
-
-    it('should throw an error when not providing an integrationName', async () => {
-      const user = await testHelper.createUser({ password: 'test' });
-      const promise = testHelper.createNetworkWithIntegration({
-        userId: user.id,
-        externalId: 'externalId',
-        name: 'networkName',
-      });
-
-      assert.isRejected(promise, /Error: Missing Parameter: integrationName/,
-        'failed to create network with integration');
-    });
-
-    it('should throw an error when not providing a token', async () => {
-      const integrationName = 'integration';
-      const user = await testHelper.createUser({ password: 'test' });
-      const promise = testHelper.createNetworkWithIntegration({
-        integrationName,
-        userId: user.id,
-        externalId: 'externalId',
-        name: 'networkName',
-      });
-
-      assert.isRejected(promise, /Error: Missing Parameter: token/,
-        'failed to create network with integration');
-    });
   });
 
   describe('createUserForNewNetwork', () => {

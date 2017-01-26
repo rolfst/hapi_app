@@ -55,13 +55,21 @@ export async function addUserToNetwork(networkUserAttributes) {
  * @param {string} [networkAttributes.externalId]
  * @param {string} [networkAttributes.name]
  * @param {string} [networkAttributes.integrationName]
+ * @param {string} [networkAttributes.userExternalId]
+ * @param {string} [networkAttributes.userToken]
  * @method createNetwork
  * @return {external:Promise<Network>} {@link module:modules/core~Network Network} - created network
  */
-export async function createNetwork({
-  userId, externalId, integrationName, name = randomString() }) {
+export function createNetwork({
+  userId, externalId, integrationName, name = randomString(), userExternalId, userToken }) {
   const networkAttributes = { userId, externalId, integrationName, name };
-  return networkService.create(networkAttributes);
+  return networkService.create(networkAttributes)
+    .then(network => {
+      addUserToNetwork({
+        networkId: network.id, userId, roleType: 'ADMIN', externalId: userExternalId, userToken });
+
+      return network;
+    });
 }
 
 /**
@@ -87,8 +95,6 @@ export async function createNetworkWithIntegration({
   userToken = null }) {
   const integration = await createIntegration({ name: integrationName, token: integrationToken });
   const network = await createNetwork({ userId, externalId, name, integrationName });
-  await addUserToNetwork({
-    networkId: network.id, userId, roleType: 'ADMIN', externalId: userExternalId, userToken });
 
   return { integration, network };
 }
