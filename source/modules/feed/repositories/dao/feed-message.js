@@ -1,7 +1,7 @@
 import Sequelize from 'sequelize';
 import { db as model } from '../../../../connections';
 
-const Message = model.define('Message', {
+const Message = model.define('FeedMessage', {
   objectId: {
     type: Sequelize.INTEGER,
     field: 'object_id',
