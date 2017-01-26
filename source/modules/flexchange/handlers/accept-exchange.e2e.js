@@ -3,7 +3,6 @@ import sinon from 'sinon';
 import moment from 'moment';
 import * as testHelper from '../../../shared/test-utils/helpers';
 import * as notifier from '../../../shared/services/notifier';
-import blueprints from '../../../shared/test-utils/blueprints';
 import { patchRequest } from '../../../shared/test-utils/request';
 import { exchangeTypes } from '../repositories/dao/exchange';
 import { createExchange } from '../repositories/exchange';
@@ -13,20 +12,14 @@ describe('Accept exchange', () => {
   let network;
   let admin;
   let exchange;
-  let accessToken;
 
   before(async () => {
     sandbox = sinon.sandbox.create();
     sandbox.stub(notifier, 'send').returns(null);
 
-    admin = await testHelper.createUser();
+    admin = await testHelper.createUser({
+      username: 'admin@flex-appeal.nl', password: 'foo' });
     network = await testHelper.createNetwork({ userId: admin.id });
-
-    await testHelper.addUserToNetwork(
-        { networkId: network.id, userId: admin.id, roleType: 'ADMIN' });
-
-    const { tokens } = await testHelper.getLoginToken(blueprints.users.admin);
-    accessToken = tokens.access_token;
 
     exchange = await createExchange(admin.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
@@ -44,7 +37,7 @@ describe('Accept exchange', () => {
   it('should return correct data', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}`;
 
-    const response = await patchRequest(endpoint, { action: 'accept' }, accessToken);
+    const response = await patchRequest(endpoint, { action: 'accept' }, admin.token);
     const { data } = response.result;
 
     assert.equal(response.statusCode, 200);
@@ -59,7 +52,7 @@ describe('Accept exchange', () => {
 
     await patchRequest(endpoint, { action: 'decline' });
     const { statusCode, result: { data } } = await patchRequest(
-        endpoint, { action: 'accept' }, accessToken);
+        endpoint, { action: 'accept' }, admin.token);
 
     assert.equal(statusCode, 200);
     assert.equal(data.response_status, 'ACCEPTED');
@@ -71,7 +64,7 @@ describe('Accept exchange', () => {
   it('should send accept notification to admin', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}`;
 
-    await patchRequest(endpoint, { action: 'accept' }, accessToken);
+    await patchRequest(endpoint, { action: 'accept' }, admin.token);
 
     assert.equal(notifier.send.called, true);
   });

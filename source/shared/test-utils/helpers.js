@@ -109,12 +109,16 @@ export async function findAllNetworks() {
 }
 
 /**
- *
+ * @param {object} credentials
+ * @param {string} creadentials.username
+ * @param {string} creadentials.password
+ * @method getLoginToken
+ * returns all the tokes for the user during login
  */
 export async function getLoginToken({ username, password }) {
   const url = '/v2/authenticate';
   const { result } = await postRequest(url, { username, password });
-  return { accessToken: tokenUtil.decode(result.data.access_token), tokens: result.data };
+  return { tokens: result.data };
 }
 
 /**
