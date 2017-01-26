@@ -12,8 +12,20 @@ const Message = model.define('Message', {
     field: 'text',
     allowNull: false,
   },
+  likesCount: {
+    type: Sequelize.INTEGER,
+    field: 'likes_count',
+    allowNull: false,
+    defaultValue: 0,
+  },
+  commentsCount: {
+    type: Sequelize.INTEGER,
+    field: 'comments_count',
+    allowNull: false,
+    defaultValue: 0,
+  },
 }, {
-  tableName: 'messages',
+  tableName: 'feed_messages',
   createdAt: 'created_at',
   updatedAt: false,
 });
