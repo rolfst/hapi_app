@@ -5,6 +5,20 @@ import * as privateMessageRepository from '../../repositories/private-message';
 const logger = Logger.createLogger('CHAT/service/conversation');
 
 /**
+ * Listing private messages
+ * @param {object} payload - Object containing payload data
+ * @param {string[]} payload.messageIds - The ids of the messages to list
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method list
+ * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
+ */
+export const list = async (payload, message) => {
+  logger.info('Listing private messages', { payload, message });
+
+  return privateMessageRepository.findByIds(payload.messageIds);
+};
+
+/**
  * Create private message
  * @param {object} payload - Object containing payload data
  * @param {string} payload.conversationId - The id of the conversation the message is created in.
@@ -31,12 +45,4 @@ export async function create(payload, message) {
   privateMessageRepository.update(createdMessage.id, { objectId: createdObject.id });
 
   return { ...createdMessage, objectId: createdObject.id };
-}
-
-export async function list(payload, message) {
-  logger.info('Listing private messages', { payload, message });
-
-  return privateMessageRepository.findBy({
-    id: { $in: payload.messageIds },
-  });
 }
