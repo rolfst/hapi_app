@@ -2,7 +2,6 @@ import { assert } from 'chai';
 import * as testHelper from '../../../../shared/test-utils/helpers';
 import blueprints from '../../../../shared/test-utils/blueprints';
 import { getRequest } from '../../../../shared/test-utils/request';
-import authenticate from '../../../../shared/test-utils/authenticate';
 import * as messageService from '../../../feed/services/message';
 import * as conversationService from '../services/conversation';
 
@@ -16,15 +15,11 @@ describe('Get conversations for logged user (v2)', () => {
     let createdConversation1;
 
     before(async () => {
-      creator = await testHelper.createUser({
-        ...blueprints.users.admin,
-        username: 'conversation_creator' });
-      participant = await testHelper.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_participant' });
-      const otherParticipant = await testHelper.createUser({
-        ...blueprints.users.employee,
-        username: 'other_conversation_participant' });
+      [creator, participant] = await Promise.all([
+        testHelper.createUser(),
+        testHelper.createUser(),
+      ]);
+      const otherParticipant = await testHelper.createUser();
 
       const network = await testHelper.createNetwork({ userId: creator.id });
 
@@ -42,9 +37,9 @@ describe('Get conversations for logged user (v2)', () => {
       }, { credentials: { id: creator.id } });
 
       const { tokens } = await testHelper.getLoginToken(
-          { ...blueprints.users.admin,
-            username: 'conversation_creator',
-          });
+        { ...blueprints.users.admin,
+          username: 'conversation_creator',
+        });
       creatorToken = tokens.access_token;
 
       await messageService.create({

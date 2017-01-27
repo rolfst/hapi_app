@@ -28,7 +28,7 @@ export const randomString = (prefix = 'test-object') =>
  * @method createIntegration
  * @return {external:Promise<Integration>} {@link module:modules/core~Integration}
  */
-export async function createIntegration(attributes = DEFAULT_INTEGRATION) {
+export function createIntegration(attributes = DEFAULT_INTEGRATION) {
   return integrationRepo.createIntegration(attributes);
 }
 
@@ -43,7 +43,7 @@ export async function createIntegration(attributes = DEFAULT_INTEGRATION) {
  * @method addUserToNetwork
  * @return {external:Promise.<NetworkUser>} {@link module:shared~NetworkUser NetworkUser}
  */
-export async function addUserToNetwork(networkUserAttributes) {
+export function addUserToNetwork(networkUserAttributes) {
   return networkService.addUserToNetwork(networkUserAttributes);
 }
 
@@ -62,6 +62,7 @@ export async function addUserToNetwork(networkUserAttributes) {
 export function createNetwork({
   userId, externalId, integrationName, name = randomString(), userExternalId, userToken }) {
   const networkAttributes = { userId, externalId, integrationName, name };
+
   return networkService.create(networkAttributes)
     .then(network => {
       addUserToNetwork({
@@ -104,7 +105,7 @@ export async function createNetworkWithIntegration({
  * @method findAllNetworks
  * @return {external:Promise<Network[]>} {@link module:modules/core~Network Network}
  */
-export async function findAllNetworks() {
+export function findAllNetworks() {
   return networkRepo.findAll();
 }
 
@@ -118,6 +119,7 @@ export async function findAllNetworks() {
 export async function getLoginToken({ username, password }) {
   const url = '/v2/authenticate';
   const { result } = await postRequest(url, { username, password });
+
   return { tokens: result.data };
 }
 
@@ -134,6 +136,7 @@ export async function getLoginToken({ username, password }) {
  */
 export async function createUser(userAttributes = {}) {
   const attributes = { username: `test-user-${Math.floor(Math.random() * 1000)}`,
+    password: `pw#${Math.floor(Math.random() * 1000)}`,
     ...userAttributes };
   const user = await userRepo.createUser(R.merge(blueprints.users.admin, attributes));
   const token = await getLoginToken(attributes);
@@ -175,7 +178,7 @@ export async function createUserForNewNetwork(
  * @return {external:Promise<AuthorizedUser>}
  * @link module:shared/test-utils/authenticate.AuthorizedUser}
  */
-export async function authenticateUser(userCredentials) {
+export function authenticateUser(userCredentials) {
   return authenticate(userCredentials, { deviceName: 'testDevice' });
 }
 
@@ -185,7 +188,7 @@ export async function authenticateUser(userCredentials) {
  * @method deleteUser
  * @return {external:Promise.<number[]>}
  */
-export async function deleteUser(...userOrUsers) {
+export function deleteUser(...userOrUsers) {
   return Promise.map(flatten(userOrUsers), (user) => userRepo.deleteById(user.id));
 }
 
@@ -194,7 +197,7 @@ export async function deleteUser(...userOrUsers) {
  * @method findAllUsers
  * @return {external:Promise<User[]>} {@link module:shared~User User}
  */
-export async function findAllUsers() {
+export function findAllUsers() {
   return userRepo.findAllUsers();
 }
 
@@ -204,7 +207,7 @@ export async function findAllUsers() {
  * @method deleteIntegration
  * @return {external:Promise}
  */
-export async function deleteIntegration(...integrationOrIntegrations) {
+export function deleteIntegration(...integrationOrIntegrations) {
   return Promise.map(flatten(integrationOrIntegrations),
     (integration) => integrationRepo.deleteById(integration.id));
 }
@@ -214,7 +217,7 @@ export async function deleteIntegration(...integrationOrIntegrations) {
  * @method findAllIntegrations
  * @return {external:Promise.IntegrationsModel[]>}
  */
-export async function findAllIntegrations() {
+export function findAllIntegrations() {
   return integrationRepo.findAll();
 }
 
@@ -223,7 +226,7 @@ export async function findAllIntegrations() {
  * @method findAllActivities
  * @return {external:Promise.<Activity[]} {@link module:shared~Activity Activity}
  */
-export async function findAllActivities() {
+export function findAllActivities() {
   return activityRepo.findAll();
 }
 
@@ -233,7 +236,7 @@ export async function findAllActivities() {
  * @method deleteActivity
  * @return {external:Promise.<number[]>} number of deleted activities
  */
-export async function deleteActivity(...activityOrActivities) {
+export function deleteActivity(...activityOrActivities) {
   return Promise.map(flatten(activityOrActivities), (activity) => {
     activityRepo.deleteById(activity.id);
   });
@@ -243,10 +246,9 @@ export async function deleteActivity(...activityOrActivities) {
  * Deletes all data in the database
  * @method cleanAll
  */
-export async function cleanAll() {
+export function cleanAll() {
   return Promise.map(findAllNetworks(), (network) => networkRepo.deleteById(network.id))
   .then(() => Promise.map(findAllUsers(), deleteUser))
   .then(() => Promise.map(findAllActivities(), deleteActivity))
   .then(() => Promise.map(findAllIntegrations(), deleteIntegration));
 }
-
