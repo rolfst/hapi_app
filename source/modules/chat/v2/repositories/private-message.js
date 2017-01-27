@@ -6,6 +6,15 @@ export const findBy = (whereConstraint) => PrivateMessage
   .findAll({ where: whereConstraint })
   .then(R.map(createPrivateMessageModel));
 
+export const findByIds = (messageIds) => findBy({
+  id: { $in: messageIds },
+});
+
+export const findById = (messageId) => R.pipeP(
+  findBy({ id: { $in: messageId } }),
+  R.head
+)();
+
 export const create = ({ objectId, text }) => PrivateMessage
   .create({ objectId, text })
   .then(createPrivateMessageModel);
