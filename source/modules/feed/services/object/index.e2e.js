@@ -62,30 +62,27 @@ describe('Service: Object', () => {
   });
 
   describe('count', () => {
-    before(async () => {
-      await objectService.create({
+    before(() => Promise.all([
+      objectService.create({
         userId: global.users.admin.id,
         parentType: 'network',
-        parentId: '42',
+        parentId: '123',
         objectType: 'poll',
-        sourceId: '2',
-      });
-
-      await objectService.create({
+        sourceId: '3',
+      }),
+      objectService.create({
         userId: global.users.admin.id,
         parentType: 'network',
-        parentId: '42',
-        objectType: 'message',
+        parentId: '123',
+        objectType: 'feed_message',
         sourceId: '2',
-      });
-    });
-
-    after(() => objectService.remove({ parentType: 'network', parentId: '42' }));
+      }),
+    ]));
 
     it('should return correct count', async () => {
       const networkObjects = await objectService.count({ where: {
         parentType: 'network',
-        parentId: '42',
+        parentId: '123',
       } });
 
       assert.equal(networkObjects, 2);

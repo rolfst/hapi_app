@@ -16,7 +16,7 @@ export const createPollResource = (createdMessage, message) => R.pipeP(
   }, message),
   (createdPoll) => objectService.create({
     userId: message.credentials.id,
-    parentType: 'message',
+    parentType: 'feed_message',
     parentId: createdMessage.id,
     objectType: 'poll',
     sourceId: createdPoll.id,

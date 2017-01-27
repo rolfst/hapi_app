@@ -4,7 +4,7 @@ import * as messageService from './index';
 import * as objectService from '../object';
 
 describe('Service: Message', () => {
-  describe('createMessage', () => {
+  describe('create', () => {
     let createdMessage;
 
     before(async () => {
@@ -35,7 +35,7 @@ describe('Service: Message', () => {
 
     it('should create a poll entry if resource is present', async () => {
       const objects = await objectService.list({
-        parentType: 'message',
+        parentType: 'feed_message',
         parentId: createdMessage.id,
       });
 
@@ -48,7 +48,7 @@ describe('Service: Message', () => {
 
     it('should create object entry for poll if resource is present', async () => {
       const expected = await objectService.list({
-        parentType: 'message',
+        parentType: 'feed_message',
         parentId: createdMessage.id,
       });
 
