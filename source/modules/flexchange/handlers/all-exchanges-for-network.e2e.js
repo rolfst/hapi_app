@@ -5,7 +5,6 @@ import { map, pick, find } from 'lodash';
 import { getRequest } from '../../../shared/test-utils/request';
 import * as testHelper from '../../../shared/test-utils/helpers';
 import * as stubs from '../../../shared/test-utils/stubs';
-import * as networkService from '../../core/services/network';
 import { create } from '../../core/repositories/team';
 import * as userRepo from '../../core/repositories/user';
 import { exchangeTypes } from '../repositories/dao/exchange';
@@ -21,10 +20,8 @@ describe('Get exchanges for network', () => {
 
     before(async () => {
       [admin, employee] = await Promise.all([
-        testHelper.createUser({
-          username: 'admin@flex-appeal.nl', password: 'foo' }),
-        testHelper.createUser({
-          username: 'employee@flex-appeal.nl', password: 'baz' }),
+        testHelper.createUser({ username: 'admin@flex-appeal.nl', password: 'foo' }),
+        testHelper.createUser({ username: 'employee@flex-appeal.nl', password: 'baz' }),
       ]);
 
       const { network: netw } = await testHelper.createNetworkWithIntegration({
@@ -34,9 +31,9 @@ describe('Get exchanges for network', () => {
       });
       integratedNetwork = netw;
       const plainNetwork = await testHelper.createNetwork(
-          { userId: admin.id, name: 'flexappeal' });
+        { userId: admin.id, name: 'flexappeal' });
 
-      await networkService.addUserToNetwork({
+      await testHelper.addUserToNetwork({
         userId: employee.id,
         networkId: integratedNetwork.id,
       });
