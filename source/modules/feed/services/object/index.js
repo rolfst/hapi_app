@@ -24,11 +24,15 @@ const logger = Logger.getLogger('FEED/service/object');
 export const list = async (payload, message) => {
   logger.info('Listing objects', { payload, message });
 
-  const options = R.pick(['offset', 'limit'], payload);
+  const createOptions = R.pipe(
+    R.pick(['offset', 'limit']),
+    R.assoc('order', [['createdAt', 'desc']])
+  );
+
   const objects = await objectRepository.findBy({
     parentType: payload.parentType,
     parentId: payload.parentId,
-  }, options);
+  }, createOptions(payload));
 
   return objects;
 };
@@ -44,7 +48,9 @@ export const list = async (payload, message) => {
 export const listWithSources = async (payload, message) => {
   logger.info('Listing objects with sources', { payload, message });
 
-  const objects = await objectRepository.findBy({ id: { $in: payload.objectIds } });
+  const objects = await objectRepository.findBy({
+    id: { $in: payload.objectIds } }, { order: [['createdAt', 'desc']] });
+
   const sourceIdsPerType = R.pipe(
     R.groupBy(R.prop('objectType')),
     R.map(R.pluck('sourceId'))
