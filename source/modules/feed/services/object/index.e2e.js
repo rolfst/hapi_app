@@ -1,4 +1,6 @@
 import { assert } from 'chai';
+import * as privateMessageService from '../../../chat/v2/services/private-message';
+import * as feedMessageService from '../message';
 import * as objectService from './index';
 
 describe('Service: Object', () => {
@@ -87,6 +89,43 @@ describe('Service: Object', () => {
       } });
 
       assert.equal(networkObjects, 2);
+    });
+  });
+
+  describe('listWithSources', () => {
+    it('should support object_type: private_message', async () => {
+      const createdMessage = await privateMessageService.create({
+        conversationId: '42',
+        text: 'Test message',
+      }, { credentials: { id: global.users.admin.id } });
+
+      const actual = await objectService.listWithSources({
+        objectIds: [createdMessage.objectId],
+      }, { credentials: { id: global.users.admin.id } });
+
+      const object = actual[0];
+
+      assert.equal(object.source.type, 'private_message');
+      assert.equal(object.source.id, createdMessage.id);
+      assert.equal(object.source.text, 'Test message');
+    });
+
+    it('should support object_type: feed_message', async () => {
+      const createdMessage = await feedMessageService.create({
+        parentType: 'network',
+        parentId: '42',
+        text: 'Test message for network',
+      }, { credentials: { id: global.users.admin.id } });
+
+      const actual = await objectService.listWithSources({
+        objectIds: [createdMessage.objectId],
+      }, { credentials: { id: global.users.admin.id } });
+
+      const object = actual[0];
+
+      assert.equal(object.source.type, 'feed_message');
+      assert.equal(object.source.id, createdMessage.id);
+      assert.equal(object.source.text, 'Test message for network');
     });
   });
 });
