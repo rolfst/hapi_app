@@ -9,7 +9,6 @@ import * as userRepo from '../../modules/core/repositories/user';
 import * as networkRepo from '../../modules/core/repositories/network';
 import * as activityRepo from '../../modules/core/repositories/activity';
 import { postRequest } from './request';
-import tokenUtil from '../utils/token';
 
 /**
  * @module shared/test-utils/TestHelper
@@ -76,8 +75,8 @@ export function createNetwork({
  * Creates a network and an integration based on the attributes
  * @param {Object} networkAttributes
  * @param {string} networkAttributes.userId
- * @param {string} [networkAttributes.name]
  * @param {string} [networkAttributes.externalId]
+ * @param {string} [networkAttributes.name]
  * @param {string} [networkAttributes.integrationName]
  * @param {string} [networkAttributes.integrationToken] - token to be used to access the integration
  * @param {string} [networkAttributes.userExternalId]
@@ -87,14 +86,15 @@ export function createNetwork({
  */
 export async function createNetworkWithIntegration({
   userId,
-  name = randomString(),
   externalId,
+  name = randomString(),
   integrationName = randomString(),
   integrationToken = randomString(),
   userExternalId = null,
   userToken = null }) {
   const integration = await createIntegration({ name: integrationName, token: integrationToken });
-  const network = await createNetwork({ userId, externalId, name, integrationName });
+  const network = await createNetwork(
+      { userId, externalId, name, integrationName, userToken, userExternalId });
 
   return { integration, network };
 }
@@ -164,44 +164,6 @@ export async function createUserForNewNetwork(
   const domainUser = await userRepo.findUserById(user.id, network.id);
 
   return { user: domainUser, network };
-}
-
-/**
- * Creates a user and a network in the database, the user is assigned as owner
- * @param {object} userAttributes
- * @param {string} userAttributes.username
- * @param {string} userAttributes.firstName
- * @param {string} userAttributes.lastName
- * @param {string} userAttributes.email
- * @param {string} userAttributes.password
- * @param {Object} networkAttributes
- * @param {string} networkAttributes.name
- * @param {Object} integrationAttributes
- * @param {string} integrationAttributes.integrationName
- * @param {string} integrationAttributes.token
- * @param {string} [roleType='EMPOYEE']
- * @method createUserForNewNetworkWithIntegration
- * @return {external:Promise.<object>} {@link module:shared~User user},
- * {@link module:shared~Network network}
- */
-export async function createUserForNewNetworkWithIntegration(
-  userAttributes,
-  { name = randomString() },
-  { token, integrationName, externalId }, roleType = 'EMPLOYEE') {
-  const user = await createUser(userAttributes);
-  const integration = await createIntegration({ name: integrationName, token });
-  const network = await createNetwork({ userId: user.id, name, externalId, integrationName });
-
-  await addUserToNetwork({
-    networkId: network.id,
-    userId: user.id,
-    externalId: userAttributes.externalId,
-    roleType,
-    userToken: token,
-    integrationName });
-  const domainUser = await userRepo.findUserById(user.id, network.id);
-
-  return { user: domainUser, network, integration };
 }
 
 /**
