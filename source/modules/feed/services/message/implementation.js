@@ -30,6 +30,6 @@ export const createPollResource = (createdMessage, message) => R.pipeP(
  * @return {Promise}
  */
 export const removeAttachedObjects = (messageId) => Promise.all([
-  objectService.remove({ objectType: 'message', sourceId: messageId }),
-  objectService.remove({ parentType: 'message', parentId: messageId }),
+  objectService.remove({ objectType: 'feed_message', sourceId: messageId }),
+  objectService.remove({ parentType: 'feed_message', parentId: messageId }),
 ]);

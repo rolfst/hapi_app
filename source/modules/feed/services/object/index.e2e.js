@@ -4,6 +4,8 @@ import * as feedMessageService from '../message';
 import * as objectService from './index';
 
 describe('Service: Object', () => {
+  after(() => objectService.remove({ parentType: 'network', parentId: '42' }));
+
   describe('list', () => {
     before(async () => {
       await objectService.create({
@@ -22,8 +24,6 @@ describe('Service: Object', () => {
         sourceId: '2',
       });
     });
-
-    after(() => objectService.remove({ parentType: 'network', parentId: '42' }));
 
     it('should return objects', async () => {
       const actual = await objectService.list({
@@ -93,6 +93,8 @@ describe('Service: Object', () => {
   });
 
   describe('listWithSources', () => {
+    after(() => objectService.remove({ parentType: 'conversation', parentId: '42' }));
+
     it('should support object_type: private_message', async () => {
       const createdMessage = await privateMessageService.create({
         conversationId: '42',
