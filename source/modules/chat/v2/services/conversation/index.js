@@ -3,9 +3,9 @@ import * as Logger from '../../../../../shared/services/logger';
 import * as userRepo from '../../../../core/repositories/user';
 import * as objectService from '../../../../feed/services/object';
 import * as objectRepository from '../../../../feed/repositories/object';
-import * as messageService from '../../../../feed/services/message';
-import * as conversationRepo from '../../repositories/conversation';
 import * as conversationRepoV1 from '../../../v1/repositories/conversation';
+import * as conversationRepo from '../../repositories/conversation';
+import * as privateMessageService from '../private-message';
 import * as impl from './implementation';
 
 const logger = Logger.createLogger('CHAT/service/conversation');
@@ -51,21 +51,34 @@ export const listConversations = async (payload, message) => {
 
   if (objects.length === 0) return conversations;
 
-  const lastMessageObjects = await impl.lastMessageObjectsForConversations(objects);
-  const lastMessages = await messageService.list({
-    messageIds: R.pluck('sourceId', lastMessageObjects) });
-  const mergeLastMessage = impl.mergeLastMessageWithConversation(lastMessageObjects, lastMessages);
+  const lastMessageObjects = R.pipe(
+    R.sort(R.descend(R.prop('createdAt'))),
+    R.groupBy(R.prop('parentId')),
+    R.map(R.head)
+  )(objects);
+
+  const objectSourceIds = R.pipe(R.pluck('sourceId'), R.values)(lastMessageObjects);
+  const lastMessages = await privateMessageService.list({ messageIds: objectSourceIds });
+
+  const lastMessagesForConversation = R.map(object =>
+    R.find(R.propEq('id', object.sourceId), lastMessages), lastMessageObjects);
 
   if (includes('participants')) {
-    const userIds = R.pipe(R.pluck('participantIds'), R.flatten, R.uniq)(conversations);
-    const participants = await userRepo.findByIds(userIds);
-    const conversationWithParticipants = await impl.addParticipantsToConversation(
-      conversations, participants);
+    const participants = await R.pipe(
+      R.pipe(R.pluck('participantIds'), R.flatten, R.uniq),
+      userRepo.findByIds
+    )(conversations);
 
-    return R.map(mergeLastMessage, conversationWithParticipants);
+    const findParticipant = (participantId) => R.find(R.propEq('id', participantId), participants);
+
+    return R.map(conversation => R.merge(conversation, {
+      lastMessage: lastMessagesForConversation[conversation.id],
+      participants: R.map(findParticipant, conversation.participantIds),
+    }), conversations);
   }
 
-  return R.map(mergeLastMessage, conversations);
+  return R.map(conversation => R.merge(conversation, {
+    lastMessage: lastMessagesForConversation[conversation.id] }), conversations);
 };
 
 /**
@@ -142,29 +155,6 @@ export const remove = async (payload, message) => {
     parentType: 'conversation',
     parentId: payload.conversationId },
   message);
-};
-
-/**
- * Create a message in a conversation
- * @param {object} payload - Object containing payload data
- * @param {string} payload.conversationId - The type of parent to create the object for
- * @param {string} payload.text - The text of the message
- * @param {object[]} payload.resources - The resources that belong to the message
- * @param {string} payload.resources[].type - The type of the resource
- * @param {object} payload.resources[].data - The data for the resource
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method createMessage
- * @return {external:Promise<Message>} {@link module:chat~Message message}
- */
-export const createMessage = async (payload, message) => {
-  await impl.assertThatUserIsPartOfTheConversation(message.credentials.id, payload.conversationId);
-
-  return await messageService.create({
-    parentType: 'conversation',
-    parentId: payload.conversationId,
-    text: payload.text,
-    resources: payload.resources,
-  }, message);
 };
 
 /**
