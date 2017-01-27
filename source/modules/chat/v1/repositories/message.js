@@ -2,7 +2,7 @@ import { map } from 'lodash';
 import sequelize from 'sequelize';
 import { User } from '../../../../shared/models';
 import { Message, Conversation } from './dao';
-import createFeedMessageModel from '../models/feed-message';
+import createFeedMessageModel from '../models/message';
 
 /**
  * @module modules/chat/repositories/message
