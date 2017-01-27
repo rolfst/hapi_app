@@ -19,7 +19,7 @@ describe('test helper', () => {
     });
 
     it('should create a user', async () => {
-      await testHelper.createUser({
+      const createdUser = await testHelper.createUser({
         username: 'testHelper',
         firstName: 'test',
         lastName: 'Helper',
@@ -32,9 +32,14 @@ describe('test helper', () => {
 
       assert.equal(users.length, 1);
       assert.equal(user.username, 'testhelper');
+      assert.equal(user.username, createdUser.username);
       assert.equal(user.firstName, 'test');
+      assert.equal(user.firstName, createdUser.firstName);
       assert.equal(user.lastName, 'Helper');
+      assert.equal(user.lastName, createdUser.lastName);
       assert.equal(user.email, 'testhelper@flex-appeal.nl');
+      assert.equal(user.email, createdUser.email);
+      assert.property(createdUser, 'token');
     });
   });
 
@@ -49,7 +54,6 @@ describe('test helper', () => {
       const integration = await testHelper.createIntegration();
 
       const integrations = await testHelper.findAllIntegrations();
-
       assert.equal(integrations.length, 1);
       assert.equal(integrations[0].name, integration.name);
       assert.equal(integrations[0].token, integration.token);
@@ -78,17 +82,10 @@ describe('test helper', () => {
   });
 
   describe('createNetworks', () => {
-    afterEach(async () => {
-      const users = await testHelper.findAllUsers();
-      const integrations = await testHelper.findAllIntegrations();
-      return Promise.all([
-        testHelper.deleteIntegration(integrations),
-        testHelper.deleteUser(users),
-      ]);
-    });
+    afterEach(async () => testHelper.cleanAll());
 
     it('should create 2 networks', async () => {
-      const user = await testHelper.createUser();
+      const user = await testHelper.createUser({ password: 'test' });
 
       await Promise.all([
         testHelper.createNetwork({ userId: user.id }),
@@ -104,7 +101,7 @@ describe('test helper', () => {
     });
 
     it('should create a network with an integration', async () => {
-      const user = await testHelper.createUser();
+      const user = await testHelper.createUser({ password: 'test' });
       const createdIntegration = await testHelper.createIntegration();
       const createdNetwork = await testHelper.createNetwork({
         userId: user.id,
@@ -113,7 +110,7 @@ describe('test helper', () => {
       });
 
       const network = await networkService.getNetwork({
-        id: createdNetwork.id }, { credentials: { id: user.id } });
+        networkId: createdNetwork.id }, { credentials: { id: user.id } });
       const integrations = await integrationRepo.findAll();
       const integration = R.find(R.propEq('name', testHelper.DEFAULT_INTEGRATION.name),
           integrations);
@@ -125,7 +122,7 @@ describe('test helper', () => {
     });
 
     it('should create a network with a custom networkName', async () => {
-      const user = await testHelper.createUser();
+      const user = await testHelper.createUser({ password: 'test' });
       await testHelper.createIntegration();
       const createdNetwork = await testHelper.createNetwork({
         userId: user.id,
@@ -135,7 +132,7 @@ describe('test helper', () => {
       });
 
       const network = await networkService.getNetwork({
-        id: createdNetwork.id }, { credentials: { id: user.id } });
+        networkId: createdNetwork.id }, { credentials: { id: user.id } });
 
       assert.equal(network.name, 'customName');
     });
@@ -153,7 +150,7 @@ describe('test helper', () => {
 
     it('should create both a network and an integration', async () => {
       const integrationName = 'integration';
-      const user = await testHelper.createUser();
+      const user = await testHelper.createUser({ password: 'test' });
       const { network, integration } = await testHelper.createNetworkWithIntegration({
         userId: user.id,
         externalId: 'externalId',
@@ -166,32 +163,6 @@ describe('test helper', () => {
       assert.isNotNull(integration);
       assert.equal(network.integrations[0], integration.name);
       assert.equal(integration.name, integrationName);
-    });
-
-    it('should throw an error when not providing an integrationName', async () => {
-      const user = await testHelper.createUser();
-      const promise = testHelper.createNetworkWithIntegration({
-        userId: user.id,
-        externalId: 'externalId',
-        name: 'networkName',
-      });
-
-      assert.isRejected(promise, /Error: Missing Parameter: integrationName/,
-        'failed to create network with integration');
-    });
-
-    it('should throw an error when not providing a token', async () => {
-      const integrationName = 'integration';
-      const user = await testHelper.createUser();
-      const promise = testHelper.createNetworkWithIntegration({
-        integrationName,
-        userId: user.id,
-        externalId: 'externalId',
-        name: 'networkName',
-      });
-
-      assert.isRejected(promise, /Error: Missing Parameter: token/,
-        'failed to create network with integration');
     });
   });
 

@@ -18,10 +18,6 @@ import tokenUtil from '../utils/token';
 export const DEFAULT_INTEGRATION = { name: 'PMT', token: 'footoken' };
 export const DEFAULT_NETWORK_EXTERNALID = 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi';
 
-function mandatory(paramName) {
-  throw new Error(`Missing Parameter: ${paramName}`);
-}
-
 export const randomString = (prefix = 'test-object') =>
   `${prefix}-${Math.floor(Math.random() * 1000)}`;
 
@@ -59,13 +55,21 @@ export async function addUserToNetwork(networkUserAttributes) {
  * @param {string} [networkAttributes.externalId]
  * @param {string} [networkAttributes.name]
  * @param {string} [networkAttributes.integrationName]
+ * @param {string} [networkAttributes.userExternalId]
+ * @param {string} [networkAttributes.userToken]
  * @method createNetwork
  * @return {external:Promise<Network>} {@link module:modules/core~Network Network} - created network
  */
-export async function createNetwork({
-  userId, externalId, integrationName, name = randomString() }) {
+export function createNetwork({
+  userId, externalId, integrationName, name = randomString(), userExternalId, userToken }) {
   const networkAttributes = { userId, externalId, integrationName, name };
-  return networkService.create(networkAttributes);
+  return networkService.create(networkAttributes)
+    .then(network => {
+      addUserToNetwork({
+        networkId: network.id, userId, roleType: 'ADMIN', externalId: userExternalId, userToken });
+
+      return network;
+    });
 }
 
 /**
@@ -82,11 +86,15 @@ export async function createNetwork({
  * @return {external:Promise<Object>}
  */
 export async function createNetworkWithIntegration({
-  userId, name = randomString(), externalId, integrationName = randomString(), integrationToken = randomString(), userExternalId = null, userToken = null }) {
+  userId,
+  name = randomString(),
+  externalId,
+  integrationName = randomString(),
+  integrationToken = randomString(),
+  userExternalId = null,
+  userToken = null }) {
   const integration = await createIntegration({ name: integrationName, token: integrationToken });
   const network = await createNetwork({ userId, externalId, name, integrationName });
-  await addUserToNetwork({
-    networkId: network.id, userId, roleType: 'ADMIN', externalId: userExternalId, userToken });
 
   return { integration, network };
 }
@@ -101,6 +109,19 @@ export async function findAllNetworks() {
 }
 
 /**
+ * @param {object} credentials
+ * @param {string} creadentials.username
+ * @param {string} creadentials.password
+ * @method getLoginToken
+ * returns all the tokes for the user during login
+ */
+export async function getLoginToken({ username, password }) {
+  const url = '/v2/authenticate';
+  const { result } = await postRequest(url, { username, password });
+  return { tokens: result.data };
+}
+
+/**
  * Creates a user in the database
  * @param {object} userAttributes
  * @param {string} [userAttributes.username]
@@ -112,8 +133,13 @@ export async function findAllNetworks() {
  * @return {external:Promise<User>} {@link module:modules/core~User User}
  */
 export async function createUser(userAttributes = {}) {
-  return userRepo.createUser(R.merge(blueprints.users.admin, {
-    ...userAttributes, username: `test-user-${Math.floor(Math.random() * 1000)}` }));
+  const attributes = { username: `test-user-${Math.floor(Math.random() * 1000)}`,
+    ...userAttributes };
+  const user = await userRepo.createUser(R.merge(blueprints.users.admin, attributes));
+  const token = await getLoginToken(attributes);
+  user.token = token.tokens.access_token;
+
+  return user;
 }
 
 /**
@@ -262,12 +288,3 @@ export async function cleanAll() {
   .then(() => Promise.map(findAllIntegrations(), deleteIntegration));
 }
 
-/**
- *
- */
-export async function getLoginToken({ username, password }) {
-  const url = '/v2/authenticate';
-  const { result } = await postRequest(url, { username, password });
-
-  return { accessToken: tokenUtil.decode(result.data.access_token), tokens: result.data };
-}
