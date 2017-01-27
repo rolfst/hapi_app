@@ -184,6 +184,6 @@ export async function countMessages(payload, message) {
     where: {
       parentType: 'conversation',
       parentId: payload.conversationId,
-      objectType: 'message',
+      objectType: 'private_message',
     } });
 }

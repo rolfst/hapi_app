@@ -67,7 +67,6 @@ describe('Get messages (v2)', () => {
     assert.equal(result.data[0].source.type, 'private_message');
     assert.isString(result.data[0].source.id);
     assert.equal(result.data[0].source.text, 'First message');
-    assert.property(result.data[0], 'object_id');
     assert.property(result.data[0], 'created_at');
     assert.equal(result.data[result.data.length - 1].source.text, 'Last message');
     assert.property(result, 'meta');
@@ -87,7 +86,6 @@ describe('Get messages (v2)', () => {
     assert.equal(result.data[0].source.type, 'private_message');
     assert.isString(result.data[0].source.id);
     assert.equal(result.data[0].source.text, 'First message');
-    assert.property(result.data[0], 'object_id');
     assert.property(result.data[0], 'created_at');
     assert.equal(result.data[1].source.text, 'Second message');
   });
@@ -103,7 +101,6 @@ describe('Get messages (v2)', () => {
     assert.equal(result.data[0].source.type, 'private_message');
     assert.isString(result.data[0].source.id);
     assert.equal(result.data[0].source.text, 'Second message');
-    assert.property(result.data[0], 'object_id');
     assert.property(result.data[0], 'created_at');
     assert.equal(result.data[1].source.text, 'Last message');
   });
