@@ -1,32 +1,49 @@
 import { assert } from 'chai';
 import { find } from 'lodash';
+import * as testHelper from '../../../shared/test-utils/helpers';
 import * as networkRepo from '../../core/repositories/network';
 import * as userRepo from '../../core/repositories/user';
 import * as teamRepo from '../../core/repositories/team';
 import * as service from './invite-user';
 
 describe('Service: invite user', () => {
+  let employee;
   let network;
   let team;
 
   before(async () => {
-    network = global.networks.flexAppeal;
+    const [admin, user] = await Promise.all([
+      testHelper.createUser({ password: 'pw', email: 'owner@flex-appeal.nl' }),
+      testHelper.createUser({ password: 'wp', email: 'user@flex-appeal.nl' }),
+    ]);
+    employee = user;
+    network = await testHelper.createNetwork({ userId: admin.id, name: 'flexAppeal' });
+    await testHelper.addUserToNetwork({ userId: employee.id, networkId: network.id });
     team = await teamRepo.create({
       networkId: network.id,
       name: 'Cool Team',
     });
   });
 
-  after(() => teamRepo.deleteById(team.id));
+  after(() => testHelper.cleanAll());
 
   describe('Existing User', () => {
     let existingUser;
 
-    before(() => (existingUser = global.users.networklessUser));
+    before(async () => {
+      existingUser = await testHelper.createUser(
+        { email: 'god@flex-appeal.nl',
+          password: 'pw',
+          firstName: 'existing',
+          lastName: 'User',
+          username: 'god@flex-appeal.nl',
+        });
+    });
+
     afterEach(() => userRepo.removeFromNetwork(existingUser.id, network.id));
 
     it('should fail when user belongs to the network', async () => {
-      const { firstName, lastName, email } = global.users.employee;
+      const { firstName, lastName, email } = employee;
       const payload = { firstName, lastName, email };
 
       await assert.isRejected(service.inviteUser(payload, { network }));

@@ -3,18 +3,14 @@ import * as testHelpers from '../../../shared/test-utils/helpers';
 import { postRequest } from '../../../shared/test-utils/request';
 
 describe('Handler: Invite user', () => {
+  let admin;
   let network;
-  let adminToken;
 
   before(async () => {
-    const admin = await testHelpers.createUser({
+    admin = await testHelpers.createUser({
       username: 'admin@flex-appeal.nl', password: 'foo' });
 
-    const adminTokens = await testHelpers.getLoginToken({
-      username: admin.username, password: 'foo' });
-
-    adminToken = adminTokens.tokens.access_token;
-    network = await testHelpers.createNetwork({ userId: admin.id });
+    network = await testHelpers.createNetwork({ userId: admin.id, name: 'flexAppeal' });
   });
 
   after(() => testHelpers.cleanAll());
@@ -32,7 +28,7 @@ describe('Handler: Invite user', () => {
     };
 
     const endpoint = `/v2/networks/${network.id}/users`;
-    const { result, statusCode } = await postRequest(endpoint, payload, adminToken);
+    const { result, statusCode } = await postRequest(endpoint, payload, admin.token);
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.email, payload.email);
@@ -47,7 +43,7 @@ describe('Handler: Invite user', () => {
     };
 
     const endpoint = `/v2/networks/${network.id}/users`;
-    const { result, statusCode } = await postRequest(endpoint, payload, adminToken);
+    const { result, statusCode } = await postRequest(endpoint, payload, admin.token);
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.username, payload.email);
@@ -62,7 +58,7 @@ describe('Handler: Invite user', () => {
     };
 
     const endpoint = `/v2/networks/${network.id}/users`;
-    const { statusCode } = await postRequest(endpoint, payload, adminToken);
+    const { statusCode } = await postRequest(endpoint, payload, admin.token);
 
     assert.equal(statusCode, 422);
   });

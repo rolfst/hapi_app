@@ -4,16 +4,12 @@ import { getRequest, putRequest } from '../../../shared/test-utils/request';
 
 describe('Handler: update my profile', () => {
   let employee;
-  let employeeToken;
   let network;
 
   before(async () => {
-    const admin = await testHelpers.createUser();
+    const admin = await testHelpers.createUser({ password: 'pw' });
     employee = await testHelpers.createUser({ password: 'baz' });
-    const employeeTokens = await testHelpers.getLoginToken({
-      username: employee.username, password: 'baz' });
 
-    employeeToken = employeeTokens.tokens.access_token;
     network = await testHelpers.createNetwork({ userId: admin.id });
     await testHelpers.addUserToNetwork({
       userId: employee.id, networkId: network.id, roleType: 'EMPLOYEE' });
@@ -25,7 +21,7 @@ describe('Handler: update my profile', () => {
     const endpoint = `/v2/networks/${network.id}/users/me`;
     const payload = { first_name: 'My new first name' };
     const { result: { data } } = await putRequest(
-      endpoint, payload, employeeToken);
+      endpoint, payload, employee.token);
 
     assert.equal(data.id, employee.id);
     assert.equal(data.username, employee.username);
@@ -41,7 +37,7 @@ describe('Handler: update my profile', () => {
   it('should return correct attributes in GET call', async () => {
     const endpoint = `/v2/networks/${network.id}/users/me`;
     const { result: { data } } = await getRequest(
-      endpoint, employeeToken);
+      endpoint, employee.token);
 
     assert.equal(data.id, employee.id);
     assert.equal(data.username, employee.username);
@@ -57,7 +53,7 @@ describe('Handler: update my profile', () => {
   it('should return 422 when trying to update the id value', async () => {
     const endpoint = `/v2/networks/${network.id}/users/me`;
     const { statusCode } = await putRequest(
-      endpoint, { id: '0002222' }, employeeToken);
+      endpoint, { id: '0002222' }, employee.token);
 
     assert.equal(statusCode, 422);
   });
