@@ -19,8 +19,7 @@
     "flow": "flow --help",
     "lint": "eslint source/",
     "doc": "jsdoc -c conf.json",
-    "check": "npm run lint && npm run test && npm outdated --depth 0",
-    "jobs": "cross-env NODE_PATH=source NODE_ENV=production babel-node ./source/modules/flexchange/scripts/createRemindersForAdmin.js"
+    "check": "npm run lint && npm run test && npm outdated --depth 0"
   },
   "author": "",
   "license": "ISC",
