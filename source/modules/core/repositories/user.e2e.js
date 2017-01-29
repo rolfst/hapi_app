@@ -17,19 +17,11 @@ describe('User Repository', () => {
       lastName: 'Doe',
       password: 'foo',
     });
-    const admin = await testHelper.createUser();
+    const admin = await testHelper.createUser({ password: 'pw' });
     network = await testHelper.createNetwork({ userId: admin.id });
-
-    await testHelper.addUserToNetwork(
-        { networkId: network.id, userId: admin.id, roleType: 'ADMIN' });
   });
 
-  after(async () => {
-    return Promise.all([
-      testHelper.deleteUser(createdUser),
-      testHelper.cleanAll(),
-    ]);
-  });
+  after(() => testHelper.cleanAll());
 
   describe('findUserById', () => {
     it('should return the correct properties', async () => {

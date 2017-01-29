@@ -1,16 +1,15 @@
 import { assert } from 'chai';
-import blueprints from '../../../shared/test-utils/blueprints';
 import * as testHelper from '../../../shared/test-utils/helpers';
 import { getRequest } from '../../../shared/test-utils/request';
 import * as teamRepository from '../repositories/team';
 
 describe('Handler: Teams for network', () => {
   let network;
+  let admin;
 
   before(async () => {
-    const admin = await testHelper.createUser();
+    admin = await testHelper.createUser({ password: 'pw' });
     network = await testHelper.createNetwork({ userId: admin.id });
-
     await testHelper.addUserToNetwork(
         { networkId: network.id, userId: admin.id, roleType: 'ADMIN' });
 
@@ -26,10 +25,7 @@ describe('Handler: Teams for network', () => {
   after(async () => testHelper.cleanAll());
 
   it('should return all teams in network', async () => {
-    const { tokens } = await testHelper.getLoginToken(blueprints.users.admin);
-    const accessToken = tokens.access_token;
-    const { result } = await getRequest(
-        `/v2/networks/${network.id}/teams`, accessToken);
+    const { result } = await getRequest(`/v2/networks/${network.id}/teams`, admin.token);
 
     assert.lengthOf(result.data, 2);
     assert.equal(result.data[0].type, 'team');

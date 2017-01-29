@@ -1,7 +1,6 @@
 import { assert } from 'chai';
 import nock from 'nock';
 import * as stubs from '../../../shared/test-utils/stubs';
-import * as blueprints from '../../../shared/test-utils/blueprints';
 import * as testHelper from '../../../shared/test-utils/helpers';
 import { getRequest } from '../../../shared/test-utils/request';
 
@@ -17,10 +16,9 @@ describe('Pristine Networks', async () => {
   let ahNetwork;
   let justANetwork;
   let jumboNetwork;
+  const admin = await testHelper.createUser({ password: 'foobar' });
 
   before(async () => {
-    const admin = await testHelper.createUser();
-
     jumboNetwork = testHelper.createNetworkWithIntegration({
       userId: admin.id,
       externalId: stubs.jumbo_stores.stores[1].base_store_url,
@@ -66,9 +64,7 @@ describe('Pristine Networks', async () => {
       .get('/users')
       .reply(200, stubs.users_200);
 
-    const { tokens } = await testHelper.getLoginToken(blueprints.users.admin);
-    const accessToken = tokens.access_token;
-    const { result } = await getRequest('/v2/pristine_networks', accessToken);
+    const { result } = await getRequest('/v2/pristine_networks', admin.token);
 
     assert.property(result.data[0], 'externalId');
     assert.property(result.data[1], 'name');
@@ -81,9 +77,7 @@ describe('Pristine Networks', async () => {
       .get('/rest.php/chains')
       .reply('404');
 
-    const { tokens } = await testHelper.getLoginToken(blueprints.users.admin);
-    const accessToken = tokens.access_token;
-    const { statusCode } = await getRequest('/v2/pristine_networks', accessToken);
+    const { statusCode } = await getRequest('/v2/pristine_networks', admin.token);
 
     assert.equal(statusCode, 500);
   });
@@ -99,9 +93,7 @@ describe('Pristine Networks', async () => {
       .get('/stores')
       .reply(200, stubs.jumbo_stores);
 
-    const { tokens } = await testHelper.getLoginToken(blueprints.users.admin);
-    const accessToken = tokens.access_token;
-    const { statusCode } = await getRequest('/v2/pristine_networks', accessToken);
+    const { statusCode } = await getRequest('/v2/pristine_networks', admin.token);
 
     assert.equal(statusCode, 404);
   });
