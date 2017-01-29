@@ -1,6 +1,6 @@
 import * as userRepo from '../../core/repositories/user';
 import * as userService from '../../core/services/user';
-import dispatchEvent, { EventTypes } from '../../../shared/services/dispatch-event';
+import EventEmitter from '../events';
 
 /**
  * @module modules/employee/services/employee
@@ -19,12 +19,18 @@ import dispatchEvent, { EventTypes } from '../../../shared/services/dispatch-eve
  */
 export const updateEmployee = async (payload, message) => {
   // TODO move this functionality to the core module
-  const updatedUser = await userRepo.updateUser(message.credentials.id, payload.attributes);
+  await userRepo.updateUser(message.credentials.id, payload.attributes);
 
-  dispatchEvent(EventTypes.USER_UPDATED, message.credentials, { user: updatedUser });
+  const updatedUser = await userService.getUserWithNetworkScope({
+    id: message.credentials.id, networkId: message.network.id }, message);
 
-  return userService.getUserWithNetworkScope({
-    id: updatedUser.id, networkId: message.network.id }, message);
+  EventEmitter.emit('user.updated', {
+    user: updatedUser,
+    network: message.network,
+    credentials: message.credentials,
+  });
+
+  return updatedUser;
 };
 
 /**

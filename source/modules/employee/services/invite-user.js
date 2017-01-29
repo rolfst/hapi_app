@@ -2,7 +2,6 @@ import { map, intersectionBy, reject } from 'lodash';
 import Promise from 'bluebird';
 import * as passwordUtil from '../../../shared/utils/password';
 import * as mailer from '../../../shared/services/mailer';
-import dispatchEvent, { EventTypes } from '../../../shared/services/dispatch-event';
 import { UserRoles } from '../../../shared/services/permission';
 import createError from '../../../shared/utils/create-error';
 import camelCaseKeys from '../../../shared/utils/camel-case-keys';
@@ -12,6 +11,7 @@ import * as userService from '../../core/services/user';
 import * as networkRepo from '../../core/repositories/network';
 import * as userRepo from '../../core/repositories/user';
 import * as teamRepo from '../../core/repositories/team';
+import EventEmitter from '../events';
 import * as impl from './implementation';
 
 /**
@@ -107,9 +107,16 @@ export const inviteUser = async (payload, message) => {
 
   if (teamIds && teamIds.length > 0) await teamRepo.addUserToTeams(teamIds, user.id);
 
-  dispatchEvent(EventTypes.USER_INVITED, message.credentials, { user, network, role });
+  const createdUser = await userService.getUserWithNetworkScope({
+    id: user.id, networkId: network.id });
 
-  return userService.getUserWithNetworkScope({ id: user.id, networkId: network.id });
+  EventEmitter.emit('user.created', {
+    user: createdUser,
+    network: message.network,
+    credentials: message.credentials,
+  });
+
+  return createdUser;
 };
 
 

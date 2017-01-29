@@ -1,13 +1,9 @@
 import { sortBy, map, reject, includes } from 'lodash';
 import R from 'ramda';
 import moment from 'moment';
-import * as Analytics from '../../../../shared/services/analytics';
-import dispatchEvent, { EventTypes } from '../../../../shared/services/dispatch-event';
 import * as Logger from '../../../../shared/services/logger';
 import { createAdapter } from '../../../../shared/utils/create-adapter';
-import approveExchangeEvent from '../../../../shared/events/approve-exchange-event';
 import createError from '../../../../shared/utils/create-error';
-import newExchangeEvent from '../../../../shared/events/new-exchange-event';
 import * as teamRepo from '../../../core/repositories/team';
 import * as userRepo from '../../../core/repositories/user';
 import * as networkRepo from '../../../core/repositories/network';
@@ -21,9 +17,6 @@ import * as exchangeRepo from '../../repositories/exchange';
 import * as exchangeValueRepo from '../../repositories/exchange-value';
 import * as exchangeResponseRepo from '../../repositories/exchange-response';
 import * as acceptanceNotifier from '../../notifications/accepted-exchange';
-import * as creatorNotifier from '../../notifications/creator-approved';
-import * as substituteNotifier from '../../notifications/substitute-approved';
-import * as createdNotifier from '../../notifications/exchange-created';
 import EventEmitter from '../../events';
 import * as impl from './implementation';
 
@@ -34,7 +27,7 @@ const logger = Logger.createLogger('FLEXCHANGE/service/exchange');
 
 const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
 
-const findUsersByType = async (type, networkId, exchangeValues, userId) => {
+export const findUsersByType = async (type, networkId, exchangeValues, userId) => {
   let usersPromise;
 
   if (type === exchangeTypes.NETWORK) {
@@ -177,17 +170,12 @@ export const approveExchange = async (payload, message) => {
     message.credentials,
     payload.user_id);
 
-  Promise.all([
-    creatorNotifier.send(exchange),
-    substituteNotifier.send(exchange),
-  ]);
-
-  Analytics.track(approveExchangeEvent(message.network, approvedExchange), message.credentials.id);
-  dispatchEvent(
-    EventTypes.EXCHANGE_APPROVED,
-    message.credentials,
-    { approvedUser: exchangeResponse.User }
-  );
+  EventEmitter.emit('exchange.approved', {
+    exchange: approvedExchange,
+    network: message.network,
+    credentials: message.credentials,
+    approvedUser: exchangeResponse.User,
+  });
 
   return approvedExchange;
 };
@@ -473,15 +461,12 @@ export const createExchange = async (payload, message) => {
       date: moment(payload.date).format('YYYY-MM-DD'),
     });
 
-  const users = await findUsersByType(
-    createdExchange.type, message.network.id, payload.values, message.credentials.id);
-
-  await createdNotifier.send(users, createdExchange);
-
-  Analytics.track(newExchangeEvent(message.network, createdExchange), message.credentials.id);
-  dispatchEvent(EventTypes.EXCHANGE_CREATED, message.credentials, { exchange: createdExchange });
-
-  EventEmitter.emit('exchange.create');
+  EventEmitter.emit('exchange.created', {
+    network: message.network,
+    credentials: message.credentials,
+    exchange: createdExchange,
+    exchangeValues: payload.values,
+  });
 
   return exchangeRepo.findExchangeById(createdExchange.id);
 };

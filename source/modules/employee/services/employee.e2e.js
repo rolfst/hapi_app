@@ -1,7 +1,9 @@
 import { assert } from 'chai';
 import { pick } from 'lodash';
 import sinon from 'sinon';
-import dispatchEvent, { EventTypes } from '../../../shared/services/dispatch-event';
+import * as Intercom from '../../../shared/services/intercom';
+import IntercomStub from '../../../shared/test-utils/stubs/intercom';
+import EventEmitter from '../events';
 import * as service from './employee';
 
 describe('Service: employee', () => {
@@ -15,30 +17,33 @@ describe('Service: employee', () => {
 
   describe('Update user', () => {
     const sandbox = sinon.sandbox.create();
-    let dispatchEventSpy;
+    let eventEmitterStub;
 
     before(() => {
-      dispatchEventSpy = sandbox.stub(dispatchEvent, 'dispatchEvent');
+      sandbox.stub(Intercom, 'getClient').returns(IntercomStub);
+
+      eventEmitterStub = sandbox.stub(EventEmitter, 'emit');
     });
 
     afterEach(async () => {
-      dispatchEventSpy.reset();
+      eventEmitterStub.reset();
     });
 
     after(() => {
       sandbox.restore();
     });
 
-    it('should fire USER_UPDATED event', async () => {
+    it('should fire user.updated event', async () => {
       await service.updateEmployee(
         { attributes: pick(credentials, 'id', 'email', 'phone') },
         { credentials, network }
       );
 
-      const { args } = dispatchEventSpy.firstCall;
-      assert.equal(args[0], EventTypes.USER_UPDATED);
-      assert.equal(args[1], credentials);
-      assert.equal(args[2].user.email, credentials.email);
+      const { args } = eventEmitterStub.firstCall;
+      assert.equal(args[0], 'user.updated');
+      assert.equal(args[1].network.id, network.id);
+      assert.equal(args[1].credentials.id, credentials.id);
+      assert.equal(args[1].user.id, credentials.id);
     });
   });
 });

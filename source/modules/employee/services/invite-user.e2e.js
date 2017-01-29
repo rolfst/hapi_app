@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { find, pick } from 'lodash';
 import sinon from 'sinon';
-import dispatchEvent, { EventTypes } from '../../../shared/services/dispatch-event';
+import EventEmitter from '../events';
 import * as networkRepo from '../../core/repositories/network';
 import * as userRepo from '../../core/repositories/user';
 import * as teamRepo from '../../core/repositories/team';
@@ -89,16 +89,16 @@ describe('Service: invite user', () => {
 
   describe('New User', () => {
     const sandbox = sinon.sandbox.create();
-    let dispatchEventSpy;
+    let eventEmitterStub;
     const credentials = { id: '1', email: 'credentials@flex-appeal.nl' };
     const payload = { firstName: 'John', lastName: 'Doe', email: 'test-user@foo.com' };
 
     before(() => {
-      dispatchEventSpy = sandbox.stub(dispatchEvent, 'dispatchEvent');
+      eventEmitterStub = sandbox.stub(EventEmitter, 'emit');
     });
 
     afterEach(async () => {
-      dispatchEventSpy.reset();
+      eventEmitterStub.reset();
       const user = await userRepo.findUserBy({ email: payload.email });
 
       return userRepo.deleteById(user.id);
@@ -117,15 +117,15 @@ describe('Service: invite user', () => {
       assert.equal(actual.email, payload.email);
     });
 
-    it('should dispatch USER_INVITED event', async () => {
+    it('should dispatch user.created event', async () => {
       await service.inviteUser(payload, { credentials, network });
 
-      const { args } = dispatchEventSpy.firstCall;
+      const { args } = eventEmitterStub.firstCall;
 
-      assert.equal(args[0], EventTypes.USER_INVITED);
-      assert.equal(args[1], credentials);
-      assert.deepEqual(pick(args[2].user, 'email', 'firstName', 'lastName'), payload);
-      assert.deepEqual(args[2].network, network);
+      assert.equal(args[0], 'user.created');
+      assert.deepEqual(args[1].credentials, credentials);
+      assert.deepEqual(pick(args[1].user, 'email', 'firstName', 'lastName'), payload);
+      assert.deepEqual(args[1].network, network);
     });
 
     it('should add to the network as admin', async () => {
