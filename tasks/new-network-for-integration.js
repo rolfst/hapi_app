@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
+import 'babel-register';
 import userRepo from '../source/modules/core/repositories/user';
 import networkRepo from '../source/modules/core/repositories/network';
 import Logger from '../source/shared/services/logger';
 
 const args = require('yargs').argv;
-const logger = Logger.createLogger('SCRIPT/createNetworkForIntegration');
+const logger = Logger.createLogger('TASK/createNetworkForIntegration');
 
 /*
  * This script can be used to create a new network that has an integration enabled.
@@ -13,7 +14,7 @@ const logger = Logger.createLogger('SCRIPT/createNetworkForIntegration');
  *
  * Example command:
  *
- * API_ENV=testing babel-node scripts/new-network-for-integration.js \
+ * API_ENV=testing node scripts/new-network-for-integration.js \
  *   --name="My New Network" \
  *   --externalId="api.externalpartner.com/12333"
  *   --integration="PMT"
@@ -23,7 +24,8 @@ const validateArgs = () => {
   console.assert(args.externalId, 'Missing externalId argument');
   console.assert(args.name, 'Missing name argument');
   console.assert(args.integration, 'Missing integration argument');
-  console.assert(['PMT'].includes(args.integration), 'We do not support that integration name');
+  console.assert(['PMT'].includes(args.integration),
+    'We do not support that integration yet. Currently supporting: PMT');
 };
 
 const main = async () => {
