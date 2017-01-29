@@ -77,8 +77,6 @@ describe('Service: Feed', () => {
         network: { id: network.id },
       });
 
-      console.log(actual);
-
       assert.lengthOf(actual, 3);
       assert.equal(actual[0].objectType, 'exchange');
       assert.equal(actual[0].parentType, 'network');

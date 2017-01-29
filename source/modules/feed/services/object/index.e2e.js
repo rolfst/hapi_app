@@ -1,4 +1,4 @@
-import { assert } from 'chai';
+/* globals assert */
 import * as testHelpers from '../../../../shared/test-utils/helpers';
 import * as objectService from './index';
 
@@ -6,13 +6,10 @@ describe('Service: Object', () => {
   let admin;
   let network;
 
-  before(async () => {
-    admin = await testHelpers.createUser({ password: 'foo' });
-    network = await testHelpers.createNetwork({ userId: admin.id });
-  });
-
   describe('list', () => {
     before(async () => {
+      admin = await testHelpers.createUser({ password: 'foo' });
+      network = await testHelpers.createNetwork({ userId: admin.id });
       await objectService.create({
         userId: admin.id,
         parentType: 'network',
@@ -30,7 +27,7 @@ describe('Service: Object', () => {
       });
     });
 
-    after(() => objectService.remove({ parentType: 'network', parentId: network.id }));
+    after(() => testHelpers.cleanAll());
 
     it('should return objects', async () => {
       const actual = await objectService.list({
@@ -70,6 +67,9 @@ describe('Service: Object', () => {
 
   describe('count', () => {
     before(async () => {
+      admin = await testHelpers.createUser({ password: 'foo' });
+      network = await testHelpers.createNetwork({ userId: admin.id });
+
       await objectService.create({
         userId: admin.id,
         parentType: 'network',
@@ -87,7 +87,7 @@ describe('Service: Object', () => {
       });
     });
 
-    after(() => objectService.remove({ parentType: 'network', parentId: network.id }));
+    after(() => testHelpers.cleanAll());
 
     it('should return correct count', async () => {
       const networkObjects = await objectService.count({ where: {
