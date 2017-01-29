@@ -2,9 +2,6 @@ import Sequelize from 'sequelize';
 import { db as model } from '../../connections';
 import * as password from '../utils/password';
 import * as dateUtils from '../utils/date';
-// TODO this has to be refactored a shared datamodel should not know about a more
-// specific one.
-import Conversation from '../../modules/chat/models/conversation';
 
 const User = model.define('User', {
   username: {
@@ -19,7 +16,7 @@ const User = model.define('User', {
   firstName: {
     type: Sequelize.STRING,
     field: 'first_name',
-    allowNull: false,
+    allowNull: true,
   },
   lastName: {
     type: Sequelize.STRING,
@@ -81,25 +78,6 @@ const User = model.define('User', {
     },
   },
   instanceMethods: {
-    hasConversationWith: (UserModel, userIds) => {
-      return Promise.resolve(Conversation.findAll({
-        include: [{
-          model: UserModel,
-          attributes: ['id', [model.fn('COUNT', '`Users`.`id`'), 'count']],
-          where: {
-            id: {
-              $in: userIds,
-            },
-          },
-        }],
-        group: ['Conversation.id'],
-        having: [
-          '`Users.count` > 1',
-        ],
-      })).then(existingChats => {
-        return existingChats[0] || null;
-      });
-    },
     toJSON: function () { // eslint-disable-line func-names, object-shorthand
       let environment = 'production';
       if (process.env.API_ENV === 'acceptance') environment = 'acc';

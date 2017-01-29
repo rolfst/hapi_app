@@ -1,101 +1,68 @@
 import Promise from 'bluebird';
-import { map } from 'lodash';
-import * as adapterUtil from '../../../../shared/utils/create-adapter';
+import R from 'ramda';
+import { createAdapter } from '../../../../shared/utils/create-adapter';
 import * as Logger from '../../../../shared/services/logger';
-import * as networkService from '../../../core/services/network';
-import * as integrationService from '../../../core/services/integration';
+import * as userRepository from '../../../core/repositories/user';
+import * as networkRepository from '../../../core/repositories/network';
 import * as impl from './implementation';
 
-const logger = Logger.getLogger('INTEGRATIONS/service/sync');
-
-const createSyncHolders = (integration) => {
-  const adapterFactory = adapterUtil.createAdapterFactory(
-    integration.name,
-    [],
-    { proceedWithoutToken: true });
-
-  return { integration, adapterFactory };
-};
-
-/**
- * syncUsers syncs users from network with external network
- * @param {array} externalUsers - list of externalUsers to sync with
- * @param {object} network - network to sync with
- * @param {object} message - metadata for this request
- * @method syncUsers
- * return {array} all synced users
- */
-const syncUsers = async (externalUsers, network, message) => {
-  const importedUsersIds = await impl.importUsersInNetwork(externalUsers, network, message);
-  const updatedUsersIds = await impl.updateUsers(externalUsers, network, message);
-  const removedUsersIds = await impl.removeUsersFromNetwork(externalUsers, network.id, message);
-  await impl.addUsersToTeams(externalUsers, network.id, message);
-
-  return [...importedUsersIds, ...updatedUsersIds, ...removedUsersIds];
-};
-
-/**
- * syncTeams syncs teams from network with external network
- * @param {array} externalTeams - list of external teams to sync with
- * @param {object} network - network to sync with
- * @param {object} message - metadata for this request
- * @method syncTeams
- * return {array} all synced teams
- */
-const syncTeams = async (externalTeams, network, message) => {
-  const importedTeamsIds = await impl.importTeamsInNetwork(externalTeams, network, message);
-  const updatedTeamsIds = await impl.updateTeamsFromNetwork(externalTeams, network, message);
-  const removedTeamsIds = await impl.removeTeamsFromNetwork(externalTeams, network.id, message);
-
-  return [...importedTeamsIds, ...updatedTeamsIds, ...removedTeamsIds];
-};
+const logger = Logger.createLogger('INTEGRATIONS/service/sync');
 
 /**
  * syncNetwork syncs users and teams from network with external network
- * @param {object} network - network to sync with
- * @param {object} adapter - connector that connects to externalNetwork
- * @param {object} message - metadata for this request
- * @method syncNetwork
- * return {map} - containing all synced users and teams
+ * @param {object} payload - unused
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method syncNetworkWithIntegrationPartner
+ * @return {external:Promise<boolean>} - true if success
  */
-const syncNetwork = async (network, adapter, message) => {
+export async function syncNetworkWithIntegrationPartner(payload, message) {
   try {
-    const externalTeams = await impl.getExternalTeams(network, adapter, message);
-    const syncedTeams = await syncTeams(externalTeams, network, message);
+    const owner = await userRepository.findUserById(message.credentials.id);
 
-    const externalUsers = await impl.getExternalUsers(network, adapter, message);
-    const syncedUsers = await syncUsers(externalUsers, network, message);
+    impl.assertUserIsAdmin(owner);
 
-    return { syncedTeams, syncedUsers };
+    const allUsersInSystem = await userRepository.findAllUsers();
+    const network = await networkRepository.findNetworkById(payload.networkId);
+
+    impl.assertNetworkIsSyncable(network);
+
+    const adapter = createAdapter(network, 0, { proceedWithoutToken: true });
+
+    await impl.syncNetwork(network, allUsersInSystem, adapter, message);
+
+    return true;
   } catch (err) {
     logger.warn('Error syncing network', { err, message });
     throw err;
   }
-};
+}
 
 /**
  * Syncs all integrations in the system with the remote services
  * @param {object} payload - unused
- * @param {object} message - metadata for this request
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method syncWithIntegrationPartner
+ * @return {external:Promise<Network[]>}
  */
-export const syncWithIntegrationPartner = async (payload, message) => {
-  logger.info('finding all integrations', { message });
-  const integrations = await integrationService.list({}, message);
-  logger.info('found integrations', { integrations, message });
-  const syncHolders = map(integrations, createSyncHolders);
+export async function syncWithIntegrationPartner(payload, message) {
+  try {
+    const allUsersInSystem = await userRepository.findAllUsers();
+    const allNetworksInSystem = await networkRepository.findAll();
+    const syncableNetworks = R.filter(impl.isSyncable);
 
-  return Promise.map(syncHolders, async (syncHolder) => {
-    const attributes = { integrationName: syncHolder.integration.name };
-    logger.info('finding all networks for integration', { attributes, message });
-    const networks = await networkService.listNetworksForIntegration(attributes, message);
-    logger.info('found networks for integration', { networks, message });
-    const networksToSync = Promise.map(networks,
-      (network) => {
-        const adapter = syncHolder.adapterFactory.create(network);
-        return syncNetwork(network, adapter, message);
-      });
+    return Promise.map(syncableNetworks(allNetworksInSystem), async (network) => {
+      try {
+        const adapter = await createAdapter(network, 0, { proceedWithoutToken: true });
 
-    return Promise.all(networksToSync);
-  });
-};
+        return impl.syncNetwork(network, allUsersInSystem, adapter, message);
+      } catch (err) {
+        logger.warn('Error syncing integration partners', { err, message });
+        throw err;
+      }
+    });
+  } catch (err) {
+    logger.warn('Error syncing integration partners', { err, message });
+    throw err;
+  }
+}

@@ -43,7 +43,6 @@ describe('Delegate', () => {
     assert.equal(statusCode, 200);
     assert.equal(decodedToken.type, 'access_token');
     assert.equal(decodedToken.sub, createdUser.id);
-    assert.property(decodedToken, 'integrations');
   });
 
   it('should return a new access token', async () => {
@@ -52,6 +51,12 @@ describe('Delegate', () => {
     assert.equal(result.success, true);
     assert.property(result.data, 'access_token');
     assert.isDefined(result.data.access_token);
+  });
+
+  it('should return 403 on wrong refresh token', async () => {
+    const { statusCode } = await getRequest(`${DELEGATE_URL}?refresh_token=thisiswrong`);
+
+    assert.equal(statusCode, 403);
   });
 
   it('should fail when no refresh token provided', async () => {

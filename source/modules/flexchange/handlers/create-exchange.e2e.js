@@ -1,8 +1,9 @@
 import { assert } from 'chai';
 import moment from 'moment';
+import Promise from 'bluebird';
 import { postRequest } from '../../../shared/test-utils/request';
 import * as teamRepo from '../../core/repositories/team';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import * as exchangeRepo from '../repositories/exchange';
 
 let network;
@@ -14,12 +15,12 @@ describe('Create exchange', () => {
     network = global.networks.flexAppeal;
 
     [flexAppealTeam, otherNetworkTeam] = await Promise.all([
-      teamRepo.createTeam({ networkId: network.id, name: 'Test network' }),
-      teamRepo.createTeam({ networkId: global.networks.pmt.id, name: 'Test other network' }),
+      teamRepo.create({ networkId: network.id, name: 'Test network' }),
+      teamRepo.create({ networkId: global.networks.pmt.id, name: 'Test other network' }),
     ]);
   });
 
-  after(() => Promise.all([flexAppealTeam.destroy(), otherNetworkTeam.destroy()]));
+  after(() => Promise.map([flexAppealTeam.id, otherNetworkTeam.id], teamRepo.deleteById));
 
   it('should create exchange for a network', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges`;

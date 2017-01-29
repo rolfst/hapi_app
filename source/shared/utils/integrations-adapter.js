@@ -6,7 +6,7 @@ import clientSerializer from '../../adapters/pmt/serializers/chain';
 import storesSerializer from '../../adapters/pmt/serializers/stores';
 import userSerializer from '../../adapters/pmt/serializers/user';
 
-const logger = Logger.getLogger('SHARED/utils/integrationsAdapter');
+const logger = Logger.createLogger('SHARED/utils/integrationsAdapter');
 
 export const clients = async (message) => {
   try {

@@ -5,14 +5,14 @@ import createError from '../utils/create-error';
 import * as userRepo from '../../modules/core/repositories/user';
 import * as Logger from '../../shared/services/logger';
 
-const logger = Logger.getLogger('SHARED/middleware/authenticatorStrategy');
+const logger = Logger.createLogger('SHARED/middleware/authenticatorStrategy');
 
 export const authenticate = async (networkId, token = null) => {
   if (!token) throw createError('401');
 
   const { sub: userId, integrations } = tokenUtil.decode(token);
   // TODO the user should be retrieved via the service
-  const user = await userRepo.findUserById(userId);
+  const user = await userRepo.findUserById(userId, null, false);
 
   return {
     credentials: pick(user, 'id', 'username'),

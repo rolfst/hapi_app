@@ -1,17 +1,23 @@
 import moment from 'moment';
+import R from 'ramda';
 import { map, omit, merge } from 'lodash';
 import createError from '../../../shared/utils/create-error';
 import { ActivityTypes } from '../../../shared/models/activity';
 import { createActivity } from '../../core/repositories/activity';
-import { User } from '../../../shared/models';
+import { User, Team } from '../../../shared/models';
 import makeCreatedInObject from '../utils/created-in-text';
-import { exchangeTypes } from '../models/exchange';
+import createExchangeModel from '../models/exchange';
+import { exchangeTypes } from './dao/exchange';
 import {
   Exchange, ExchangeResponse, ExchangeComment, ExchangeValue,
-} from '../models';
+} from './dao';
 import { createExchangeResponse } from './exchange-response';
 import { createValuesForExchange } from './exchange-value';
 import * as exchangeResponseRepo from './exchange-response';
+
+/**
+ * @module modules/flexchange/repositories/exchange
+ */
 
 const defaultIncludes = [
     { model: User },
@@ -20,17 +26,30 @@ const defaultIncludes = [
     { model: ExchangeValue },
 ];
 
-const createDateFilter = (filter) => {
+// FIXME: Will be removed soon
+const createDateFilter = (start, end) => {
   let dateFilter;
 
-  if (filter.start && filter.end) {
-    dateFilter = { $between: [filter.start, filter.end] };
-  } else if (filter.start && !filter.end) {
-    dateFilter = { $gte: filter.start };
+  if (start && end) {
+    dateFilter = { $between: [start, end] };
+  } else if (start && !end) {
+    dateFilter = { $gte: start };
   }
 
   return dateFilter;
 };
+
+// NEW REFACTORED METHODS
+export const findAllBy = (whereConstraint) => Exchange
+  .findAll({ where: whereConstraint })
+  .then(R.map(createExchangeModel));
+
+export const findByIds = async (exchangeIds) => {
+  const result = await Exchange.findAll({ where: { id: { $in: exchangeIds } } });
+
+  return R.map(createExchangeModel, result);
+};
+// END OF NEW REFACTORED METHODS
 
 /**
  * @param {object} [date=null] - moment, or parsable object
@@ -61,7 +80,7 @@ export const findAllAcceptedExchanges = async (date = null) => {
  * @param {number} exchangeId - Id of exchange being looked for
  * @param {number} userId - Id of the user to use in includes
  * @method findExchangeById
- * @return {Exchange} Find exchange promise
+ * @return {external:Promise.<Exchange>} Find exchange promise
  */
 export async function findExchangeById(exchangeId, userId) {
   const extraIncludes = [{
@@ -81,14 +100,26 @@ export async function findExchangeById(exchangeId, userId) {
   return exchange;
 }
 
+// FIXME: Should be replaced when flexchange will be used with
+// models instead of DAO's containing so many includes
+export const findPlainExchangesById = async (exchangeIds) => {
+  const result = await Exchange.findAll({
+    where: { id: { $in: exchangeIds } },
+    include: [{ attributes: ['value'], model: ExchangeValue }],
+  });
+
+  return R.map(createExchangeModel, result);
+};
+
 /**
  * Find a specific exchange by ids
- * @param {number} exchangeIds - Id of exchange being looked for
- * @param {number} userId - Id of the user to use in includes
+ * @param {string} exchangeIds - Id of exchange being looked for
+ * @param {string} userId - Id of the user to use in includes
+ * @param {object} [extraConstraint={}] - extra query params
  * @method findExchangeByIds
- * @return {Promise} Find exchanges promise
+ * @return {external:Promise.<Exchange>} Find exchanges promise
  */
-export function findExchangeByIds(exchangeIds, userId, extraContraint = {}) {
+export function findExchangeByIds(exchangeIds, userId, extraConstraint = {}) {
   const extraIncludes = [{
     model: ExchangeResponse,
     as: 'ResponseStatus',
@@ -103,7 +134,7 @@ export function findExchangeByIds(exchangeIds, userId, extraContraint = {}) {
     include: [...defaultIncludes, ...extraIncludes],
   };
 
-  return Exchange.findAll(merge(options, extraContraint));
+  return Exchange.findAll(merge(options, extraConstraint));
 }
 
 export async function findExchangesByShiftIds(shiftIds) {
@@ -127,7 +158,7 @@ export const findExchangesByUserAndNetwork = async (userId, networkId, filter = 
     where: { userId, networkId },
   });
 
-  const dateFilter = createDateFilter(filter);
+  const dateFilter = createDateFilter(filter.start, filter.end);
   const constraint = dateFilter ? { where: { date: dateFilter } } : {};
 
   return findExchangeByIds(map(exchanges, 'id'), userId, constraint);
@@ -145,7 +176,7 @@ export async function findExchangesForValues(type, networkId, values, userId, fi
   });
 
   const validExchangeIds = validExchangeResult.map(exchange => exchange.id);
-  const dateFilter = createDateFilter(filter);
+  const dateFilter = createDateFilter(filter.start);
   const constraint = dateFilter ? { where: { date: dateFilter } } : {};
 
   return findExchangeByIds(validExchangeIds, userId, constraint);
@@ -157,16 +188,14 @@ export async function findExchangesForValues(type, networkId, values, userId, fi
  * @method findExchangesByNetwork
  * @return {Promise} Get exchanges promise
  */
-export const findExchangesByNetwork = async (networkId, userId, filter = {}) => {
-  const exchanges = await Exchange.findAll({
-    attributes: ['id'],
-    where: { networkId },
-  });
+export const findExchangesByNetwork = async (networkId, options = {}) => {
+  const opts = { where: { networkId } };
+  if (options.start || options.end) opts.where.date = createDateFilter(options.start, options.end);
+  if (options.attributes) opts.attributes = options.attributes;
 
-  const dateFilter = createDateFilter(filter);
-  const constraint = dateFilter ? { where: { date: dateFilter } } : {};
+  const exchanges = await Exchange.findAll(opts);
 
-  return findExchangeByIds(map(exchanges, 'id'), userId, constraint);
+  return R.map(createExchangeModel, exchanges);
 };
 
 /**
@@ -175,13 +204,14 @@ export const findExchangesByNetwork = async (networkId, userId, filter = {}) => 
  * @method findExchangesByTeam
  * @return {Promise} Get exchanges promise
  */
-export const findExchangesByTeam = async (team, userId, filter = {}) => {
-  const exchanges = await team.getExchanges({ attributes: ['id'] });
-  const exchangeIds = exchanges.map(e => e.id);
-  const dateFilter = createDateFilter(filter);
+export const findExchangesByTeam = async (teamId, userId, filter = {}) => {
+  const teamDAO = await Team.findById(teamId);
+  const exchanges = await teamDAO.getExchanges();
+
+  const dateFilter = createDateFilter(filter.start, filter.end);
   const constraint = dateFilter ? { where: { date: dateFilter } } : {};
 
-  return findExchangeByIds(exchangeIds, userId, constraint);
+  return findExchangeByIds(map(exchanges, 'id'), userId, constraint);
 };
 
 /**
@@ -401,9 +431,10 @@ export async function approveExchange(exchange, approvingUser, userIdToApprove) 
 /**
  * Reject an exchange
  * @param {Exchange} exchange - Exchange to reject
- * @param {number} userIdToReject - User that will be rejected
+ * @param {User} rejectingUser - User that is rejecting the exchange
+ * @param {string} userIdToReject - User that will be rejected
  * @method rejectExchange
- * @return {Promise} Promise containing the updated exchange
+ * @return {external:Promise<Exchange>} Promise containing the updated exchange
  */
 export async function rejectExchange(exchange, rejectingUser, userIdToReject) {
   const constraint = { exchangeId: exchange.id, userId: userIdToReject };

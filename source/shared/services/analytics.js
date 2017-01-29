@@ -1,7 +1,7 @@
 import Mixpanel from 'mixpanel';
 import * as Logger from './logger';
 
-const logger = Logger.getLogger('SHARED/services/analytics');
+const logger = Logger.createLogger('SHARED/services/analytics');
 
 export function getClient() {
   return Mixpanel.init(process.env.MIXPANEL_TOKEN);

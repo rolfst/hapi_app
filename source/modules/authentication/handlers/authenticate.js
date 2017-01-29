@@ -1,8 +1,8 @@
-import { pick } from 'lodash';
+import { pick, omit } from 'lodash';
 import * as authenticationService from '../services/authentication';
 import * as Logger from '../../../shared/services/logger';
 
-const logger = Logger.getLogger('AUTHENTICATION/handler/authenticate');
+const logger = Logger.createLogger('AUTHENTICATION/handler/authenticate');
 
 /*
  * The authentication script first authenticates with the Flex-Appeal database
@@ -19,7 +19,7 @@ export default async (request, reply) => {
     const payload = pick(request.payload, 'username', 'password');
 
     message.deviceName = request.headers['user-agent'];
-    logger.info('Authenticating', { payload, message });
+    logger.info('Authenticating', { ...omit(payload, 'password'), message });
     const result = await authenticationService.authenticate(payload, message);
     const data = {
       access_token: result.accessToken,

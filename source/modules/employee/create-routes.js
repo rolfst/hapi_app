@@ -18,9 +18,10 @@ const routes = [{
   handler: require(`${baseImport}/invite-user`),
   validator: require('./validators/create-user'),
 }, {
-  method: 'GET',
-  url: `${basePath}/users/bulk_invite`,
+  method: 'POST',
+  url: `${basePath}/users/invite`,
   handler: require(`${baseImport}/bulk-invite-users`),
+  validator: require('./validators/bulk-invite'),
 }];
 
 export default createRoutes(routes);

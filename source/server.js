@@ -8,7 +8,7 @@ import * as serverUtil from './shared/utils/server';
 import { server as serverConnection } from './connections';
 import * as Logger from './shared/services/logger';
 
-const logger = Logger.getLogger('SERVER');
+const logger = Logger.createLogger('SERVER');
 
 const createServer = () => {
   const ravenClient = new raven.Client(process.env.SENTRY_DSN, {
@@ -30,7 +30,7 @@ const createServer = () => {
 
   // Register server extensions
   server.ext('onRequest', serverUtil.onRequest);
-  server.ext('onPreResponse', serverUtil.onPreResponse);
+  server.ext('onPreResponse', serverUtil.onPreResponse(ravenClient));
 
   server.ext('onPostAuth', (req, reply) => {
     const requestContext = {

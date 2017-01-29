@@ -1,0 +1,33 @@
+[{
+  "id": "1",
+  "username": "beheerder@pmt.nl",
+  "email": "beheerder@pmt.nl",
+  "department": "1",
+  "first_name": "Beheerder",
+  "last_name": "Doe",
+  "cell_phone_number": "600000000",
+  "home_phone_number": "600000000",
+  "date_of_birth": "1999-02-23",
+  "rolename": "admin",
+  "scope": [{
+    "department": "14"
+  }, {
+    "department": "20"
+  }],
+  "active": true
+}, {
+  "id": "2",
+  "username": "medewerker@pmt.nl",
+  "email": "medewerker@pmt.nl",
+  "department": "1",
+  "first_name": "Medewerker",
+  "last_name": "Doe",
+  "cell_phone_number": "612750183",
+  "home_phone_number": "612750183",
+  "date_of_birth": "1995-01-08",
+  "rolename": "Medewerker",
+  "scope": [{
+    "department": "14"
+  }],
+  "active": true
+}]

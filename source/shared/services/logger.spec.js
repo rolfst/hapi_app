@@ -1,264 +1,233 @@
 import { assert } from 'chai';
-import * as Logger from './logger';
-import mockConsole from 'std-mocks';
+import sinon from 'sinon';
+import bunyan from 'bunyan';
+import * as loggerService from './logger';
 import createError from '../utils/create-error';
 
 describe('Logger', () => {
-  beforeEach(() => {
-    mockConsole.use();
-  });
+  let loggerStub;
+  let logger;
+  const defaultMessage = { artifacts: { requestId: 'rid:002' } };
 
-  afterEach(() => {
-    mockConsole.restore();
-    mockConsole.flush();
-  });
-
-  it('should log on info level', () => {
-    const logger = Logger.getLogger('infoLogger');
-    logger.info('hi');
-
-    const output = mockConsole.flush();
-    const logMsg = JSON.parse(output.stdout[0]);
-
-    assert.equal(logMsg.name, 'infoLogger');
-    assert.equal(logMsg.level, 30);
-    assert.equal(logMsg.msg, 'hi');
-    assert.notProperty(logMsg, 'err');
+  before(() => {
+    loggerStub = sinon.stub(bunyan.createLogger({ name: 'TestLogger' }));
+    logger = loggerService.createLogger(loggerStub);
   });
 
   it('should log on info level', () => {
-    const logger = Logger.getLogger('infoLogger');
-    const message = { artifacts: { requestId: 'rid:001' } };
-    logger.info('hi', { message });
+    loggerStub.info.reset();
+    logger.info('hi', { foo: 'baz' });
 
-    const output = mockConsole.flush();
-    const logMsg = JSON.parse(output.stdout[0]);
+    const expectedArgs = [{
+      err: null,
+      message: {},
+      context: { foo: 'baz' },
+    }, 'hi'];
 
-    assert.equal(logMsg.name, 'infoLogger');
-    assert.equal(logMsg.level, 30);
-    assert.equal(logMsg.requestId, 'rid:001');
-    assert.equal(logMsg.msg, 'hi');
-    assert.notProperty(logMsg, 'err');
+    assert.equal(loggerStub.info.callCount, 1);
+    assert.deepEqual(loggerStub.info.firstCall.args, expectedArgs);
   });
 
-  it.skip('should log on debug level', () => {
-    const logger = Logger.getLogger('debugLogger');
-    const message = { artifacts: { requestId: 'rid:002' } };
+  it('should log on debug level', () => {
+    loggerStub.debug.reset();
+    logger.debug('hi', { message: defaultMessage });
 
-    logger.debug('hi', { message });
+    const expectedArgs = [{
+      err: null,
+      message: { artifacts: { requestId: 'rid:002' } },
+      context: {},
+    }, 'hi'];
 
-    const output = mockConsole.flush();
-    const logMsg = JSON.parse(output.stdout[0]);
-
-    assert.equal(logMsg.name, 'debugLogger');
-    assert.equal(logMsg.level, 20);
-    assert.equal(logMsg.requestId, 'rid:002');
-    assert.equal(logMsg.msg, 'hi');
-    assert.notProperty(logMsg, 'err');
+    assert.equal(loggerStub.debug.callCount, 1);
+    assert.notProperty(loggerStub.debug.firstCall.args, 'err');
+    assert.deepEqual(loggerStub.debug.firstCall.args, expectedArgs);
   });
 
-  it.skip('should log on debug level with multiple context objects', () => {
-    const logger = Logger.getLogger('debugLogger');
+  it('should log on debug level with multiple context objects', () => {
+    loggerStub.debug.reset();
     const extraObject = { extra: 'extraobject' };
     const extraObject2 = { extra: 'extraobject2', nested: { greetings: 'hello' } };
+    logger.debug('hi', { extraObject, extraObject2, message: defaultMessage });
 
-    logger.debug('hi', {
-      extraObject,
-      extraObject2,
+    const expectedArgs = [{
+      err: null,
       message: { artifacts: { requestId: 'rid:002' } },
-    });
+      context: { extraObject, extraObject2 },
+    }, 'hi'];
 
-    const output = mockConsole.flush();
-    const logMsg = JSON.parse(output.stdout[0]);
-
-    assert.equal(logMsg.name, 'debugLogger');
-    assert.equal(logMsg.level, 20);
-    assert.equal(logMsg.requestId, 'rid:002');
-    assert.equal(logMsg.msg, 'hi');
-    assert.lengthOf(Object.keys(logMsg.context), 2);
-    assert.deepEqual(logMsg.context, { extraObject, extraObject2 });
-    assert.equal(logMsg.context.extraObject2.nested.greetings, 'hello');
-    assert.notProperty(logMsg, 'err');
+    assert.equal(loggerStub.debug.callCount, 1);
+    assert.notProperty(loggerStub.debug.firstCall.args, 'err');
+    assert.lengthOf(Object.keys(loggerStub.debug.firstCall.args[0].context), 2);
+    assert.deepEqual(loggerStub.debug.firstCall.args, expectedArgs);
   });
 
   it('should log on warning level without error', () => {
-    const logger = Logger.getLogger('warnLogger');
-    const message = { message: { artifacts: { requestId: 'rid:002' } } };
+    loggerStub.warn.reset();
+    logger.warn('hi', { message: defaultMessage });
 
-    logger.warn('warning', message);
+    const expectedArgs = [{
+      err: null,
+      message: { artifacts: { requestId: 'rid:002' } },
+      context: {},
+    }, 'hi'];
 
-    const output = mockConsole.flush();
-    const logMsg = JSON.parse(output.stdout[0]);
-
-    assert.equal(logMsg.name, 'warnLogger');
-    assert.equal(logMsg.level, 40);
-    assert.equal(logMsg.requestId, 'rid:002');
-    assert.equal(logMsg.msg, 'warning');
-    assert.notProperty(logMsg, 'err');
+    assert.equal(loggerStub.warn.callCount, 1);
+    assert.notProperty(loggerStub.warn.firstCall.args, 'err');
+    assert.deepEqual(loggerStub.warn.firstCall.args, expectedArgs);
   });
 
   it('should log on warning level with error', () => {
-    const logger = Logger.getLogger('warnLogger');
-    const message = { artifacts: { requestId: 'rid:003' } };
-    let err;
+    let error;
+    loggerStub.warn.reset();
 
     try {
       throw createError('10006');
     } catch (e) {
-      err = e;
-      logger.warn('warning', { message, err: e });
+      error = e;
+      logger.warn('warning', { message: defaultMessage, err: e });
     }
 
-    const output = mockConsole.flush();
-    const logMsg = JSON.parse(output.stdout[0]);
+    const expectedArgs = [{
+      err: error.stack,
+      message: { artifacts: { requestId: 'rid:002' } },
+      context: {
+        statusCode: error.output.statusCode,
+        errorCode: error.data.errorCode,
+      },
+    }, 'warning'];
 
-    assert.equal(logMsg.name, 'warnLogger');
-    assert.property(logMsg, 'err');
-    assert.equal(logMsg.statusCode, err.output.statusCode);
-    assert.equal(logMsg.errorCode, err.data.errorCode);
-    assert.equal(logMsg.level, 40);
-    assert.equal(logMsg.requestId, 'rid:003');
-    assert.equal(logMsg.msg, 'warning');
-    assert.lengthOf(Object.keys(logMsg.context), 0);
+    assert.equal(loggerStub.warn.callCount, 1);
+    assert.deepEqual(loggerStub.warn.firstCall.args, expectedArgs);
   });
 
   it('should log on warning level with error without artifacts', () => {
-    const logger = Logger.getLogger('warnLogger');
+    let error;
     const message = { artifacts: undefined };
-    let err;
+    loggerStub.warn.reset();
 
     try {
       throw createError('10006');
     } catch (e) {
-      err = e;
+      error = e;
       logger.warn('warning', { message, err: e });
     }
 
-    const output = mockConsole.flush();
-    const logMsg = JSON.parse(output.stdout[0]);
+    const expectedArgs = [{
+      err: error.stack,
+      message: {},
+      context: {
+        statusCode: error.output.statusCode,
+        errorCode: error.data.errorCode,
+      },
+    }, 'warning'];
 
-    assert.equal(logMsg.name, 'warnLogger');
-    assert.property(logMsg, 'err');
-    assert.equal(logMsg.statusCode, err.output.statusCode);
-    assert.equal(logMsg.errorCode, err.data.errorCode);
-    assert.equal(logMsg.level, 40);
-    assert.equal(logMsg.msg, 'warning');
-    assert.lengthOf(Object.keys(logMsg.context), 0);
+    assert.equal(loggerStub.warn.callCount, 1);
+    assert.deepEqual(loggerStub.warn.firstCall.args, expectedArgs);
   });
 
   it('should log on error level without error', () => {
-    const logger = Logger.getLogger('errorLogger');
-    const message = { artifacts: { requestId: 'rid:002' } };
+    loggerStub.error.reset();
+    logger.error('error', { message: defaultMessage });
 
-    logger.error('error', { message });
+    const expectedArgs = [{
+      err: null,
+      message: { artifacts: { requestId: 'rid:002' } },
+      context: {},
+    }, 'error'];
 
-    const output = mockConsole.flush();
-    const logMsg = JSON.parse(output.stdout[0]);
-
-    assert.equal(logMsg.name, 'errorLogger');
-    assert.equal(logMsg.level, 50);
-    assert.equal(logMsg.requestId, 'rid:002');
-    assert.equal(logMsg.msg, 'error');
-    assert.notProperty(logMsg, 'err');
+    assert.equal(loggerStub.error.callCount, 1);
+    assert.deepEqual(loggerStub.error.firstCall.args, expectedArgs);
   });
 
   it('should log on error level with error', () => {
-    const logger = Logger.getLogger('errorLogger');
-    const message = { artifacts: { requestId: 'rid:002' } };
-    let err;
+    let error;
+    loggerStub.error.reset();
 
     try {
       throw createError('10006');
     } catch (e) {
-      err = e;
-      logger.error('error', { message, err: e });
+      error = e;
+      logger.error('error', { message: defaultMessage, err: e });
     }
 
-    const output = mockConsole.flush();
-    const logMsg = JSON.parse(output.stdout[0]);
+    const expectedArgs = [{
+      err: error.stack,
+      message: { artifacts: { requestId: 'rid:002' } },
+      context: {
+        statusCode: error.output.statusCode,
+        errorCode: error.data.errorCode,
+      },
+    }, 'error'];
 
-    assert.equal(logMsg.name, 'errorLogger');
-    assert.property(logMsg, 'err');
-    assert.equal(logMsg.statusCode, err.output.statusCode);
-    assert.equal(logMsg.errorCode, err.data.errorCode);
-    assert.equal(logMsg.level, 50);
-    assert.equal(logMsg.requestId, 'rid:002');
-    assert.equal(logMsg.msg, 'error');
+    assert.equal(loggerStub.error.callCount, 1);
+    assert.deepEqual(loggerStub.error.firstCall.args, expectedArgs);
   });
 
   it('should log on error level with error and no artifacts', () => {
-    const logger = Logger.getLogger('errorLogger');
+    let error;
     const message = { artifacts: undefined };
-    let err;
+    loggerStub.error.reset();
 
     try {
       throw createError('10006');
     } catch (e) {
-      err = e;
+      error = e;
       logger.error('error', { message, err: e });
     }
 
-    const output = mockConsole.flush();
-    const logMsg = JSON.parse(output.stdout[0]);
+    const expectedArgs = [{
+      err: error.stack,
+      message: {},
+      context: {
+        statusCode: error.output.statusCode,
+        errorCode: error.data.errorCode,
+      },
+    }, 'error'];
 
-    assert.equal(logMsg.name, 'errorLogger');
-    assert.property(logMsg, 'err');
-    assert.equal(logMsg.statusCode, err.output.statusCode);
-    assert.equal(logMsg.errorCode, err.data.errorCode);
-    assert.equal(logMsg.level, 50);
-    assert.equal(logMsg.msg, 'error');
+    assert.equal(loggerStub.error.callCount, 1);
+    assert.deepEqual(loggerStub.error.firstCall.args, expectedArgs);
   });
 
   it('should log on error level with error and multiple context objects', () => {
-    const logger = Logger.getLogger('errorLogger');
-    const message = { artifacts: { requestId: 'rid:002' } };
+    let error;
     const extraObject = { extra: 'extraobject' };
     const extraObject2 = { extra: 'extraobject2', nested: { greetings: 'hello' } };
-    let err;
+    loggerStub.error.reset();
 
     try {
       throw createError('10006');
     } catch (e) {
-      err = e;
-      logger.error('error', {
-        extraObject,
-        extraObject2,
-        message,
-        err: e,
-      });
+      error = e;
+      logger.error('error', { message: defaultMessage, extraObject, extraObject2, err: e });
     }
 
-    const output = mockConsole.flush();
-    const logMsg = JSON.parse(output.stdout[0]);
+    const expectedArgs = [{
+      err: error.stack,
+      message: { artifacts: { requestId: 'rid:002' } },
+      context: {
+        extraObject,
+        extraObject2,
+        statusCode: error.output.statusCode,
+        errorCode: error.data.errorCode,
+      },
+    }, 'error'];
 
-    assert.equal(logMsg.name, 'errorLogger');
-    assert.property(logMsg, 'err');
-    assert.equal(logMsg.statusCode, err.output.statusCode);
-    assert.equal(logMsg.errorCode, err.data.errorCode);
-    assert.equal(logMsg.level, 50);
-    assert.equal(logMsg.requestId, 'rid:002');
-    assert.equal(logMsg.msg, 'error');
-    assert.lengthOf(Object.keys(logMsg.context), 2);
-    assert.deepEqual(logMsg.context, { extraObject, extraObject2 });
-    assert.equal(logMsg.context.extraObject2.nested.greetings, 'hello');
+    assert.equal(loggerStub.error.callCount, 1);
+    assert.notProperty(loggerStub.error.firstCall.args, 'err');
+    assert.lengthOf(Object.keys(loggerStub.error.firstCall.args[0].context), 4);
+    assert.deepEqual(loggerStub.error.firstCall.args, expectedArgs);
   });
 
   it('should log a fatal message', () => {
-    const logger = Logger.getLogger('fatalLogger');
+    loggerStub.fatal.reset();
 
     try {
-      throw new Error('unrecoverable error');
+      throw new Error('Unrecoverable error');
     } catch (e) {
       logger.fatal('fatal', e);
     }
 
-    const output = mockConsole.flush();
-    const logMsg = JSON.parse(output.stdout[0]);
-
-    assert.equal(logMsg.name, 'fatalLogger');
-    assert.equal(logMsg.level, 60);
-    assert.equal(logMsg.msg, 'fatal');
-    assert.property(logMsg, 'err');
-    assert.equal(logMsg.err.message, 'unrecoverable error');
+    assert.equal(loggerStub.fatal.callCount, 1);
+    assert.deepEqual(loggerStub.fatal.firstCall.args[0].message, 'Unrecoverable error');
   });
 });

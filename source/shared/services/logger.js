@@ -1,44 +1,42 @@
-import { isUndefined, omit } from 'lodash';
+import R from 'ramda';
 import bunyan from 'bunyan';
+
+/**
+ * @module shared/services/logger
+ */
 
 const environment = process.env.API_ENV;
 const defaultConfig = process.env.CI ?
-  {} : require(`../configs/logs-${environment}`).default;
+   require('../configs/logs-ci').default :
+   require(`../configs/logs-${environment}`).default;
 
-const fetchContextObjects = (args = {}) => {
-  if (isUndefined(args.err)) return { context: args };
-
-  const context = { err: args.err.stack, context: omit(args, 'err') };
-  if (args.err.output) context.statusCode = args.err.output.statusCode;
-  if (args.err.data) context.errorCode = args.err.data.errorCode;
-
-  return context;
-};
+const makeMessage = R.pipe(
+  R.pick(['credentials', 'artifacts', 'network']),
+  R.reject(R.isNil)
+);
 
 const buildLogContext = (args = {}) => {
-  const options = args.message || {};
-  const logArgs = omit(args, 'message');
+  const payload = R.omit(['err', 'message'], args);
+  if (args.err && args.err.output) payload.statusCode = args.err.output.statusCode;
+  if (args.err && args.err.data) payload.errorCode = args.err.data.errorCode;
 
-  if (options.artifacts) {
-    const requestIdObject = { requestId: options.artifacts.requestId };
-
-    return { ...requestIdObject, ...fetchContextObjects(logArgs) };
-  }
-
-  return { ...fetchContextObjects(logArgs) };
+  return {
+    err: args.err ? args.err.stack : null,
+    message: args.message ? makeMessage(args.message) : {},
+    context: payload,
+  };
 };
 
-const defaultLogger = (name) => bunyan.createLogger({
-  ...defaultConfig,
-  name,
-});
+export const getLogger = (name) => bunyan.createLogger({ name, ...defaultConfig });
 
 /**
- * @param {string} name - logger name
- * @method getLogger returns a logger instance
+ * @param {string|Logger} loggerOrName
+ * @method createLogger
+ * @return {void}
  */
-export const getLogger = (name, loggerInstance = defaultLogger) => {
-  const logger = loggerInstance(name);
+export const createLogger = (loggerOrName) => {
+  const logger = typeof loggerOrName === 'string' ?
+    getLogger(loggerOrName) : loggerOrName;
 
   return {
     /**
@@ -93,3 +91,5 @@ export const getLogger = (name, loggerInstance = defaultLogger) => {
     },
   };
 };
+
+export default createLogger;

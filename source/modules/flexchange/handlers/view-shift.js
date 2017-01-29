@@ -2,7 +2,7 @@ import { omit } from 'lodash';
 import * as Logger from '../../../shared/services/logger';
 import * as flexchangeService from '../services/flexchange';
 
-const logger = Logger.getLogger('FLEXCHANGE/handler/viewShift');
+const logger = Logger.createLogger('FLEXCHANGE/handler/viewShift');
 
 export default async (req, reply) => {
   try {

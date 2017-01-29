@@ -1,7 +1,7 @@
 import * as Logger from '../../../shared/services/logger';
 import * as authenticationService from '../services/authentication';
 
-const logger = Logger.getLogger('AUTHENCTIATION/handler/delegate');
+const logger = Logger.createLogger('AUTHENCTIATION/handler/delegate');
 
 export default async (request, reply) => {
   try {

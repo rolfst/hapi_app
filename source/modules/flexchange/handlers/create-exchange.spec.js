@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import * as networkUtil from '../../../shared/utils/network';
 import * as exchangeRepo from '../repositories/exchange';
 import * as exchangeValueRepo from '../repositories/exchange-value';
@@ -27,7 +27,7 @@ describe('Create exchange', () => {
 
   it('should send a notification', async () => {
     sandbox.stub(exchangeCreatedNotification, 'send').returns(Promise.resolve(null));
-    sandbox.stub(userRepo, 'findUserMetaDataForNetwork')
+    sandbox.stub(userRepo, 'findNetworkLink')
       .returns(Promise.resolve({ roleType: 'EMPLOYEE' }));
 
     const message = {

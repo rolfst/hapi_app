@@ -1,13 +1,11 @@
-import { pick } from 'lodash';
+import { map, pick, toString } from 'lodash';
 import * as dateUtils from '../../../shared/utils/date';
 
 const whitelistAttrs = [
-  'username',
   'firstName',
   'lastName',
   'fullName',
   'phoneNum',
-  'email',
 ];
 
 let environment = 'production';
@@ -18,13 +16,16 @@ export default (dao) => ({
   type: 'user',
   id: dao.id.toString(),
   ...pick(dao, whitelistAttrs),
-  externalId: dao.externalId || null,
-  integrationAuth: dao.integrationAuth || null,
-  function: dao.function || null,
-  roleType: dao.role || null,
-  profileImg: `https://d64vbosa7udom.cloudfront.net/${environment}/profiles/${dao.profileImg}`,
+  username: dao.username.toLowerCase(),
+  email: dao.email.toLowerCase(),
+  externalId: dao.externalId ? dao.externalId.toString() : null,
+  integrationAuth: dao.userToken ? !!dao.userToken : dao.integrationAuth || null,
+  function: dao.roleType === 'ADMIN' ? 'Beheerder' : 'Medewerker',
+  roleType: dao.roleType || null,
+  teamIds: dao.Teams ? map(map(dao.Teams, 'id'), toString) : [],
+  profileImg: `https://assets.flex-appeal.nl/${environment}/profiles/${dao.profileImg}`,
   dateOfBirth: dao.dateOfBirth ? dateUtils.toISOString(dao.dateOfBirth) : null,
   createdAt: dateUtils.toISOString(dao.created_at),
   lastLogin: dao.lastLogin ? dateUtils.toISOString(dao.lastLogin) : null,
+  deletedAt: dao.deletedAt || null,
 });
-

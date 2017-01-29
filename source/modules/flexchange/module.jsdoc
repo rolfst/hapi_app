@@ -1,0 +1,77 @@
+/**
+ * @module modules/flexchange
+ * @description This module contains the Flexchange domain of the NodeJS Flex-Appeal API
+ * It contains the functionality concerning:
+ * <ul>
+ *   <li>{@link module:modules/flexchange~Exchange Exchange}</li>
+ *   <li>{@link module:modules/flexchange~ExchangeComment ExchangeComment}</li>
+ *   <li>{@link module:modules/flexchange~ExchangeResponse ExchangeResponse}</li>
+ *   <li>{@link module:modules/flexchange~ExchangeValue ExchangeValue}</li>
+ *   <li>{@link module:modules/flexchange~Shift Shift}</li>
+ * </ul>
+ */
+
+
+/**
+ * @typedef {object} Exchange
+ * @property {ExchangeType} type {@link module:flexchange~ExchangeType type}
+ * @property {string} id
+ * @property {Network} network
+ * @property {Team} team
+ * @property {string} title
+ * @property {User} user {@link module:modules/core~User User}
+ * @property {string} description - Products that are enabled
+ * @property {User} approvedBy {@link module:modules/core~User approvedBy}
+ * @property {number} acceptCount
+ * @property {string} date - ISO formatted date for when the exchange is created
+ * @property {string} startTime - ISO formatted date for when the shift is intended to start
+ * @property {string} endTime - ISO formatted date for when the shift was is intended to end
+ * @property {string} responseStatus - status of the exchange
+ * @property {ExchangeResponse[]} responses {@link module:modules/flexchange~ExchangeResponse responses}
+ * @property {ExchangeComment[]} comments {@link module:modules/flexchange~ExchangeComment comments}
+ * @property {ExchangeValue[]} exchangeValues {@link module:modules/flexchange~ExchangeValue exchangeValues}
+ * @property {string} createdAt - ISO formatted date for when the exchange is created
+ * @property {string} updatedAt - ISO formatted date for when the exchange is updated
+ */
+
+/**
+ * @typedef {object} ExchangeValue
+ * @property {Exchange} exchange {@link module:modules/flexchange~Exchange}
+ * @property {number} value - exchange value
+ */
+
+/**
+ * @typedef {object} ExchangeComment
+ * @property {string} parentId
+ * @property {string} parentType
+ * @property {string} text - token to be used for authentication with the integration partner
+ * @property {User} createdBy {@link module:modules/core~User createdBy}
+ * @property {string} createdAt - ISO formatted date for when the exchange is created
+ * @property {string} updatedAt - ISO formatted date for when the exchange is updated
+ */
+
+/**
+ * @typedef {object} ExchangeResponse
+ * @property {User} user
+ * @property {string} type - 'exchange_responses'
+ * @property {string} name
+ * @property {string} description
+ */
+
+ /**
+ * @typedef {object} ExchangeActivity
+ * @property {User} user
+ * @property {string} activityType - 'exchange_responses'
+ * @property {string} name
+ * @property {string} description
+  */
+
+ /**
+  * @typedef {object} Shift
+  * @property {string} exchangeId - nullable
+  * @property {string} teamId - nullable
+  * @property {string} date - date of the shift
+  * @property {string} start_time - ISO date format of the start of the shift
+  * @property {string} end_time - ISO date format of the end of the shift
+  * @property {string} break - break of the shift
+  */

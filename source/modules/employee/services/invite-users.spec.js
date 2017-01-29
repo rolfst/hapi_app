@@ -1,66 +1,73 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
+import { map } from 'lodash';
 import * as passwordUtil from '../../../shared/utils/password';
 import * as mailer from '../../../shared/services/mailer';
-import addedToNetworkMail from '../../../shared/mails/added-to-network';
-import addedToExtraNetworkMail from '../../../shared/mails/added-to-extra-network';
-import * as adapterUtil from '../../../shared/utils/create-adapter';
-import * as userService from '../../core/services/user';
-import * as networkRepo from '../../core/repositories/network';
+import signupMail from '../../../shared/mails/signup';
 import * as userRepo from '../../core/repositories/user';
+import * as userService from '../../core/services/user';
 import * as service from './invite-user';
+import * as impl from './implementation';
 
 describe('Invite users', () => {
   let sandbox;
 
-  const importUser = {
+  const aUser = {
+    id: '1',
     username: 'importTestUser@flex-appeal.nl',
-    plainPassword: 'testpassword',
+    email: 'importTestUser@flex-appeal.nl',
+    password: 'testpassword',
     firstName: 'import',
   };
-  const oldUser = {
+  const invitedUser = {
+    id: '2',
     username: 'importedTestUser@flex-appeal.nl',
+    email: 'importedTestUser@flex-appeal.nl',
+    password: 'testpassword',
     firstName: 'imported',
-    password: 'pass',
-    plainPassword: 'testedpassword' };
+    invitedAt: new Date(),
+  };
   const adminUser = {
+    id: '3',
     username: 'adminUser@flex-appeal.nl',
-    plainPassword: 'password',
-    password: 'password',
     firstName: 'admin',
-    roleType: 'ADMIN' };
-  const allUsersFromIntegration = [importUser, oldUser, adminUser];
-  const message = {
-    credentials: { id: '' },
-    network: { id: '',
+    password: 'testpassword',
+    roleType: 'ADMIN',
+  };
+  const allUsersFromIntegration = [aUser, invitedUser, adminUser];
+  const network = { id: '1',
       superAdmin: { firstName: 'admin' },
       integrations: ['PMT'],
-    },
+    };
+  const message = {
+    credentials: { id: '3' },
+    network,
   };
 
   before(() => (sandbox = sinon.sandbox.create()));
   after(() => sandbox.restore());
 
   it('should send correct emails', async () => {
-    const fakeAdapter = { fetchUsers: () => allUsersFromIntegration };
-
-    sandbox.stub(mailer, 'send');
     sandbox.stub(userRepo, 'userBelongsToNetwork').returns(Promise.resolve(true));
-    sandbox.stub(userRepo, 'updateUser').returns(Promise.resolve(importUser));
     sandbox.stub(userService, 'getUserWithNetworkScope').returns(Promise.resolve(adminUser));
-    sandbox.stub(adapterUtil, 'createAdapter').returns(fakeAdapter);
     sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
-    sandbox.stub(networkRepo, 'findUsersForNetwork').returns(
-      Promise.resolve(allUsersFromIntegration));
+    sandbox.stub(impl, 'generatePasswordsForMembers', users => {
+      return users;
+    });
+    sandbox.stub(userRepo, 'setNetworkLink').returns(Promise.resolve({
+      userId: '1', networkId: network.Id, invitedAt: new Date() }));
+    sandbox.stub(userService, 'listUsersWithNetworkScope')
+      .returns(Promise.resolve(allUsersFromIntegration));
 
-    const passwordMailConfig = addedToNetworkMail(message.network, importUser);
-    const noPasswordMailAdminConfig = addedToExtraNetworkMail(message.network, adminUser);
-    const noPasswordMailConfig = addedToExtraNetworkMail(message.network, oldUser);
+    const passwordMailConfig = signupMail(message.network, aUser);
+    const noPasswordMailAdminConfig = signupMail(message.network, adminUser);
+    const noPasswordMailConfig = signupMail(message.network, invitedUser);
+    const userIdsToNotify = map(allUsersFromIntegration, user => user.id);
 
-    await service.inviteUsers({}, message);
+    await service.inviteUsers({ userIds: userIdsToNotify, networkId: network.id }, message);
 
     assert.equal(mailer.send.calledWithMatch(passwordMailConfig), true);
-    assert.equal(mailer.send.calledWithMatch(noPasswordMailConfig), true);
-    assert.equal(mailer.send.neverCalledWithMatch(noPasswordMailAdminConfig), true);
+    assert.equal(mailer.send.calledWithMatch(noPasswordMailConfig), false);
+    assert.equal(mailer.send.calledWithMatch(noPasswordMailAdminConfig), true);
   });
 });
