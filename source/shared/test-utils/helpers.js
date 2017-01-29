@@ -8,6 +8,7 @@ import * as integrationRepo from '../../modules/core/repositories/integration';
 import * as userRepo from '../../modules/core/repositories/user';
 import * as networkRepo from '../../modules/core/repositories/network';
 import * as activityRepo from '../../modules/core/repositories/activity';
+import * as objectRepo from '../../modules/feed/repositories/object';
 import { postRequest } from './request';
 
 /**
@@ -240,6 +241,27 @@ export async function deleteActivity(...activityOrActivities) {
 }
 
 /**
+ * Deletes objects from database
+ * @param {Object|Object[]} objectOrObjects
+ * @method deleteObject
+ * @return {external:Promise.<number[]>} number of deleted objects
+ */
+export function deleteObject(...objectOrObjects) {
+  return Promise.map(flatten(objectOrObjects), (object) => {
+    objectRepo.deleteById(object.id);
+  });
+}
+
+/**
+ * Finds all Objects in the database
+ * @method findAllObjects
+ * @return {external:Promise.<Object[]} {@link module:shared~Object Object}
+ */
+export async function findAllObjects() {
+  return objectRepo.findAll();
+}
+
+/**
  * Deletes all data in the database
  * @method cleanAll
  */
@@ -247,6 +269,7 @@ export async function cleanAll() {
   return Promise.map(findAllNetworks(), (network) => networkRepo.deleteById(network.id))
   .then(() => Promise.map(findAllUsers(), deleteUser))
   .then(() => Promise.map(findAllActivities(), deleteActivity))
-  .then(() => Promise.map(findAllIntegrations(), deleteIntegration));
+  .then(() => Promise.map(findAllIntegrations(), deleteIntegration))
+  .then(() => Promise.map(findAllObjects(), deleteObject));
 }
 
