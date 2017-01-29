@@ -4,8 +4,9 @@ class EventEmitter extends NativeEventEmitter {
   constructor() {
     super();
 
-    this.asyncOn = (eventName, fn) => {
-      return this.on(eventName, () => setImmediate(fn));
+    this.asyncOn = function (eventName, fn) {
+      return this.on(eventName, (...args) =>
+        setImmediate(() => fn.apply(this, args)));
     };
   }
 }
