@@ -249,14 +249,18 @@ export function getOutOfSyncTeams(internalTeams, externalTeams) {
 }
 
 /**
- * This step synchronises the teams.
+ * This step synchronises the teams that should be synced.
+ * This depends on the externalId value.
  * @param {string} networkId - The network to sync the users for
  * @param {Array<ExternalTeam>} _externalTeams - The teams that come from the external system
  * @method syncTeams
  * @return {Team} - Return team objects
  */
 export async function syncTeams(networkId, _externalTeams) {
-  const internalTeams = await networkService.listTeamsForNetwork({ networkId });
+  const internalTeams = await networkService
+    .listTeamsForNetwork({ networkId })
+    .then(R.reject(R.propEq('externalId', null)));
+
   // We are setting the networkId here because the external team object
   // does not contain the networkId yet.
   const externalTeams = map(_externalTeams, t => ({ ...t, networkId }));
