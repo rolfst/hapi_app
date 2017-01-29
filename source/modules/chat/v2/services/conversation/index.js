@@ -58,7 +58,7 @@ export const listConversations = async (payload, message) => {
 
   if (includes('participants')) {
     const userIds = R.pipe(R.pluck('participantIds'), R.flatten, R.uniq)(conversations);
-    const participants = await userRepo.findPlainUsersByIds(userIds);
+    const participants = await userRepo.findByIds(userIds);
     const conversationWithParticipants = await impl.addParticipantsToConversation(
       conversations, participants);
 
@@ -109,7 +109,7 @@ export const listMessages = async (payload, message) => {
     parentId: payload.conversationId,
   }, message);
 
-  return messageService.list({ messageIds: R.pluck('sourceId', objects) }, message);
+  return objectService.listWithSources({ objectIds: R.pluck('id', objects) }, message);
 };
 
 /**
@@ -126,12 +126,45 @@ export async function countConversations(payload, message) {
   return conversationRepo.countConversationsForUser(payload.userId);
 }
 
+/**
+ * Delete a conversation
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.conversationId - The type of parent to create the object for
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method createMessage
+ * @return {external:Promise<Message>} {@link module:chat~Message message}
+ */
 export const remove = async (payload, message) => {
   logger.info('Deleting conversation', { payload, message });
 
   await conversationRepoV1.deleteConversationById(payload.conversationId);
   await objectService.remove({
-    parentType: 'conversation', parentId: payload.conversationId }, message);
+    parentType: 'conversation',
+    parentId: payload.conversationId },
+  message);
+};
+
+/**
+ * Create a message in a conversation
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.conversationId - The type of parent to create the object for
+ * @param {string} payload.text - The text of the message
+ * @param {object[]} payload.resources - The resources that belong to the message
+ * @param {string} payload.resources[].type - The type of the resource
+ * @param {object} payload.resources[].data - The data for the resource
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method createMessage
+ * @return {external:Promise<Message>} {@link module:chat~Message message}
+ */
+export const createMessage = async (payload, message) => {
+  await impl.assertThatUserIsPartOfTheConversation(message.credentials.id, payload.conversationId);
+
+  return await messageService.create({
+    parentType: 'conversation',
+    parentId: payload.conversationId,
+    text: payload.text,
+    resources: payload.resources,
+  }, message);
 };
 
 /**

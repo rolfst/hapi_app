@@ -1,19 +1,7 @@
-import { omit, map, filter, find } from 'lodash';
+import { omit, find } from 'lodash';
 import R from 'ramda';
 import createError from '../../../../shared/utils/create-error';
-import * as networkUtil from '../../../../shared/utils/network';
-import * as userRepo from '../../../core/repositories/user';
 import * as exchangeRepo from '../../repositories/exchange';
-
-export const matchUsersForShift = async (usersToMatch, network) => {
-  const externalIds = map(usersToMatch, 'externalId');
-  const matchedUsers = await userRepo.findExternalUsers(externalIds);
-
-  const response = filter(matchedUsers, (u) => !!networkUtil.select(u.Networks, network.id))
-    .map((u) => networkUtil.addUserScope(u, network.id));
-
-  return response;
-};
 
 export const validateExchangeResponse = (exchangeResponse) => {
   if (exchangeResponse.approved) {
@@ -24,9 +12,6 @@ export const validateExchangeResponse = (exchangeResponse) => {
     throw createError('403', 'You cannot approve a user that did not accept the exchange.');
   }
 };
-
-export const filterTeamsForNetwork = (teams, networkId) => teams.
-  filter(team => team.networkId === networkId);
 
 export const mergeShiftWithExchangeAndTeam = (shift, exchange, team) => ({
   ...omit(shift, 'team_id'),

@@ -2,7 +2,7 @@ import { map, omit, pick, sample } from 'lodash';
 import R from 'ramda';
 import Promise from 'bluebird';
 import createError from '../../../shared/utils/create-error';
-import { User, Network, NetworkUser, Integration, Team, TeamUser } from '../../../shared/models';
+import { User, Network, NetworkUser, Team, TeamUser } from '../../../shared/models';
 import createUserModel from '../models/user';
 import createNetworkLinkModel from '../models/network-link';
 import createCredentialsModel from '../models/credentials';
@@ -20,15 +20,6 @@ const dummyProfileImgPaths = [
 const defaultIncludes = {
   include: [{
     model: Team,
-  }, {
-    model: Network,
-    include: [{
-      model: Integration,
-      required: false,
-    }, {
-      model: User,
-      as: 'SuperAdmin',
-    }],
   }],
 };
 
@@ -61,17 +52,11 @@ export const findExternalUsers = async (externalIds) => {
 /**
  * Finds users based on a list of ids
  * @param {string[]} userIds - identifier how the user is known
- * @method findUsersByIds
+ * @method findByIds
  * @return {external:Promise.<User[]>} {@link module:modules/core~User User}
  */
-export const findUsersByIds = async (userIds) => {
+export const findByIds = async (userIds) => {
   const result = await User.findAll({ ...defaultIncludes, where: { id: { $in: userIds } } });
-
-  return map(result, toModel);
-};
-
-export const findPlainUsersByIds = async (userIds) => {
-  const result = await User.findAll({ where: { id: { $in: userIds } } });
 
   return map(result, toModel);
 };
@@ -83,7 +68,7 @@ export const findPlainUsersByIds = async (userIds) => {
  * retrieved
  * @param {string} [scoped=true] - flag to specifiy whether a user needs to be fetched
  * with network scoped attributes
- * @method findUsersByIds
+ * @method findByIds
  * @return {external:Promise.<User>} {@link module:modules/core~User User}
  */
 export const findUserById = async (userId, networkId, scoped = true) => {
