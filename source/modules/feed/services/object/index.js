@@ -9,6 +9,16 @@ import * as impl from './implementation';
  */
 
 const logger = Logger.getLogger('FEED/service/object');
+const typeEq = R.propEq('type');
+const idEq = R.propEq('id');
+const getSources = R.pipeP(Promise.all, R.flatten, R.reject(R.isNil));
+const groupByObjectType = R.groupBy(R.prop('objectType'));
+const sourceIdsPerType = R.pipe(groupByObjectType, R.map(R.pluck('sourceId')));
+const whereTypeAndId = (type, id) => R.both(typeEq(type), idEq(id));
+const createOptionsFromPayload = R.pipe(
+  R.pick(['offset', 'limit']),
+  R.assoc('order', [['createdAt', 'desc']])
+);
 
 /**
  * Listing objects for a specific parent
@@ -24,11 +34,10 @@ const logger = Logger.getLogger('FEED/service/object');
 export const list = async (payload, message) => {
   logger.info('Listing objects', { payload, message });
 
-  const options = R.pick(['offset', 'limit'], payload);
   const objects = await objectRepository.findBy({
     parentType: payload.parentType,
     parentId: payload.parentId,
-  }, options);
+  }, createOptionsFromPayload(payload));
 
   return objects;
 };
@@ -43,26 +52,21 @@ export const list = async (payload, message) => {
  */
 export const listWithSources = async (payload, message) => {
   logger.info('Listing objects with sources', { payload, message });
+
   const objects = await objectRepository.findBy({
-    id: { $in: payload.objectIds },
-  });
+    id: { $in: payload.objectIds } }, createOptionsFromPayload(payload));
 
-  // Gathering the data to build the feed
-  const objectSourceLinks = impl.createObjectSourceLinks(objects);
-  const promisedSources = R.map(impl.findSourcesForFeed(message), objectSourceLinks);
-  const sources = await Promise.map(promisedSources, Promise.props);
-  const occurringTypes = R.pluck('type', objectSourceLinks);
+  const promisedSources = R.pipe(
+    sourceIdsPerType,
+    R.mapObjIndexed(impl.findSourcesForType(message)),
+    R.values
+  )(objects);
 
-  // Linking everything together
-  return R.chain(occurringType => {
-    const sourcesForType = impl.findWhereType(occurringType, sources);
-    const linksForType = impl.findWhereType(occurringType, objectSourceLinks);
+  const sources = await getSources(promisedSources);
+  const findSource = (type, id) => R.find(whereTypeAndId(type, id), sources) || null;
 
-    return impl.mergeSourceAndObject(
-      impl.objectsForType(occurringType, objects),
-      linksForType.values,
-      sourcesForType.values);
-  }, occurringTypes);
+  return R.map((object) =>
+    R.merge(object, { source: findSource(object.objectType, object.sourceId) }), objects);
 };
 
 /**

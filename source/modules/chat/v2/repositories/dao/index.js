@@ -1,6 +1,7 @@
 import UserModel from '../../../../../shared/models/user';
 import ConversationModel from './conversation';
 import ConversationUserModel from './conversation-user';
+import PrivateMessageModel from './private-message';
 
 ConversationModel.belongsToMany(UserModel, {
   foreignKey: 'conversation_id',
@@ -19,3 +20,4 @@ UserModel.belongsToMany(ConversationModel, {
 
 export const Conversation = ConversationModel;
 export const ConversationUser = ConversationUserModel;
+export const PrivateMessage = PrivateMessageModel;

@@ -27,6 +27,14 @@ const _Object = model.define('_Object', {
     field: 'parent_id',
     allowNull: false,
   },
+  createdAt: {
+    type: Sequelize.DATE,
+    field: 'created_at',
+  },
+  updatedAt: {
+    type: Sequelize.DATE,
+    field: 'updated_at',
+  },
 }, {
   tableName: 'objects',
   timestamps: true,

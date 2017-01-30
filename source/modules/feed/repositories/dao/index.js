@@ -1,7 +1,7 @@
-import MessageModel from './message';
+import FeedMessageModel from './feed-message';
 import ObjectModel from './object';
 
 module.exports = {
-  Message: MessageModel,
+  FeedMessage: FeedMessageModel,
   _Object: ObjectModel,
 };
