@@ -10,7 +10,7 @@ const logger = Logger.createLogger('CHAT/service/conversation');
  * @param {string[]} payload.messageIds - The ids of the messages to list
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method list
- * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
+ * @return {external:Promise.<PrivateMessage[]>} {@link module:modules/chat~PrivateMessage}
  */
 export const list = async (payload, message) => {
   logger.info('Listing private messages', { payload, message });

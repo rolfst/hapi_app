@@ -1,6 +1,6 @@
 import R from 'ramda';
 import { FeedMessage } from './dao';
-import createFeedMessageModel from '../models/feed-message';
+import createFeedMessageModel from '../models/message';
 
 /**
  * Find a message by id
