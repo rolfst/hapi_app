@@ -51,7 +51,10 @@ export const getRemovableUsersForNetwork = async (externalUsers, networkId, mess
  * @return {external:Promise.<string[]>} Promise containing removed teamids
  */
 export const getRemovableTeamsIdsForNetwork = async (externalTeams, networkId, message) => {
-  const internalTeams = await networkService.listTeamsForNetwork({ networkId }, message);
+  const internalTeams = await networkService
+    .listTeamsForNetwork({ networkId }, message)
+    .then(R.reject(R.propEq('externalId', null)));
+
   const removableTeams = differenceBy(internalTeams, externalTeams, 'externalId');
 
   return map(removableTeams, 'id');
@@ -484,7 +487,9 @@ export async function syncUsersWithTeams(networkId, externalUsers) {
   const network = await networkRepo.findNetworkById(networkId);
   const internalUsers = await networkService.listAllUsersForNetwork({
     networkId }, { credentials: network.superAdmin });
-  const internalTeams = await networkService.listTeamsForNetwork({ networkId });
+  const internalTeams = await networkService
+    .listTeamsForNetwork({ networkId })
+    .then(R.reject(R.propEq('externalId', null)));
 
   // We want to make sure we only sync the users that are out-of-sync.
   const usersOutOfSync = getOutOfSyncUsersForTeamLinking(
