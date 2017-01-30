@@ -39,23 +39,19 @@ describe('Get messages (v2)', () => {
       credentials: { id: participant.id },
     });
 
-    await Promise.delay(1000);
-
-    await privateMessageService.create({
+    await Promise.delay(1000).then(() => privateMessageService.create({
       conversationId: createdConversation.id,
       text: 'Second message',
     }, {
       credentials: { id: participant.id },
-    });
+    }));
 
-    await Promise.delay(1000);
-
-    await privateMessageService.create({
+    await Promise.delay(1000).then(() => privateMessageService.create({
       conversationId: createdConversation.id,
       text: 'Last message',
     }, {
       credentials: { id: participant.id },
-    });
+    }));
   });
 
   after(async () => {

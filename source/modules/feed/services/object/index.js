@@ -9,6 +9,16 @@ import * as impl from './implementation';
  */
 
 const logger = Logger.getLogger('FEED/service/object');
+const typeEq = R.propEq('type');
+const idEq = R.propEq('id');
+const getSources = R.pipeP(Promise.all, R.flatten, R.reject(R.isNil));
+const groupByObjectType = R.groupBy(R.prop('objectType'));
+const sourceIdsPerType = R.pipe(groupByObjectType, R.map(R.pluck('sourceId')));
+const whereTypeAndId = (type, id) => R.both(typeEq(type), idEq(id));
+const createOptionsFromPayload = R.pipe(
+  R.pick(['offset', 'limit']),
+  R.assoc('order', [['createdAt', 'desc']])
+);
 
 /**
  * Listing objects for a specific parent
@@ -24,15 +34,10 @@ const logger = Logger.getLogger('FEED/service/object');
 export const list = async (payload, message) => {
   logger.info('Listing objects', { payload, message });
 
-  const createOptions = R.pipe(
-    R.pick(['offset', 'limit']),
-    R.assoc('order', [['createdAt', 'desc']])
-  );
-
   const objects = await objectRepository.findBy({
     parentType: payload.parentType,
     parentId: payload.parentId,
-  }, createOptions(payload));
+  }, createOptionsFromPayload(payload));
 
   return objects;
 };
@@ -49,12 +54,7 @@ export const listWithSources = async (payload, message) => {
   logger.info('Listing objects with sources', { payload, message });
 
   const objects = await objectRepository.findBy({
-    id: { $in: payload.objectIds } }, { order: [['createdAt', 'desc']] });
-
-  const sourceIdsPerType = R.pipe(
-    R.groupBy(R.prop('objectType')),
-    R.map(R.pluck('sourceId'))
-  );
+    id: { $in: payload.objectIds } }, createOptionsFromPayload(payload));
 
   const promisedSources = R.pipe(
     sourceIdsPerType,
@@ -62,9 +62,7 @@ export const listWithSources = async (payload, message) => {
     R.values
   )(objects);
 
-  const sources = await R.pipeP(Promise.all, R.flatten, R.reject(R.isNil))(promisedSources);
-
-  const whereTypeAndId = (type, id) => R.both(R.propEq('type', type), R.propEq('id', id));
+  const sources = await getSources(promisedSources);
   const findSource = (type, id) => R.find(whereTypeAndId(type, id), sources) || null;
 
   return R.map((object) =>

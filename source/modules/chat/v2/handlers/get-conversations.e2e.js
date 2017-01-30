@@ -53,14 +53,12 @@ describe('Get conversations for logged user (v2)', () => {
         credentials: { id: participant.id },
       });
 
-      await Promise.delay(1000);
-
-      await privateMessageService.create({
+      await Promise.delay(1000).then(() => privateMessageService.create({
         conversationId: createdConversation1.id,
         text: 'Last message',
       }, {
         credentials: { id: participant.id },
-      });
+      }));
     });
 
     after(async () => {
@@ -138,23 +136,19 @@ describe('Get conversations for logged user (v2)', () => {
         credentials: { id: participant.id },
       });
 
-      await Promise.delay(1000);
-
-      await privateMessageService.create({
+      await Promise.delay(1000).then(() => privateMessageService.create({
         conversationId: createdConversation1.id,
         text: 'Last message',
       }, {
         credentials: { id: participant.id },
-      });
+      }));
 
-      await Promise.delay(1000);
-
-      await privateMessageService.create({
+      await Promise.delay(1000).then(() => privateMessageService.create({
         conversationId: createdConversation2.id,
         text: 'First message second conversation',
       }, {
         credentials: { id: participant.id },
-      });
+      }));
     });
 
     after(async () => {
