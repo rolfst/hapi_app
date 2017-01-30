@@ -1,5 +1,3 @@
-const baseUrl = process.env.LOG_DIR || '/var/log/node.api.flex-appeal.nl';
-
 export default {
   streams: [{
     level: 'debug',
@@ -9,9 +7,9 @@ export default {
     stream: process.stdout,
   }, {
     level: 'warn',
-    path: `${baseUrl}/warnings.log`,
+    path: process.stderr,
   }, {
     level: 'error',
-    path: `${baseUrl}/errors.log`,
+    path: process.stderr,
   }],
 };
