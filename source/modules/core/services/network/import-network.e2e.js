@@ -39,7 +39,7 @@ describe('Import network', () => {
           .get('/users')
           .reply(200, stubs.users_200);
 
-        admin = await testHelper.createUser();
+        admin = await testHelper.createUser({ password: 'pw' });
         const { network: netw } = await testHelper.createNetworkWithIntegration({
           userId: admin.id,
           ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
@@ -137,7 +137,7 @@ describe('Import network', () => {
       sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve(fakeAdapter));
       sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
 
-      admin = await testHelper.createUser();
+      admin = await testHelper.createUser({ password: 'pw' });
       const { network: netw } = await testHelper.createNetworkWithIntegration({
         userId: admin.id,
         ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),

@@ -16,14 +16,11 @@ describe('Post message', () => {
     sandbox = sinon.sandbox.create();
     sandbox.stub(notifier, 'send').returns(null);
 
-    admin = await testHelper.createUser();
+    admin = await testHelper.createUser({ password: 'foo' });
     user = await testHelper.createUser(blueprints.users.employee);
 
-    const network = await testHelper.createNetwork({ userId: admin.id });
-
+    const network = await testHelper.createNetwork({ userId: admin.id, name: 'flexAppeal' });
     await testHelper.addUserToNetwork({ networkId: network.id, userId: user.id });
-    await testHelper.addUserToNetwork({
-      networkId: network.id, userId: admin.id, roleType: 'ADMIN' });
 
     conversation = await conversationRepo.createConversation(
       'PRIVATE', admin.id, [user.id, admin.id]);
@@ -40,9 +37,8 @@ describe('Post message', () => {
 
   it('should show new message data', async () => {
     const endpoint = `/v1/chats/conversations/${conversation.id}/messages`;
-    const { tokens } = await testHelper.getLoginToken(blueprints.users.employee);
     const { result, statusCode } = await postRequest(
-        endpoint, { text: 'Test message' }, tokens.access_token);
+        endpoint, { text: 'Test message' }, user.token);
     const { data } = result;
 
     assert.equal(statusCode, 200);

@@ -14,12 +14,9 @@ describe('Post conversation', () => {
   let networklessUser;
 
   before(async () => {
-    admin = await testHelper.createUser();
+    admin = await testHelper.createUser({ password: 'foo' });
     networklessUser = await testHelper.createUser(blueprints.users.networkless);
-    const network = await testHelper.createNetwork({ userId: admin.id });
-
-    await testHelper.addUserToNetwork({
-      networkId: network.id, userId: admin.id, roleType: 'ADMIN' });
+    await testHelper.createNetwork({ userId: admin.id });
 
     createdConversation = await conversationRepo.createConversation(
       'private', admin.id, [admin.id, networklessUser.id]
@@ -28,18 +25,12 @@ describe('Post conversation', () => {
     return messageRepo.createMessage(createdConversation.id, networklessUser.id, 'Foo text');
   });
 
-  after(async () => {
-    return Promise.all([
-      testHelper.deleteUser(networklessUser),
-      testHelper.deleteUser(admin),
-    ]);
-  });
+  after(async () => testHelper.cleanAll());
 
   it('should show new conversation data', async () => {
     const employee = await testHelper.createUser(blueprints.users.employee);
     const payload = { type: 'private', users: [employee.id] };
-    const { tokens } = await testHelper.getLoginToken(blueprints.users.networkless);
-    const { result, statusCode } = await postRequest(ENDPOINT_URL, payload, tokens.access_token);
+    const { result, statusCode } = await postRequest(ENDPOINT_URL, payload, networklessUser.token);
     await testHelper.deleteUser(employee);
 
     assert.equal(statusCode, 200);
@@ -51,8 +42,7 @@ describe('Post conversation', () => {
 
   it('should return the existing conversation when there is already one created', async () => {
     const payload = { type: 'private', users: [networklessUser.id] };
-    const { tokens } = await testHelper.getLoginToken(blueprints.users.admin);
-    const { result, statusCode } = await postRequest(ENDPOINT_URL, payload, tokens.access_token);
+    const { result, statusCode } = await postRequest(ENDPOINT_URL, payload, admin.token);
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.id, createdConversation.id);
@@ -65,8 +55,7 @@ describe('Post conversation', () => {
 
   it('should fail when creating conversation with yourself', async () => {
     const payload = { type: 'private', users: [admin.id.toString()] };
-    const { tokens } = await testHelper.getLoginToken(blueprints.users.admin);
-    const { statusCode } = await postRequest(ENDPOINT_URL, payload, tokens.access_token);
+    const { statusCode } = await postRequest(ENDPOINT_URL, payload, admin.token);
 
     assert.equal(statusCode, 403);
   });

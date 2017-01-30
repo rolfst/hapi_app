@@ -7,34 +7,23 @@ import * as teamRepository from '../repositories/team';
 describe('Handler: create team', () => {
   let admin;
   let employee;
-  let accessToken;
   let network;
 
   before(async () => {
-    admin = await testHelper.createUser();
+    admin = await testHelper.createUser({ password: 'foo' });
     employee = await testHelper.createUser(blueprints.users.employee);
-    network = await testHelper.createNetwork({ userId: admin.id });
+    network = await testHelper.createNetwork({ userId: admin.id, name: 'flexAppeal' });
 
-    await testHelper.addUserToNetwork(
-        { networkId: network.id, userId: admin.id, roleType: 'ADMIN' });
-    await testHelper.addUserToNetwork({ networkId: network.id, userId: employee.id });
-
-    const { tokens } = await testHelper.getLoginToken(blueprints.users.admin);
-    accessToken = tokens.access_token;
+    return testHelper.addUserToNetwork({ networkId: network.id, userId: employee.id });
   });
 
-  after(async () => {
-    return Promise.all([
-      testHelper.deleteUser(employee),
-      testHelper.deleteUser(admin),
-    ]);
-  });
+  after(async () => testHelper.cleanAll());
 
   it('should create a new team', async () => {
     const userIds = [admin.id, employee.id];
     const endpoint = `/v2/networks/${network.id}/teams`;
     const payload = { name: 'Foo team', is_channel: true, user_ids: userIds };
-    const { statusCode, result } = await postRequest(endpoint, payload, accessToken);
+    const { statusCode, result } = await postRequest(endpoint, payload, admin.token);
 
     await teamRepository.deleteById(result.data.id);
 
@@ -51,7 +40,7 @@ describe('Handler: create team', () => {
   it('should be a channel by default', async () => {
     const endpoint = `/v2/networks/${network.id}/teams`;
     const payload = { name: 'Foo team' };
-    const { statusCode, result } = await postRequest(endpoint, payload, accessToken);
+    const { statusCode, result } = await postRequest(endpoint, payload, admin.token);
 
     await teamRepository.deleteById(result.data.id);
 
@@ -68,8 +57,7 @@ describe('Handler: create team', () => {
   it('should return 403 if user is not an admin', async () => {
     const endpoint = `/v2/networks/${network.id}/teams`;
     const payload = { name: 'Foo team' };
-    const { tokens } = await testHelper.getLoginToken(blueprints.users.employee);
-    const { statusCode } = await postRequest(endpoint, payload, tokens.access_token);
+    const { statusCode } = await postRequest(endpoint, payload, employee.token);
 
     assert.equal(statusCode, 403);
   });
