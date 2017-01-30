@@ -5,11 +5,18 @@ import * as objectService from '../../../../feed/services/object';
 import * as objectRepository from '../../../../feed/repositories/object';
 import * as conversationRepoV1 from '../../../v1/repositories/conversation';
 import * as conversationRepo from '../../repositories/conversation';
-import * as privateMessageService from '../private-message';
 import * as impl from './implementation';
 
 const logger = Logger.createLogger('CHAT/service/conversation');
-const PAGINATION_PROPERTIES = ['limit', 'offset'];
+const createOptions = R.pick(['limit', 'offset']);
+const pluckUniqueParticipantIds = R.pipe(R.pluck('participantIds'), R.flatten, R.uniq);
+const groupByParentId = R.groupBy(R.prop('parentId'));
+const findIdEq = (id, collection) => R.find(R.propEq('id', id), collection);
+const lastMessageObjectsByConversationId = R.pipe(
+  R.sort(R.descend(R.prop('createdAt'))),
+  groupByParentId,
+  R.map(R.head)
+);
 
 /**
  * Create conversation
@@ -41,35 +48,26 @@ export const create = async (payload, message) => {
 export const listConversations = async (payload, message) => {
   logger.info('Listing conversations', { payload, message });
 
-  const options = R.pick(PAGINATION_PROPERTIES, payload);
   const includes = impl.hasInclude(payload.include);
   const [conversations, objects] = await Promise.all([
-    conversationRepo.findByIds(payload.conversationIds, options),
+    conversationRepo.findByIds(payload.conversationIds, createOptions(payload)),
     objectRepository.findBy({
       parentType: 'conversation', parentId: { $in: payload.conversationIds } }),
   ]);
 
   if (objects.length === 0) return conversations;
 
-  const lastMessageObjects = R.pipe(
-    R.sort(R.descend(R.prop('createdAt'))),
-    R.groupBy(R.prop('parentId')),
-    R.map(R.head)
-  )(objects);
-
-  const objectSourceIds = R.pipe(R.pluck('sourceId'), R.values)(lastMessageObjects);
-  const lastMessages = await privateMessageService.list({ messageIds: objectSourceIds });
+  const lastMessageObjects = lastMessageObjectsByConversationId(objects);
+  const objectIds = R.pipe(R.pluck('id'), R.values)(lastMessageObjects);
+  const lastMessages = await objectService.listWithSources({ objectIds }, message);
 
   const lastMessagesForConversation = R.map(object =>
-    R.find(R.propEq('id', object.sourceId), lastMessages), lastMessageObjects);
+    R.find(R.propEq('sourceId', object.sourceId), lastMessages), lastMessageObjects);
 
   if (includes('participants')) {
     const participants = await R.pipe(
-      R.pipe(R.pluck('participantIds'), R.flatten, R.uniq),
-      userRepo.findByIds
-    )(conversations);
-
-    const findParticipant = (participantId) => R.find(R.propEq('id', participantId), participants);
+      pluckUniqueParticipantIds, userRepo.findByIds)(conversations);
+    const findParticipant = (participantId) => findIdEq(participantId, participants);
 
     return R.map(conversation => R.merge(conversation, {
       lastMessage: lastMessagesForConversation[conversation.id],
@@ -112,12 +110,11 @@ export const listConversationsForUser = async (payload, message) => {
  */
 export const listMessages = async (payload, message) => {
   logger.info('List messages for conversation', { payload, message });
-  const options = R.pick(PAGINATION_PROPERTIES, payload);
 
   await impl.assertThatUserIsPartOfTheConversation(message.credentials.id, payload.conversationId);
 
   const objects = await objectService.list({
-    ...options,
+    ...createOptions(payload),
     parentType: 'conversation',
     parentId: payload.conversationId,
   }, message);
@@ -150,11 +147,11 @@ export async function countConversations(payload, message) {
 export const remove = async (payload, message) => {
   logger.info('Deleting conversation', { payload, message });
 
-  await conversationRepoV1.deleteConversationById(payload.conversationId);
-  await objectService.remove({
-    parentType: 'conversation',
-    parentId: payload.conversationId },
-  message);
+  await Promise.all([
+    conversationRepoV1.deleteConversationById(payload.conversationId),
+    objectService.remove({
+      parentType: 'conversation', parentId: payload.conversationId }, message),
+  ]);
 };
 
 /**
