@@ -1,7 +1,10 @@
 import R from 'ramda';
 import Promise from 'bluebird';
 import * as Logger from '../../../../shared/services/logger';
+import createError from '../../../../shared/utils/create-error';
 import * as messageRepository from '../../repositories/message';
+import * as likeRepository from '../../repositories/like';
+import * as commentRepository from '../../repositories/comment';
 import * as objectService from '../object';
 import * as impl from './implementation';
 
@@ -9,7 +12,7 @@ import * as impl from './implementation';
  * @module modules/feed/services/message
  */
 
-const logger = Logger.getLogger('FEED/service/object');
+const logger = Logger.getLogger('FEED/service/message');
 
 /**
  * Get a single message
@@ -38,9 +41,28 @@ export const get = async (payload, message) => {
 export const list = async (payload, message) => {
   logger.info('Listing multiple messages', { payload, message });
   // TODO Listing messages with their children objects
-  const result = await messageRepository.findByIds(payload.messageIds);
+  const [messageResult, likeResult, commentResult] = await Promise.all([
+    messageRepository.findByIds(payload.messageIds),
+    likeRepository.findBy({ messageId: { $in: payload.messageIds } }),
+    commentRepository.findBy({ messageId: { $in: payload.messageIds } }),
+  ]);
 
-  return result;
+  const byMessageId = (messageId, collection) =>
+    R.filter(R.propEq('messageId', messageId), collection);
+  const likesForMessage = (messageId) => byMessageId(messageId, likeResult);
+  const commentsForMessage = (messageId) => byMessageId(messageId, commentResult);
+
+  return R.map((feedMessage) => {
+    const likes = likesForMessage(feedMessage.id);
+    const comments = commentsForMessage(feedMessage.id);
+
+    return {
+      ...feedMessage,
+      hasLiked: R.pipe(R.pluck('userId'), R.contains(message.credentials.id))(likes),
+      likesCount: likes.length,
+      commentsCount: comments.length,
+    };
+  }, messageResult);
 };
 
 /**
@@ -84,6 +106,30 @@ export const create = async (payload, message) => {
   }
 
   return { ...createdMessage, objectId: createdObject.id };
+};
+
+/**
+ * Likes a message
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.messageId - The id of the message to like
+ * @param {string} payload.userId - The id of the user that likes the message
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method like
+ * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
+ */
+export const like = async (payload, message) => {
+  logger.info('Liking message', { payload, message });
+
+  const messageToLike = await get({ messageId: payload.messageId }, message);
+  if (!messageToLike) throw createError('404');
+
+  await likeRepository.create(messageToLike.id, payload.userId);
+
+  return {
+    ...messageToLike,
+    hasLiked: true,
+    likesCount: messageToLike.likesCount + 1,
+  };
 };
 
 /**
