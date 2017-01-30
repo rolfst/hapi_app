@@ -11,23 +11,24 @@ describe('Authenticate', () => {
   const networklessUserCredentials = blueprints.users.networkless;
 
   before(async () => {
-    await testHelper.createUserForNewNetwork(adminCredentials, {});
-    await testHelper.createUserForNewNetworkWithIntegration(
-      { ...employeeCredentials, externalId: '8023' },
-      {
-        externalId: '8023',
-      },
-      {
-        integrationName: 'PMT',
-        token: '379ce9b4176cb89354c1f74b3a2c1c7a',
-      });
+    const admin = await testHelper.createUser(adminCredentials);
+    const employee = await testHelper.createUser(employeeCredentials);
+    const { network } = await testHelper.createNetworkWithIntegration({
+      userId: admin.id,
+      userExternalId: '8023',
+      externalId: '8023',
+      name: 'pmt',
+      integrationName: 'PMT',
+      integrationToken: '379ce9b4176cb89354c1f74b3a2c1c7a',
+      userToken: 'token',
+    });
+
+    return testHelper.addUserToNetwork({
+      userId: employee.id,
+      networkId: network.id });
   });
 
   after(async () => {
-    // const allUsers = await testHelper.findAllUsers();
-    // const allIntegrations = await testHelper.findAllIntegrations();
-    // await testHelper.deleteUser(allUsers);
-    // return testHelper.deleteIntegration(allIntegrations);
     return testHelper.cleanAll();
   });
 
