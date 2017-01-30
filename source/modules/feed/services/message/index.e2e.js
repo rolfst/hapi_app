@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import R from 'ramda';
+import Promise from 'bluebird';
 import * as pollService from '../../../poll/services/poll';
 import * as messageService from './index';
 import * as objectService from '../object';
@@ -34,6 +35,9 @@ describe('Service: Message', () => {
         }),
       ]);
     });
+
+    after(() => Promise.map(createdMessages, (message) =>
+      messageService.remove({ messageId: message.id })));
 
     it('should return message models', async () => {
       const actual = await messageService.list({
