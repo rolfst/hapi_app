@@ -68,7 +68,7 @@ export const create = async (payload, message) => {
     userId: message.credentials.id,
     parentType: payload.parentType,
     parentId: payload.parentId,
-    objectType: 'message',
+    objectType: 'feed_message',
     sourceId: createdMessage.id,
   });
 

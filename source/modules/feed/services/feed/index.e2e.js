@@ -78,9 +78,9 @@ describe('Service: Feed', () => {
       assert.equal(actual[0].objectType, 'exchange');
       assert.equal(actual[0].parentType, 'network');
       assert.equal(actual[0].parentId, global.networks.flexAppeal.id);
-      assert.equal(actual[1].objectType, 'message');
+      assert.equal(actual[1].objectType, 'feed_message');
       assert.equal(actual[1].source.text, 'Second message for feed');
-      assert.equal(actual[2].objectType, 'message');
+      assert.equal(actual[2].objectType, 'feed_message');
       assert.equal(actual[2].source.text, 'Message for feed');
     });
 
@@ -96,7 +96,7 @@ describe('Service: Feed', () => {
       });
 
       assert.lengthOf(actual, 1);
-      assert.equal(actual[0].objectType, 'message');
+      assert.equal(actual[0].objectType, 'feed_message');
       assert.equal(actual[0].source.text, 'Second message for feed');
     });
   });

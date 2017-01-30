@@ -24,11 +24,15 @@ const logger = Logger.getLogger('FEED/service/object');
 export const list = async (payload, message) => {
   logger.info('Listing objects', { payload, message });
 
-  const options = R.pick(['offset', 'limit'], payload);
+  const createOptions = R.pipe(
+    R.pick(['offset', 'limit']),
+    R.assoc('order', [['createdAt', 'desc']])
+  );
+
   const objects = await objectRepository.findBy({
     parentType: payload.parentType,
     parentId: payload.parentId,
-  }, options);
+  }, createOptions(payload));
 
   return objects;
 };
@@ -43,26 +47,28 @@ export const list = async (payload, message) => {
  */
 export const listWithSources = async (payload, message) => {
   logger.info('Listing objects with sources', { payload, message });
+
   const objects = await objectRepository.findBy({
-    id: { $in: payload.objectIds },
-  });
+    id: { $in: payload.objectIds } }, { order: [['createdAt', 'desc']] });
 
-  // Gathering the data to build the feed
-  const objectSourceLinks = impl.createObjectSourceLinks(objects);
-  const promisedSources = R.map(impl.findSourcesForFeed(message), objectSourceLinks);
-  const sources = await Promise.map(promisedSources, Promise.props);
-  const occurringTypes = R.pluck('type', objectSourceLinks);
+  const sourceIdsPerType = R.pipe(
+    R.groupBy(R.prop('objectType')),
+    R.map(R.pluck('sourceId'))
+  );
 
-  // Linking everything together
-  return R.chain(occurringType => {
-    const sourcesForType = impl.findWhereType(occurringType, sources);
-    const linksForType = impl.findWhereType(occurringType, objectSourceLinks);
+  const promisedSources = R.pipe(
+    sourceIdsPerType,
+    R.mapObjIndexed(impl.findSourcesForType(message)),
+    R.values
+  )(objects);
 
-    return impl.mergeSourceAndObject(
-      impl.objectsForType(occurringType, objects),
-      linksForType.values,
-      sourcesForType.values);
-  }, occurringTypes);
+  const sources = await R.pipeP(Promise.all, R.flatten, R.reject(R.isNil))(promisedSources);
+
+  const whereTypeAndId = (type, id) => R.both(R.propEq('type', type), R.propEq('id', id));
+  const findSource = (type, id) => R.find(whereTypeAndId(type, id), sources) || null;
+
+  return R.map((object) =>
+    R.merge(object, { source: findSource(object.objectType, object.sourceId) }), objects);
 };
 
 /**

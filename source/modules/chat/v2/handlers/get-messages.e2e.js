@@ -1,9 +1,10 @@
 import { assert } from 'chai';
+import Promise from 'bluebird';
 import blueprints from '../../../../shared/test-utils/blueprints';
 import authenticate from '../../../../shared/test-utils/authenticate';
 import { getRequest } from '../../../../shared/test-utils/request';
 import * as userRepo from '../../../../modules/core/repositories/user';
-import * as messageService from '../../../feed/services/message';
+import * as privateMessageService from '../services/private-message';
 import * as conversationService from '../services/conversation';
 
 describe('Get messages (v2)', () => {
@@ -31,25 +32,26 @@ describe('Get messages (v2)', () => {
       password: blueprints.users.employee.password,
     })).token;
 
-    await messageService.create({
-      parentType: 'conversation',
-      parentId: createdConversation.id,
+    await privateMessageService.create({
+      conversationId: createdConversation.id,
       text: 'First message',
     }, {
       credentials: { id: participant.id },
     });
 
-    await messageService.create({
-      parentType: 'conversation',
-      parentId: createdConversation.id,
+    await Promise.delay(1000);
+
+    await privateMessageService.create({
+      conversationId: createdConversation.id,
       text: 'Second message',
     }, {
       credentials: { id: participant.id },
     });
 
-    await messageService.create({
-      parentType: 'conversation',
-      parentId: createdConversation.id,
+    await Promise.delay(1000);
+
+    await privateMessageService.create({
+      conversationId: createdConversation.id,
       text: 'Last message',
     }, {
       credentials: { id: participant.id },
@@ -67,12 +69,12 @@ describe('Get messages (v2)', () => {
 
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 3);
-    assert.equal(result.data[0].source.type, 'message');
+    assert.equal(result.data[0].source.type, 'private_message');
     assert.isString(result.data[0].source.id);
-    assert.equal(result.data[0].source.text, 'First message');
-    assert.property(result.data[0], 'object_id');
+    assert.equal(result.data[0].source.text, 'Last message');
     assert.property(result.data[0], 'created_at');
-    assert.equal(result.data[result.data.length - 1].source.text, 'Last message');
+    assert.equal(result.data[1].source.text, 'Second message');
+    assert.equal(result.data[2].source.text, 'First message');
     assert.property(result, 'meta');
     assert.property(result.meta.pagination, 'offset');
     assert.property(result.meta.pagination, 'limit');
@@ -87,10 +89,9 @@ describe('Get messages (v2)', () => {
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 2);
     assert.equal(result.meta.pagination.total_count, 3);
-    assert.equal(result.data[0].source.type, 'message');
+    assert.equal(result.data[0].source.type, 'private_message');
     assert.isString(result.data[0].source.id);
-    assert.equal(result.data[0].source.text, 'First message');
-    assert.property(result.data[0], 'object_id');
+    assert.equal(result.data[0].source.text, 'Last message');
     assert.property(result.data[0], 'created_at');
     assert.equal(result.data[1].source.text, 'Second message');
   });
@@ -103,12 +104,11 @@ describe('Get messages (v2)', () => {
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 2);
     assert.equal(result.meta.pagination.total_count, 3);
-    assert.equal(result.data[0].source.type, 'message');
+    assert.equal(result.data[0].source.type, 'private_message');
     assert.isString(result.data[0].source.id);
     assert.equal(result.data[0].source.text, 'Second message');
-    assert.property(result.data[0], 'object_id');
     assert.property(result.data[0], 'created_at');
-    assert.equal(result.data[1].source.text, 'Last message');
+    assert.equal(result.data[1].source.text, 'First message');
   });
 
   it('should return 404 code when conversation does not exist', async () => {

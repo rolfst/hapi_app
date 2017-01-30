@@ -26,7 +26,6 @@ export const make = async (payload, message) => {
   const relatedObjects = await objectService
     .list(whitelistedPayload, message);
 
-  return objectService
-    .listWithSources({ objectIds: R.pluck('id', relatedObjects) }, message)
-    .then(R.sort(R.descend(R.prop('createdAt'))));
+  return objectService.listWithSources({
+    objectIds: R.pluck('id', relatedObjects) }, message);
 };
