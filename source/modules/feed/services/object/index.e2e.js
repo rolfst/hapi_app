@@ -1,4 +1,5 @@
 import { assert } from 'chai';
+import R from 'ramda';
 import * as privateMessageService from '../../../chat/v2/services/private-message';
 import * as feedMessageService from '../message';
 import * as objectService from './index';
@@ -20,7 +21,7 @@ describe('Service: Object', () => {
         userId: global.users.admin.id,
         parentType: 'network',
         parentId: '42',
-        objectType: 'message',
+        objectType: 'feed_message',
         sourceId: '2',
       });
     });
@@ -91,6 +92,37 @@ describe('Service: Object', () => {
 
   describe('listWithSources', () => {
     after(() => objectService.remove({ parentType: 'conversation', parentId: '42' }));
+
+    it.only('should return children', async () => {
+      const createdMessage = await feedMessageService.create({
+        parentType: 'network',
+        parentId: '42',
+        text: 'Do you want to join us tomorrow?',
+        resources: [{
+          type: 'poll',
+          data: { options: ['Yes', 'No', 'Ok'] },
+        }],
+      }, {
+        credentials: global.users.admin,
+        network: { id: '42' },
+      });
+
+      const actual = await objectService.listWithSources({
+        objectIds: [createdMessage.objectId],
+      }, { credentials: { id: global.users.admin.id } });
+
+      await objectService.remove({ parentType: 'network', parentId: '42' });
+      await objectService.remove({ parentType: 'feed_message', parentId: createdMessage.id });
+
+      const objectWithChild = R.find(R.propEq('parentType', 'message'), actual);
+      console.log(objectWithChild);
+
+      assert.lengthOf(actual, 2);
+      assert.property(objectWithChild, 'children');
+      assert.lengthOf(objectWithChild.children, 1);
+      assert.equal(objectWithChild.children[0].type, 'poll');
+      assert.equal(objectWithChild.children[0].id, '20');
+    });
 
     it('should support object_type: private_message', async () => {
       const createdMessage = await privateMessageService.create({
