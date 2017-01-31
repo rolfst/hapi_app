@@ -18,6 +18,8 @@ describe('Service: Comment (feed)', () => {
       });
     });
 
+    after(() => messageService.remove({ messageId: createdMessage.id }));
+
     it('should return comment model after creation', async () => {
       const actual = await commentService.create({
         messageId: createdMessage.id,
@@ -45,9 +47,10 @@ describe('Service: Comment (feed)', () => {
 
   describe('list', () => {
     let createdComments = [];
+    let createdMessage;
 
     before(async () => {
-      const createdMessage = await messageService.create({
+      createdMessage = await messageService.create({
         parentType: 'network',
         parentId: global.networks.flexAppeal.id,
         text: 'Message for feed',
@@ -65,13 +68,15 @@ describe('Service: Comment (feed)', () => {
       ]);
     });
 
+    after(() => messageService.remove({ messageId: createdMessage.id }));
+
     it('should return a collection of comment models', async () => {
       const actual = await commentService.list({
         commentIds: R.pluck('id', createdComments),
       });
 
-      actual.lengthOf(actual, 1);
-      actual.equal(actual[0].text, 'Cool comment');
+      assert.lengthOf(actual, 1);
+      assert.equal(actual[0].text, 'Cool comment');
     });
   });
 });
