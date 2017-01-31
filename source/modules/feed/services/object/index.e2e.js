@@ -99,13 +99,13 @@ describe('Service: Object', () => {
       }, { credentials: { id: global.users.admin.id } });
 
       const actual = await objectService.listWithSources({
-        objectIds: [createdMessage.objectId],
+        objectIds: [createdMessage.id],
       }, { credentials: { id: global.users.admin.id } });
 
       const object = actual[0];
 
       assert.equal(object.source.type, 'private_message');
-      assert.equal(object.source.id, createdMessage.id);
+      assert.equal(object.source.id, createdMessage.source.id);
       assert.equal(object.source.text, 'Test message');
     });
 
