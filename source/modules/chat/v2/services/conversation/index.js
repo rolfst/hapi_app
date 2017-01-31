@@ -147,7 +147,7 @@ export async function countConversations(payload, message) {
 export const remove = async (payload, message) => {
   logger.info('Deleting conversation', { payload, message });
 
-  await Promise.all([
+  return Promise.all([
     conversationRepoV1.deleteConversationById(payload.conversationId),
     objectService.remove({
       parentType: 'conversation', parentId: payload.conversationId }, message),
