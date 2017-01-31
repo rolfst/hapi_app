@@ -20,7 +20,7 @@ describe('Service: Object', () => {
         userId: global.users.admin.id,
         parentType: 'network',
         parentId: '42',
-        objectType: 'message',
+        objectType: 'feed_message',
         sourceId: '2',
       });
     });
@@ -38,7 +38,7 @@ describe('Service: Object', () => {
       assert.equal(actual[0].parentType, 'network');
       assert.equal(actual[0].parentId, '42');
       assert.equal(actual[1].userId, global.users.admin.id);
-      assert.equal(actual[1].objectType, 'message');
+      assert.equal(actual[1].objectType, 'feed_message');
       assert.equal(actual[1].sourceId, '2');
       assert.equal(actual[1].parentType, 'network');
       assert.equal(actual[1].parentId, '42');
@@ -54,7 +54,7 @@ describe('Service: Object', () => {
 
       assert.lengthOf(actual, 1);
       assert.equal(actual[0].userId, global.users.admin.id);
-      assert.equal(actual[0].objectType, 'message');
+      assert.equal(actual[0].objectType, 'feed_message');
       assert.equal(actual[0].sourceId, '2');
       assert.equal(actual[0].parentType, 'network');
       assert.equal(actual[0].parentId, '42');
@@ -75,7 +75,7 @@ describe('Service: Object', () => {
         parentType: 'network',
         parentId: '123',
         objectType: 'feed_message',
-        sourceId: '2',
+        sourceId: '3',
       }),
     ]));
 
