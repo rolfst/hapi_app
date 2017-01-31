@@ -77,8 +77,8 @@ describe('Get conversations for logged user (v2)', () => {
       assert.equal(conversationUnderTest.id, createdConversation1.id);
       assert.equal(conversationUnderTest.user_id, creator.id);
       assert.property(conversationUnderTest, 'last_message');
-      assert.equal(conversationUnderTest.last_message.type, 'private_message');
-      assert.equal(conversationUnderTest.last_message.text, 'Last message');
+      assert.equal(conversationUnderTest.last_message.source.type, 'private_message');
+      assert.equal(conversationUnderTest.last_message.source.text, 'Last message');
       assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant.id]);
       assert.property(conversationUnderTest, 'created_at');
       assert.property(result, 'meta');
@@ -178,8 +178,8 @@ describe('Get conversations for logged user (v2)', () => {
       assert.equal(conversationUnderTest.id, createdConversation1.id);
       assert.equal(conversationUnderTest.user_id, creator.id);
       assert.property(conversationUnderTest, 'last_message');
-      assert.property(conversationUnderTest.last_message, 'object_id');
-      assert.equal(conversationUnderTest.last_message.text, 'Last message');
+      assert.property(conversationUnderTest.last_message, 'id');
+      assert.equal(conversationUnderTest.last_message.source.text, 'Last message');
       assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant.id]);
       assert.property(conversationUnderTest, 'created_at');
     });
@@ -196,8 +196,9 @@ describe('Get conversations for logged user (v2)', () => {
         assert.equal(conversationUnderTest.id, createdConversation2.id);
         assert.equal(conversationUnderTest.user_id, creator.id);
         assert.property(conversationUnderTest, 'last_message');
-        assert.property(conversationUnderTest.last_message, 'object_id');
-        assert.equal(conversationUnderTest.last_message.text, 'First message second conversation');
+        assert.property(conversationUnderTest.last_message, 'id');
+        assert.equal(conversationUnderTest.last_message.source.text,
+          'First message second conversation');
         assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant.id]);
         assert.property(conversationUnderTest, 'created_at');
       });
