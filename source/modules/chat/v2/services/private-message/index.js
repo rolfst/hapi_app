@@ -1,3 +1,4 @@
+import R from 'ramda';
 import * as Logger from '../../../../../shared/services/logger';
 import * as objectService from '../../../../feed/services/object';
 import * as privateMessageRepository from '../../repositories/private-message';
@@ -44,5 +45,7 @@ export async function create(payload, message) {
 
   privateMessageRepository.update(createdMessage.id, { objectId: createdObject.id });
 
-  return { ...createdMessage, objectId: createdObject.id };
+  return R.merge(createdObject, {
+    source: { ...createdMessage, objectId: createdObject.id },
+  });
 }
