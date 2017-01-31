@@ -9,7 +9,7 @@ import * as messageService from '../message';
 import * as feedService from './index';
 
 describe('Service: Feed', () => {
-  describe.only('make', () => {
+  describe('make', () => {
     let createdObject;
     let createdMessages;
 
