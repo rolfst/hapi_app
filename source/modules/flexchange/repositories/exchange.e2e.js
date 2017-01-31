@@ -13,10 +13,7 @@ describe('Exchange Repo', () => {
         testHelper.createUser(),
       ]);
       const network = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
-      await testHelper.addUserToNetwork({
-        userId: employee.id,
-        networkId: network.id,
-      });
+      await testHelper.addUserToNetwork({ userId: employee.id, networkId: network.id });
 
       const exchanges = await exchangeRepo.findAllAcceptedExchanges();
       amountOfExchanges = exchanges.length;
@@ -24,16 +21,15 @@ describe('Exchange Repo', () => {
       const inTwoDays = moment().add(2, 'd');
       const endTime = inTwoDays.clone();
       endTime.add(5, 'h');
-      const exchange = await exchangeRepo.createExchange(
-        employee.id,
-        network.id,
-        {
+
+      const exchange = await exchangeRepo.createExchange(employee.id, network.id, {
           date: inTwoDays.format('YYYY-MM-DD'),
           startTime: inTwoDays.toISOString(),
           endTime: endTime.toISOString(),
           title: 'test time retrieval',
           type: 'ALL',
         });
+
       return exchangeRepo.acceptExchange(exchange.id, admin.id);
     });
 

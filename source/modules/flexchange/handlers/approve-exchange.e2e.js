@@ -32,12 +32,12 @@ describe('Approve exchange', () => {
       title: 'Test exchange to reject',
     });
 
-    const acceptedExchangePromise = exchangeRepo.acceptExchange(exchangeToAccept.id,
-      admin.id)
+    const acceptedExchangePromise = exchangeRepo.acceptExchange(
+      exchangeToAccept.id, admin.id)
     .then(() => exchangeToAccept.reload());
 
-    const rejectedExchangePromise = exchangeRepo.acceptExchange(exchangeToReject.id,
-      admin.id)
+    const rejectedExchangePromise = exchangeRepo.acceptExchange(
+      exchangeToReject.id, admin.id)
     .then(() => exchangeRepo.rejectExchange(exchangeToReject, admin, admin.id));
 
     [acceptedExchange, rejectedExchange] = await Promise.all([

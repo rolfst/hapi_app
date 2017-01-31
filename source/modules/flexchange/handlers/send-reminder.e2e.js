@@ -19,22 +19,20 @@ describe('Reminder', () => {
       testHelper.createUser(),
     ]);
     admin = user;
-    const network = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
 
+    const network = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
     const inTwoDays = moment().add(2, 'd');
     const endTime = inTwoDays.clone();
+
     endTime.add(5, 'h');
 
-    const exchange = await exchangeRepo.createExchange(
-      employee.id,
-      network.id,
-      {
-        date: inTwoDays.format('YYYY-MM-DD'),
-        startTime: inTwoDays.toISOString(),
-        endTime: endTime.toISOString(),
-        title: 'test time retrieval',
-        type: 'ALL',
-      });
+    const exchange = await exchangeRepo.createExchange(employee.id, network.id, {
+      date: inTwoDays.format('YYYY-MM-DD'),
+      startTime: inTwoDays.toISOString(),
+      endTime: endTime.toISOString(),
+      title: 'test time retrieval',
+      type: 'ALL',
+    });
 
     return exchangeRepo.acceptExchange(exchange.id, admin.id);
   });

@@ -25,16 +25,16 @@ describe('Handler: View shift', () => {
 
   before(async () => {
     admin = await testHelper.createUser();
-    const network = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
-    const { network: netw } = await testHelper.createNetworkWithIntegration({
+    const flexappealNetwork = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
+    const { network } = await testHelper.createNetworkWithIntegration({
+      ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
       userId: admin.id,
       token: 'footoken',
       userToken: 'foo',
-      ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
     });
-    integratedNetwork = netw;
+    integratedNetwork = network;
 
-    createdExchange = await createExchange(admin.id, network.id, {
+    createdExchange = await createExchange(admin.id, flexappealNetwork.id, {
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'External shift from integration',

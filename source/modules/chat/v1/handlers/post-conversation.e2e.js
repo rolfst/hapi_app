@@ -51,8 +51,7 @@ describe('Post conversation', () => {
 
   it('should return the existing conversation when there is already one created', async () => {
     const payload = { type: 'private', users: [networklessUser.id] };
-    const { tokens } = await testHelper.getLoginToken(blueprints.users.admin);
-    const { result, statusCode } = await postRequest(ENDPOINT_URL, payload, tokens.access_token);
+    const { result, statusCode } = await postRequest(ENDPOINT_URL, payload, admin.token);
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.id, createdConversation.id);
@@ -65,8 +64,7 @@ describe('Post conversation', () => {
 
   it('should fail when creating conversation with yourself', async () => {
     const payload = { type: 'private', users: [admin.id.toString()] };
-    const { tokens } = await testHelper.getLoginToken(blueprints.users.admin);
-    const { statusCode } = await postRequest(ENDPOINT_URL, payload, tokens.access_token);
+    const { statusCode } = await postRequest(ENDPOINT_URL, payload, admin.token);
 
     assert.equal(statusCode, 403);
   });

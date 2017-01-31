@@ -20,13 +20,13 @@ describe('My shifts', () => {
     sandbox = sinon.sandbox.create();
 
     admin = await testHelper.createUser();
-    const { network: netw } = await testHelper.createNetworkWithIntegration({
+    const { network } = await testHelper.createNetworkWithIntegration({
+      ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
       userId: admin.id,
       token: 'footoken',
       userToken: 'foo',
-      ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
     });
-    integratedNetwork = netw;
+    integratedNetwork = network;
   });
 
   afterEach(() => {
