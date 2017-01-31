@@ -12,6 +12,11 @@ const FeedComment = model.define('FeedComment', {
     field: 'user_id',
     allowNull: false,
   },
+  text: {
+    type: Sequelize.STRING,
+    field: 'text',
+    allowNull: true,
+  },
   createdAt: {
     type: Sequelize.DATE,
     field: 'created_at',
