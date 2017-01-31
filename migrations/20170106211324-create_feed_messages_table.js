@@ -2,7 +2,7 @@
 
 module.exports = {
   up: function (queryInterface, Sequelize) {
-    queryInterface.renameTable('messages', 'old_messages').then(() =>
+    return queryInterface.renameTable('messages', 'old_messages').then(() =>
       queryInterface.createTable('feed_messages', {
         id: {
           type: Sequelize.INTEGER.UNSIGNED,
