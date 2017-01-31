@@ -33,14 +33,14 @@ describe('Integration auth', () => {
     employee = user;
 
     flexappealNetwork = await testHelper.createNetwork({ userId: admin.id, name: 'flexAppeal' });
-    const { network: createdNetwork } = await testHelper.createNetworkWithIntegration(
+    const { network } = await testHelper.createNetworkWithIntegration(
       { userId: admin.id,
         name: 'flexAppeal',
         externalId: 'api.coolintegration.nl',
         integrationName: 'NEW_INTEGRATION',
         integrationToken: 'integrationtoken',
       });
-    pmtNetwork = createdNetwork;
+    pmtNetwork = network;
 
     const fakeAdapter = {
       authenticate: () => Promise.resolve(authResult),
