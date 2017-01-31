@@ -1,16 +1,21 @@
 import { assert } from 'chai';
 import moment from 'moment';
+import * as testHelper from '../../../shared/test-utils/helpers';
 import { getRequest } from '../../../shared/test-utils/request';
 import { exchangeTypes } from '../repositories/dao/exchange';
 import * as exchangeRepo from '../repositories/exchange';
 
 describe('Responded to exchange', () => {
+  let user;
   let network;
-  let createdExchanges;
 
   before(async () => {
-    network = global.networks.flexAppeal;
-    const user = global.users.admin;
+    const [admin, employee] = await Promise.all([
+      testHelper.createUser(),
+      testHelper.createUser(),
+    ]);
+    user = admin;
+    network = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
 
     const exchangeToApprove = await exchangeRepo.createExchange(user.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
@@ -39,22 +44,20 @@ describe('Responded to exchange', () => {
     await exchangeRepo.rejectExchange(exchangeToReject, user, user.id);
 
     const irrelevantExchange = await exchangeRepo.createExchange(
-      global.users.employee.id, network.id, {
+      employee.id, network.id, {
         date: moment().format('YYYY-MM-DD'),
         type: exchangeTypes.NETWORK,
         title: 'Shift from someone else',
       });
 
-    await exchangeRepo.acceptExchange(irrelevantExchange.id, global.users.employee.id);
-
-    createdExchanges = [irrelevantExchange, exchangeToApprove, exchangeToAccept];
+    return exchangeRepo.acceptExchange(irrelevantExchange.id, employee.id);
   });
 
-  after(() => Promise.all(createdExchanges.map(e => e.destroy())));
+  after(() => testHelper.cleanAll());
 
   it('should return correct exchanges', async () => {
     const endpoint = `/v2/networks/${network.id}/users/me/exchanges/responded_to`;
-    const { result, statusCode } = await getRequest(endpoint);
+    const { result, statusCode } = await getRequest(endpoint, user.token);
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.length, 2);

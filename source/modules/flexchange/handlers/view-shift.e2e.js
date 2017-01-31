@@ -1,13 +1,18 @@
 import { assert } from 'chai';
+import { pick } from 'lodash';
 import moment from 'moment';
 import nock from 'nock';
+import * as testHelper from '../../../shared/test-utils/helpers';
+import * as sharedStubs from '../../../shared/test-utils/stubs';
 import * as stubs from '../../../adapters/pmt/test-utils/stubs';
 import { getRequest } from '../../../shared/test-utils/request';
 import { exchangeTypes } from '../repositories/dao/exchange';
 import { createExchange } from '../repositories/exchange';
 
 describe('Handler: View shift', () => {
-  let network;
+  const pristineNetwork = sharedStubs.pristine_networks_admins[0];
+  let admin;
+  let integratedNetwork;
   let createdExchange;
 
   const stubbedResult = {
@@ -19,9 +24,17 @@ describe('Handler: View shift', () => {
   };
 
   before(async () => {
-    network = global.networks.pmt;
+    admin = await testHelper.createUser();
+    const flexappealNetwork = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
+    const { network } = await testHelper.createNetworkWithIntegration({
+      ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
+      userId: admin.id,
+      token: 'footoken',
+      userToken: 'foo',
+    });
+    integratedNetwork = network;
 
-    createdExchange = await createExchange(global.users.admin.id, network.id, {
+    createdExchange = await createExchange(admin.id, flexappealNetwork.id, {
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'External shift from integration',
@@ -31,16 +44,16 @@ describe('Handler: View shift', () => {
 
     const date = moment().format('DD-MM-YYYY');
 
-    nock(network.externalId)
+    nock(integratedNetwork.externalId)
       .get(`/me/shifts/${date}`)
       .reply(200, { shifts: [stubbedResult] });
   });
 
-  after(() => createdExchange.destroy());
+  after(() => testHelper.cleanAll());
 
   it('should return correct result', async () => {
-    const endpoint = `/v2/networks/${network.id}/shifts/133723`;
-    const { result } = await getRequest(endpoint);
+    const endpoint = `/v2/networks/${integratedNetwork.id}/shifts/133723`;
+    const { result } = await getRequest(endpoint, admin.token);
 
     assert.equal(result.data.id, stubbedResult.id);
     assert.property(result.data, 'start_time');
@@ -53,12 +66,13 @@ describe('Handler: View shift', () => {
 
   it('should fail when shift not found', async () => {
     const today = moment().format('DD-MM-YYYY');
-    nock(global.networks.pmt.externalId)
+
+    nock(integratedNetwork.externalId)
       .get(`/me/shifts/${today}`)
       .reply(200, stubs.shifts_empty_200);
 
-    const endpoint = `/v2/networks/${network.id}/shifts/1`;
-    const { statusCode } = await getRequest(endpoint);
+    const endpoint = `/v2/networks/${integratedNetwork.id}/shifts/1`;
+    const { statusCode } = await getRequest(endpoint, admin.token);
 
     assert.equal(statusCode, 404);
   });

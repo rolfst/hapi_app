@@ -20,8 +20,8 @@ describe('Get exchanges for network', () => {
 
     before(async () => {
       [admin, employee] = await Promise.all([
-        testHelper.createUser({ username: 'admin@flex-appeal.nl', password: 'foo' }),
-        testHelper.createUser({ username: 'employee@flex-appeal.nl', password: 'baz' }),
+        testHelper.createUser(),
+        testHelper.createUser(),
       ]);
 
       const { network: netw } = await testHelper.createNetworkWithIntegration({

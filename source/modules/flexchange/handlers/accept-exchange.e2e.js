@@ -17,7 +17,7 @@ describe('Accept exchange', () => {
     sandbox = sinon.sandbox.create();
     sandbox.stub(notifier, 'send').returns(null);
 
-    admin = await testHelper.createUser({ username: 'admin@flex-appeal.nl', password: 'foo' });
+    admin = await testHelper.createUser();
     network = await testHelper.createNetwork({ userId: admin.id });
     exchange = await createExchange(admin.id, network.id, {
       date: moment().format('YYYY-MM-DD'),

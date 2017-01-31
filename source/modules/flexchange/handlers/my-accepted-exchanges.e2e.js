@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import moment from 'moment';
+import * as testHelper from '../../../shared/test-utils/helpers';
 import { getRequest } from '../../../shared/test-utils/request';
 import { exchangeTypes } from '../repositories/dao/exchange';
 import {
@@ -11,49 +12,48 @@ import {
 
 describe('My Accepted exchanges', () => {
   let network;
-  let acceptedExchange;
-  let approvedExchange;
-  let declinedExchange;
+  let admin;
 
   before(async () => {
-    network = global.networks.flexAppeal;
+    const [owner, employee] = await Promise.all([
+      testHelper.createUser(),
+      testHelper.createUser(),
+    ]);
+    admin = owner;
+    network = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
 
-    const acceptedExchangePromise = createExchange(global.users.employee.id, network.id, {
+    const acceptedExchangePromise = createExchange(employee.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'Accepted shift',
-    }).then((exchange) => acceptExchange(exchange.id, global.users.admin.id));
+    }).then((exchange) => acceptExchange(exchange.id, admin.id));
 
-    const approvedExchangePromise = createExchange(global.users.employee.id, network.id, {
+    const approvedExchangePromise = createExchange(employee.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'Approved shift',
     })
-    .then((exchange) => acceptExchange(exchange.id, global.users.admin.id))
-    .then((exchange) => approveExchange(exchange, global.users.admin, global.users.admin.id));
+    .then((exchange) => acceptExchange(exchange.id, admin.id))
+    .then((exchange) => approveExchange(exchange, admin, admin.id));
 
-    const declinedExchangePromise = createExchange(global.users.admin.id, network.id, {
+    const declinedExchangePromise = createExchange(admin.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'Declined shift',
-    }).then((exchange) => declineExchange(exchange.id, global.users.admin.id));
+    }).then((exchange) => declineExchange(exchange.id, admin.id));
 
-    [acceptedExchange, declinedExchange, approvedExchange] = await Promise.all([
+    return Promise.all([
       acceptedExchangePromise,
       declinedExchangePromise,
       approvedExchangePromise,
     ]);
   });
 
-  after(() => Promise.all([
-    acceptedExchange.destroy(),
-    approvedExchange.destroy(),
-    declinedExchange.destroy(),
-  ]));
+  after(() => testHelper.cleanAll());
 
   it('should return accepted and approved exchanges', async () => {
     const endpoint = `/v2/networks/${network.id}/users/me/exchanges/accepted`;
-    const { result } = await getRequest(endpoint);
+    const { result } = await getRequest(endpoint, admin.token);
 
     assert.equal(result.data.length, 2);
   });
