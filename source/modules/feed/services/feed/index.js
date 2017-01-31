@@ -1,7 +1,7 @@
 import R from 'ramda';
 import * as Logger from '../../../../shared/services/logger';
 import * as objectService from '../object';
-import * as messageService from '../message';
+import * as impl from './implementation';
 
 /**
  * @module modules/feed/services/object
@@ -10,9 +10,8 @@ import * as messageService from '../message';
 const logger = Logger.getLogger('FEED/service/feed');
 const typeEq = R.propEq('objectType');
 const messageIdEq = R.propEq('messageId');
-const anyWithType = (type, objects) => R.any(typeEq(type), objects);
-const getSourceIdsForType = (type, objects) => R.pipe(
-  R.filter(typeEq(type)), R.pluck('sourceId'))(objects);
+const findIncludes = (object, includes) => (typeEq('feed_message')) ?
+  R.defaultTo(null, R.filter(messageIdEq(object.sourceId), includes)) : null;
 
 /**
  * Making a feed for a parent
@@ -33,28 +32,21 @@ export const make = async (payload, message) => {
   const relatedObjects = await objectService.list(whitelistedPayload, message);
 
   const hasInclude = R.contains(R.__, payload.include || []);
-  const hasType = (type) => anyWithType(type, relatedObjects);
-  const includes = { comments: [], likes: [] };
-
-  if (hasType('feed_message')) {
-    const messageIds = getSourceIdsForType('feed_message', relatedObjects);
-
-    if (hasInclude('comments')) {
-      includes.comments = await messageService.getComments({ messageIds });
-    }
-  }
+  const includes = await impl.getIncludes(hasInclude, relatedObjects);
 
   const objectsWithSources = await objectService.listWithSources({
     objectIds: R.pluck('id', relatedObjects) }, message);
+  const addComments = (object) =>
+    R.assoc('comments', findIncludes(object, includes.comments), object);
+  const addLikes = (object) =>
+    R.assoc('likes', findIncludes(object, includes.likes), object);
 
-  const findComments = (object) => (typeEq('feed_message')) ?
-    R.defaultTo(null, R.filter(messageIdEq(object.sourceId), includes.comments)) : null;
+  const createObjectWithIncludes = R.cond([
+    [() => R.and(hasInclude('comments'), hasInclude('likes')), R.pipe(addComments, addLikes)],
+    [() => hasInclude('comments'), addComments],
+    [() => hasInclude('likes'), addLikes],
+    [R.T, R.identity],
+  ]);
 
-  return R.map((object) => {
-    if (hasInclude('comments')) {
-      return R.assoc('comments', findComments(object), object);
-    }
-
-    return object;
-  }, objectsWithSources);
+  return R.map(createObjectWithIncludes, objectsWithSources);
 };
