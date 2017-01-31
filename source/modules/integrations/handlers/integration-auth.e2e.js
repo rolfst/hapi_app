@@ -7,14 +7,10 @@ import * as testHelper from '../../../shared/test-utils/helpers';
 import blueprints from '../../../shared/test-utils/blueprints';
 import createError from '../../../shared/utils/create-error';
 import tokenUtil from '../../../shared/utils/token';
-import { createIntegration } from '../../core/repositories/integration';
-import * as networkRepo from '../../core/repositories/network';
-import * as networkService from '../../core/services/network';
 import * as userRepo from '../../core/repositories/user';
 
 describe('Integration auth', () => {
   let sandbox;
-  let admin;
   let employee;
   let pmtNetwork;
   let flexappealNetwork;
@@ -30,10 +26,12 @@ describe('Integration auth', () => {
 
   before(async () => {
     sandbox = sinon.sandbox.create();
-    [admin, employee] = await Promise.all([
+    const [admin, user] = await Promise.all([
       testHelper.createUser({ password: 'foo' }),
       testHelper.createUser({ password: 'bar' }),
     ]);
+    employee = user;
+
     flexappealNetwork = await testHelper.createNetwork({ userId: admin.id, name: 'flexAppeal' });
     const { network: createdNetwork } = await testHelper.createNetworkWithIntegration(
       { userId: admin.id,
@@ -51,14 +49,14 @@ describe('Integration auth', () => {
     sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve(fakeAdapter));
 
     return Promise.all([
-      testHelper.addUserToNetwork({ userId: employee.id, networkId: pmtNetwork.id }),               
+      testHelper.addUserToNetwork({ userId: employee.id, networkId: pmtNetwork.id }),
       testHelper.addUserToNetwork({ userId: employee.id, networkId: flexappealNetwork.id }),
     ]);
   });
 
   after(async () => {
     sandbox.restore();
-    return testHelper.cleanAll()
+    return testHelper.cleanAll();
   });
 
   it('hook should be called with the credentials', async () => {

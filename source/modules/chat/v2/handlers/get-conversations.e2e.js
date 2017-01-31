@@ -2,7 +2,6 @@ import { assert } from 'chai';
 import * as testHelper from '../../../../shared/test-utils/helpers';
 import blueprints from '../../../../shared/test-utils/blueprints';
 import { getRequest } from '../../../../shared/test-utils/request';
-import authenticate from '../../../../shared/test-utils/authenticate';
 import * as messageService from '../../../feed/services/message';
 import * as conversationService from '../services/conversation';
 

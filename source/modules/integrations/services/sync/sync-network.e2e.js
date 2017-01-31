@@ -14,8 +14,7 @@ describe('Network synchronisation', () => {
 
   before(async () => {
     admin = await testHelper.createUser({ password: 'pw' });
-    integratedNetwork = await networkRepository
-    .createNetwork(admin.id, 'Foo network for sync')
+    integratedNetwork = await networkRepository.createNetwork(admin.id, 'Foo network for sync');
   });
 
   after(async () => testHelper.cleanAll());
@@ -435,15 +434,12 @@ describe('Network synchronisation', () => {
       });
       await teamRepository.addUserToTeam(createdTeams[0].id, createdUser.id);
 
-      const us = await userRepository.findUserById(createdUser.id, integratedNetwork.id);
       const count = await teamRepository.findMembers(createdTeams[0].id);
-      console.log('+++++++++++++++++++', us)
-      assert.lengthOf(count, 1);
       await serviceImpl.syncUsersWithTeams(integratedNetwork.id, externalUsers);
       const membersOfCreatedTeams = await Promise.map(createdTeams,
         team => teamRepository.findMembers(team.id));
 
-      const m = await teamRepository.findMembers(createdTeams[0].id);
+      assert.lengthOf(count, 1);
       assert.lengthOf(membersOfCreatedTeams[0], 0);
       assert.lengthOf(membersOfCreatedTeams[1], 1);
     });

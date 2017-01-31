@@ -7,7 +7,6 @@ import { UserRoles } from '../services/permission';
 import * as networkRepo from '../../modules/core/repositories/network';
 import * as integrationRepo from '../../modules/core/repositories/integration';
 import * as networkService from '../../modules/core/services/network';
-import * as userRepo from '../../modules/core/repositories/user';
 import * as testHelper from './helpers';
 
 describe('test helper', () => {
