@@ -15,8 +15,10 @@ describe('Authenticator strategy', () => {
   let flexAppeal;
 
   before(async () => {
-    admin = await testHelper.createUser({ password: 'foo' });
-    employee = await testHelper.createUser({ password: 'bar' });
+    [admin, employee] = await Promise.all([
+      testHelper.createUser({ password: 'foo' }),
+      testHelper.createUser({ password: 'bar' }),
+    ])
     flexAppeal = await testHelper.createNetwork({ name: 'flexappeal', userId: admin.id });
  
     return testHelper.addUserToNetwork({ userId: employee.id, networkId: flexAppeal.id });
