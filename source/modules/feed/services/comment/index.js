@@ -8,6 +8,14 @@ import * as impl from './implementation';
 
 const logger = Logger.getLogger('FEED/service/comment');
 
+/**
+ * List comments
+ * @param {object} payload - Object containing payload data
+ * @param {string[]} payload.commentIds - The ids of comment to retrieve
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method list
+ * @return {external:Promise.<Comment[]>} {@link module:modules/feed~Comment}
+ */
 export const list = async (payload, message) => {
   logger.info('List comments', { payload, message });
 

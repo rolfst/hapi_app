@@ -5,6 +5,8 @@
  * <ul>
  *   <li>{@link module:modules/feed~Message Message}</li>
  *   <li>{@link module:modules/feed~Object Object}</li>
+ *   <li>{@link module:modules/feed~Comment Comment}</li>
+ *   <li>{@link module:modules/feed~Like Like}</li>
  * </ul>
  */
 
@@ -29,3 +31,20 @@
  * @property {string} createdAt - ISO formatted date when the object is created
  * @property {string} updatedAt - ISO formatted date when the object is updated
  */
+
+ /**
+  * @typedef {object} Comment
+  * @property {string} id - The unique identifier of the comment
+  * @property {string} userId - The id of the user that created the comment
+  * @property {string} messageId - The message where the comment is created for
+  * @property {string} text - The text contents of the comment
+  * @property {string} createdAt - ISO formatted date when the message is created
+  */
+
+  /**
+   * @typedef {object} Comment
+   * @property {string} id - The unique identifier of the comment
+   * @property {string} messageId - The message where the comment is created for
+   * @property {string} userId - The id of the user that created the comment
+   * @property {string} createdAt - ISO formatted date when the message is created
+   */

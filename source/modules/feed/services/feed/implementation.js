@@ -7,6 +7,13 @@ const anyWithType = (type, objects) => R.any(typeEq(type), objects);
 const getSourceIdsForType = (type, objects) => R.pipe(
   R.filter(typeEq(type)), R.pluck('sourceId'))(objects);
 
+/**
+ * Get resources that belong to object as child.
+ * @param {function} hasInclude - Function to determine the includes passed from request
+ * @param {Object[]} objects {@link module:modules/feed~Object object}
+ * @method getIncludes
+ * @return {external:Promise}
+ */
 export const getIncludes = async (hasInclude, objects) => {
   const hasType = (type) => anyWithType(type, objects);
   const includes = { comments: [], likes: [] };

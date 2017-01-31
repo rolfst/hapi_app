@@ -38,8 +38,8 @@ export const get = async (payload, message) => {
  * @param {string} payload.messageId - The id of the message to retrieve
  * @param {string[]} payload.messageIds - The id of the message to retrieve
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method get
- * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
+ * @method getComments
+ * @return {external:Promise.<Comment[]>} {@link module:feed~Comment comment}
  */
 export const getComments = async (payload, message) => {
   logger.info('Get comments for message', { payload, message });
@@ -53,13 +53,13 @@ export const getComments = async (payload, message) => {
 };
 
 /**
- * Get comments for message of multiple messages
+ * Get likes for message of multiple messages
  * @param {object} payload - Object containing payload data
  * @param {string} payload.messageId - The id of the message to retrieve
  * @param {string[]} payload.messageIds - The id of the message to retrieve
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method get
- * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
+ * @method getLikes
+ * @return {external:Promise.<Like[]>} {@link module:feed~Like like}
  */
 export const getLikes = async (payload, message) => {
   logger.info('Get likes for message', { payload, message });
