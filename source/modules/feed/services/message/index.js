@@ -53,6 +53,26 @@ export const getComments = async (payload, message) => {
 };
 
 /**
+ * Get comments for message of multiple messages
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.messageId - The id of the message to retrieve
+ * @param {string[]} payload.messageIds - The id of the message to retrieve
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method get
+ * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
+ */
+export const getLikes = async (payload, message) => {
+  logger.info('Get likes for message', { payload, message });
+
+  let whereConstraint = {};
+
+  if (payload.messageId) whereConstraint = { messageId: payload.messageId };
+  else if (payload.messageIds) whereConstraint = { messageId: { $in: payload.messageIds } };
+
+  return likeRepository.findBy(whereConstraint);
+};
+
+/**
  * Listing messages
  * @param {object} payload - Object containing payload data
  * @param {string[]} payload.messageIds - The ids of the messages to list
