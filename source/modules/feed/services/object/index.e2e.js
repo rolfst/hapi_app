@@ -93,7 +93,7 @@ describe('Service: Object', () => {
   describe('listWithSources', () => {
     after(() => objectService.remove({ parentType: 'conversation', parentId: '42' }));
 
-    it.only('should return children', async () => {
+    it('should return children', async () => {
       const createdMessage = await feedMessageService.create({
         parentType: 'network',
         parentId: '42',
@@ -107,21 +107,33 @@ describe('Service: Object', () => {
         network: { id: '42' },
       });
 
+      const createdMessage2 = await feedMessageService.create({
+        parentType: 'network',
+        parentId: '42',
+        text: 'Do you want to join us tomorrow?',
+        resources: [],
+      }, {
+        credentials: global.users.admin,
+        network: { id: '42' },
+      });
+
       const actual = await objectService.listWithSources({
-        objectIds: [createdMessage.objectId],
+        objectIds: [createdMessage.objectId, createdMessage2.objectId],
       }, { credentials: { id: global.users.admin.id } });
 
       await objectService.remove({ parentType: 'network', parentId: '42' });
       await objectService.remove({ parentType: 'feed_message', parentId: createdMessage.id });
 
-      const objectWithChild = R.find(R.propEq('parentType', 'message'), actual);
-      console.log(objectWithChild);
+      const objectWithChildren = R.find(R.propEq('id', createdMessage.objectId), actual);
+      const objectWithoutChildren = R.find(R.propEq('id', createdMessage2.objectId), actual);
 
       assert.lengthOf(actual, 2);
-      assert.property(objectWithChild, 'children');
-      assert.lengthOf(objectWithChild.children, 1);
-      assert.equal(objectWithChild.children[0].type, 'poll');
-      assert.equal(objectWithChild.children[0].id, '20');
+      assert.deepEqual(objectWithoutChildren.children, []);
+      assert.property(objectWithChildren, 'children');
+      assert.lengthOf(objectWithChildren.children, 1);
+      assert.equal(objectWithChildren.children[0].parentType, 'feed_message');
+      assert.equal(objectWithChildren.children[0].parentId, createdMessage.id);
+      assert.equal(objectWithChildren.children[0].source.type, 'poll');
     });
 
     it('should support object_type: private_message', async () => {
