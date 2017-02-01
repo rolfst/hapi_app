@@ -10,6 +10,10 @@ const defaultIncludes = [{
   include: [{ model: PollVote, as: 'Votes' }],
 }];
 
+export const findBy = async (whereConstraint) => Poll
+  .findAll({ include: defaultIncludes, where: whereConstraint })
+  .then(R.map(createPollModel));
+
 /**
  * Find a specific poll by id
  * @param {string} id - Id of the poll
