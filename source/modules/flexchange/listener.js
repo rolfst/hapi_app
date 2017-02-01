@@ -1,6 +1,6 @@
 import R from 'ramda';
 import * as Analytics from '../../shared/services/analytics';
-import EventEmitter from '../../shared/services/event-emitter';
+import createEmitter from '../../shared/services/event-emitter';
 import * as Intercom from '../../shared/services/intercom';
 import approveExchangeEvent from '../../shared/events/approve-exchange-event';
 import newExchangeEvent from '../../shared/events/new-exchange-event';
@@ -9,7 +9,7 @@ import * as substituteNotifier from './notifications/substitute-approved';
 import * as createdNotifier from './notifications/exchange-created';
 import * as exchangeService from './services/flexchange';
 
-const pubsub = new EventEmitter();
+const pubsub = createEmitter();
 
 pubsub.on('exchange.created', async (payload) => {
   const { exchange, network, exchangeValues, credentials } = payload;

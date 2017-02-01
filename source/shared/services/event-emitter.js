@@ -11,4 +11,6 @@ class EventEmitter extends NativeEventEmitter {
   }
 }
 
-export default EventEmitter;
+const createEmitter = () => new EventEmitter();
+
+export default createEmitter;

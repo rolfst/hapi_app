@@ -11,7 +11,7 @@ import * as userService from '../../core/services/user';
 import * as networkRepo from '../../core/repositories/network';
 import * as userRepo from '../../core/repositories/user';
 import * as teamRepo from '../../core/repositories/team';
-import EventEmitter from '../events';
+import FlexchangeEmitter from '../events';
 import * as impl from './implementation';
 
 /**
@@ -110,7 +110,7 @@ export const inviteUser = async (payload, message) => {
   const createdUser = await userService.getUserWithNetworkScope({
     id: user.id, networkId: network.id });
 
-  EventEmitter.emit('user.created', {
+  FlexchangeEmitter.emit('user.created', {
     user: createdUser,
     network: message.network,
     credentials: message.credentials,

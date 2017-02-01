@@ -17,7 +17,7 @@ import * as exchangeRepo from '../../repositories/exchange';
 import * as exchangeValueRepo from '../../repositories/exchange-value';
 import * as exchangeResponseRepo from '../../repositories/exchange-response';
 import * as acceptanceNotifier from '../../notifications/accepted-exchange';
-import EventEmitter from '../../events';
+import FlexchangeListener from '../../listener';
 import * as impl from './implementation';
 
 /**
@@ -170,7 +170,7 @@ export const approveExchange = async (payload, message) => {
     message.credentials,
     payload.user_id);
 
-  EventEmitter.emit('exchange.approved', {
+  FlexchangeListener.emit('exchange.approved', {
     exchange: approvedExchange,
     network: message.network,
     credentials: message.credentials,
