@@ -1,14 +1,31 @@
 import { assert } from 'chai';
+import * as testHelper from '../../../../shared/test-utils/helpers';
 import * as pollService from './index';
 
 describe('Service: Poll', () => {
+  let employee;
+  let flexAppeal;
+  let pmt;
   let message;
   let defaultPayload;
   let defaultVotePayload;
 
-  before(() => {
-    const { employee } = global.users;
-    const { flexAppeal } = global.networks;
+  before(async () => {
+    const [admin, user] = await Promise.all([
+      testHelper.createUser(),
+      testHelper.createUser(),
+    ]);
+    employee = user;
+
+    const { network } = await testHelper.createNetworkWithIntegration({
+      userId: admin.id,
+      token: 'footoken',
+      externalId: 'http://external.com',
+      name: 'pmt',
+      integrationName: 'PMT',
+    });
+    pmt = network;
+    flexAppeal = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
 
     message = { credentials: { id: employee.id } };
     defaultPayload = { networkId: flexAppeal.id, options: ['Option A', 'Option B', 'Option C'] };
@@ -16,9 +33,6 @@ describe('Service: Poll', () => {
   });
 
   it('should create a poll', async () => {
-    const { employee } = global.users;
-    const { flexAppeal } = global.networks;
-
     const poll = await pollService.create(defaultPayload, message);
     const actual = poll;
 
@@ -82,7 +96,6 @@ describe('Service: Poll', () => {
   });
 
   it('should fail when user doesn\'t belong to network', async () => {
-    const { pmt } = global.networks;
     const { id: pollId, options } = await pollService.create(defaultPayload, message);
 
     const payload = { networkId: pmt.id, pollId, optionIds: [options[1].id, options[2].id] };

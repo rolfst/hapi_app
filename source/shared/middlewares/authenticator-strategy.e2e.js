@@ -10,17 +10,18 @@ const expiredToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoiYWNjZXNzX
 
 describe('Authenticator strategy', () => {
   let server;
-  let admin;
   let employee;
   let flexAppeal;
 
   before(async () => {
-    [admin, employee] = await Promise.all([
+    const [admin, user] = await Promise.all([
       testHelper.createUser({ password: 'foo' }),
       testHelper.createUser({ password: 'bar' }),
-    ])
+    ]);
+    employee = user;
+
     flexAppeal = await testHelper.createNetwork({ name: 'flexappeal', userId: admin.id });
- 
+
     return testHelper.addUserToNetwork({ userId: employee.id, networkId: flexAppeal.id });
   });
 

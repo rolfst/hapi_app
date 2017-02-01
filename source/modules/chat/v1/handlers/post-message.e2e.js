@@ -9,15 +9,17 @@ import * as conversationRepo from '../repositories/conversation';
 describe('Post message', () => {
   let conversation;
   let sandbox;
-  let admin;
   let user;
 
   before(async () => {
     sandbox = sinon.sandbox.create();
     sandbox.stub(notifier, 'send').returns(null);
 
-    admin = await testHelper.createUser({ password: 'foo' });
-    user = await testHelper.createUser(blueprints.users.employee);
+    const [admin, employee] = await Promise.all([
+      testHelper.createUser({ password: 'foo' }),
+      testHelper.createUser(blueprints.users.employee),
+    ]);
+    user = employee;
 
     const network = await testHelper.createNetwork({ userId: admin.id, name: 'flexAppeal' });
     await testHelper.addUserToNetwork({ networkId: network.id, userId: user.id });
@@ -29,10 +31,7 @@ describe('Post message', () => {
   after(async () => {
     sandbox.restore();
 
-    return Promise.all([
-      testHelper.deleteUser(user),
-      testHelper.deleteUser(admin),
-    ]);
+    return testHelper.cleanAll();
   });
 
   it('should show new message data', async () => {

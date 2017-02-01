@@ -25,7 +25,8 @@ describe('Handler: View shift', () => {
 
   before(async () => {
     admin = await testHelper.createUser();
-    const flexappealNetwork = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
+    const flexappealNetwork = await testHelper.createNetwork({
+      userId: admin.id, name: 'flexappeal' });
     const { network } = await testHelper.createNetworkWithIntegration({
       ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
       userId: admin.id,

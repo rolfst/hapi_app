@@ -23,12 +23,12 @@ describe('Exchange Repo', () => {
       endTime.add(5, 'h');
 
       const exchange = await exchangeRepo.createExchange(employee.id, network.id, {
-          date: inTwoDays.format('YYYY-MM-DD'),
-          startTime: inTwoDays.toISOString(),
-          endTime: endTime.toISOString(),
-          title: 'test time retrieval',
-          type: 'ALL',
-        });
+        date: inTwoDays.format('YYYY-MM-DD'),
+        startTime: inTwoDays.toISOString(),
+        endTime: endTime.toISOString(),
+        title: 'test time retrieval',
+        type: 'ALL',
+      });
 
       return exchangeRepo.acceptExchange(exchange.id, admin.id);
     });

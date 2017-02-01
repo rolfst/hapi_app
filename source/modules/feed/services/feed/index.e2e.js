@@ -11,11 +11,13 @@ import * as feedService from './index';
 
 describe('Service: Feed', () => {
   describe('make', () => {
+    let sandbox;
     let network;
     let admin;
 
     before(async () => {
-      sinon.stub(notifier, 'send');
+      sandbox = sinon.sandbox.create();
+      sandbox.stub(notifier, 'send');
       admin = await testHelpers.createUser({ password: 'foo' });
       network = await testHelpers.createNetwork({ userId: admin.id });
       await testHelpers.addUserToNetwork({ userId: admin.id, networkId: network.id });
@@ -66,7 +68,10 @@ describe('Service: Feed', () => {
       });
     });
 
-    after(() => testHelpers.cleanAll());
+    after(() => {
+      sandbox.restore();
+      return testHelpers.cleanAll();
+    });
 
     it('should return feed models in descending order by creation date', async () => {
       const actual = await feedService.make({

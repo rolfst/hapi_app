@@ -10,6 +10,7 @@ import * as userService from '../../core/services/user';
 import * as testHelpers from '../../../shared/test-utils/helpers';
 
 describe('Handler: Bulk invite users', () => {
+  let sandbox;
   let createdUsers;
   const sortByUsername = partialRight(sortBy, 'username');
   const sortImportedUsers = flow(flatten, sortByUsername);
@@ -34,7 +35,8 @@ describe('Handler: Bulk invite users', () => {
   let network;
 
   before(async () => {
-    sinon.stub(mailer, 'send');
+    sandbox = sinon.sandbox.create();
+    sandbox.stub(mailer, 'send');
 
     const admin = await testHelpers.createUser({
       username: 'admin@flex-appeal.nl', password: 'foo' });
@@ -58,7 +60,10 @@ describe('Handler: Bulk invite users', () => {
     createdUsers = sortImportedUsers(await Promise.map(toBeImportedUsers, importUser(network.id)));
   });
 
-  after(() => testHelpers.cleanAll());
+  after(() => {
+    sandbox.restore();
+    return testHelpers.cleanAll();
+  });
 
   describe('Happy path', () => {
     it('should add to the network as admin', async () => {
