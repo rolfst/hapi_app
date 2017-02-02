@@ -79,6 +79,7 @@ describe('Exchange activity feed', () => {
   it('should contain correct values for type: exchange_created', () => {
     const actual = _.find(result, { data: { activity_type: ActivityTypes.EXCHANGE_CREATED } });
 
+    assert.isDefined(actual.data.id);
     assert.equal(actual.type, 'activity');
     assert.equal(actual.data.activity_type, ActivityTypes.EXCHANGE_CREATED);
     assert.equal(actual.data.source_id, exchange.id.toString());
@@ -89,6 +90,7 @@ describe('Exchange activity feed', () => {
   it('should contain correct values for type: exchange_accepted', () => {
     const actual = _.find(result, { data: { activity_type: ActivityTypes.EXCHANGE_ACCEPTED } });
 
+    assert.isDefined(actual.data.id);
     assert.equal(actual.type, 'activity');
     assert.equal(actual.data.activity_type, ActivityTypes.EXCHANGE_ACCEPTED);
     assert.equal(actual.data.source_id, exchange.id.toString());
@@ -99,6 +101,7 @@ describe('Exchange activity feed', () => {
   it('should contain correct values for type: exchange_comment', () => {
     const actual = _.find(result, { data: { activity_type: ActivityTypes.EXCHANGE_COMMENT } });
 
+    assert.isDefined(actual.data.id);
     assert.equal(actual.type, 'activity');
     assert.equal(actual.data.activity_type, ActivityTypes.EXCHANGE_COMMENT);
     assert.equal(actual.data.source_id, exchange.id.toString());
@@ -109,6 +112,7 @@ describe('Exchange activity feed', () => {
   it('should contain correct values for type: exchange_rejected', () => {
     const actual = _.find(result, { data: { activity_type: ActivityTypes.EXCHANGE_REJECTED } });
 
+    assert.isDefined(actual.data.id);
     assert.equal(actual.type, 'activity');
     assert.equal(actual.data.activity_type, ActivityTypes.EXCHANGE_REJECTED);
     assert.equal(actual.data.source_id, exchange.id.toString());
@@ -119,6 +123,7 @@ describe('Exchange activity feed', () => {
   it('should contain correct values for type: exchange_approved', () => {
     const actual = _.find(result, { data: { activity_type: ActivityTypes.EXCHANGE_APPROVED } });
 
+    assert.isDefined(actual.data.id);
     assert.equal(actual.type, 'activity');
     assert.equal(actual.data.activity_type, ActivityTypes.EXCHANGE_APPROVED);
     assert.equal(actual.data.source_id, exchange.id.toString());

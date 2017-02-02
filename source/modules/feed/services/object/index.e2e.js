@@ -39,7 +39,7 @@ describe('Service: Object', () => {
       assert.equal(actual[0].parentType, 'network');
       assert.equal(actual[0].parentId, '42');
       assert.equal(actual[1].userId, global.users.admin.id);
-      assert.equal(actual[1].objectType, 'message');
+      assert.equal(actual[1].objectType, 'feed_message');
       assert.equal(actual[1].sourceId, '2');
       assert.equal(actual[1].parentType, 'network');
       assert.equal(actual[1].parentId, '42');
@@ -55,7 +55,7 @@ describe('Service: Object', () => {
 
       assert.lengthOf(actual, 1);
       assert.equal(actual[0].userId, global.users.admin.id);
-      assert.equal(actual[0].objectType, 'message');
+      assert.equal(actual[0].objectType, 'feed_message');
       assert.equal(actual[0].sourceId, '2');
       assert.equal(actual[0].parentType, 'network');
       assert.equal(actual[0].parentId, '42');
@@ -76,7 +76,7 @@ describe('Service: Object', () => {
         parentType: 'network',
         parentId: '123',
         objectType: 'feed_message',
-        sourceId: '2',
+        sourceId: '3',
       }),
     ]));
 
@@ -90,7 +90,7 @@ describe('Service: Object', () => {
     });
   });
 
-  describe('listWithSources', () => {
+  describe.only('listWithSources', () => {
     after(() => objectService.remove({ parentType: 'conversation', parentId: '42' }));
 
     it('should return children', async () => {
@@ -143,13 +143,13 @@ describe('Service: Object', () => {
       }, { credentials: { id: global.users.admin.id } });
 
       const actual = await objectService.listWithSources({
-        objectIds: [createdMessage.objectId],
+        objectIds: [createdMessage.id],
       }, { credentials: { id: global.users.admin.id } });
 
       const object = actual[0];
 
       assert.equal(object.source.type, 'private_message');
-      assert.equal(object.source.id, createdMessage.id);
+      assert.equal(object.source.id, createdMessage.source.id);
       assert.equal(object.source.text, 'Test message');
     });
 

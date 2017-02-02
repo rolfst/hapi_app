@@ -1,4 +1,5 @@
 import { assert } from 'chai';
+import R from 'ramda';
 import * as networkRepository from './network';
 
 describe('Repository: Network', () => {
@@ -8,11 +9,14 @@ describe('Repository: Network', () => {
         networkId: global.networks.flexAppeal.id,
       });
 
+      const admin = R.find(R.propEq('roleType', 'ADMIN'), actual);
+      const employee = R.find(R.propEq('roleType', 'EMPLOYEE'), actual);
+
       assert.lengthOf(actual, 2);
-      assert.equal(actual[0].roleType, 'ADMIN');
-      assert.equal(actual[0].function, 'Beheerder');
-      assert.equal(actual[1].roleType, 'EMPLOYEE');
-      assert.equal(actual[1].function, 'Medewerker');
+      assert.equal(admin.roleType, 'ADMIN');
+      assert.equal(admin.function, 'Beheerder');
+      assert.equal(employee.roleType, 'EMPLOYEE');
+      assert.equal(employee.function, 'Medewerker');
     });
 
     it('should be able to select users for roleType', async () => {

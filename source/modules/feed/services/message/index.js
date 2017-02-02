@@ -25,9 +25,51 @@ const logger = Logger.getLogger('FEED/service/message');
 export const get = async (payload, message) => {
   logger.info('Finding message', { payload, message });
   const result = await messageRepository.findById(payload.messageId);
+
+  if (!result) throw createError('404');
   // TODO find child object
 
   return result;
+};
+
+/**
+ * Get comments for message of multiple messages
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.messageId - The id of the message to retrieve
+ * @param {string[]} payload.messageIds - The id of the message to retrieve
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method getComments
+ * @return {external:Promise.<Comment[]>} {@link module:feed~Comment comment}
+ */
+export const getComments = async (payload, message) => {
+  logger.info('Get comments for message', { payload, message });
+
+  let whereConstraint = {};
+
+  if (payload.messageId) whereConstraint = { messageId: payload.messageId };
+  else if (payload.messageIds) whereConstraint = { messageId: { $in: payload.messageIds } };
+
+  return commentRepository.findBy(whereConstraint);
+};
+
+/**
+ * Get likes for message of multiple messages
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.messageId - The id of the message to retrieve
+ * @param {string[]} payload.messageIds - The id of the message to retrieve
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method getLikes
+ * @return {external:Promise.<Like[]>} {@link module:feed~Like like}
+ */
+export const getLikes = async (payload, message) => {
+  logger.info('Get likes for message', { payload, message });
+
+  let whereConstraint = {};
+
+  if (payload.messageId) whereConstraint = { messageId: payload.messageId };
+  else if (payload.messageIds) whereConstraint = { messageId: { $in: payload.messageIds } };
+
+  return likeRepository.findBy(whereConstraint);
 };
 
 /**
@@ -147,10 +189,8 @@ export const remove = async (payload, message) => {
 
   // TODO ACL: Only an admin or the creator of the message can delete.
 
-  await Promise.all([
-    messageRepository.destroy(payload.messageId),
-    impl.removeAttachedObjects(payload.messageId),
-  ]);
+  await messageRepository.destroy(payload.messageId);
+  await impl.removeAttachedObjects(payload.messageId);
 
   return true;
 };

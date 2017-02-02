@@ -9,10 +9,19 @@ import * as impl from './implementation';
  */
 
 const logger = Logger.getLogger('FEED/service/object');
-const objectsForTypeValuePair = (fn, pairs) => R.pipe(R.mapObjIndexed(fn), R.values);
+
+const objectsForTypeValuePair = (fn, pairs) => R.pipe(R.mapObjIndexed(fn), R.values)(pairs);
+const typeEq = R.propEq('type');
+const idEq = R.propEq('id');
+const getSources = R.pipeP(Promise.all, R.flatten, R.reject(R.isNil));
 const groupByObjectType = R.groupBy(R.prop('objectType'));
-const sourceIdsPerType = R.pipe(groupByObjectType, R.map(R.pluck('sourceId'));
-const isChildOfObject = (object) => R.both(
+const sourceIdsPerType = R.pipe(groupByObjectType, R.map(R.pluck('sourceId')));
+const whereTypeAndId = (type, id) => R.both(typeEq(type), idEq(id));
+const createOptionsFromPayload = R.pipe(
+  R.pick(['offset', 'limit']),
+  R.assoc('order', [['createdAt', 'desc']])
+);
+const isChildOfObject = (object) => R.and(
   R.propEq('parentType', object.objectType),
   R.propEq('parentId', object.sourceId)
 );
@@ -31,21 +40,16 @@ const isChildOfObject = (object) => R.both(
 export const list = async (payload, message) => {
   logger.info('Listing objects', { payload, message });
 
-  const createOptions = R.pipe(
-    R.pick(['offset', 'limit']),
-    R.assoc('order', [['createdAt', 'desc']])
-  );
-
   const objects = await objectRepository.findBy({
     parentType: payload.parentType,
     parentId: payload.parentId,
-  }, createOptions(payload));
+  }, createOptionsFromPayload(payload));
 
   return objects;
 };
 
 /**
- * Listing objects including the source
+ * Listing objects including the source and children
  * @param {object} payload - Object containing payload data
  * @param {string} payload.objectIds - The id for objects to list
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
@@ -56,22 +60,27 @@ export const listWithSources = async (payload, message) => {
   logger.info('Listing objects with sources', { payload, message });
 
   const objects = await objectRepository.findBy({
-    id: { $in: payload.objectIds } }, { order: [['createdAt', 'desc']] });
+    id: { $in: payload.objectIds } }, createOptionsFromPayload(payload));
 
   const promisedChildren = objectsForTypeValuePair(impl.findChildrenForType, sourceIdsPerType(objects));
-  const children = await R.pipeP(Promise.all, R.flatten, R.reject(R.isNil))(promisedChildren);
+  const children = await getSources(promisedChildren);
 
   const promisedSources = objectsForTypeValuePair(impl.findSourcesForType(message),
     R.merge(sourceIdsPerType(objects), sourceIdsPerType(children)));
-  const sources = await R.pipeP(Promise.all, R.flatten, R.reject(R.isNil))(promisedSources);
+  const sources = await getSources(promisedSources);
 
   const objectsWithSource = R.map(impl.addSourceToObject(sources), R.concat(objects, children));
 
   const findObjectById = (objectId) => R.find(R.propEq('id', objectId), objectsWithSource);
   const findChildren = (object) => R.filter(isChildOfObject, objectsWithSource);
 
+  console.log('____objectsWithSource', objectsWithSource);
+
   return R.map((objectId) => {
     const match = findObjectById(objectId);
+
+    console.log('___processing object', match);
+    console.log('___children', findChildren(match));
 
     return R.merge(match, { children: findChildren(match) });
   }, R.pluck('id', objects));

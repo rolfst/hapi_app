@@ -1,3 +1,4 @@
+import R from 'ramda';
 import * as Logger from '../../../../../shared/services/logger';
 import * as objectService from '../../../../feed/services/object';
 import * as privateMessageRepository from '../../repositories/private-message';
@@ -10,7 +11,7 @@ const logger = Logger.createLogger('CHAT/service/conversation');
  * @param {string[]} payload.messageIds - The ids of the messages to list
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method list
- * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
+ * @return {external:Promise.<PrivateMessage[]>} {@link module:modules/chat~PrivateMessage}
  */
 export const list = async (payload, message) => {
   logger.info('Listing private messages', { payload, message });
@@ -44,5 +45,7 @@ export async function create(payload, message) {
 
   privateMessageRepository.update(createdMessage.id, { objectId: createdObject.id });
 
-  return { ...createdMessage, objectId: createdObject.id };
+  return R.merge(createdObject, {
+    source: { ...createdMessage, objectId: createdObject.id },
+  });
 }
