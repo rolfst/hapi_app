@@ -8,8 +8,8 @@ import * as authenticationService from '../../modules/authentication/services/au
 
 /**
  * @typedef {Object} AuthorizedUser
- * @property {UserModel}
- * @property {string} token
+ * @property {User} {@link module:modules/core~User user}
+ * @property {AuthenticationToken} {@link module:shared~AuthenticationToken token}
  * @property {Object[]} integrations
  */
 
@@ -23,7 +23,7 @@ import * as authenticationService from '../../modules/authentication/services/au
 export default async (credentials, message) => {
   const { accessToken } = await authenticationService.authenticate(credentials, message);
   const decodedToken = tokenUtil.decode(accessToken);
-  const user = await userRepo.findUserById(decodedToken.sub);
+  const user = await userRepo.findUserById(decodedToken.sub, null, false);
 
   return {
     ...user,

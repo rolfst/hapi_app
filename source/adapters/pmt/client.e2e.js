@@ -3,18 +3,17 @@ import nock from 'nock';
 import createError from '../../shared/utils/create-error';
 import * as stubs from './test-utils/stubs';
 import client from './client';
+import * as testHelper from '../../shared/test-utils/helpers';
 
 nock.disableNetConnect();
 
 describe('PMT Client', () => {
   it('should fail with correct error when token is expired', async () => {
-    const BASE_URL = global.networks.pmt.externalId;
-
-    nock(BASE_URL)
+    nock(testHelper.DEFAULT_NETWORK_EXTERNALID)
       .get('/foo/baz')
       .reply('400', stubs.token_expired_400);
 
-    const response = client.get(`${BASE_URL}/foo/baz`);
+    const response = client.get(`${testHelper.DEFAULT_NETWORK_EXTERNALID}/foo/baz`);
 
     return assert.isRejected(response, new RegExp(createError('10005').message));
   });

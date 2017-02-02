@@ -2,7 +2,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import tokenUtil from '../../../shared/utils/token';
 
-export default (userId, deviceId, integrations) => {
+export default (userId, deviceId) => {
   const payload = {
     type: 'access_token',
     exp: moment().add(1, 'hour').unix(),
@@ -11,7 +11,6 @@ export default (userId, deviceId, integrations) => {
     sub: userId,
     device: deviceId,
     jti: _.random(1000000, 9999999),
-    integrations,
   };
 
   return tokenUtil.encode(payload);

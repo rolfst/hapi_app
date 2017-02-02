@@ -9,3 +9,12 @@ export const createFunctionName = async (userId, network) => {
 
   return first(map(teamsThatUserBelongsTo, 'name'));
 };
+
+export const createScopedUser = async (user, networkLink) => ({
+  ...user,
+  roleType: networkLink.roleType || null,
+  externalId: networkLink.externalId || null,
+  deletedAt: networkLink.deletedAt || null,
+  invitedAt: networkLink.invitedAt || null,
+  integrationAuth: !!networkLink.userToken,
+});

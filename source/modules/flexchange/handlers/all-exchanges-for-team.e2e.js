@@ -2,20 +2,21 @@ import { assert } from 'chai';
 import qs from 'qs';
 import moment from 'moment';
 import { find } from 'lodash';
-import { exchangeTypes } from '../models/exchange';
+import * as testHelper from '../../../shared/test-utils/helpers';
 import { getRequest } from '../../../shared/test-utils/request';
-import { createTeam } from '../../core/repositories/team';
-import { createExchange } from '..//repositories/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
+import { create } from '../../core/repositories/team';
+import { createExchange } from '../repositories/exchange';
 
 describe('Get exchanges for team', () => {
   let team;
+  let admin;
   let network;
-  let createdExchanges;
 
   before(async () => {
-    network = global.networks.flexAppeal;
-
-    team = await createTeam({ networkId: network.id, name: 'Team #1' });
+    admin = await testHelper.createUser();
+    network = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
+    team = await create({ networkId: network.id, name: 'Team #1' });
 
     const defaultArgs = {
       date: moment().format('YYYY-MM-DD'),
@@ -23,42 +24,42 @@ describe('Get exchanges for team', () => {
       values: [team.id],
     };
 
-    const exchange1 = createExchange(global.users.admin.id, network.id, {
+    const exchange1 = createExchange(admin.id, network.id, {
       ...defaultArgs,
       title: 'Test shift 1 for team',
     });
 
-    const exchange2 = createExchange(global.users.admin.id, network.id, {
+    const exchange2 = createExchange(admin.id, network.id, {
       ...defaultArgs,
       title: 'Test shift 2 for team',
     });
 
-    const exchange3 = createExchange(global.users.admin.id, network.id, {
+    const exchange3 = createExchange(admin.id, network.id, {
       ...defaultArgs,
       date: moment().add(2, 'weeks').format('YYYY-MM-DD'),
       title: 'Test shift 2',
     });
 
-    const exchangeInPast = createExchange(global.users.admin.id, network.id, {
+    const exchangeInPast = createExchange(admin.id, network.id, {
       ...defaultArgs,
       date: moment().subtract(2, 'weeks').format('YYYY-MM-DD'),
       title: 'Test shift in past',
     });
 
-    createdExchanges = await Promise.all([exchange1, exchange2, exchange3, exchangeInPast]);
+    return Promise.all([exchange1, exchange2, exchange3, exchangeInPast]);
   });
 
-  after(() => Promise.all(createdExchanges.map(e => e.destroy())));
+  after(() => testHelper.cleanAll());
 
   it('should return exchanges', () => {
-    return getRequest(`/v2/networks/${network.id}/teams/${team.id}/exchanges`)
+    return getRequest(`/v2/networks/${network.id}/teams/${team.id}/exchanges`, admin.token)
       .then(response => {
         const teamExchange = find(response.result.data, { title: 'Test shift 1 for team' });
 
         assert.equal(response.statusCode, 200);
         assert.deepEqual(teamExchange.created_in, { type: 'team', ids: [team.id.toString()] });
         assert.lengthOf(response.result.data, 4);
-        assert.equal(response.result.data[0].user.full_name, global.users.admin.fullName);
+        assert.equal(response.result.data[0].user.full_name, admin.fullName);
         assert.lengthOf(response.result.data[0].responses, 0);
         assert.deepEqual(response.result.data[0].created_in, {
           type: 'team',
@@ -67,7 +68,7 @@ describe('Get exchanges for team', () => {
       });
   });
 
-  it('should fail when no values are provided', () => {
+  xit('should fail when no values are provided', () => {
     // TODO
   });
 
@@ -78,7 +79,7 @@ describe('Get exchanges for team', () => {
     });
 
     const endpoint = `/v2/networks/${network.id}/teams/${team.id}/exchanges?${query}`;
-    const { result, statusCode } = await getRequest(endpoint);
+    const { result, statusCode } = await getRequest(endpoint, admin.token);
 
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 2);
@@ -90,7 +91,7 @@ describe('Get exchanges for team', () => {
     });
 
     const endpoint = `/v2/networks/${network.id}/teams/${team.id}/exchanges?${query}`;
-    const { result, statusCode } = await getRequest(endpoint);
+    const { result, statusCode } = await getRequest(endpoint, admin.token);
 
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 3);
@@ -102,7 +103,7 @@ describe('Get exchanges for team', () => {
     });
 
     const endpoint = `/v2/networks/${network.id}/teams/${team.id}/exchanges?${query}`;
-    const { statusCode } = await getRequest(endpoint);
+    const { statusCode } = await getRequest(endpoint, admin.token);
 
     assert.equal(statusCode, 422);
   });

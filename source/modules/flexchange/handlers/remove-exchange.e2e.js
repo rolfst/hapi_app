@@ -1,17 +1,20 @@
 import { assert } from 'chai';
 import moment from 'moment';
+import * as testHelper from '../../../shared/test-utils/helpers';
 import { deleteRequest } from '../../../shared/test-utils/request';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import { createExchange } from '../repositories/exchange';
 
 describe('Remove exchange', () => {
+  let admin;
   let network;
   let exchange;
 
   before(async () => {
-    network = global.networks.flexAppeal;
+    admin = await testHelper.createUser();
+    network = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
 
-    exchange = await createExchange(global.users.admin.id, network.id, {
+    exchange = await createExchange(admin.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'Test shift to view',
@@ -19,11 +22,11 @@ describe('Remove exchange', () => {
     });
   });
 
-  after(() => exchange.destroy());
+  after(() => testHelper.cleanAll());
 
   it('should remove the exchange', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}`;
-    const { result, statusCode } = await deleteRequest(endpoint);
+    const { result, statusCode } = await deleteRequest(endpoint, admin.token);
 
     assert.equal(statusCode, 200);
     assert.equal(result.success, true);
@@ -31,7 +34,7 @@ describe('Remove exchange', () => {
 
   it('should fail when exchange cannot be found', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id + 1337}`;
-    const { statusCode } = await deleteRequest(endpoint);
+    const { statusCode } = await deleteRequest(endpoint, admin.token);
 
     assert.equal(statusCode, 404);
   });

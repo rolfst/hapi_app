@@ -30,10 +30,8 @@ export const delegate = async (payload, message) => {
 
   if (!decodedToken.sub) throw createError('403', 'No sub found in refresh token.');
 
-  const user = await userRepo.findUserById(decodedToken.sub);
-  const integrationInfo = await impl.getIntegrationInfoForUser(user.id);
-  const { accessToken } = await impl.createAuthenticationTokens(
-    user.id, message.deviceName, integrationInfo);
+  const user = await userRepo.findUserById(decodedToken.sub, null, false);
+  const { accessToken } = await impl.createAuthenticationTokens(user.id, message.deviceName);
 
   return { accessToken };
 };
@@ -50,9 +48,6 @@ export const delegate = async (payload, message) => {
  */
 export const authenticate = async (payload, message) => {
   const user = await impl.authenticateUser(payload);
-
-  await impl.assertUserBelongsToANetwork(user.id);
-
   const tokens = await impl.getAuthenticationTokens(user, message.deviceName);
 
   Analytics.registerProfile(user);

@@ -1,17 +1,19 @@
 import { assert } from 'chai';
+import * as testHelpers from '../../../shared/test-utils/helpers';
 import { postRequest } from '../../../shared/test-utils/request';
-import * as userRepo from '../../core/repositories/user';
 
 describe('Handler: Invite user', () => {
-  after(async () => {
-    const admin = await userRepo.findUserByEmail('admin@baz.com');
-    const employee = await userRepo.findUserByEmail('employee@baz.com');
+  let admin;
+  let network;
 
-    return Promise.all([
-      userRepo.deleteById(admin.id),
-      userRepo.deleteById(employee.id),
-    ]);
+  before(async () => {
+    admin = await testHelpers.createUser({
+      username: 'admin@flex-appeal.nl', password: 'foo' });
+
+    network = await testHelpers.createNetwork({ userId: admin.id, name: 'flexAppeal' });
   });
+
+  after(() => testHelpers.cleanAll());
 
   const user = {
     first_name: 'Foo',
@@ -25,8 +27,8 @@ describe('Handler: Invite user', () => {
       role_type: 'admin',
     };
 
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/users`;
-    const { result, statusCode } = await postRequest(endpoint, payload);
+    const endpoint = `/v2/networks/${network.id}/users`;
+    const { result, statusCode } = await postRequest(endpoint, payload, admin.token);
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.email, payload.email);
@@ -40,8 +42,8 @@ describe('Handler: Invite user', () => {
       role_type: 'employee',
     };
 
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/users`;
-    const { result, statusCode } = await postRequest(endpoint, payload);
+    const endpoint = `/v2/networks/${network.id}/users`;
+    const { result, statusCode } = await postRequest(endpoint, payload, admin.token);
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.username, payload.email);
@@ -55,8 +57,8 @@ describe('Handler: Invite user', () => {
       role_type: 'admin',
     };
 
-    const endpoint = `/v2/networks/${global.networks.flexAppeal.id}/users`;
-    const { statusCode } = await postRequest(endpoint, payload);
+    const endpoint = `/v2/networks/${network.id}/users`;
+    const { statusCode } = await postRequest(endpoint, payload, admin.token);
 
     assert.equal(statusCode, 422);
   });

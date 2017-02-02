@@ -1,17 +1,35 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import * as unit from '../utils/create-adapter';
+import * as userRepo from '../../modules/core/repositories/user';
+import * as unit from './create-adapter';
 
 describe('createAdapter', () => {
   const integrationName = 'foo';
-  const network = { name: 'My network', integrations: [integrationName] };
-  const authSettings = [{ name: integrationName, token: 'footoken' }];
+  const userId = '1';
+  const network = {
+    id: '1',
+    name: 'My network',
+    externalId: 'http://foo.api.com',
+    hasIntegration: true,
+    integrations: [integrationName],
+  };
 
-  it('should pass network and token to adapter', () => {
+  const fakeAdapter = () => ({ foo: 'baz' });
+  const fakeIntegrations = [{ name: 'foo', adapter: fakeAdapter }];
+
+  beforeEach(() => {
+    sinon.stub(userRepo, 'findNetworkLink').returns(Promise.resolve({
+      userToken: 'footoken',
+    }));
+  });
+
+  afterEach(() => userRepo.findNetworkLink.restore());
+
+  it('should pass network and token to adapter', async () => {
     const adapterSpy = sinon.spy();
-    const fakeIntegrations = [{ name: 'foo', adapter: adapterSpy }];
+    const _fakeIntegrations = [{ name: 'foo', adapter: adapterSpy }];
 
-    unit.createAdapter(network, authSettings, { integrations: fakeIntegrations });
+    await unit.createAdapter(network, userId, { integrations: _fakeIntegrations });
 
     assert.isTrue(adapterSpy.calledWith(network, 'footoken'));
     assert.isTrue(adapterSpy.calledOnce);
@@ -19,20 +37,19 @@ describe('createAdapter', () => {
     adapterSpy.reset();
   });
 
-  it('should return the adapter', () => {
-    const fakeAdapter = () => ({ foo: 'baz' });
-    const fakeIntegrations = [{ name: 'foo', adapter: fakeAdapter }];
-
-    const actual = unit.createAdapter(network, authSettings, { integrations: fakeIntegrations });
+  it('should return the adapter', async () => {
+    const actual = await unit.createAdapter(network, userId, { integrations: fakeIntegrations });
 
     assert.deepEqual(actual, { foo: 'baz' });
   });
 
-  it('should proceed without token', () => {
-    const fakeAdapter = () => ({ foo: 'baz' });
-    const fakeIntegrations = [{ name: 'foo', adapter: fakeAdapter }];
+  it('should proceed when proceedWithoutToken is set to true', async () => {
+    userRepo.findNetworkLink.restore();
+    sinon.stub(userRepo, 'findNetworkLink').returns(Promise.resolve({
+      userToken: null,
+    }));
 
-    const actual = unit.createAdapter(network, [], {
+    const actual = await unit.createAdapter(network, userId, {
       proceedWithoutToken: true,
       integrations: fakeIntegrations,
     });
@@ -40,46 +57,35 @@ describe('createAdapter', () => {
     assert.deepEqual(actual, { foo: 'baz' });
   });
 
-  it('should fail when no adapter found', () => {
-    const actual = () => unit.createAdapter(network, authSettings, { integrations: {} });
+  it('should fail when there is no adapter for integration for network', () => {
+    const promise = unit.createAdapter(network, userId, { integrations: {} });
 
-    assert.throws(actual);
+    return assert.isRejected(promise, /Couldn\'t find integration with adapter./);
+  });
+
+  it('should fail when the network has no externalId value', () => {
+    const networkWithoutExternalId = { ...network, externalId: null };
+    const promise = unit.createAdapter(networkWithoutExternalId, userId, { integrations: {} });
+
+    return assert.isRejected(promise, /Network has no externalId value./);
+  });
+
+  it('should fail when network has no integration', () => {
+    const networkWithoutIntegration = { ...network, hasIntegration: false };
+    const promise = unit.createAdapter(networkWithoutIntegration, userId, {
+      integrations: { fakeIntegrations } });
+
+    return assert.isRejected(promise, /The network doesn\'t have a linked integration./);
   });
 
   it('should fail when no token found', () => {
-    const fakeAdapter = () => ({ foo: 'baz' });
-    const fakeIntegrations = [{ name: 'foo', adapter: fakeAdapter }];
+    userRepo.findNetworkLink.restore();
+    sinon.stub(userRepo, 'findNetworkLink').returns(Promise.resolve({
+      userToken: null,
+    }));
 
-    const actual = () => unit.createAdapter(network, [], { integrations: fakeIntegrations });
+    const promise = unit.createAdapter(network, userId, { integrations: fakeIntegrations });
 
-    assert.throws(actual);
-  });
-
-  it('should create an adapter', () => {
-    const adapterSpy = sinon.spy();
-    const fakeIntegrations = [{ name: integrationName, adapter: adapterSpy }];
-
-    const factory = unit.createAdapterFactory(
-      integrationName, authSettings, { integrations: fakeIntegrations });
-    factory.create(network);
-
-    assert.isTrue(adapterSpy.calledWith(network, 'footoken'));
-    assert.isTrue(adapterSpy.calledOnce);
-
-    adapterSpy.reset();
-  });
-
-  it('should create an adapterFactory', () => {
-    const adapterSpy = sinon.spy();
-    const fakeIntegrations = [{ name: integrationName, adapter: adapterSpy }];
-
-    const factory = unit.createAdapterFactory(
-      integrationName, authSettings, { integrations: fakeIntegrations });
-
-    assert.property(factory, 'create');
-    assert.isTrue(adapterSpy.neverCalledWith(network, 'footoken'));
-    assert.equal(adapterSpy.callCount, 0);
-
-    adapterSpy.reset();
+    return assert.isRejected(promise, /User not authenticated with integration./);
   });
 });

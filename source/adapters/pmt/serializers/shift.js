@@ -1,12 +1,13 @@
-import moment from 'moment';
+import moment from 'moment-timezone';
 
-const incomingDateFormat = 'DD-MM-YYYY HH:mm:ss';
+const createUTCDate = (time, dateFormat = 'DD-MM-YYYY HH:mm:ss') =>
+  moment.tz(time, dateFormat, 'Europe/Amsterdam').tz('UTC');
 
 export default (externalShift) => ({
   id: externalShift.id,
-  date: moment.utc(externalShift.start_time, incomingDateFormat).format('YYYY-MM-DD'),
-  start_time: moment.utc(externalShift.start_time, incomingDateFormat).toISOString(),
-  end_time: moment.utc(externalShift.end_time, incomingDateFormat).toISOString(),
+  date: createUTCDate(externalShift.start_time).format('YYYY-MM-DD'),
+  start_time: createUTCDate(externalShift.start_time).toISOString(),
+  end_time: createUTCDate(externalShift.end_time).toISOString(),
   break: externalShift.break,
   team_id: externalShift.department,
 });

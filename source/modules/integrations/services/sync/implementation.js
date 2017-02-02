@@ -1,7 +1,6 @@
 import Promise from 'bluebird';
 import _, {
   flatMap,
-  filter,
   isEqual,
   pick,
   find,
@@ -10,19 +9,31 @@ import _, {
   differenceBy,
   intersectionBy,
 } from 'lodash';
+import R from 'ramda';
+import createError from '../../../../shared/utils/create-error';
+import * as Logger from '../../../../shared/services/logger';
 import * as teamService from '../../../core/services/team';
 import * as networkService from '../../../core/services/network';
 import * as networkServiceImpl from '../../../core/services/network/implementation';
 import * as networkRepo from '../../../core/repositories/network';
 import * as userRepo from '../../../core/repositories/user';
 import * as teamRepo from '../../../core/repositories/team';
-import * as Logger from '../../../../shared/services/logger';
 
 /**
  * @module modules/integrations/services/sync/impl
  */
 
 const logger = Logger.getLogger('INTEGRATIONS/services/sync');
+
+export const isSyncable = R.and(R.prop('hasIntegration'), R.prop('importedAt'));
+
+export function assertNetworkIsSyncable(network) {
+  if (!isSyncable(network)) throw createError('10009');
+}
+
+export function assertUserIsAdmin(user) {
+  if (!R.propEq('role', 'ADMIN', user)) throw createError('403');
+}
 
 export const getRemovableUsersForNetwork = async (externalUsers, networkId, message) => {
   const internalUsers = await networkService.listActiveUsersForNetwork(
@@ -56,7 +67,7 @@ export const getRemovableTeamsIdsForNetwork = async (externalTeams, networkId, m
 export const removeUsersFromNetwork = async (externalUsers, networkId, message) => {
   const removableUserIds = await getRemovableUsersForNetwork(externalUsers, networkId, message);
   const removableUsers = await Promise.map(removableUserIds, (userId) => {
-    return userRepo.findUserMetaDataForNetwork(userId, networkId);
+    return userRepo.findNetworkLink({ userId, networkId });
   });
   const removedUsersIds = await Promise.map(removableUsers,
     async (user) => {
@@ -194,7 +205,7 @@ export const removeTeamsFromNetwork = async (externalTeams, networkId, message) 
     { teamIds: removableTeamsIds, networkId }, message);
 
   logger.info('Successfully teams removed from network',
-    { removedTeams: removedTeamsIds, message });
+    { removed_teams_count: removedTeamsIds.length, message });
 
   return removedTeamsIds;
 };
@@ -214,6 +225,30 @@ export const addUsersToTeams = async (externalUsers, networkId, message) => {
 };
 
 /**
+ * Calculate which teams have to be synced.
+ * @param {Array<Team>} internalTeams - The teams that come from the internal system
+ * @param {Array<ExternalTeam>} externalTeams - The teams that come from the external system
+ * @method getOutOfSyncTeams
+ * @return {Array<ExternalTeam>}
+ */
+export function getOutOfSyncTeams(internalTeams, externalTeams) {
+  const existingTeams = intersectionBy(externalTeams, internalTeams, 'externalId');
+
+  return _(existingTeams)
+    .map(externalTeam => {
+      const matchingInternalTeam = find(internalTeams, { externalId: externalTeam.externalId });
+      const externalTeamValues = pick(externalTeam, 'name');
+      const internalTeamValues = pick(matchingInternalTeam, 'name');
+
+      if (isEqual(externalTeamValues, internalTeamValues)) return null;
+
+      return externalTeam;
+    })
+    .filter(v => v)
+    .value();
+}
+
+/**
  * This step synchronises the teams.
  * @param {string} networkId - The network to sync the users for
  * @param {Array<ExternalTeam>} _externalTeams - The teams that come from the external system
@@ -228,31 +263,108 @@ export async function syncTeams(networkId, _externalTeams) {
 
   const nonExistingTeams = differenceBy(externalTeams, internalTeams, 'externalId');
   const teamsToDelete = differenceBy(internalTeams, externalTeams, 'externalId');
+  const teamsOutOfSync = getOutOfSyncTeams(internalTeams, externalTeams);
 
-  const existingTeams = intersectionBy(internalTeams, externalTeams, 'externalId');
-  // Because existingTeams contains our internal objects. We have
-  // to get the updated values from the matching external team.
-  const teamsToUpdate = _(existingTeams)
-    .map(internalTeam => {
-      const matchingExternalTeam = find(externalTeams, { externalId: internalTeam.externalId });
-      const externalTeamValues = pick(matchingExternalTeam, 'name', 'description');
-      const internalTeamValues = pick(internalTeam, 'name', 'description');
+  logger.info('Syncing teams that are out-of-sync', { networkId, teams: teamsOutOfSync });
 
-      // We return null here so we are sure that we only update the teams that
-      // are actually changed instead of updating all the teams against the database.
-      if (isEqual(externalTeamValues, internalTeamValues)) return null;
+  const teamsToUpdate = _(teamsOutOfSync)
+    .map(externalTeam => {
+      const matchingInternalTeam = find(internalTeams, { externalId: externalTeam.externalId });
 
-      return { ...internalTeam, ...externalTeamValues };
+      return { ...matchingInternalTeam, ...pick(externalTeam, 'name', 'description') };
     })
     .filter(_.isDefined)
     .value();
 
   await Promise.map(teamsToDelete, team => teamRepo.deleteById(team.id));
-  await Promise.map(teamsToUpdate, team => teamRepo.updateTeam(team.id, team));
+  await Promise.map(teamsToUpdate, team => teamRepo.update(team.id, team));
   await teamRepo.createBulkTeams(map(nonExistingTeams, t => omit(t, 'id')));
 
-  return true;
+  return {
+    changed: teamsToUpdate.length,
+    added: nonExistingTeams.length,
+    deleted: teamsToDelete.length,
+  };
 }
+
+export const filterNonExistingUsers = (internalUsers, externalUsers) =>
+  differenceBy(externalUsers, internalUsers, 'username');
+
+export const filterExistingUsersInNetwork = (usersInNetwork, externalUsers) =>
+  _.intersectionBy(usersInNetwork, externalUsers, 'username');
+
+export const filterUsersToDelete = (internalUsers, externalUsers) => {
+  const activeInternalUsers = _.reject(internalUsers, 'deletedAt');
+  const inactiveExternalUsers = _.filter(externalUsers, 'deletedAt');
+
+  return intersectionBy(activeInternalUsers, inactiveExternalUsers, 'externalId');
+};
+
+/**
+ * Retrieve duplicated items from a collection based on a property.
+ * @param {Array} collection - The collection to filter
+ * @param {string} matchingProperty - The property to check for duplication
+ * @method filterDuplicates
+ * @return {Array} - Array containing the duplicated items
+ */
+export const filterDuplicates = (collection, matchingProperty) => _.filter(collection, item => {
+  const matches = _.filter(collection, { [matchingProperty]: item[matchingProperty] });
+
+  return matches.length >= 2;
+});
+
+/**
+ * Return unique users based on the username. Duplications will be filtered based on
+ * the deletedAt value. So that we only return active users when they are duplicated.
+ * @param {Array} externalUsers - The collection to filter
+ * @method filterExternalUserDuplications
+ * @return {Array} - Array containing unique users
+ */
+export const filterExternalUserDuplications = (externalUsers) => {
+  const activeDuplicates = _.reject(filterDuplicates(externalUsers, 'username'), 'deletedAt');
+  const remainingUsers = _.reject(externalUsers, user => {
+    return _.some(activeDuplicates, (duplicate) => duplicate.username === user.username);
+  });
+
+  return _.uniqBy(_.concat(activeDuplicates, remainingUsers), 'username');
+};
+
+/**
+ * Calculate which users needs to be synced and what their outcome should be.
+ * @param {User[]} allUsersInSystem - All the users that are registered
+ * @param {User[]} usersInNetwork - The users that belong to the network
+ * @param {ExternalUser[]} externalUsers - The users from the external system
+ * @method syncUsers
+ * @return {User[]} - Array containing the sync output to process
+ */
+export const syncUsers = (allUsersInSystem, usersInNetwork, externalUsers) => {
+  const nonExistingUsers = filterNonExistingUsers(usersInNetwork, externalUsers);
+  const newUsersForNetwork = _.map(nonExistingUsers, (externalUser) => ({
+    ..._.find(allUsersInSystem, { username: externalUser.username }),
+    externalId: externalUser.externalId,
+    deletedAt: externalUser.deletedAt,
+  }));
+
+  // We calculate the change based on the externalId and deletedAt value.
+  // Afterwards we make sure we do not include new users that will be added
+  // to the network.
+  const outOfSyncUsersInNetwork = _.reject(externalUsers, user => {
+    const match = _.find(usersInNetwork, { username: user.username });
+    if (!match) return true;
+
+    // We cast deletedAt to boolean so we only check if the value is set yes/no.
+    // Else we also include users that have a deletedAt date value difference.
+    return !!user.deletedAt === !!match.deletedAt && user.externalId === match.externalId;
+  });
+
+  const updatedUsersInNetwork = _.map(outOfSyncUsersInNetwork, (externalUser) => ({
+    ..._.find(usersInNetwork, { username: externalUser.username }),
+    externalId: externalUser.externalId,
+    deletedAt: externalUser.deletedAt,
+  }));
+
+  return _.uniqBy(_.concat(updatedUsersInNetwork, newUsersForNetwork), 'externalId');
+};
 
 /**
  * This step synchronises the link between an user and the network it belongs to.
@@ -260,48 +372,37 @@ export async function syncTeams(networkId, _externalTeams) {
  * This is due foreign key cascading. Else all the linked messages etc will be deleted as well.
  * This requires the users to be already imported by the import script to avoid wrong behaviour.
  * @param {string} networkId - The network to sync the users for
- * @param {Array<ExternalUser>} externalUsers - The users that come from the external system
+ * @param {ExternalUser[]} externalUsers - The users that come from the external system
+ * @param {User[]} allUsersInSystem - All users in the system
  * @method syncUsersWithNetwork
  * @return {boolean} - Return success boolean
  */
-export async function syncUsersWithNetwork(networkId, externalUsers) {
+export async function syncUsersWithNetwork(networkId, externalUsers, allUsersInSystem = []) {
   const network = await networkRepo.findNetworkById(networkId);
   const internalUsers = await networkService.listAllUsersForNetwork({
     networkId }, { credentials: network.superAdmin });
-  const nonExistingUsers = differenceBy(externalUsers, internalUsers, 'externalId');
-  await networkServiceImpl.importUsers(nonExistingUsers, networkId);
 
-  const usersToDelete = differenceBy(internalUsers, externalUsers, 'externalId');
-  await Promise.map(usersToDelete, user => userRepo.removeFromNetwork(user.id, networkId));
+  const importedUsers = await networkServiceImpl.importUsers(
+    filterNonExistingUsers(allUsersInSystem, externalUsers), networkId);
 
-  const previouslyDeletedUsers = filter(internalUsers, user => !!user.deletedAt);
-  const usersToAddToNetwork = differenceBy(previouslyDeletedUsers, externalUsers, 'deletedAt');
-  await Promise.map(usersToAddToNetwork, user =>
-    networkRepo.addUser({ networkId, userId: user.id }));
+  const usersToSync = syncUsers(
+    _.concat(allUsersInSystem, importedUsers),
+    filterExistingUsersInNetwork(internalUsers, externalUsers),
+    externalUsers);
 
-  return true;
-}
+  const logError = (message, user) => (err) => logger.error(message, {
+    err, user, networkId, networkName: network.name });
 
-/**
- * Calculate which users have to be synced.
- * @param {Array<ExternalUser>} externalUsers - The users that come from the external system
- * @param {Array<User>} internalUsers - The users that come from the internal system
- * @param {Array<Team>} internalTeams - The teams that come from the external system
- * @method getOutOfSyncUsersForTeamLinking
- * @return {Array<User>}
- */
-export function getOutOfSyncUsersForTeamLinking(externalUsers, internalUsers, internalTeams) {
-  return _(externalUsers)
-    .map(externalUser => ({
-      ...externalUser,
-      teamIds: map(externalUser.teamIds, teamId => find(internalTeams, { externalId: teamId }).id),
-    }))
-    .filter(externalUser => {
-      const matchingInternalUser = find(internalUsers, { externalId: externalUser.externalId });
+  await Promise.map(usersToSync, user => userRepo
+    .setNetworkLink({ userId: user.id, networkId, ...pick(user, 'externalId', 'deletedAt') })
+    .catch(logError('Error setting network link for user', user)));
 
-      return !isEqual(externalUser.teamIds, matchingInternalUser.teamIds);
-    })
-    .value();
+  logger.info('Synced users with network', {
+    ...pick(network, 'id', 'name'),
+    count: usersToSync.length,
+  });
+
+  return usersToSync.length;
 }
 
 export function getMatchingInternalTeam(externalId, internalTeams) {
@@ -329,6 +430,31 @@ export function replaceExternalTeamIds(externalUser, internalUser, internalTeams
       .filter(_.isDefined)
       .value(),
   };
+}
+
+/**
+ * Calculate which users have to be synced.
+ * @param {Array<ExternalUser>} externalUsers - The users that come from the external system
+ * @param {Array<User>} internalUsers - The users that come from the internal system
+ * @param {Array<Team>} internalTeams - The teams that come from the external system
+ * @method getOutOfSyncUsersForTeamLinking
+ * @return {Array<ExternalUser>}
+ */
+export function getOutOfSyncUsersForTeamLinking(externalUsers, internalUsers, internalTeams) {
+  return _(externalUsers)
+    .filter(externalUser => {
+      const matchingInternalUser = find(internalUsers, { externalId: externalUser.externalId });
+
+      if (!matchingInternalUser) {
+        return false;
+      }
+
+      const externalUserWithReplacedTeamIds = replaceExternalTeamIds(
+        externalUser, matchingInternalUser, internalTeams);
+
+      return !isEqual(externalUserWithReplacedTeamIds.teamIds, matchingInternalUser.teamIds);
+    })
+    .value();
 }
 
 /**
@@ -360,29 +486,67 @@ export async function syncUsersWithTeams(networkId, externalUsers) {
   const usersOutOfSync = getOutOfSyncUsersForTeamLinking(
     externalUsers, internalUsers, internalTeams);
 
-  logger.info('Syncing users that are out-of-sync', { users: usersOutOfSync });
+  logger.info('Syncing users that are out-of-sync with teams', {
+    networkId,
+    networkName: network.name,
+    userCount: usersOutOfSync.length,
+  });
 
   const removeUserFromTeamsPromises = flatMap(usersOutOfSync, externalUser => {
-    const matchingInternalUser = getInternalUserByExternalId(
-      externalUser.externalId, internalUsers);
-    const externalUserWithReplacedTeamIds = replaceExternalTeamIds(
-      externalUser, matchingInternalUser, internalTeams);
+    let matchingInternalUser;
+    let externalUserWithReplacedTeamIds;
 
-    return _(matchingInternalUser.teamIds)
-      .difference(externalUserWithReplacedTeamIds.teamIds)
-      .map(teamId => teamRepo.removeUserFromTeam(teamId, matchingInternalUser.id))
-      .value();
+    try {
+      matchingInternalUser = getInternalUserByExternalId(
+        externalUser.externalId, internalUsers);
+      externalUserWithReplacedTeamIds = replaceExternalTeamIds(
+        externalUser, matchingInternalUser, internalTeams);
+
+      return _(matchingInternalUser.teamIds)
+        .difference(externalUserWithReplacedTeamIds.teamIds)
+        .map(teamId => teamRepo.removeUserFromTeam(teamId, matchingInternalUser.id))
+        .value();
+    } catch (err) {
+      logger.error('Error when removing user from team', {
+        networkId,
+        err,
+        externalUser: externalUserWithReplacedTeamIds,
+        internalUser: matchingInternalUser,
+      });
+    }
   });
 
-  const addUserToTeamsPromises = flatMap(externalUsers, externalUser => {
-    const matchingInternalUser = getInternalUserByExternalId(
-      externalUser.externalId, internalUsers);
-    const externalUserWithReplacedTeamIds = replaceExternalTeamIds(
-      externalUser, matchingInternalUser, internalTeams);
+  await Promise.all(removeUserFromTeamsPromises);
+  await networkServiceImpl.addUsersToTeam(internalUsers, internalTeams, usersOutOfSync);
+}
 
-    return map(externalUserWithReplacedTeamIds.teamIds, teamId =>
-      teamRepo.addUserToTeam(teamId, matchingInternalUser.id));
-  });
+/**
+ * syncNetwork syncs users and teams from network with external network
+ * @param {object} network - network to sync with
+ * @param {object} adapter - connector that connects to externalNetwork
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method syncNetwork
+ * @return {external:Promise<object>} - containing all synced users and teams
+ */
+export async function syncNetwork(network, allUsersInSystem = [], adapter, message) {
+  try {
+    const externalTeams = await getExternalTeams(network, adapter, message);
+    const externalUsers = filterExternalUserDuplications(
+      await adapter.fetchUsers(network.externalId));
+    const syncTeamsResult = await syncTeams(network.id, externalTeams);
+    const syncUsersResult = await syncUsersWithNetwork(
+      network.id, externalUsers, allUsersInSystem);
+    await syncUsersWithTeams(network.id, externalUsers);
 
-  await Promise.all([...addUserToTeamsPromises, ...removeUserFromTeamsPromises]);
+    logger.info('Finished syncing network', {
+      networkId: network.id,
+      addedTeams: syncTeamsResult.added,
+      changedTeams: syncTeamsResult.changed,
+      deletedTeams: syncTeamsResult.deleted,
+      syncedUsers: syncUsersResult,
+    });
+  } catch (err) {
+    logger.warn('Error syncing network', { err, message });
+    throw err;
+  }
 }

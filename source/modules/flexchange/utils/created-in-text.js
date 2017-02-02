@@ -1,4 +1,4 @@
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 
 export default (exchange) => {
   let exchangeValueOutput;

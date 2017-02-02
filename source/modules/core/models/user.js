@@ -2,12 +2,10 @@ import { map, pick, toString } from 'lodash';
 import * as dateUtils from '../../../shared/utils/date';
 
 const whitelistAttrs = [
-  'username',
   'firstName',
   'lastName',
   'fullName',
   'phoneNum',
-  'email',
 ];
 
 let environment = 'production';
@@ -18,10 +16,12 @@ export default (dao) => ({
   type: 'user',
   id: dao.id.toString(),
   ...pick(dao, whitelistAttrs),
+  username: dao.username.toLowerCase(),
+  email: dao.email.toLowerCase(),
   externalId: dao.externalId ? dao.externalId.toString() : null,
   integrationAuth: dao.integrationAuth || null,
-  function: dao.function || null,
-  roleType: dao.role || null,
+  function: dao.roleType === 'ADMIN' ? 'Beheerder' : 'Medewerker',
+  roleType: dao.roleType || null,
   teamIds: dao.Teams ? map(map(dao.Teams, 'id'), toString) : [],
   profileImg: `https://assets.flex-appeal.nl/${environment}/profiles/${dao.profileImg}`,
   dateOfBirth: dao.dateOfBirth ? dateUtils.toISOString(dao.dateOfBirth) : null,
