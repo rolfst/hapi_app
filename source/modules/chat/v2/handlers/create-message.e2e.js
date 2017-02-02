@@ -1,0 +1,45 @@
+import { assert } from 'chai';
+import blueprints from '../../../../shared/test-utils/blueprints';
+import * as testHelper from '../../../../shared/test-utils/helpers';
+import { postRequest } from '../../../../shared/test-utils/request';
+import * as conversationService from '../services/conversation';
+
+describe('Handler: Create message (v2)', () => {
+  let createdConversation;
+  let creator;
+
+  before(async () => {
+    const [admin, participant] = await Promise.all([
+      testHelper.createUser({
+        ...blueprints.users.employee,
+        username: 'conversation_creator' }),
+      testHelper.createUser({
+        ...blueprints.users.employee,
+        username: 'conversation_participant' }),
+    ]);
+    creator = admin;
+
+    await testHelper.createNetwork({ userId: creator.id, name: 'flexappeal' });
+
+    createdConversation = await conversationService.create({
+      type: 'PRIVATE',
+      participantIds: [creator.id, participant.id],
+    }, { credentials: { id: creator.id } });
+  });
+
+  after(async () => testHelper.cleanAll());
+
+  it('should return object model with new message as source', async () => {
+    const ENDPOINT_URL = `/v2/conversations/${createdConversation.id}/messages`;
+    const { result, statusCode } = await postRequest(ENDPOINT_URL, {
+      text: 'My cool message',
+    }, creator.token);
+
+    assert.equal(statusCode, 200);
+    assert.equal(result.data.object_type, 'private_message');
+    assert.equal(result.data.parent_id, createdConversation.id);
+    assert.equal(result.data.parent_type, 'conversation');
+    assert.property(result.data, 'source');
+    assert.equal(result.data.source.text, 'My cool message');
+  });
+});

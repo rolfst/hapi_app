@@ -2,8 +2,8 @@
 
 module.exports = {
   up: function (queryInterface, Sequelize) {
-    queryInterface.renameTable('messages', 'old_messages').then(() =>
-      queryInterface.createTable('messages', {
+    return queryInterface.renameTable('messages', 'old_messages').then(() =>
+      queryInterface.createTable('feed_messages', {
         id: {
           type: Sequelize.INTEGER.UNSIGNED,
           primaryKey: true,
@@ -21,6 +21,16 @@ module.exports = {
         text: {
           type: Sequelize.STRING,
           allowNull: false,
+        },
+        likes_count: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          defaultValue: 0,
+        },
+        comments_count: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          defaultValue: 0,
         },
         created_at: {
           type: Sequelize.DATE,

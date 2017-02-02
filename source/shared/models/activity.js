@@ -53,6 +53,7 @@ const Activity = model.define('Activity', {
       return {
         type: 'activity',
         data: {
+          id: this.id.toString(),
           activity_type: this.activityType,
           source_id: this.sourceId.toString(),
           user: this.User.toSimpleJSON(),

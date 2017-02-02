@@ -100,7 +100,7 @@ export const findMembers = async (teamId) => {
     where: { teamId },
   });
 
-  return userRepo.findUsersByIds(map(result, 'userId'));
+  return userRepo.findByIds(map(result, 'userId'));
 };
 
 /**

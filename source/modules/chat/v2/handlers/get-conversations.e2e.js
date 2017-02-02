@@ -1,8 +1,9 @@
 import { assert } from 'chai';
 import * as testHelper from '../../../../shared/test-utils/helpers';
+import Promise from 'bluebird';
 import blueprints from '../../../../shared/test-utils/blueprints';
 import { getRequest } from '../../../../shared/test-utils/request';
-import * as messageService from '../../../feed/services/message';
+import * as privateMessageService from '../services/private-message';
 import * as conversationService from '../services/conversation';
 
 describe('Get conversations for logged user (v2)', () => {
@@ -35,21 +36,19 @@ describe('Get conversations for logged user (v2)', () => {
         participantIds: [creator.id, otherParticipant.id],
       }, { credentials: { id: creator.id } });
 
-      await messageService.create({
-        parentType: 'conversation',
-        parentId: createdConversation1.id,
+      await privateMessageService.create({
+        conversationId: createdConversation1.id,
         text: 'First message',
       }, {
         credentials: { id: participant.id },
       });
 
-      await messageService.create({
-        parentType: 'conversation',
-        parentId: createdConversation1.id,
+      await Promise.delay(1000).then(() => privateMessageService.create({
+        conversationId: createdConversation1.id,
         text: 'Last message',
       }, {
         credentials: { id: participant.id },
-      });
+      }));
     });
 
     after(() => testHelper.cleanAll());
@@ -64,8 +63,8 @@ describe('Get conversations for logged user (v2)', () => {
       assert.equal(conversationUnderTest.id, createdConversation1.id);
       assert.equal(conversationUnderTest.user_id, creator.id);
       assert.property(conversationUnderTest, 'last_message');
-      assert.property(conversationUnderTest.last_message, 'object_id');
-      assert.equal(conversationUnderTest.last_message.text, 'Last message');
+      assert.equal(conversationUnderTest.last_message.source.type, 'private_message');
+      assert.equal(conversationUnderTest.last_message.source.text, 'Last message');
       assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant.id]);
       assert.property(conversationUnderTest, 'created_at');
       assert.property(result, 'meta');
@@ -115,29 +114,26 @@ describe('Get conversations for logged user (v2)', () => {
         participantIds: [creator.id, participant.id],
       }, { credentials: { id: creator.id } });
 
-      await messageService.create({
-        parentType: 'conversation',
-        parentId: createdConversation1.id,
+      await privateMessageService.create({
+        conversationId: createdConversation1.id,
         text: 'First message',
       }, {
         credentials: { id: participant.id },
       });
 
-      await messageService.create({
-        parentType: 'conversation',
-        parentId: createdConversation1.id,
+      await Promise.delay(1000).then(() => privateMessageService.create({
+        conversationId: createdConversation1.id,
         text: 'Last message',
       }, {
         credentials: { id: participant.id },
-      });
+      }));
 
-      await messageService.create({
-        parentType: 'conversation',
-        parentId: createdConversation2.id,
+      await Promise.delay(1000).then(() => privateMessageService.create({
+        conversationId: createdConversation2.id,
         text: 'First message second conversation',
       }, {
         credentials: { id: participant.id },
-      });
+      }));
     });
 
     after(() => testHelper.cleanAll());
@@ -162,8 +158,8 @@ describe('Get conversations for logged user (v2)', () => {
       assert.equal(conversationUnderTest.id, createdConversation1.id);
       assert.equal(conversationUnderTest.user_id, creator.id);
       assert.property(conversationUnderTest, 'last_message');
-      assert.property(conversationUnderTest.last_message, 'object_id');
-      assert.equal(conversationUnderTest.last_message.text, 'Last message');
+      assert.property(conversationUnderTest.last_message, 'id');
+      assert.equal(conversationUnderTest.last_message.source.text, 'Last message');
       assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant.id]);
       assert.property(conversationUnderTest, 'created_at');
     });
@@ -180,8 +176,9 @@ describe('Get conversations for logged user (v2)', () => {
         assert.equal(conversationUnderTest.id, createdConversation2.id);
         assert.equal(conversationUnderTest.user_id, creator.id);
         assert.property(conversationUnderTest, 'last_message');
-        assert.property(conversationUnderTest.last_message, 'object_id');
-        assert.equal(conversationUnderTest.last_message.text, 'First message second conversation');
+        assert.property(conversationUnderTest.last_message, 'id');
+        assert.equal(conversationUnderTest.last_message.source.text,
+          'First message second conversation');
         assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant.id]);
         assert.property(conversationUnderTest, 'created_at');
       });

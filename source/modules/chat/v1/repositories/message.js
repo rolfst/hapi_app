@@ -2,13 +2,11 @@ import { map } from 'lodash';
 import sequelize from 'sequelize';
 import { User } from '../../../../shared/models';
 import { Message, Conversation } from './dao';
-import createMessageModel from '../models/message';
+import createFeedMessageModel from '../models/message';
 
 /**
  * @module modules/chat/repositories/message
  */
-
-const toModel = (dao) => createMessageModel(dao);
 
 /**
  * Create a new message
@@ -39,7 +37,7 @@ export const findMessageById = async (id) => {
     include: [{ model: Conversation, include: [User] }, User],
   });
 
-  return toModel(result);
+  return createFeedMessageModel(result);
 };
 
 /**
@@ -54,7 +52,7 @@ export const findMessageByIds = async (messageIds) => {
     include: [{ model: Conversation, include: [User] }, User],
   });
 
-  return map(result, toModel);
+  return map(result, createFeedMessageModel);
 };
 
 /**

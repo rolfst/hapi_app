@@ -24,8 +24,9 @@ export const create = async (attributes) => {
  * Find objects by where constraint
  * @param {object} whereConstraint - Object containing a where constraint
  * @param {object} options - Object containing options
- * @param {string} options.offset - The offset of the resultset
- * @param {string} options.limit - The limit of the resultset
+ * @param {string} options.offset - The offset of the result set
+ * @param {string} options.limit - The limit of the result set
+ * @param {string} options.order - The order of the result set
  * @method findBy
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */

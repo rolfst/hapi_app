@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import * as notifier from '../../../../shared/services/notifier';
-import * as mailer from '../../../../shared/services/mailer';
-import * as responseUtils from '../../../../shared/utils/response';
-import * as socketService from '../../../../shared/services/socket';
+import * as responseUtils from '../../../../../shared/utils/response';
+import * as socketService from '../../../../../shared/services/socket';
+import * as notifier from '../../../../../shared/services/notifier';
+import * as mailer from '../../../../../shared/services/mailer';
 import * as impl from './implementation';
 import * as newMessageNotification from '../../notifications/new-message';
 
