@@ -9,6 +9,7 @@ import * as userRepo from '../../modules/core/repositories/user';
 import * as networkRepo from '../../modules/core/repositories/network';
 import * as activityRepo from '../../modules/core/repositories/activity';
 import * as objectRepo from '../../modules/feed/repositories/object';
+import * as pollRepo from '../../modules/poll/repositories/poll';
 import { postRequest } from './request';
 
 /**
@@ -238,9 +239,8 @@ export function findAllActivities() {
  * @return {external:Promise.<number[]>} number of deleted activities
  */
 export function deleteActivity(...activityOrActivities) {
-  return Promise.map(flatten(activityOrActivities), (activity) => {
-    activityRepo.deleteById(activity.id);
-  });
+  return Promise.map(flatten(activityOrActivities), (activity) => 
+    activityRepo.deleteById(activity.id));
 }
 
 /**
@@ -250,9 +250,7 @@ export function deleteActivity(...activityOrActivities) {
  * @return {external:Promise.<number[]>} number of deleted objects
  */
 export function deleteObject(...objectOrObjects) {
-  return Promise.map(flatten(objectOrObjects), (object) => {
-    objectRepo.deleteById(object.id);
-  });
+  return Promise.map(flatten(objectOrObjects), (object) => objectRepo.deleteById(object.id));
 }
 
 /**
@@ -265,6 +263,25 @@ export async function findAllObjects() {
 }
 
 /**
+ * Finds all Polls in the database
+ * @method findAllPolls
+ * @return {external:Promise.<Poll[]} {@link module:modules/poll~Poll Poll}
+ */
+export async function findAllPolls() {
+  return pollRepo.findAll();
+}
+
+/**
+ * Deletes polls from database
+ * @param {Poll|Poll[]} objectOrPolls
+ * @method deletePoll
+ * @return {external:Promise.<number[]>} number of deleted polls
+ */
+export async function deletePoll(...pollOrPolls) {
+  return Promise.map(flatten(pollOrPolls), (poll) => pollRepo.deleteById(poll.id));
+}
+
+/**
  * Deletes all data in the database
  * @method cleanAll
  */
@@ -273,5 +290,6 @@ export function cleanAll() {
   .then(() => Promise.map(findAllUsers(), deleteUser))
   .then(() => Promise.map(findAllActivities(), deleteActivity))
   .then(() => Promise.map(findAllIntegrations(), deleteIntegration))
-  .then(() => Promise.map(findAllObjects(), deleteObject));
+  .then(() => Promise.map(findAllObjects(), deleteObject))
+  .then(() => Promise.map(findAllPolls(), deletePoll));
 }
