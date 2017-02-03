@@ -73,4 +73,4 @@ export const findAll = async () => {
 
 export const deleteById = async (pollId) => {
   return Poll.destroy({ where: { id: pollId } });
-}
+};
