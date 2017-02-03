@@ -239,7 +239,7 @@ export function findAllActivities() {
  * @return {external:Promise.<number[]>} number of deleted activities
  */
 export function deleteActivity(...activityOrActivities) {
-  return Promise.map(flatten(activityOrActivities), (activity) => 
+  return Promise.map(flatten(activityOrActivities), (activity) =>
     activityRepo.deleteById(activity.id));
 }
 
