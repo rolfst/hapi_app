@@ -17,6 +17,33 @@ import * as impl from './implementation';
 const logger = Logger.getLogger('CORE/service/network');
 
 /**
+ * Adding an user to a network.
+ * @param {object} payload - Object containing payload data
+ * @param {number} payload.networkId - The id of the network
+ * @param {number} payload.userId - The id of the user to add
+ * @param {string} payload.roleType - The role type for the user
+ * @param {string} payload.externalId - The external id for the user
+ * @param {string} payload.userToken - The user token of the user to add
+ * @param {boolean} payload.active - Flag if the user is active
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method addUserToNetwork
+ * @return {external:Promise.<NetworkUser>} {@link module:shared~NetworkUser NetworkUser}
+ * Promise containing a User
+ */
+export const addUserToNetwork = async (payload, message) => {
+  logger.info('Adding user to network', { payload, message });
+
+  const attrsWhitelist = ['userId', 'networkId', 'externalId', 'userToken'];
+  const attributes = {
+    ...pick(payload, attrsWhitelist),
+    roleType: payload.roleType || 'EMPLOYEE',
+    deletedAt: payload.active === false ? new Date() : null,
+  };
+
+  return networkRepo.addUser(attributes);
+};
+
+/**
  * Create a new network.
  * @param {object} payload - Object containing payload data
  * @param {string} payload.userId - The id of the owner of the network
@@ -38,33 +65,6 @@ export const create = async (payload, message) => {
   }
 
   return networkRepo.createNetwork(payload.userId, payload.name);
-};
-
-/**
- * Adding an user to a network.
- * @param {object} payload - Object containing payload data
- * @param {number} payload.networkId - The id of the network
- * @param {number} payload.userId - The id of the user to add
- * @param {string} payload.roleType - The role type for the user
- * @param {string} payload.externalId - The external id for the user
- * @param {string} payload.userToken - The user token of the user to add
- * @param {boolean} payload.active - Flag if the user is active
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method addUserToNetwork
- * @return {external:Promise.<Network>} {@link module:modules/core~User User} -
- * Promise containing a User
- */
-export const addUserToNetwork = async (payload, message) => {
-  logger.info('Adding user to network', { payload, message });
-
-  const attrsWhitelist = ['userId', 'networkId', 'externalId', 'userToken'];
-  const attributes = {
-    ...pick(payload, attrsWhitelist),
-    roleType: payload.roleType || 'EMPLOYEE',
-    deletedAt: payload.active === false ? new Date() : null,
-  };
-
-  return networkRepo.addUser(attributes);
 };
 
 const getNetworks = async (url) => {

@@ -2,6 +2,7 @@ import { assert } from 'chai';
 import Promise from 'bluebird';
 import moment from 'moment';
 import _ from 'lodash';
+import * as testHelper from '../../../shared/test-utils/helpers';
 import { ActivityTypes } from '../../../shared/models/activity';
 import * as Logger from '../../../shared/services/logger';
 import { getRequest } from '../../../shared/test-utils/request';
@@ -11,14 +12,19 @@ import * as commentRepo from '../repositories/comment';
 const logger = Logger.createLogger('FLEXCHANGE/test/exchangeActivityFeed');
 
 describe('Exchange activity feed', () => {
+  let admin;
+  let employee;
   let network;
   let exchange;
   let result;
   let comment;
 
   before(async () => {
-    const { admin, employee } = global.users;
-    network = global.networks.flexAppeal;
+    [admin, employee] = await Promise.all([
+      testHelper.createUser(),
+      testHelper.createUser(),
+    ]);
+    network = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
 
     exchange = await exchangeRepo.createExchange(employee.id, network.id, {
       type: 'ALL',
@@ -44,7 +50,7 @@ describe('Exchange activity feed', () => {
     comment = values[1];
 
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}/activity_feed`;
-    const response = await getRequest(endpoint);
+    const response = await getRequest(endpoint, admin.token);
 
     logger.debug('@@@@@@@ DEBUG for occasional failure @@@@@@@@', response.result);
 
@@ -54,7 +60,7 @@ describe('Exchange activity feed', () => {
     }));
   });
 
-  after(() => exchange.destroy());
+  after(() => testHelper.cleanAll());
 
   it('should contain ids as string', () => {
     const actual = result[0];
@@ -83,7 +89,7 @@ describe('Exchange activity feed', () => {
     assert.equal(actual.type, 'activity');
     assert.equal(actual.data.activity_type, ActivityTypes.EXCHANGE_CREATED);
     assert.equal(actual.data.source_id, exchange.id.toString());
-    assert.equal(actual.data.user.id, global.users.employee.id);
+    assert.equal(actual.data.user.id, employee.id);
     assert.deepEqual(actual.data.meta_data, { created_in: { type: 'network', id: network.id } });
   });
 
@@ -94,7 +100,7 @@ describe('Exchange activity feed', () => {
     assert.equal(actual.type, 'activity');
     assert.equal(actual.data.activity_type, ActivityTypes.EXCHANGE_ACCEPTED);
     assert.equal(actual.data.source_id, exchange.id.toString());
-    assert.equal(actual.data.user.id, global.users.admin.id);
+    assert.equal(actual.data.user.id, admin.id);
     assert.deepEqual(actual.data.meta_data, { });
   });
 
@@ -105,7 +111,7 @@ describe('Exchange activity feed', () => {
     assert.equal(actual.type, 'activity');
     assert.equal(actual.data.activity_type, ActivityTypes.EXCHANGE_COMMENT);
     assert.equal(actual.data.source_id, exchange.id.toString());
-    assert.equal(actual.data.user.id, global.users.employee.id);
+    assert.equal(actual.data.user.id, employee.id);
     assert.deepEqual(actual.data.meta_data, { comment_id: comment.id });
   });
 
@@ -116,8 +122,8 @@ describe('Exchange activity feed', () => {
     assert.equal(actual.type, 'activity');
     assert.equal(actual.data.activity_type, ActivityTypes.EXCHANGE_REJECTED);
     assert.equal(actual.data.source_id, exchange.id.toString());
-    assert.equal(actual.data.user.id, global.users.admin.id);
-    assert.deepEqual(actual.data.meta_data, { rejected_user_id: global.users.employee.id });
+    assert.equal(actual.data.user.id, admin.id);
+    assert.deepEqual(actual.data.meta_data, { rejected_user_id: employee.id });
   });
 
   it('should contain correct values for type: exchange_approved', () => {
@@ -127,7 +133,7 @@ describe('Exchange activity feed', () => {
     assert.equal(actual.type, 'activity');
     assert.equal(actual.data.activity_type, ActivityTypes.EXCHANGE_APPROVED);
     assert.equal(actual.data.source_id, exchange.id.toString());
-    assert.equal(actual.data.user.id, global.users.admin.id);
-    assert.deepEqual(actual.data.meta_data, { approved_user_id: global.users.admin.id });
+    assert.equal(actual.data.user.id, admin.id);
+    assert.deepEqual(actual.data.meta_data, { approved_user_id: admin.id });
   });
 });

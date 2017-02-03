@@ -60,3 +60,22 @@ export const deleteBy = async (whereConstraint) => {
 export const count = async (whereConstraint) => {
   return _Object.count({ where: whereConstraint });
 };
+
+/**
+ * Deletes an object by id
+ * @param {string} - identifier for the object to delete
+ * @method deleteById
+ * @return {boolean}
+ */
+export function deleteById(id) {
+  return deleteBy({ id });
+}
+
+/**
+ * Internal function
+ * @method findAll
+ * return {external:Promise.<Object[]>} {@link module:modules/feed~Object Object}
+ */
+export function findAll() {
+  return _Object.findAll();
+}

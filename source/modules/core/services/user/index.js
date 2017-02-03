@@ -1,5 +1,6 @@
 import { map, find } from 'lodash';
 import Promise from 'bluebird';
+import createError from '../../../../shared/utils/create-error';
 import * as Logger from '../../../../shared/services/logger';
 import * as userRepo from '../../repositories/user';
 import * as networkService from '../../services/network';
@@ -44,7 +45,7 @@ export async function listUsersWithNetworkScope(payload, message) {
   return Promise.map(users, async (user) => {
     const metaData = find(metaDataList, { userId: user.id });
 
-    return impl.createScopedUser(user, metaData, network);
+    return impl.createScopedUser(user, metaData);
   });
 }
 
@@ -61,7 +62,9 @@ export async function listUsersWithNetworkScope(payload, message) {
 export async function getUserWithNetworkScope(payload) {
   const user = await userRepo.findUserById(payload.id, payload.networkId);
   const network = await networkRepo.findNetworkById(payload.networkId);
-  const metaData = await userRepo.findNetworkLink({ userId: user.id, networkId: network.id });
+  const networkLink = await userRepo.findNetworkLink({ userId: user.id, networkId: network.id });
 
-  return impl.createScopedUser(user, metaData, network);
+  if (!networkLink) throw createError('10002');
+
+  return impl.createScopedUser(user, networkLink);
 }

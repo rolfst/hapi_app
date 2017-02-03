@@ -15,7 +15,7 @@ export default async (req, reply) => {
 
     return reply(network);
   } catch (err) {
-    logger.info('Error while pre-fetching the network', { payload, message });
+    logger.info('Error while pre-fetching the network', { payload, message, err });
 
     if (!err.isBoom) return reply(createError('500'));
     const errorResponse = serverUtil.transformBoomToErrorResponse(err);
