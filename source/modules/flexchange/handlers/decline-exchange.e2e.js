@@ -33,6 +33,7 @@ describe('Decline exchange', () => {
     assert.equal(data.response_status, 'DECLINED');
     assert.equal(data.accept_count, 0);
     assert.equal(data.decline_count, 1);
+    assert.isDefined(data.responses[0].id);
     assert.equal(data.responses[0].response, false);
     assert.equal(data.responses[0].user.full_name, admin.fullName);
   });
