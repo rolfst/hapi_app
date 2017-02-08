@@ -1,13 +1,14 @@
 import { map, find } from 'lodash';
 import Promise from 'bluebird';
+import * as Logger from '../../../../shared/services/logger';
 import * as userRepo from '../../repositories/user';
 import * as networkService from '../../services/network';
-import * as networkRepo from '../../repositories/network';
 import * as impl from './implementation';
 
 /**
  * @module modules/core/services/user
  */
+const logger = Logger.getLogger('CORE/service/user');
 
 /**
  * Retrieve user without network scope
@@ -32,6 +33,7 @@ export const getUser = async (payload) => {
  * collection of users
  */
 export async function listUsersWithNetworkScope(payload, message) {
+  logger.info('Listing users with network scope', { payload, message });
   const users = await userRepo.findUsersByIds(payload.userIds);
   const network = await networkService.getNetwork({ id: payload.networkId }, message);
   const metaDataList = await userRepo.findMultipleUserMetaDataForNetwork(
@@ -54,9 +56,9 @@ export async function listUsersWithNetworkScope(payload, message) {
  * @return {external:Promise.<User[]>} {@link module:modules/core~User} Promise containing
  * collection of users
  */
-export async function getUserWithNetworkScope(payload) {
+export async function getUserWithNetworkScope(payload, message) {
   const user = await userRepo.findUserById(payload.id, payload.networkId);
-  const network = await networkRepo.findNetworkById(payload.networkId);
+  const network = await networkService.getNetwork({ id: payload.networkId }, message);
   const metaData = await userRepo.findNetworkLink({ userId: user.id, networkId: network.id });
 
   return impl.createScopedUser(user, metaData, network);

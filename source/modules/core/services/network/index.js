@@ -167,11 +167,10 @@ export const listAllUsersForNetwork = async (payload, message) => {
  * Promise containing network
  */
 export const getNetwork = async (payload, message) => {
+  logger.info('Retrieving single network', { payload, message });
   const network = await networkRepo.findNetworkById(payload.id);
 
-  if (!network) throw createError('404');
-
-  await impl.assertThatUserBelongsToTheNetwork(network.id, message.credentials.id);
+  if (!network) throw createError('404', 'Network not found.');
 
   return network;
 };
