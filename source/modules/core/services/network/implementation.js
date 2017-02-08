@@ -44,16 +44,6 @@ export const assertTheNetworkIsNotImportedYet = async (networkId) => {
   }
 };
 
-export const assertThatUserBelongsToTheNetwork = async (networkId, userId) => {
-  const belongs = await userRepo.userBelongsToNetwork(userId, networkId);
-  const network = await networkRepo.findNetwork({ userId, id: networkId });
-  const result = belongs || network;
-
-  if (!result) {
-    throw createError('10002');
-  }
-};
-
 export const filterExistingNetworks = async (networksFromIntegration) => {
   const networks = await networkRepo.findAll();
   const pristineNetworks = differenceBy(networksFromIntegration, networks, 'externalId');
