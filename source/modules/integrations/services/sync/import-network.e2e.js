@@ -9,13 +9,12 @@ import * as passwordUtil from '../../../../shared/utils/password';
 import configurationMailNewAdmin from '../../../../shared/mails/configuration-invite-newadmin';
 import * as mailer from '../../../../shared/services/mailer';
 import userSerializer from '../../../../adapters/pmt/serializers/user';
-import * as networkRepo from '../../repositories/network';
-import * as networkService from './index';
-import * as networkServiceImpl from './implementation';
-import * as userService from '../user';
-import * as userRepo from '../../repositories/user';
-import * as teamRepo from '../../repositories/team';
-import * as integrationRepo from '../../repositories/integration';
+import * as networkRepo from '../../../core/repositories/network';
+import * as userService from '../../../core/services/user';
+import * as userRepo from '../../../core/repositories/user';
+import * as teamRepo from '../../../core/repositories/team';
+import * as integrationRepo from '../../../core/repositories/integration';
+import * as syncService from './index';
 
 describe('Import network', () => {
   let sandbox;
@@ -44,7 +43,7 @@ describe('Import network', () => {
   });
 
   describe('Happy path', async () => {
-    describe('general', () => {
+    describe.only('general', () => {
       let integration;
 
       before(async () => {
@@ -61,7 +60,7 @@ describe('Import network', () => {
         sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
         mailer.send.reset();
 
-        await networkServiceImpl.importNetwork(network, employee.username);
+        await syncService.syncNetwork({ networkId: network.id, internal: true });
       });
 
       after(async () => {
