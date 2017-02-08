@@ -1,4 +1,4 @@
-import { map, omit, pick, sample } from 'lodash';
+import { map, pick, sample } from 'lodash';
 import R from 'ramda';
 import Promise from 'bluebird';
 import createError from '../../../shared/utils/create-error';
@@ -281,6 +281,7 @@ export const removeFromNetwork = async (userId, networkId, forceDelete = false) 
 
 /**
  * Sets the network link for a user.
+ * @param {object} whereConstraint
  * @param {object} attributes
  * @param {string} attributes.userId
  * @param {string} attributes.networkId
@@ -292,18 +293,41 @@ export const removeFromNetwork = async (userId, networkId, forceDelete = false) 
  * @method setNetworkLink
  * @return {void}
  */
-export const setNetworkLink = async (_attributes) => {
+export const setNetworkLink = async (whereConstraint, _attributes) => {
   const attributes = pick(_attributes,
     'userId', 'networkId', 'externalId', 'deletedAt', 'userToken', 'roleType', 'invitedAt');
 
   const result = await NetworkUser.findOne({
-    where: { userId: attributes.userId, networkId: attributes.networkId },
+    where: whereConstraint,
   });
 
   if (!result) return NetworkUser.create({ ...attributes, user_id: attributes.userId });
 
-  return result.update({ ...omit(attributes, 'userId, networkId') });
+  return result.update({ ...R.omit(['userId', 'networkId', 'externalId'], attributes) });
 };
+
+const NETWORK_USER_ATTRIBUTES = ['user_id', 'networkId', 'externalId', 'roleType', 'deletedAt'];
+
+export const createNetworkLink = async (attributes) => {
+  const defaults = {
+    externalId: null,
+    roleType: 'EMPLOYEE',
+    deletedAt: null,
+    userToken: null,
+    invitedAt: null,
+  };
+
+  return NetworkUser.create(R.pick(NETWORK_USER_ATTRIBUTES, R.merge(defaults, {
+    ...attributes, user_id: attributes.userId })));
+};
+
+export const updateNetworkLink = async (whereConstraint, attributes) => NetworkUser
+  .update(R.pick(NETWORK_USER_ATTRIBUTES, attributes), {
+    where: whereConstraint,
+  });
+
+export const removeNetworkLink = async (whereConstraint) => NetworkUser
+  .destroy({ where: whereConstraint });
 
 /**
  * updates the networkUser

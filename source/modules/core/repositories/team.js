@@ -197,13 +197,14 @@ export function findUsersByTeamIds(ids) {
 
 /**
  * Updates team attributes
- * @param {string} teamId - team to update
+ * @param {string|object} teamIdOrWhereConstraint - Pass id or object containg the constraint
  * @param {object} attributes - {@link module:modules/core~Team team} attributes
  * @method update
- * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team}
+ * @return {external:Promise}
  */
-export const update = async (teamId, attributes) => {
-  return Team.update(attributes, {
-    where: { id: teamId },
-  });
+export const update = async (teamIdOrWhereConstraint, attributes) => {
+  const whereConstraint = (typeof teamIdOrWhereConstraint === 'object') ?
+    teamIdOrWhereConstraint : { id: teamIdOrWhereConstraint };
+
+  return Team.update(attributes, { where: whereConstraint });
 };

@@ -1,5 +1,5 @@
 import { uniq, map } from 'lodash';
-import Promise from 'bluebird';
+import R from 'ramda';
 import moment from 'moment';
 import { Network,
   Team,
@@ -173,7 +173,7 @@ export const findAllUsersForNetwork = async (networkId) => {
     where: { networkId },
   });
 
-  return userRepo.findUsersByIds(map(result, 'userId'));
+  return userRepo.findUsersByIds(map(result, 'userId'), networkId, true);
 };
 
 /**
@@ -181,12 +181,9 @@ export const findAllUsersForNetwork = async (networkId) => {
  * @method findTeamsForNetwork
  * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team}
  */
-export const findTeamsForNetwork = async (networkId) => {
-  return Promise.map(Team.findAll({
-    where: { networkId },
-    include: [{ attributes: ['id'], model: User }],
-  }), createTeamModel);
-};
+export const findTeamsForNetwork = (networkId) => Team
+  .findAll({ where: { networkId }, include: [{ attributes: ['id'], model: User }] })
+  .then(R.map(createTeamModel));
 
 /**
  * @param {string} networkId - network where the integration is added to.
