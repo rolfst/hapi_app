@@ -12,7 +12,7 @@ import * as userRepo from '../../core/repositories/user';
 import * as teamRepo from '../../core/repositories/team';
 import * as integrationRepo from '../../core/repositories/integration';
 
-describe('Handle sync networks', () => {
+describe('Handle sync networks of linked to integration', () => {
   nock.disableNetConnect();
   let network;
   let integration;
