@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import * as userRepository from '../../../core/repositories/user';
 import * as networkRepository from '../../../core/repositories/network';
-import * as service from '../sync';
+import * as service from './index';
 
 describe('Single Network synchronisation', () => {
   const sandbox = sinon.sandbox.create();
