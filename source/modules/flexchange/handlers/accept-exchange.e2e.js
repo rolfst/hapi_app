@@ -41,6 +41,7 @@ describe('Accept exchange', () => {
     assert.equal(response.statusCode, 200);
     assert.equal(data.response_status, 'ACCEPTED');
     assert.equal(data.accept_count, 1);
+    assert.isDefined(data.responses[0].id);
     assert.equal(data.responses[0].response, true);
     assert.equal(data.responses[0].user.full_name, admin.fullName);
   });

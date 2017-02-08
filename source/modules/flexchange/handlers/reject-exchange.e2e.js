@@ -60,6 +60,7 @@ describe('Reject exchange', () => {
 
     assert.equal(result.data.response_status, 'REJECTED');
     assert.equal(result.data.title, 'Test shift to accept & reject');
+    assert.isDefined(result.data.responses[0].id);
     assert.equal(statusCode, 200);
   });
 

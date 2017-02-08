@@ -12,7 +12,7 @@ describe('Approve exchange', () => {
   before(() => (sandbox = sinon.sandbox.create()));
   afterEach(() => (sandbox.restore()));
 
-  it('should send a notification to the approved user and owner of the shift', async () => {
+  it.skip('should send a notification to the approved user and owner of the shift', async () => {
     sandbox.stub(creatorApproved, 'send').returns(Promise.resolve(null));
     sandbox.stub(substituteApproved, 'send').returns(Promise.resolve(null));
     sandbox.stub(exchangeRepo, 'findExchangeById').returns({});
