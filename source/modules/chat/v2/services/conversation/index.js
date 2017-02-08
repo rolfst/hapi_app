@@ -1,5 +1,6 @@
 import R from 'ramda';
 import * as Logger from '../../../../../shared/services/logger';
+import createError from '../../../../../shared/utils/create-error';
 import * as userRepo from '../../../../core/repositories/user';
 import * as objectService from '../../../../feed/services/object';
 import * as objectRepository from '../../../../feed/repositories/object';
@@ -29,9 +30,21 @@ const lastMessageObjectsByConversationId = R.pipe(
  */
 export const create = async (payload, message) => {
   logger.info('Creating conversation', { payload, message });
-  const attributes = R.pick(['type', 'participantIds'], payload);
+  const participantIds = R.uniq(payload.participantIds);
 
-  return conversationRepo.create({ ...attributes, userId: message.credentials.id });
+  if (participantIds.length < 2) {
+    throw createError('403', 'A conversation must have 2 or more participants');
+  }
+
+  const existingConversation = await conversationRepo.findExistingConversation(participantIds);
+
+  if (existingConversation) return existingConversation;
+
+  return conversationRepo.create({
+    type: payload.type,
+    participantIds,
+    userId: message.credentials.id,
+  });
 };
 
 /**

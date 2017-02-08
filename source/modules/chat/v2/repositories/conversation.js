@@ -1,4 +1,5 @@
 import R from 'ramda';
+import { db as Sequelize } from '../../../../connections';
 import { User } from '../../../../shared/models';
 import { Conversation, ConversationUser } from './dao';
 import createConversationModel from '../models/conversation';
@@ -63,4 +64,31 @@ export const create = async (attributes) => {
   model.participantIds = attributes.participantIds;
 
   return model;
+};
+
+/**
+ * Check if conversation already exists and return it if it does
+ * @param {array} participantIds - Id's of users in the conversation
+ * @method findExistingConversation
+ * @return {Object.<Conversation>|null}
+ */
+export const findExistingConversation = async (participantIds) => {
+  const countUsersInConverrsation = Sequelize.fn('COUNT',
+    Sequelize.fn('DISTINCT', Sequelize.col('`Users.ConversationUser`.`user_id`'))
+  );
+  const foundConversations = await Conversation.findAll({
+    attributes: ['id', [countUsersInConverrsation, 'users_in_conversation']],
+    include: [{
+      model: User,
+      where: { id: { $in: participantIds } },
+    }],
+    group: ['Conversation.id'],
+    having: ['users_in_conversation = 2'],
+  });
+
+  if (foundConversations.length === 0) return null;
+
+  const conversations = await findByIds(R.pluck('id', foundConversations));
+
+  return conversations[0];
 };
