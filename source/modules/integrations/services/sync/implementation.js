@@ -51,10 +51,12 @@ const getTeamsByExternalId = async (networkId, externalIds) => {
  */
 const setTeamLink = (networkId) => async (user) => {
   // TODO Big performance impact
-  const teamsToRemove = getTeamsByExternalId(
-    networkId, R.difference(user.teamIds, user.externalTeamIds));
-  const teamsToAdd = getTeamsByExternalId(
-    networkId, R.difference(user.externalTeamIds, user.teamIds));
+  const [teamsToRemove, teamsToAdd] = await Promise.all([
+    getTeamsByExternalId(
+      networkId, R.difference(user.teamIds, user.externalTeamIds)),
+    getTeamsByExternalId(
+      networkId, R.difference(user.externalTeamIds, user.teamIds)),
+  ]);
 
   const makePromises = (repoFn, errorMessage) => R.map((team) =>
     repoFn(team.id, user.id)
