@@ -1,5 +1,6 @@
 import R from 'ramda';
 import Promise from 'bluebird';
+import * as passwordUtil from '../../../../shared/utils/password';
 import { createAdapter } from '../../../../shared/utils/create-adapter';
 import * as Logger from '../../../../shared/services/logger';
 import createError from '../../../../shared/utils/create-error';
@@ -20,40 +21,124 @@ const logger = Logger.createLogger('INTEGRATIONS/service/sync');
  * @return {external:Promise<Network[]>}
  */
 export const syncNetwork = async (payload, message) => {
-  logger.info('Syncing network', { payload, message });
+  try {
+    logger.info('Started network synchronization', { payload, message });
 
-  if (!payload.internal) {
-    const owner = await userRepository.findUserById(message.credentials.id, payload.networkId);
-    impl.assertUserIsAdmin(owner);
+    if (!payload.internal) {
+      const owner = await userRepository.findUserById(message.credentials.id, payload.networkId);
+      impl.assertUserIsAdmin(owner);
+    }
+
+    const network = await networkRepository.findNetworkById(payload.networkId);
+    if (!network) throw createError('404', 'Network not found.');
+    if (!network.hasIntegration) throw createError('10001');
+    if (!impl.isSyncable(network)) throw createError('10009');
+    // TODO invite users based on importedAt value
+
+    const adapter = await createAdapter(network, 0, { proceedWithoutToken: true });
+    const data = await Promise.all([
+      adapter.fetchTeams(),
+      adapter.fetchUsers(),
+      networkService.listAllUsersForNetwork({ networkId: network.id }, message),
+      networkRepository.findTeamsForNetwork(network.id),
+      userRepository.findAllUsers(),
+    ]);
+
+    const [externalTeams, externalUsers, internalUsers, internalTeams, allUsersInSystem] = data;
+    const teamActions = impl.createTeamActions(internalTeams, externalTeams);
+    await impl.executeTeamActions(network.id, teamActions);
+
+    const internalTeamsAfterSync = await networkRepository.findTeamsForNetwork(network.id);
+
+    const userActions = impl.createUserActions(
+      allUsersInSystem,
+      internalTeamsAfterSync,
+      internalUsers,
+      R.uniqBy(R.prop('email'), externalUsers)
+    );
+
+    await impl.executeUserActions(network.id, userActions);
+
+    return {
+      teamActions: R.omit(['data'], teamActions),
+      userActions: R.omit(['data'], userActions),
+    };
+  } catch (err) {
+    logger.error('Failed network synchronization', { payload, message, err });
+
+    throw err;
   }
+};
 
-  const network = await networkRepository.findNetworkById(payload.networkId);
-  if (!network) throw createError('404', 'Network not found.');
-  // impl.assertNetworkIsSyncable(network); TODO invite users based on importedAt value
+/**
+ * Synchronize a single network with his integration partner
+ * @param {object} payload
+ * @param {string} payload.ownerEmail - The username of the user that should
+ * be assigned as owner of the network
+ * @param {boolean} payload.networkId - The id of the network to import
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method syncWithIntegrationPartner
+ * @return {external:Promise<Network[]>}
+ */
+export const importNetwork = async (payload, message) => {
+  try {
+    logger.info('Started network import', { payload, message });
 
-  const adapter = await createAdapter(network, 0, { proceedWithoutToken: true });
-  const data = await Promise.all([
-    adapter.fetchTeams(),
-    adapter.fetchUsers(),
-    networkService.listAllUsersForNetwork({ networkId: network.id }, message),
-    networkRepository.findTeamsForNetwork(network.id),
-    userRepository.findAllUsers(),
-  ]);
+    const network = await networkRepository.findNetworkById(payload.networkId);
+    if (!network) throw createError('404', 'Network not found.');
+    if (!!network.importedAt) throw createError('10007');
+    if (!network.hasIntegration) throw createError('10001');
 
-  const [externalTeams, externalUsers, internalUsers, internalTeams, allUsersInSystem] = data;
-  const teamActions = impl.createTeamActions(internalTeams, externalTeams);
-  await impl.executeTeamActions(network.id, teamActions);
+    const adapter = await createAdapter(network, 0, { proceedWithoutToken: true });
+    const externalUsers = await adapter.fetchUsers();
+    const externalAdmin = R.find(R.propEq('email', payload.ownerEmail), externalUsers);
+    if (!externalAdmin) throw createError('10006');
 
-  const internalTeamsAfterSync = await networkRepository.findTeamsForNetwork(network.id);
+    const admin = await userRepository.findUserBy({ email: externalAdmin.email });
 
-  const userActions = impl.createUserActions(
-    allUsersInSystem,
-    internalTeamsAfterSync,
-    internalUsers,
-    R.uniqBy(R.prop('email'), externalUsers)
-  );
+    if (admin) {
+      await networkRepository.updateNetwork(network.id, { userId: admin.id });
+      await userRepository.setNetworkLink({
+        networkId: network.id,
+        userId: admin.id,
+      }, {
+        networkId: network.id,
+        userId: admin.id,
+        roleType: 'ADMIN',
+        deletedAt: null,
+        externalId: externalAdmin.externalId,
+      });
 
-  await impl.executeUserActions(network.id, userActions);
+      // mailConfig = configurationMail(network, admin);
+    } else {
+      const password = passwordUtil.plainRandom();
+      const newAdmin = await userRepository.createUser({ ...externalAdmin, password });
+      await networkRepository.updateNetwork(network.id, { userId: newAdmin.id });
+      await userRepository.setNetworkLink({
+        networkId: network.id,
+        userId: newAdmin.id,
+      }, {
+        networkId: network.id,
+        userId: newAdmin.id,
+        roleType: 'ADMIN',
+        deletedAt: null,
+        externalId: externalAdmin.externalId,
+      });
+
+      // mailConfig = configurationMailNewAdmin(network, superUser, password);
+    }
+
+    await networkRepository.setImportDateOnNetworkIntegration(network.id);
+    const syncResult = await syncNetwork({ networkId: network.id, internal: true }, message);
+
+    logger.info('Finished importing users for network', { syncResult });
+
+    // Mailer.send(mailConfig);
+  } catch (err) {
+    logger.error('Failed importing network', { payload, message, err });
+
+    throw err;
+  }
 };
 
 /**
@@ -69,10 +154,6 @@ export async function syncWithIntegrationPartner(payload, message) {
   try {
     const allNetworksInSystem = await networkRepository.findAll();
     const syncableNetworks = R.filter(impl.isSyncable);
-
-    console.log('@@@@@@@');
-    console.log('@@@@@@@', syncableNetworks(allNetworksInSystem));
-    console.log('@@@@@@@');
 
     return Promise.map(syncableNetworks(allNetworksInSystem), async (network) => {
       try {
