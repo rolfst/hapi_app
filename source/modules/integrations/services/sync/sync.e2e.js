@@ -323,7 +323,10 @@ describe('Network synchronisation', () => {
       }));
 
       const createdUser = await userRepository.createUser(internalUser);
-      await userRepository.createNetworkLink({
+      await userRepository.setNetworkLink({
+        userId: createdUser.id,
+        networkId: network.id,
+      }, {
         userId: createdUser.id,
         networkId: network.id,
         deletedAt: new Date(),

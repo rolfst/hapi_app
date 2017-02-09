@@ -6,6 +6,7 @@ import { getRequest } from '../../../shared/test-utils/request';
 import * as networkService from '../../core/services/network';
 import { create } from '../../core/repositories/team';
 import * as userRepo from '../../core/repositories/user';
+import * as teamRepo from '../../core/repositories/team';
 import { exchangeTypes } from '../repositories/dao/exchange';
 import * as exchangeRepo from '../repositories/exchange';
 
@@ -112,8 +113,8 @@ describe('Get exchanges for network', () => {
       const [team1, team2, team3] = createdTeams;
 
       await Promise.all([
-        userRepo.addToTeam(global.users.employee.id, team2.id),
-        userRepo.addToTeam(global.users.employee.id, team3.id),
+        teamRepo.addUserToTeam(team2.id, global.users.employee.id),
+        teamRepo.addUserToTeam(team3.id, global.users.employee.id),
       ]);
 
       const exchanges = await exchangeRepo.findExchangesByNetwork(network.id);
