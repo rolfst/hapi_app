@@ -11,19 +11,12 @@ import * as impl from './implementation';
 const logger = Logger.getLogger('FEED/service/object');
 
 const objectsForTypeValuePair = (fn, pairs) => R.pipe(R.mapObjIndexed(fn), R.values)(pairs);
-const typeEq = R.propEq('type');
-const idEq = R.propEq('id');
 const getSources = R.pipeP(Promise.all, R.flatten, R.reject(R.isNil));
 const groupByObjectType = R.groupBy(R.prop('objectType'));
 const sourceIdsPerType = R.pipe(groupByObjectType, R.map(R.pluck('sourceId')));
-const whereTypeAndId = (type, id) => R.both(typeEq(type), idEq(id));
 const createOptionsFromPayload = R.pipe(
   R.pick(['offset', 'limit']),
   R.assoc('order', [['createdAt', 'desc']])
-);
-const isChildOfObject = (object) => R.and(
-  R.propEq('parentType', object.objectType),
-  R.propEq('parentId', object.sourceId)
 );
 
 /**
@@ -62,7 +55,8 @@ export const listWithSources = async (payload, message) => {
   const objects = await objectRepository.findBy({
     id: { $in: payload.objectIds } }, createOptionsFromPayload(payload));
 
-  const promisedChildren = objectsForTypeValuePair(impl.findChildrenForType, sourceIdsPerType(objects));
+  const promisedChildren = objectsForTypeValuePair(
+    impl.findChildrenForType, sourceIdsPerType(objects));
   const children = await getSources(promisedChildren);
 
   const promisedSources = objectsForTypeValuePair(impl.findSourcesForType(message),
@@ -70,19 +64,12 @@ export const listWithSources = async (payload, message) => {
   const sources = await getSources(promisedSources);
 
   const objectsWithSource = R.map(impl.addSourceToObject(sources), R.concat(objects, children));
-
   const findObjectById = (objectId) => R.find(R.propEq('id', objectId), objectsWithSource);
-  const findChildren = (object) => R.filter(isChildOfObject, objectsWithSource);
-
-  console.log('____objectsWithSource', objectsWithSource);
 
   return R.map((objectId) => {
     const match = findObjectById(objectId);
 
-    console.log('___processing object', match);
-    console.log('___children', findChildren(match));
-
-    return R.merge(match, { children: findChildren(match) });
+    return R.merge(match, { children: impl.findChildren(objectsWithSource, match) });
   }, R.pluck('id', objects));
 };
 

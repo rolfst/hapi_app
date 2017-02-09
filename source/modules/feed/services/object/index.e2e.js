@@ -90,7 +90,7 @@ describe('Service: Object', () => {
     });
   });
 
-  describe.only('listWithSources', () => {
+  describe('listWithSources', () => {
     after(() => objectService.remove({ parentType: 'conversation', parentId: '42' }));
 
     it('should return children', async () => {
