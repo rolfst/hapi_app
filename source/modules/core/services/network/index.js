@@ -1,7 +1,6 @@
 import Promise from 'bluebird';
-import { flatten, map, filter, pick } from 'lodash';
+import { flatten, map, pick } from 'lodash';
 import R from 'ramda';
-import { createAdapter } from '../../../../shared/utils/create-adapter';
 import * as Logger from '../../../../shared/services/logger';
 import createError from '../../../../shared/utils/create-error';
 import * as integrationsAdapter from '../../../../shared/utils/integrations-adapter';
@@ -90,26 +89,6 @@ export const listPristineNetworks = async (payload, message) => {
     (pristineNetwork) => impl.mergeAdminsIntoPristineNetwork(pristineNetwork, message));
 
   return pristineNetworksWithAdmins;
-};
-
-/**
- * retrieves Admins from network
- * @param {object} payload
- * @param {string} payload.networkId
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method listAdminsFromNetwork
- * @return {external:Promise} Promise containing collection of a pristine network admins
- */
-export const listAdminsFromNetwork = async (payload, message) => {
-  logger.info('listing Admins From Network', { payload, message });
-  const network = await networkRepo.findNetworkById(payload.networkId);
-
-  if (!network) throw createError('404');
-
-  const adapter = await createAdapter(network, 0, { proceedWithoutToken: true });
-  const externalUsers = await adapter.fetchUsers(network.externalId);
-
-  return filter(externalUsers, 'isAdmin');
 };
 
 /**

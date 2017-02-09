@@ -18,11 +18,6 @@ const routes = [{
   prefetch: false,
 }, {
   method: 'GET',
-  url: '/v2/networks/{networkId}/integration/admins',
-  strategy: 'integration',
-  handler: require('./handlers/network-admins'),
-}, {
-  method: 'GET',
   url: '/v2/integrations/sync',
   handler: require('./handlers/sync-with-integration-partner'),
   strategy: 'integration',
