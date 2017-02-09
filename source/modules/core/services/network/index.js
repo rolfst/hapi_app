@@ -1,5 +1,4 @@
 import Promise from 'bluebird';
-import { flatten, map, pick } from 'lodash';
 import R from 'ramda';
 import * as Logger from '../../../../shared/services/logger';
 import createError from '../../../../shared/utils/create-error';
@@ -30,7 +29,7 @@ const logger = Logger.getLogger('CORE/service/network');
 export const create = async (payload, message) => {
   logger.info('Creating network', { payload, message });
 
-  const whitelistAttrs = pick(payload, 'userId', 'name', 'externalId', 'integrationName');
+  const whitelistAttrs = R.pick(['userId', 'name', 'externalId', 'integrationName'], payload);
 
   if (payload.integrationName) {
     return networkRepo.createIntegrationNetwork(whitelistAttrs);
@@ -58,7 +57,7 @@ export const addUserToNetwork = async (payload, message) => {
 
   const attrsWhitelist = ['userId', 'networkId', 'externalId', 'userToken'];
   const attributes = {
-    ...pick(payload, attrsWhitelist),
+    ...R.pick(attrsWhitelist, payload),
     roleType: payload.roleType || 'EMPLOYEE',
     deletedAt: payload.active === false ? new Date() : null,
   };
@@ -79,14 +78,15 @@ export const listPristineNetworks = async (payload, message) => {
 
   const baseUrl = 'https://partner2.testpmt.nl/rest.php';
   const clients = await integrationsAdapter.clients(baseUrl);
-  const externalIds = map(clients, 'externalId');
+  const externalIds = R.pluck('externalId', clients);
 
-  const networksFromIntegration = flatten(await Promise.map(
-    externalIds, integrationsAdapter.pristineNetworks));
+  const networksFromIntegration = await R.pipeP(
+    ids => Promise.map(ids, integrationsAdapter.pristineNetworks),
+    R.flatten)(externalIds);
+
   const pristineNetworks = impl.filterExistingNetworks(networksFromIntegration, message);
-  const pristineNetworksWithAdmins = await Promise.map(
-    pristineNetworks,
-    (pristineNetwork) => impl.mergeAdminsIntoPristineNetwork(pristineNetwork, message));
+  const pristineNetworksWithAdmins = await Promise.map(pristineNetworks, (pristineNetwork) =>
+    impl.mergeAdminsIntoPristineNetwork(pristineNetwork, message));
 
   return pristineNetworksWithAdmins;
 };
@@ -107,7 +107,7 @@ export const listActiveUsersForNetwork = async (payload, message) => {
   const usersFromNetwork = await networkRepo.findUsersForNetwork(network.id);
 
   return userService.listUsersWithNetworkScope({
-    userIds: map(usersFromNetwork, 'id'),
+    userIds: R.pluck('id', usersFromNetwork),
     networkId: payload.networkId,
   }, message);
 };
@@ -128,7 +128,7 @@ export const listAllUsersForNetwork = async (payload, message) => {
   const usersFromNetwork = await networkRepo.findAllUsersForNetwork(network.id);
 
   return userService.listUsersWithNetworkScope({
-    userIds: map(usersFromNetwork, 'id'),
+    userIds: R.pluck('id', usersFromNetwork),
     networkId: payload.networkId,
   }, message);
 };
