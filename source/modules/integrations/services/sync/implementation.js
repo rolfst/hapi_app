@@ -1,5 +1,4 @@
 import R from 'ramda';
-import _ from 'lodash';
 import Promise from 'bluebird';
 import * as Logger from '../../../../shared/services/logger';
 import createError from '../../../../shared/utils/create-error';
@@ -81,7 +80,9 @@ export const executeTeamActions = (networkId, actions) => {
   return Promise.props(evolvedObj);
 };
 
-export const createUserActions = (allUsersInSystem, internalTeams, _networkUsers, _externalUsers) => {
+export const createUserActions = (
+  allUsersInSystem, internalTeams, _networkUsers, _externalUsers
+) => {
   const findTeamById = (id) => R.defaultTo(null, R.find(R.propEq('id', id), internalTeams));
   const networkUsers = R.map(user => {
     const replacedIds = R.map(id => {
@@ -151,7 +152,7 @@ export const createUserActions = (allUsersInSystem, internalTeams, _networkUsers
       R.pipe(
         R.filter(user => groupedSystemUser[user.email]),
         groupByEmail
-      )(allUsersInSystem), // TODO big performance impact
+      )(allUsersInSystem), // TODO Big performance impact
       R.mergeWith(
         R.merge,
         R.pipe(R.filter(R.prop('externalId')), groupByEmail)(networkUsers),
@@ -163,6 +164,38 @@ export const createUserActions = (allUsersInSystem, internalTeams, _networkUsers
   logger.info('Created user actions', { actions: R.omit(['data'], createdActions) });
 
   return createdActions;
+};
+
+const setTeamLink = (networkId) => async (user) => {
+  // TODO Big performance impact
+  const groupedTeams = await R.pipeP(
+    networkRepository.findTeamsForNetwork,
+    R.filter(R.prop('externalId')),
+    groupByExternalId
+  )(networkId);
+
+  const getTeams = R.pipe(
+    R.map((externalId) => R.defaultTo(null, groupedTeams[externalId])),
+    rejectNil
+  );
+
+  const teamsToRemove = getTeams(R.difference(user.teamIds, user.externalTeamIds));
+  const teamsToAdd = getTeams(R.difference(user.externalTeamIds, user.teamIds));
+
+  const makePromises = (repoFn, errorMessage) => R.map((team) =>
+    repoFn(team.id, user.id)
+    .catch((err) => logger.error(errorMessage, { networkId, team, user, err })));
+
+  const makeRemovePromises = makePromises(
+    teamRepository.removeUserFromTeam, 'Error removing user from team');
+
+  const makeAddPromises = makePromises(
+    teamRepository.addUserToTeam, 'Error adding user to team');
+
+  return Promise.all(R.concat(
+    makeRemovePromises(teamsToRemove),
+    makeAddPromises(teamsToAdd)
+  ));
 };
 
 const addUser = (networkId) => (user) => userRepository
@@ -186,44 +219,12 @@ const createUser = (networkId) => (user) => userRepository
     password: passwordUtil.plainRandom(),
   })
   .then((createdUser) => addUser(networkId)({ ...user, id: createdUser.id }))
+  .then((networkLink) => setTeamLink(networkId)({ ...user, id: networkLink.userId, teamIds: [] }))
   .catch((err) => logger.error('Error creating user', { networkId, user, err }));
 
 const removeUser = (networkId) => (user) => userRepository
   .setNetworkLink({ networkId, externalId: user.externalId }, { deletedAt: new Date() })
   .catch((err) => logger.error('Error removing user from network', { networkId, user, err }));
-
-const updateTeamLinks = async (networkId, users) => {
-  const groupedTeams = await R.pipeP(
-    networkRepository.findTeamsForNetwork,
-    R.filter(R.prop('externalId')),
-    groupByExternalId
-  )(networkId);
-
-  const getTeams = R.pipe(
-    R.map((externalId) => R.defaultTo(null, groupedTeams[externalId])),
-    rejectNil
-  );
-
-  return Promise.map(users, (user) => {
-    const teamsToRemove = getTeams(R.difference(user.teamIds, user.externalTeamIds));
-    const teamsToAdd = getTeams(R.difference(user.externalTeamIds, user.teamIds));
-
-    const makePromises = (repoFn, errorMessage) => R.map((team) =>
-      repoFn(team.id, user.id)
-      .catch((err) => logger.error(errorMessage, { networkId, team, user, err })));
-
-    const makeRemovePromises = makePromises(
-      teamRepository.removeUserFromTeam, 'Error removing user from team');
-
-    const makeAddPromises = makePromises(
-      teamRepository.addUserToTeam, 'Error adding user to team');
-
-    return Promise.all(R.concat(
-      makeRemovePromises(teamsToRemove),
-      makeAddPromises(teamsToAdd)
-    ));
-  });
-};
 
 export const executeUserActions = (networkId, actions) => {
   const values = R.map(email => actions.data[email]);
@@ -231,7 +232,7 @@ export const executeUserActions = (networkId, actions) => {
     add: (emails) => Promise.map(values(emails), addUser(networkId)),
     create: (emails) => Promise.map(values(emails), createUser(networkId)),
     remove: (emails) => Promise.map(values(emails), removeUser(networkId)),
-    changedTeams: (emails) => updateTeamLinks(networkId, values(emails)),
+    changedTeams: (emails) => Promise.map(values(emails), setTeamLink(networkId)),
   })(actions);
 
   return Promise.props(evolvedObj);
