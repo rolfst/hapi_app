@@ -42,7 +42,14 @@ export async function listUsersWithNetworkScope(payload, message) {
   return Promise.map(users, async (user) => {
     const metaData = find(metaDataList, { userId: user.id });
 
-    return impl.createScopedUser(user, metaData, network);
+    return {
+      ...user,
+      roleType: metaData.roleType,
+      externalId: metaData.externalId,
+      deletedAt: metaData.deletedAt,
+      invitedAt: metaData.invitedAt,
+      integrationAuth: !!metaData.userToken,
+    };
   });
 }
 
@@ -61,5 +68,12 @@ export async function getUserWithNetworkScope(payload, message) {
   const network = await networkService.getNetwork({ id: payload.networkId }, message);
   const metaData = await userRepo.findNetworkLink({ userId: user.id, networkId: network.id });
 
-  return impl.createScopedUser(user, metaData, network);
+  return {
+    ...user,
+    roleType: metaData.roleType,
+    externalId: metaData.externalId,
+    deletedAt: metaData.deletedAt,
+    invitedAt: metaData.invitedAt,
+    integrationAuth: !!metaData.userToken,
+  };
 }

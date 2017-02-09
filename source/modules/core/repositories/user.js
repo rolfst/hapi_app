@@ -172,17 +172,6 @@ export const findCredentialsForUser = async (username) => {
 };
 
 /**
- * Adds user to a network
- * @param {User} users - users to add
- * @param {Network} network - network to add the users to
- * @method addUsersToNetwork
- * @return {external:Promise.<User[]>} {@link module:modules/core~User User}
- */
-export const addUsersToNetwork = (user, network, roleType = 'EMPLOYEE') => {
-  return network.addUsers(user, { roleType });
-};
-
-/**
  * @param {string} userId - attribute to find the user with
  * @param {object} attributes - attributes to create a user with
  * @method updateUser
@@ -250,17 +239,6 @@ export const validateUserIds = async (ids, networkId) => {
 };
 
 /**
- * Adds a user to a team
- * @param {string} userId - user id
- * @param {string} teamId - team the users will belong to
- * @method validateUserIds
- * @return {external:Promise.<TeamUser>} - Promise with a team-user association
- */
-export const addToTeam = async (userId, teamId) => {
-  return TeamUser.create({ userId, teamId });
-};
-
-/**
  * removes a user from a network
  * @param {string} userId - users to to remove from network
  * @param {string} networkId - network to find the user in
@@ -304,52 +282,6 @@ export const setNetworkLink = async (whereConstraint, _attributes) => {
   if (!result) return NetworkUser.create({ ...attributes, user_id: attributes.userId });
 
   return result.update({ ...R.omit(['userId', 'networkId', 'externalId'], attributes) });
-};
-
-const NETWORK_USER_ATTRIBUTES = ['user_id', 'networkId', 'externalId', 'roleType', 'deletedAt'];
-
-export const createNetworkLink = async (attributes) => {
-  const defaults = {
-    externalId: null,
-    roleType: 'EMPLOYEE',
-    deletedAt: null,
-    userToken: null,
-    invitedAt: null,
-  };
-
-  return NetworkUser.create(R.pick(NETWORK_USER_ATTRIBUTES, R.merge(defaults, {
-    ...attributes, user_id: attributes.userId })));
-};
-
-export const updateNetworkLink = async (whereConstraint, attributes) => NetworkUser
-  .update(R.pick(NETWORK_USER_ATTRIBUTES, attributes), {
-    where: whereConstraint,
-  });
-
-export const removeNetworkLink = async (whereConstraint) => NetworkUser
-  .destroy({ where: whereConstraint });
-
-/**
- * updates the networkUser
- * the user is from the external source
- * @Param {object} user - externalInformation of user
- * @param {string} network - network id to update the userinfo for
- * @param {string} [active=true] - network id to update the userinfo for
- * @method updateUserForNetwork
- * @return user object
- */
-export const updateUserForNetwork = async (user, networkId, active = true) => {
-  const deletedAt = active ? null : new Date();
-  const roleType = user.isAdmin ? 'ADMIN' : 'EMPLOYEE';
-  const result = await NetworkUser.findOne({
-    where: { externalId: user.externalId, networkId },
-  });
-  const networkUser = await result.update({
-    deletedAt,
-    roleType,
-  });
-
-  return findUserById(networkUser.userId, networkId);
 };
 
 /**
