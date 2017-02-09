@@ -6,6 +6,22 @@ const routes = [{
   handler: require('./handlers/integration-auth'),
   validator: require('./validators/authenticate'),
 }, {
+  method: 'POST',
+  url: '/v2/networks/{networkId}/integration/import',
+  handler: require('./handlers/import-network'),
+  strategy: 'integration',
+  validator: require('./validators/import-network'),
+}, {
+  method: 'GET',
+  url: '/v2/pristine_networks',
+  handler: require('./handlers/pristine-networks'),
+  prefetch: false,
+}, {
+  method: 'GET',
+  url: '/v2/networks/{networkId}/integration/admins',
+  strategy: 'integration',
+  handler: require('./handlers/network-admins'),
+}, {
   method: 'GET',
   url: '/v2/integrations/sync',
   handler: require('./handlers/sync-with-integration-partner'),
