@@ -26,7 +26,8 @@ export const syncNetwork = async (payload, message) => {
 
     if (!payload.internal) {
       const owner = await userRepository.findUserById(message.credentials.id, payload.networkId);
-      impl.assertUserIsAdmin(owner);
+
+      if (!R.propEq('role', 'ADMIN', owner)) throw createError('403');
     }
 
     const network = await networkRepository.findNetworkById(payload.networkId);

@@ -1,7 +1,6 @@
 import R from 'ramda';
 import Promise from 'bluebird';
 import * as Logger from '../../../../shared/services/logger';
-import createError from '../../../../shared/utils/create-error';
 import * as passwordUtil from '../../../../shared/utils/password';
 import * as teamRepository from '../../../core/repositories/team';
 import * as userRepository from '../../../core/repositories/user';
@@ -28,16 +27,102 @@ const createTeams = (networkId, teams) => Promise.map(teams, (team) =>
 const deleteTeams = (teamIds) => Promise.map(teamIds, teamRepository.deleteById);
 const mergeAndGroupByExternalId = (internalCollection, externalCollection) =>
   R.merge(groupByExternalId(internalCollection), groupByExternalId(externalCollection));
-
 export const isSyncable = R.and(R.prop('hasIntegration'), R.prop('importedAt'));
+const getTeamsByExternalId = async (networkId, externalIds) => {
+  const groupedTeams = await R.pipeP(
+    networkRepository.findTeamsForNetwork,
+    R.filter(R.prop('externalId')),
+    groupByExternalId
+  )(networkId);
 
-export function assertNetworkIsSyncable(network) {
-  if (!isSyncable(network)) throw createError('10009');
-}
+  return R.pipe(
+    R.map((externalId) => R.defaultTo(null, groupedTeams[externalId])),
+    rejectNil
+  )(externalIds);
+};
 
-export function assertUserIsAdmin(user) {
-  if (!R.propEq('role', 'ADMIN', user)) throw createError('403');
-}
+/**
+ * Adding or removing the user from teams.
+ * @param {string} networkId - The network to remove the user from
+ * @param {User[]} user - The user where the properties come from the data lookup
+ * passed through the actions.
+ * @method setTeamLink
+ * @return {Promise}
+ */
+const setTeamLink = (networkId) => async (user) => {
+  // TODO Big performance impact
+  const teamsToRemove = getTeamsByExternalId(
+    networkId, R.difference(user.teamIds, user.externalTeamIds));
+  const teamsToAdd = getTeamsByExternalId(
+    networkId, R.difference(user.externalTeamIds, user.teamIds));
+
+  const makePromises = (repoFn, errorMessage) => R.map((team) =>
+    repoFn(team.id, user.id)
+    .catch((err) => logger.error(errorMessage, { networkId, team, user, err })));
+
+  const makeRemovePromises = makePromises(
+    teamRepository.removeUserFromTeam, 'Error removing user from team');
+
+  const makeAddPromises = makePromises(
+    teamRepository.addUserToTeam, 'Error adding user to team');
+
+  return Promise.all(R.concat(
+    makeRemovePromises(teamsToRemove),
+    makeAddPromises(teamsToAdd)
+  ));
+};
+
+/**
+ * Adding a user to the network.
+ * @param {string} networkId - The network to remove the user from
+ * @param {User[]} user - The user where the properties come from the data lookup
+ * passed through the actions.
+ * @method addUser
+ * @return {Promise}
+ */
+const addUser = (networkId) => (user) => userRepository
+  .setNetworkLink({ networkId, externalId: user.externalId }, {
+    networkId,
+    userId: user.id,
+    externalId: user.externalId,
+    deletedAt: null,
+    roleType: user.roleType || 'EMPLOYEE',
+  })
+  .catch((err) => logger.error('Error creating network link', { networkId, user, err }));
+
+/**
+ * Creating a new user in the network. We also set the team link here.
+ * @param {string} networkId - The network to remove the user from
+ * @param {User[]} user - The user where the properties come from the data lookup
+ * passed through the actions.
+ * @method createUser
+ * @return {Promise}
+ */
+const createUser = (networkId) => (user) => userRepository
+  .createUser({
+    username: user.email,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    phoneNum: user.phoneNum,
+    dateOfBirth: user.dateOfBirth,
+    password: passwordUtil.plainRandom(),
+  })
+  .then((createdUser) => addUser(networkId)({ ...user, id: createdUser.id }))
+  .then((networkLink) => setTeamLink(networkId)({ ...user, id: networkLink.userId, teamIds: [] }))
+  .catch((err) => logger.error('Error creating user', { networkId, user, err }));
+
+/**
+ * Removing the user from a network
+ * @param {string} networkId - The network to remove the user from
+ * @param {User[]} user - The user where the properties come from the data lookup
+ * passed through the actions.
+ * @method removeUser
+ * @return {Promise}
+ */
+const removeUser = (networkId) => (user) => userRepository
+  .setNetworkLink({ networkId, externalId: user.externalId }, { deletedAt: new Date() })
+  .catch((err) => logger.error('Error removing user from network', { networkId, user, err }));
 
 /**
  * We build up the actions to be executed by the executeTeamActions function.
@@ -68,6 +153,13 @@ export const createTeamActions = (internalTeams, externalTeams) => {
   return actions;
 };
 
+/**
+ * We invoke functions for each action.
+ * @param {string} networkId - The id of the network to execute upon.
+ * @param {object} actions - The actions retrieved from the createTeamActions method.
+ * @method createTeamActions
+ * @return {Promise} containing the result from the invoked functions.
+ */
 export const executeTeamActions = (networkId, actions) => {
   const values = R.map(findDataByExternalId(actions.data));
   const internalIds = R.pipe(values, R.pluck('id'), rejectNil);
@@ -80,6 +172,17 @@ export const executeTeamActions = (networkId, actions) => {
   return Promise.props(evolvedObj);
 };
 
+/**
+ * We build up the actions to be executed by the executeUserActions function.
+ * The output will consist of emails that can be matched with the lookup
+ * in the 'data' property.
+ * @param {User[]} allUsersInSystem - All the users present in our system.
+ * @param {Team[]} internalTeams - The teams that belong to the network.
+ * @param {User[]} _networkUsers - The users that belong to the network.
+ * @param {User[]} _externalUsers - The users coming from the external partner.
+ * @method createUserActions
+ * @return Returns an object containing the actions to execute.
+ */
 export const createUserActions = (
   allUsersInSystem, internalTeams, _networkUsers, _externalUsers
 ) => {
@@ -165,66 +268,6 @@ export const createUserActions = (
 
   return createdActions;
 };
-
-const setTeamLink = (networkId) => async (user) => {
-  // TODO Big performance impact
-  const groupedTeams = await R.pipeP(
-    networkRepository.findTeamsForNetwork,
-    R.filter(R.prop('externalId')),
-    groupByExternalId
-  )(networkId);
-
-  const getTeams = R.pipe(
-    R.map((externalId) => R.defaultTo(null, groupedTeams[externalId])),
-    rejectNil
-  );
-
-  const teamsToRemove = getTeams(R.difference(user.teamIds, user.externalTeamIds));
-  const teamsToAdd = getTeams(R.difference(user.externalTeamIds, user.teamIds));
-
-  const makePromises = (repoFn, errorMessage) => R.map((team) =>
-    repoFn(team.id, user.id)
-    .catch((err) => logger.error(errorMessage, { networkId, team, user, err })));
-
-  const makeRemovePromises = makePromises(
-    teamRepository.removeUserFromTeam, 'Error removing user from team');
-
-  const makeAddPromises = makePromises(
-    teamRepository.addUserToTeam, 'Error adding user to team');
-
-  return Promise.all(R.concat(
-    makeRemovePromises(teamsToRemove),
-    makeAddPromises(teamsToAdd)
-  ));
-};
-
-const addUser = (networkId) => (user) => userRepository
-  .setNetworkLink({ networkId, externalId: user.externalId }, {
-    networkId,
-    userId: user.id,
-    externalId: user.externalId,
-    deletedAt: null,
-    roleType: user.roleType || 'EMPLOYEE',
-  })
-  .catch((err) => logger.error('Error creating network link', { networkId, user, err }));
-
-const createUser = (networkId) => (user) => userRepository
-  .createUser({
-    username: user.email,
-    email: user.email,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    phoneNum: user.phoneNum,
-    dateOfBirth: user.dateOfBirth,
-    password: passwordUtil.plainRandom(),
-  })
-  .then((createdUser) => addUser(networkId)({ ...user, id: createdUser.id }))
-  .then((networkLink) => setTeamLink(networkId)({ ...user, id: networkLink.userId, teamIds: [] }))
-  .catch((err) => logger.error('Error creating user', { networkId, user, err }));
-
-const removeUser = (networkId) => (user) => userRepository
-  .setNetworkLink({ networkId, externalId: user.externalId }, { deletedAt: new Date() })
-  .catch((err) => logger.error('Error removing user from network', { networkId, user, err }));
 
 export const executeUserActions = (networkId, actions) => {
   const values = R.map(email => actions.data[email]);
