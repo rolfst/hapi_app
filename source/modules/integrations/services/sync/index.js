@@ -95,39 +95,27 @@ export const importNetwork = async (payload, message) => {
     const externalAdmin = R.find(R.propEq('email', payload.ownerEmail), externalUsers);
     if (!externalAdmin) throw createError('10006');
 
-    const admin = await userRepository.findUserBy({ email: externalAdmin.email });
+    let admin = await userRepository.findUserBy({ email: externalAdmin.email });
 
-    if (admin) {
-      await networkRepository.updateNetwork(network.id, { userId: admin.id });
-      await userRepository.setNetworkLink({
-        networkId: network.id,
-        userId: admin.id,
-      }, {
-        networkId: network.id,
-        userId: admin.id,
-        roleType: 'ADMIN',
-        deletedAt: null,
-        externalId: externalAdmin.externalId,
-      });
-
-      // mailConfig = configurationMail(network, admin);
-    } else {
+    if (!admin) {
       const password = passwordUtil.plainRandom();
-      const newAdmin = await userRepository.createUser({ ...externalAdmin, password });
-      await networkRepository.updateNetwork(network.id, { userId: newAdmin.id });
-      await userRepository.setNetworkLink({
-        networkId: network.id,
-        userId: newAdmin.id,
-      }, {
-        networkId: network.id,
-        userId: newAdmin.id,
-        roleType: 'ADMIN',
-        deletedAt: null,
-        externalId: externalAdmin.externalId,
-      });
-
-      // mailConfig = configurationMailNewAdmin(network, superUser, password);
+      admin = await userRepository.createUser({ ...externalAdmin, password });
     }
+
+    await networkRepository.updateNetwork(network.id, { userId: admin.id });
+    await userRepository.setNetworkLink({
+      networkId: network.id,
+      userId: admin.id,
+    }, {
+      networkId: network.id,
+      userId: admin.id,
+      roleType: 'ADMIN',
+      deletedAt: null,
+      externalId: externalAdmin.externalId,
+    });
+
+    // mailConfig = configurationMail(network, admin);
+    // mailConfig = configurationMailNewAdmin(network, superUser, password);
 
     await networkRepository.setImportDateOnNetworkIntegration(network.id);
     const syncResult = await syncNetwork({ networkId: network.id, internal: true }, message);

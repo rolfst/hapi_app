@@ -16,12 +16,14 @@ const groupByExternalId = R.pipe(
   R.groupBy(R.prop('externalId')),
   R.map(R.head)
 );
+const findById = (collection, id) =>
+  R.defaultTo(null, R.find(R.propEq('id', id), collection));
 const groupByEmail = R.pipe(R.groupBy(R.prop('email')), R.map(R.head));
 const findDataByExternalId = R.curry((data, externalId) => data[externalId]);
-const updateTeams = (networkId, teams) => Promise.map(teams, (team) =>
+const updateTeams = (networkId) => (teams) => Promise.map(teams, (team) =>
   teamRepository.update({ externalId: team.externalId, networkId }, R.pick(['name'], team))
     .catch((err) => logger.error('Error updating team', { err })));
-const createTeams = (networkId, teams) => Promise.map(teams, (team) =>
+const createTeams = (networkId) => (teams) => Promise.map(teams, (team) =>
   teamRepository.create(R.merge({ networkId }, R.pick(['name', 'externalId'], team)))
     .catch((err) => logger.error('Error creating team', { err })));
 const deleteTeams = (teamIds) => Promise.map(teamIds, teamRepository.deleteById);
@@ -40,6 +42,21 @@ const getTeamsByExternalId = async (networkId, externalIds) => {
     rejectNil
   )(externalIds);
 };
+
+const replaceTeamIdsWithExternalId = (internalTeams) => (user) => {
+  const replacedIds = R.map(id => {
+    const match = findById(internalTeams, id);
+
+    return match ? match.externalId : null;
+  }, R.defaultTo([], user.teamIds));
+
+  return R.assoc('teamIds', rejectNil(replacedIds), user);
+};
+
+const swapTeamIdsWithExternalTeamIds = (externalUser) => R.pipe(
+  obj => R.assoc('externalTeamIds', R.defaultTo([], obj.teamIds), obj),
+  R.dissoc('teamIds')
+)(externalUser);
 
 /**
  * Adding or removing the user from teams.
@@ -143,11 +160,14 @@ export const createTeamActions = (internalTeams, externalTeams) => {
   const externalIdsToUpdate = R.intersection(internalTeamExternalIds, externalTeamExternalIds);
   const externalIdsToRemove = R.difference(internalTeamExternalIds, externalTeamExternalIds);
 
+  const data = mergeAndGroupByExternalId(internalTeams, externalTeams);
+  const values = R.map(findDataByExternalId(data));
+  const internalIds = R.pipe(values, R.pluck('id'), rejectNil);
+
   const actions = {
-    add: externalIdsToAdd,
-    update: externalIdsToUpdate,
-    delete: externalIdsToRemove,
-    data: mergeAndGroupByExternalId(internalTeams, externalTeams),
+    add: values(externalIdsToAdd),
+    update: values(externalIdsToUpdate),
+    delete: internalIds(externalIdsToRemove),
   };
 
   logger.info('Created team actions', { actions: R.omit(['data'], actions) });
@@ -163,12 +183,10 @@ export const createTeamActions = (internalTeams, externalTeams) => {
  * @return {Promise} containing the result from the invoked functions.
  */
 export const executeTeamActions = (networkId, actions) => {
-  const values = R.map(findDataByExternalId(actions.data));
-  const internalIds = R.pipe(values, R.pluck('id'), rejectNil);
   const evolvedObj = R.evolve({
-    add: (externalIds) => createTeams(networkId, values(externalIds)),
-    update: (externalIds) => updateTeams(networkId, values(externalIds)),
-    delete: (externalIds) => deleteTeams(internalIds(externalIds)),
+    add: createTeams(networkId),
+    update: updateTeams(networkId),
+    delete: deleteTeams,
   })(actions);
 
   return Promise.props(evolvedObj);
@@ -188,32 +206,18 @@ export const executeTeamActions = (networkId, actions) => {
 export const createUserActions = (
   allUsersInSystem, internalTeams, _networkUsers, _externalUsers
 ) => {
-  const findTeamById = (id) => R.defaultTo(null, R.find(R.propEq('id', id), internalTeams));
-  const networkUsers = R.map(user => {
-    const replacedIds = R.map(id => {
-      const match = findTeamById(id);
-
-      return match ? match.externalId : null;
-    }, R.defaultTo([], user.teamIds));
-
-    return R.assoc('teamIds', rejectNil(replacedIds), user);
-  }, _networkUsers);
-
-  const externalUsers = R.map(R.pipe(
-    obj => R.assoc('externalTeamIds', R.defaultTo([], obj.teamIds), obj),
-    R.dissoc('teamIds')
-  ), _externalUsers);
-
+  const networkUsers = R.map(replaceTeamIdsWithExternalId(internalTeams), _networkUsers);
+  const externalUsers = R.map(swapTeamIdsWithExternalTeamIds, _externalUsers);
   const groupedNetworkUsers = groupByEmail(networkUsers);
   const groupedExternalUsers = groupByEmail(externalUsers);
   const groupedSystemUser = groupByEmail(allUsersInSystem);
   const externalUserEmails = pluckEmail(externalUsers);
+
   const networkMatch = (email) => groupedNetworkUsers[email];
   const externalMatch = (email) => groupedExternalUsers[email];
   const systemMatch = (email) => groupedSystemUser[email];
   const isActive = (matchFn) => (email) => R.isNil(R.prop('deletedAt', matchFn(email)));
   const isInactive = (matchFn) => (email) => R.not(R.isNil(R.prop('deletedAt', matchFn(email))));
-
   const actionReducer = (pred) => R.reduce((acc, value) =>
     R.ifElse(pred, () => R.append(value, acc), R.always(acc))(value), [], externalUserEmails);
 
@@ -244,26 +248,30 @@ export const createUserActions = (
     R.F
   );
 
+  // TODO Big performance impact
+  const data = R.mergeWith(
+    R.merge,
+    R.pipe(
+      R.filter(user => groupedSystemUser[user.email]),
+      groupByEmail
+    )(allUsersInSystem),
+    R.mergeWith(
+      R.merge,
+      R.pipe(R.filter(R.prop('externalId')), groupByEmail)(networkUsers),
+      R.pipe(R.filter(R.prop('externalId')), groupByEmail)(externalUsers)
+    )
+  );
+
+  const values = R.map(email => data[email]);
+
   const createdActions = {
-    create: actionReducer(createPredicate),
-    add: actionReducer(addPredicate),
+    create: values(actionReducer(createPredicate)),
+    add: values(actionReducer(addPredicate)),
     remove: R.concat(
       R.difference(pluckEmail(networkUsers), externalUserEmails),
-      actionReducer(removePredicate)
+      values(actionReducer(removePredicate))
     ),
-    changedTeams: actionReducer(changedTeamsPredicate),
-    data: R.mergeWith(
-      R.merge,
-      R.pipe(
-        R.filter(user => groupedSystemUser[user.email]),
-        groupByEmail
-      )(allUsersInSystem), // TODO Big performance impact
-      R.mergeWith(
-        R.merge,
-        R.pipe(R.filter(R.prop('externalId')), groupByEmail)(networkUsers),
-        R.pipe(R.filter(R.prop('externalId')), groupByEmail)(externalUsers)
-      )
-    ),
+    changedTeams: values(actionReducer(changedTeamsPredicate)),
   };
 
   logger.info('Created user actions', { actions: R.omit(['data'], createdActions) });
@@ -272,12 +280,12 @@ export const createUserActions = (
 };
 
 export const executeUserActions = (networkId, actions) => {
-  const values = R.map(email => actions.data[email]);
+  const curriedPromiseMap = (actionFn) => (users) => Promise.map(users, actionFn);
   const evolvedObj = R.evolve({
-    add: (emails) => Promise.map(values(emails), addUser(networkId)),
-    create: (emails) => Promise.map(values(emails), createUser(networkId)),
-    remove: (emails) => Promise.map(values(emails), removeUser(networkId)),
-    changedTeams: (emails) => Promise.map(values(emails), setTeamLink(networkId)),
+    add: curriedPromiseMap(addUser(networkId)),
+    create: curriedPromiseMap(createUser(networkId)),
+    remove: curriedPromiseMap(removeUser(networkId)),
+    changedTeams: curriedPromiseMap(setTeamLink(networkId)),
   })(actions);
 
   return Promise.props(evolvedObj);
