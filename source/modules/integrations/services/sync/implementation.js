@@ -267,10 +267,10 @@ export const createUserActions = (
   const createdActions = {
     create: values(actionReducer(createPredicate)),
     add: values(actionReducer(addPredicate)),
-    remove: R.concat(
+    remove: values(R.concat(
       R.difference(pluckEmail(networkUsers), externalUserEmails),
-      values(actionReducer(removePredicate))
-    ),
+      actionReducer(removePredicate)
+    )),
     changedTeams: values(actionReducer(changedTeamsPredicate)),
   };
 
@@ -280,7 +280,7 @@ export const createUserActions = (
 };
 
 export const executeUserActions = (networkId, actions) => {
-  const curriedPromiseMap = (actionFn) => (users) => Promise.map(users, actionFn);
+  const curriedPromiseMap = (actionFn) => (data) => Promise.map(data, actionFn);
   const evolvedObj = R.evolve({
     add: curriedPromiseMap(addUser(networkId)),
     create: curriedPromiseMap(createUser(networkId)),

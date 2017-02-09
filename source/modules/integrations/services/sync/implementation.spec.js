@@ -35,44 +35,28 @@ describe('Service: Sync Implementation', () => {
     it('should set correct teams to be added', () => {
       const teamActions = impl.createTeamActions(internalTeams, externalTeams);
 
-      assert.deepEqual(teamActions.add, ['235']);
+      assert.deepEqual(teamActions.add, [{
+        externalId: '235',
+        name: 'New team',
+      }]);
     });
 
     it('should set correct teams to be updated', () => {
       const teamActions = impl.createTeamActions(internalTeams, externalTeams);
 
-      assert.deepEqual(teamActions.update, ['240', '234']);
+      assert.deepEqual(teamActions.update, [{
+        externalId: '240',
+        name: 'Hodor',
+      }, {
+        externalId: '234',
+        name: 'Vulploeg twee',
+      }]);
     });
 
     it('should set correct teams to be deleted', () => {
       const teamActions = impl.createTeamActions(internalTeams, externalTeams);
 
-      assert.deepEqual(teamActions.delete, ['232']);
-    });
-
-    it('should set correct teams lookup grouped by externalId ' +
-       'by overwriting internal values if the model is present on both sides', () => {
-      const teamActions = impl.createTeamActions(internalTeams, externalTeams);
-
-      assert.deepEqual(teamActions.data, {
-        240: {
-          externalId: '240',
-          name: 'Hodor',
-        },
-        232: {
-          id: '3',
-          externalId: '232',
-          name: 'Team to delete',
-        },
-        234: {
-          externalId: '234',
-          name: 'Vulploeg twee',
-        },
-        235: {
-          externalId: '235',
-          name: 'New team',
-        },
-      });
+      assert.deepEqual(teamActions.delete, ['3']);
     });
   });
 
@@ -158,27 +142,23 @@ describe('Service: Sync Implementation', () => {
 
       const userActions = impl.createUserActions(usersInSystem, [], internalUsers, externalUsers);
 
-      assert.deepEqual(userActions.add, ['foo@baz.com', 'added@baz.com']);
       assert.deepEqual(userActions.remove, []);
       assert.deepEqual(userActions.changedTeams, []);
-      assert.deepEqual(userActions.data, {
-        'foo@baz.com': {
-          id: '1',
-          externalId: '23',
-          email: 'foo@baz.com',
-          teamIds: [],
-          externalTeamIds: [],
-          deletedAt: null,
-        },
-        'added@baz.com': {
-          id: '3',
-          externalId: '234',
-          email: 'added@baz.com',
-          teamIds: [],
-          externalTeamIds: [],
-          deletedAt: null,
-        },
-      });
+      assert.deepEqual(userActions.add, [{
+        id: '1',
+        externalId: '23',
+        email: 'foo@baz.com',
+        teamIds: [],
+        externalTeamIds: [],
+        deletedAt: null,
+      }, {
+        id: '3',
+        externalId: '234',
+        email: 'added@baz.com',
+        teamIds: [],
+        externalTeamIds: [],
+        deletedAt: null,
+      }]);
     });
 
     it('should set correct user to be created in system', () => {
@@ -194,18 +174,15 @@ describe('Service: Sync Implementation', () => {
 
       const userActions = impl.createUserActions(usersInSystem, [], internalUsers, externalUsers);
 
-      assert.deepEqual(userActions.create, ['new@baz.com']);
       assert.deepEqual(userActions.remove, []);
       assert.deepEqual(userActions.add, []);
       assert.deepEqual(userActions.changedTeams, []);
-      assert.deepEqual(userActions.data, {
-        'new@baz.com': {
-          externalId: '234',
-          email: 'new@baz.com',
-          externalTeamIds: [],
-          deletedAt: null,
-        },
-      });
+      assert.deepEqual(userActions.create, [{
+        externalId: '234',
+        email: 'new@baz.com',
+        externalTeamIds: [],
+        deletedAt: null,
+      }]);
     });
 
     it('should set correct user to be removed from network', () => {
@@ -235,27 +212,23 @@ describe('Service: Sync Implementation', () => {
 
       const userActions = impl.createUserActions(usersInSystem, [], internalUsers, externalUsers);
 
-      assert.deepEqual(userActions.remove, ['removed@baz.com', 'foo@baz.com']);
       assert.deepEqual(userActions.create, []);
       assert.deepEqual(userActions.add, []);
       assert.deepEqual(userActions.changedTeams, []);
-      assert.deepEqual(userActions.data, {
-        'foo@baz.com': {
-          id: '1',
-          externalId: '23',
-          email: 'foo@baz.com',
-          teamIds: [],
-          externalTeamIds: [],
-          deletedAt: now,
-        },
-        'removed@baz.com': {
-          id: '2',
-          externalId: '24',
-          email: 'removed@baz.com',
-          teamIds: [],
-          deletedAt: null,
-        },
-      });
+      assert.deepEqual(userActions.remove, [{
+        id: '2',
+        externalId: '24',
+        email: 'removed@baz.com',
+        teamIds: [],
+        deletedAt: null,
+      }, {
+        id: '1',
+        externalId: '23',
+        email: 'foo@baz.com',
+        teamIds: [],
+        externalTeamIds: [],
+        deletedAt: now,
+      }]);
     });
 
     it('should handle team changes and network add from the same user at the same time', () => {
@@ -290,28 +263,24 @@ describe('Service: Sync Implementation', () => {
       const userActions = impl.createUserActions(
         usersInSystem, internalTeams, internalUsers, externalUsers);
 
-      assert.deepEqual(userActions.changedTeams, ['changed@baz.com']);
+      assert.deepEqual(userActions.changedTeams, [{
+        id: '2',
+        externalId: '254',
+        email: 'changed@baz.com',
+        teamIds: ['240', '234', '232'],
+        externalTeamIds: ['240'],
+        deletedAt: null,
+      }]);
       assert.deepEqual(userActions.remove, []);
       assert.deepEqual(userActions.create, []);
-      assert.deepEqual(userActions.add, ['changed@baz.com']);
-      assert.deepEqual(userActions.data, {
-        'foo@baz.com': {
-          id: '1',
-          externalId: '23',
-          email: 'foo@baz.com',
-          teamIds: ['240', '234'],
-          externalTeamIds: ['240', '234'],
-          deletedAt: null,
-        },
-        'changed@baz.com': {
-          id: '2',
-          externalId: '254',
-          email: 'changed@baz.com',
-          teamIds: ['240', '234', '232'],
-          externalTeamIds: ['240'],
-          deletedAt: null,
-        },
-      });
+      assert.deepEqual(userActions.add, [{
+        id: '2',
+        externalId: '254',
+        email: 'changed@baz.com',
+        teamIds: ['240', '234', '232'],
+        externalTeamIds: ['240'],
+        deletedAt: null,
+      }]);
     });
 
     it('should add correct values for team link changes', () => {
@@ -346,28 +315,17 @@ describe('Service: Sync Implementation', () => {
       const userActions = impl.createUserActions(
         usersInSystem, internalTeams, internalUsers, externalUsers);
 
-      assert.deepEqual(userActions.changedTeams, ['changed@baz.com']);
+      assert.deepEqual(userActions.changedTeams, [{
+        id: '2',
+        externalId: '254',
+        email: 'changed@baz.com',
+        teamIds: ['240', '234', '232'],
+        externalTeamIds: ['240'],
+        deletedAt: null,
+      }]);
       assert.deepEqual(userActions.remove, []);
       assert.deepEqual(userActions.create, []);
       assert.deepEqual(userActions.add, []);
-      assert.deepEqual(userActions.data, {
-        'foo@baz.com': {
-          id: '1',
-          externalId: '23',
-          email: 'foo@baz.com',
-          teamIds: ['240', '234'],
-          externalTeamIds: ['240', '234'],
-          deletedAt: null,
-        },
-        'changed@baz.com': {
-          id: '2',
-          externalId: '254',
-          email: 'changed@baz.com',
-          teamIds: ['240', '234', '232'],
-          externalTeamIds: ['240'],
-          deletedAt: null,
-        },
-      });
     });
   });
 
@@ -402,19 +360,16 @@ describe('Service: Sync Implementation', () => {
 
     it('should execute correct function for add action', async () => {
       await impl.executeUserActions('1', {
-        add: ['foo@baz.com'],
+        add: [{
+          id: '1',
+          externalId: '23',
+          email: 'foo@baz.com',
+          teamIds: ['1', '2'],
+          deletedAt: null,
+        }],
         create: [],
         remove: [],
         changedTeams: [],
-        data: {
-          'foo@baz.com': {
-            id: '1',
-            externalId: '23',
-            email: 'foo@baz.com',
-            teamIds: ['1', '2'],
-            deletedAt: null,
-          },
-        },
       });
 
       assert.equal(userRepository.setNetworkLink.callCount, 1);
@@ -434,18 +389,15 @@ describe('Service: Sync Implementation', () => {
     it('should execute correct function for create action', async () => {
       await impl.executeUserActions('1', {
         add: [],
-        create: ['new@baz.com'],
+        create: [{
+          firstName: 'John',
+          lastName: 'Doe',
+          externalId: '21',
+          email: 'new@baz.com',
+          teamIds: ['1', '2'],
+        }],
         remove: [],
         changedTeams: [],
-        data: {
-          'new@baz.com': {
-            firstName: 'John',
-            lastName: 'Doe',
-            externalId: '21',
-            email: 'new@baz.com',
-            teamIds: ['1', '2'],
-          },
-        },
       });
 
       assert.equal(userRepository.createUser.callCount, 1);
@@ -468,17 +420,14 @@ describe('Service: Sync Implementation', () => {
       await impl.executeUserActions('1', {
         add: [],
         create: [],
-        remove: ['removed@baz.com'],
+        remove: [{
+          id: '3',
+          externalId: '244',
+          email: 'removed@baz.com',
+          teamIds: ['1', '2'],
+          externalTeamIds: ['1', '2'],
+        }],
         changedTeams: [],
-        data: {
-          'removed@baz.com': {
-            id: '3',
-            externalId: '244',
-            email: 'removed@baz.com',
-            teamIds: ['1', '2'],
-            externalTeamIds: ['1', '2'],
-          },
-        },
       });
 
       assert.equal(userRepository.setNetworkLink.callCount, 1);
@@ -492,17 +441,14 @@ describe('Service: Sync Implementation', () => {
         add: [],
         create: [],
         remove: [],
-        changedTeams: ['changed@baz.com'],
-        data: {
-          'changed@baz.com': {
-            id: '2',
-            externalId: '254',
-            email: 'changed@baz.com',
-            externalTeamIds: ['1', '2'],
-            teamIds: ['1', '3'],
-            deletedAt: null,
-          },
-        },
+        changedTeams: [{
+          id: '2',
+          externalId: '254',
+          email: 'changed@baz.com',
+          externalTeamIds: ['1', '2'],
+          teamIds: ['1', '3'],
+          deletedAt: null,
+        }],
       });
 
       assert.equal(teamRepository.removeUserFromTeam.callCount, 1);
