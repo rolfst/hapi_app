@@ -1,5 +1,5 @@
 import * as Logger from '../../../shared/services/logger';
-import * as networkService from '../services/network';
+import * as networkService from '../../core/services/network';
 
 const logger = Logger.createLogger('CORE/handler/pristineNetworks');
 

@@ -2,8 +2,8 @@ import { assert } from 'chai';
 import nock from 'nock';
 import * as stubs from '../../../shared/test-utils/stubs';
 import { getRequest } from '../../../shared/test-utils/request';
-import * as networkRepo from '../repositories/network';
-import * as integrationRepo from '../repositories/integration';
+import * as networkRepo from '../../core/repositories/network';
+import * as integrationRepo from '../../core/repositories/integration';
 
 const PMT_BASE_URL = 'https://partner2.testpmt.nl';
 const PMT_BASE_CHAIN_URL_AH = `https://${stubs.pmt_clients.chains[0].base_url}`;

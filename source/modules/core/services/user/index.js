@@ -3,7 +3,6 @@ import Promise from 'bluebird';
 import * as Logger from '../../../../shared/services/logger';
 import * as userRepo from '../../repositories/user';
 import * as networkService from '../../services/network';
-import * as impl from './implementation';
 
 /**
  * @module modules/core/services/user
