@@ -1,35 +1,40 @@
 import { assert } from 'chai';
 import R from 'ramda';
+import * as testHelper from '../../../../shared/test-utils/helpers';
 import * as messageService from '../message';
 import * as commentService from './index';
 
 describe('Service: Comment (feed)', () => {
   describe('create', () => {
     let createdMessage;
+    let admin;
 
     before(async () => {
+      admin = await testHelper.createUser({ password: 'foo' });
+      const network = await testHelper.createNetwork({ userId: admin.id });
+
       createdMessage = await messageService.create({
         parentType: 'network',
-        parentId: global.networks.flexAppeal.id,
+        parentId: network.id,
         text: 'Message for feed',
       }, {
-        credentials: { id: global.users.admin.id },
-        network: { id: global.networks.flexAppeal.id },
+        credentials: { id: admin.id },
+        network: { id: network.id },
       });
     });
 
-    after(() => messageService.remove({ messageId: createdMessage.id }));
+    after(() => testHelper.cleanAll());
 
     it('should return comment model after creation', async () => {
       const actual = await commentService.create({
         messageId: createdMessage.id,
-        userId: global.users.admin.id,
+        userId: admin.id,
         text: 'Cool new comment',
       });
 
       assert.property(actual, 'id');
       assert.property(actual, 'createdAt');
-      assert.equal(actual.userId, global.users.admin.id);
+      assert.equal(actual.userId, admin.id);
       assert.equal(actual.messageId, createdMessage.id);
       assert.equal(actual.text, 'Cool new comment');
     });
@@ -37,7 +42,7 @@ describe('Service: Comment (feed)', () => {
     it('should return 404 when message not found', async () => {
       const commentPromise = commentService.create({
         messageId: '5453451',
-        userId: global.users.admin.id,
+        userId: admin.id,
         text: 'Cool comment',
       });
 
@@ -47,28 +52,30 @@ describe('Service: Comment (feed)', () => {
 
   describe('list', () => {
     let createdComments = [];
-    let createdMessage;
 
     before(async () => {
-      createdMessage = await messageService.create({
+      const admin = await testHelper.createUser({ password: 'foo' });
+      const network = await testHelper.createNetwork({ userId: admin.id });
+
+      const createdMessage = await messageService.create({
         parentType: 'network',
-        parentId: global.networks.flexAppeal.id,
+        parentId: network.id,
         text: 'Message for feed',
       }, {
-        credentials: { id: global.users.admin.id },
-        network: { id: global.networks.flexAppeal.id },
+        credentials: { id: admin.id },
+        network: { id: network.id },
       });
 
       createdComments = await Promise.all([
         commentService.create({
           messageId: createdMessage.id,
-          userId: global.users.admin.id,
+          userId: admin.id,
           text: 'Cool comment',
         }),
       ]);
     });
 
-    after(() => messageService.remove({ messageId: createdMessage.id }));
+    after(() => testHelper.cleanAll());
 
     it('should return a collection of comment models', async () => {
       const actual = await commentService.list({

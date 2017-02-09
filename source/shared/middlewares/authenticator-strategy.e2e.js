@@ -1,14 +1,32 @@
 import { Server } from 'hapi';
 import { assert } from 'chai';
 import jwtStrategy from './authenticator-strategy';
+import * as testHelper from '../test-utils/helpers';
 import { getRequest } from '../test-utils/request';
 import { createRoute } from '../utils/create-routes';
 import preFetchNetwork from './prefetch-network';
 
 const expiredToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNDcwMzA4OTY0LCJpc3MiOiJodHRwczpcL1wvYXBpLmZsZXgtYXBwZWFsLm5sIiwiaWF0IjoxNDcwMzA1MzY0LCJzdWIiOjY0LCJkZXZpY2UiOiI2NUJGQjcwRTc3Rjg0OEVFQUQ3MzBFQ0U2RDkyRkY2NyIsImp0aSI6MzMxODg4N30.MdrwMF1VrSAhmwg0oKbQ0Tl6_Nu1WKVxrm1uMGsvR9E'; // eslint-disable-line
-let server;
 
 describe('Authenticator strategy', () => {
+  let server;
+  let employee;
+  let flexAppeal;
+
+  before(async () => {
+    const [admin, user] = await Promise.all([
+      testHelper.createUser({ password: 'foo' }),
+      testHelper.createUser({ password: 'bar' }),
+    ]);
+    employee = user;
+
+    flexAppeal = await testHelper.createNetwork({ name: 'flexappeal', userId: admin.id });
+
+    return testHelper.addUserToNetwork({ userId: employee.id, networkId: flexAppeal.id });
+  });
+
+  after(async () => testHelper.cleanAll());
+
   beforeEach(() => {
     server = new Server();
     server.connection({ port: 2000 });
@@ -19,9 +37,6 @@ describe('Authenticator strategy', () => {
   afterEach(() => server.stop());
 
   it('should succeed when the token is valid', async () => {
-    const { flexAppeal } = global.networks;
-    const { employee } = global.tokens;
-
     server.route({
       method: 'GET',
       path: '/v2/networks/{networkId}/test',
@@ -32,7 +47,7 @@ describe('Authenticator strategy', () => {
       },
     });
 
-    const res = await getRequest(`/v2/networks/${flexAppeal.id}/test`, server, employee);
+    const res = await getRequest(`/v2/networks/${flexAppeal.id}/test`, employee.token, server);
 
     assert.equal(res.result, 'ok');
     assert.equal(res.statusCode, 200);
@@ -49,7 +64,7 @@ describe('Authenticator strategy', () => {
       },
     });
 
-    const res = await getRequest('/v2/test', server, 'invalid_token');
+    const res = await getRequest('/v2/test', 'invalid_token', server);
 
     assert.equal(res.statusCode, 401);
   });
@@ -65,7 +80,7 @@ describe('Authenticator strategy', () => {
       },
     });
 
-    const res = await getRequest('/v2/test', server, expiredToken);
+    const res = await getRequest('/v2/test', expiredToken, server);
 
     assert.equal(res.statusCode, 401);
   });
@@ -80,8 +95,8 @@ describe('Authenticator strategy', () => {
     });
 
     server.route(route);
-    const expiredTokenResponse = await getRequest(ENDPOINT, server, expiredToken);
-    const wrongTokenResponse = await getRequest(ENDPOINT, server, 'invalid_token');
+    const expiredTokenResponse = await getRequest(ENDPOINT, expiredToken, server);
+    const wrongTokenResponse = await getRequest(ENDPOINT, 'invalid_token', server);
 
     assert.equal(expiredTokenResponse.statusCode, 403);
     assert.equal(wrongTokenResponse.statusCode, 403);

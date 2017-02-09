@@ -1,12 +1,22 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import * as impl from './implementation';
 import * as responseUtils from '../../../../../shared/utils/response';
 import * as socketService from '../../../../../shared/services/socket';
+import * as notifier from '../../../../../shared/services/notifier';
+import * as mailer from '../../../../../shared/services/mailer';
+import * as impl from './implementation';
 import * as newMessageNotification from '../../notifications/new-message';
 
 describe('Conversation Service implementation', () => {
+  let sandbox;
   const conversationStub = { users: [{ id: 1 }, { id: 2 }] };
+
+  before(() => {
+    sandbox = sinon.sandbox.create();
+    sandbox.stub(notifier, 'send').returns(null);
+    sandbox.stub(mailer, 'send').returns(null);
+  });
+  after(() => sandbox.restore());
 
   describe('assertThatUserIsPartOfTheConversation', () => {
     it('should return correct assertion', () => {
@@ -25,7 +35,7 @@ describe('Conversation Service implementation', () => {
     const expectedUsersToNotify = [{ id: 2 }];
 
     it('should send push notification', () => {
-      sinon.stub(newMessageNotification, 'send');
+      sandbox.stub(newMessageNotification, 'send');
 
       impl.notifyUsersForNewMessage(conversationStub, messageStub, 'foo_token');
 
@@ -36,7 +46,7 @@ describe('Conversation Service implementation', () => {
     });
 
     it('should send socket event', () => {
-      sinon.stub(socketService, 'send');
+      sandbox.stub(socketService, 'send');
 
       impl.notifyUsersForNewMessage(conversationStub, messageStub, 'foo_token');
 

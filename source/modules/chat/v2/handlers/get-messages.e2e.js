@@ -1,36 +1,37 @@
 import { assert } from 'chai';
 import Promise from 'bluebird';
 import blueprints from '../../../../shared/test-utils/blueprints';
-import authenticate from '../../../../shared/test-utils/authenticate';
+import * as testHelper from '../../../../shared/test-utils/helpers';
 import { getRequest } from '../../../../shared/test-utils/request';
-import * as userRepo from '../../../../modules/core/repositories/user';
 import * as privateMessageService from '../services/private-message';
 import * as conversationService from '../services/conversation';
 
-describe('Get messages (v2)', () => {
-  let creator;
-  let creatorToken;
-  let participant;
+describe('Handler: Get messages (v2)', () => {
   let createdConversation;
+  let creator;
 
   before(async () => {
-    creator = await userRepo.createUser({
-      ...blueprints.users.employee,
-      username: 'conversation_creator' });
+    const [admin, participant] = await Promise.all([
+      testHelper.createUser({
+        ...blueprints.users.admin,
+        username: 'conversation_creator' }),
+      testHelper.createUser({
+        ...blueprints.users.employee,
+        username: 'conversation_participant' }),
+    ]);
+    creator = admin;
 
-    participant = await userRepo.createUser({
-      ...blueprints.users.employee,
-      username: 'conversation_participant' });
+    const network = await testHelper.createNetwork({ userId: creator.id });
+
+    await Promise.all([
+      testHelper.addUserToNetwork({ networkId: network.id, userId: participant.id }),
+      testHelper.addUserToNetwork({ networkId: network.id, userId: creator.id }),
+    ]);
 
     createdConversation = await conversationService.create({
       type: 'PRIVATE',
       participantIds: [creator.id, participant.id],
     }, { credentials: { id: creator.id } });
-
-    creatorToken = (await authenticate(global.server, {
-      username: creator.username,
-      password: blueprints.users.employee.password,
-    })).token;
 
     await privateMessageService.create({
       conversationId: createdConversation.id,
@@ -54,14 +55,11 @@ describe('Get messages (v2)', () => {
     }));
   });
 
-  after(async () => {
-    await conversationService.remove({ conversationId: createdConversation.id });
-    await [creator, participant].map(user => userRepo.deleteById(user.id));
-  });
+  after(async () => testHelper.cleanAll());
 
-  it('should return messages for conversation', async () => {
+  it('should return messages for conversation (v2)', async () => {
     const endpoint = `/v2/conversations/${createdConversation.id}/messages`;
-    const { result, statusCode } = await getRequest(endpoint, global.server, creatorToken);
+    const { result, statusCode } = await getRequest(endpoint, creator.token);
 
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 3);
@@ -80,7 +78,7 @@ describe('Get messages (v2)', () => {
 
   it('should return messages for conversation limited by 2', async () => {
     const endpoint = `/v2/conversations/${createdConversation.id}/messages?limit=2`;
-    const { result, statusCode } = await getRequest(endpoint, global.server, creatorToken);
+    const { result, statusCode } = await getRequest(endpoint, creator.token);
 
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 2);
@@ -95,7 +93,7 @@ describe('Get messages (v2)', () => {
   it('should return messages for conversation limited by 2 starting from the second message',
   async () => {
     const endpoint = `/v2/conversations/${createdConversation.id}/messages?limit=2&offset=1`;
-    const { result, statusCode } = await getRequest(endpoint, global.server, creatorToken);
+    const { result, statusCode } = await getRequest(endpoint, creator.token);
 
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 2);
@@ -109,7 +107,7 @@ describe('Get messages (v2)', () => {
 
   it('should return 404 code when conversation does not exist', async () => {
     const endpoint = '/v2/conversations/93523423423/messages';
-    const { statusCode } = await getRequest(endpoint, global.server, creatorToken);
+    const { statusCode } = await getRequest(endpoint, creator.token);
 
     assert.equal(statusCode, 404);
   });

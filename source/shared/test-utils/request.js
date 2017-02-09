@@ -2,14 +2,14 @@ export const makeOptions = (token) => {
   return { headers: { 'X-API-Token': token } };
 };
 
-export function deleteRequest(url, server = global.server, token = global.tokens.admin) {
+export function deleteRequest(url, token, server = global.server) {
   return server.inject(Object.assign({
     method: 'DELETE',
     url,
   }, makeOptions(token)));
 }
 
-export function postRequest(url, payload, server = global.server, token = global.tokens.admin) {
+export function postRequest(url, payload, token, server = global.server) {
   return server.inject(Object.assign({
     method: 'POST',
     url,
@@ -17,7 +17,7 @@ export function postRequest(url, payload, server = global.server, token = global
   }, makeOptions(token)));
 }
 
-export function putRequest(url, payload, server = global.server, token = global.tokens.admin) {
+export function putRequest(url, payload, token, server = global.server) {
   return server.inject(Object.assign({
     method: 'PUT',
     url,
@@ -25,14 +25,14 @@ export function putRequest(url, payload, server = global.server, token = global.
   }, makeOptions(token)));
 }
 
-export function getRequest(url, server = global.server, token = global.tokens.admin) {
+export function getRequest(url, token, server = global.server) {
   return server.inject(Object.assign({
     method: 'GET',
     url,
   }, makeOptions(token)));
 }
 
-export function patchRequest(url, payload, server = global.server, token = global.tokens.admin) {
+export function patchRequest(url, payload, token, server = global.server) {
   return server.inject(Object.assign({
     method: 'PATCH',
     url,

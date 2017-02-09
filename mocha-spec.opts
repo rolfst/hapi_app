@@ -1,0 +1,5 @@
+--compilers js:babel-register
+--timeout 10000
+--require mocha
+--require ./spec-bootstrap
+--slow 10

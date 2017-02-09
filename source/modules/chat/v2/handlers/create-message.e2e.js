@@ -1,29 +1,25 @@
 import { assert } from 'chai';
 import blueprints from '../../../../shared/test-utils/blueprints';
-import authenticate from '../../../../shared/test-utils/authenticate';
+import * as testHelper from '../../../../shared/test-utils/helpers';
 import { postRequest } from '../../../../shared/test-utils/request';
-import * as userRepo from '../../../../modules/core/repositories/user';
 import * as conversationService from '../services/conversation';
 
 describe('Handler: Create message (v2)', () => {
   let createdConversation;
   let creator;
-  let participant;
-  let creatorToken;
 
   before(async () => {
-    creator = await userRepo.createUser({
-      ...blueprints.users.employee,
-      username: 'conversation_creator' });
+    const [admin, participant] = await Promise.all([
+      testHelper.createUser({
+        ...blueprints.users.employee,
+        username: 'conversation_creator' }),
+      testHelper.createUser({
+        ...blueprints.users.employee,
+        username: 'conversation_participant' }),
+    ]);
+    creator = admin;
 
-    participant = await userRepo.createUser({
-      ...blueprints.users.employee,
-      username: 'conversation_participant' });
-
-    creatorToken = (await authenticate(global.server, {
-      username: creator.username,
-      password: blueprints.users.employee.password,
-    })).token;
+    await testHelper.createNetwork({ userId: creator.id, name: 'flexappeal' });
 
     createdConversation = await conversationService.create({
       type: 'PRIVATE',
@@ -31,16 +27,13 @@ describe('Handler: Create message (v2)', () => {
     }, { credentials: { id: creator.id } });
   });
 
-  after(async () => {
-    await conversationService.remove({ conversationId: createdConversation.id });
-    await [creator, participant].map(user => userRepo.deleteById(user.id));
-  });
+  after(async () => testHelper.cleanAll());
 
   it('should return object model with new message as source', async () => {
     const ENDPOINT_URL = `/v2/conversations/${createdConversation.id}/messages`;
     const { result, statusCode } = await postRequest(ENDPOINT_URL, {
       text: 'My cool message',
-    }, global.server, creatorToken);
+    }, creator.token);
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.object_type, 'private_message');

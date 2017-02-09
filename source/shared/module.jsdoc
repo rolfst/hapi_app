@@ -15,6 +15,11 @@
  */
 
 /**
+ * @typedef {object} AuthenticationToken
+ * @property {string} access_token
+ */
+
+/**
  * @typedef {object} Message
  * @property {artifacts}
  * @property {object} message.artifacts {@link module:shared~Artifacts Artifacts}- Artifacts containing request meta data

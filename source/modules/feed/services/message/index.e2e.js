@@ -1,4 +1,5 @@
 import { assert } from 'chai';
+import * as testHelpers from '../../../../shared/test-utils/helpers';
 import R from 'ramda';
 import Promise from 'bluebird';
 import * as pollService from '../../../poll/services/poll';
@@ -7,43 +8,51 @@ import * as objectService from '../object';
 import * as commentService from '../comment';
 
 describe('Service: Message', () => {
+  let admin;
+  let employee;
+  let network;
+
   describe('list', () => {
     let createdMessages = [];
 
     before(async () => {
+      [admin, employee] = await Promise.all([
+        testHelpers.createUser({ password: 'foo' }),
+        testHelpers.createUser({ password: 'foo' }),
+      ]);
+      network = await testHelpers.createNetwork({ userId: admin.id });
       createdMessages = await Promise.all([
         messageService.create({
           parentType: 'network',
-          parentId: global.networks.flexAppeal.id,
+          parentId: network.id,
           text: 'My cool message',
           resources: [{
             type: 'poll',
             data: { options: ['Yes', 'No', 'Ok'] },
           }],
         }, {
-          credentials: global.users.admin,
-          network: global.networks.flexAppeal,
+          network,
+          credentials: admin,
         }),
         messageService.create({
           parentType: 'network',
-          parentId: global.networks.flexAppeal.id,
+          parentId: network.id,
           text: 'My other cool message',
           resources: [],
         }, {
-          credentials: global.users.admin,
-          network: global.networks.flexAppeal,
+          network,
+          credentials: admin,
         }),
       ]);
     });
 
-    after(() => Promise.map(createdMessages, (message) =>
-      messageService.remove({ messageId: message.id })));
+    after(() => testHelpers.cleanAll());
 
     it('should return message models', async () => {
       const actual = await messageService.list({
         messageIds: R.pluck('id', createdMessages),
       }, {
-        credentials: global.users.admin,
+        credentials: admin,
       });
 
       assert.lengthOf(actual, 2);
@@ -59,15 +68,15 @@ describe('Service: Message', () => {
     it('should return correct like count', async () => {
       await Promise.all([
         messageService.like({
-          messageId: createdMessages[0].id, userId: global.users.admin.id }),
+          messageId: createdMessages[0].id, userId: admin.id }),
         messageService.like({
-          messageId: createdMessages[0].id, userId: global.users.employee.id }),
+          messageId: createdMessages[0].id, userId: employee.id }),
       ]);
 
       const actual = await messageService.list({
         messageIds: R.pluck('id', createdMessages),
       }, {
-        credentials: global.users.admin,
+        credentials: admin,
       });
 
       const likedMessage = R.find(R.propEq('id', createdMessages[0].id), actual);
@@ -86,13 +95,13 @@ describe('Service: Message', () => {
       await commentService.create({
         messageId: createdMessages[1].id,
         text: 'Foo comment for feed message!',
-        userId: global.users.admin.id,
+        userId: admin.id,
       });
 
       const actual = await messageService.list({
         messageIds: R.pluck('id', createdMessages),
       }, {
-        credentials: global.users.admin,
+        credentials: admin,
       });
 
       const commentedMessage = R.find(R.propEq('id', createdMessages[1].id), actual);
@@ -106,21 +115,24 @@ describe('Service: Message', () => {
     let createdMessage;
 
     before(async () => {
+      admin = await testHelpers.createUser({ password: 'foo' });
+      network = await testHelpers.createNetwork({ userId: admin.id });
+
       createdMessage = await messageService.create({
         parentType: 'network',
-        parentId: global.networks.flexAppeal.id,
+        parentId: network.id,
         text: 'My cool message',
         resources: [{
           type: 'poll',
           data: { options: ['Yes', 'No', 'Ok'] },
         }],
       }, {
-        credentials: { id: global.users.admin.id },
-        network: { id: global.networks.flexAppeal.id },
+        credentials: { id: admin.id },
+        network: { id: network.id },
       });
     });
 
-    after(() => messageService.remove({ messageId: createdMessage.id }));
+    after(() => testHelpers.cleanAll());
 
     it('should create a message entry', async () => {
       const expected = await messageService.get({ messageId: createdMessage.id });
@@ -140,8 +152,8 @@ describe('Service: Message', () => {
       const pollEntry = await pollService.get({ pollId: objects[0].sourceId });
 
       assert.isDefined(pollEntry);
-      assert.equal(pollEntry.networkId, global.networks.flexAppeal.id);
-      assert.equal(pollEntry.userId, global.users.admin.id);
+      assert.equal(pollEntry.networkId, network.id);
+      assert.equal(pollEntry.userId, admin.id);
     });
 
     it('should create object entry for poll if resource is present', async () => {
@@ -151,7 +163,7 @@ describe('Service: Message', () => {
       });
 
       assert.lengthOf(expected, 1);
-      assert.equal(expected[0].userId, global.users.admin.id);
+      assert.equal(expected[0].userId, admin.id);
       assert.equal(expected[0].objectType, 'poll');
       assert.isDefined(expected[0].sourceId);
     });
@@ -167,7 +179,7 @@ describe('Service: Message', () => {
     it('should create object entry for message', async () => {
       const objects = await objectService.list({
         parentType: 'network',
-        parentId: global.networks.flexAppeal.id,
+        parentId: network.id,
       });
 
       assert.equal(objects[0].sourceId, createdMessage.id);
