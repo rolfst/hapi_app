@@ -8,7 +8,6 @@ import * as networkRepository from '../../../core/repositories/network';
 import * as teamRepository from '../../../core/repositories/team';
 import * as userRepository from '../../../core/repositories/user';
 import * as networkService from '../../../core/services/network';
-import * as serviceImpl from './implementation';
 import * as service from './index';
 
 describe('Network synchronisation', () => {

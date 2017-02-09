@@ -120,7 +120,7 @@ describe('Service: Sync Implementation', () => {
     });
   });
 
-  describe.only('createUserActions', () => {
+  describe('createUserActions', () => {
     it('should set correct user to be added to network', () => {
       const internalUsers = [{
         id: '1',
