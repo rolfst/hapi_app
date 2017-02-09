@@ -25,6 +25,8 @@ describe('Network synchronisation', () => {
       name: 'Network with integration',
       integrationName: 'FOO_PARTNER',
     });
+
+    await networkRepository.setImportDateOnNetworkIntegration(network.id);
   });
 
   after(async () => {
@@ -399,8 +401,14 @@ describe('Network synchronisation', () => {
         }),
       ]);
 
-      const newNetwork = await networkRepository
-        .createNetwork(global.users.admin.id, 'Foo network for transfer');
+      const newNetwork = await networkRepository.createIntegrationNetwork({
+        userId: global.users.admin.id,
+        externalId: 'api.transferednetwork.nl',
+        name: 'Foo network for transfer',
+        integrationName: 'FOO_PARTNER',
+      });
+
+      await networkRepository.setImportDateOnNetworkIntegration(newNetwork.id);
       const activeUsersInNetwork = await networkService.listActiveUsersForNetwork({
         networkId: network.id }, { credentials: network.superAdmin });
 
