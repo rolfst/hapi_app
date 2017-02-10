@@ -5,7 +5,7 @@ import * as privateMessageService from '../../../chat/v2/services/private-messag
 import * as feedMessageService from '../message';
 import * as objectService from './index';
 
-describe.only('Service: Object', () => {
+describe('Service: Object', () => {
   let admin;
   let network;
 
