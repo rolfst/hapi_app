@@ -1,7 +1,7 @@
-import createEmitter from '../../shared/services/event-emitter';
+import EventEmitter from '../../shared/services/event-emitter';
 import * as Intercom from '../../shared/services/intercom';
 
-const pubsub = createEmitter();
+const pubsub = EventEmitter.create();
 
 pubsub.asyncOn('user.created', (payload) => {
   Intercom.getClient().users.create({
