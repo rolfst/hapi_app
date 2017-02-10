@@ -9,12 +9,11 @@ import * as impl from './implementation';
  */
 
 const logger = Logger.getLogger('FEED/service/object');
-const typeEq = R.propEq('type');
-const idEq = R.propEq('id');
+
+const objectsForTypeValuePair = (fn, pairs) => R.pipe(R.mapObjIndexed(fn), R.values)(pairs);
 const getSources = R.pipeP(Promise.all, R.flatten, R.reject(R.isNil));
 const groupByObjectType = R.groupBy(R.prop('objectType'));
 const sourceIdsPerType = R.pipe(groupByObjectType, R.map(R.pluck('sourceId')));
-const whereTypeAndId = (type, id) => R.both(typeEq(type), idEq(id));
 const createOptionsFromPayload = R.pipe(
   R.pick(['offset', 'limit']),
   R.assoc('order', [['createdAt', 'desc']])
@@ -43,7 +42,7 @@ export const list = async (payload, message) => {
 };
 
 /**
- * Listing objects including the source
+ * Listing objects including the source and children
  * @param {object} payload - Object containing payload data
  * @param {string} payload.objectIds - The id for objects to list
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
@@ -56,17 +55,25 @@ export const listWithSources = async (payload, message) => {
   const objects = await objectRepository.findBy({
     id: { $in: payload.objectIds } }, createOptionsFromPayload(payload));
 
-  const promisedSources = R.pipe(
-    sourceIdsPerType,
-    R.mapObjIndexed(impl.findSourcesForType(message)),
-    R.values
-  )(objects);
+  const promisedChildren = objectsForTypeValuePair(
+    impl.findChildrenForType, sourceIdsPerType(objects));
+  const children = await getSources(promisedChildren);
 
+  const promisedSources = objectsForTypeValuePair(impl.findSourcesForType(message),
+    R.merge(sourceIdsPerType(objects), sourceIdsPerType(children)));
   const sources = await getSources(promisedSources);
-  const findSource = (type, id) => R.find(whereTypeAndId(type, id), sources) || null;
 
-  return R.map((object) =>
-    R.merge(object, { source: findSource(object.objectType, object.sourceId) }), objects);
+  const objectsWithSource = R.map(impl.addSourceToObject(sources), R.concat(objects, children));
+  const findObjectById = (objectId) => R.find(R.propEq('id', objectId), objectsWithSource);
+
+  const addChildrenToObject = (object) => R.merge(object, {
+    children: impl.findChildren(objectsWithSource, object),
+  });
+
+  return R.pipe(
+    R.pluck('id'),
+    R.map(R.pipe(findObjectById, addChildrenToObject))
+  )(objects);
 };
 
 /**

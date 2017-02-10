@@ -9,6 +9,12 @@ import * as impl from './implementation';
 
 const logger = Logger.getLogger('POLL/service/poll');
 
+export const list = async (payload, message) => {
+  logger.info('Finding multiple polls', { payload, message });
+
+  return pollRepository.findBy({ id: { $in: payload.pollIds } });
+};
+
 /**
  * Gets a poll
  * @param {object} payload - Object containing payload data
