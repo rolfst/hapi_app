@@ -7,7 +7,6 @@ import chatRoutesV2 from './modules/chat/v2/create-routes';
 import flexchangeRoutes from './modules/flexchange/create-routes';
 import pollRoutes from './modules/poll/create-routes';
 import feedRoutes from './modules/feed/create-routes';
-import uploadRoutes from './modules/upload/create-routes';
 
 export default [
   ...coreRoutes,
@@ -19,5 +18,4 @@ export default [
   ...flexchangeRoutes,
   ...pollRoutes,
   ...feedRoutes,
-  ...uploadRoutes,
 ];
