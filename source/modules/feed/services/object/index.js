@@ -72,8 +72,7 @@ export const listWithSources = async (payload, message) => {
 
   return R.pipe(
     R.pluck('id'),
-    R.map(findObjectById),
-    R.map(addChildrenToObject)
+    R.map(R.pipe(findObjectById, addChildrenToObject))
   )(objects);
 };
 

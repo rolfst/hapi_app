@@ -5,7 +5,7 @@ import * as privateMessageService from '../../../chat/v2/services/private-messag
 import * as feedMessageService from '../message';
 import * as objectService from './index';
 
-describe('Service: Object', () => {
+describe.only('Service: Object', () => {
   let admin;
   let network;
 
@@ -78,14 +78,14 @@ describe('Service: Object', () => {
           parentType: 'network',
           parentId: '123',
           objectType: 'poll',
-          sourceId: '3',
+          sourceId: '39102',
         }),
         objectService.create({
           userId: admin.id,
           parentType: 'network',
           parentId: '123',
           objectType: 'feed_message',
-          sourceId: '3',
+          sourceId: '39102',
         }),
       ]);
     });
