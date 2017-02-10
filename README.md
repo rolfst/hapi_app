@@ -26,7 +26,6 @@ It is possible to generate some documentation about the method interfaces which 
 
 # Testing
 
-The test setup is currently under change:
 Test make use of Mocha as the test runner and Chai as the assertion framework.
 
 To run the e2e test individually one can use:
@@ -39,3 +38,10 @@ To run the unit test individually one can use:
 ```
 API_ENV=testing node_modules/.bin/_mocha --opts ./mocha-spec.opts  <file_or_folder_under_test>
 ```
+## Debugging
+
+To run the test with debugging use:
+```
+API_ENV=testing node --inspect --debug-brk node_modules/.bin/_mocha --opts ./mocha-spec.opts  <file_or_folder_under_test>
+```
+this will halt the execution of the test till a debug client can attach itself to the process and this will pause the debugger on the first line.
