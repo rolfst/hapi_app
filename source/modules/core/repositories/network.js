@@ -121,7 +121,6 @@ export const findNetworksForUser = async (userId) => {
   const pivotResult = await NetworkUser.findAll({
     where: { userId, deletedAt: null },
   });
-
   const networkIds = uniq(map(pivotResult, 'networkId'));
 
   return findNetworkByIds(networkIds);
@@ -132,7 +131,7 @@ export const findNetworksForUser = async (userId) => {
  * @param {string} attributes.networkId - network where user is added to.
  * @param {string} attributes.userId - user to add to the network
  * @method addUser
- * @return {external:Promise.<NetworkUser>} {@link module:modules/core~NetworkUser NetworkUser}
+ * @return {external:Promise.<NetworkUser>} {@link module:shared~NetworkUser NetworkUser}
  */
 export const addUser = async (attributes) => {
   const pivotResult = await NetworkUser.findOne({

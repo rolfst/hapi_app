@@ -141,7 +141,9 @@ export const acceptExchange = async (payload, message) => {
 
   acceptanceNotifier.send(message.network, acceptedExchange, acceptanceUser);
 
-  return acceptedExchange;
+  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+
+  return exchanges[0];
 };
 
 /**
@@ -177,7 +179,9 @@ export const approveExchange = async (payload, message) => {
     approvedUser: exchangeResponse.User,
   });
 
-  return approvedExchange;
+  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+
+  return exchanges[0];
 };
 
 /**
@@ -210,9 +214,11 @@ export const declineExchange = async (payload, message) => {
 
   if (approved === 0) throw createError('403', 'You are already rejected for the exchange.');
 
-  const declinedExchange = await exchangeRepo.declineExchange(exchange.id, message.credentials.id);
+  await exchangeRepo.declineExchange(exchange.id, message.credentials.id);
 
-  return declinedExchange;
+  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+
+  return exchanges[0];
 };
 
 /**
@@ -265,10 +271,12 @@ export const rejectExchange = async (payload, message) => {
 
   const rejectedExchange = await exchangeRepo.rejectExchange(
     exchange, message.credentials, payload.user_id);
-  const reloadedExchange = await rejectedExchange.reload();
+  await rejectedExchange.reload();
   // TODO: Fire ExchangeWasRejected event
 
-  return reloadedExchange;
+  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+
+  return exchanges[0];
 };
 
 /**

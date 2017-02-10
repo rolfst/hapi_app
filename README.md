@@ -1,7 +1,7 @@
 # NODE-API
 
 This repository contains the server side JavaScript part of the Flex-Appeal API.
-The project build is managed by npm.
+The project build is managed by NPM.
 
 ## Usage
 
@@ -23,3 +23,19 @@ To run the application locally one can use:
 It is possible to generate some documentation about the method interfaces which are located in the docs directory:
 
   `npm run doc`
+
+# Testing
+
+The test setup is currently under change:
+Test make use of Mocha as the test runner and Chai as the assertion framework.
+
+To run the e2e test individually one can use:
+```
+API_ENV=testing node_modules/.bin/_mocha --opts ./mocha.opts  <file_or_folder_under_test>
+```
+Whereas `./test-bootstrap.js` contains the logic that provides the assertion framework and the usage of babel
+
+To run the unit test individually one can use:
+```
+API_ENV=testing node_modules/.bin/_mocha --opts ./mocha-spec.opts  <file_or_folder_under_test>
+```

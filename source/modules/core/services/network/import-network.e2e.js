@@ -3,7 +3,9 @@ import sinon from 'sinon';
 import nock from 'nock';
 import Promise from 'bluebird';
 import { pick, find, map } from 'lodash';
+import R from 'ramda';
 import stubs from '../../../../shared/test-utils/stubs';
+import * as testHelper from '../../../../shared/test-utils/helpers';
 import * as adapterUtil from '../../../../shared/utils/create-adapter';
 import * as passwordUtil from '../../../../shared/utils/password';
 import configurationMailNewAdmin from '../../../../shared/mails/configuration-invite-newadmin';
@@ -15,11 +17,11 @@ import * as networkServiceImpl from './implementation';
 import * as userService from '../user';
 import * as userRepo from '../../repositories/user';
 import * as teamRepo from '../../repositories/team';
-import * as integrationRepo from '../../repositories/integration';
 
 describe('Import network', () => {
   let sandbox;
   let network;
+  let admin;
   const pristineNetwork = stubs.pristine_networks_admins[0];
   const employee = pristineNetwork.admins[0];
   const externalUsers = map(stubs.users_200.data, userSerializer);
@@ -28,25 +30,8 @@ describe('Import network', () => {
     fetchUsers: () => externalUsers,
   };
 
-  const createIntegration = () => integrationRepo.createIntegration({
-    name: pristineNetwork.integrationName,
-    token: 'footoken',
-  });
-
-  const createIntegrationNetwork = async () => networkRepo.createIntegrationNetwork({
-    ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
-    userId: global.users.admin.id,
-  });
-
-  const findNetwork = () => networkRepo.findNetwork({
-    externalId: pristineNetwork.externalId,
-    name: pristineNetwork.name,
-  });
-
   describe('Happy path', async () => {
     describe('general', () => {
-      let integration;
-
       before(async () => {
         sandbox = sinon.sandbox.create();
 
@@ -54,29 +39,30 @@ describe('Import network', () => {
           .get('/users')
           .reply(200, stubs.users_200);
 
-        integration = await createIntegration();
-        network = await createIntegrationNetwork();
+        admin = await testHelper.createUser({ password: 'pw' });
+        const { network: netw } = await testHelper.createNetworkWithIntegration({
+          userId: admin.id,
+          ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
+        });
+        network = netw;
 
         sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve(fakeAdapter));
         sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
-        mailer.send.reset();
+        sandbox.stub(mailer, 'send').returns(Promise.resolve(true));
 
         await networkServiceImpl.importNetwork(network, employee.username);
       });
 
       after(async () => {
-        network = await findNetwork();
-
-        const users = await networkRepo.findAllUsersForNetwork(network.id);
-        const createdUser = await userRepo.findUserBy({ username: employee.username });
-
         sandbox.restore();
+        const reloadedNetwork = await networkRepo.findNetworkById(network.id);
+        const findAllNormalUsers = R.reject((user) => (user.id === reloadedNetwork.superAdmin.id
+              || user.id === admin.id));
+        const users = await networkRepo.findAllUsersForNetwork(network.id);
 
-        await userRepo.deleteById(createdUser.id);
-        await integration.destroy();
-        await networkRepo.deleteById(network.id);
-
-        return Promise.map(users, user => userRepo.deleteById(user.id));
+        const normalUsers = findAllNormalUsers(users);
+        await testHelper.deleteUser(normalUsers);
+        return testHelper.cleanAll();
       });
 
 
@@ -114,14 +100,14 @@ describe('Import network', () => {
         const admins = await networkRepo.findUsersForNetwork({
           networkId: network.id, roleType: 'ADMIN' });
 
-        assert.lengthOf(admins, 1);
+        assert.lengthOf(admins, 2);
       });
 
       it('should add new unique users to network', async () => {
         const activeUsers = await networkRepo.findUsersForNetwork({
           networkId: network.id });
 
-        assert.lengthOf(activeUsers, 13);
+        assert.lengthOf(activeUsers, 14);
       });
 
       it('should add new users to teams', async () => {
@@ -144,8 +130,6 @@ describe('Import network', () => {
   });
 
   describe('Fault path', async () => {
-    let integration;
-
     before(async () => {
       nock(pristineNetwork.externalId)
         .get('/users')
@@ -155,27 +139,25 @@ describe('Import network', () => {
       sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve(fakeAdapter));
       sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
 
-      integration = await createIntegration();
-      network = await createIntegrationNetwork();
+      admin = await testHelper.createUser({ password: 'pw' });
+      const { network: netw } = await testHelper.createNetworkWithIntegration({
+        userId: admin.id,
+        ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
+      });
+      network = netw;
     });
 
     after(async () => {
       sandbox.restore();
-      network = await findNetwork();
 
-      const users = await networkRepo.findAllUsersForNetwork(network.id);
-
-      await integration.destroy();
-      await networkRepo.deleteById(network.id);
-
-      return Promise.all(users.map(u => userRepo.deleteById(u.id)));
+      return testHelper.cleanAll();
     });
 
     it('should return 404 when network does not exists', async () => {
       const result = networkService.importNetwork({
         external_username: employee.username,
         networkId: 0,
-      }, { credentials: global.users.admin.id });
+      }, { credentials: admin.id });
 
       await assert.isRejected(result, /Error: Network not found./);
     });
@@ -184,7 +166,7 @@ describe('Import network', () => {
       const result = networkService.importNetwork({
         external_username: employee.username,
         networkId: 0,
-      }, { credentials: global.users.admin.id });
+      }, { credentials: admin.id });
 
       await assert.isRejected(result, /Error: Network not found./);
     });
@@ -195,19 +177,19 @@ describe('Import network', () => {
       const result = networkService.importNetwork({
         external_username: employee.username,
         networkId: network.id,
-      }, { credentials: global.users.admin.id });
+      }, { credentials: admin.id });
 
       await assert.isRejected(result, /Error: The network has already been imported./);
     });
 
     it('should return 403 when no integration has been enabled for the network', async () => {
       const networkWithoutIntegration = await networkRepo.createNetwork(
-        global.users.admin.id, pristineNetwork.name, pristineNetwork.externalId);
+        admin.id, pristineNetwork.name, pristineNetwork.externalId);
 
       const result = networkService.importNetwork({
         external_username: employee.username,
         networkId: networkWithoutIntegration.id,
-      }, { credentials: global.users.admin.id });
+      }, { credentials: admin.id });
 
       await networkRepo.deleteById(network.id);
 
