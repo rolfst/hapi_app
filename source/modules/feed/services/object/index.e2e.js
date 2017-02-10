@@ -61,7 +61,7 @@ describe('Service: Object', () => {
       assert.lengthOf(actual, 1);
       assert.equal(actual[0].userId, admin.id);
       assert.equal(actual[0].objectType, 'feed_message');
-      assert.equal(actual[0].sourceId, '2');
+      assert.equal(actual[0].sourceId, '1932');
       assert.equal(actual[0].parentType, 'network');
       assert.equal(actual[0].parentId, network.id);
     });
