@@ -4,7 +4,7 @@ import FormData from 'form-data';
 import * as testHelper from '../../../shared/test-utils/helpers';
 import { postRequest } from '../../../shared/test-utils/request';
 
-describe('upload', () => {
+describe.skip('upload', () => {
   let user;
   let admin;
 
