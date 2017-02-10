@@ -55,7 +55,7 @@ describe('Handler: Get messages (v2)', () => {
     }));
   });
 
-  after(async () => testHelper.cleanAll());
+  after(() => testHelper.cleanAll());
 
   it('should return messages for conversation (v2)', async () => {
     const endpoint = `/v2/conversations/${createdConversation.id}/messages`;

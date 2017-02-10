@@ -28,9 +28,7 @@ describe('Authenticate', () => {
       networkId: network.id });
   });
 
-  after(async () => {
-    return testHelper.cleanAll();
-  });
+  after(() => testHelper.cleanAll());
 
   it('should check for required input fields', async () => {
     const response1 = postRequest(url, { foo: 'bar' });

@@ -34,7 +34,7 @@ describe('Networks for logged user', async () => {
     requestResult = result;
   });
 
-  after(async () => testHelper.cleanAll());
+  after(() => testHelper.cleanAll());
 
   it('should return correct network amount', async () => {
     assert.equal(requestResult.data.length, 2);

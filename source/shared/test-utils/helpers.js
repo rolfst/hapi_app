@@ -1,4 +1,3 @@
-import { flatten } from 'lodash';
 import R from 'ramda';
 import Promise from 'bluebird';
 import authenticate from './authenticate';
@@ -137,9 +136,14 @@ export async function getLoginToken({ username, password }) {
  * @return {external:Promise<User>} {@link module:modules/core~User User}
  */
 export async function createUser(userAttributes = {}) {
-  const attributes = { username: `test-user-${Math.floor(Math.random() * 1000)}`,
+  const username = `test-user-${Math.floor(Math.random() * 1000)}`;
+  const attributes = {
+    username,
+    email: username,
     password: `pw#${Math.floor(Math.random() * 1000)}`,
-    ...userAttributes };
+    ...userAttributes,
+  };
+
   const user = await userRepo.createUser(R.merge(blueprints.users.admin, attributes));
   const token = await getLoginToken(attributes);
   user.token = token.tokens.access_token;
@@ -190,8 +194,8 @@ export function authenticateUser(userCredentials) {
  * @method deleteUser
  * @return {external:Promise.<number[]>}
  */
-export function deleteUser(...userOrUsers) {
-  return Promise.map(flatten(userOrUsers), (user) => userRepo.deleteById(user.id));
+export function deleteUser(user) {
+  return userRepo.deleteById(user.id);
 }
 
 /**
@@ -209,9 +213,8 @@ export function findAllUsers() {
  * @method deleteIntegration
  * @return {external:Promise}
  */
-export function deleteIntegration(...integrationOrIntegrations) {
-  return Promise.map(flatten(integrationOrIntegrations),
-    (integration) => integrationRepo.deleteById(integration.id));
+export function deleteIntegration(integration) {
+  return integrationRepo.deleteById(integration.id);
 }
 
 /**
@@ -238,9 +241,8 @@ export function findAllActivities() {
  * @method deleteActivity
  * @return {external:Promise.<number[]>} number of deleted activities
  */
-export function deleteActivity(...activityOrActivities) {
-  return Promise.map(flatten(activityOrActivities), (activity) =>
-    activityRepo.deleteById(activity.id));
+export function deleteActivity(activity) {
+  return activityRepo.deleteById(activity.id);
 }
 
 /**
@@ -249,8 +251,8 @@ export function deleteActivity(...activityOrActivities) {
  * @method deleteObject
  * @return {external:Promise.<number[]>} number of deleted objects
  */
-export function deleteObject(...objectOrObjects) {
-  return Promise.map(flatten(objectOrObjects), (object) => objectRepo.deleteById(object.id));
+export function deleteObject(object) {
+  return objectRepo.deleteById(object.id);
 }
 
 /**
@@ -277,19 +279,28 @@ export async function findAllPolls() {
  * @method deletePoll
  * @return {external:Promise.<number[]>} number of deleted polls
  */
-export async function deletePoll(...pollOrPolls) {
-  return Promise.map(flatten(pollOrPolls), (poll) => pollRepo.deleteById(poll.id));
+export async function deletePoll(poll) {
+  return pollRepo.deleteById(poll.id);
 }
 
 /**
  * Deletes all data in the database
  * @method cleanAll
  */
-export function cleanAll() {
-  return Promise.map(findAllNetworks(), (network) => networkRepo.deleteById(network.id))
-  .then(() => Promise.map(findAllUsers(), deleteUser))
-  .then(() => Promise.map(findAllActivities(), deleteActivity))
-  .then(() => Promise.map(findAllIntegrations(), deleteIntegration))
-  .then(() => Promise.map(findAllObjects(), deleteObject))
-  .then(() => Promise.map(findAllPolls(), deletePoll));
+export async function cleanAll() {
+  const networks = await findAllNetworks();
+  const admins = R.map((network) => network.superAdmin, networks);
+  await Promise.all(R.map(deleteUser, admins));
+
+  const users = await findAllUsers();
+  await Promise.all(R.map(deleteUser, users));
+
+  const activities = await findAllActivities();
+  await Promise.all(R.map(deleteActivity, activities));
+
+  const integrations = await findAllIntegrations();
+  await Promise.all(R.map(deleteIntegration, integrations));
+
+  const polls = findAllPolls();
+  await Promise.all(R.map(deletePoll, polls));
 }

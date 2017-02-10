@@ -8,15 +8,15 @@ import * as teamRepo from '../../core/repositories/team';
 import EmployeeDispatcher from '../dispatcher';
 import * as service from './invite-user';
 
-describe('Service: invite user', () => {
+describe('Service: Invite user', () => {
   let employee;
   let network;
   let team;
 
   before(async () => {
     const [admin, user] = await Promise.all([
-      testHelper.createUser({ password: 'pw', email: 'owner@flex-appeal.nl' }),
-      testHelper.createUser({ password: 'wp', email: 'user@flex-appeal.nl' }),
+      testHelper.createUser(),
+      testHelper.createUser(),
     ]);
     employee = user;
     network = await testHelper.createNetwork({ userId: admin.id, name: 'flexAppeal' });

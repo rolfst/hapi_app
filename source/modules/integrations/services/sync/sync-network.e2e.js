@@ -17,7 +17,7 @@ describe('Network synchronisation', () => {
     integratedNetwork = await networkRepository.createNetwork(admin.id, 'Foo network for sync');
   });
 
-  after(async () => testHelper.cleanAll());
+  after(() => testHelper.cleanAll());
 
   describe('Teams synchronisation', () => {
     afterEach(async () => {

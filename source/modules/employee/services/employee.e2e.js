@@ -1,6 +1,7 @@
 import { assert } from 'chai';
 import { pick } from 'lodash';
 import sinon from 'sinon';
+import * as testHelper from '../../../shared/test-utils/helpers';
 import * as Intercom from '../../../shared/services/intercom';
 import IntercomStub from '../../../shared/test-utils/stubs/intercom';
 import EmployeeDispatcher from '../dispatcher';
@@ -11,9 +12,11 @@ describe('Service: employee', () => {
   let network;
 
   before(async () => {
-    credentials = global.users.employee;
-    network = global.networks.flexAppeal;
+    credentials = await testHelper.createUser({ password: 'wp', email: 'user@flex-appeal.nl' });
+    network = await testHelper.createNetwork({ userId: credentials.id, name: 'flexAppeal' });
   });
+
+  after(() => testHelper.deleteUser(credentials));
 
   describe('Update user', () => {
     const sandbox = sinon.sandbox.create();

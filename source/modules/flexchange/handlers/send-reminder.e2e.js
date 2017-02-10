@@ -18,6 +18,7 @@ describe('Reminder', () => {
       testHelper.createUser(),
       testHelper.createUser(),
     ]);
+
     admin = user;
 
     const network = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
