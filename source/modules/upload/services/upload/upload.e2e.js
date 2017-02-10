@@ -4,7 +4,7 @@ import sinon from 'sinon';
 import * as uploadService from './index';
 import * as impl from './implementation';
 
-describe.only('Service: upload', () => {
+describe('Service: upload', () => {
   let sandbox;
 
   beforeEach(async () => {
