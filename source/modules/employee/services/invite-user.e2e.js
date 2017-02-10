@@ -1,20 +1,22 @@
 import { assert } from 'chai';
-import { find } from 'lodash';
+import { find, pick } from 'lodash';
+import sinon from 'sinon';
 import * as testHelper from '../../../shared/test-utils/helpers';
 import * as networkRepo from '../../core/repositories/network';
 import * as userRepo from '../../core/repositories/user';
 import * as teamRepo from '../../core/repositories/team';
+import EmployeeDispatcher from '../dispatcher';
 import * as service from './invite-user';
 
-describe('Service: invite user', () => {
+describe('Service: Invite user', () => {
   let employee;
   let network;
   let team;
 
   before(async () => {
     const [admin, user] = await Promise.all([
-      testHelper.createUser({ password: 'pw', email: 'owner@flex-appeal.nl' }),
-      testHelper.createUser({ password: 'wp', email: 'user@flex-appeal.nl' }),
+      testHelper.createUser(),
+      testHelper.createUser(),
     ]);
     employee = user;
     network = await testHelper.createNetwork({ userId: admin.id, name: 'flexAppeal' });
@@ -103,12 +105,24 @@ describe('Service: invite user', () => {
   });
 
   describe('New User', () => {
+    const sandbox = sinon.sandbox.create();
+    let eventEmitterStub;
+    const credentials = { id: '1', email: 'credentials@flex-appeal.nl' };
     const payload = { firstName: 'John', lastName: 'Doe', email: 'test-user@foo.com' };
 
+    before(() => {
+      eventEmitterStub = sandbox.stub(EmployeeDispatcher, 'emit');
+    });
+
     afterEach(async () => {
+      eventEmitterStub.reset();
       const user = await userRepo.findUserBy({ email: payload.email });
 
       return userRepo.deleteById(user.id);
+    });
+
+    after(() => {
+      sandbox.restore();
     });
 
     it('should create when not exists', async () => {
@@ -118,6 +132,17 @@ describe('Service: invite user', () => {
       assert.equal(actual.lastName, payload.lastName);
       assert.equal(actual.username, payload.email);
       assert.equal(actual.email, payload.email);
+    });
+
+    it('should dispatch user.created event', async () => {
+      await service.inviteUser(payload, { credentials, network });
+
+      const { args } = eventEmitterStub.firstCall;
+
+      assert.equal(args[0], 'user.created');
+      assert.deepEqual(args[1].credentials, credentials);
+      assert.deepEqual(pick(args[1].user, 'email', 'firstName', 'lastName'), payload);
+      assert.deepEqual(args[1].network, network);
     });
 
     it('should add to the network as admin', async () => {

@@ -32,7 +32,7 @@ describe('Service: Poll', () => {
     defaultVotePayload = { networkId: flexAppeal.id };
   });
 
-  after(async () => testHelper.cleanAll());
+  after(() => testHelper.cleanAll());
 
   it('should create a poll', async () => {
     const poll = await pollService.create(defaultPayload, message);

@@ -17,7 +17,7 @@ describe('Handler: create team', () => {
     return testHelper.addUserToNetwork({ networkId: network.id, userId: employee.id });
   });
 
-  after(async () => testHelper.cleanAll());
+  after(() => testHelper.cleanAll());
 
   it('should create a new team', async () => {
     const userIds = [admin.id, employee.id];

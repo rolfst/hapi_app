@@ -83,7 +83,7 @@ describe('Get exchanges for network', () => {
       ]);
     });
 
-    after(async () => testHelper.cleanAll());
+    after(() => testHelper.cleanAll());
 
     it('should return exchanges for admin', async () => {
       const endpoint = `/v2/networks/${integratedNetwork.id}/exchanges`;

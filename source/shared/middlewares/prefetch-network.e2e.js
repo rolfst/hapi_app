@@ -21,7 +21,7 @@ describe('Plugin: Network', () => {
     pmtNetwork = network;
   });
 
-  after(async () => testHelper.cleanAll());
+  after(() => testHelper.cleanAll());
 
   beforeEach(() => {
     server = new Server();

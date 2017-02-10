@@ -19,7 +19,7 @@ describe('Service: Object', () => {
         parentType: 'network',
         parentId: network.id,
         objectType: 'poll',
-        sourceId: '2',
+        sourceId: '1931',
       });
 
       await objectService.create({
@@ -27,7 +27,7 @@ describe('Service: Object', () => {
         parentType: 'network',
         parentId: network.id,
         objectType: 'feed_message',
-        sourceId: '2',
+        sourceId: '1932',
       });
     });
 
@@ -42,10 +42,10 @@ describe('Service: Object', () => {
       assert.lengthOf(actual, 2);
       assert.equal(actual[0].userId, admin.id);
       assert.equal(actual[0].objectType, 'poll');
-      assert.equal(actual[0].sourceId, '2');
+      assert.equal(actual[0].sourceId, '1931');
       assert.equal(actual[0].parentType, 'network');
       assert.equal(actual[1].objectType, 'feed_message');
-      assert.equal(actual[1].sourceId, '2');
+      assert.equal(actual[1].sourceId, '1932');
       assert.equal(actual[1].parentType, 'network');
       assert.equal(actual[1].parentId, network.id);
     });
@@ -61,7 +61,7 @@ describe('Service: Object', () => {
       assert.lengthOf(actual, 1);
       assert.equal(actual[0].userId, admin.id);
       assert.equal(actual[0].objectType, 'feed_message');
-      assert.equal(actual[0].sourceId, '2');
+      assert.equal(actual[0].sourceId, '1932');
       assert.equal(actual[0].parentType, 'network');
       assert.equal(actual[0].parentId, network.id);
     });

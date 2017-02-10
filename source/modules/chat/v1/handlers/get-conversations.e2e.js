@@ -26,7 +26,7 @@ describe('Get conversations for logged user', () => {
     await messageRepo.createMessage(conversation.id, user.id, 'Last message');
   });
 
-  after(async () => testHelper.cleanAll());
+  after(() => testHelper.cleanAll());
 
   it('should return conversation collection', async () => {
     const { result, statusCode } = await getRequest('/v1/chats/users/me/conversations',

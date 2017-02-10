@@ -23,7 +23,7 @@ describe('View network', async () => {
     network2 = await testHelper.createNetwork({ userId: admin.id });
   });
 
-  after(async () => testHelper.cleanAll());
+  after(() => testHelper.cleanAll());
 
   it('should return correct has_integration property value', async () => {
     const [integratedNetwork, nonIntegratedNetwork] = await Promise.all([

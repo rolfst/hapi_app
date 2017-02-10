@@ -32,6 +32,7 @@
     "dotenv": "2.0.0",
     "hapi": "13.2.1",
     "hapi-async-handler": "1.0.3",
+    "intercom-client": "2.8.5",
     "isomorphic-fetch": "2.2.1",
     "joi": "8.0.4",
     "jwt-simple": "0.5.0",

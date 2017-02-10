@@ -11,14 +11,15 @@ const JUMBO_SCHAAF_STORE_URL = stubs.jumbo_stores.stores[0].base_store_url;
 const JUMBO_BERGEN_STORE_URL = stubs.jumbo_stores.stores[2].base_store_url;
 
 
-describe('Pristine Networks', async () => {
-  nock.disableNetConnect();
+describe('Handler: Pristine Networks', async () => {
   let ahNetwork;
   let justANetwork;
   let jumboNetwork;
-  const admin = await testHelper.createUser({ password: 'foobar' });
+  let admin;
 
   before(async () => {
+    admin = await testHelper.createUser({ password: 'foobar' });
+
     jumboNetwork = testHelper.createNetworkWithIntegration({
       userId: admin.id,
       externalId: stubs.jumbo_stores.stores[1].base_store_url,
@@ -45,7 +46,7 @@ describe('Pristine Networks', async () => {
       jumboNetwork, justANetwork, ahNetwork]);
   });
 
-  after(async () => testHelper.cleanAll());
+  after(() => testHelper.cleanAll());
 
   it('should return correct network amount', async () => {
     nock(PMT_BASE_URL)
