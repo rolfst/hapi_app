@@ -139,6 +139,8 @@ export const create = async (payload, message) => {
   await messageRepository.update(createdMessage.id, { objectId: createdObject.id });
 
   if (payload.resources) {
+    logger.info('Creating resources for message', { resources: payload.resources });
+
     const typeEq = R.propEq('type');
     const createResource = R.cond([
       [typeEq('poll'), impl.createPollResource(createdMessage, message)],
