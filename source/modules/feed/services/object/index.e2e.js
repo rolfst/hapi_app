@@ -14,22 +14,21 @@ describe('Service: Object', () => {
       admin = await testHelpers.createUser({ password: 'foo' });
       network = await testHelpers.createNetwork({ userId: admin.id });
 
-      return Promise.all([
-        objectService.create({
-          userId: admin.id,
-          parentType: 'network',
-          parentId: network.id,
-          objectType: 'poll',
-          sourceId: '2',
-        }),
-        objectService.create({
-          userId: admin.id,
-          parentType: 'network',
-          parentId: network.id,
-          objectType: 'feed_message',
-          sourceId: '2',
-        }),
-      ]);
+      await objectService.create({
+        userId: admin.id,
+        parentType: 'network',
+        parentId: network.id,
+        objectType: 'poll',
+        sourceId: '2',
+      });
+
+      await objectService.create({
+        userId: admin.id,
+        parentType: 'network',
+        parentId: network.id,
+        objectType: 'feed_message',
+        sourceId: '2',
+      });
     });
 
     after(() => testHelpers.cleanAll());
@@ -38,7 +37,7 @@ describe('Service: Object', () => {
       const actual = await objectService.list({
         parentType: 'network',
         parentId: network.id,
-      }, { credentials: { id: admin.id } });
+      }, { credentials: admin });
 
       assert.lengthOf(actual, 2);
       assert.equal(actual[0].userId, admin.id);
@@ -57,7 +56,7 @@ describe('Service: Object', () => {
         parentId: network.id,
         limit: 1,
         offset: 1,
-      }, { credentials: { id: admin.id } });
+      }, { credentials: admin });
 
       assert.lengthOf(actual, 1);
       assert.equal(actual[0].userId, admin.id);
@@ -114,7 +113,7 @@ describe('Service: Object', () => {
           data: { options: ['Yes', 'No', 'Ok'] },
         }],
       }, {
-        credentials: global.users.admin,
+        credentials: admin,
         network: { id: '42' },
       });
 
@@ -124,13 +123,13 @@ describe('Service: Object', () => {
         text: 'Do you want to join us tomorrow?',
         resources: [],
       }, {
-        credentials: global.users.admin,
+        credentials: admin,
         network: { id: '42' },
       });
 
       const actual = await objectService.listWithSources({
         objectIds: [createdMessage.objectId, createdMessage2.objectId],
-      }, { credentials: { id: global.users.admin.id } });
+      }, { credentials: admin });
 
       await objectService.remove({ parentType: 'network', parentId: '42' });
       await objectService.remove({ parentType: 'feed_message', parentId: createdMessage.id });
@@ -151,11 +150,11 @@ describe('Service: Object', () => {
       const createdMessage = await privateMessageService.create({
         conversationId: '42',
         text: 'Test message',
-      }, { credentials: { id: admin.id } });
+      }, { credentials: admin });
 
       const actual = await objectService.listWithSources({
         objectIds: [createdMessage.id],
-      }, { credentials: { id: admin.id } });
+      }, { credentials: admin });
 
       const object = actual[0];
 
