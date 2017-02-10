@@ -2,7 +2,7 @@ import moment from 'moment';
 import * as Intercom from 'intercom-client';
 
 export const getClient = () =>
-  new Intercom.Client({ token: process.env.INTERCOM_TOKEN });
+  new Intercom.Client({ token: process.env.INTERCOM_TOKEN || 'foofortesting' });
 
 export const incrementAttribute = (email, attributeName) => {
   const client = getClient();
