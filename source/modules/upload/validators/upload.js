@@ -8,6 +8,6 @@ export default {
     checksum: Joi.string(),
     width: Joi.number(),
     height: Joi.number(),
-    filedata: Joi.binary().encoding('base64'),§
+    filedata: Joi.binary().encoding('base64'),
   }),
 };

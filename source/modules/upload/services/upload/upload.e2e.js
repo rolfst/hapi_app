@@ -37,7 +37,6 @@ describe('Service: upload', () => {
       }),
     });
 
-    
     const imageStream = new stream.PassThrough();
     imageStream.end(new Buffer('image'));
     const result = uploadService.upload({
