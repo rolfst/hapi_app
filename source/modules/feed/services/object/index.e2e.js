@@ -19,7 +19,7 @@ describe('Service: Object', () => {
         parentType: 'network',
         parentId: network.id,
         objectType: 'poll',
-        sourceId: '2',
+        sourceId: '1931',
       });
 
       await objectService.create({
@@ -27,7 +27,7 @@ describe('Service: Object', () => {
         parentType: 'network',
         parentId: network.id,
         objectType: 'feed_message',
-        sourceId: '2',
+        sourceId: '1931',
       });
     });
 
