@@ -66,12 +66,14 @@ export const listWithSources = async (payload, message) => {
   const objectsWithSource = R.map(impl.addSourceToObject(sources), R.concat(objects, children));
   const findObjectById = (objectId) => R.find(R.propEq('id', objectId), objectsWithSource);
 
+  const addChildrenToObject = (object) => R.merge(object, {
+    children: impl.findChildren(objectsWithSource, object),
+  });
+
   return R.pipe(
     R.pluck('id'),
     R.map(findObjectById),
-    R.map((object) => R.merge(object, {
-      children: impl.findChildren(objectsWithSource, object),
-    }))
+    R.map(addChildrenToObject)
   )(objects);
 };
 
