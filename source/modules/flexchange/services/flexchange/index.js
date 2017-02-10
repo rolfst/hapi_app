@@ -17,7 +17,7 @@ import * as exchangeRepo from '../../repositories/exchange';
 import * as exchangeValueRepo from '../../repositories/exchange-value';
 import * as exchangeResponseRepo from '../../repositories/exchange-response';
 import * as acceptanceNotifier from '../../notifications/accepted-exchange';
-import FlexchangeListener from '../../listener';
+import FlexchangeDispatcher from '../../dispatcher';
 import * as impl from './implementation';
 
 /**
@@ -170,7 +170,7 @@ export const approveExchange = async (payload, message) => {
     message.credentials,
     payload.user_id);
 
-  FlexchangeListener.emit('exchange.approved', {
+  FlexchangeDispatcher.emit('exchange.approved', {
     exchange: approvedExchange,
     network: message.network,
     credentials: message.credentials,
@@ -433,7 +433,7 @@ const createValidator = (exchangeType) => {
  * @param {string} [payload.description]
  * {@link module:modules/flexchange~Exchange Exchange.description}
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method createExchange
+ * @method Dispatcher
  * @return {external:Promise.<Exchange>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with the newly created Exchange
  */
@@ -461,7 +461,7 @@ export const createExchange = async (payload, message) => {
       date: moment(payload.date).format('YYYY-MM-DD'),
     });
 
-  EventEmitter.emit('exchange.created', {
+  FlexchangeDispatcher.emit('exchange.created', {
     network: message.network,
     credentials: message.credentials,
     exchange: createdExchange,

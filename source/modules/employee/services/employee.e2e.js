@@ -3,7 +3,7 @@ import { pick } from 'lodash';
 import sinon from 'sinon';
 import * as Intercom from '../../../shared/services/intercom';
 import IntercomStub from '../../../shared/test-utils/stubs/intercom';
-import FlexchangeEmitter from '../events';
+import EmployeeDispatcher from '../dispatcher';
 import * as service from './employee';
 
 describe('Service: employee', () => {
@@ -22,7 +22,7 @@ describe('Service: employee', () => {
     before(() => {
       sandbox.stub(Intercom, 'getClient').returns(IntercomStub);
 
-      eventEmitterStub = sandbox.stub(FlexchangeEmitter, 'emit');
+      eventEmitterStub = sandbox.stub(EmployeeDispatcher, 'emit');
     });
 
     afterEach(async () => {

@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { find, pick } from 'lodash';
 import sinon from 'sinon';
-import EventEmitter from '../events';
+import EmployeeDispatcher from '../dispatcher';
 import * as networkRepo from '../../core/repositories/network';
 import * as userRepo from '../../core/repositories/user';
 import * as teamRepo from '../../core/repositories/team';
@@ -94,7 +94,7 @@ describe('Service: invite user', () => {
     const payload = { firstName: 'John', lastName: 'Doe', email: 'test-user@foo.com' };
 
     before(() => {
-      eventEmitterStub = sandbox.stub(EventEmitter, 'emit');
+      eventEmitterStub = sandbox.stub(EmployeeDispatcher, 'emit');
     });
 
     afterEach(async () => {

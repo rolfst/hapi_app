@@ -1,6 +1,6 @@
 import * as userRepo from '../../core/repositories/user';
 import * as userService from '../../core/services/user';
-import EventEmitter from '../events';
+import EmployeeDispatcher from '../dispatcher';
 
 /**
  * @module modules/employee/services/employee
@@ -24,7 +24,7 @@ export const updateEmployee = async (payload, message) => {
   const updatedUser = await userService.getUserWithNetworkScope({
     id: message.credentials.id, networkId: message.network.id }, message);
 
-  EventEmitter.emit('user.updated', {
+  EmployeeDispatcher.emit('user.updated', {
     user: updatedUser,
     network: message.network,
     credentials: message.credentials,
