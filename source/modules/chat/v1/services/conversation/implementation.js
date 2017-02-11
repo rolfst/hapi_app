@@ -1,8 +1,5 @@
 import { find, pick } from 'lodash';
-import * as responseUtils from '../../../../../shared/utils/response';
-import * as socketService from '../../../../../shared/services/socket';
 import * as conversationRepo from '../../repositories/conversation';
-import * as newMessageNotification from '../../notifications/new-message';
 
 export const findExistingConversation = async (participantIds) => {
   return conversationRepo.findExistingConversation(participantIds);
@@ -33,13 +30,4 @@ export const replaceConversationUserIdWithObject = (conversation, users) => {
   }
 
   return { ...conversation, lastMessage };
-};
-
-export const notifyUsersForNewMessage = (conversation, message, authenticationToken) => {
-  const usersToNotify = conversation.users.filter(user => user.id !== message.createdBy.id);
-
-  newMessageNotification.send(message, usersToNotify);
-
-  const socketPayload = { data: responseUtils.toSnakeCase(message) };
-  socketService.send('send-message', usersToNotify, socketPayload, authenticationToken);
 };
