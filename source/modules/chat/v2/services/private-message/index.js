@@ -1,7 +1,10 @@
 import R from 'ramda';
 import * as Logger from '../../../../../shared/services/logger';
+import createError from '../../../../../shared/utils/create-error';
 import * as objectService from '../../../../feed/services/object';
 import * as privateMessageRepository from '../../repositories/private-message';
+import * as conversationRepository from '../../repositories/conversation';
+import ChatDispatcher from '../../dispatcher';
 
 const logger = Logger.createLogger('CHAT/service/conversation');
 
@@ -31,6 +34,9 @@ export const list = async (payload, message) => {
 export async function create(payload, message) {
   logger.info('Creating private message', { payload, message });
 
+  const conversation = R.head(await conversationRepository.findByIds([payload.conversationId]));
+  if (!conversation) throw createError('404');
+
   const createObjectPayload = (createdMessage) => ({
     userId: message.credentials.id,
     parentType: 'conversation',
@@ -45,7 +51,15 @@ export async function create(payload, message) {
 
   privateMessageRepository.update(createdMessage.id, { objectId: createdObject.id });
 
-  return R.merge(createdObject, {
+  const output = R.merge(createdObject, {
     source: { ...createdMessage, objectId: createdObject.id },
   });
+
+  ChatDispatcher.emit('message.created', {
+    conversation,
+    object: output,
+    token: message.artifacts.authenticationToken,
+  });
+
+  return output;
 }
