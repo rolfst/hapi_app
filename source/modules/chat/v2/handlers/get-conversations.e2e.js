@@ -30,25 +30,27 @@ describe('Get conversations for logged user (v2)', () => {
       createdConversation1 = await conversationService.create({
         type: 'PRIVATE',
         participantIds: [creator.id, participant1.id],
-      }, { credentials: { id: creator.id } });
+      }, { credentials: creator });
 
       await conversationService.create({
         type: 'PRIVATE',
         participantIds: [creator.id, participant2.id],
-      }, { credentials: { id: creator.id } });
+      }, { credentials: creator });
 
       await privateMessageService.create({
         conversationId: createdConversation1.id,
         text: 'First message',
       }, {
-        credentials: { id: participant1.id },
+        credentials: participant1,
+        artifacts: { authenticationToken: 'foo' },
       });
 
       await Promise.delay(1000).then(() => privateMessageService.create({
         conversationId: createdConversation1.id,
         text: 'Last message',
       }, {
-        credentials: { id: participant1.id },
+        credentials: participant1,
+        artifacts: { authenticationToken: 'foo' },
       }));
     });
 
@@ -111,32 +113,35 @@ describe('Get conversations for logged user (v2)', () => {
       createdConversation1 = await conversationService.create({
         type: 'PRIVATE',
         participantIds: [creator.id, participant1.id],
-      }, { credentials: { id: creator.id } });
+      }, { credentials: creator });
 
       createdConversation2 = await conversationService.create({
         type: 'PRIVATE',
         participantIds: [creator.id, participant2.id],
-      }, { credentials: { id: creator.id } });
+      }, { credentials: creator });
 
       await privateMessageService.create({
         conversationId: createdConversation1.id,
         text: 'First message',
       }, {
-        credentials: { id: participant1.id },
+        credentials: participant1,
+        artifacts: { authenticationToken: 'foo' },
       });
 
       await Promise.delay(1000).then(() => privateMessageService.create({
         conversationId: createdConversation1.id,
         text: 'Last message',
       }, {
-        credentials: { id: participant1.id },
+        credentials: participant1,
+        artifacts: { authenticationToken: 'foo' },
       }));
 
       await Promise.delay(1000).then(() => privateMessageService.create({
         conversationId: createdConversation2.id,
         text: 'First message second conversation',
       }, {
-        credentials: { id: participant1.id },
+        credentials: participant1,
+        artifacts: { authenticationToken: 'foo' },
       }));
     });
 
