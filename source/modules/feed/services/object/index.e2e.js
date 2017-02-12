@@ -1,6 +1,7 @@
 import * as testHelpers from '../../../../shared/test-utils/helpers';
 import { assert } from 'chai';
 import R from 'ramda';
+import * as conversationService from '../../../chat/v2/services/conversation';
 import * as privateMessageService from '../../../chat/v2/services/private-message';
 import * as feedMessageService from '../message';
 import * as objectService from './index';
@@ -101,7 +102,7 @@ describe('Service: Object', () => {
   });
 
   describe('listWithSources', () => {
-    after(() => objectService.remove({ parentType: 'conversation', parentId: '42' }));
+    after(() => testHelpers.cleanAll());
 
     it('should return children', async () => {
       const createdMessage = await feedMessageService.create({
@@ -147,10 +148,19 @@ describe('Service: Object', () => {
     });
 
     it('should support object_type: private_message', async () => {
-      const createdMessage = await privateMessageService.create({
-        conversationId: '42',
-        text: 'Test message',
+      const participant = await testHelpers.createUser({ password: 'foo' });
+      const createdConversation = await conversationService.create({
+        type: 'PRIVATE',
+        participantIds: [admin.id, participant.id],
       }, { credentials: admin });
+
+      const createdMessage = await privateMessageService.create({
+        conversationId: createdConversation.id,
+        text: 'Test message',
+      }, {
+        credentials: admin,
+        artifacts: { authenticationToken: 'FOO_TOKEN' },
+      });
 
       const actual = await objectService.listWithSources({
         objectIds: [createdMessage.id],

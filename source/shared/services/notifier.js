@@ -1,4 +1,5 @@
 import Parse from 'parse/node';
+import R from 'ramda';
 import * as Logger from './logger';
 import * as Analytics from './analytics';
 
@@ -9,10 +10,6 @@ function createQuery(emails) {
   query.containedIn('loggedin_as_email', emails);
 
   return query;
-}
-
-export function createEmailList(users) {
-  return users.map(user => user.email).filter(u => u);
 }
 
 export function trackPushNotification(notification, user) {
@@ -28,10 +25,9 @@ export function send(users, notification, networkId = null, message = null) {
     network_id: networkId,
   };
 
-  const emails = createEmailList(users);
-
-  users.forEach(user => trackPushNotification(notification, user));
+  const emails = R.reject(R.isNil, R.pluck('email', users));
 
   return Parse.Push.send({ where: createQuery(emails), data })
+    .then(() => users.forEach(user => trackPushNotification(notification, user)))
     .catch(err => logger.warn('Error sending push notification', { message, err }));
 }
