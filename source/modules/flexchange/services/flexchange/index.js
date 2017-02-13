@@ -403,13 +403,14 @@ export const listExchangesForUser = async (payload, message) => {
   const user = await userService.getUserWithNetworkScope({
     id: message.credentials.id, networkId: message.network.id }, message);
 
-  let exchanges;
+  let exchangeIds;
 
   if (user.roleType === 'ADMIN') {
-    exchanges = await exchangeRepo.findExchangesByNetwork(
+    const exchanges = await exchangeRepo.findExchangesByNetwork(
       message.network.id, { ...payload.filter });
+    exchangeIds = R.pluck('id', exchanges);
   } else if (user.roleType === 'EMPLOYEE') {
-    exchanges = await impl.listExchangesForEmployee(message.network, user, payload.filter);
+    exchangeIds = await impl.getExchangeIdsForEmployee(message.network, user, payload.filter);
   }
 
   const createdExchangesByUser = await exchangeRepo.findAllBy(R.merge({
@@ -418,7 +419,7 @@ export const listExchangesForUser = async (payload, message) => {
 
   return list({
     networkId: message.network.id,
-    exchangeIds: R.pluck('id', R.concat(exchanges, createdExchangesByUser)) },
+    exchangeIds: R.concat(exchangeIds, R.pluck('id', createdExchangesByUser)) },
     message);
 };
 

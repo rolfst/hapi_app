@@ -153,10 +153,14 @@ export const findExchangesByUserAndNetwork = async (userId, networkId, filter = 
   return findExchangeByIds(map(exchanges, 'id'), userId, constraint);
 };
 
-export async function findExchangesForValues(type, networkId, values, userId, filter = {}) {
-  const validExchangeResult = await Exchange.findAll({
+export async function findExchangeIdsForValues(type, networkId, values, userId, filter = {}) {
+  const whereConstraint = { type, networkId };
+  const dateFilter = createDateFilter(filter.start);
+  if (dateFilter) whereConstraint.date = dateFilter;
+
+  const exchangeResult = await Exchange.findAll({
     attributes: ['id'],
-    where: { type, networkId },
+    where: whereConstraint,
     include: [{
       model: ExchangeValue,
       required: true,
@@ -164,11 +168,7 @@ export async function findExchangesForValues(type, networkId, values, userId, fi
     }],
   });
 
-  const validExchangeIds = validExchangeResult.map(exchange => exchange.id);
-  const dateFilter = createDateFilter(filter.start);
-  const constraint = dateFilter ? { where: { date: dateFilter } } : {};
-
-  return findExchangeByIds(validExchangeIds, userId, constraint);
+  return R.pluck('id', exchangeResult);
 }
 
 /**
