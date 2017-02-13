@@ -248,6 +248,17 @@ export const listMyShifts = async (payload, message) => {
 
 export const deleteExchange = async (payload) => {
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId);
+  activityRepo.deleteBy({
+    activityType: { $in: [
+      'exchange_created',
+      'exchange_declined',
+      'exchange_accepted',
+      'exchange_comment',
+      'exchange_approved',
+      'exchange_rejected',
+    ] },
+    sourceId: payload.exchangeId,
+  });
 
   return exchangeRepo.deleteById(exchange.id);
 };
