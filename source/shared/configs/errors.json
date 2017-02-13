@@ -85,8 +85,8 @@
     "code": 500
   },
   "30001": {
-    "type": "Error_in_upload",
-    "detail": "Something went wrong in communicating with upload service",
+    "type": "error_in_upload",
+    "detail": "Something went wrong while uploading your file",
     "code": 500
   }
 }
