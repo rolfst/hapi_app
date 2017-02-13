@@ -1,3 +1,4 @@
+import R from 'ramda';
 import createError from '../../../../shared/utils/create-error';
 import * as Logger from '../../../../shared/services/logger';
 import * as impl from './implementation';
@@ -19,7 +20,7 @@ export async function upload(image, message) {
     Body: image.stream,
   };
 
-  logger.info('sending to S3', { params, message });
+  logger.info('sending to S3', { params: R.omit(['BODY'], params), message });
 
   return s3.putObject(params).promise()
     .then((response) => {
