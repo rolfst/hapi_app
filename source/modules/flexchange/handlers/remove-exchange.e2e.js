@@ -31,11 +31,4 @@ describe('Remove exchange', () => {
     assert.equal(statusCode, 200);
     assert.equal(result.success, true);
   });
-
-  it('should fail when exchange cannot be found', async () => {
-    const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id + 1337}`;
-    const { statusCode } = await deleteRequest(endpoint, admin.token);
-
-    assert.equal(statusCode, 404);
-  });
 });

@@ -3,7 +3,8 @@ import moment from 'moment';
 import * as testHelper from '../../../shared/test-utils/helpers';
 import { patchRequest } from '../../../shared/test-utils/request';
 import { exchangeTypes } from '../repositories/dao/exchange';
-import * as exchangeRepo from '../repositories/exchange';
+import * as exchangeService from '../services/flexchange';
+import * as objectRepository from '../../feed/repositories/object';
 
 describe('Approve exchange', () => {
   let admin;
@@ -20,29 +21,37 @@ describe('Approve exchange', () => {
     network = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
     await testHelper.addUserToNetwork({ networkId: network.id, userId: employee.id });
 
-    const exchangeToAccept = await exchangeRepo.createExchange(admin.id, network.id, {
+    acceptedExchange = await exchangeService.createExchange({
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'Test exchange to approve',
+      values: [network.id],
+    }, {
+      network,
+      credentials: admin,
     });
 
-    const exchangeToReject = await exchangeRepo.createExchange(admin.id, network.id, {
+    rejectedExchange = await exchangeService.createExchange({
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'Test exchange to reject',
+      values: [network.id],
+    }, {
+      network,
+      credentials: admin,
     });
 
-    const acceptedExchangePromise = exchangeRepo.acceptExchange(
-      exchangeToAccept.id, admin.id)
-    .then(() => exchangeToAccept.reload());
+    await exchangeService.acceptExchange({
+      exchangeId: acceptedExchange.id,
+    }, { network, credentials: admin });
 
-    const rejectedExchangePromise = exchangeRepo.acceptExchange(
-      exchangeToReject.id, admin.id)
-    .then(() => exchangeRepo.rejectExchange(exchangeToReject, admin, admin.id));
-
-    [acceptedExchange, rejectedExchange] = await Promise.all([
-      acceptedExchangePromise, rejectedExchangePromise,
-    ]);
+    await exchangeService.acceptExchange({
+      exchangeId: rejectedExchange.id,
+    }, { network, credentials: admin })
+    .then(() => exchangeService.rejectExchange({
+      exchangeId: rejectedExchange.id,
+      userId: admin.id,
+    }, { network, credentials: admin }));
   });
 
   after(() => testHelper.cleanAll());
@@ -57,6 +66,15 @@ describe('Approve exchange', () => {
     assert.equal(result.data.approved_user.id, admin.id);
     assert.isDefined(result.data.responses[0].id);
     assert.equal(statusCode, 200);
+  });
+
+  it('should delete objects associated to the exchange', async () => {
+    const createdObjects = await objectRepository.findBy({
+      objectType: 'exchange',
+      sourceId: acceptedExchange.id,
+    });
+
+    assert.lengthOf(createdObjects, 0);
   });
 
   it('should fail when user wants to approve a rejected exchange', async () => {
