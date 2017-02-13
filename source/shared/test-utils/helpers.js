@@ -9,6 +9,7 @@ import * as networkRepo from '../../modules/core/repositories/network';
 import * as activityRepo from '../../modules/core/repositories/activity';
 import * as objectRepo from '../../modules/feed/repositories/object';
 import * as pollRepo from '../../modules/poll/repositories/poll';
+import * as attachmentRepo from '../../modules/attachment/repositories/attachment';
 import { postRequest } from './request';
 
 /**
@@ -190,7 +191,7 @@ export function authenticateUser(userCredentials) {
 
 /**
  * Deletes users from database
- * @param {User|User[]} userOrUsers
+ * @param {User} user
  * @method deleteUser
  * @return {external:Promise.<number[]>}
  */
@@ -209,7 +210,7 @@ export function findAllUsers() {
 
 /**
  * Deletes integrations from the database
- * @param {Integration|Integration[]} integrationOrIntegrations
+ * @param {Integration} integration
  * @method deleteIntegration
  * @return {external:Promise}
  */
@@ -237,7 +238,7 @@ export function findAllActivities() {
 
 /**
  * Deletes activities from database
- * @param {Activity|Activity[]} activityOrActivities
+ * @param {Activity} activity
  * @method deleteActivity
  * @return {external:Promise.<number[]>} number of deleted activities
  */
@@ -247,7 +248,7 @@ export function deleteActivity(activity) {
 
 /**
  * Deletes objects from database
- * @param {Object|Object[]} objectOrObjects
+ * @param {Object} object
  * @method deleteObject
  * @return {external:Promise.<number[]>} number of deleted objects
  */
@@ -275,12 +276,31 @@ export async function findAllPolls() {
 
 /**
  * Deletes polls from database
- * @param {Poll|Poll[]} objectOrPolls
+ * @param {Poll} poll
  * @method deletePoll
  * @return {external:Promise.<number[]>} number of deleted polls
  */
 export async function deletePoll(poll) {
   return pollRepo.deleteById(poll.id);
+}
+
+/**
+ * Finds all Attachments in the database
+ * @method findAllAttachments
+ * @return {external:Promise.<Attachment[]} {@link module:modules/attachment~Attachment Attachment}
+ */
+export async function findAllAttachments() {
+  return attachmentRepo.findAll();
+}
+
+/**
+ * Deletes attachments from database
+ * @param {Attachment} attachment
+ * @method deleteAttachment
+ * @return {external:Promise.<number[]>} number of deleted polls
+ */
+export async function deleteAttachment(attachment) {
+  return attachmentRepo.deleteById(attachment.id);
 }
 
 /**
@@ -306,4 +326,7 @@ export async function cleanAll() {
 
   const polls = findAllPolls();
   await Promise.all(R.map(deletePoll, polls));
+
+  const attachments = findAllAttachments();
+  await Promise.all(R.map(deleteAttachment, attachments));
 }
