@@ -18,12 +18,9 @@ pubsub.on('exchange.created', async (payload) => {
     'networkId', 'date', 'startTime', 'endTime', 'type'], exchange);
   const exchangeReceivers = await exchangeService.listReceivers({
     exchangeId: exchange.id,
-  }, {
-    credentials,
-    network,
-  });
+  }, { credentials, network });
 
-  const promisedObjects = R.map((receiver) => objectService.create({
+  const createObjectsForReceivers = R.map((receiver) => objectService.create({
     userId: receiver.id,
     parentType: 'user',
     parentId: receiver.id,
@@ -31,7 +28,7 @@ pubsub.on('exchange.created', async (payload) => {
     sourceId: exchange.id,
   }), exchangeReceivers);
 
-  Promise.all(promisedObjects);
+  Promise.all(createObjectsForReceivers);
 
   createdNotifier.send(exchangeReceivers, payload.exchange);
   Analytics.track(newExchangeEvent(network.id, exchange), credentials.id);
