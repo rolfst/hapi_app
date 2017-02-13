@@ -48,6 +48,6 @@ module.exports = {
   },
 
   down: function (queryInterface, Sequelize) {
-    return queryInterface.dropTable('messages');
+    return queryInterface.dropTable('old_messages');
   }
 };
