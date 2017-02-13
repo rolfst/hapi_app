@@ -47,11 +47,13 @@ describe('Integration auth', () => {
     await networkService.addUserToNetwork({
       userId: global.users.employee.id,
       networkId: global.networks.pmt.id,
+      externalId: '1',
     });
 
     await networkService.addUserToNetwork({
       userId: global.users.employee.id,
       networkId: network.id,
+      externalId: '1',
     });
   });
 
@@ -96,7 +98,6 @@ describe('Integration auth', () => {
       userId: global.users.employee.id, networkId: network.id });
 
     assert.equal(metaData.userToken, 'auth_token');
-    assert.equal(metaData.externalId, 1);
   });
 
   it('should return 403 error when someone is already authenticated with the same account', async () => { // eslint-disable-line max-len

@@ -69,7 +69,9 @@ export const inviteExistingUser = async (network, user, roleType) => {
     await networkRepo.addUser({ userId, networkId, roleType });
   }
 
-  await userRepo.setNetworkLink({ networkId, userId, roleType, deletedAt: null });
+  await userRepo.setNetworkLink({
+    networkId, userId,
+  }, { networkId, userId, roleType, deletedAt: null });
 
   mailer.send(addedToNetworkMail(network, user));
 
@@ -134,7 +136,8 @@ export const inviteUsers = async (payload, message) => {
   const usersToSendMailto = await impl.generatePasswordsForMembers(toNotifyUsers);
 
   await Promise.map(usersToSendMailto, user =>
-    userRepo.setNetworkLink({ userId: user.id, networkId: network.id, invitedAt: new Date() }));
+    userRepo.setNetworkLink({ userId: user.id, networkId: network.id }, {
+      invitedAt: new Date(), userId: user.id, networkId: network.id }));
 
   map(usersToSendMailto, (user) => mailer.send(signupMail(network, user, user.plainPassword)));
 };

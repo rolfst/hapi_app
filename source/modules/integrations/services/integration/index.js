@@ -21,6 +21,9 @@ export async function authenticate(payload, message) {
   await userRepo.setNetworkLink({
     userId: message.credentials.id,
     networkId: message.network.id,
+  }, {
+    userId: message.credentials.id,
+    networkId: message.network.id,
     userToken: authResult.token,
     externalId: authResult.externalId,
   });
