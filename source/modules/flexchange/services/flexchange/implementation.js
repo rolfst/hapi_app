@@ -34,17 +34,17 @@ export const mergeShiftWithExchangeAndTeam = (shift, exchange, team) => ({
   teamId: team ? team.id : null,
 });
 
-export const listExchangesForEmployee = async (network, user, queryFilter) => {
+export const getExchangeIdsForEmployee = async (network, user, queryFilter) => {
   if (network.hasIntegration) {
-    const exchangesForUser = await exchangeRepo.findExchangesForValues(
+    const exchangesForUser = await exchangeRepo.findExchangeIdsForValues(
       'USER', network.id, [user.id], user.id, queryFilter);
 
     return exchangesForUser;
   }
 
   const [exchangesInNetwork, exchangesInTeams] = await Promise.all([
-    exchangeRepo.findExchangesForValues('ALL', network.id, [network.id], user.id, queryFilter),
-    exchangeRepo.findExchangesForValues('TEAM', network.id, user.teamIds, user.id, queryFilter),
+    exchangeRepo.findExchangeIdsForValues('ALL', network.id, [network.id], user.id, queryFilter),
+    exchangeRepo.findExchangeIdsForValues('TEAM', network.id, user.teamIds, user.id, queryFilter),
   ]);
 
   return exchangesInNetwork.concat(exchangesInTeams);
