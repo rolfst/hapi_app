@@ -6,7 +6,6 @@ import Promise from 'bluebird';
 import * as testHelpers from '../../../../shared/test-utils/helpers';
 import * as notifier from '../../../../shared/services/notifier';
 import * as flexchangeService from '../../../flexchange/services/flexchange';
-import * as objectService from '../object';
 import * as commentService from '../comment';
 import * as messageService from '../message';
 import * as feedService from './index';
@@ -17,6 +16,7 @@ describe('Service: Feed', () => {
     let network;
     let admin;
     let createdMessages;
+    let createdExchange;
 
     before(async () => {
       sandbox = sinon.sandbox.create();
@@ -30,14 +30,6 @@ describe('Service: Feed', () => {
         credentials: { id: admin.id },
         network: { id: network.id },
       };
-
-      const createdExchange = await flexchangeService.createExchange({
-        date: moment().toISOString(),
-        startTime: moment().toISOString(),
-        endTime: moment().add(3, 'hours').toISOString(),
-        type: 'ALL',
-        values: [network.id],
-      }, serviceMessage);
 
       const createdMessage1 = await Promise.delay(1000)
         .then(() => messageService.create({
@@ -60,15 +52,18 @@ describe('Service: Feed', () => {
           text: 'Second message for other feed',
         }, serviceMessage));
 
-      createdMessages = [createdMessage1, createdMessage2, createdMessage3];
+      createdExchange = await Promise.delay(1000)
+        .then(() => flexchangeService.createExchange({
+          date: moment().toISOString(),
+          startTime: moment().toISOString(),
+          endTime: moment().add(3, 'hours').toISOString(),
+          type: 'ALL',
+          values: [network.id],
+        }, serviceMessage));
 
-      await objectService.create({
-        userId: admin.id,
-        parentType: 'network',
-        parentId: network.id,
-        objectType: 'exchange',
-        sourceId: createdExchange.id,
-      });
+      await Promise.delay(1000); // We wait here for the EventEmitter actions to finish
+
+      createdMessages = [createdMessage1, createdMessage2, createdMessage3];
     });
 
     after(() => {
@@ -89,8 +84,9 @@ describe('Service: Feed', () => {
       assert.notProperty(actual[0], 'comments');
       assert.notProperty(actual[0], 'likes');
       assert.equal(actual[0].objectType, 'exchange');
-      assert.equal(actual[0].parentType, 'network');
-      assert.equal(actual[0].parentId, network.id);
+      assert.equal(actual[0].parentType, 'user');
+      assert.equal(actual[0].parentId, admin.id);
+      assert.equal(actual[0].sourceId, createdExchange.id);
       assert.equal(actual[1].objectType, 'feed_message');
       assert.equal(actual[1].source.text, 'Second message for feed');
       assert.equal(actual[2].objectType, 'feed_message');
@@ -102,17 +98,21 @@ describe('Service: Feed', () => {
         parentType: 'network',
         parentId: network.id,
         offset: 1,
-        limit: 1,
+        limit: 2,
       }, {
         credentials: { id: admin.id },
         network: { id: network.id },
       });
 
-      assert.lengthOf(actual, 1);
-      assert.notProperty(actual[0], 'comments');
-      assert.notProperty(actual[0], 'likes');
-      assert.equal(actual[0].objectType, 'feed_message');
-      assert.equal(actual[0].source.text, 'Second message for feed');
+      assert.lengthOf(actual, 2);
+      assert.equal(actual[0].objectType, 'exchange');
+      assert.equal(actual[0].parentType, 'user');
+      assert.equal(actual[0].parentId, admin.id);
+      assert.equal(actual[0].sourceId, createdExchange.id);
+      assert.notProperty(actual[1], 'comments');
+      assert.notProperty(actual[1], 'likes');
+      assert.equal(actual[1].objectType, 'feed_message');
+      assert.equal(actual[1].source.text, 'Second message for feed');
     });
 
     it('should include comments sub-resources via query parameter', async () => {
