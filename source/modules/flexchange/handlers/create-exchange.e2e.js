@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
+import R from 'ramda';
 import { pick } from 'lodash';
 import moment from 'moment';
 import Promise from 'bluebird';
@@ -8,8 +9,10 @@ import * as stubs from '../../../shared/test-utils/stubs';
 import * as notifier from '../../../shared/services/notifier';
 import { postRequest } from '../../../shared/test-utils/request';
 import * as teamRepo from '../../core/repositories/team';
+import * as objectService from '../../feed/services/object';
 import { exchangeTypes } from '../repositories/dao/exchange';
 import * as exchangeRepo from '../repositories/exchange';
+import * as exchangeService from '../services/flexchange';
 
 describe('Create exchange', () => {
   let sandbox;
@@ -27,12 +30,13 @@ describe('Create exchange', () => {
     admin = await testHelper.createUser();
     flexappealNetwork = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
 
-    const { network } = await testHelper.createNetworkWithIntegration({
+    const networkWithIntegration = await testHelper.createNetworkWithIntegration({
       userId: admin.id,
       token: 'footoken',
       ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
     });
-    pmtNetwork = network;
+
+    pmtNetwork = networkWithIntegration.network;
 
     [flexAppealTeam, otherNetworkTeam] = await Promise.all([
       teamRepo.create({ networkId: flexappealNetwork.id, name: 'Test network' }),
@@ -63,7 +67,35 @@ describe('Create exchange', () => {
     assert.isNotNull(result.data.start_time);
     assert.isNotNull(result.data.end_time);
 
-    return exchangeRepo.deleteById(result.data.id);
+    return exchangeService.deleteExchange({ exchangeId: result.data.id });
+  });
+
+  it('should create an object for the exchange', async () => {
+    const endpoint = `/v2/networks/${flexappealNetwork.id}/exchanges`;
+    const { statusCode, result } = await postRequest(endpoint, {
+      title: 'Test shift for network',
+      date: moment().format('YYYY-MM-DD'),
+      description: '',
+      type: exchangeTypes.NETWORK,
+      start_time: moment().toISOString(),
+      end_time: moment().add(2, 'hours').toISOString(),
+    }, admin.token);
+
+    await Promise.delay(1000);
+
+    const createdObject = R.find(R.propEq('sourceId', result.data.id), await objectService.list({
+      parentType: 'user',
+      parentId: admin.id,
+    }));
+
+    assert.equal(statusCode, 200);
+    assert.equal(createdObject.userId, admin.id);
+    assert.equal(createdObject.objectType, 'exchange');
+    assert.equal(createdObject.sourceId, result.data.id);
+    assert.equal(createdObject.parentId, admin.id);
+    assert.equal(createdObject.parentType, 'user');
+
+    return exchangeService.deleteExchange({ exchangeId: result.data.id });
   });
 
   it('should create exchange for a team', async () => {
@@ -84,7 +116,7 @@ describe('Create exchange', () => {
     assert.isNotNull(result.data.start_time);
     assert.isNotNull(result.data.end_time);
 
-    return exchangeRepo.deleteById(result.data.id);
+    return exchangeService.deleteExchange({ exchangeId: result.data.id });
   });
 
   it('should create exchange for external shift', async () => {
@@ -106,7 +138,7 @@ describe('Create exchange', () => {
     assert.equal(actual.teamId, flexAppealTeam.id);
     assert.equal(actual.ExchangeValues[0].value, admin.id);
 
-    return exchangeRepo.deleteById(result.data.id);
+    return exchangeService.deleteExchange({ exchangeId: result.data.id });
   });
 
   it('should create exchange with begin and end-time', async () => {
@@ -124,7 +156,7 @@ describe('Create exchange', () => {
     assert.isTrue(moment(result.data.start_time).isSame(payload.start_time, 'minute'));
     assert.isTrue(moment(result.data.end_time).isSame(payload.end_time, 'minute'));
 
-    return exchangeRepo.deleteById(result.data.id);
+    return exchangeService.deleteExchange({ exchangeId: result.data.id });
   });
 
   it('should fail when end_time is before start_time', async () => {

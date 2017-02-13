@@ -15,8 +15,11 @@ const services = {
 export default async (req, reply) => {
   try {
     const params = pick(req.params, ['exchangeId']);
-    const reqPayload = pick(req.payload, ['action', 'user_id']);
-    const payload = { ...params, ...reqPayload };
+    const payload = {
+      ...params,
+      action: req.payload.action,
+      userId: req.payload.user_id,
+    };
 
     const actionHook = services[payload.action];
     const message = { ...req.pre, ...req.auth };
