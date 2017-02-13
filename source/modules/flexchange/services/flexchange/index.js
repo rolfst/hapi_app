@@ -130,6 +130,12 @@ export const acceptExchange = async (payload, message) => {
   );
 
   acceptanceNotifier.send(message.network, acceptedExchange, acceptanceUser);
+  objectService.remove({
+    parentType: 'user',
+    parentId: message.credentials.id,
+    objectType: 'exchange',
+    sourceId: payload.exchangeId,
+  });
 
   const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
 
