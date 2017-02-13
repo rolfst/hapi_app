@@ -9,13 +9,9 @@ import * as integrationRepo from '../../modules/core/repositories/integration';
 import * as networkService from '../../modules/core/services/network';
 import * as testHelper from './helpers';
 
-describe('test helper', () => {
+describe('Test Helper', () => {
   describe('createUser', () => {
-    afterEach(async () => {
-      const users = await testHelper.findAllUsers();
-
-      return testHelper.deleteUser(users);
-    });
+    afterEach(async () => Promise.map(testHelper.findAllUsers(), testHelper.deleteUser));
 
     it('should create a user', async () => {
       const createdUser = await testHelper.createUser({
@@ -43,11 +39,8 @@ describe('test helper', () => {
   });
 
   describe('createIntegration', () => {
-    afterEach(async () => {
-      const integrations = await testHelper.findAllIntegrations();
-
-      return testHelper.deleteIntegration(integrations);
-    });
+    afterEach(async () => Promise.map(
+      testHelper.findAllIntegrations(), testHelper.deleteIntegration));
 
     it('should create a default integration', async () => {
       const integration = await testHelper.createIntegration();
@@ -81,7 +74,7 @@ describe('test helper', () => {
   });
 
   describe('createNetworks', () => {
-    afterEach(async () => testHelper.cleanAll());
+    afterEach(() => testHelper.cleanAll());
 
     it('should create 2 networks', async () => {
       const user = await testHelper.createUser({ password: 'test' });
@@ -139,12 +132,8 @@ describe('test helper', () => {
 
   describe('createNetworkWithIntegration', () => {
     afterEach(async () => {
-      const users = await testHelper.findAllUsers();
-      const integrations = await testHelper.findAllIntegrations();
-      return Promise.all([
-        testHelper.deleteIntegration(integrations),
-        testHelper.deleteUser(users),
-      ]);
+      await Promise.map(testHelper.findAllUsers(), testHelper.deleteIntegration);
+      await Promise.map(testHelper.findAllIntegrations(), testHelper.deleteUser);
     });
 
     it('should create both a network and an integration', async () => {
@@ -166,11 +155,7 @@ describe('test helper', () => {
   });
 
   describe('createUserForNewNetwork', () => {
-    afterEach(async () => {
-      const users = await testHelper.findAllUsers();
-
-      return testHelper.deleteUser(users);
-    });
+    afterEach(() => Promise.map(testHelper.findAllUsers(), testHelper.deleteUser));
 
     it('should create a user connected to a network', async () => {
       const { user, network } = await testHelper.createUserForNewNetwork(
@@ -184,11 +169,7 @@ describe('test helper', () => {
   });
 
   describe('authenticateUser', () => {
-    afterEach(async () => {
-      const users = await testHelper.findAllUsers();
-
-      return testHelper.deleteUser(users);
-    });
+    afterEach(() => Promise.map(testHelper.findAllUsers(), testHelper.deleteUser));
 
     it('should authenticate a user', async () => {
       const user = await testHelper.createUser(blueprints.users.employee);

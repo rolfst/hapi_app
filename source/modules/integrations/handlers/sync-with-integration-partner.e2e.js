@@ -77,7 +77,7 @@ describe('Handle sync networks', () => {
       return Promise.map(usersToAdd, networkRepo.addUser);
     });
 
-    after(async () => testHelper.cleanAll());
+    after(() => testHelper.cleanAll());
 
     afterEach(async () => {
       const allUsers = await testHelper.findAllUsers();

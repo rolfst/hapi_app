@@ -8,46 +8,49 @@ import * as conversationService from '../services/conversation';
 
 describe('Get conversations for logged user (v2)', () => {
   let creator;
-  let participant;
+  let participant1;
+  let participant2;
   const ENDPOINT_URL = '/v2/users/me/conversations';
 
   describe('Normal flow', () => {
     let createdConversation1;
 
     before(async () => {
-      [creator, participant] = await Promise.all([
+      [creator, participant1, participant2] = await Promise.all([
+        testHelper.createUser(),
         testHelper.createUser(),
         testHelper.createUser(),
       ]);
-      const otherParticipant = await testHelper.createUser();
 
       const network = await testHelper.createNetwork({ userId: creator.id });
 
-      await testHelper.addUserToNetwork({ networkId: network.id, userId: participant.id });
+      await testHelper.addUserToNetwork({ networkId: network.id, userId: participant1.id });
       await testHelper.addUserToNetwork({ networkId: network.id, userId: creator.id });
 
       createdConversation1 = await conversationService.create({
         type: 'PRIVATE',
-        participantIds: [creator.id, participant.id],
-      }, { credentials: { id: creator.id } });
+        participantIds: [creator.id, participant1.id],
+      }, { credentials: creator });
 
       await conversationService.create({
         type: 'PRIVATE',
-        participantIds: [creator.id, otherParticipant.id],
-      }, { credentials: { id: creator.id } });
+        participantIds: [creator.id, participant2.id],
+      }, { credentials: creator });
 
       await privateMessageService.create({
         conversationId: createdConversation1.id,
         text: 'First message',
       }, {
-        credentials: { id: participant.id },
+        credentials: participant1,
+        artifacts: { authenticationToken: 'foo' },
       });
 
       await Promise.delay(1000).then(() => privateMessageService.create({
         conversationId: createdConversation1.id,
         text: 'Last message',
       }, {
-        credentials: { id: participant.id },
+        credentials: participant1,
+        artifacts: { authenticationToken: 'foo' },
       }));
     });
 
@@ -65,7 +68,7 @@ describe('Get conversations for logged user (v2)', () => {
       assert.property(conversationUnderTest, 'last_message');
       assert.equal(conversationUnderTest.last_message.source.type, 'private_message');
       assert.equal(conversationUnderTest.last_message.source.text, 'Last message');
-      assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant.id]);
+      assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant1.id]);
       assert.property(conversationUnderTest, 'created_at');
       assert.property(result, 'meta');
       assert.property(result.meta.pagination, 'offset');
@@ -83,7 +86,7 @@ describe('Get conversations for logged user (v2)', () => {
       assert.property(conversationUnderTest, 'participants');
       assert.lengthOf(conversationUnderTest.participants, 2);
       assert.equal(conversationUnderTest.participants[0].id, creator.id);
-      assert.equal(conversationUnderTest.participants[1].id, participant.id);
+      assert.equal(conversationUnderTest.participants[1].id, participant1.id);
     });
   });
 
@@ -95,44 +98,50 @@ describe('Get conversations for logged user (v2)', () => {
       creator = await testHelper.createUser({
         ...blueprints.users.creator,
         username: 'conversation_creator' });
-      participant = await testHelper.createUser({
+      participant1 = await testHelper.createUser({
         ...blueprints.users.employee,
-        username: 'conversation_participant' });
+        username: 'conversation_participant1' });
+      participant2 = await testHelper.createUser({
+        ...blueprints.users.employee,
+        username: 'conversation_participant2' });
 
       const network = await testHelper.createNetwork({ userId: creator.id });
 
-      await testHelper.addUserToNetwork({ networkId: network.id, userId: participant.id });
+      await testHelper.addUserToNetwork({ networkId: network.id, userId: participant1.id });
       await testHelper.addUserToNetwork({ networkId: network.id, userId: creator.id });
 
       createdConversation1 = await conversationService.create({
         type: 'PRIVATE',
-        participantIds: [creator.id, participant.id],
-      }, { credentials: { id: creator.id } });
+        participantIds: [creator.id, participant1.id],
+      }, { credentials: creator });
 
       createdConversation2 = await conversationService.create({
         type: 'PRIVATE',
-        participantIds: [creator.id, participant.id],
-      }, { credentials: { id: creator.id } });
+        participantIds: [creator.id, participant2.id],
+      }, { credentials: creator });
 
       await privateMessageService.create({
         conversationId: createdConversation1.id,
         text: 'First message',
       }, {
-        credentials: { id: participant.id },
+        credentials: participant1,
+        artifacts: { authenticationToken: 'foo' },
       });
 
       await Promise.delay(1000).then(() => privateMessageService.create({
         conversationId: createdConversation1.id,
         text: 'Last message',
       }, {
-        credentials: { id: participant.id },
+        credentials: participant1,
+        artifacts: { authenticationToken: 'foo' },
       }));
 
       await Promise.delay(1000).then(() => privateMessageService.create({
         conversationId: createdConversation2.id,
         text: 'First message second conversation',
       }, {
-        credentials: { id: participant.id },
+        credentials: participant1,
+        artifacts: { authenticationToken: 'foo' },
       }));
     });
 
@@ -160,7 +169,7 @@ describe('Get conversations for logged user (v2)', () => {
       assert.property(conversationUnderTest, 'last_message');
       assert.property(conversationUnderTest.last_message, 'id');
       assert.equal(conversationUnderTest.last_message.source.text, 'Last message');
-      assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant.id]);
+      assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant1.id]);
       assert.property(conversationUnderTest, 'created_at');
     });
 
@@ -179,7 +188,7 @@ describe('Get conversations for logged user (v2)', () => {
         assert.property(conversationUnderTest.last_message, 'id');
         assert.equal(conversationUnderTest.last_message.source.text,
           'First message second conversation');
-        assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant.id]);
+        assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant2.id]);
         assert.property(conversationUnderTest, 'created_at');
       });
   });

@@ -1,3 +1,4 @@
+import R from 'ramda';
 import * as responseUtil from '../../../shared/utils/response';
 import * as feedService from '../services/feed';
 import * as objectService from '../services/object';
@@ -8,7 +9,7 @@ export default async (req, reply) => {
     const message = { ...req.pre, ...req.auth };
     const [feedItems, count] = await Promise.all([
       feedService.make(payload, message),
-      objectService.count(payload, message),
+      objectService.count({ where: R.pick(['parentType', 'parentId'], payload) }, message),
     ]);
 
     return reply({

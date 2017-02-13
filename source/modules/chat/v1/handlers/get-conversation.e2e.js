@@ -29,7 +29,7 @@ describe('Get conversation', () => {
     await messageRepo.createMessage(conversation.id, employee.id, 'Last message');
   });
 
-  after(async () => testHelper.cleanAll());
+  after(() => testHelper.cleanAll());
 
   it('should return correct values', async () => {
     const endpoint = `/v1/chats/conversations/${conversation.id}`;

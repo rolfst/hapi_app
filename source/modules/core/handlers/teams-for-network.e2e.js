@@ -22,7 +22,7 @@ describe('Handler: Teams for network', () => {
     await teamRepository.addUserToTeam(coolTeam.id, admin.id);
   });
 
-  after(async () => testHelper.cleanAll());
+  after(() => testHelper.cleanAll());
 
   it('should return all teams in network', async () => {
     const { result } = await getRequest(`/v2/networks/${network.id}/teams`, admin.token);

@@ -27,7 +27,7 @@ describe('Handler: Create message (v2)', () => {
     }, { credentials: { id: creator.id } });
   });
 
-  after(async () => testHelper.cleanAll());
+  after(() => testHelper.cleanAll());
 
   it('should return object model with new message as source', async () => {
     const ENDPOINT_URL = `/v2/conversations/${createdConversation.id}/messages`;

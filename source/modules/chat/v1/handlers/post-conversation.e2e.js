@@ -25,7 +25,7 @@ describe('Post conversation', () => {
     return messageRepo.createMessage(createdConversation.id, networklessUser.id, 'Foo text');
   });
 
-  after(async () => testHelper.cleanAll());
+  after(() => testHelper.cleanAll());
 
   it('should show new conversation data', async () => {
     const employee = await testHelper.createUser(blueprints.users.employee);

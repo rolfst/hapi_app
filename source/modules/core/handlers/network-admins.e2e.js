@@ -10,13 +10,15 @@ describe('Handler: List admins from network', () => {
   const pristineNetwork = stubs.pristine_networks_admins[0];
 
   describe('Happy path', async () => {
-    const sandbox = sinon.sandbox.create();
-    const admin = await testHelper.createUser({ password: 'foo' });
+    let sandbox;
 
     before(async () => {
       nock(pristineNetwork.externalId)
         .get('/users')
         .reply(200, stubs.users_200);
+
+      sandbox = sinon.sandbox.create();
+      const admin = await testHelper.createUser({ password: 'foo' });
 
       const { network: result } = await testHelper.createNetworkWithIntegration({
         userId: admin.id,

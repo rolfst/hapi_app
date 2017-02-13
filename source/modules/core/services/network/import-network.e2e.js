@@ -56,12 +56,11 @@ describe('Import network', () => {
       after(async () => {
         sandbox.restore();
         const reloadedNetwork = await networkRepo.findNetworkById(network.id);
-        const findAllNormalUsers = R.reject((user) => (user.id === reloadedNetwork.superAdmin.id
-              || user.id === admin.id));
+        const findAllNormalUsers = R.reject((user) =>
+          (user.id === reloadedNetwork.superAdmin.id || user.id === admin.id));
         const users = await networkRepo.findAllUsersForNetwork(network.id);
+        await testHelper.deleteUser(findAllNormalUsers(users));
 
-        const normalUsers = findAllNormalUsers(users);
-        await testHelper.deleteUser(normalUsers);
         return testHelper.cleanAll();
       });
 

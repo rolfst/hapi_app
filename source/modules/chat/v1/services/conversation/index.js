@@ -2,6 +2,7 @@ import { uniq, filter, map, omit } from 'lodash';
 import createError from '../../../../../shared/utils/create-error';
 import * as conversationRepo from '../../repositories/conversation';
 import * as messageRepo from '../../repositories/message';
+import ChatDispatcher from '../../dispatcher';
 import * as impl from './implementation';
 
 /**
@@ -154,8 +155,11 @@ export const createMessage = async (payload, message) => {
 
   const refreshedMessage = await getMessage({ messageId: createdMessage.id });
 
-  impl.notifyUsersForNewMessage(
-    conversation, refreshedMessage, message.artifacts.authenticationToken);
+  ChatDispatcher.emit('message.created', {
+    conversation,
+    message: refreshedMessage,
+    token: message.artifacts.authenticationToken,
+  });
 
   return refreshedMessage;
 };

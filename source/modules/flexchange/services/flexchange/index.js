@@ -1,12 +1,9 @@
 import { sortBy, map, reject, includes } from 'lodash';
 import R from 'ramda';
 import moment from 'moment';
-import * as Analytics from '../../../../shared/services/analytics';
 import * as Logger from '../../../../shared/services/logger';
 import { createAdapter } from '../../../../shared/utils/create-adapter';
-import approveExchangeEvent from '../../../../shared/events/approve-exchange-event';
 import createError from '../../../../shared/utils/create-error';
-import newExchangeEvent from '../../../../shared/events/new-exchange-event';
 import * as teamRepo from '../../../core/repositories/team';
 import * as userRepo from '../../../core/repositories/user';
 import * as networkRepo from '../../../core/repositories/network';
@@ -20,9 +17,7 @@ import * as exchangeRepo from '../../repositories/exchange';
 import * as exchangeValueRepo from '../../repositories/exchange-value';
 import * as exchangeResponseRepo from '../../repositories/exchange-response';
 import * as acceptanceNotifier from '../../notifications/accepted-exchange';
-import * as creatorNotifier from '../../notifications/creator-approved';
-import * as substituteNotifier from '../../notifications/substitute-approved';
-import * as createdNotifier from '../../notifications/exchange-created';
+import FlexchangeDispatcher from '../../dispatcher';
 import * as impl from './implementation';
 
 /**
@@ -32,7 +27,7 @@ const logger = Logger.createLogger('FLEXCHANGE/service/exchange');
 
 const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
 
-const findUsersByType = async (type, networkId, exchangeValues, userId) => {
+export const findUsersByType = async (type, networkId, exchangeValues, userId) => {
   let usersPromise;
 
   if (type === exchangeTypes.NETWORK) {
@@ -146,7 +141,9 @@ export const acceptExchange = async (payload, message) => {
 
   acceptanceNotifier.send(message.network, acceptedExchange, acceptanceUser);
 
-  return acceptedExchange;
+  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+
+  return exchanges[0];
 };
 
 /**
@@ -175,14 +172,16 @@ export const approveExchange = async (payload, message) => {
     message.credentials,
     payload.user_id);
 
-  Promise.all([
-    creatorNotifier.send(exchange),
-    substituteNotifier.send(exchange),
-  ]);
+  FlexchangeDispatcher.emit('exchange.approved', {
+    exchange: approvedExchange,
+    network: message.network,
+    credentials: message.credentials,
+    approvedUser: exchangeResponse.User,
+  });
 
-  Analytics.track(approveExchangeEvent(message.network, approvedExchange), message.credentials.id);
+  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
 
-  return approvedExchange;
+  return exchanges[0];
 };
 
 /**
@@ -215,9 +214,11 @@ export const declineExchange = async (payload, message) => {
 
   if (approved === 0) throw createError('403', 'You are already rejected for the exchange.');
 
-  const declinedExchange = await exchangeRepo.declineExchange(exchange.id, message.credentials.id);
+  await exchangeRepo.declineExchange(exchange.id, message.credentials.id);
 
-  return declinedExchange;
+  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+
+  return exchanges[0];
 };
 
 /**
@@ -270,10 +271,12 @@ export const rejectExchange = async (payload, message) => {
 
   const rejectedExchange = await exchangeRepo.rejectExchange(
     exchange, message.credentials, payload.user_id);
-  const reloadedExchange = await rejectedExchange.reload();
+  await rejectedExchange.reload();
   // TODO: Fire ExchangeWasRejected event
 
-  return reloadedExchange;
+  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+
+  return exchanges[0];
 };
 
 /**
@@ -438,7 +441,7 @@ const createValidator = (exchangeType) => {
  * @param {string} [payload.description]
  * {@link module:modules/flexchange~Exchange Exchange.description}
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method createExchange
+ * @method Dispatcher
  * @return {external:Promise.<Exchange>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with the newly created Exchange
  */
@@ -466,11 +469,12 @@ export const createExchange = async (payload, message) => {
       date: moment(payload.date).format('YYYY-MM-DD'),
     });
 
-  const users = await findUsersByType(
-    createdExchange.type, message.network.id, payload.values, message.credentials.id);
-
-  await createdNotifier.send(users, createdExchange);
-  Analytics.track(newExchangeEvent(message.network, createdExchange), message.credentials.id);
+  FlexchangeDispatcher.emit('exchange.created', {
+    network: message.network,
+    credentials: message.credentials,
+    exchange: createdExchange,
+    exchangeValues: payload.values,
+  });
 
   return exchangeRepo.findExchangeById(createdExchange.id);
 };

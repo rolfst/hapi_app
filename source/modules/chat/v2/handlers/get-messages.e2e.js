@@ -31,31 +31,34 @@ describe('Handler: Get messages (v2)', () => {
     createdConversation = await conversationService.create({
       type: 'PRIVATE',
       participantIds: [creator.id, participant.id],
-    }, { credentials: { id: creator.id } });
+    }, { credentials: creator });
 
     await privateMessageService.create({
       conversationId: createdConversation.id,
       text: 'First message',
     }, {
-      credentials: { id: participant.id },
+      credentials: participant,
+      artifacts: { authenticationToken: 'foo' },
     });
 
     await Promise.delay(1000).then(() => privateMessageService.create({
       conversationId: createdConversation.id,
       text: 'Second message',
     }, {
-      credentials: { id: participant.id },
+      credentials: participant,
+      artifacts: { authenticationToken: 'foo' },
     }));
 
     await Promise.delay(1000).then(() => privateMessageService.create({
       conversationId: createdConversation.id,
       text: 'Last message',
     }, {
-      credentials: { id: participant.id },
+      credentials: participant,
+      artifacts: { authenticationToken: 'foo' },
     }));
   });
 
-  after(async () => testHelper.cleanAll());
+  after(() => testHelper.cleanAll());
 
   it('should return messages for conversation (v2)', async () => {
     const endpoint = `/v2/conversations/${createdConversation.id}/messages`;

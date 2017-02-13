@@ -25,7 +25,7 @@ describe('Authenticator strategy', () => {
     return testHelper.addUserToNetwork({ userId: employee.id, networkId: flexAppeal.id });
   });
 
-  after(async () => testHelper.cleanAll());
+  after(() => testHelper.cleanAll());
 
   beforeEach(() => {
     server = new Server();
