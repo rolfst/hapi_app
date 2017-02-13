@@ -215,6 +215,12 @@ export const declineExchange = async (payload, message) => {
   if (approved === 0) throw createError('403', 'You are already rejected for the exchange.');
 
   await exchangeRepo.declineExchange(exchange.id, message.credentials.id);
+  objectService.remove({
+    parentType: 'user',
+    parentId: message.credentials.id,
+    objectType: 'exchange',
+    sourceId: payload.exchangeId,
+  });
 
   const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
 
