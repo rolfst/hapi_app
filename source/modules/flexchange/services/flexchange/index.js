@@ -446,12 +446,12 @@ const createValidator = (exchangeType) => {
  * Creates a new Exchange.
  * @param {object} payload - Object containing payload data
  * @param {string} payload.date - date for the exchange
- * @param {string} payload.values - {@link module:modules/flexchange~Exchange Exchange.values}
- * @param {string} payload.type - {@link module:modules/flexchange~Exchange Exchange.type}
- * @param {string} [payload.startTime] - {@link module:modules/flexchange~Exchange Exchange.startTime}
- * @param {string} [payload.endTime] - {@link module:modules/flexchange~Exchange Exchange.endTime}
- * @param {string} [payload.shiftId] - {@link module:modules/flexchange~Exchange Exchange.shiftId}
- * @param {string} [payload.title] - {@link module:modules/flexchange~Exchange Exchange.title}
+ * @param {string} payload.values - {@link module:modules/flexchange~Exchange.values}
+ * @param {string} payload.type - {@link module:modules/flexchange~Exchange.type}
+ * @param {string} [payload.startTime] - {@link module:modules/flexchange~Exchange.startTime}
+ * @param {string} [payload.endTime] - {@link module:modules/flexchange~Exchange.endTime}
+ * @param {string} [payload.shiftId] - {@link module:modules/flexchange~Exchange.shiftId}
+ * @param {string} [payload.title] - {@link module:modules/flexchange~Exchange.title}
  * @param {string} [payload.description]
  * {@link module:modules/flexchange~Exchange Exchange.description}
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
