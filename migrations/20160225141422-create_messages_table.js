@@ -2,7 +2,7 @@
 
 module.exports = {
   up: function (queryInterface, Sequelize) {
-    return queryInterface.createTable('messages', {
+    return queryInterface.createTable('old_messages', {
       id: {
         type: Sequelize.INTEGER.UNSIGNED,
         primaryKey: true,
