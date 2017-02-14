@@ -13,10 +13,10 @@ const location = {
 
 export async function upload(image, message) {
   const s3 = impl.createS3();
-  const locationInBucket = location[process.env.API_ENV];
+  const environment = location[process.env.API_ENV];
   const params = {
     Bucket: process.env.S3_BUCKET,
-    Key: `${locationInBucket}${image.name}`,
+    Key: `${environment}${image.path}`,
     Body: image.stream,
   };
 
