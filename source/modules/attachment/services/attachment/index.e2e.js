@@ -13,7 +13,7 @@ describe('Service: Attachment', () => {
   let message;
   let sandbox;
 
-  describe('create step 1', () => {
+  describe('create', () => {
     before(async () => {
       sandbox = sinon.sandbox.create();
 
@@ -30,7 +30,7 @@ describe('Service: Attachment', () => {
 
     it('should create a attachment', async () => {
       const imageLocation = '/attachments/test.jpg';
-      sandbox.stub(uploadService, 'upload').returns(imageLocation);
+      sandbox.stub(uploadService, 'upload').returns(Promise.resolve(imageLocation));
 
       const readStream = new Readable;
       readStream.push('image');
@@ -46,10 +46,12 @@ describe('Service: Attachment', () => {
       assert.isNull(actual.objectId);
       assert.property(actual, 'path');
       assert.equal(actual.path, imageLocation);
+      assert.property(actual, 'createdAt');
+      assert.isNotNull(actual.createdAt);
     });
   });
 
-  describe('create step 2', () => {
+  describe('creation flow', () => {
     let attachment;
 
     before(async () => {
@@ -73,7 +75,7 @@ describe('Service: Attachment', () => {
 
     after(async () => testHelper.cleanAll());
 
-    it('should contain an updated attacment with object id', async () => {
+    it('should contain an updated attachment with object id', async () => {
       await attachmentService.update({ attachment }, {});
       const attachments = await testHelper.findAllAttachments();
 

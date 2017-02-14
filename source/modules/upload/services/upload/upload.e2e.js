@@ -25,7 +25,7 @@ describe('Service: upload', () => {
     const imageStream = new stream.PassThrough();
     imageStream.end(new Buffer('image'));
     const result = await uploadService.upload({
-      name: '/attachments/image.jpg', stream: imageStream }, {});
+      path: '/attachments/image.jpg', stream: imageStream }, {});
 
     assert.equal(result, '/attachments/image.jpg');
   });
@@ -40,7 +40,7 @@ describe('Service: upload', () => {
     const imageStream = new stream.PassThrough();
     imageStream.end(new Buffer('image'));
     const result = uploadService.upload({
-      name: '/attachments/image.jpg', stream: imageStream }, {});
+      path: '/attachments/image.jpg', stream: imageStream }, {});
 
     return assert.isRejected(result, /Error: Error in S3/);
   });

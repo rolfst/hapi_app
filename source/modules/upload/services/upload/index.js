@@ -1,3 +1,4 @@
+import R from 'ramda';
 import createError from '../../../../shared/utils/create-error';
 import * as Logger from '../../../../shared/services/logger';
 import * as impl from './implementation';
@@ -12,20 +13,20 @@ const location = {
 
 export async function upload(image, message) {
   const s3 = impl.createS3();
-  const locationInBucket = location[process.env.API_ENV];
+  const environment = location[process.env.API_ENV];
   const params = {
     Bucket: process.env.S3_BUCKET,
-    Key: `${locationInBucket}${image.name}`,
+    Key: `${environment}${image.path}`,
     Body: image.stream,
   };
 
-  logger.info('sending to S3', { params, message });
+  logger.info('Uploading file to S3', { params: R.omit(['BODY'], params), message });
 
   return s3.putObject(params).promise()
     .then((response) => {
       logger.info('S3 response', { response, message });
 
-      if (response.ETag) return image.name;
+      if (response.ETag) return image.path;
     })
     .catch(err => {
       logger.error('Error with S3', { err, message });
