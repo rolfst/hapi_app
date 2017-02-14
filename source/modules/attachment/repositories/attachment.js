@@ -45,12 +45,11 @@ export const create = async (path) => {
 
 /**
  * Updates an attachment
- * @param {Attachment} attachment - {@link module:modules/attachment~Attachment Attachment} 
+ * @param {Attachment} attachment - {@link module:modules/attachment~Attachment Attachment}
  * @method update
  * @return {external:Promise.<Attachment>} - Create attachment promise
  */
 export const update = async (attachment) => {
-  console.log('updating', attachment);
   const updatedAttachment = await Attachment.findById(attachment.id)
     .then(pivot => pivot.update(attachment));
 
