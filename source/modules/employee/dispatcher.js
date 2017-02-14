@@ -3,7 +3,7 @@ import * as Intercom from '../../shared/services/intercom';
 
 const pubsub = EventEmitter.create();
 
-pubsub.asyncOn('user.created', (payload) => {
+pubsub.asyncOn('user.created', async (payload) => {
   Intercom.getClient().users.create({
     user_id: payload.user.id,
     email: payload.user.email,
@@ -14,7 +14,7 @@ pubsub.asyncOn('user.created', (payload) => {
   });
 });
 
-pubsub.asyncOn('user.updated', (payload) => {
+pubsub.asyncOn('user.updated', async (payload) => {
   Intercom.getClient().users.update({
     email: payload.user.email,
     name: payload.user.fullName,
@@ -22,7 +22,7 @@ pubsub.asyncOn('user.updated', (payload) => {
   });
 });
 
-pubsub.asyncOn('user.deleted', (payload) => {
+pubsub.asyncOn('user.deleted', async (payload) => {
   Intercom.getClient().users.update({
     email: payload.user.email,
     companies: [{ company_id: payload.network.id, remove: true }],

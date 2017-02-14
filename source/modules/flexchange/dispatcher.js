@@ -12,7 +12,7 @@ import * as exchangeService from './services/flexchange';
 
 const pubsub = EventEmitter.create();
 
-pubsub.on('exchange.created', async (payload) => {
+pubsub.asyncOn('exchange.created', async (payload) => {
   const { exchange, network, credentials } = payload;
   const intercomEventPayload = R.pick([
     'networkId', 'date', 'startTime', 'endTime', 'type'], exchange);
