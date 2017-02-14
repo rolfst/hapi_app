@@ -134,8 +134,16 @@ describe('Service: Message', () => {
 
     after(() => testHelpers.cleanAll());
 
+    it('should return object with source after create', () => {
+      assert.equal(createdMessage.userId, admin.id);
+      assert.equal(createdMessage.objectType, 'feed_message');
+      assert.equal(createdMessage.parentType, 'network');
+      assert.equal(createdMessage.parentId, network.id);
+      assert.equal(createdMessage.source.text, 'My cool message');
+    });
+
     it('should create a message entry', async () => {
-      const expected = await messageService.get({ messageId: createdMessage.id });
+      const expected = await messageService.get({ messageId: createdMessage.sourceId });
 
       assert.isDefined(expected);
       assert.property(expected, 'objectId');
@@ -146,7 +154,7 @@ describe('Service: Message', () => {
     it('should create a poll entry if resource is present', async () => {
       const objects = await objectService.list({
         parentType: 'feed_message',
-        parentId: createdMessage.id,
+        parentId: createdMessage.sourceId,
       });
 
       const pollEntry = await pollService.get({ pollId: objects[0].sourceId });
@@ -159,7 +167,7 @@ describe('Service: Message', () => {
     it('should create object entry for poll if resource is present', async () => {
       const expected = await objectService.list({
         parentType: 'feed_message',
-        parentId: createdMessage.id,
+        parentId: createdMessage.sourceId,
       });
 
       assert.lengthOf(expected, 1);
@@ -182,7 +190,7 @@ describe('Service: Message', () => {
         parentId: network.id,
       });
 
-      assert.equal(objects[0].sourceId, createdMessage.id);
+      assert.equal(objects[0].sourceId, createdMessage.sourceId);
       assert.equal(objects[0].objectType, 'feed_message');
     });
   });

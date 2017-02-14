@@ -149,7 +149,9 @@ export const create = async (payload, message) => {
     await Promise.map(payload.resources, createResource);
   }
 
-  return { ...createdMessage, objectId: createdObject.id };
+  return R.merge(createdObject, {
+    source: { ...createdMessage, objectId: createdObject.id },
+  });
 };
 
 /**
