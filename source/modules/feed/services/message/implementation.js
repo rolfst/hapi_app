@@ -1,5 +1,8 @@
 import R from 'ramda';
+import createError from '../../../../shared/utils/create-error';
 import * as pollService from '../../../poll/services/poll';
+import * as networkRepository from '../../../core/repositories/network';
+import * as teamRepository from '../../../core/repositories/team';
 import * as objectService from '../object';
 
 /**
@@ -33,3 +36,18 @@ export const removeAttachedObjects = (messageId) => Promise.all([
   objectService.remove({ objectType: 'feed_message', sourceId: messageId }),
   objectService.remove({ parentType: 'feed_message', parentId: messageId }),
 ]);
+
+export const getParent = async (parentType, parentId) => {
+  const parentFn = R.cond([
+    [R.equals('network'), R.always(networkRepository.findNetworkById)],
+    [R.equals('team'), R.always(teamRepository.findTeamById)],
+    [R.T, R.F],
+  ])(parentType);
+
+  if (!parentFn) throw createError('403', 'Parent not supported');
+
+  const result = await parentFn(parentId);
+  if (!result) throw createError('404', 'Parent not found');
+
+  return result;
+};

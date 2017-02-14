@@ -185,5 +185,19 @@ describe('Service: Message', () => {
       assert.equal(objects[0].sourceId, createdMessage.id);
       assert.equal(objects[0].objectType, 'feed_message');
     });
+
+    it('should fail when parent not found', async () => {
+      const wrongMessagePromise = messageService.create({
+        parentType: 'network',
+        parentId: '12938',
+        text: 'My cool message',
+        resources: [],
+      }, {
+        credentials: { id: admin.id },
+        network: { id: network.id },
+      });
+
+      return assert.isRejected(wrongMessagePromise, /Parent not found/);
+    });
   });
 });
