@@ -1,15 +1,14 @@
-import R from 'ramda';
 import * as Logger from '../../../../shared/services/logger';
+import { createError } from '../../../../shared/utils/create-error';
 import * as uploadService from '../../../upload/services/upload';
 import * as attachmentRepo from '../../repositories/attachment';
+import * as impl from './implementation';
 
 /**
  * @module modules/attachment/services/attachment
  */
 
 const logger = Logger.getLogger('attachment/service/attachment');
-const createAttachmentUpload = (upload) => ({ name: `/attachment/${upload.name}`,
-  stream: upload.stream });
 
 /**
  * Gets a attachment
@@ -23,11 +22,11 @@ export const get = async (payload, message) => {
   logger.info('Finding attachment', { payload, message });
   const attachment = await attachmentRepo.findById(payload.attachmentId);
 
+  if (!attachment) createError('404');
+
   return attachment;
 };
 
-const toStorage = async (message, uploads) => { return uploadService.upload(uploads, message); };
-const uploadAttachment = R.curry(toStorage);
 /**
  * Creates a attachment
  * @param {object} payload - Object containing payload data
@@ -37,13 +36,12 @@ const uploadAttachment = R.curry(toStorage);
  * @method create
  * @return {external:Promise.<Attachment>} {@link module:modules/attachment~Attachment Attachment}
  */
-export const create = async (payload, message) => {
+export const create = (payload, message) => {
   logger.info('Creating attachment', { payload, message });
 
-  const upload = createAttachmentUpload(payload.upload);
-  const uploadToStorage = uploadAttachment(message);
+  const upload = impl.createAttachmentUpload(payload.upload);
 
-  return uploadToStorage(upload)
+  return uploadService.upload(upload, message)
     .then(attachmentRepo.create);
 };
 
