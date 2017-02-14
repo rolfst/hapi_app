@@ -1,5 +1,4 @@
 import R from 'ramda';
-import Promise from 'bluebird';
 import * as Logger from '../../../../shared/services/logger';
 import * as uploadService from '../../../upload/services/upload';
 import * as attachmentRepo from '../../repositories/attachment';
@@ -27,33 +26,29 @@ export const get = async (payload, message) => {
   return attachment;
 };
 
-async function storeAttachments(uploadPaths) {
-  return Promise.map(uploadPaths, attachmentRepo.create);
-}
-
 const toStorage = async (message, uploads) => { return uploadService.upload(uploads, message); };
-const upload = R.curry(toStorage);
+const uploadAttachment = R.curry(toStorage);
 /**
  * Creates a attachment
  * @param {object} payload - Object containing payload data
- * @param {Upload[]} payload.uploads - Array of uploaded Attachment
+ * @param {Upload} payload.upload - uploaded Attachment
  * {@link module:modules/attachment~Upload Upload}
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method create
- * @return {external:Promise.<Attachment[]>} {@link module:modules/attachment~Attachment Attachment}
+ * @return {external:Promise.<Attachment>} {@link module:modules/attachment~Attachment Attachment}
  */
 export const create = async (payload, message) => {
   logger.info('Creating attachment', { payload, message });
 
-  const uploads = R.map(createAttachmentUpload, payload.uploads);
-  const uploadToStorage = upload(message);
+  const upload = createAttachmentUpload(payload.upload);
+  const uploadToStorage = uploadAttachment(message);
 
-  return Promise.map(uploads, uploadToStorage)
-    .then(storeAttachments);
+  return uploadToStorage(upload)
+    .then(attachmentRepo.create);
 };
 
 export const update = async (payload, message) => {
   logger.info('Updating attachment', { payload, message });
 
-  return Promise.map(payload.attachments, attachmentRepo.update);
+  return attachmentRepo.update(payload.attachment);
 };

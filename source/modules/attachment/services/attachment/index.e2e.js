@@ -34,21 +34,18 @@ describe('Service: Attachment', () => {
 
       const readStream = new Readable;
       readStream.push('image');
-      const payload = { uploads: [
-        { name: 'test.jpg', stream: readStream.push(null) },
-        { name: 'image.jpg', stream: readStream.push(null) },
-      ] };
+      readStream.push(null);
+      const payload = { upload: { name: 'image.jpg', stream: readStream } };
 
       const actual = await attachmentService.create(payload, message);
       const attachments = await testHelper.findAllAttachments();
 
-      assert.equal(attachments.length, 2);
-      assert.equal(actual.length, 2);
-      assert.equal(actual[0].type, 'attachment');
-      assert.property(actual[0], 'objectId');
-      assert.isNull(actual[0].objectId);
-      assert.property(actual[0], 'path');
-      assert.equal(actual[0].path, imageLocation);
+      assert.equal(attachments.length, 1);
+      assert.equal(actual.type, 'attachment');
+      assert.property(actual, 'objectId');
+      assert.isNull(actual.objectId);
+      assert.property(actual, 'path');
+      assert.equal(actual.path, imageLocation);
     });
   });
 
@@ -77,7 +74,7 @@ describe('Service: Attachment', () => {
     after(async () => testHelper.cleanAll());
 
     it('should contain an updated attacment with object id', async () => {
-      await attachmentService.update({ attachments: [attachment] });
+      await attachmentService.update({ attachment }, {});
       const attachments = await testHelper.findAllAttachments();
 
       assert.equal(attachments.length, 1);
