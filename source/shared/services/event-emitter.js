@@ -1,4 +1,5 @@
 import NativeEventEmitter from 'events';
+import Promise from 'bluebird';
 import * as Logger from './logger';
 
 class EventEmitter extends NativeEventEmitter {
@@ -15,8 +16,8 @@ class EventEmitter extends NativeEventEmitter {
   asyncOn(eventName, fn) {
     const that = this;
     return this.on(eventName, (...args) => {
-      return fn.apply(this, args).catch(err =>
-        that.logger.error('Error while emitter event', { eventName, err }));
+      return Promise.try(() => fn(...args)).catch(err =>
+        that.logger.error('Error while emitting event', { eventName, err }));
     });
   }
 }
