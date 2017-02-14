@@ -1,6 +1,7 @@
 import R from 'ramda';
 import * as flexchangeService from '../../../flexchange/services/flexchange';
 import * as pollService from '../../../poll/services/poll';
+import * as attachmentService from '../../../attachment/services/attachment';
 import * as privateMessageService from '../../../chat/v2/services/private-message';
 import * as objectRepository from '../../repositories/object';
 import * as feedMessageService from '../message';
@@ -24,6 +25,7 @@ export const findSourcesForType = R.curry((message, values, type) => R.cond([
   [R.equals('feed_message'), () => feedMessageService.list({ messageIds: values }, message)],
   [R.equals('exchange'), () => flexchangeService.list({ exchangeIds: values }, message)],
   [R.equals('poll'), () => pollService.list({ pollIds: values }, message)],
+  [R.equals('attachment'), () => attachmentService.list({ attachmentIds: values }, message)],
 ])(type, values));
 
 export const findChildrenForType = R.curry((values, type) => R.cond([

@@ -12,12 +12,27 @@ const createAttachmentUpload = (upload) => ({ name: `/attachment/${upload.name}`
   stream: upload.stream });
 
 /**
+ * Lists selected attachments
+ * @param {object} payload - Object containing payload data
+ * @param {string[]} payload.attachmentIds - Ids of the attachments to get
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method list
+ * @return {external:Promise.<Attachment[]>} {@link
+ * module:modules/attachment~Attachment Attachment}
+ */
+export const list = async (payload, message) => {
+  logger.info('Finding multiple attachments', { payload, message });
+
+  return attachmentRepo.findBy({ id: { $in: payload.attachmentIds } });
+};
+
+/**
  * Gets a attachment
  * @param {object} payload - Object containing payload data
  * @param {string} payload.attachmentId - Id of the attachment to get
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method get
- * @return {external:Promise.<attachment>}
+ * @return {external:Promise.<attachment>} {@link module:modules/attachment~Attachment Attachment}
  */
 export const get = async (payload, message) => {
   logger.info('Finding attachment', { payload, message });
@@ -34,6 +49,11 @@ const uploadAttachment = R.curry(toStorage);
  * @param {Upload} payload.upload - uploaded Attachment
  * {@link module:modules/attachment~Upload Upload}
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @example
+ * const attachment = await attachmentService.create({...
+ * const objResource = await objectService.create({...
+ * const attachment = Object.assign({}, attachment, objResource);
+ * const updatedAttachment = await attachmentService.update({ attachment }...
  * @method create
  * @return {external:Promise.<Attachment>} {@link module:modules/attachment~Attachment Attachment}
  */
