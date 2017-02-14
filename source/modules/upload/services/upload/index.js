@@ -26,7 +26,7 @@ export async function upload(image, message) {
     .then((response) => {
       logger.info('S3 response', { response, message });
 
-      if (response.ETag) return image.name;
+      if (response.ETag) return image.path;
     })
     .catch(err => {
       logger.error('Error with S3', { err, message });
