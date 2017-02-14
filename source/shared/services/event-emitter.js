@@ -13,10 +13,10 @@ class EventEmitter extends NativeEventEmitter {
     this.logger = logger;
   }
 
-  asyncOn(eventName, fn) {
+  asyncOn(eventName, callback) {
     const that = this;
     return this.on(eventName, (...args) => {
-      return Promise.try(() => fn(...args)).catch(err =>
+      return Promise.try(() => callback(...args)).catch(err =>
         that.logger.error('Error while emitting event', { eventName, err }));
     });
   }
