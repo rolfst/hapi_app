@@ -27,7 +27,9 @@ export function send(users, notification, networkId = null, message = null) {
 
   const emails = R.reject(R.isNil, R.pluck('email', users));
 
-  return Parse.Push.send({ where: createQuery(emails), data })
+  logger.info('Sending Push Notification', { data, emails });
+
+  return Parse.Push.send({ where: createQuery(emails), data }, { useMasterKey: true })
     .then(() => users.forEach(user => trackPushNotification(notification, user)))
-    .catch(err => logger.warn('Error sending push notification', { message, err }));
+    .catch(err => logger.error('Error sending push notification', { message, err }));
 }

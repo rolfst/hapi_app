@@ -12,7 +12,7 @@ import * as exchangeService from './services/flexchange';
 
 const pubsub = EventEmitter.create();
 
-pubsub.on('exchange.created', async (payload) => {
+pubsub.asyncOn('exchange.created', async (payload) => {
   const { exchange, network, credentials } = payload;
   const intercomEventPayload = R.pick([
     'networkId', 'date', 'startTime', 'endTime', 'type'], exchange);
@@ -36,7 +36,7 @@ pubsub.on('exchange.created', async (payload) => {
   Intercom.incrementAttribute(credentials.username, 'created_shifts');
 });
 
-pubsub.asyncOn('exchange.approved', async (payload) => {
+pubsub.asyncOn('exchange.approved', (payload) => {
   const { exchange, network, credentials, approvedUser } = payload;
 
   objectService.remove({ objectType: 'exchange', sourceId: exchange.id });
