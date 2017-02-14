@@ -258,6 +258,13 @@ export const deleteExchange = async (payload, message) => {
 
   return Promise.all([
     objectService.remove({ objectType: 'exchange', sourceId: payload.exchangeId }),
+    activityRepo.deleteBy({
+      activityType: { $in: [
+        'exchange_created', 'exchange_declined', 'exchange_accepted',
+        'exchange_comment', 'exchange_approved', 'exchange_rejected',
+      ] },
+      sourceId: payload.exchangeId,
+    }),
     exchangeRepo.deleteById(payload.exchangeId),
   ]);
 };
