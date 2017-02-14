@@ -1,6 +1,7 @@
 import R from 'ramda';
 import * as Logger from '../../../../shared/services/logger';
 import * as objectService from '../object';
+import * as objectRepository from '../../repositories/object';
 import * as impl from './implementation';
 
 /**
@@ -28,8 +29,18 @@ const findIncludes = (object, includes) => (typeEq('feed_message')) ?
 export const make = async (payload, message) => {
   logger.info(`Making feed for ${payload.parentType}`, { payload, message });
 
-  const whitelistedPayload = R.pick(['parentType', 'parentId', 'limit', 'offset'], payload);
-  const relatedObjects = await objectService.list(whitelistedPayload, message);
+  const relatedObjects = await objectRepository.findBy({
+    $or: [{
+      parentType: payload.parentType,
+      parentId: payload.parentId,
+    }, {
+      parentType: 'user',
+      parentId: message.credentials.id,
+    }],
+  }, {
+    limit: payload.limit,
+    offset: payload.offset,
+  });
 
   const hasInclude = R.contains(R.__, payload.include || []);
   const includes = await impl.getIncludes(hasInclude, relatedObjects);

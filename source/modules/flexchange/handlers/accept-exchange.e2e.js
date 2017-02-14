@@ -4,8 +4,9 @@ import moment from 'moment';
 import * as testHelper from '../../../shared/test-utils/helpers';
 import * as notifier from '../../../shared/services/notifier';
 import { patchRequest } from '../../../shared/test-utils/request';
+import * as objectRepository from '../../feed/repositories/object';
 import { exchangeTypes } from '../repositories/dao/exchange';
-import { createExchange } from '../repositories/exchange';
+import * as exchangeService from '../services/flexchange';
 
 describe('Accept exchange', () => {
   let sandbox;
@@ -19,11 +20,11 @@ describe('Accept exchange', () => {
 
     admin = await testHelper.createUser();
     network = await testHelper.createNetwork({ userId: admin.id });
-    exchange = await createExchange(admin.id, network.id, {
+    exchange = await exchangeService.createExchange({
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'Test shift to accept',
-    });
+    }, { network, credentials: admin });
   });
 
   after(async () => {
@@ -44,6 +45,17 @@ describe('Accept exchange', () => {
     assert.isDefined(data.responses[0].id);
     assert.equal(data.responses[0].response, true);
     assert.equal(data.responses[0].user.full_name, admin.fullName);
+  });
+
+  it('should delete object for accepting user', async () => {
+    const createdObjects = await objectRepository.findBy({
+      objectType: 'exchange',
+      sourceId: exchange.id,
+      parentType: 'user',
+      parentId: admin.id,
+    });
+
+    assert.lengthOf(createdObjects, 0);
   });
 
   it('should be able to accept after declining', async () => {
