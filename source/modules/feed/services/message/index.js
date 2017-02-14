@@ -2,6 +2,7 @@ import R from 'ramda';
 import Promise from 'bluebird';
 import * as Logger from '../../../../shared/services/logger';
 import createError from '../../../../shared/utils/create-error';
+import FeedDispatcher from '../../dispatcher';
 import * as messageRepository from '../../repositories/message';
 import * as likeRepository from '../../repositories/like';
 import * as commentRepository from '../../repositories/comment';
@@ -123,6 +124,8 @@ export const list = async (payload, message) => {
 export const create = async (payload, message) => {
   logger.info('Creating message', { payload, message });
 
+  const parent = await impl.getParent(payload.parentType, payload.parentId);
+
   const createdMessage = await messageRepository.create({
     objectId: null,
     text: payload.text,
@@ -148,6 +151,12 @@ export const create = async (payload, message) => {
 
     await Promise.map(payload.resources, createResource);
   }
+
+  FeedDispatcher.emit('message.created', {
+    parent,
+    actor: message.credentials,
+    message: createdMessage,
+  });
 
   return { ...createdMessage, objectId: createdObject.id };
 };
