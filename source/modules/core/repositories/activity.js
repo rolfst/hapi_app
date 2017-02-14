@@ -13,6 +13,10 @@ const defaultIncludes = [{
   }],
 }];
 
+export const findBy = (whereConstraint) => Activity.findAll({
+  where: whereConstraint,
+});
+
 /**
  * Finds all activities for a user
  * @param {string} userId - userId
@@ -69,3 +73,6 @@ export async function findAll() {
 export async function deleteById(activityId) {
   return Activity.destroy({ where: { id: activityId } });
 }
+
+export const deleteBy = (whereConstraint) =>
+  Activity.destroy({ where: whereConstraint });
