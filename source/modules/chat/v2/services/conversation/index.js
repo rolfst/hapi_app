@@ -93,6 +93,25 @@ export const listConversations = async (payload, message) => {
 };
 
 /**
+ * Retrieve a specific conversation
+ * @param {string} conversationId - Id of the conversation
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method getConversation
+ * @return {external:Promise.<Conversation>} {@link module:modules/chat~Conversation}
+ */
+export const getConversation = async(conversationId, message) => {
+  logger.info('get conversation', { conversationId, message });
+
+  const conversations = await listConversations({ conversationIds: [conversationId], limit: 1 });
+  const conversation = R.head(conversations);
+
+  if (!conversation) throw createError('404');
+  if (!R.contains(message.credentials.id, conversation.participantIds)) throw createError('404');
+
+  return conversation;
+};
+
+/**
  * Retrieve conversations for specific user.
  * @param {object} payload - Object containing payload data
  * @param {string} payload.userId - The id of the user
