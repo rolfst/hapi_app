@@ -50,7 +50,7 @@ describe('Service: Message', () => {
 
     it('should return message models', async () => {
       const actual = await messageService.list({
-        messageIds: R.pluck('id', createdMessages),
+        messageIds: R.pluck('sourceId', createdMessages),
       }, {
         credentials: admin,
       });
@@ -68,19 +68,19 @@ describe('Service: Message', () => {
     it('should return correct like count', async () => {
       await Promise.all([
         messageService.like({
-          messageId: createdMessages[0].id, userId: admin.id }),
+          messageId: createdMessages[0].sourceId, userId: admin.id }),
         messageService.like({
-          messageId: createdMessages[0].id, userId: employee.id }),
+          messageId: createdMessages[0].sourceId, userId: employee.id }),
       ]);
 
       const actual = await messageService.list({
-        messageIds: R.pluck('id', createdMessages),
+        messageIds: R.pluck('sourceId', createdMessages),
       }, {
         credentials: admin,
       });
 
-      const likedMessage = R.find(R.propEq('id', createdMessages[0].id), actual);
-      const otherMessage = R.find(R.propEq('id', createdMessages[1].id), actual);
+      const likedMessage = R.find(R.propEq('id', createdMessages[0].sourceId), actual);
+      const otherMessage = R.find(R.propEq('id', createdMessages[1].sourceId), actual);
 
       assert.lengthOf(actual, 2);
       assert.equal(likedMessage.likesCount, 2);
@@ -93,18 +93,18 @@ describe('Service: Message', () => {
 
     it('should return correct comment count', async () => {
       await commentService.create({
-        messageId: createdMessages[1].id,
+        messageId: createdMessages[1].sourceId,
         text: 'Foo comment for feed message!',
         userId: admin.id,
       });
 
       const actual = await messageService.list({
-        messageIds: R.pluck('id', createdMessages),
+        messageIds: R.pluck('sourceId', createdMessages),
       }, {
         credentials: admin,
       });
 
-      const commentedMessage = R.find(R.propEq('id', createdMessages[1].id), actual);
+      const commentedMessage = R.find(R.propEq('id', createdMessages[1].sourceId), actual);
 
       assert.lengthOf(actual, 2);
       assert.equal(commentedMessage.commentsCount, 1);
