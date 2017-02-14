@@ -20,7 +20,7 @@ export async function upload(image, message) {
     Body: image.stream,
   };
 
-  logger.info('sending to S3', { params: R.omit(['BODY'], params), message });
+  logger.info('Uploading file to S3', { params: R.omit(['BODY'], params), message });
 
   return s3.putObject(params).promise()
     .then((response) => {
