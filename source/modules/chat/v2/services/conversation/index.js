@@ -30,10 +30,10 @@ const lastMessageObjectsByConversationId = R.pipe(
  */
 export const create = async (payload, message) => {
   logger.info('Creating conversation', { payload, message });
-  const participantIds = R.uniq(payload.participantIds);
+  const participantIds = R.pipe(R.append(message.credentials.id), R.uniq)(payload.participantIds);
 
   if (participantIds.length < 2) {
-    throw createError('403', 'A conversation must have 2 or more participants');
+    throw createError('422', 'A conversation must have 2 or more participants');
   }
 
   const existingConversation = await conversationRepo.findExistingConversation(participantIds);
