@@ -1,13 +1,18 @@
 import { assert } from 'chai';
+import sinon from 'sinon';
 import * as testHelpers from '../../../../shared/test-utils/helpers';
 import R from 'ramda';
 import Promise from 'bluebird';
+import stream from 'stream';
+import * as uploadService from '../../../upload/services/upload';
 import * as pollService from '../../../poll/services/poll';
+import * as attachmentService from '../../../attachment/services/attachment';
 import * as messageService from './index';
 import * as objectService from '../object';
 import * as commentService from '../comment';
 
 describe('Service: Message', () => {
+  const Readable = stream.Readable;
   let admin;
   let employee;
   let network;
@@ -111,7 +116,7 @@ describe('Service: Message', () => {
     });
   });
 
-  describe('create', () => {
+  describe('create poll', () => {
     let createdMessage;
 
     before(async () => {
@@ -172,9 +177,6 @@ describe('Service: Message', () => {
       // TODO
     });
 
-    xit('should create object entry for attachment if resource is present', async () => {
-      // TODO
-    });
 
     it('should create object entry for message', async () => {
       const objects = await objectService.list({
@@ -184,6 +186,76 @@ describe('Service: Message', () => {
 
       assert.equal(objects[0].sourceId, createdMessage.id);
       assert.equal(objects[0].objectType, 'feed_message');
+    });
+  });
+
+  describe('create attachment', () => {
+    let createdMessage;
+    let sandbox;
+
+    before(async () => {
+      sandbox = sinon.sandbox.create();
+      sandbox.stub(uploadService, 'upload').returns(Promise.resolve('/attachment/test.jpg'));
+
+      admin = await testHelpers.createUser({ password: 'foo' });
+      network = await testHelpers.createNetwork({ userId: admin.id });
+
+      const readStream = new Readable;
+      readStream.push('hi');
+      readStream.push(null);
+
+      createdMessage = await messageService.create({
+        parentType: 'network',
+        parentId: network.id,
+        text: 'My cool message',
+        resources: [
+          {
+            type: 'attachment',
+            data: { path: 'test.jpg', stream: readStream },
+          },
+        ],
+      }, {
+        credentials: { id: admin.id },
+        network: { id: network.id },
+      });
+    });
+
+    after(() => {
+      sandbox.restore();
+      return testHelpers.cleanAll();
+    });
+
+    it('should create an attachment entry if resource is present', async () => {
+      const objects = await objectService.list({
+        parentType: 'feed_message',
+        parentId: createdMessage.id,
+      });
+
+      const attachmentEntry = await attachmentService.get({ attachmentId: objects[0].sourceId });
+
+      assert.isDefined(attachmentEntry);
+      assert.equal(attachmentEntry.path, '/attachment/test.jpg');
+    });
+
+    it('should create a message entry', async () => {
+      const expected = await messageService.get({ messageId: createdMessage.id });
+
+      assert.isDefined(expected);
+      assert.property(expected, 'objectId');
+      assert.equal(expected.text, 'My cool message');
+      assert.property(expected, 'createdAt');
+    });
+
+    it('should create object entry for attachment if resource is present', async () => {
+      const expected = await objectService.list({
+        parentType: 'feed_message',
+        parentId: createdMessage.id,
+      });
+
+      assert.lengthOf(expected, 1);
+      assert.equal(expected[0].userId, admin.id);
+      assert.equal(expected[0].objectType, 'attachment');
+      assert.isDefined(expected[0].sourceId);
     });
   });
 });

@@ -144,6 +144,7 @@ export const create = async (payload, message) => {
     const typeEq = R.propEq('type');
     const createResource = R.cond([
       [typeEq('poll'), impl.createPollResource(createdMessage, message)],
+      [typeEq('attachment'), impl.createAttachmentResource(createdMessage, message)],
     ]);
 
     await Promise.map(payload.resources, createResource);
