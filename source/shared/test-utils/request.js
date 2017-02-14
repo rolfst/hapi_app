@@ -10,12 +10,11 @@ export function deleteRequest(url, token, server = global.server) {
 }
 
 export function postRequest(
-    url, payload, token, headers = 'application/json', server = global.server) {
+    url, payload, token, server = global.server) {
   return server.inject(Object.assign({
     method: 'POST',
     url,
     payload,
-    headers,
   }, makeOptions(token)));
 }
 
