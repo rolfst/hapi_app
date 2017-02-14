@@ -37,6 +37,13 @@ export const removeAttachedObjects = (messageId) => Promise.all([
   objectService.remove({ parentType: 'feed_message', parentId: messageId }),
 ]);
 
+/**
+ * Get parent by type and id
+ * @param {string} parentType - The type of the parent
+ * @param {string} parentId - The id of the parent
+ * @method getParent
+ * @return {Mixed}
+ */
 export const getParent = async (parentType, parentId) => {
   const parentFn = R.cond([
     [R.equals('network'), R.always(networkRepository.findNetworkById)],
