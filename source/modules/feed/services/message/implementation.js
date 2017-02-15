@@ -45,15 +45,24 @@ export const removeAttachedObjects = (messageId) => Promise.all([
  * @return {Mixed}
  */
 export const getParent = async (parentType, parentId) => {
-  const parentFn = R.cond([
-    [R.equals('network'), R.always(networkRepository.findNetworkById)],
-    [R.equals('team'), R.always(teamRepository.findTeamById)],
+  const result = R.cond([
+    [R.equals('network'), () => networkRepository.findNetworkById(parentId)],
+    [R.equals('team'), () => teamRepository.findTeamById(parentId)],
     [R.T, R.F],
   ])(parentType);
 
-  if (!parentFn) throw createError('403', 'Parent not supported');
+  if (!result) throw createError('404', 'Parent not found');
 
-  const result = await parentFn(parentId);
+  return result;
+};
+
+export const getUsersForParent = async (parentType, parentId) => {
+  const result = R.cond([
+    [R.equals('network'), () => networkRepository.findUsersForNetwork(parentId)],
+    [R.equals('team'), () => teamRepository.findMembers(parentId)],
+    [R.T, R.F],
+  ])(parentType);
+
   if (!result) throw createError('404', 'Parent not found');
 
   return result;
