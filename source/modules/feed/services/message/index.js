@@ -154,6 +154,7 @@ export const create = async (payload, message) => {
 
   FeedDispatcher.emit('message.created', {
     parent,
+    networkId: message.network.id,
     actor: message.credentials,
     message: createdMessage,
   });
