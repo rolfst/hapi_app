@@ -33,8 +33,8 @@ export const createPollResource = (createdMessage, message) => R.pipeP(
  * @return {external:Promise.<Object>}
  */
 export const createAttachmentResource = (createdMessage, message) => R.pipeP(
-  (attachmentResource) => attachmentService.create({
-    upload: attachmentResource.data,
+  (attachmentFile) => attachmentService.create({
+    file: attachmentFile,
   }, message),
   async (createdAttachment) => {
     const objectResource = await objectService.create({
@@ -44,10 +44,10 @@ export const createAttachmentResource = (createdMessage, message) => R.pipeP(
       objectType: 'attachment',
       sourceId: createdAttachment.id,
     }, message);
-    const attachment = R.merge(createdAttachment,
-        { objectId: R.prop('id', objectResource) });
 
-    return attachmentService.update({ attachment }, message);
+    return attachmentService.update({
+      attachmentId: createdAttachment.id,
+      attributes: { objectId: objectResource.id } }, message);
   }
 );
 /**

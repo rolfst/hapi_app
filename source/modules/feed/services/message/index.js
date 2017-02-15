@@ -134,21 +134,22 @@ export const create = async (payload, message) => {
     parentId: payload.parentId,
     objectType: 'feed_message',
     sourceId: createdMessage.id,
-  });
+  }, message);
 
   await messageRepository.update(createdMessage.id, { objectId: createdObject.id });
 
-  if (payload.resources) {
-    logger.info('Creating resources for message', { resources: payload.resources });
+  const resourcePromises = [];
 
-    const typeEq = R.propEq('type');
-    const createResource = R.cond([
-      [typeEq('poll'), impl.createPollResource(createdMessage, message)],
-      [typeEq('attachment'), impl.createAttachmentResource(createdMessage, message)],
-    ]);
-
-    await Promise.map(payload.resources, createResource);
+  if (payload.attachments) {
+    resourcePromises.push(Promise.map(R.flatten([payload.attachments]),
+      impl.createAttachmentResource(createdMessage, message)));
   }
+
+  if (payload.poll) {
+    resourcePromises.push(impl.createPollResource(createdMessage, message)(payload.poll));
+  }
+
+  await Promise.all(resourcePromises);
 
   return R.merge(createdObject, {
     source: { ...createdMessage, objectId: createdObject.id },
