@@ -194,7 +194,7 @@ describe('Service: Message', () => {
     it('should fail when parent not found', async () => {
       const wrongMessagePromise = messageService.create({
         parentType: 'network',
-        parentId: '12938',
+        parentId: -1,
         text: 'My cool message',
         resources: [],
       }, { network, credentials: admin });
