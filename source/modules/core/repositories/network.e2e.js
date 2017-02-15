@@ -18,9 +18,7 @@ describe('Repository: Network', () => {
 
   describe('findUsersForNetwork', () => {
     it('should include network link data', async () => {
-      const actual = await networkRepository.findUsersForNetwork({
-        networkId: network.id,
-      });
+      const actual = await networkRepository.findUsersForNetwork(network.id);
 
       const admin = R.find(R.propEq('roleType', 'ADMIN'), actual);
       const employee = R.find(R.propEq('roleType', 'EMPLOYEE'), actual);
@@ -33,10 +31,8 @@ describe('Repository: Network', () => {
     });
 
     it('should be able to select users for roleType', async () => {
-      const actual = await networkRepository.findUsersForNetwork({
-        networkId: network.id,
-        roleType: 'ADMIN',
-      });
+      const actual = await networkRepository.findUsersForNetwork(
+        network.id, { roleType: 'ADMIN' });
 
       assert.lengthOf(actual, 1);
       assert.equal(actual[0].roleType, 'ADMIN');

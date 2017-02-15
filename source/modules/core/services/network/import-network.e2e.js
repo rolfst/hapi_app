@@ -96,15 +96,13 @@ describe('Import network', () => {
       });
 
       it('should add new admins to network', async () => {
-        const admins = await networkRepo.findUsersForNetwork({
-          networkId: network.id, roleType: 'ADMIN' });
+        const admins = await networkRepo.findUsersForNetwork(network.id, { roleType: 'ADMIN' });
 
         assert.lengthOf(admins, 2);
       });
 
       it('should add new unique users to network', async () => {
-        const activeUsers = await networkRepo.findUsersForNetwork({
-          networkId: network.id });
+        const activeUsers = await networkRepo.findUsersForNetwork(network.id);
 
         assert.lengthOf(activeUsers, 14);
       });
