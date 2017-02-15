@@ -186,4 +186,43 @@ describe('Service: Message', () => {
       assert.equal(objects[0].objectType, 'feed_message');
     });
   });
+
+  describe.only('update', () => {
+    let createdMessage;
+
+    before(async () => {
+      admin = await testHelpers.createUser({ password: 'foo' });
+      network = await testHelpers.createNetwork({ userId: admin.id });
+
+      createdMessage = await messageService.create({
+        parentType: 'network',
+        parentId: network.id,
+        text: 'My cool message',
+        resources: [{
+          type: 'poll',
+          data: { options: ['Yes', 'No', 'Ok'] },
+        }],
+      }, {
+        credentials: { id: admin.id },
+        network: { id: network.id },
+      });
+    });
+
+    after(() => testHelpers.cleanAll());
+
+    it('should update a message entry', async () => {
+      const updatedMessage = await messageService.update({
+        parentType: 'network',
+        parentId: network.id,
+        text: 'My cool updated message',
+      });
+      const expected = await messageService.get({ messageId: createdMessage.id });
+
+      assert.isDefined(expected);
+      assert.property(expected, 'objectId');
+      assert.equal(expected.text, 'My cool updated message');
+      assert.property(expected, 'createdAt');
+      assert.isNotNull(expcted.createdAt);
+    });
+  });
 });

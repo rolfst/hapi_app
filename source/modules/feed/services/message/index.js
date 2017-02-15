@@ -153,6 +153,50 @@ export const create = async (payload, message) => {
 };
 
 /**
+ * Updates a message as authenticated user with an associated object entry.
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.parentType - The type of parent to create the object for
+ * @param {string} payload.parentId - The id of the parent
+ * @param {string} payload.text - The text of the message
+ * @param {object[]} payload.resources - The resources that belong to the message
+ * @param {string} payload.resources[].type - The type of the resource
+ * @param {object} payload.resources[].data - The data for the resource
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method create
+ * @return {external:Promise.<Message>} {@link module:feed~Message message}
+ */
+export const create = async (payload, message) => {
+  logger.info('Creating message', { payload, message });
+
+  const createdMessage = await messageRepository.create({
+    objectId: null,
+    text: payload.text,
+  });
+
+  const createdObject = await objectService.create({
+    userId: message.credentials.id,
+    parentType: payload.parentType,
+    parentId: payload.parentId,
+    objectType: 'feed_message',
+    sourceId: createdMessage.id,
+  });
+
+  await messageRepository.update(createdMessage.id, { objectId: createdObject.id });
+
+  if (payload.resources) {
+    logger.info('Creating resources for message', { resources: payload.resources });
+
+    const typeEq = R.propEq('type');
+    const createResource = R.cond([
+      [typeEq('poll'), impl.createPollResource(createdMessage, message)],
+    ]);
+
+    await Promise.map(payload.resources, createResource);
+  }
+
+  return { ...createdMessage, objectId: createdObject.id };
+};
+/**
  * Likes a message
  * @param {object} payload - Object containing payload data
  * @param {string} payload.messageId - The id of the message to like

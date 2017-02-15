@@ -18,9 +18,20 @@ const routes = [{
   validator: require('./validators/create-message'),
 }, {
   method: 'POST',
-  url: '/v3/teams/{teamId}/feed',
-  handler: require('./handlers/create-team-message'),
+  url: '/v3/networks/{networkId}/feed',
+  handler: require('./handlers/create-network-message'),
   validator: require('./validators/create-message'),
+}, {
+  method: 'PUT',
+  url: '/v3/teams/{teamId}/feed',
+  handler: require('./handlers/update-message'),
+  validator: require('./validators/update-message'),
+  prefetch: false,
+}, {
+  method: 'PUT',
+  url: '/v3/networks/{networkId}/feed',
+  handler: require('./handlers/update-message'),
+  validator: require('./validators/update-message'),
   prefetch: false,
 }];
 
