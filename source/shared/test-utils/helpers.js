@@ -139,7 +139,7 @@ export async function createUser(userAttributes = {}) {
   const username = `test-user-${Math.floor(Math.random() * 1000)}`;
   const attributes = {
     username,
-    email: username,
+    email: `${username}@example.com`,
     password: `pw#${Math.floor(Math.random() * 1000)}`,
     ...userAttributes,
   };
