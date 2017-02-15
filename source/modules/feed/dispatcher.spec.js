@@ -5,7 +5,7 @@ import * as notifier from '../../shared/services/notifier';
 import * as objectService from './services/object';
 import Dispatcher from './dispatcher';
 
-describe.only('Feed: Dispatcher', () => {
+describe('Feed: Dispatcher', () => {
   let sandbox;
 
   before(() => (sandbox = sinon.sandbox.create()));
