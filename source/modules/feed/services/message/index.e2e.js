@@ -126,10 +126,7 @@ describe('Service: Message', () => {
           type: 'poll',
           data: { options: ['Yes', 'No', 'Ok'] },
         }],
-      }, {
-        credentials: { id: admin.id },
-        network: { id: network.id },
-      });
+      }, { network, credentials: admin });
     });
 
     after(() => testHelpers.cleanAll());
@@ -200,10 +197,7 @@ describe('Service: Message', () => {
         parentId: '12938',
         text: 'My cool message',
         resources: [],
-      }, {
-        credentials: { id: admin.id },
-        network: { id: network.id },
-      });
+      }, { network, credentials: admin });
 
       return assert.isRejected(wrongMessagePromise, /Parent not found/);
     });
