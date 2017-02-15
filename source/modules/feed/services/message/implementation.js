@@ -1,8 +1,5 @@
 import R from 'ramda';
-import createError from '../../../../shared/utils/create-error';
 import * as pollService from '../../../poll/services/poll';
-import * as networkRepository from '../../../core/repositories/network';
-import * as teamRepository from '../../../core/repositories/team';
 import * as objectService from '../object';
 
 /**
@@ -36,34 +33,3 @@ export const removeAttachedObjects = (messageId) => Promise.all([
   objectService.remove({ objectType: 'feed_message', sourceId: messageId }),
   objectService.remove({ parentType: 'feed_message', parentId: messageId }),
 ]);
-
-/**
- * Get parent by type and id
- * @param {string} parentType - The type of the parent
- * @param {string} parentId - The id of the parent
- * @method getParent
- * @return {Mixed}
- */
-export const getParent = async (parentType, parentId) => {
-  const result = R.cond([
-    [R.equals('network'), () => networkRepository.findNetworkById(parentId)],
-    [R.equals('team'), () => teamRepository.findTeamById(parentId)],
-    [R.T, R.F],
-  ])(parentType);
-
-  if (!result) throw createError('404', 'Parent not found');
-
-  return result;
-};
-
-export const getUsersForParent = async (parentType, parentId) => {
-  const result = R.cond([
-    [R.equals('network'), () => networkRepository.findUsersForNetwork(parentId)],
-    [R.equals('team'), () => teamRepository.findMembers(parentId)],
-    [R.T, R.F],
-  ])(parentType);
-
-  if (!result) throw createError('404', 'Parent not found');
-
-  return result;
-};
