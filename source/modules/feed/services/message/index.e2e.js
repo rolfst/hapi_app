@@ -50,7 +50,7 @@ describe('Service: Message', () => {
 
     it('should return message models', async () => {
       const actual = await messageService.list({
-        messageIds: R.pluck('id', createdMessages),
+        messageIds: R.pluck('sourceId', createdMessages),
       }, {
         credentials: admin,
       });
@@ -68,19 +68,19 @@ describe('Service: Message', () => {
     it('should return correct like count', async () => {
       await Promise.all([
         messageService.like({
-          messageId: createdMessages[0].id, userId: admin.id }),
+          messageId: createdMessages[0].sourceId, userId: admin.id }),
         messageService.like({
-          messageId: createdMessages[0].id, userId: employee.id }),
+          messageId: createdMessages[0].sourceId, userId: employee.id }),
       ]);
 
       const actual = await messageService.list({
-        messageIds: R.pluck('id', createdMessages),
+        messageIds: R.pluck('sourceId', createdMessages),
       }, {
         credentials: admin,
       });
 
-      const likedMessage = R.find(R.propEq('id', createdMessages[0].id), actual);
-      const otherMessage = R.find(R.propEq('id', createdMessages[1].id), actual);
+      const likedMessage = R.find(R.propEq('id', createdMessages[0].sourceId), actual);
+      const otherMessage = R.find(R.propEq('id', createdMessages[1].sourceId), actual);
 
       assert.lengthOf(actual, 2);
       assert.equal(likedMessage.likesCount, 2);
@@ -93,18 +93,18 @@ describe('Service: Message', () => {
 
     it('should return correct comment count', async () => {
       await commentService.create({
-        messageId: createdMessages[1].id,
+        messageId: createdMessages[1].sourceId,
         text: 'Foo comment for feed message!',
         userId: admin.id,
       });
 
       const actual = await messageService.list({
-        messageIds: R.pluck('id', createdMessages),
+        messageIds: R.pluck('sourceId', createdMessages),
       }, {
         credentials: admin,
       });
 
-      const commentedMessage = R.find(R.propEq('id', createdMessages[1].id), actual);
+      const commentedMessage = R.find(R.propEq('id', createdMessages[1].sourceId), actual);
 
       assert.lengthOf(actual, 2);
       assert.equal(commentedMessage.commentsCount, 1);
@@ -134,8 +134,16 @@ describe('Service: Message', () => {
 
     after(() => testHelpers.cleanAll());
 
+    it('should return object with source after create', () => {
+      assert.equal(createdMessage.userId, admin.id);
+      assert.equal(createdMessage.objectType, 'feed_message');
+      assert.equal(createdMessage.parentType, 'network');
+      assert.equal(createdMessage.parentId, network.id);
+      assert.equal(createdMessage.source.text, 'My cool message');
+    });
+
     it('should create a message entry', async () => {
-      const expected = await messageService.get({ messageId: createdMessage.id });
+      const expected = await messageService.get({ messageId: createdMessage.sourceId });
 
       assert.isDefined(expected);
       assert.property(expected, 'objectId');
@@ -146,7 +154,7 @@ describe('Service: Message', () => {
     it('should create a poll entry if resource is present', async () => {
       const objects = await objectService.list({
         parentType: 'feed_message',
-        parentId: createdMessage.id,
+        parentId: createdMessage.sourceId,
       });
 
       const pollEntry = await pollService.get({ pollId: objects[0].sourceId });
@@ -159,7 +167,7 @@ describe('Service: Message', () => {
     it('should create object entry for poll if resource is present', async () => {
       const expected = await objectService.list({
         parentType: 'feed_message',
-        parentId: createdMessage.id,
+        parentId: createdMessage.sourceId,
       });
 
       assert.lengthOf(expected, 1);
@@ -182,7 +190,7 @@ describe('Service: Message', () => {
         parentId: network.id,
       });
 
-      assert.equal(objects[0].sourceId, createdMessage.id);
+      assert.equal(objects[0].sourceId, createdMessage.sourceId);
       assert.equal(objects[0].objectType, 'feed_message');
     });
 

@@ -105,7 +105,7 @@ describe('Service: Object', () => {
     after(() => testHelpers.cleanAll());
 
     it('should return children', async () => {
-      const createdMessage = await feedMessageService.create({
+      const createdMessageObject = await feedMessageService.create({
         parentType: 'network',
         parentId: '42',
         text: 'Do you want to join us tomorrow?',
@@ -118,7 +118,7 @@ describe('Service: Object', () => {
         network: { id: '42' },
       });
 
-      const createdMessage2 = await feedMessageService.create({
+      const createdMessageObject2 = await feedMessageService.create({
         parentType: 'network',
         parentId: '42',
         text: 'Do you want to join us tomorrow?',
@@ -129,21 +129,22 @@ describe('Service: Object', () => {
       });
 
       const actual = await objectService.listWithSources({
-        objectIds: [createdMessage.objectId, createdMessage2.objectId],
+        objectIds: [createdMessageObject.id, createdMessageObject2.id],
       }, { credentials: admin });
 
       await objectService.remove({ parentType: 'network', parentId: '42' });
-      await objectService.remove({ parentType: 'feed_message', parentId: createdMessage.id });
+      await objectService.remove({
+        parentType: 'feed_message', parentId: createdMessageObject.sourceId });
 
-      const objectWithChildren = R.find(R.propEq('id', createdMessage.objectId), actual);
-      const objectWithoutChildren = R.find(R.propEq('id', createdMessage2.objectId), actual);
+      const objectWithChildren = R.find(R.propEq('id', createdMessageObject.id), actual);
+      const objectWithoutChildren = R.find(R.propEq('id', createdMessageObject2.id), actual);
 
       assert.lengthOf(actual, 2);
       assert.deepEqual(objectWithoutChildren.children, []);
       assert.property(objectWithChildren, 'children');
       assert.lengthOf(objectWithChildren.children, 1);
       assert.equal(objectWithChildren.children[0].parentType, 'feed_message');
-      assert.equal(objectWithChildren.children[0].parentId, createdMessage.id);
+      assert.equal(objectWithChildren.children[0].parentId, createdMessageObject.sourceId);
       assert.equal(objectWithChildren.children[0].source.type, 'poll');
     });
 
@@ -154,7 +155,7 @@ describe('Service: Object', () => {
         participantIds: [admin.id, participant.id],
       }, { credentials: admin });
 
-      const createdMessage = await privateMessageService.create({
+      const createdMessageObject = await privateMessageService.create({
         conversationId: createdConversation.id,
         text: 'Test message',
       }, {
@@ -163,31 +164,31 @@ describe('Service: Object', () => {
       });
 
       const actual = await objectService.listWithSources({
-        objectIds: [createdMessage.id],
+        objectIds: [createdMessageObject.id],
       }, { credentials: admin });
 
       const object = actual[0];
 
       assert.equal(object.source.type, 'private_message');
-      assert.equal(object.source.id, createdMessage.source.id);
+      assert.equal(object.source.id, createdMessageObject.source.id);
       assert.equal(object.source.text, 'Test message');
     });
 
     it('should support object_type: feed_message', async () => {
-      const createdMessage = await feedMessageService.create({
+      const createdMessageObject = await feedMessageService.create({
         parentType: 'network',
         parentId: '42',
         text: 'Test message for network',
       }, { credentials: { id: admin.id } });
 
       const actual = await objectService.listWithSources({
-        objectIds: [createdMessage.objectId],
+        objectIds: [createdMessageObject.id],
       }, { credentials: { id: admin.id } });
 
       const object = actual[0];
 
       assert.equal(object.source.type, 'feed_message');
-      assert.equal(object.source.id, createdMessage.id);
+      assert.equal(object.source.id, createdMessageObject.sourceId);
       assert.equal(object.source.text, 'Test message for network');
     });
   });

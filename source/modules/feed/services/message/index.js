@@ -124,7 +124,7 @@ export const list = async (payload, message) => {
 export const create = async (payload, message) => {
   logger.info('Creating message', { payload, message });
 
-  const parent = await impl.getParent(payload.parentType, payload.parentId);
+  const parent = await objectService.getParent(R.pick(['parentType', 'parentId'], payload));
 
   const createdMessage = await messageRepository.create({
     objectId: null,
@@ -152,14 +152,18 @@ export const create = async (payload, message) => {
     await Promise.map(payload.resources, createResource);
   }
 
+  const objectWithSource = R.merge(createdObject, {
+    source: { ...createdMessage, objectId: createdObject.id },
+  });
+
   FeedDispatcher.emit('message.created', {
     parent,
     networkId: message.network.id,
     actor: message.credentials,
-    message: createdMessage,
+    object: objectWithSource,
   });
 
-  return { ...createdMessage, objectId: createdObject.id };
+  return objectWithSource;
 };
 
 /**
