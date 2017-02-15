@@ -67,6 +67,8 @@ export const create = (payload, message) => {
 
 export const update = async (payload, message) => {
   logger.info('Updating attachment', { payload, message });
+  const attachment = await attachmentRepo.findById(payload.attachment.id);
+  if (!attachment) createError('404');
 
   return attachmentRepo.update(payload.attachment);
 };
