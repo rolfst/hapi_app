@@ -19,7 +19,7 @@ describe('Handler: Create conversation (v2)', () => {
 
     after(() => testHelper.cleanAll());
 
-    it('should return object model with new message as source', async () => {
+    it('should create a conversation with logged user and a participant', async () => {
       const ENDPOINT_URL = '/v2/conversations';
       const { result, statusCode } = await postRequest(ENDPOINT_URL, {
         type: 'private',
@@ -38,11 +38,21 @@ describe('Handler: Create conversation (v2)', () => {
 
     after(() => testHelper.cleanAll());
 
-    it('should return object model with new message as source', async () => {
+    it('should fail when passing logged user as a participant', async () => {
       const ENDPOINT_URL = '/v2/conversations';
       const { statusCode } = await postRequest(ENDPOINT_URL, {
         type: 'private',
         participantIds: [creator.id],
+      }, creator.token);
+
+      assert.equal(statusCode, 422);
+    });
+
+    it('should fail when there are no participants', async () => {
+      const ENDPOINT_URL = '/v2/conversations';
+      const { statusCode } = await postRequest(ENDPOINT_URL, {
+        type: 'private',
+        participantIds: [],
       }, creator.token);
 
       assert.equal(statusCode, 422);
