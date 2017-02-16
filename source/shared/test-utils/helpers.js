@@ -22,6 +22,15 @@ export const DEFAULT_NETWORK_EXTERNALID = 'https://partner2.testpmt.nl/rest.php/
 export const randomString = (prefix = 'test-object') =>
   `${prefix}-${Math.floor(Math.random() * 1000)}`;
 
+export const hapiFile = (fileName) => ({
+  filename: fileName,
+  path: `${process.cwd()}/${fileName}`,
+  headers: {
+    'content-disposition': `form-data; name="attachments"; filename="${fileName}"`,
+    'content-type': 'image/jpg',
+  },
+});
+
 /**
  * creates an integration in the database
  * @param {object} [attributes=DEFAULT_INTEGRATION] - attributes to user for an integration

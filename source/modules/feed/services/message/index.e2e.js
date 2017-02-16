@@ -185,14 +185,7 @@ describe('Service: Message', () => {
     let createdMessage;
     let sandbox;
 
-    const hapiFile = {
-      filename: 'image.jpg',
-      path: `${process.cwd()}/image.jpg`,
-      headers: {
-        'content-disposition': 'form-data; name="attachments"; filename="image.jpg"',
-        'content-type': 'image/jpg',
-      },
-    };
+    const hapiFile = testHelpers.hapiFile('image.jpg');
 
     before(async () => {
       sandbox = sinon.sandbox.create();

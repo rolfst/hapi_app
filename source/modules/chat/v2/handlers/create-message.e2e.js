@@ -46,15 +46,7 @@ describe('Handler: Create message (v2)', () => {
   });
 
   it('should handle file upload', async () => {
-    const hapiFile = {
-      filename: 'image.jpg',
-      path: `${process.cwd()}/image.jpg`,
-      headers: {
-        'content-disposition': 'form-data; name="attachments"; filename="image.jpg"',
-        'content-type': 'image/jpg',
-      },
-    };
-
+    const hapiFile = testHelper.hapiFile('image.jpg');
     sinon.stub(Storage, 'upload').returns(Promise.resolve('image.jpg'));
 
     const ENDPOINT_URL = `/v2/conversations/${createdConversation.id}/messages`;

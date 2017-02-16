@@ -2,6 +2,7 @@ import fs from 'fs';
 import { assert } from 'chai';
 import sinon from 'sinon';
 import AWS from 'aws-sdk';
+import * as testHelpers from '../test-utils/helpers';
 import * as Storage from './storage';
 
 describe('Service: Storage', () => {
@@ -9,14 +10,7 @@ describe('Service: Storage', () => {
 
   const filePath = `${process.cwd()}/image.jpg`;
 
-  const hapiFile = {
-    filename: 'image.jpg',
-    path: `${process.cwd()}/image.jpg`,
-    headers: {
-      'content-disposition': 'form-data; name="attachments"; filename="image.jpg"',
-      'content-type': 'image/jpg',
-    },
-  };
+  const hapiFile = testHelpers.hapiFile('image.jpg');
 
   before(() => fs.writeFileSync(filePath, new Buffer('foo')));
   after(() => fs.unlinkSync(filePath));
