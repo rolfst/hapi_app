@@ -14,7 +14,7 @@ const location = {
   acceptance: 'acc',
 };
 
-const getStorageClient = () => {
+export const getClient = () => {
   AWS.config.setPromisesDependency(Promise);
 
   const options = {
@@ -28,7 +28,9 @@ const getStorageClient = () => {
 
 /**
  * Upload a fileStream to Amazon S3 Storage
- * @param {object} file - Stream containing the file to upload
+ * @param {object} file - Object containing file meta data
+ * @param {string} file.filename
+ * @param {object} file.headers
  * @param {string} prefix - The prefix that will be prepended to the filename
  * @method upload
  * @return {external:Promise.<String>} Returning the filename
@@ -36,7 +38,7 @@ const getStorageClient = () => {
 export function upload(file, prefix = null) {
   const environment = location[process.env.API_ENV];
   const fileExtension = file.filename.split('.')[1];
-  const generatedFileName = Math.random().toString(20).substr(2, 10);
+  const generatedFileName = Math.random().toString(20).substr(2, 15);
   const newFilename = `${generatedFileName}.${fileExtension}`;
   const uploadPath = prefix ?
     `${environment}/${prefix}/${newFilename}` :
@@ -56,7 +58,7 @@ export function upload(file, prefix = null) {
 
       logger.info('Uploading file to S3', { params: R.omit(['Body'], params) });
 
-      getStorageClient().putObject(params).promise()
+      getClient().putObject(params).promise()
         .then((response) => {
           logger.info('S3 response', { response });
 
