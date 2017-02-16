@@ -1,4 +1,5 @@
 import R from 'ramda';
+import fs from 'fs';
 import Promise from 'bluebird';
 import AWS from 'aws-sdk';
 import createError from '../utils/create-error';
@@ -27,14 +28,14 @@ const getStorageClient = () => {
 
 /**
  * Upload a fileStream to Amazon S3 Storage
- * @param {Stream} fileStream - Stream containing the file to upload
+ * @param {object} file - Stream containing the file to upload
  * @param {string} prefix - The prefix that will be prepended to the filename
  * @method upload
  * @return {external:Promise.<String>} Returning the filename
  */
-export function upload(fileStream, prefix = null) {
+export function upload(file, prefix = null) {
   const environment = location[process.env.API_ENV];
-  const fileExtension = fileStream.hapi.filename.split('.')[1];
+  const fileExtension = file.filename.split('.')[1];
   const generatedFileName = Math.random().toString(20).substr(2, 10);
   const newFilename = `${generatedFileName}.${fileExtension}`;
   const uploadPath = prefix ?
@@ -42,11 +43,15 @@ export function upload(fileStream, prefix = null) {
     `${environment}/${newFilename}`;
 
   return new Promise((fulfill, reject) => {
-    fileStream.on('readable', (buffer) => {
+    fs.readFile(file.path, (fsErr, fileData) => {
+      if (fsErr) return reject(fsErr);
+
       const params = {
         Bucket: process.env.S3_BUCKET,
         Key: uploadPath,
-        Body: buffer,
+        Body: fileData,
+        ContentDisposition: file.headers['content-disposition'],
+        ContentType: file.headers['content-type'],
       };
 
       logger.info('Uploading file to S3', { params: R.omit(['Body'], params) });
