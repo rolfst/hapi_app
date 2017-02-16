@@ -50,10 +50,10 @@ export const list = async (payload, message) => {
  * @param {object} payload - Object containing payload data
  * @param {string} payload.objectIds - The id for objects to list
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method listWithSources
+ * @method listWithSourcesAndChildren
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
-export const listWithSources = async (payload, message) => {
+export const listWithSourcesAndChildren = async (payload, message) => {
   logger.info('Listing objects with sources', { payload, message });
 
   const objects = await objectRepository.findBy({
