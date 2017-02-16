@@ -1,11 +1,11 @@
 import { assert } from 'chai';
 import stream from 'stream';
 import sinon from 'sinon';
-import * as objectRepo from '../../../feed/repositories/object';
 import * as testHelper from '../../../../shared/test-utils/helpers';
-import * as uploadService from '../../../upload/services/upload';
-import * as attachmentService from './index';
+import * as Storage from '../../../../shared/services/storage';
+import * as objectRepo from '../../../feed/repositories/object';
 import * as attachmentRepo from '../../repositories/attachment';
+import * as attachmentService from './index';
 
 const Readable = stream.Readable;
 
@@ -29,8 +29,8 @@ describe('Service: Attachment', () => {
     });
 
     it('should create a attachment', async () => {
-      const imageLocation = '/attachments/test.jpg';
-      sandbox.stub(uploadService, 'upload').returns(Promise.resolve(imageLocation));
+      const imageLocation = '/test.jpg';
+      sandbox.stub(Storage, 'upload').returns(Promise.resolve(imageLocation));
 
       const readStream = new Readable;
       readStream.push('image');

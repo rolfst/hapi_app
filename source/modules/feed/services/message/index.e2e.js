@@ -1,15 +1,15 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import * as testHelpers from '../../../../shared/test-utils/helpers';
 import R from 'ramda';
 import Promise from 'bluebird';
 import stream from 'stream';
-import * as uploadService from '../../../upload/services/upload';
+import * as testHelpers from '../../../../shared/test-utils/helpers';
+import * as Storage from '../../../../shared/services/storage';
 import * as pollService from '../../../poll/services/poll';
 import * as attachmentService from '../../../attachment/services/attachment';
-import * as messageService from './index';
 import * as objectService from '../object';
 import * as commentService from '../comment';
+import * as messageService from './index';
 
 describe('Service: Message', () => {
   const Readable = stream.Readable;
@@ -203,7 +203,7 @@ describe('Service: Message', () => {
 
     before(async () => {
       sandbox = sinon.sandbox.create();
-      sandbox.stub(uploadService, 'upload').returns(Promise.resolve('/attachment/test.jpg'));
+      sandbox.stub(Storage, 'upload').returns(Promise.resolve('/attachment/test.jpg'));
 
       admin = await testHelpers.createUser({ password: 'foo' });
       network = await testHelpers.createNetwork({ userId: admin.id });
