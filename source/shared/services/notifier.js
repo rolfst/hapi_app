@@ -16,7 +16,7 @@ export function trackPushNotification(notification, user) {
   return Analytics.track({ name: 'Push Notification Sent', data: notification.data }, user.id);
 }
 
-export function send(users, notification, networkId = null, message = null) {
+export function send(users, notification, networkId = null) {
   const data = {
     ...notification.data,
     alert: notification.text,
@@ -31,5 +31,5 @@ export function send(users, notification, networkId = null, message = null) {
 
   return Parse.Push.send({ where: createQuery(emails), data }, { useMasterKey: true })
     .then(() => users.forEach(user => trackPushNotification(notification, user)))
-    .catch(err => logger.error('Error sending push notification', { message, err }));
+    .catch(err => logger.error('Error sending push notification', { err }));
 }

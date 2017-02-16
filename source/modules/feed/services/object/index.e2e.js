@@ -77,14 +77,14 @@ describe('Service: Object', () => {
         objectService.create({
           userId: admin.id,
           parentType: 'network',
-          parentId: '123',
+          parentId: network.id,
           objectType: 'poll',
           sourceId: '39102',
         }),
         objectService.create({
           userId: admin.id,
           parentType: 'network',
-          parentId: '123',
+          parentId: network.id,
           objectType: 'feed_message',
           sourceId: '39102',
         }),
@@ -94,7 +94,7 @@ describe('Service: Object', () => {
     it('should return correct count', async () => {
       const networkObjects = await objectService.count({ where: {
         parentType: 'network',
-        parentId: '123',
+        parentId: network.id,
       } });
 
       assert.equal(networkObjects, 2);
@@ -111,22 +111,16 @@ describe('Service: Object', () => {
     it('should return children', async () => {
       const createdMessageObject = await feedMessageService.create({
         parentType: 'network',
-        parentId: '42',
+        parentId: network.id,
         text: 'Do you want to join us tomorrow?',
         poll: { options: ['Yes', 'No', 'Ok'] },
-      }, {
-        credentials: admin,
-        network: { id: '42' },
-      });
+      }, { network, credentials: admin });
 
       const createdMessageObject2 = await feedMessageService.create({
         parentType: 'network',
-        parentId: '42',
+        parentId: network.id,
         text: 'Do you want to join us tomorrow?',
-      }, {
-        credentials: admin,
-        network: { id: '42' },
-      });
+      }, { network, credentials: admin });
 
       const actual = await objectService.listWithSources({
         objectIds: [createdMessageObject.id, createdMessageObject2.id],
@@ -177,13 +171,13 @@ describe('Service: Object', () => {
     it('should support object_type: feed_message', async () => {
       const createdMessageObject = await feedMessageService.create({
         parentType: 'network',
-        parentId: '42',
+        parentId: network.id,
         text: 'Test message for network',
-      }, { credentials: { id: admin.id } });
+      }, { network, credentials: admin });
 
       const actual = await objectService.listWithSources({
         objectIds: [createdMessageObject.id],
-      }, { credentials: { id: admin.id } });
+      }, { network, credentials: admin });
 
       const object = actual[0];
 

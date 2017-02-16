@@ -168,6 +168,17 @@ describe('Service: Message', () => {
       assert.equal(objects[0].sourceId, createdMessage.sourceId);
       assert.equal(objects[0].objectType, 'feed_message');
     });
+
+    it('should fail when parent not found', async () => {
+      const wrongMessagePromise = messageService.create({
+        parentType: 'network',
+        parentId: -1,
+        text: 'My cool message',
+        resources: [],
+      }, { network, credentials: admin });
+
+      return assert.isRejected(wrongMessagePromise, /Parent not found/);
+    });
   });
 
   describe('Create attachment', () => {
