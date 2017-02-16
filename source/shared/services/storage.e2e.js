@@ -4,7 +4,7 @@ import sinon from 'sinon';
 import AWS from 'aws-sdk';
 import * as Storage from './storage';
 
-describe('Service: upload', () => {
+describe('Service: Storage', () => {
   let sandbox;
 
   const filePath = `${process.cwd()}/image.jpg`;
