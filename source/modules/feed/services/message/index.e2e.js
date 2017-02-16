@@ -209,7 +209,7 @@ describe('Service: Message', () => {
     });
   });
 
-  describe.only('create attachment', () => {
+  describe('create attachment', () => {
     let createdMessage;
     let sandbox;
 
@@ -246,7 +246,6 @@ describe('Service: Message', () => {
     });
 
     it('should return object with children and source', () => {
-      console.log(createdMessage);
       assert.equal(createdMessage.children[0].objectType, 'attachment');
       assert.equal(createdMessage.children[0].source.path, 'test.jpg');
     });
