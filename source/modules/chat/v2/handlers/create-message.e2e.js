@@ -1,4 +1,6 @@
 import { assert } from 'chai';
+import FormData from 'form-data';
+import streamToPromise from 'stream-to-promise';
 import sinon from 'sinon';
 import * as Storage from '../../../../shared/services/storage';
 import blueprints from '../../../../shared/test-utils/blueprints';
@@ -33,9 +35,19 @@ describe('Handler: Create message (v2)', () => {
 
   it('should return object model with new message as source', async () => {
     const ENDPOINT_URL = `/v2/conversations/${createdConversation.id}/messages`;
-    const { result, statusCode } = await postRequest(ENDPOINT_URL, {
-      text: 'My cool message',
-    }, creator.token);
+    const formData = new FormData();
+    formData.append('text', 'My cool message');
+
+    const payload = await streamToPromise(formData);
+    const { result, statusCode } = await global.server.inject({
+      payload,
+      method: 'POST',
+      url: ENDPOINT_URL,
+      headers: {
+        ...formData.getHeaders(),
+        'X-API-Token': creator.token,
+      },
+    });
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.object_type, 'private_message');
@@ -50,14 +62,25 @@ describe('Handler: Create message (v2)', () => {
     sinon.stub(Storage, 'upload').returns(Promise.resolve('image.jpg'));
 
     const ENDPOINT_URL = `/v2/conversations/${createdConversation.id}/messages`;
-    const { statusCode } = await postRequest(ENDPOINT_URL, {
-      text: 'My cool message',
-      attachments: [hapiFile],
-    }, creator.token);
+    const formData = new FormData();
+    formData.append('text', 'My cool message');
+    formData.append('attachments', JSON.stringify(hapiFile));
+
+    const payload = await streamToPromise(formData);
+
+    const { result, statusCode } = await global.server.inject({
+      payload,
+      method: 'POST',
+      url: ENDPOINT_URL,
+      headers: {
+        ...formData.getHeaders(),
+        'X-API-Token': creator.token,
+      },
+    });
 
     Storage.upload.restore();
 
     assert.equal(statusCode, 200);
-    // TODO add assertion for returned children
+    assert.equal(result.data.source.text, 'My cool message');
   });
 });
