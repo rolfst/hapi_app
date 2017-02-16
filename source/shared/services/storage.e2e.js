@@ -1,11 +1,25 @@
-import stream from 'stream';
+import fs from 'fs';
 import { assert } from 'chai';
 import sinon from 'sinon';
-import * as uploadService from './index';
-import * as impl from './implementation';
+import AWS from 'aws-sdk';
+import * as Storage from './storage';
 
 describe('Service: upload', () => {
   let sandbox;
+
+  const filePath = `${process.cwd()}/image.jpg`;
+
+  const hapiFile = {
+    filename: 'image.jpg',
+    path: `${process.cwd()}/image.jpg`,
+    headers: {
+      'content-disposition': 'form-data; name="attachments"; filename="image.jpg"',
+      'content-type': 'image/jpg',
+    },
+  };
+
+  before(() => fs.writeFileSync(filePath, new Buffer('foo')));
+  after(() => fs.unlinkSync(filePath));
 
   beforeEach(async () => {
     sandbox = sinon.sandbox.create();
@@ -16,31 +30,26 @@ describe('Service: upload', () => {
   });
 
   it('should return a url in bucket', async () => {
-    sandbox.stub(impl, 'createS3').returns({
+    sandbox.stub(AWS, 'S3').returns({
       putObject: () => ({
         promise: () => Promise.resolve({ ETag: '2322aab33cd302e' }),
       }),
     });
 
-    const imageStream = new stream.PassThrough();
-    imageStream.end(new Buffer('image'));
-    const result = await uploadService.upload({
-      path: '/attachments/image.jpg', stream: imageStream }, {});
+    const result = await Storage.upload(hapiFile, {});
 
-    assert.equal(result, '/attachments/image.jpg');
+    assert.isDefined(result);
+    assert.match(result, /(.jpg)/);
   });
 
   it('should throw an exception', async () => {
-    sandbox.stub(impl, 'createS3').returns({
+    sandbox.stub(AWS, 'S3').returns({
       putObject: () => ({
         promise: () => Promise.reject('Error in S3'),
       }),
     });
 
-    const imageStream = new stream.PassThrough();
-    imageStream.end(new Buffer('image'));
-    const result = uploadService.upload({
-      path: '/attachments/image.jpg', stream: imageStream }, {});
+    const result = Storage.upload(hapiFile, {});
 
     return assert.isRejected(result, /Error: Error in S3/);
   });
