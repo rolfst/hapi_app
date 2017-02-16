@@ -32,7 +32,6 @@ const routes = [{
   payload: {
     maxBytes: 10000000,
     output: 'file',
-    parse: true,
   },
 }];
 
