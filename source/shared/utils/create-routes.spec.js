@@ -4,7 +4,7 @@ import preFetchNetwork from '../middlewares/prefetch-network';
 import * as systemUnderTest from './create-routes';
 
 describe('createRoutes', () => {
-  describe('#createRoute', () => {
+  describe('createRoute', () => {
     const routeStub = {
       method: 'POST',
       path: '/foo/baz',
@@ -27,6 +27,34 @@ describe('createRoutes', () => {
       const actual = systemUnderTest.createRoute(fakeRoute);
 
       assert.deepEqual(actual, routeStub);
+    });
+
+    it('should be able to add payload config', () => {
+      const fakeRoute = {
+        method: 'POST',
+        url: '/foo/baz',
+        handler: 'handler',
+        validator: 'my_validator',
+        payload: {
+          foo: 'baz',
+        },
+      };
+
+      const expected = {
+        method: 'POST',
+        path: '/foo/baz',
+        handler: 'handler',
+        config: {
+          auth: 'jwt',
+          payload: { foo: 'baz' },
+          pre: [{ method: preFetchNetwork, assign: 'network' }],
+          validate: 'my_validator',
+        },
+      };
+
+      const actual = systemUnderTest.createRoute(fakeRoute);
+
+      assert.deepEqual(actual, expected);
     });
 
     it('should handle es5 handler import with default property', () => {
