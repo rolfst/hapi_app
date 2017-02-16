@@ -246,6 +246,7 @@ describe('Service: Message', () => {
     });
 
     it('should return object with children and source', () => {
+      // TODO
       assert.equal(createdMessage.children[0].objectType, 'attachment');
       assert.equal(createdMessage.children[0].source.path, 'test.jpg');
     });
