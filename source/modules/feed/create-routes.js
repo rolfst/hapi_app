@@ -13,15 +13,22 @@ const routes = [{
   prefetch: false,
 }, {
   method: 'POST',
-  url: '/v3/networks/{networkId}/feed',
-  handler: require('./handlers/create-network-message'),
-  validator: require('./validators/create-message'),
-}, {
-  method: 'POST',
   url: '/v3/teams/{teamId}/feed',
   handler: require('./handlers/create-team-message'),
   validator: require('./validators/create-message'),
   prefetch: false,
 }];
 
-export default createRoutes(routes);
+export default [...createRoutes(routes), {
+  method: 'POST',
+  path: '/v3/networks/{networkId}/feed',
+  config: {
+    payload: {
+      maxBytes: 209715200,
+      output: 'file',
+      parse: true,
+    },
+    auth: 'jwt',
+    handler: require('./handlers/create-network-message').default,
+  },
+}];
