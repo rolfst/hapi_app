@@ -2,6 +2,7 @@ import R from 'ramda';
 import Promise from 'bluebird';
 import * as Logger from '../../../../shared/services/logger';
 import createError from '../../../../shared/utils/create-error';
+import * as attachmentService from '../../../attachment/services/attachment';
 import * as messageRepository from '../../repositories/message';
 import * as likeRepository from '../../repositories/like';
 import * as commentRepository from '../../repositories/comment';
@@ -140,8 +141,11 @@ export const create = async (payload, message) => {
   const resourcePromises = [];
 
   if (payload.attachments) {
-    resourcePromises.push(Promise.map(R.flatten([payload.attachments]),
-      impl.createAttachmentResource(createdMessage, message)));
+    resourcePromises.push(Promise.map(R.flatten([payload.attachments]), (attachment) =>
+      attachmentService.create({
+        parentType: 'feed_message',
+        parentId: createdMessage.id,
+        file: attachment }, message)));
   }
 
   if (payload.poll) {
