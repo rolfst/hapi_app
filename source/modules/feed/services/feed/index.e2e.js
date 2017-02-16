@@ -23,6 +23,7 @@ describe('Service: Feed', () => {
       sandbox.stub(notifier, 'send');
       admin = await testHelpers.createUser({ password: 'foo' });
       network = await testHelpers.createNetwork({ userId: admin.id });
+      const otherNetwork = await testHelpers.createNetwork({ userId: admin.id });
 
       await testHelpers.addUserToNetwork({ userId: admin.id, networkId: network.id });
       const serviceMessage = { network, credentials: admin };
@@ -43,8 +44,8 @@ describe('Service: Feed', () => {
 
       const createdMessage3 = await Promise.delay(1000)
         .then(() => messageService.create({
-          parentType: 'team',
-          parentId: '33',
+          parentType: 'network',
+          parentId: otherNetwork.id,
           text: 'Second message for other feed',
         }, serviceMessage));
 

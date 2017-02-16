@@ -17,8 +17,7 @@ export const createNotification = (exchange, substituteUser) => {
 };
 
 export const send = async (network, exchange, userThatAccepts) => {
-  const admins = await networkRepo.findUsersForNetwork({
-    networkId: network.id, roleType: 'ADMIN' });
+  const admins = await networkRepo.findUsersForNetwork(network.id, { roleType: 'ADMIN' });
   const usersToNotify = admins.filter(u => u.id !== userThatAccepts.id);
   const notification = createNotification(exchange, userThatAccepts);
 

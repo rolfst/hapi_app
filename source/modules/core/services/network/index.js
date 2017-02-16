@@ -130,7 +130,7 @@ export const listActiveUsersForNetwork = async (payload, message) => {
   const network = await networkRepo.findNetworkById(payload.networkId);
   if (!network) throw createError('404', 'Network not found.');
 
-  return networkRepo.findUsersForNetwork({ networkId: network.id });
+  return networkRepo.findUsersForNetwork(network.id);
 };
 
 /**

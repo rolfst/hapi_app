@@ -1,6 +1,10 @@
 import R from 'ramda';
 import Promise from 'bluebird';
+import createError from '../../../../shared/utils/create-error';
 import * as Logger from '../../../../shared/services/logger';
+import * as networkRepository from '../../../core/repositories/network';
+import * as teamRepository from '../../../core/repositories/team';
+import * as userRepository from '../../../core/repositories/user';
 import * as objectRepository from '../../repositories/object';
 import * as impl from './implementation';
 
@@ -110,6 +114,53 @@ export const count = async (payload, message) => {
   const attributeWhitelist = ['parentType', 'parentId', 'userId', 'objectType'];
 
   return objectRepository.count(R.pick(attributeWhitelist, payload.where));
+};
+
+/**
+ * Get parent model for object
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.parentType - The type of parent to retrieve
+ * @param {string} payload.parentId - The id of the parent
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method getParent
+ * @return {external:Promise}
+ */
+export const getParent = async (payload, message) => {
+  logger.info('Retrieving parent for object', { payload, message });
+
+  const result = await R.cond([
+    [R.equals('network'), () => networkRepository.findNetworkById(payload.parentId)],
+    [R.equals('team'), () => teamRepository.findTeamById(payload.parentId)],
+    [R.equals('user'), () => userRepository.findUserById(payload.parentId, null, false)],
+    [R.T, R.F],
+  ])(payload.parentType);
+
+  if (!result) throw createError('404', 'Parent not found');
+
+  return result;
+};
+
+/**
+ * Get users for parent model of object
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.parentType - The type of parent to retrieve
+ * @param {string} payload.parentId - The id of the parent
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method usersForParent
+ * @return {external:Promise}
+ */
+export const usersForParent = async (payload, message) => {
+  logger.info('Retrieving users for parent of object', { payload, message });
+
+  const result = await R.cond([
+    [R.equals('network'), () => networkRepository.findUsersForNetwork(payload.parentId)],
+    [R.equals('team'), () => teamRepository.findMembers(payload.parentId)],
+    [R.T, R.F],
+  ])(payload.parentType);
+
+  if (!result) throw createError('404', 'Parent not found');
+
+  return result;
 };
 
 /**
