@@ -1,6 +1,6 @@
-import * as testHelpers from '../../../../shared/test-utils/helpers';
 import { assert } from 'chai';
 import R from 'ramda';
+import * as testHelpers from '../../../../shared/test-utils/helpers';
 import * as conversationService from '../../../chat/v2/services/conversation';
 import * as privateMessageService from '../../../chat/v2/services/private-message';
 import * as feedMessageService from '../message';
@@ -102,6 +102,10 @@ describe('Service: Object', () => {
   });
 
   describe('listWithSources', () => {
+    before(async () => {
+      admin = await testHelpers.createUser({ password: 'foo' });
+    });
+
     after(() => testHelpers.cleanAll());
 
     it('should return children', async () => {
@@ -109,10 +113,7 @@ describe('Service: Object', () => {
         parentType: 'network',
         parentId: '42',
         text: 'Do you want to join us tomorrow?',
-        resources: [{
-          type: 'poll',
-          data: { options: ['Yes', 'No', 'Ok'] },
-        }],
+        poll: { options: ['Yes', 'No', 'Ok'] },
       }, {
         credentials: admin,
         network: { id: '42' },
@@ -122,7 +123,6 @@ describe('Service: Object', () => {
         parentType: 'network',
         parentId: '42',
         text: 'Do you want to join us tomorrow?',
-        resources: [],
       }, {
         credentials: admin,
         network: { id: '42' },

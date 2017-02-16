@@ -1,4 +1,6 @@
 import { assert } from 'chai';
+import sinon from 'sinon';
+import * as Storage from '../../../../shared/services/storage';
 import blueprints from '../../../../shared/test-utils/blueprints';
 import * as testHelper from '../../../../shared/test-utils/helpers';
 import { postRequest } from '../../../../shared/test-utils/request';
@@ -41,5 +43,29 @@ describe('Handler: Create message (v2)', () => {
     assert.equal(result.data.parent_type, 'conversation');
     assert.property(result.data, 'source');
     assert.equal(result.data.source.text, 'My cool message');
+  });
+
+  it('should handle file upload', async () => {
+    const hapiFile = {
+      filename: 'image.jpg',
+      path: `${process.cwd()}/image.jpg`,
+      headers: {
+        'content-disposition': 'form-data; name="attachments"; filename="image.jpg"',
+        'content-type': 'image/jpg',
+      },
+    };
+
+    sinon.stub(Storage, 'upload').returns(Promise.resolve('image.jpg'));
+
+    const ENDPOINT_URL = `/v2/conversations/${createdConversation.id}/messages`;
+    const { statusCode } = await postRequest(ENDPOINT_URL, {
+      text: 'My cool message',
+      attachments: [hapiFile],
+    }, creator.token);
+
+    Storage.upload.restore();
+
+    assert.equal(statusCode, 200);
+    // TODO add assertion for returned children
   });
 });

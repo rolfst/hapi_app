@@ -1,7 +1,9 @@
 import R from 'ramda';
+import Promise from 'bluebird';
 import * as Logger from '../../../../../shared/services/logger';
 import createError from '../../../../../shared/utils/create-error';
 import * as objectService from '../../../../feed/services/object';
+import * as attachmentService from '../../../../attachment/services/attachment';
 import * as privateMessageRepository from '../../repositories/private-message';
 import * as conversationRepository from '../../repositories/conversation';
 import ChatDispatcher from '../../dispatcher';
@@ -27,6 +29,7 @@ export const list = async (payload, message) => {
  * @param {object} payload - Object containing payload data
  * @param {string} payload.conversationId - The id of the conversation the message is created in.
  * @param {string[]} payload.text - The text of the message
+ * @param {object} payload.attachments - Attachments to upload with message
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method create
  * @return {external:Promise.<PrivateMessage>} {@link module:modules/chat~PrivateMessage}
@@ -47,6 +50,15 @@ export async function create(payload, message) {
 
   const createdMessage = await privateMessageRepository.create({
     objectId: null, text: payload.text });
+
+  if (payload.attachments) {
+    await Promise.map(R.flatten([payload.attachments]), (file) => attachmentService.create({
+      file,
+      parentType: 'feed_message',
+      parentId: createdMessage.id,
+    }, message));
+  }
+
   const createdObject = await objectService.create(createObjectPayload(createdMessage));
 
   privateMessageRepository.update(createdMessage.id, { objectId: createdObject.id });

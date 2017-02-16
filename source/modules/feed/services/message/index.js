@@ -113,9 +113,8 @@ export const list = async (payload, message) => {
  * @param {string} payload.parentType - The type of parent to create the object for
  * @param {string} payload.parentId - The id of the parent
  * @param {string} payload.text - The text of the message
- * @param {object[]} payload.resources - The resources that belong to the message
- * @param {string} payload.resources[].type - The type of the resource
- * @param {object} payload.resources[].data - The data for the resource
+ * @param {object} payload.atachments - A collection of attachments
+ * @param {object} payload.poll - The poll
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method create
  * @return {external:Promise.<Message>} {@link module:feed~Message message}
