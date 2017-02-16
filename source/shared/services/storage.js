@@ -37,7 +37,7 @@ export const getClient = () => {
  */
 export function upload(file, prefix = null) {
   const environment = location[process.env.API_ENV];
-  const fileExtension = file.filename.split('.')[1];
+  const fileExtension = R.last(file.filename.split('.'));
   const generatedFileName = Math.random().toString(20).substr(2, 15);
   const newFilename = `${generatedFileName}.${fileExtension}`;
   const uploadPath = prefix ?
