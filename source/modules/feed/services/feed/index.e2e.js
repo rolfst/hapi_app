@@ -96,14 +96,10 @@ describe('Service: Feed', () => {
       }, { network, credentials: admin });
 
       assert.lengthOf(actual, 2);
-      assert.equal(actual[0].objectType, 'exchange');
-      assert.equal(actual[0].parentType, 'user');
-      assert.equal(actual[0].parentId, admin.id);
-      assert.equal(actual[0].sourceId, createdExchange.id);
-      assert.notProperty(actual[1], 'comments');
-      assert.notProperty(actual[1], 'likes');
+      assert.equal(actual[0].objectType, 'feed_message');
+      assert.equal(actual[0].source.text, 'Second message for feed');
       assert.equal(actual[1].objectType, 'feed_message');
-      assert.equal(actual[1].source.text, 'Second message for feed');
+      assert.equal(actual[1].source.text, 'Message for feed');
     });
 
     it('should include comments sub-resources via query parameter', async () => {
