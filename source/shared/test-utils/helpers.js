@@ -9,7 +9,6 @@ import * as networkRepo from '../../modules/core/repositories/network';
 import * as activityRepo from '../../modules/core/repositories/activity';
 import * as objectRepo from '../../modules/feed/repositories/object';
 import * as pollRepo from '../../modules/poll/repositories/poll';
-import * as attachmentRepo from '../../modules/attachment/repositories/attachment';
 import { postRequest } from './request';
 
 /**
