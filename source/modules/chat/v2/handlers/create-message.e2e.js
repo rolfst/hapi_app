@@ -5,7 +5,6 @@ import sinon from 'sinon';
 import * as Storage from '../../../../shared/services/storage';
 import blueprints from '../../../../shared/test-utils/blueprints';
 import * as testHelper from '../../../../shared/test-utils/helpers';
-import { postRequest } from '../../../../shared/test-utils/request';
 import * as conversationService from '../services/conversation';
 
 describe('Handler: Create message (v2)', () => {
