@@ -1,4 +1,5 @@
 import { uniq, map } from 'lodash';
+import R from 'ramda';
 import Promise from 'bluebird';
 import moment from 'moment';
 import { Network,
@@ -9,8 +10,10 @@ import { Network,
   NetworkIntegration } from '../../../shared/models';
 import createError from '../../../shared/utils/create-error';
 import createNetworkModel from '../models/network';
+import createNetworkLinkModel from '../models/network-link';
+import createUserModel from '../models/user';
+import createTeamModel from '../models/team';
 import * as userRepo from './user';
-import { toModel as toTeamModel } from './team';
 
 /**
  * @module modules/core/repositories/network
@@ -21,8 +24,6 @@ const defaultIncludes = [
   { model: User, as: 'SuperAdmin' },
 ];
 
-const toModel = (dao) => createNetworkModel(dao);
-
 /**
  * @method findAll
  * @return {external:Promise.<Network[]>} {@link module:modules/core~Network Network}
@@ -32,7 +33,7 @@ export const findAll = async () => {
     include: defaultIncludes,
   });
 
-  return map(networks, toModel);
+  return map(networks, createNetworkModel);
 };
 
 /**
@@ -48,7 +49,7 @@ export const findNetwork = async (data) => {
 
   if (!result) return null;
 
-  return toModel(result);
+  return createNetworkModel(result);
 };
 
 /**
@@ -63,7 +64,7 @@ export const findNetworkById = async (id) => {
 
   if (!result) return null;
 
-  return toModel(result);
+  return createNetworkModel(result);
 };
 
 /**
@@ -77,7 +78,7 @@ export const findNetworkByIds = async (ids) => {
     include: defaultIncludes,
   });
 
-  return map(result, toModel);
+  return map(result, createNetworkModel);
 };
 
 export const updateNetwork = async (networkId, attributes) => {
@@ -120,7 +121,6 @@ export const findNetworksForUser = async (userId) => {
   const pivotResult = await NetworkUser.findAll({
     where: { userId, deletedAt: null },
   });
-
   const networkIds = uniq(map(pivotResult, 'networkId'));
 
   return findNetworkByIds(networkIds);
@@ -131,7 +131,7 @@ export const findNetworksForUser = async (userId) => {
  * @param {string} attributes.networkId - network where user is added to.
  * @param {string} attributes.userId - user to add to the network
  * @method addUser
- * @return {external:Promise.<NetworkUser>} {@link module:modules/core~NetworkUser NetworkUser}
+ * @return {external:Promise.<NetworkUser>} {@link module:shared~NetworkUser NetworkUser}
  */
 export const addUser = async (attributes) => {
   const pivotResult = await NetworkUser.findOne({
@@ -146,22 +146,35 @@ export const addUser = async (attributes) => {
 };
 
 /**
+ * @param {object} attributes - attributes
  * @param {string} networkId - network where user is searched in.
- * @param {string} roleType - search attribute
- * @param {boolean} [isInvisibleUser=false] - user to add to the network
+ * @param {string} [attributes.roleType=null] - roleType constraint
+ * @param {string} [attributes.deletedAt=null] - deletedAt constraint
+ * @param {boolean} [attributes.invisibleUser=false] - user to add to the network
  * @method findUsersForNetwork
  * @return {external:Promise.<User[]>} {@link module:modules/core~User User}
  */
-export const findUsersForNetwork = async (networkId, roleType = null, invisibleUser = false) => {
-  const whereConstraint = { networkId, deletedAt: null, invisibleUser };
-  if (roleType) whereConstraint.roleType = roleType;
+export const findUsersForNetwork = async (networkId, attributes = {}) => {
+  const whereConstraint = {
+    networkId,
+    deletedAt: attributes.deletedAt || null,
+    invisibleUser: attributes.invisibleUser || false,
+  };
 
-  const result = await NetworkUser.findAll({
-    attributes: ['userId'],
-    where: whereConstraint,
-  });
+  if (attributes.roleType) whereConstraint.roleType = attributes.roleType;
 
-  return userRepo.findUsersByIds(map(result, 'userId'));
+  const networkLinks = await NetworkUser
+    .findAll({ where: whereConstraint })
+    .then(R.map(createNetworkLinkModel));
+
+  const users = await userRepo.findByIds(R.pluck('userId', networkLinks));
+  const networkLinkAttrs = R.pick([
+    'roleType', 'externalId', 'deletedAt', 'invitedAt', 'userToken']);
+  const findLink = (userId) => R.find(R.propEq('userId', userId), networkLinks);
+  const mergeWithNetworkLink = (user) =>
+    R.merge(user, R.pipe(findLink, networkLinkAttrs)(user.id));
+
+  return R.map(R.pipe(mergeWithNetworkLink, createUserModel), users);
 };
 
 /**
@@ -169,14 +182,8 @@ export const findUsersForNetwork = async (networkId, roleType = null, invisibleU
  * @method findAllUsersForNetwork
  * @return {external:Promise.<User[]>} {@link module:modules/core~User User}
  */
-export const findAllUsersForNetwork = async (networkId) => {
-  const result = await NetworkUser.findAll({
-    attributes: ['userId'],
-    where: { networkId },
-  });
-
-  return userRepo.findUsersByIds(map(result, 'userId'));
-};
+export const findAllUsersForNetwork = async (networkId) =>
+  findUsersForNetwork(networkId, { deletedAt: { $or: { $ne: null, $eq: null } } });
 
 /**
  * @param {string} networkId - network where user is searched in.
@@ -184,7 +191,10 @@ export const findAllUsersForNetwork = async (networkId) => {
  * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team}
  */
 export const findTeamsForNetwork = async (networkId) => {
-  return Promise.map(Team.findAll({ where: { networkId } }), toTeamModel);
+  return Promise.map(Team.findAll({
+    where: { networkId },
+    include: [{ attributes: ['id'], model: User }],
+  }), createTeamModel);
 };
 
 /**

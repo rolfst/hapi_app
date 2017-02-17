@@ -1,4 +1,5 @@
 import { map, intersectionBy, reject } from 'lodash';
+import Promise from 'bluebird';
 import * as passwordUtil from '../../../shared/utils/password';
 import * as mailer from '../../../shared/services/mailer';
 import { UserRoles } from '../../../shared/services/permission';
@@ -10,6 +11,7 @@ import * as userService from '../../core/services/user';
 import * as networkRepo from '../../core/repositories/network';
 import * as userRepo from '../../core/repositories/user';
 import * as teamRepo from '../../core/repositories/team';
+import EmployeeDispatcher from '../dispatcher';
 import * as impl from './implementation';
 
 /**
@@ -105,7 +107,16 @@ export const inviteUser = async (payload, message) => {
 
   if (teamIds && teamIds.length > 0) await teamRepo.addUserToTeams(teamIds, user.id);
 
-  return userService.getUserWithNetworkScope({ id: user.id, networkId: network.id });
+  const createdUser = await userService.getUserWithNetworkScope({
+    id: user.id, networkId: network.id });
+
+  EmployeeDispatcher.emit('user.created', {
+    user: createdUser,
+    network: message.network,
+    credentials: message.credentials,
+  });
+
+  return createdUser;
 };
 
 
@@ -120,7 +131,6 @@ export const inviteUsers = async (payload, message) => {
   const { network } = message;
   const identifiedUser = await userService.getUserWithNetworkScope({
     id: message.credentials.id, networkId: network.id }, message);
-
   const userBelongsToNetwork = await userRepo.userBelongsToNetwork(identifiedUser.id, network.id);
 
   if (!userBelongsToNetwork || identifiedUser.roleType !== UserRoles.ADMIN) {
@@ -131,8 +141,10 @@ export const inviteUsers = async (payload, message) => {
     userIds: payload.userIds, networkId: network.id }, message);
   const preparedUsers = reject(networkMembers, 'invitedAt');
   const toNotifyUsers = intersectionBy(preparedUsers, networkMembers, 'id');
-
   const usersToSendMailto = await impl.generatePasswordsForMembers(toNotifyUsers);
 
-  map(usersToSendMailto, (user) => mailer.send(addedToNetworkMail(network, user)));
+  await Promise.map(usersToSendMailto, user =>
+    userRepo.setNetworkLink({ userId: user.id, networkId: network.id, invitedAt: new Date() }));
+
+  map(usersToSendMailto, (user) => mailer.send(signupMail(network, user, user.plainPassword)));
 };

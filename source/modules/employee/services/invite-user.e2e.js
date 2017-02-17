@@ -1,38 +1,57 @@
 import { assert } from 'chai';
-import { find } from 'lodash';
+import { find, pick } from 'lodash';
+import sinon from 'sinon';
+import * as testHelper from '../../../shared/test-utils/helpers';
 import * as networkRepo from '../../core/repositories/network';
 import * as userRepo from '../../core/repositories/user';
 import * as teamRepo from '../../core/repositories/team';
+import EmployeeDispatcher from '../dispatcher';
 import * as service from './invite-user';
 
-describe('Service: invite user', () => {
+describe('Service: Invite user', () => {
+  let employee;
   let network;
   let team;
 
   before(async () => {
-    network = global.networks.flexAppeal;
-    team = await teamRepo.createTeam({
+    const [admin, user] = await Promise.all([
+      testHelper.createUser(),
+      testHelper.createUser(),
+    ]);
+    employee = user;
+    network = await testHelper.createNetwork({ userId: admin.id, name: 'flexAppeal' });
+    await testHelper.addUserToNetwork({ userId: employee.id, networkId: network.id });
+    team = await teamRepo.create({
       networkId: network.id,
       name: 'Cool Team',
     });
   });
 
-  after(() => teamRepo.deleteById(team.id));
+  after(() => testHelper.cleanAll());
 
   describe('Existing User', () => {
     let existingUser;
 
-    before(() => (existingUser = global.users.networklessUser));
+    before(async () => {
+      existingUser = await testHelper.createUser(
+        { email: 'god@flex-appeal.nl',
+          password: 'pw',
+          firstName: 'existing',
+          lastName: 'User',
+          username: 'god@flex-appeal.nl',
+        });
+    });
+
     afterEach(() => userRepo.removeFromNetwork(existingUser.id, network.id));
 
     it('should fail when user belongs to the network', async () => {
-      const { firstName, lastName, email } = global.users.employee;
+      const { firstName, lastName, email } = employee;
       const payload = { firstName, lastName, email };
 
       await assert.isRejected(service.inviteUser(payload, { network }));
     });
 
-    it('should fail when team doesn\'t belongs to the network', async () => {
+    xit('should fail when team doesn\'t belongs to the network', async () => {
       // TODO
     });
 
@@ -68,7 +87,7 @@ describe('Service: invite user', () => {
     });
 
     it('should add to the multiple teams', async () => {
-      const extraTeam = await teamRepo.createTeam({
+      const extraTeam = await teamRepo.create({
         networkId: network.id,
         name: 'Cool Team',
       });
@@ -86,12 +105,24 @@ describe('Service: invite user', () => {
   });
 
   describe('New User', () => {
+    const sandbox = sinon.sandbox.create();
+    let eventEmitterStub;
+    const credentials = { id: '1', email: 'credentials@flex-appeal.nl' };
     const payload = { firstName: 'John', lastName: 'Doe', email: 'test-user@foo.com' };
 
+    before(() => {
+      eventEmitterStub = sandbox.stub(EmployeeDispatcher, 'emit');
+    });
+
     afterEach(async () => {
+      eventEmitterStub.reset();
       const user = await userRepo.findUserBy({ email: payload.email });
 
       return userRepo.deleteById(user.id);
+    });
+
+    after(() => {
+      sandbox.restore();
     });
 
     it('should create when not exists', async () => {
@@ -101,6 +132,17 @@ describe('Service: invite user', () => {
       assert.equal(actual.lastName, payload.lastName);
       assert.equal(actual.username, payload.email);
       assert.equal(actual.email, payload.email);
+    });
+
+    it('should dispatch user.created event', async () => {
+      await service.inviteUser(payload, { credentials, network });
+
+      const { args } = eventEmitterStub.firstCall;
+
+      assert.equal(args[0], 'user.created');
+      assert.deepEqual(args[1].credentials, credentials);
+      assert.deepEqual(pick(args[1].user, 'email', 'firstName', 'lastName'), payload);
+      assert.deepEqual(args[1].network, network);
     });
 
     it('should add to the network as admin', async () => {
@@ -128,7 +170,7 @@ describe('Service: invite user', () => {
     });
 
     it('should add to the multiple teams', async () => {
-      const extraTeam = await teamRepo.createTeam({
+      const extraTeam = await teamRepo.create({
         networkId: network.id,
         name: 'Cool Team',
       });
@@ -200,7 +242,7 @@ describe('Service: invite user', () => {
     });
 
     it('should add to the multiple teams', async () => {
-      const extraTeam = await teamRepo.createTeam({
+      const extraTeam = await teamRepo.create({
         networkId: network.id,
         name: 'Cool Team',
       });

@@ -3,19 +3,8 @@ import bcrypt from 'bcrypt';
 import createError from '../../../../shared/utils/create-error';
 import * as authenticationRepo from '../../../core/repositories/authentication';
 import * as userRepo from '../../../core/repositories/user';
-import * as networkRepo from '../../../core/repositories/network';
 import createAccessToken from '../../utils/create-access-token';
 import createRefreshToken from '../../utils/create-refresh-token';
-
-export const assertUserBelongsToANetwork = async (userId) => {
-  const networksContainingUser = await networkRepo.findNetworksForUser(userId);
-
-  if (networksContainingUser.length === 0) {
-    throw createError('403', 'The user does not belong to any network.');
-  }
-
-  return true;
-};
 
 export const checkPassword = (hash, plain) => {
   // We have to replace the first characters because of the

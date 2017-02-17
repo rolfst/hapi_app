@@ -1,16 +1,29 @@
 import Url from 'url';
 import Qs from 'qs';
-import { pick } from 'lodash';
+import { pick, omit } from 'lodash';
 import createError from './create-error';
 import * as Logger from '../services/logger';
 
 const logger = Logger.createLogger('NODE-API/server/response');
 
-export const onRequest = (req, reply) => {
+export const onRequest = (ravenClient) => (req, reply) => {
   const uri = req.raw.req.url;
   const parsed = Url.parse(uri, false);
   parsed.query = Qs.parse(parsed.query);
   req.setUrl(parsed);
+
+  const requestContext = {
+    id: req.id,
+    payload: omit(req.payload, 'password'),
+    user_agent: req.headers['user-agent'],
+    method: req.method,
+    url: req.path,
+    headers: req.headers,
+  };
+
+  if (ravenClient && typeof ravenClient.setExtraContext === 'function') {
+    ravenClient.setExtraContext({ request: requestContext });
+  }
 
   process.env.BASE_URL = `${req.connection.info.protocol}://${req.info.host}`;
 
@@ -25,8 +38,7 @@ export const transformBoomToErrorResponse = (boom) => ({
 });
 
 const trackSentryError = (client, payload, error) => {
-  client.mergeContext({ extra: { ...payload } });
-  client.captureException(error);
+  if (client && typeof client.captureException === 'function') client.captureException(error);
 };
 
 const logApplicationError = (message, payload, error) => {
@@ -40,7 +52,7 @@ const logApplicationError = (message, payload, error) => {
 const logError = (ravenClient, message, payload, error) => {
   logApplicationError(message, payload, error);
 
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.API_ENV === 'production') {
     trackSentryError(ravenClient, payload, error);
   }
 };
@@ -68,6 +80,7 @@ export const onPreResponse = (ravenClient) => (req, reply) => {
     }
 
     const errorResponse = transformBoomToErrorResponse(error);
+
     return reply(errorResponse).code(errorResponse.status_code);
   }
 

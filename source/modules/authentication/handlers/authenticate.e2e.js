@@ -1,15 +1,35 @@
-import { assert } from 'chai';
+/* global assert */
 import blueprints from '../../../shared/test-utils/blueprints';
 import { postRequest } from '../../../shared/test-utils/request';
+import * as testHelper from '../../../shared/test-utils/helpers';
 
-const url = '/v2/authenticate';
-const employeeCredentials = blueprints.users.employee;
-const networklessUserCredentials = blueprints.users.networkless;
-const loginRequest = ({ username, password }) => {
-  return postRequest(url, { username, password });
-};
 
 describe('Authenticate', () => {
+  const url = '/v2/authenticate';
+  const adminCredentials = blueprints.users.admin;
+  const employeeCredentials = blueprints.users.employee;
+  const networklessUserCredentials = blueprints.users.networkless;
+
+  before(async () => {
+    const admin = await testHelper.createUser(adminCredentials);
+    const employee = await testHelper.createUser(employeeCredentials);
+    const { network } = await testHelper.createNetworkWithIntegration({
+      userId: admin.id,
+      userExternalId: '8023',
+      externalId: '8023',
+      name: 'pmt',
+      integrationName: 'PMT',
+      integrationToken: '379ce9b4176cb89354c1f74b3a2c1c7a',
+      userToken: 'token',
+    });
+
+    return testHelper.addUserToNetwork({
+      userId: employee.id,
+      networkId: network.id });
+  });
+
+  after(() => testHelper.cleanAll());
+
   it('should check for required input fields', async () => {
     const response1 = postRequest(url, { foo: 'bar' });
     const response2 = postRequest(url, { username: 'bar' });
@@ -24,31 +44,31 @@ describe('Authenticate', () => {
 
   it('should login with correct credentials', async () => {
     const { username, password } = employeeCredentials;
-    const { result } = await loginRequest({ username, password });
-    const { data } = result;
+    const { result } = await postRequest(url, { username, password });
+    const loginToken = result.data;
 
-    assert.isDefined(data.access_token);
-    assert.isDefined(data.refresh_token);
-    assert.isDefined(data.last_login);
+    assert.isDefined(loginToken.access_token);
+    assert.isDefined(loginToken.refresh_token);
+    assert.isDefined(loginToken.last_login);
   });
 
   it('should fail when password is not correct', async () => {
     const { username } = employeeCredentials;
-    const { statusCode } = await loginRequest({ username, password: 'wrongpassword' });
+    const { statusCode } = await postRequest(url, { username, password: 'wrongpassword' });
 
     assert.equal(statusCode, 403);
   });
 
   it('should fail when username is not correct', async () => {
     const { password } = employeeCredentials;
-    const { statusCode } = await loginRequest({ username: 'blabla@gmail.com', password });
+    const { statusCode } = await postRequest(url, { username: 'blabla@gmail.com', password });
 
     assert.equal(statusCode, 403);
   });
 
   it('should fail when user does not belong to a network', async () => {
     const { username, password } = networklessUserCredentials;
-    const { statusCode } = await loginRequest({ username, password });
+    const { statusCode } = await postRequest(url, { username, password });
 
     assert.equal(statusCode, 403);
   });

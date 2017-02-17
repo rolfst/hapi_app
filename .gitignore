@@ -9,7 +9,9 @@ database*.json
 *.swp
 *.swo
 *.orig
+.tern-port
 
 newrelic_agent.log
 /coverage
 /docs
+.tern-port

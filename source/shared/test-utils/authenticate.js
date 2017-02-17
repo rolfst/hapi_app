@@ -1,16 +1,29 @@
 import tokenUtil from '../utils/token';
-import { findUserById } from '../../modules/core/repositories/user';
+import * as userRepo from '../../modules/core/repositories/user';
+import * as authenticationService from '../../modules/authentication/services/authentication';
 
-export default async (server, credentials) => {
-  const response = await server.inject({
-    method: 'POST',
-    url: '/v2/authenticate',
-    payload: credentials,
-  });
+/**
+ * @module shared/test-utils/authencticate
+ */
 
-  const { access_token: accessToken } = response.result.data;
+/**
+ * @typedef {Object} AuthorizedUser
+ * @property {User} {@link module:modules/core~User user}
+ * @property {AuthenticationToken} {@link module:shared~AuthenticationToken token}
+ * @property {Object[]} integrations
+ */
+
+/**
+ * @param {object} credentials
+ * @param {string} credentials.username
+ * @param {string} credentials.password
+ * @method default
+ * @returns {@link module:shared/test-utils/authenticate.AuthorizedUser}
+ */
+export default async (credentials, message) => {
+  const { accessToken } = await authenticationService.authenticate(credentials, message);
   const decodedToken = tokenUtil.decode(accessToken);
-  const user = await findUserById(decodedToken.sub);
+  const user = await userRepo.findUserById(decodedToken.sub, null, false);
 
   return {
     ...user,

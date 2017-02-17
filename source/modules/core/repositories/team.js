@@ -1,41 +1,46 @@
-import { map, pick } from 'lodash';
+import { map } from 'lodash';
 import sequelize from 'sequelize';
 import Promise from 'bluebird';
-import createError from '../../../shared/utils/create-error';
+import R from 'ramda';
 import { Team, User, TeamUser } from '../../../shared/models';
 import * as userRepo from './user';
 import createTeamModel from '../models/team';
 
-
 /**
  * @module modules/core/repositories/team
  */
-
-export const toModel = (dao) => createTeamModel(dao);
 
 /**
  * @param {string} id - team id
  * @method findTeamById
  * @return {external:Promise.<Team>} {@link module:modules/core~Team Team}
  */
-export function findTeamById(id) {
-  return Team
-    .findById(id)
-    .then(team => {
-      if (!team) throw createError('404', `teamId: ${id}`);
+export async function findTeamById(teamId) {
+  const result = await Team.findById(teamId, {
+    include: [{ attributes: ['id'], model: User }],
+  });
 
-      return team;
-    });
+  return result ? createTeamModel(result) : null;
 }
 
 /**
  * @param {objects} attributes - {@link module:modules/core~Team team attributes}
- * @method findTeamById
+ * @method findBy
  * @return {external:Promise.<Team>} {@link module:modules/core~Team Team}
  */
 export const findBy = async (attributes) => {
   return Team.findOne({ where: { ...attributes } });
 };
+
+export async function setUsersForTeam(teamId, userIds) {
+  const team = await await Team.findById(teamId, {
+    include: [{ attributes: ['id'], model: User }],
+  });
+
+  await team.setUsers(userIds);
+
+  return R.merge(createTeamModel(team), { memberIds: userIds });
+}
 
 /**
  * @param {string} teamIds - team to add the user to
@@ -81,7 +86,7 @@ export const findTeamsForNetworkThatUserBelongsTo = async (userId, networkId) =>
     }],
   });
 
-  return map(result, toModel);
+  return map(result, createTeamModel);
 };
 
 /**
@@ -95,42 +100,47 @@ export const findMembers = async (teamId) => {
     where: { teamId },
   });
 
-  return userRepo.findUsersByIds(map(result, 'userId'));
+  return userRepo.findByIds(map(result, 'userId'));
 };
 
 /**
- * @param {string[]} ids - team to search for
- * @method findTeamsByIds
+ * @param {string[]} teamIds - Teams to find
+ * @method findByIds
  * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team}
  */
-export function findTeamsByIds(ids) {
-  return Team
-    .findAll({
-      where: { id: { $in: ids } },
-    });
-}
+export const findByIds = async (teamIds) => {
+  const result = await Team.findAll({
+    where: { id: { $in: teamIds } },
+    include: [{ attributes: ['id'], model: User }],
+  });
+
+  return R.map(createTeamModel, result);
+};
 
 /**
- * Finds teams by the provided externalIds
+ * Finds teams by the provided externalIds. We are passing the networkId because it's
+ * possible that the externalId is duplicated. If so, it's possible to return the wrong team.
+ * @param {string} networkId - The network id
  * @param {string[]} externalIds - external teamids to search for
  * @method findTeamsByExternalId
  * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team}
  */
-export const findTeamsByExternalId = externalIds => {
-  return Team
-    .findAll({
-      where: { externalId: { $in: externalIds } },
-    });
+export const findTeamsByExternalId = (networkId, externalIds) => {
+  return Team.findAll({
+    where: { externalId: { $in: externalIds }, networkId },
+  });
 };
 
 /**
  * Creates a new team
- * @param {Team} team - The team to create
- * @method createTeam
+ * @param {Team} attributes - The team to create
+ * @method create
  * @return {external:Promise.<Team>} {@link module:modules/core~Team Team}
  */
-export async function createTeam(team) {
-  return toModel(await Team.create(team));
+export async function create(attributes) {
+  const team = await Team.create(attributes);
+
+  return createTeamModel(team);
 }
 
 /**
@@ -140,7 +150,7 @@ export async function createTeam(team) {
  * @return {external:Promise.<Team>} {@link module:modules/core~Team Team}
  */
 export function createBulkTeams(teams) {
-  return Promise.map(teams, createTeam);
+  return Promise.map(teams, create);
 }
 
 /**
@@ -186,17 +196,14 @@ export function findUsersByTeamIds(ids) {
 }
 
 /**
- * Updates a team attributes
+ * Updates team attributes
  * @param {string} teamId - team to update
  * @param {object} attributes - {@link module:modules/core~Team team} attributes
- * @method updateTeam
+ * @method update
  * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team}
  */
-export const updateTeam = async (teamId, attributes) => {
-  const whitelistedAttributes = pick(attributes,
-    'networkId', 'externalId', 'name', 'description');
-
-  return Team.update(whitelistedAttributes, {
+export const update = async (teamId, attributes) => {
+  return Team.update(attributes, {
     where: { id: teamId },
   });
 };

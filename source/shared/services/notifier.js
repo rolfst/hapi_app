@@ -1,4 +1,5 @@
 import Parse from 'parse/node';
+import R from 'ramda';
 import * as Logger from './logger';
 import * as Analytics from './analytics';
 
@@ -11,15 +12,11 @@ function createQuery(emails) {
   return query;
 }
 
-export function createEmailList(users) {
-  return users.map(user => user.email).filter(u => u);
-}
-
 export function trackPushNotification(notification, user) {
   return Analytics.track({ name: 'Push Notification Sent', data: notification.data }, user.id);
 }
 
-export function send(users, notification, networkId = null, message = null) {
+export function send(users, notification, networkId = null) {
   const data = {
     ...notification.data,
     alert: notification.text,
@@ -28,10 +25,11 @@ export function send(users, notification, networkId = null, message = null) {
     network_id: networkId,
   };
 
-  const emails = createEmailList(users);
+  const emails = R.reject(R.isNil, R.pluck('email', users));
 
-  users.forEach(user => trackPushNotification(notification, user));
+  logger.info('Sending Push Notification', { data, emails });
 
-  return Parse.Push.send({ where: createQuery(emails), data })
-    .catch(err => logger.warn('Error sending push notification', { message, err }));
+  return Parse.Push.send({ where: createQuery(emails), data }, { useMasterKey: true })
+    .then(() => users.forEach(user => trackPushNotification(notification, user)))
+    .catch(err => logger.error('Error sending push notification', { err }));
 }

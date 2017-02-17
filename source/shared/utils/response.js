@@ -1,12 +1,6 @@
 import { map, isString, isArray, forIn, mapKeys, snakeCase, isObject } from 'lodash';
 
-export const error = errorObject => ({ error: errorObject });
-
-export const serialize = response => {
-  return (isArray(response)) ? response.map(item => item.toJSON()) : response.toJSON();
-};
-
-export const transformSnakeCase = (obj) => {
+const transformSnakeCase = (obj) => {
   if (isString(obj)) return obj;
 
   const snakeResult = mapKeys(obj, (value, key) => {
@@ -28,6 +22,12 @@ export const transformSnakeCase = (obj) => {
   });
 
   return result;
+};
+
+export const error = errorObject => ({ error: errorObject });
+
+export const serialize = response => {
+  return (isArray(response)) ? response.map(item => item.toJSON()) : response.toJSON();
 };
 
 export const toSnakeCase = (response) => {

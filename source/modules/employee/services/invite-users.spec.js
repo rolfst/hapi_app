@@ -2,11 +2,11 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import { map } from 'lodash';
 import * as passwordUtil from '../../../shared/utils/password';
+import * as notifier from '../../../shared/services/notifier';
 import * as mailer from '../../../shared/services/mailer';
-import addedToNetworkMail from '../../../shared/mails/added-to-network';
-import addedToExtraNetworkMail from '../../../shared/mails/added-to-extra-network';
-import * as userService from '../../core/services/user';
+import signupMail from '../../../shared/mails/signup';
 import * as userRepo from '../../core/repositories/user';
+import * as userService from '../../core/services/user';
 import * as service from './invite-user';
 import * as impl from './implementation';
 
@@ -17,14 +17,14 @@ describe('Invite users', () => {
     id: '1',
     username: 'importTestUser@flex-appeal.nl',
     email: 'importTestUser@flex-appeal.nl',
-    plainPassword: 'testpassword',
+    password: 'testpassword',
     firstName: 'import',
   };
   const invitedUser = {
     id: '2',
     username: 'importedTestUser@flex-appeal.nl',
     email: 'importedTestUser@flex-appeal.nl',
-    plainPassword: 'testpassword',
+    password: 'testpassword',
     firstName: 'imported',
     invitedAt: new Date(),
   };
@@ -32,7 +32,7 @@ describe('Invite users', () => {
     id: '3',
     username: 'adminUser@flex-appeal.nl',
     firstName: 'admin',
-    plainPassword: 'testpassword',
+    password: 'testpassword',
     roleType: 'ADMIN',
   };
   const allUsersFromIntegration = [aUser, invitedUser, adminUser];
@@ -49,18 +49,22 @@ describe('Invite users', () => {
   after(() => sandbox.restore());
 
   it('should send correct emails', async () => {
+    sandbox.stub(notifier, 'send').returns(null);
+    sandbox.stub(mailer, 'send').returns(null);
     sandbox.stub(userRepo, 'userBelongsToNetwork').returns(Promise.resolve(true));
     sandbox.stub(userService, 'getUserWithNetworkScope').returns(Promise.resolve(adminUser));
     sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
     sandbox.stub(impl, 'generatePasswordsForMembers', users => {
       return users;
     });
+    sandbox.stub(userRepo, 'setNetworkLink').returns(Promise.resolve({
+      userId: '1', networkId: network.Id, invitedAt: new Date() }));
     sandbox.stub(userService, 'listUsersWithNetworkScope')
       .returns(Promise.resolve(allUsersFromIntegration));
 
-    const passwordMailConfig = addedToNetworkMail(message.network, aUser);
-    const noPasswordMailAdminConfig = addedToExtraNetworkMail(message.network, adminUser);
-    const noPasswordMailConfig = addedToExtraNetworkMail(message.network, invitedUser);
+    const passwordMailConfig = signupMail(message.network, aUser);
+    const noPasswordMailAdminConfig = signupMail(message.network, adminUser);
+    const noPasswordMailConfig = signupMail(message.network, invitedUser);
     const userIdsToNotify = map(allUsersFromIntegration, user => user.id);
 
     await service.inviteUsers({ userIds: userIdsToNotify, networkId: network.id }, message);

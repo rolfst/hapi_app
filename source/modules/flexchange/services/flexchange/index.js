@@ -1,44 +1,77 @@
-import { sortBy, orderBy, uniqBy, map, filter, includes } from 'lodash';
+import { sortBy, map, includes } from 'lodash';
+import R from 'ramda';
 import moment from 'moment';
-import * as Analytics from '../../../../shared/services/analytics';
+import * as Logger from '../../../../shared/services/logger';
 import { createAdapter } from '../../../../shared/utils/create-adapter';
-import approveExchangeEvent from '../../../../shared/events/approve-exchange-event';
 import createError from '../../../../shared/utils/create-error';
-import newExchangeEvent from '../../../../shared/events/new-exchange-event';
 import * as teamRepo from '../../../core/repositories/team';
 import * as userRepo from '../../../core/repositories/user';
-import * as networkRepo from '../../../core/repositories/network';
 import * as activityRepo from '../../../core/repositories/activity';
 import * as userService from '../../../core/services/user';
 import * as teamService from '../../../core/services/team';
+import * as objectService from '../../../feed/services/object';
 import * as networkService from '../../../core/services/network';
-import { exchangeTypes } from '../../models/exchange';
+import { exchangeTypes } from '../../repositories/dao/exchange';
 import * as commentRepo from '../../repositories/comment';
 import * as exchangeRepo from '../../repositories/exchange';
+import * as exchangeValueRepo from '../../repositories/exchange-value';
 import * as exchangeResponseRepo from '../../repositories/exchange-response';
 import * as acceptanceNotifier from '../../notifications/accepted-exchange';
-import * as creatorNotifier from '../../notifications/creator-approved';
-import * as substituteNotifier from '../../notifications/substitute-approved';
-import * as createdNotifier from '../../notifications/exchange-created';
+import FlexchangeDispatcher from '../../dispatcher';
 import * as impl from './implementation';
 
 /**
  * @module modules/flexchange/services/flexchange
  */
+const logger = Logger.createLogger('FLEXCHANGE/service/exchange');
 
 const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
 
-const findUsersByType = async (exchange, network, exchangeValues, loggedUser) => {
-  let usersPromise;
-  if (exchange.type === exchangeTypes.NETWORK) {
-    usersPromise = networkRepo.findAllUsersForNetwork(network.id);
-  } else if (exchange.type === exchangeTypes.TEAM) {
-    usersPromise = teamRepo.findUsersByTeamIds(exchangeValues);
-  }
-  const users = await (usersPromise);
-  return filter(users, u => u.id !== loggedUser.id);
-};
+/**
+ * Lists exchanges for network by id
+ * @param {object} payload - Object containing payload data
+ * @param {string[]} payload.exchangeIds - The id of the exchanges to list
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method list
+ * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange}
+ */
+export const list = async (payload, message) => {
+  logger.info('Listing exchanges', { payload, message });
 
+  const [exchanges, responsesForExchanges, valuesForExchanges] = await Promise.all([
+    exchangeRepo.findByIds(payload.exchangeIds),
+    exchangeResponseRepo.findAllWhere({
+      exchangeId: { $in: payload.exchangeIds } }),
+    exchangeValueRepo.findAllWhere({
+      exchangeId: { $in: payload.exchangeIds },
+    }).then(impl.groupValuesPerExchange),
+  ]);
+
+  const occuringUsers = await R.pipe(
+    impl.getUserIdsInObjects(['approvedUser', 'approvedBy', 'userId']),
+    (userIds) => userService.listUsersWithNetworkScope({
+      networkId: message.network.id, userIds }, message)
+  )(R.concat(exchanges, responsesForExchanges));
+
+  const responsesForExchange = (exchangeId) =>
+    R.filter(R.propEq('exchangeId', exchangeId), responsesForExchanges) || [];
+
+  const responseForUser = (userId, exchangeId) =>
+    R.find(R.propEq('userId', userId), responsesForExchange(exchangeId));
+
+  const findUserById = impl.findUserById(occuringUsers);
+
+  return R.map((exchange) => R.merge(exchange, {
+    createdIn: impl.makeCreatedInObject(
+      impl.addValues(valuesForExchanges, exchange)),
+    user: findUserById(exchange.userId),
+    approvedUser: findUserById(exchange.approvedUserId),
+    responseStatus: impl.createResponseStatus(
+      responseForUser(message.credentials.id, exchange.id)),
+    responses: impl.replaceUsersInResponses(
+      occuringUsers, responsesForExchange(exchange.id)),
+  }), exchanges);
+};
 
 /**
  * Lists the possible receivers for an exchange
@@ -50,8 +83,9 @@ const findUsersByType = async (exchange, network, exchangeValues, loggedUser) =>
  * Promise with list of receivers for this exchange
  */
 export const listReceivers = async (payload, message) => {
+  logger.info('Listing receivers for exchange', { payload, message });
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, message.credentials.id);
-  const valueIds = map(exchange.ExchangeValues, 'value');
+  const valueIds = R.pluck('value', exchange.ExchangeValues);
   let receivers;
 
   if (exchange.type === exchangeTypes.NETWORK) {
@@ -78,6 +112,7 @@ export const listReceivers = async (payload, message) => {
  * Promise with the accepted exchange
  */
 export const acceptExchange = async (payload, message) => {
+  logger.info('Accepting exchange', { payload, message });
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, message.credentials.id);
 
   if (isExpired(exchange.date)) throw createError('403', 'The exchange is expired.');
@@ -95,24 +130,33 @@ export const acceptExchange = async (payload, message) => {
   );
 
   acceptanceNotifier.send(message.network, acceptedExchange, acceptanceUser);
+  objectService.remove({
+    parentType: 'user',
+    parentId: message.credentials.id,
+    objectType: 'exchange',
+    sourceId: payload.exchangeId,
+  });
 
-  return acceptedExchange;
+  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+
+  return exchanges[0];
 };
 
 /**
  * Approve an accepted exchange.
  * @param {object} payload - Object containing payload data
  * @param {string} payload.exchangeId - The id of the exchange to fetch the receivers for
- * @param {string} payload.user_id - The id of the user that has accepted the exchange
+ * @param {string} payload.userId - The id of the user that has accepted the exchange
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method acceptExchange
+ * @method approveExchange
  * @return {external:Promise.<Exchange>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with the accepted exchange
  */
 export const approveExchange = async (payload, message) => {
+  logger.info('Approving exchange', { payload, message });
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, message.credentials.id);
 
-  const constraint = { exchangeId: payload.exchangeId, userId: payload.user_id };
+  const constraint = { exchangeId: payload.exchangeId, userId: payload.userId };
   const exchangeResponse = await exchangeResponseRepo.findResponseWhere(constraint);
 
   if (!exchangeResponse) {
@@ -123,23 +167,27 @@ export const approveExchange = async (payload, message) => {
 
   const approvedExchange = await exchangeRepo.approveExchange(exchange,
     message.credentials,
-    payload.user_id);
+    payload.userId);
 
-  Promise.all([
-    creatorNotifier.send(exchange),
-    substituteNotifier.send(exchange),
-  ]);
+  if (approvedExchange) {
+    FlexchangeDispatcher.emit('exchange.approved', {
+      exchange: approvedExchange,
+      network: message.network,
+      credentials: message.credentials,
+      approvedUser: exchangeResponse.User,
+    });
+  }
 
-  Analytics.track(approveExchangeEvent(message.network, approvedExchange), message.credentials.id);
+  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
 
-  return approvedExchange;
+  return exchanges[0];
 };
 
 /**
  * Lists all exchanges who the user has responded to.
  * @param {object} payload - Object containing payload data
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method acceptExchange
+ * @method listRespondedTo
  * @return {external:Promise.<Exchange>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with the accepted exchange
  */
@@ -154,20 +202,29 @@ export const listRespondedTo = async (payload, message) => {
  * @param {object} payload - Object containing payload data
  * @param {string} payload.exchangeId - The id of the exchange to decline
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method acceptExchange
+ * @method declineExchange
  * @return {external:Promise.<Exchange>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with the declined exchange
  */
 export const declineExchange = async (payload, message) => {
+  logger.info('Declining exchange', { payload, message });
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, message.credentials.id);
   const { ResponseStatus } = exchange;
   const approved = ResponseStatus ? ResponseStatus.approved : null;
 
   if (approved === 0) throw createError('403', 'You are already rejected for the exchange.');
 
-  const declinedExchange = await exchangeRepo.declineExchange(exchange.id, message.credentials.id);
+  await exchangeRepo.declineExchange(exchange.id, message.credentials.id);
+  objectService.remove({
+    parentType: 'user',
+    parentId: message.credentials.id,
+    objectType: 'exchange',
+    sourceId: payload.exchangeId,
+  });
 
-  return declinedExchange;
+  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+
+  return exchanges[0];
 };
 
 /**
@@ -175,11 +232,12 @@ export const declineExchange = async (payload, message) => {
  * @param {object} payload - Object containing payload data
  * @param {string} payload.exchangeId - The id of the exchange to decline
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method acceptExchange
+ * @method listMyShifts
  * @return {external:Promise.<Shift[]>} {@link module:modules/flexchange~Shift Shift} -
  * Promise with list of shifts
  */
 export const listMyShifts = async (payload, message) => {
+  logger.info('Listing my shifts', { payload, message });
   const { network } = message;
 
   if (!network.hasIntegration) throw createError('10001');
@@ -189,41 +247,55 @@ export const listMyShifts = async (payload, message) => {
 
   const [exchanges, teams] = await Promise.all([
     exchangeRepo.findExchangesByShiftIds(map(shifts, 'id')),
-    teamRepo.findTeamsByExternalId(map(shifts, 'team_id')),
+    teamRepo.findTeamsByExternalId(network.id, map(shifts, 'team_id')),
   ]);
 
   return impl.mapShiftsWithExchangeAndTeam(shifts, exchanges, teams);
 };
 
-export const deleteExchange = async (payload) => {
-  const exchange = await exchangeRepo.findExchangeById(payload.exchangeId);
+export const deleteExchange = async (payload, message) => {
+  logger.info('Deleting exchange', { payload, message });
 
-  return exchangeRepo.deleteById(exchange.id);
+  return Promise.all([
+    objectService.remove({ objectType: 'exchange', sourceId: payload.exchangeId }),
+    activityRepo.deleteBy({
+      activityType: { $in: [
+        'exchange_created', 'exchange_declined', 'exchange_accepted',
+        'exchange_comment', 'exchange_approved', 'exchange_rejected',
+      ] },
+      sourceId: payload.exchangeId,
+    }),
+    exchangeRepo.deleteById(payload.exchangeId),
+  ]);
 };
 
 /**
  * Rejects an acceptance response for the exchange.
  * @param {object} payload - Object containing payload data
  * @param {string} payload.exchangeId - The id of the exchange to reject
+ * @param {string} payload.userId - The id of the user to reject
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method acceptExchange
+ * @method rejectExchange
  * @return {external:Promise.<Exchange>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with the rejected exchange
  */
 export const rejectExchange = async (payload, message) => {
+  logger.info('Rejecting exchange', { payload, message });
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId,
     message.credentials.id);
-  const constraint = { exchangeId: exchange.id, userId: payload.user_id };
+  const constraint = { exchangeId: exchange.id, userId: payload.userId };
   const exchangeResponse = await exchangeResponseRepo.findResponseWhere(constraint);
 
   impl.validateExchangeResponse(exchangeResponse);
 
   const rejectedExchange = await exchangeRepo.rejectExchange(
-    exchange, message.credentials, payload.user_id);
-  const reloadedExchange = await rejectedExchange.reload();
+    exchange, message.credentials, payload.userId);
+  await rejectedExchange.reload();
   // TODO: Fire ExchangeWasRejected event
 
-  return reloadedExchange;
+  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+
+  return exchanges[0];
 };
 
 /**
@@ -251,6 +323,7 @@ export const getExchange = async (payload, message) => {
  * Promise with a list of comments for an exchange
  */
 export const listComments = async (payload, message) => {
+  logger.info('Listing comments for exchange', { payload, message });
   const userId = message.credentials.id;
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, userId);
 
@@ -276,7 +349,7 @@ export const getShift = async (payload, message) => {
 
   const [exchanges, teams] = await Promise.all([
     exchangeRepo.findExchangesByShiftIds([shift.id]),
-    teamRepo.findTeamsByExternalId([shift.team_id]),
+    teamRepo.findTeamsByExternalId(message.network.id, [shift.team_id]),
   ]);
 
   return impl.mergeShiftWithExchangeAndTeam(shift, exchanges[0], teams[0]);
@@ -292,11 +365,12 @@ export const getShift = async (payload, message) => {
  * Promise with a list of Users
  */
 export const listAvailableUsersForShift = async (payload, message) => {
+  logger.info('Listing available users for shift', { payload, message });
   if (!message.network.hasIntegration) throw createError('10001');
 
   const adapter = await createAdapter(message.network, message.credentials.id);
   const externalUsers = await adapter.usersAvailableForShift(payload.shiftId);
-  const availableUsers = await impl.matchUsersForShift(externalUsers, message.network);
+  const availableUsers = await userRepo.findExternalUsers(R.pluck('externalId', externalUsers));
 
   return userService.listUsersWithNetworkScope({
     userIds: map(availableUsers, 'id'),
@@ -317,7 +391,7 @@ export const listAvailableUsersForShift = async (payload, message) => {
 export const listExchangesForTeam = async (payload, message) => {
   const team = await teamRepo.findTeamById(payload.teamId);
   const exchanges = await exchangeRepo.findExchangesByTeam(
-    team, message.credentials.id, payload.filter);
+    team.id, message.credentials.id, payload.filter);
 
   return exchanges;
 };
@@ -340,19 +414,34 @@ export const listPersonalizedExchanges = async (payload, message) => {
 /**
  * Lists exchanges for a network of the current current user in the current network.
  * @param {object} payload - Object containing payload data
+ * @param {object} payload.networkId - The network to list exchanges for
+ * @param {object} payload.filter - The filter
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method listExchangesForNetwork
+ * @method listExchangesForUser
  * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange} -
- * Promise with a list of Exchanges for a user
  */
-export const listExchangesForNetwork = async (payload, message) => {
-  const { credentials, network } = message;
+export const listExchangesForUser = async (payload, message) => {
+  logger.info('Listing all exchanges for user', { payload, message });
+
   const user = await userService.getUserWithNetworkScope({
-    id: credentials.id, networkId: network.id }, message);
+    id: message.credentials.id, networkId: message.network.id }, message);
 
-  const exchanges = await impl.listExchangesForUser(network, user, payload.filter);
+  let exchanges;
 
-  return orderBy(uniqBy(exchanges, 'id'), 'date');
+  if (user.roleType === 'ADMIN') {
+    exchanges = await exchangeRepo.findExchangesByNetwork(
+      message.network.id, { ...payload.filter });
+  } else if (user.roleType === 'EMPLOYEE') {
+    exchanges = await impl.listExchangesForEmployee(message.network, user, payload.filter);
+  }
+
+  const createdExchangesByUser = await exchangeRepo.findAllBy(R.merge({
+    userId: user.id, networkId: message.network.id,
+  }, impl.createDateWhereConstraint(payload.filter.start, payload.filter.end)));
+
+  return list({
+    exchangeIds: R.pluck('id', R.concat(exchanges, createdExchangesByUser)) },
+    message);
 };
 
 const createValidator = (exchangeType) => {
@@ -364,43 +453,50 @@ const createValidator = (exchangeType) => {
  * Creates a new Exchange.
  * @param {object} payload - Object containing payload data
  * @param {string} payload.date - date for the exchange
- * @param {string} payload.startTime - {@link module:modules/flexchange~Exchange Exchange.startTime}
- * @param {string} payload.endTime - {@link module:modules/flexchange~Exchange Exchange.endTime}
- * @param {string} payload.value - {@link module:modules/flexchange~Exchange Exchange.value}
- * @param {string} payload.type - {@link module:modules/flexchange~Exchange Exchange.type}
- * @param {string} payload.title - {@link module:modules/flexchange~Exchange Exchange.title}
- * @param {string} payload.description
+ * @param {string} payload.values - {@link module:modules/flexchange~Exchange.values}
+ * @param {string} payload.type - {@link module:modules/flexchange~Exchange.type}
+ * @param {string} [payload.startTime] - {@link module:modules/flexchange~Exchange.startTime}
+ * @param {string} [payload.endTime] - {@link module:modules/flexchange~Exchange.endTime}
+ * @param {string} [payload.shiftId] - {@link module:modules/flexchange~Exchange.shiftId}
+ * @param {string} [payload.title] - {@link module:modules/flexchange~Exchange.title}
+ * @param {string} [payload.description]
  * {@link module:modules/flexchange~Exchange Exchange.description}
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method createExchange
+ * @method Dispatcher
  * @return {external:Promise.<Exchange>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with the newly created Exchange
  */
 export const createExchange = async (payload, message) => {
-  const { network, credentials } = message;
+  logger.info('Creating an exchange', { payload, message });
+
   if (payload.startTime && payload.endTime && moment(payload.endTime).isBefore(payload.startTime)) {
     throw createError('422', 'Attribute end_time should be after start_time');
   }
 
-  if (payload.shiftId && !network.hasIntegration) {
+  if (payload.shiftId && !message.network.hasIntegration) {
     throw createError('10001');
   }
 
   if (includes([exchangeTypes.TEAM, exchangeTypes.USER], payload.type)) {
     const validator = createValidator(payload.type);
-    const isValid = validator ? await validator(payload.values, network.id) : true;
+    const isValid = validator ? await validator(payload.values, message.network.id) : true;
 
     if (!isValid) throw createError('422', 'Specified invalid ids for type.');
   }
-  const createdExchange = await exchangeRepo.createExchange(message.credentials.id, network.id, {
-    ...payload,
-    date: moment(payload.date).format('YYYY-MM-DD'),
-  });
 
-  const users = await findUsersByType(createdExchange, network, payload.values, credentials);
+  const createdExchange = await exchangeRepo.createExchange(
+    message.credentials.id, message.network.id, {
+      ...payload,
+      date: moment(payload.date).format('YYYY-MM-DD'),
+    });
 
-  await createdNotifier.send(users, createdExchange);
-  Analytics.track(newExchangeEvent(network, createdExchange), message.credentials.id);
+  if (createdExchange) {
+    FlexchangeDispatcher.emit('exchange.created', {
+      network: message.network,
+      credentials: message.credentials,
+      exchange: createdExchange,
+    });
+  }
 
   return exchangeRepo.findExchangeById(createdExchange.id);
 };

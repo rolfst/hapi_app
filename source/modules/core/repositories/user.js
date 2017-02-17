@@ -1,7 +1,8 @@
 import { map, omit, pick, sample } from 'lodash';
+import R from 'ramda';
 import Promise from 'bluebird';
 import createError from '../../../shared/utils/create-error';
-import { User, Network, NetworkUser, Integration, Team, TeamUser } from '../../../shared/models';
+import { User, Network, NetworkUser, Team, TeamUser } from '../../../shared/models';
 import createUserModel from '../models/user';
 import createNetworkLinkModel from '../models/network-link';
 import createCredentialsModel from '../models/credentials';
@@ -19,15 +20,6 @@ const dummyProfileImgPaths = [
 const defaultIncludes = {
   include: [{
     model: Team,
-  }, {
-    model: Network,
-    include: [{
-      model: Integration,
-      required: false,
-    }, {
-      model: User,
-      as: 'SuperAdmin',
-    }],
   }],
 };
 
@@ -60,24 +52,53 @@ export const findExternalUsers = async (externalIds) => {
 /**
  * Finds users based on a list of ids
  * @param {string[]} userIds - identifier how the user is known
- * @method findUsersByIds
+ * @param {string} [networkId] - identifier for a possible network
+ * @method findByIds
  * @return {external:Promise.<User[]>} {@link module:modules/core~User User}
  */
-export const findUsersByIds = async (userIds) => {
-  const result = await User.findAll({ ...defaultIncludes, where: { id: { $in: userIds } } });
+export const findByIds = async (userIds, networkId = null) => {
+  let result;
+
+  if (networkId) {
+    result = await User.findAll({ ...defaultIncludes, where: { id: { $in: userIds } } });
+  } else {
+    const includes = {
+      include: [{ model: Team,
+      attributes: ['id'],
+      where: { networkId },
+      required: false }] };
+    result = await User.findAll({ ...includes, where: { id: { $in: userIds } } });
+  }
 
   return map(result, toModel);
 };
 
 /**
  * Finds a user
- * @param {string} ids - identifier how the user is known
- * @method findUsersByIds
+ * @param {string} userId - identifier how the user is known
+ * @param {string} networkId - identifier for what network the user need to be
+ * retrieved
+ * @param {string} [scoped=true] - flag to specifiy whether a user needs to be fetched
+ * with network scoped attributes
+ * @method findByIds
  * @return {external:Promise.<User>} {@link module:modules/core~User User}
  */
-export const findUserById = async (id) => {
-  const user = await User.findOne({ ...defaultIncludes, where: { id } });
-  if (!user) throw createError('403', `The user with id '${id}' could not be found.`);
+export const findUserById = async (userId, networkId, scoped = true) => {
+  if (scoped) {
+    if (R.isNil(networkId)) throw createError('20001');
+  }
+  const includes = scoped
+    ? { include: [{ model: Team,
+      attributes: ['id'],
+      where: { networkId },
+      required: false }] }
+    : {};
+  const user = await User.findOne({
+    ...includes,
+    where: { id: userId },
+  });
+
+  if (!user) throw createError('403', `The user with id '${userId}' could not be found.`);
 
   return toModel(user);
 };
@@ -116,31 +137,6 @@ export const findNetworkLink = async (attributes) => {
   if (!result) return null;
 
   return toNetworkLinkModel(result);
-};
-
-/**
- * Sets the network link for a user.
- * @param {object} attributes
- * @param {string} attributes.userId
- * @param {string} attributes.networkId
- * @param {string} attributes.externalId
- * @param {string} attributes.deletedAt
- * @param {string} attributes.userToken
- * @param {string} attributes.roleType
- * @method setNetworkLink
- * @return {void}
- */
-export const setNetworkLink = async (_attributes) => {
-  const attributes = pick(_attributes,
-    'userId', 'networkId', 'externalId', 'deletedAt', 'userToken', 'roleType');
-
-  const result = await NetworkUser.findOne({
-    where: { userId: attributes.userId, networkId: attributes.networkId },
-  });
-
-  if (!result) return NetworkUser.create({ ...attributes, user_id: attributes.userId });
-
-  return result.update({ ...omit(attributes, 'userId, networkId') });
 };
 
 /**
@@ -193,7 +189,7 @@ export const updateUser = async (userId, attributes) => {
   const user = await User.findById(userId);
   await user.update(attributes);
 
-  return findUserById(userId);
+  return findUserById(userId, null, false);
 };
 
 /**
@@ -217,7 +213,7 @@ export const createUser = async (attributes) => {
     profileImg: sample(dummyProfileImgPaths),
   });
 
-  return findUserById(user.id);
+  return findUserById(user.id, null, false);
 };
 
 /**
@@ -281,6 +277,32 @@ export const removeFromNetwork = async (userId, networkId, forceDelete = false) 
 };
 
 /**
+ * Sets the network link for a user.
+ * @param {object} attributes
+ * @param {string} attributes.userId
+ * @param {string} attributes.networkId
+ * @param {string} [attributes.userToken]
+ * @param {string} [attributes.roleType]
+ * @param {string} [attributes.externalId]
+ * @param {string} [attributes.deletedAt]
+ * @param {string} [attributes.invitedAt]
+ * @method setNetworkLink
+ * @return {void}
+ */
+export const setNetworkLink = async (_attributes) => {
+  const attributes = pick(_attributes,
+    'userId', 'networkId', 'externalId', 'deletedAt', 'userToken', 'roleType', 'invitedAt');
+
+  const result = await NetworkUser.findOne({
+    where: { userId: attributes.userId, networkId: attributes.networkId },
+  });
+
+  if (!result) return NetworkUser.create({ ...attributes, user_id: attributes.userId });
+
+  return result.update({ ...omit(attributes, 'userId, networkId') });
+};
+
+/**
  * updates the networkUser
  * the user is from the external source
  * @Param {object} user - externalInformation of user
@@ -300,7 +322,7 @@ export const updateUserForNetwork = async (user, networkId, active = true) => {
     roleType,
   });
 
-  return findUserById(networkUser.userId);
+  return findUserById(networkUser.userId, networkId);
 };
 
 /**

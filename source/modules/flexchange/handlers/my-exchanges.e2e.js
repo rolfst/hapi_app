@@ -1,49 +1,55 @@
 import { assert } from 'chai';
 import moment from 'moment';
 import qs from 'qs';
+import * as testHelper from '../../../shared/test-utils/helpers';
 import { getRequest } from '../../../shared/test-utils/request';
-import { exchangeTypes } from '../models/exchange';
+import { exchangeTypes } from '../repositories/dao/exchange';
 import { createExchange } from '../repositories/exchange';
 
 describe('My exchanges', () => {
+  let admin;
   let network;
-  let exchanges;
 
   before(async () => {
-    network = global.networks.flexAppeal;
+    const [user, employee] = await Promise.all([
+      testHelper.createUser(),
+      testHelper.createUser(),
+    ]);
+    admin = user;
+    network = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
 
-    const myExchange = createExchange(global.users.admin.id, network.id, {
+    const myExchange = createExchange(admin.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'Test shift created by myself',
     });
 
-    const otherExchange = createExchange(global.users.employee.id, network.id, {
+    const otherExchange = createExchange(employee.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'Test shift created by someone else',
     });
 
-    const futureExchange = createExchange(global.users.admin.id, network.id, {
+    const futureExchange = createExchange(admin.id, network.id, {
       date: moment().add(2, 'weeks').format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'Test shift created in future',
     });
 
-    const pastExchange = createExchange(global.users.admin.id, network.id, {
+    const pastExchange = createExchange(admin.id, network.id, {
       date: moment().subtract(2, 'weeks').format('YYYY-MM-DD'),
       type: exchangeTypes.NETWORK,
       title: 'Test shift created in the past',
     });
 
-    exchanges = await Promise.all([myExchange, otherExchange, futureExchange, pastExchange]);
+    return Promise.all([myExchange, otherExchange, futureExchange, pastExchange]);
   });
 
-  after(() => Promise.all(exchanges.map(e => e.destroy())));
+  after(() => testHelper.cleanAll());
 
   it('should return correct data', async () => {
     const endpoint = `/v2/networks/${network.id}/users/me/exchanges`;
-    const { result, statusCode } = await getRequest(endpoint);
+    const { result, statusCode } = await getRequest(endpoint, admin.token);
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.length, 3);
@@ -56,7 +62,7 @@ describe('My exchanges', () => {
     });
 
     const endpoint = `/v2/networks/${network.id}/users/me/exchanges?${query}`;
-    const { result, statusCode } = await getRequest(endpoint);
+    const { result, statusCode } = await getRequest(endpoint, admin.token);
 
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 1);
@@ -68,7 +74,7 @@ describe('My exchanges', () => {
     });
 
     const endpoint = `/v2/networks/${network.id}/users/me/exchanges?${query}`;
-    const { result, statusCode } = await getRequest(endpoint);
+    const { result, statusCode } = await getRequest(endpoint, admin.token);
 
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 2);

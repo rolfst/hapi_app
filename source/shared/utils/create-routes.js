@@ -13,7 +13,7 @@ const createDefaultConfig = (stategy, prefetch) => {
 const getImport = (importFn) => importFn.default ? importFn.default : importFn;
 
 export const createRoute = ({
-  method, url, handler, validator, auth = true, strategy = 'jwt', prefetch = true,
+  method, url, handler, validator, payload, auth = true, strategy = 'jwt', prefetch = true,
 }) => {
   const route = {
     method,
@@ -25,6 +25,7 @@ export const createRoute = ({
   };
 
   if (auth) route.config = { ...route.config, ...createDefaultConfig(strategy, prefetch) };
+  if (payload) route.config.payload = payload;
 
   return route;
 };
