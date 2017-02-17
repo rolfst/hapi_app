@@ -1,18 +1,16 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import * as testHelpers from '../../../../shared/test-utils/helpers';
 import R from 'ramda';
 import Promise from 'bluebird';
-import stream from 'stream';
-import * as uploadService from '../../../upload/services/upload';
+import * as testHelpers from '../../../../shared/test-utils/helpers';
+import * as Storage from '../../../../shared/services/storage';
 import * as pollService from '../../../poll/services/poll';
 import * as attachmentService from '../../../attachment/services/attachment';
-import * as messageService from './index';
 import * as objectService from '../object';
 import * as commentService from '../comment';
+import * as messageService from './index';
 
 describe('Service: Message', () => {
-  const Readable = stream.Readable;
   let admin;
   let employee;
   let network;
@@ -31,23 +29,13 @@ describe('Service: Message', () => {
           parentType: 'network',
           parentId: network.id,
           text: 'My cool message',
-          resources: [{
-            type: 'poll',
-            data: { options: ['Yes', 'No', 'Ok'] },
-          }],
-        }, {
-          network,
-          credentials: admin,
-        }),
+          poll: { options: ['Yes', 'No', 'Ok'] },
+        }, { network, credentials: admin }),
         messageService.create({
           parentType: 'network',
           parentId: network.id,
           text: 'My other cool message',
-          resources: [],
-        }, {
-          network,
-          credentials: admin,
-        }),
+        }, { network, credentials: admin }),
       ]);
     });
 
@@ -80,9 +68,7 @@ describe('Service: Message', () => {
 
       const actual = await messageService.list({
         messageIds: R.pluck('sourceId', createdMessages),
-      }, {
-        credentials: admin,
-      });
+      }, { credentials: admin });
 
       const likedMessage = R.find(R.propEq('id', createdMessages[0].sourceId), actual);
       const otherMessage = R.find(R.propEq('id', createdMessages[1].sourceId), actual);
@@ -105,9 +91,7 @@ describe('Service: Message', () => {
 
       const actual = await messageService.list({
         messageIds: R.pluck('sourceId', createdMessages),
-      }, {
-        credentials: admin,
-      });
+      }, { credentials: admin });
 
       const commentedMessage = R.find(R.propEq('id', createdMessages[1].sourceId), actual);
 
@@ -116,7 +100,7 @@ describe('Service: Message', () => {
     });
   });
 
-  describe('create poll', () => {
+  describe('Create poll', () => {
     let createdMessage;
 
     before(async () => {
@@ -127,10 +111,7 @@ describe('Service: Message', () => {
         parentType: 'network',
         parentId: network.id,
         text: 'My cool message',
-        resources: [{
-          type: 'poll',
-          data: { options: ['Yes', 'No', 'Ok'] },
-        }],
+        poll: { options: ['Yes', 'No', 'Ok'] },
       }, { network, credentials: admin });
     });
 
@@ -182,11 +163,6 @@ describe('Service: Message', () => {
       assert.isDefined(expected[0].sourceId);
     });
 
-    xit('should create an attachment entry if resource is present', async () => {
-      // TODO
-    });
-
-
     it('should create object entry for message', async () => {
       const objects = await objectService.list({
         parentType: 'network',
@@ -209,35 +185,25 @@ describe('Service: Message', () => {
     });
   });
 
-  describe('create attachment', () => {
+  describe('Create attachment', () => {
     let createdMessage;
     let sandbox;
 
+    const hapiFile = testHelpers.hapiFile('image.jpg');
+
     before(async () => {
       sandbox = sinon.sandbox.create();
-      sandbox.stub(uploadService, 'upload').returns(Promise.resolve('/attachment/test.jpg'));
+      sandbox.stub(Storage, 'upload').returns(Promise.resolve('image.jpg'));
 
       admin = await testHelpers.createUser({ password: 'foo' });
       network = await testHelpers.createNetwork({ userId: admin.id });
-
-      const readStream = new Readable;
-      readStream.push('hi');
-      readStream.push(null);
 
       createdMessage = await messageService.create({
         parentType: 'network',
         parentId: network.id,
         text: 'My cool message',
-        resources: [
-          {
-            type: 'attachment',
-            data: { path: 'test.jpg', stream: readStream },
-          },
-        ],
-      }, {
-        credentials: { id: admin.id },
-        network: { id: network.id },
-      });
+        attachments: [hapiFile],
+      }, { network, credentials: admin });
     });
 
     after(() => {
@@ -254,17 +220,17 @@ describe('Service: Message', () => {
     it('should create an attachment entry if resource is present', async () => {
       const objects = await objectService.list({
         parentType: 'feed_message',
-        parentId: createdMessage.id,
+        parentId: createdMessage.sourceId,
       });
 
       const attachmentEntry = await attachmentService.get({ attachmentId: objects[0].sourceId });
 
       assert.isDefined(attachmentEntry);
-      assert.equal(attachmentEntry.path, '/attachment/test.jpg');
+      assert.equal(attachmentEntry.path, 'image.jpg');
     });
 
     it('should create a message entry', async () => {
-      const expected = await messageService.get({ messageId: createdMessage.id });
+      const expected = await messageService.get({ messageId: createdMessage.sourceId });
 
       assert.isDefined(expected);
       assert.property(expected, 'objectId');
@@ -275,7 +241,7 @@ describe('Service: Message', () => {
     it('should create object entry for attachment if resource is present', async () => {
       const expected = await objectService.list({
         parentType: 'feed_message',
-        parentId: createdMessage.id,
+        parentId: createdMessage.sourceId,
       });
 
       assert.lengthOf(expected, 1);

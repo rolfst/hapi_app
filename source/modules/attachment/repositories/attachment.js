@@ -50,10 +50,11 @@ export const create = async (path) => {
  * @return {external:Promise.<Attachment>} - Create attachment promise
  */
 export const update = async (attachment) => {
-  const updatedAttachment = await Attachment.findById(attachment.id)
-    .then(pivot => pivot.update(attachment));
+  await Attachment.update(R.omit(['id'], attachment), {
+    where: { id: attachment.id },
+  });
 
-  return createAttachmentModel(updatedAttachment);
+  return attachment;
 };
 
 export const deleteById = async (attachmentId) => {
