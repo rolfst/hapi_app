@@ -89,7 +89,7 @@ export const listWithSourceAndChildren = async (payload, message) => {
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
 export const getWithSourceAndChildren = async (payload, message) => {
-  return listWithSourceAndChildren({ objectIds: [payload.objectId] }, message);
+  return R.head(await listWithSourceAndChildren({ objectIds: [payload.objectId] }, message));
 };
 
 /**
