@@ -37,7 +37,7 @@ export const list = async (payload, message) => {
 export async function create(payload, message) {
   logger.info('Creating private message', { payload, message });
 
-  const conversation = R.head(await conversationRepository.findByIds([payload.conversationId]));
+  const conversation = await conversationRepository.findById(payload.conversationId);
   if (!conversation) throw createError('404');
 
   const createObjectPayload = (createdMessage) => ({

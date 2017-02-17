@@ -157,9 +157,9 @@ export const create = async (payload, message) => {
 
   await Promise.all(resourcePromises);
 
-  const objectWithSourceAndChildren = R.head(await objectService.listWithSourcesAndChildren({
-    objectIds: [createdObject.id],
-  }, message));
+  const objectWithSourceAndChildren = await objectService.getWithSourceAndChildren({
+    objectId: createdObject.id,
+  }, message);
 
   FeedDispatcher.emit('message.created', {
     parent,

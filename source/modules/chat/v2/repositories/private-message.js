@@ -11,7 +11,7 @@ export const findByIds = (messageIds) => findBy({
 });
 
 export const findById = (messageId) => R.pipeP(
-  findBy({ id: { $in: messageId } }),
+  findByIds([messageId]),
   R.head
 )();
 
