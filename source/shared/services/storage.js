@@ -7,11 +7,15 @@ import * as Logger from './logger';
 
 const logger = Logger.getLogger('SHARED/service/upload');
 
-const location = {
-  testing: 'development',
-  development: 'development',
-  production: 'production',
-  acceptance: 'acc',
+export const getEnvironmentLocation = () => {
+  const mapping = {
+    testing: 'development',
+    development: 'development',
+    production: 'production',
+    acceptance: 'acc',
+  };
+
+  return mapping[process.env.API_ENV];
 };
 
 export const getClient = () => {
@@ -36,7 +40,7 @@ export const getClient = () => {
  * @return {external:Promise.<String>} Returning the filename
  */
 export function upload(file, prefix = null) {
-  const environment = location[process.env.API_ENV];
+  const environment = getEnvironmentLocation();
   const fileExtension = R.last(file.filename.split('.'));
   const generatedFileName = Math.random().toString(20).substr(2, 15);
   const newFilename = `${generatedFileName}.${fileExtension}`;
