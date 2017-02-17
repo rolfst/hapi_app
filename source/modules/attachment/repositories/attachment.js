@@ -7,29 +7,24 @@ import createAttachmentModel from '../models/attachment';
  */
 
 /**
- * Internal function
- * @return {external:Promise.<Attachment[]>} {@link module:modules/attachment~Attachment
- * Attachment}
+ * Find attachments by where constraint
+ * @param {object} whereConstraint - The where constraint
+ * @method findBy
+ * @return {external:Promise.<Attachment[]>} {@link module:modules/attachment~Attachment}
  */
-export const findAll = async () => {
-  const attachments = Attachment.findAll();
-
-  return R.map(createAttachmentModel, attachments);
-};
+export const findBy = (whereConstraint) => Attachment
+  .findAll({ where: whereConstraint })
+  .then(R.map(createAttachmentModel));
 
 /**
  * Find a specific attachment by id
  * @param {string} id - Id of the attachment
- * @method findAttachmentById
+ * @method findById
  * @return {external:Promise.<Attachment>} - Find attachment promise
  */
-export const findById = async (id) => {
-  const attachment = await Attachment.findById(id);
-
-  if (!attachment) return null;
-
-  return createAttachmentModel(attachment);
-};
+export const findById = (id) => Attachment
+  .findById(id)
+  .then(R.ifElse(R.isNil, R.always(null), createAttachmentModel));
 
 /**
  * Create a new attachment
@@ -37,11 +32,13 @@ export const findById = async (id) => {
  * @method create
  * @return {external:Promise.<Attachment>} - Create attachment promise
  */
-export const create = async (path) => {
-  const attachment = await Attachment.create({ path });
+export const create = (path) => Attachment
+  .create({ path })
+  .then(createAttachmentModel)
+  .catch(R.always(null));
 
-  return createAttachmentModel(attachment);
-};
+export const deleteById = (attachmentId) => Attachment
+  .destroy({ where: { id: attachmentId } });
 
 /**
  * Updates an attachment
@@ -49,14 +46,8 @@ export const create = async (path) => {
  * @method update
  * @return {external:Promise.<Attachment>} - Create attachment promise
  */
-export const update = async (attachment) => {
-  await Attachment.update(R.omit(['id'], attachment), {
+export const update = (attachment) => Attachment
+  .update(R.omit(['id'], attachment), {
     where: { id: attachment.id },
-  });
-
-  return attachment;
-};
-
-export const deleteById = async (attachmentId) => {
-  return Attachment.destroy({ where: { id: attachmentId } });
-};
+  })
+  .then(R.always(attachment));

@@ -123,6 +123,10 @@ describe('Service: Message', () => {
       assert.equal(createdMessage.parentType, 'network');
       assert.equal(createdMessage.parentId, network.id);
       assert.equal(createdMessage.source.text, 'My cool message');
+      assert.equal(createdMessage.children[0].objectType, 'poll');
+      assert.deepEqual(createdMessage.children[0].source.options[0].text, 'Yes');
+      assert.deepEqual(createdMessage.children[0].source.options[1].text, 'No');
+      assert.deepEqual(createdMessage.children[0].source.options[2].text, 'Ok');
     });
 
     it('should create a message entry', async () => {
@@ -205,6 +209,13 @@ describe('Service: Message', () => {
     after(() => {
       sandbox.restore();
       return testHelpers.cleanAll();
+    });
+
+    it('should return object with children and source', () => {
+      assert.equal(createdMessage.children[0].parentType, 'feed_message');
+      assert.equal(createdMessage.children[0].parentId, createdMessage.sourceId);
+      assert.equal(createdMessage.children[0].objectType, 'attachment');
+      assert.equal(createdMessage.children[0].source.path, 'image.jpg');
     });
 
     it('should create an attachment entry if resource is present', async () => {

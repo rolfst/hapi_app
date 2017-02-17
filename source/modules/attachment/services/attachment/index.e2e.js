@@ -32,7 +32,7 @@ describe('Service: Attachment', () => {
         parentId: '23',
         file: { file: new Buffer('Foo'), filename: 'test.jpg' },
       }, { credentials: admin });
-      const attachments = await testHelper.findAllAttachments();
+      const attachments = await attachmentRepo.findBy({ objectId: actual.objectId });
 
       Storage.upload.restore();
 
@@ -74,7 +74,7 @@ describe('Service: Attachment', () => {
         attributes: { objectId: createdObject.id },
       }, {});
 
-      const attachments = await testHelper.findAllAttachments();
+      const attachments = await attachmentRepo.findBy({ objectId: createdObject.id });
 
       assert.equal(attachments.length, 1);
       assert.equal(attachments[0].type, 'attachment');

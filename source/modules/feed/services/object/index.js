@@ -50,10 +50,10 @@ export const list = async (payload, message) => {
  * @param {object} payload - Object containing payload data
  * @param {string} payload.objectIds - The id for objects to list
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method listWithSources
+ * @method listWithSourceAndChildren
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
-export const listWithSources = async (payload, message) => {
+export const listWithSourceAndChildren = async (payload, message) => {
   logger.info('Listing objects with sources', { payload, message });
 
   const objects = await objectRepository.findBy({
@@ -78,6 +78,18 @@ export const listWithSources = async (payload, message) => {
     R.pluck('id'),
     R.map(R.pipe(findObjectById, addChildrenToObject))
   )(objects);
+};
+
+/**
+ * Get object including the source and children
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.objectId - The id for object to get
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method getWithSourceAndChildren
+ * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
+ */
+export const getWithSourceAndChildren = async (payload, message) => {
+  return R.head(await listWithSourceAndChildren({ objectIds: [payload.objectId] }, message));
 };
 
 /**

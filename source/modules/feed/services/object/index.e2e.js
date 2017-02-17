@@ -101,7 +101,7 @@ describe('Service: Object', () => {
     });
   });
 
-  describe('listWithSources', () => {
+  describe('listWithSourceAndChildren', () => {
     before(async () => {
       admin = await testHelpers.createUser({ password: 'foo' });
     });
@@ -122,7 +122,7 @@ describe('Service: Object', () => {
         text: 'Do you want to join us tomorrow?',
       }, { network, credentials: admin });
 
-      const actual = await objectService.listWithSources({
+      const actual = await objectService.listWithSourceAndChildren({
         objectIds: [createdMessageObject.id, createdMessageObject2.id],
       }, { credentials: admin });
 
@@ -157,7 +157,7 @@ describe('Service: Object', () => {
         artifacts: { authenticationToken: 'FOO_TOKEN' },
       });
 
-      const actual = await objectService.listWithSources({
+      const actual = await objectService.listWithSourceAndChildren({
         objectIds: [createdMessageObject.id],
       }, { credentials: admin });
 
@@ -175,7 +175,7 @@ describe('Service: Object', () => {
         text: 'Test message for network',
       }, { network, credentials: admin });
 
-      const actual = await objectService.listWithSources({
+      const actual = await objectService.listWithSourceAndChildren({
         objectIds: [createdMessageObject.id],
       }, { network, credentials: admin });
 

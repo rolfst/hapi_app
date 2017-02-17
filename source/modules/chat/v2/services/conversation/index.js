@@ -72,7 +72,7 @@ export const listConversations = async (payload, message) => {
 
   const lastMessageObjects = lastMessageObjectsByConversationId(objects);
   const objectIds = R.pipe(R.pluck('id'), R.values)(lastMessageObjects);
-  const lastMessages = await objectService.listWithSources({ objectIds }, message);
+  const lastMessages = await objectService.listWithSourceAndChildren({ objectIds }, message);
 
   const lastMessagesForConversation = R.map(object =>
     R.find(R.propEq('sourceId', object.sourceId), lastMessages), lastMessageObjects);
@@ -151,7 +151,7 @@ export const listMessages = async (payload, message) => {
     parentId: payload.conversationId,
   }, message);
 
-  return objectService.listWithSources({ objectIds: R.pluck('id', objects) }, message);
+  return objectService.listWithSourceAndChildren({ objectIds: R.pluck('id', objects) }, message);
 };
 
 /**

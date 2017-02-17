@@ -157,18 +157,18 @@ export const create = async (payload, message) => {
 
   await Promise.all(resourcePromises);
 
-  const objectWithSource = R.merge(createdObject, {
-    source: { ...createdMessage, objectId: createdObject.id },
-  });
+  const objectWithSourceAndChildren = await objectService.getWithSourceAndChildren({
+    objectId: createdObject.id,
+  }, message);
 
   FeedDispatcher.emit('message.created', {
     parent,
     networkId: message.network.id,
     actor: message.credentials,
-    object: objectWithSource,
+    object: objectWithSourceAndChildren,
   });
 
-  return objectWithSource;
+  return objectWithSourceAndChildren;
 };
 
 /**
