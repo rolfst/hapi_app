@@ -162,39 +162,22 @@ export const create = async (payload, message) => {
  * @param {string} payload.resources[].type - The type of the resource
  * @param {object} payload.resources[].data - The data for the resource
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method create
+ * @method update
  * @return {external:Promise.<Message>} {@link module:feed~Message message}
  */
-export const create = async (payload, message) => {
-  logger.info('Creating message', { payload, message });
+export const update = async (payload, message) => {
+  logger.info('Updating message', { payload, message });
 
-  const createdMessage = await messageRepository.create({
-    objectId: null,
-    text: payload.text,
-  });
+  return messageRepository.findById(payload.messageId)
+    .then(async (foundMessage) => {
+      if (!foundMessage) throw createError('404');
 
-  const createdObject = await objectService.create({
-    userId: message.credentials.id,
-    parentType: payload.parentType,
-    parentId: payload.parentId,
-    objectType: 'feed_message',
-    sourceId: createdMessage.id,
-  });
+      const attributes = R.pick(['text'], payload);
 
-  await messageRepository.update(createdMessage.id, { objectId: createdObject.id });
+      const mess = await messageRepository.update(foundMessage.id, attributes);
 
-  if (payload.resources) {
-    logger.info('Creating resources for message', { resources: payload.resources });
-
-    const typeEq = R.propEq('type');
-    const createResource = R.cond([
-      [typeEq('poll'), impl.createPollResource(createdMessage, message)],
-    ]);
-
-    await Promise.map(payload.resources, createResource);
-  }
-
-  return { ...createdMessage, objectId: createdObject.id };
+      return mess;
+    });
 };
 /**
  * Likes a message

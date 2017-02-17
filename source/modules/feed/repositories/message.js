@@ -10,6 +10,7 @@ import createFeedMessageModel from '../models/message';
  */
 export const findById = async (messageId) => {
   const result = await FeedMessage.findById(messageId);
+
   if (!result) return null;
 
   return createFeedMessageModel(result);
@@ -44,8 +45,21 @@ export const create = async (attributes) => {
   return createFeedMessageModel(result);
 };
 
-export const update = async (messageId, attributes) => FeedMessage.update(attributes, {
-  where: { id: messageId },
-});
+/*
+ * Updating a message
+ * @param {string} attributes.text - The text that contains the message
+ * @method update
+ * @return {external:Promise.<FeedMessage>} {@link module:modules/feed~FeedMessage}
+ */
+export const update = async (messageId, attributes) => {
+  const result = await FeedMessage.findOne({
+    where: { id: messageId },
+  });
+
+  await result.update(attributes);
+
+  const mes = await findById(messageId);
+  return mes;
+};
 
 export const destroy = (messageId) => FeedMessage.destroy({ where: { id: messageId } });

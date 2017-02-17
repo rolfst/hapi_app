@@ -187,7 +187,7 @@ describe('Service: Message', () => {
     });
   });
 
-  describe.only('update', () => {
+  describe('update', () => {
     let createdMessage;
 
     before(async () => {
@@ -210,19 +210,19 @@ describe('Service: Message', () => {
 
     after(() => testHelpers.cleanAll());
 
-    it('should update a message entry', async () => {
+    it.only('should update a message entry', async () => {
       const updatedMessage = await messageService.update({
-        parentType: 'network',
-        parentId: network.id,
+        messageId: createdMessage.id,
         text: 'My cool updated message',
-      });
+      }, {});
       const expected = await messageService.get({ messageId: createdMessage.id });
 
+      assert.equal(updatedMessage.id, expected.id);
       assert.isDefined(expected);
       assert.property(expected, 'objectId');
       assert.equal(expected.text, 'My cool updated message');
       assert.property(expected, 'createdAt');
-      assert.isNotNull(expcted.createdAt);
+      assert.isNotNull(expected.createdAt);
     });
   });
 });
