@@ -212,9 +212,10 @@ describe('Service: Message', () => {
     });
 
     it('should return object with children and source', () => {
-      // TODO
+      assert.equal(createdMessage.children[0].parentType, 'feed_message');
+      assert.equal(createdMessage.children[0].parentId, createdMessage.sourceId);
       assert.equal(createdMessage.children[0].objectType, 'attachment');
-      assert.equal(createdMessage.children[0].source.path, 'test.jpg');
+      assert.equal(createdMessage.children[0].source.path, 'image.jpg');
     });
 
     it('should create an attachment entry if resource is present', async () => {
