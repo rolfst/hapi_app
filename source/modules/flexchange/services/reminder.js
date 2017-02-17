@@ -16,8 +16,7 @@ const createAdminInfo = (admins) => {
 
 const createNotificationData = async (exchange) => {
   const network = await networkRepo.findNetworkById(exchange.networkId);
-  const admins = await networkRepo.findUsersForNetwork({
-    networkId: network.id, roleType: 'ADMIN' });
+  const admins = await networkRepo.findUsersForNetwork(network.id, { roleType: 'ADMIN' });
   const usersToNotify = createAdminInfo(admins);
 
   return { network, admins: usersToNotify };

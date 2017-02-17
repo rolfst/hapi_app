@@ -1,4 +1,5 @@
 import R from 'ramda';
+import Promise from 'bluebird';
 import * as pollService from '../../../poll/services/poll';
 import * as objectService from '../object';
 
@@ -12,7 +13,7 @@ import * as objectService from '../object';
 export const createPollResource = (createdMessage, message) => R.pipeP(
   (pollResource) => pollService.create({
     networkId: message.network.id,
-    options: pollResource.data.options,
+    options: pollResource.options,
   }, message),
   (createdPoll) => objectService.create({
     userId: message.credentials.id,

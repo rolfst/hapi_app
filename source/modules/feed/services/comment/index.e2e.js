@@ -27,7 +27,7 @@ describe('Service: Comment (feed)', () => {
 
     it('should return comment model after creation', async () => {
       const actual = await commentService.create({
-        messageId: createdMessage.id,
+        messageId: createdMessage.sourceId,
         userId: admin.id,
         text: 'Cool new comment',
       });
@@ -35,7 +35,7 @@ describe('Service: Comment (feed)', () => {
       assert.property(actual, 'id');
       assert.property(actual, 'createdAt');
       assert.equal(actual.userId, admin.id);
-      assert.equal(actual.messageId, createdMessage.id);
+      assert.equal(actual.messageId, createdMessage.sourceId);
       assert.equal(actual.text, 'Cool new comment');
     });
 
@@ -68,7 +68,7 @@ describe('Service: Comment (feed)', () => {
 
       createdComments = await Promise.all([
         commentService.create({
-          messageId: createdMessage.id,
+          messageId: createdMessage.sourceId,
           userId: admin.id,
           text: 'Cool comment',
         }),

@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import blueprints from '../../../../../shared/test-utils/blueprints';
 import * as userRepo from '../../../../core/repositories/user';
 import * as objectService from '../../../../feed/services/object';
-import * as messageService from '../../../../feed/services/message';
+import * as messageService from '../private-message';
 import * as conversationService from '../../services/conversation';
 
 describe('Service: Conversation (v2)', () => {
@@ -23,23 +23,19 @@ describe('Service: Conversation (v2)', () => {
       createdConversation = await conversationService.create({
         type: 'PRIVATE',
         participantIds: [creator.id, participant.id],
-      }, { credentials: { id: creator.id } });
+      }, { credentials: creator });
 
       await messageService.create({
-        parentType: 'conversation',
-        parentId: createdConversation.id,
+        conversationId: createdConversation.id,
         text: 'First message',
-      }, {
-        credentials: { id: participant.id },
-      });
+      }, { credentials: participant, artifacts: {
+        authenticationToken: 'foo_token' } });
 
       await messageService.create({
-        parentType: 'conversation',
-        parentId: createdConversation.id,
+        conversationId: createdConversation.id,
         text: 'Last message',
-      }, {
-        credentials: { id: participant.id },
-      });
+      }, { credentials: participant, artifacts: {
+        authenticationToken: 'foo_token' } });
 
       await conversationService.remove({ conversationId: createdConversation.id });
     });

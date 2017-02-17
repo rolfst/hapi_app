@@ -40,12 +40,13 @@ export const make = async (payload, message) => {
   }, {
     limit: payload.limit,
     offset: payload.offset,
+    order: [['created_at', 'DESC']],
   });
 
   const hasInclude = R.contains(R.__, payload.include || []);
   const includes = await impl.getIncludes(hasInclude, relatedObjects);
 
-  const objectsWithSources = await objectService.listWithSources({
+  const objectsWithSources = await objectService.listWithSourceAndChildren({
     objectIds: R.pluck('id', relatedObjects) }, message);
   const addComments = (object) =>
     R.assoc('comments', findIncludes(object, includes.comments), object);

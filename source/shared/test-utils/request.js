@@ -9,7 +9,8 @@ export function deleteRequest(url, token, server = global.server) {
   }, makeOptions(token)));
 }
 
-export function postRequest(url, payload, token, server = global.server) {
+export function postRequest(
+    url, payload, token, server = global.server) {
   return server.inject(Object.assign({
     method: 'POST',
     url,
