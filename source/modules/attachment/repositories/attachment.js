@@ -55,7 +55,8 @@ export const create = (path) => Attachment
 export const update = (attachment) => Attachment
   .update(R.omit(['id'], attachment), {
     where: { id: attachment.id },
-  }).then(R.always(attachment));
+  })
+  .then(R.always(attachment));
 
 export const deleteById = (attachmentId) => Attachment
   .destroy({ where: { id: attachmentId } });
