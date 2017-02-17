@@ -21,6 +21,15 @@ export const DEFAULT_NETWORK_EXTERNALID = 'https://partner2.testpmt.nl/rest.php/
 export const randomString = (prefix = 'test-object') =>
   `${prefix}-${Math.floor(Math.random() * 1000)}`;
 
+export const hapiFile = (fileName) => ({
+  filename: fileName,
+  path: `${process.cwd()}/${fileName}`,
+  headers: {
+    'content-disposition': `form-data; name="attachments"; filename="${fileName}"`,
+    'content-type': 'image/jpg',
+  },
+});
+
 /**
  * creates an integration in the database
  * @param {object} [attributes=DEFAULT_INTEGRATION] - attributes to user for an integration
@@ -139,7 +148,7 @@ export async function createUser(userAttributes = {}) {
   const username = `test-user-${Math.floor(Math.random() * 1000)}`;
   const attributes = {
     username,
-    email: username,
+    email: `${username}@example.com`,
     password: `pw#${Math.floor(Math.random() * 1000)}`,
     ...userAttributes,
   };
@@ -190,7 +199,7 @@ export function authenticateUser(userCredentials) {
 
 /**
  * Deletes users from database
- * @param {User|User[]} userOrUsers
+ * @param {User} user
  * @method deleteUser
  * @return {external:Promise.<number[]>}
  */
@@ -209,7 +218,7 @@ export function findAllUsers() {
 
 /**
  * Deletes integrations from the database
- * @param {Integration|Integration[]} integrationOrIntegrations
+ * @param {Integration} integration
  * @method deleteIntegration
  * @return {external:Promise}
  */
@@ -237,7 +246,7 @@ export function findAllActivities() {
 
 /**
  * Deletes activities from database
- * @param {Activity|Activity[]} activityOrActivities
+ * @param {Activity} activity
  * @method deleteActivity
  * @return {external:Promise.<number[]>} number of deleted activities
  */
@@ -247,7 +256,7 @@ export function deleteActivity(activity) {
 
 /**
  * Deletes objects from database
- * @param {Object|Object[]} objectOrObjects
+ * @param {Object} object
  * @method deleteObject
  * @return {external:Promise.<number[]>} number of deleted objects
  */
@@ -275,7 +284,7 @@ export async function findAllPolls() {
 
 /**
  * Deletes polls from database
- * @param {Poll|Poll[]} objectOrPolls
+ * @param {Poll} poll
  * @method deletePoll
  * @return {external:Promise.<number[]>} number of deleted polls
  */

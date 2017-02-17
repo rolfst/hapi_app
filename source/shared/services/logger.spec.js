@@ -1,4 +1,5 @@
 import { assert } from 'chai';
+import stream from 'stream';
 import sinon from 'sinon';
 import bunyan from 'bunyan';
 import * as loggerService from './logger';
@@ -25,6 +26,19 @@ describe('Logger', () => {
     }, 'hi'];
 
     assert.equal(loggerStub.info.callCount, 1);
+    assert.deepEqual(loggerStub.info.firstCall.args, expectedArgs);
+  });
+
+  it('should replace Streams in payload', () => {
+    loggerStub.info.reset();
+    logger.info('hi', { payload: { foo: 'Ok', file: new stream.Readable({ objectMode: true }) } });
+
+    const expectedArgs = [{
+      err: null,
+      message: {},
+      context: { file: 'Readable Stream', foo: 'Ok' },
+    }, 'hi'];
+
     assert.deepEqual(loggerStub.info.firstCall.args, expectedArgs);
   });
 

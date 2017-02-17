@@ -1,11 +1,14 @@
 import { assert } from 'chai';
-import * as testHelpers from '../../../../shared/test-utils/helpers';
+import sinon from 'sinon';
 import R from 'ramda';
 import Promise from 'bluebird';
+import * as testHelpers from '../../../../shared/test-utils/helpers';
+import * as Storage from '../../../../shared/services/storage';
 import * as pollService from '../../../poll/services/poll';
-import * as messageService from './index';
+import * as attachmentService from '../../../attachment/services/attachment';
 import * as objectService from '../object';
 import * as commentService from '../comment';
+import * as messageService from './index';
 
 describe('Service: Message', () => {
   let admin;
@@ -26,23 +29,13 @@ describe('Service: Message', () => {
           parentType: 'network',
           parentId: network.id,
           text: 'My cool message',
-          resources: [{
-            type: 'poll',
-            data: { options: ['Yes', 'No', 'Ok'] },
-          }],
-        }, {
-          network,
-          credentials: admin,
-        }),
+          poll: { options: ['Yes', 'No', 'Ok'] },
+        }, { network, credentials: admin }),
         messageService.create({
           parentType: 'network',
           parentId: network.id,
           text: 'My other cool message',
-          resources: [],
-        }, {
-          network,
-          credentials: admin,
-        }),
+        }, { network, credentials: admin }),
       ]);
     });
 
@@ -50,7 +43,7 @@ describe('Service: Message', () => {
 
     it('should return message models', async () => {
       const actual = await messageService.list({
-        messageIds: R.pluck('id', createdMessages),
+        messageIds: R.pluck('sourceId', createdMessages),
       }, {
         credentials: admin,
       });
@@ -68,19 +61,17 @@ describe('Service: Message', () => {
     it('should return correct like count', async () => {
       await Promise.all([
         messageService.like({
-          messageId: createdMessages[0].id, userId: admin.id }),
+          messageId: createdMessages[0].sourceId, userId: admin.id }),
         messageService.like({
-          messageId: createdMessages[0].id, userId: employee.id }),
+          messageId: createdMessages[0].sourceId, userId: employee.id }),
       ]);
 
       const actual = await messageService.list({
-        messageIds: R.pluck('id', createdMessages),
-      }, {
-        credentials: admin,
-      });
+        messageIds: R.pluck('sourceId', createdMessages),
+      }, { credentials: admin });
 
-      const likedMessage = R.find(R.propEq('id', createdMessages[0].id), actual);
-      const otherMessage = R.find(R.propEq('id', createdMessages[1].id), actual);
+      const likedMessage = R.find(R.propEq('id', createdMessages[0].sourceId), actual);
+      const otherMessage = R.find(R.propEq('id', createdMessages[1].sourceId), actual);
 
       assert.lengthOf(actual, 2);
       assert.equal(likedMessage.likesCount, 2);
@@ -93,25 +84,23 @@ describe('Service: Message', () => {
 
     it('should return correct comment count', async () => {
       await commentService.create({
-        messageId: createdMessages[1].id,
+        messageId: createdMessages[1].sourceId,
         text: 'Foo comment for feed message!',
         userId: admin.id,
       });
 
       const actual = await messageService.list({
-        messageIds: R.pluck('id', createdMessages),
-      }, {
-        credentials: admin,
-      });
+        messageIds: R.pluck('sourceId', createdMessages),
+      }, { credentials: admin });
 
-      const commentedMessage = R.find(R.propEq('id', createdMessages[1].id), actual);
+      const commentedMessage = R.find(R.propEq('id', createdMessages[1].sourceId), actual);
 
       assert.lengthOf(actual, 2);
       assert.equal(commentedMessage.commentsCount, 1);
     });
   });
 
-  describe('create', () => {
+  describe('Create poll', () => {
     let createdMessage;
 
     before(async () => {
@@ -122,20 +111,26 @@ describe('Service: Message', () => {
         parentType: 'network',
         parentId: network.id,
         text: 'My cool message',
-        resources: [{
-          type: 'poll',
-          data: { options: ['Yes', 'No', 'Ok'] },
-        }],
-      }, {
-        credentials: { id: admin.id },
-        network: { id: network.id },
-      });
+        poll: { options: ['Yes', 'No', 'Ok'] },
+      }, { network, credentials: admin });
     });
 
     after(() => testHelpers.cleanAll());
 
+    it('should return object with source after create', () => {
+      assert.equal(createdMessage.userId, admin.id);
+      assert.equal(createdMessage.objectType, 'feed_message');
+      assert.equal(createdMessage.parentType, 'network');
+      assert.equal(createdMessage.parentId, network.id);
+      assert.equal(createdMessage.source.text, 'My cool message');
+      assert.equal(createdMessage.children[0].objectType, 'poll');
+      assert.deepEqual(createdMessage.children[0].source.options[0].text, 'Yes');
+      assert.deepEqual(createdMessage.children[0].source.options[1].text, 'No');
+      assert.deepEqual(createdMessage.children[0].source.options[2].text, 'Ok');
+    });
+
     it('should create a message entry', async () => {
-      const expected = await messageService.get({ messageId: createdMessage.id });
+      const expected = await messageService.get({ messageId: createdMessage.sourceId });
 
       assert.isDefined(expected);
       assert.property(expected, 'objectId');
@@ -146,7 +141,7 @@ describe('Service: Message', () => {
     it('should create a poll entry if resource is present', async () => {
       const objects = await objectService.list({
         parentType: 'feed_message',
-        parentId: createdMessage.id,
+        parentId: createdMessage.sourceId,
       });
 
       const pollEntry = await pollService.get({ pollId: objects[0].sourceId });
@@ -159,7 +154,7 @@ describe('Service: Message', () => {
     it('should create object entry for poll if resource is present', async () => {
       const expected = await objectService.list({
         parentType: 'feed_message',
-        parentId: createdMessage.id,
+        parentId: createdMessage.sourceId,
       });
 
       assert.lengthOf(expected, 1);
@@ -168,22 +163,92 @@ describe('Service: Message', () => {
       assert.isDefined(expected[0].sourceId);
     });
 
-    xit('should create an attachment entry if resource is present', async () => {
-      // TODO
-    });
-
-    xit('should create object entry for attachment if resource is present', async () => {
-      // TODO
-    });
-
     it('should create object entry for message', async () => {
       const objects = await objectService.list({
         parentType: 'network',
         parentId: network.id,
       });
 
-      assert.equal(objects[0].sourceId, createdMessage.id);
+      assert.equal(objects[0].sourceId, createdMessage.sourceId);
       assert.equal(objects[0].objectType, 'feed_message');
+    });
+
+    it('should fail when parent not found', async () => {
+      const wrongMessagePromise = messageService.create({
+        parentType: 'network',
+        parentId: -1,
+        text: 'My cool message',
+        resources: [],
+      }, { network, credentials: admin });
+
+      return assert.isRejected(wrongMessagePromise, /Parent not found/);
+    });
+  });
+
+  describe('Create attachment', () => {
+    let createdMessage;
+    let sandbox;
+
+    const hapiFile = testHelpers.hapiFile('image.jpg');
+
+    before(async () => {
+      sandbox = sinon.sandbox.create();
+      sandbox.stub(Storage, 'upload').returns(Promise.resolve('image.jpg'));
+
+      admin = await testHelpers.createUser({ password: 'foo' });
+      network = await testHelpers.createNetwork({ userId: admin.id });
+
+      createdMessage = await messageService.create({
+        parentType: 'network',
+        parentId: network.id,
+        text: 'My cool message',
+        attachments: [hapiFile],
+      }, { network, credentials: admin });
+    });
+
+    after(() => {
+      sandbox.restore();
+      return testHelpers.cleanAll();
+    });
+
+    it('should return object with children and source', () => {
+      assert.equal(createdMessage.children[0].parentType, 'feed_message');
+      assert.equal(createdMessage.children[0].parentId, createdMessage.sourceId);
+      assert.equal(createdMessage.children[0].objectType, 'attachment');
+      assert.equal(createdMessage.children[0].source.path, 'image.jpg');
+    });
+
+    it('should create an attachment entry if resource is present', async () => {
+      const objects = await objectService.list({
+        parentType: 'feed_message',
+        parentId: createdMessage.sourceId,
+      });
+
+      const attachmentEntry = await attachmentService.get({ attachmentId: objects[0].sourceId });
+
+      assert.isDefined(attachmentEntry);
+      assert.equal(attachmentEntry.path, 'image.jpg');
+    });
+
+    it('should create a message entry', async () => {
+      const expected = await messageService.get({ messageId: createdMessage.sourceId });
+
+      assert.isDefined(expected);
+      assert.property(expected, 'objectId');
+      assert.equal(expected.text, 'My cool message');
+      assert.property(expected, 'createdAt');
+    });
+
+    it('should create object entry for attachment if resource is present', async () => {
+      const expected = await objectService.list({
+        parentType: 'feed_message',
+        parentId: createdMessage.sourceId,
+      });
+
+      assert.lengthOf(expected, 1);
+      assert.equal(expected[0].userId, admin.id);
+      assert.equal(expected[0].objectType, 'attachment');
+      assert.isDefined(expected[0].sourceId);
     });
   });
 

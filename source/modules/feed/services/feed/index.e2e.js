@@ -23,13 +23,10 @@ describe('Service: Feed', () => {
       sandbox.stub(notifier, 'send');
       admin = await testHelpers.createUser({ password: 'foo' });
       network = await testHelpers.createNetwork({ userId: admin.id });
+      const otherNetwork = await testHelpers.createNetwork({ userId: admin.id });
 
       await testHelpers.addUserToNetwork({ userId: admin.id, networkId: network.id });
-
-      const serviceMessage = {
-        credentials: { id: admin.id },
-        network: { id: network.id },
-      };
+      const serviceMessage = { network, credentials: admin };
 
       const createdMessage1 = await Promise.delay(1000)
         .then(() => messageService.create({
@@ -47,8 +44,8 @@ describe('Service: Feed', () => {
 
       const createdMessage3 = await Promise.delay(1000)
         .then(() => messageService.create({
-          parentType: 'team',
-          parentId: '33',
+          parentType: 'network',
+          parentId: otherNetwork.id,
           text: 'Second message for other feed',
         }, serviceMessage));
 
@@ -75,10 +72,7 @@ describe('Service: Feed', () => {
       const actual = await feedService.make({
         parentType: 'network',
         parentId: network.id,
-      }, {
-        credentials: { id: admin.id },
-        network: { id: network.id },
-      });
+      }, { network, credentials: admin });
 
       assert.lengthOf(actual, 3);
       assert.notProperty(actual[0], 'comments');
@@ -99,25 +93,18 @@ describe('Service: Feed', () => {
         parentId: network.id,
         offset: 1,
         limit: 2,
-      }, {
-        credentials: { id: admin.id },
-        network: { id: network.id },
-      });
+      }, { network, credentials: admin });
 
       assert.lengthOf(actual, 2);
-      assert.equal(actual[0].objectType, 'exchange');
-      assert.equal(actual[0].parentType, 'user');
-      assert.equal(actual[0].parentId, admin.id);
-      assert.equal(actual[0].sourceId, createdExchange.id);
-      assert.notProperty(actual[1], 'comments');
-      assert.notProperty(actual[1], 'likes');
+      assert.equal(actual[0].objectType, 'feed_message');
+      assert.equal(actual[0].source.text, 'Second message for feed');
       assert.equal(actual[1].objectType, 'feed_message');
-      assert.equal(actual[1].source.text, 'Second message for feed');
+      assert.equal(actual[1].source.text, 'Message for feed');
     });
 
     it('should include comments sub-resources via query parameter', async () => {
       await commentService.create({
-        messageId: createdMessages[0].id,
+        messageId: createdMessages[0].sourceId,
         userId: admin.id,
         text: 'Cool comment as sub-resource',
       });
@@ -126,24 +113,21 @@ describe('Service: Feed', () => {
         parentType: 'network',
         parentId: network.id,
         include: ['comments'],
-      }, {
-        credentials: { id: admin.id },
-        network: { id: network.id },
-      });
+      }, { network, credentials: admin });
 
-      const commentedMessage = R.find(R.propEq('sourceId', createdMessages[0].id), actual);
-      const uncommentedMessage = R.find(R.propEq('sourceId', createdMessages[1].id), actual);
+      const commentedMessage = R.find(R.propEq('sourceId', createdMessages[0].sourceId), actual);
+      const uncommentedMessage = R.find(R.propEq('sourceId', createdMessages[1].sourceId), actual);
 
       assert.lengthOf(uncommentedMessage.comments, 0);
       assert.lengthOf(commentedMessage.comments, 1);
-      assert.equal(commentedMessage.comments[0].messageId, createdMessages[0].id);
+      assert.equal(commentedMessage.comments[0].messageId, createdMessages[0].sourceId);
       assert.equal(commentedMessage.comments[0].userId, admin.id);
       assert.equal(commentedMessage.comments[0].text, 'Cool comment as sub-resource');
     });
 
     it('should include likes sub-resources via query parameter', async () => {
       await messageService.like({
-        messageId: createdMessages[1].id,
+        messageId: createdMessages[1].sourceId,
         userId: admin.id,
       });
 
@@ -151,12 +135,9 @@ describe('Service: Feed', () => {
         parentType: 'network',
         parentId: network.id,
         include: ['likes'],
-      }, {
-        credentials: { id: admin.id },
-        network: { id: network.id },
-      });
+      }, { network, credentials: admin });
 
-      const likedMessage = R.find(R.propEq('sourceId', createdMessages[1].id), actual);
+      const likedMessage = R.find(R.propEq('sourceId', createdMessages[1].sourceId), actual);
 
       assert.lengthOf(likedMessage.likes, 1);
       assert.equal(likedMessage.likes[0].userId, admin.id);
@@ -167,17 +148,14 @@ describe('Service: Feed', () => {
         parentType: 'network',
         parentId: network.id,
         include: ['likes', 'comments'],
-      }, {
-        credentials: { id: admin.id },
-        network: { id: network.id },
-      });
+      }, { network, credentials: admin });
 
-      const likedMessage = R.find(R.propEq('sourceId', createdMessages[1].id), actual);
-      const commentedMessage = R.find(R.propEq('sourceId', createdMessages[0].id), actual);
+      const likedMessage = R.find(R.propEq('sourceId', createdMessages[1].sourceId), actual);
+      const commentedMessage = R.find(R.propEq('sourceId', createdMessages[0].sourceId), actual);
 
       assert.lengthOf(likedMessage.likes, 1);
       assert.equal(likedMessage.likes[0].userId, admin.id);
-      assert.equal(commentedMessage.comments[0].messageId, createdMessages[0].id);
+      assert.equal(commentedMessage.comments[0].messageId, createdMessages[0].sourceId);
       assert.equal(commentedMessage.comments[0].userId, admin.id);
       assert.equal(commentedMessage.comments[0].text, 'Cool comment as sub-resource');
     });

@@ -83,5 +83,10 @@
     "type": "bad_number_of_arguments",
     "detail": "A bad number of arguments is provided for this method",
     "code": 500
+  },
+  "30001": {
+    "type": "error_in_upload",
+    "detail": "Something went wrong while uploading your file",
+    "code": 500
   }
 }

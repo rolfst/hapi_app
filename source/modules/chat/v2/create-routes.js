@@ -13,6 +13,11 @@ const routes = [{
   validator: require('./validators/get-messages'),
   prefetch: false,
 }, {
+  method: 'GET',
+  url: '/v2/conversations/{conversationId}',
+  handler: require('./handlers/get-conversation'),
+  prefetch: false,
+}, {
   method: 'POST',
   url: '/v2/conversations',
   handler: require('./handlers/create-conversation'),
@@ -24,6 +29,10 @@ const routes = [{
   handler: require('./handlers/create-message'),
   validator: require('./validators/create-message'),
   prefetch: false,
+  payload: {
+    maxBytes: 10000000,
+    output: 'file',
+  },
 }];
 
 export default createRoutes(routes);

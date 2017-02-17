@@ -23,6 +23,9 @@ export async function findByIds(conversationIds, options) {
   return R.map(createConversationModel, result);
 }
 
+export const findById = (conversationId) => findByIds([conversationId])
+  .then(R.head);
+
 export async function countConversationsForUser(userId) {
   return ConversationUser.count({ where: { userId } });
 }
