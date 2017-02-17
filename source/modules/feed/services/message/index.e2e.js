@@ -191,8 +191,12 @@ describe('Service: Message', () => {
     let createdMessage;
 
     before(async () => {
-      admin = await testHelpers.createUser({ password: 'foo' });
+      [admin, employee] = await Promise.all([
+        testHelpers.createUser({ password: 'foo' }),
+        testHelpers.createUser({ password: 'foo' }),
+      ]);
       network = await testHelpers.createNetwork({ userId: admin.id });
+      await testHelpers.addUserToNetwork({ networkId: network.id, userId: employee.id }),
 
       createdMessage = await messageService.create({
         parentType: 'network',
@@ -210,11 +214,26 @@ describe('Service: Message', () => {
 
     after(() => testHelpers.cleanAll());
 
-    it.only('should update a message entry', async () => {
+    it('should update a message entry', async () => {
       const updatedMessage = await messageService.update({
         messageId: createdMessage.id,
         text: 'My cool updated message',
-      }, {});
+      }, { credentials: { id: admin.id } });
+      const expected = await messageService.get({ messageId: createdMessage.id });
+
+      assert.equal(updatedMessage.id, expected.id);
+      assert.isDefined(expected);
+      assert.property(expected, 'objectId');
+      assert.equal(expected.text, 'My cool updated message');
+      assert.property(expected, 'createdAt');
+      assert.isNotNull(expected.createdAt);
+    });
+
+    it.only('should not allow an update by a different person a message entry', async () => {
+      const updatedMessage = await messageService.update({
+        messageId: createdMessage.id,
+        text: 'My cool updated message',
+      }, { credentials: { id: employee.id } });
       const expected = await messageService.get({ messageId: createdMessage.id });
 
       assert.equal(updatedMessage.id, expected.id);

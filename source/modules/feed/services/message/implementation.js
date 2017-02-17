@@ -33,3 +33,7 @@ export const removeAttachedObjects = (messageId) => Promise.all([
   objectService.remove({ objectType: 'feed_message', sourceId: messageId }),
   objectService.remove({ parentType: 'feed_message', parentId: messageId }),
 ]);
+
+export const assertThatCurrentOwnerHasUpdateRights = async (objectId, credentials) => {
+
+};

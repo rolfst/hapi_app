@@ -168,16 +168,16 @@ export const create = async (payload, message) => {
 export const update = async (payload, message) => {
   logger.info('Updating message', { payload, message });
 
-  return messageRepository.findById(payload.messageId)
-    .then(async (foundMessage) => {
-      if (!foundMessage) throw createError('404');
+  const foundMessage = await messageRepository.findById(payload.messageId);
 
-      const attributes = R.pick(['text'], payload);
+  if (!foundMessage) throw createError('404');
 
-      const mess = await messageRepository.update(foundMessage.id, attributes);
+  await impl.assertThatCurrentOwnerHasUpdateRights(message.credentials);
+  const attributes = R.pick(['text'], payload);
 
-      return mess;
-    });
+  const mess = await messageRepository.update(foundMessage.id, attributes);
+
+  return mess;
 };
 /**
  * Likes a message
