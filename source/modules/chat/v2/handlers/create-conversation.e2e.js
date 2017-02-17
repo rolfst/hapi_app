@@ -3,7 +3,7 @@ import blueprints from '../../../../shared/test-utils/blueprints';
 import * as testHelper from '../../../../shared/test-utils/helpers';
 import { postRequest } from '../../../../shared/test-utils/request';
 
-describe('Handler: Create conversation (v2)', () => {
+describe.only('Handler: Create conversation (v2)', () => {
   let creator;
   let participant;
 

@@ -1,7 +1,7 @@
 import R from 'ramda';
 import * as Logger from '../../../../../shared/services/logger';
 import createError from '../../../../../shared/utils/create-error';
-import * as userRepo from '../../../../core/repositories/user';
+import * as userRepository from '../../../../core/repositories/user';
 import * as objectService from '../../../../feed/services/object';
 import * as objectRepository from '../../../../feed/repositories/object';
 import * as conversationRepoV1 from '../../../v1/repositories/conversation';
@@ -32,7 +32,9 @@ export const create = async (payload, message) => {
   logger.info('Creating conversation', { payload, message });
   const participantIds = R.pipe(R.append(message.credentials.id), R.uniq)(payload.participantIds);
 
-  if (participantIds.length < 2) {
+  const users = await userRepository.findByIds(participantIds);
+
+  if (users.length < 2) {
     throw createError('422', 'A conversation must have 2 or more participants');
   }
 
@@ -79,7 +81,7 @@ export const listConversations = async (payload, message) => {
 
   if (includes('participants')) {
     const participants = await R.pipe(
-      pluckUniqueParticipantIds, userRepo.findByIds)(conversations);
+      pluckUniqueParticipantIds, userRepository.findByIds)(conversations);
     const findParticipant = (participantId) => findIdEq(participantId, participants);
 
     return R.map(conversation => R.merge(conversation, {
