@@ -7,15 +7,6 @@ import createAttachmentModel from '../models/attachment';
  */
 
 /**
- * Find all attachments in the database
- * @method findAll
- * @return {external:Promise.<Attachment[]>} {@link module:modules/attachment~Attachment}
- */
-export const findAll = () => Attachment
-  .findAll()
-  .then(R.map(createAttachmentModel));
-
-/**
  * Find attachments by where constraint
  * @param {object} whereConstraint - The where constraint
  * @method findBy
@@ -46,6 +37,9 @@ export const create = (path) => Attachment
   .then(createAttachmentModel)
   .catch(R.always(null));
 
+export const deleteById = (attachmentId) => Attachment
+  .destroy({ where: { id: attachmentId } });
+
 /**
  * Updates an attachment
  * @param {Attachment} attachment - {@link module:modules/attachment~Attachment Attachment}
@@ -57,6 +51,3 @@ export const update = (attachment) => Attachment
     where: { id: attachment.id },
   })
   .then(R.always(attachment));
-
-export const deleteById = (attachmentId) => Attachment
-  .destroy({ where: { id: attachmentId } });

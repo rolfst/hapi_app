@@ -294,25 +294,6 @@ export async function deletePoll(poll) {
 }
 
 /**
- * Finds all Attachments in the database
- * @method findAllAttachments
- * @return {external:Promise.<Attachment[]} {@link module:modules/attachment~Attachment Attachment}
- */
-export async function findAllAttachments() {
-  return attachmentRepo.findAll();
-}
-
-/**
- * Deletes attachments from database
- * @param {Attachment} attachment
- * @method deleteAttachment
- * @return {external:Promise.<number[]>} number of deleted polls
- */
-export async function deleteAttachment(attachment) {
-  return attachmentRepo.deleteById(attachment.id);
-}
-
-/**
  * Deletes all data in the database
  * @method cleanAll
  */
@@ -335,7 +316,4 @@ export async function cleanAll() {
 
   const polls = findAllPolls();
   await Promise.all(R.map(deletePoll, polls));
-
-  const attachments = findAllAttachments();
-  await Promise.all(R.map(deleteAttachment, attachments));
 }

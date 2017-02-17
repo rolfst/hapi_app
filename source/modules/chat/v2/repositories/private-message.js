@@ -10,10 +10,9 @@ export const findByIds = (messageIds) => findBy({
   id: { $in: messageIds },
 });
 
-export const findById = (messageId) => R.pipeP(
-  findByIds([messageId]),
-  R.head
-)();
+export const findById = (messageId) => PrivateMessage
+  .findOne({ where: { id: messageId } })
+  .then(createPrivateMessageModel);
 
 export const create = ({ objectId, text }) => PrivateMessage
   .create({ objectId, text })
