@@ -161,9 +161,10 @@ export const create = async (payload, message) => {
     source: { ...createdMessage, objectId: createdObject.id },
   });
 
+  const networkId = R.ifElse(R.propEq('type', 'team'), R.prop('networkId'), R.prop('id'))(parent);
+
   FeedDispatcher.emit('message.created', {
-    parent,
-    networkId: message.network.id,
+    parent, networkId,
     actor: message.credentials,
     object: objectWithSource,
   });
