@@ -40,6 +40,7 @@ export const make = async (payload, message) => {
   }, {
     limit: payload.limit,
     offset: payload.offset,
+    order: [['created_at', 'DESC']],
   });
 
   const hasInclude = R.contains(R.__, payload.include || []);
