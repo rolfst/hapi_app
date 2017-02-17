@@ -2,6 +2,7 @@ import R from 'ramda';
 import Promise from 'bluebird';
 import * as Logger from '../../../../shared/services/logger';
 import createError from '../../../../shared/utils/create-error';
+import * as attachmentService from '../../../attachment/services/attachment';
 import FeedDispatcher from '../../dispatcher';
 import * as messageRepository from '../../repositories/message';
 import * as likeRepository from '../../repositories/like';
@@ -114,9 +115,8 @@ export const list = async (payload, message) => {
  * @param {string} payload.parentType - The type of parent to create the object for
  * @param {string} payload.parentId - The id of the parent
  * @param {string} payload.text - The text of the message
- * @param {object[]} payload.resources - The resources that belong to the message
- * @param {string} payload.resources[].type - The type of the resource
- * @param {object} payload.resources[].data - The data for the resource
+ * @param {object} payload.atachments - A collection of attachments
+ * @param {object} payload.poll - The poll
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method create
  * @return {external:Promise.<Message>} {@link module:feed~Message message}
@@ -137,21 +137,25 @@ export const create = async (payload, message) => {
     parentId: payload.parentId,
     objectType: 'feed_message',
     sourceId: createdMessage.id,
-  });
+  }, message);
 
   await messageRepository.update(createdMessage.id, { objectId: createdObject.id });
 
-  if (payload.resources) {
-    logger.info('Creating resources for message', { resources: payload.resources });
+  const resourcePromises = [];
 
-    const typeEq = R.propEq('type');
-    const createResource = R.cond([
-      [typeEq('poll'), impl.createPollResource(createdMessage, message)],
-      [typeEq('attachment'), impl.createAttachmentResource(createdMessage, message)],
-    ]);
-
-    await Promise.map(payload.resources, createResource);
+  if (payload.attachments) {
+    resourcePromises.push(Promise.map(R.flatten([payload.attachments]), (attachment) =>
+      attachmentService.create({
+        parentType: 'feed_message',
+        parentId: createdMessage.id,
+        file: attachment }, message)));
   }
+
+  if (payload.poll) {
+    resourcePromises.push(impl.createPollResource(createdMessage, message)(payload.poll));
+  }
+
+  await Promise.all(resourcePromises);
 
   const objectWithSource = R.merge(createdObject, {
     source: { ...createdMessage, objectId: createdObject.id },

@@ -1,4 +1,5 @@
 import R from 'ramda';
+import stream from 'stream';
 import bunyan from 'bunyan';
 
 /**
@@ -16,7 +17,18 @@ const makeMessage = R.pipe(
 );
 
 const buildLogContext = (args = {}) => {
-  const payload = R.omit(['err', 'message'], args);
+  let payloadWithoutStreams = {};
+
+  if (args.payload) {
+    payloadWithoutStreams = Object.keys(args.payload).reduce((obj, key) => {
+      return (args.payload[key] instanceof stream.Readable) ?
+        { ...obj, [key]: 'Readable Stream' } :
+        { ...obj, [key]: args.payload[key] };
+    }, {});
+  }
+
+  const payload = R.merge(R.omit(['err', 'message', 'payload'], args), payloadWithoutStreams);
+
   if (args.err && args.err.output) payload.statusCode = args.err.output.statusCode;
   if (args.err && args.err.data) payload.errorCode = args.err.data.errorCode;
 
