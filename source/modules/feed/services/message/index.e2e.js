@@ -255,14 +255,13 @@ describe('Service: Message', () => {
   describe('update', () => {
     let createdMessage;
     let createdTeamMessage;
-    let teamMember;
 
     before(async () => {
-      [admin, employee, teamMember] = await Promise.all([
-        testHelpers.createUser({ password: 'foo' }),
+      [admin, employee] = await Promise.all([
         testHelpers.createUser({ password: 'foo' }),
         testHelpers.createUser({ password: 'foo' }),
       ]);
+      const teamMember = await testHelpers.createUser({ password: 'foo' });
       network = await testHelpers.createNetwork({ userId: admin.id });
       const team = await testHelpers.addTeamToNetwork(network.id);
 
@@ -310,10 +309,10 @@ describe('Service: Message', () => {
 
     it('should update a team message entry by an admin', async () => {
       const updatedMessage = await messageService.update({
-        messageId: createdMessage.source.id,
+        messageId: createdTeamMessage.source.id,
         text: 'My cool updated message',
       }, { credentials: { id: admin.id } });
-      const expected = await messageService.get({ messageId: createdMessage.source.id });
+      const expected = await messageService.get({ messageId: createdTeamMessage.source.id });
 
       assert.equal(updatedMessage.id, expected.id);
       assert.isDefined(expected);
