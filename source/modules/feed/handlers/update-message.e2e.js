@@ -39,9 +39,10 @@ describe('Handler: Update Message', () => {
   after(() => testHelpers.cleanAll());
 
   it('should update a message', async () => {
-    const { result } = await putRequest(`/v3/messages/${createdMessages[0].id}`,
+    const { result } = await putRequest(`/v3/messages/${createdMessages[0].source.id}`,
         { text: 'My cool updated message' }, admin.token);
 
+    console.log(result)
     assert.equal(result.data.text, 'My cool updated message');
   });
 });

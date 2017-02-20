@@ -191,7 +191,7 @@ export const update = async (payload, message) => {
 
   if (!foundMessage) throw createError('404');
 
-  await impl.assertThatCurrentOwnerHasUpdateRights(message.credentials);
+  await impl.assertThatCurrentOwnerHasUpdateRights(foundMessage.objectId, message.credentials);
   const attributes = R.pick(['text'], payload);
 
   const mess = await messageRepository.update(foundMessage.id, attributes);

@@ -8,12 +8,13 @@ import createFeedMessageModel from '../models/message';
  * @method findById
  * @return {external:Promise.<FeedMessage>} {@link module:modules/feed~FeedMessage}
  */
-export const findById = async (messageId) => {
-  const result = await FeedMessage.findById(messageId);
+export const findById = (messageId) => {
+  return FeedMessage.findById(messageId)
+    .then((message) => {
+      if (!message) return null;
 
-  if (!result) return null;
-
-  return createFeedMessageModel(result);
+      return createFeedMessageModel(message);
+    });
 };
 
 /**

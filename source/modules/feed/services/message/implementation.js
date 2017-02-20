@@ -1,7 +1,11 @@
 import R from 'ramda';
 import Promise from 'bluebird';
+import createError from '../../../../shared/utils/create-error';
 import * as pollService from '../../../poll/services/poll';
 import * as objectService from '../object';
+import * as userService from '../../../core/services/user';
+import * as networkService from '../../../core/services/network';
+import * as teamService from '../../../core/services/team';
 
 /**
  * Creates a poll resource that consists of a poll object and a object object.
@@ -35,6 +39,21 @@ export const removeAttachedObjects = (messageId) => Promise.all([
   objectService.remove({ parentType: 'feed_message', parentId: messageId }),
 ]);
 
-export const assertThatCurrentOwnerHasUpdateRights = async (objectId, credentials) => {
+const getNetworkFromTeams = async (teams) => networkService.get({ networkId: teams[0].networkId });
 
+export const assertThatCurrentOwnerHasUpdateRights = async (objectId, credentials) => {
+  const object = await objectService.get({ objectId });
+  const network = await R.cond([
+    [R.equals('network'), () => networkService.getNetwork(
+      { networkId: object.parentId }, { credentials })],
+    [R.equals('team'), () => R.pipeP(teamService.list(
+        { teamId: object.parentId }), getNetworkFromTeams)],
+  ])(object.parentType);
+
+  const user = await userService.getUserWithNetworkScope({
+    id: credentials.id, networkId: network.id });
+
+  if (user.userRole === 'ADMIN' || object.userId === credentials.id) return;
+
+  throw createError('403');
 };

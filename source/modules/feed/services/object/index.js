@@ -207,6 +207,8 @@ export const remove = async (payload, message) => {
 export const get = async (payload, message) => {
   logger.info('retrieving object', { payload, message });
 
-  return objectRepository.findById(payload.objectid);
+  const objects = await objectRepository.findBy({ id: payload.objectId });
+
+  return R.head(objects);
 };
 
