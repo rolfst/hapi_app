@@ -6,6 +6,7 @@ import * as networkService from '../../modules/core/services/network';
 import * as integrationRepo from '../../modules/core/repositories/integration';
 import * as userRepo from '../../modules/core/repositories/user';
 import * as networkRepo from '../../modules/core/repositories/network';
+import * as teamRepo from '../../modules/core/repositories/team';
 import * as activityRepo from '../../modules/core/repositories/activity';
 import * as objectRepo from '../../modules/feed/repositories/object';
 import * as pollRepo from '../../modules/poll/repositories/poll';
@@ -117,6 +118,10 @@ export async function createNetworkWithIntegration({
  */
 export function findAllNetworks() {
   return networkRepo.findAll();
+}
+
+export function addTeamToNetwork(networkId, name = randomString(), description = null) {
+  return teamRepo.create({ networkId, name, description });
 }
 
 /**
