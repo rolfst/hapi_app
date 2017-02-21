@@ -32,8 +32,8 @@ export const findById = (id) => Attachment
  * @method create
  * @return {external:Promise.<Attachment>} - Create attachment promise
  */
-export const create = (path) => Attachment
-  .create({ path })
+export const create = (messageId, path) => Attachment
+  .create({ messageId, path })
   .then(createAttachmentModel)
   .catch(R.always(null));
 

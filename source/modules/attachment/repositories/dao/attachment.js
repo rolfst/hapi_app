@@ -2,6 +2,11 @@ import Sequelize from 'sequelize';
 import { db as model } from '../../../../connections';
 
 const Attachment = model.define('Attachment', {
+  messageId: {
+    type: Sequelize.INTEGER,
+    field: 'message_id',
+    allowNull: false,
+  },
   objectId: {
     type: Sequelize.INTEGER,
     field: 'object_id',
@@ -13,7 +18,7 @@ const Attachment = model.define('Attachment', {
     allowNull: false,
   },
 }, {
-  tableName: 'new_attachments',
+  tableName: 'attachments',
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: false,

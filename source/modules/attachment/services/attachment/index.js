@@ -63,8 +63,7 @@ export const update = async (payload, message) => {
 /**
  * Creates a attachment
  * @param {object} payload - Object containing payload data
- * @param {string} payload.parentType - The parent the attachment is created for
- * @param {string} payload.parentId - The parent the attachment is created for
+ * @param {string} payload.messageId - The message the attachment is created for
  * @param {Stream} payload.file - The file to upload
  * {@link module:modules/attachment~Upload Upload}
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
@@ -80,12 +79,12 @@ export const create = async (payload, message) => {
   logger.info('Creating attachment', { payload, message });
 
   const path = await Storage.upload(payload.file, 'attachments');
-  const createdAttachment = await attachmentRepo.create(path);
+  const createdAttachment = await attachmentRepo.create(payload.messageId, path);
 
   const objectResource = await objectService.create({
     userId: message.credentials.id,
-    parentType: payload.parentType,
-    parentId: payload.parentId,
+    parentType: 'feed_message',
+    parentId: payload.messageId,
     objectType: 'attachment',
     sourceId: createdAttachment.id,
   }, message);
