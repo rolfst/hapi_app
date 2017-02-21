@@ -54,7 +54,7 @@ export async function create(payload, message) {
   if (payload.attachments) {
     await Promise.map(R.flatten([payload.attachments]), (file) => attachmentService.create({
       file,
-      parentType: 'feed_message',
+      parentType: 'private_message',
       parentId: createdMessage.id,
     }, message));
   }

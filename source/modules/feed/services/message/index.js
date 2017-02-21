@@ -151,7 +151,8 @@ export const create = async (payload, message) => {
   if (payload.attachments) {
     resourcePromises.push(Promise.map(R.flatten([payload.attachments]), (attachment) =>
       attachmentService.create({
-        messageId: createdMessage.id,
+        parentId: createdMessage.id,
+        parentType: 'feed_message',
         file: attachment }, message)));
   }
 
