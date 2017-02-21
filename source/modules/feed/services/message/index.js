@@ -126,9 +126,14 @@ export const create = async (payload, message) => {
 
   const parent = await objectService.getParent(R.pick(['parentType', 'parentId'], payload));
 
+  const parentEntity = `${payload.parentType.slice(0, 1)
+      .toUpperCase()}${payload.parentType.slice(1)}`;
   const createdMessage = await messageRepository.create({
+    parentType: `FlexAppeal\\Entities\\${parentEntity}`, // Backwards compatibility for PHP API
+    parentId: payload.parentId,
     objectId: null,
     text: payload.text,
+    createdBy: message.credentials.id,
   });
 
   const createdObject = await objectService.create({
@@ -146,8 +151,7 @@ export const create = async (payload, message) => {
   if (payload.attachments) {
     resourcePromises.push(Promise.map(R.flatten([payload.attachments]), (attachment) =>
       attachmentService.create({
-        parentType: 'feed_message',
-        parentId: createdMessage.id,
+        messageId: createdMessage.id,
         file: attachment }, message)));
   }
 
