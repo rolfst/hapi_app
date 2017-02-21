@@ -39,21 +39,26 @@ export const removeAttachedObjects = (messageId) => Promise.all([
   objectService.remove({ parentType: 'feed_message', parentId: messageId }),
 ]);
 
-const getNetworkFromTeams = async (teams) => networkService.get({ networkId: teams[0].networkId });
 
 export const assertThatCurrentOwnerHasUpdateRights = async (objectId, credentials) => {
   const object = await objectService.get({ objectId });
+  const getNetworkFromTeams = async (teams) => networkService.getNetwork(
+    { networkId: teams[0].networkId }, { credentials });
+  const getNetworkForTeam = async () => {
+    const teams = await teamService.list({ teamIds: [object.parentId] }, { credentials });
+
+    return getNetworkFromTeams(teams);
+  };
   const network = await R.cond([
     [R.equals('network'), () => networkService.getNetwork(
       { networkId: object.parentId }, { credentials })],
-    [R.equals('team'), () => R.pipeP(teamService.list(
-        { teamId: object.parentId }), getNetworkFromTeams)],
+    [R.equals('team'), getNetworkForTeam],
   ])(object.parentType);
 
   const user = await userService.getUserWithNetworkScope({
     id: credentials.id, networkId: network.id });
 
-  if (user.userRole === 'ADMIN' || object.userId === credentials.id) return;
+  if (user.roleType === 'ADMIN' || object.userId === credentials.id) return;
 
   throw createError('403');
 };
