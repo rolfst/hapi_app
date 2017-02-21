@@ -2,17 +2,17 @@
 
 module.exports = {
   up: function (queryInterface, Sequelize) {
-    return queryInterface.createTable('feed_comments', {
+    return queryInterface.createTable('exchange_comments', {
       id: {
         type: Sequelize.INTEGER.UNSIGNED,
         primaryKey: true,
         autoIncrement: true,
       },
-      message_id: {
+      exchange_id: {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
         references: {
-          model: 'messages',
+          model: 'exchanges',
           key: 'id',
         },
         onDelete: 'cascade',
