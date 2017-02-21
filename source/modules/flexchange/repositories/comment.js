@@ -34,8 +34,7 @@ export function findCommentById(commentId) {
  */
 export async function createExchangeComment(exchangeId, { text, userId }) {
   const exchangeComment = await ExchangeComment.create({
-    parentId: exchangeId,
-    parentType: 'FlexAppeal\\Entities\\Exchange',
+    exchangeId,
     text,
     createdBy: userId,
   });
