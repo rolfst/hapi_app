@@ -17,7 +17,7 @@ const Like = model.define('Like', {
     field: 'created_at',
   },
 }, {
-  tableName: 'new_likes',
+  tableName: 'likes',
   createdAt: 'created_at',
   updatedAt: false,
 });
