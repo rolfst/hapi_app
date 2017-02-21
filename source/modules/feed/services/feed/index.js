@@ -1,5 +1,6 @@
 import R from 'ramda';
 import * as Logger from '../../../../shared/services/logger';
+import * as networkService from '../../../core/services/network';
 import * as objectService from '../object';
 import * as objectRepository from '../../repositories/object';
 import * as impl from './implementation';
@@ -29,21 +30,26 @@ const findIncludes = (object, includes) => (typeEq('feed_message')) ?
 export const make = async (payload, message) => {
   logger.info(`Making feed for ${payload.parentType}`, { payload, message });
 
-  const whereClause = await R.cond([
-    [R.equals('network'),
-    () => impl.createNetworkObjectQuery(payload.parentId, message.credentials.id)],
-    [R.T, () => ({
-      $or: [{
-        parentType: payload.parentType,
-        parentId: payload.parentId,
-      }, {
-        parentType: 'user',
-        parentId: message.credentials.id,
-      }],
-    })],
-  ])(payload.parentType);
+  const whereClause = [{
+    parentType: 'user',
+    parentId: message.credentials.id,
+  }, {
+    parentType: payload.parentType,
+    parentId: payload.parentId,
+  }];
 
-  const relatedObjects = await objectRepository.findBy(whereClause, {
+  if (R.equals('network', payload.parentType)) {
+    const teams = await networkService.listTeamsForNetwork(
+      { networkId: payload.parentId }, message);
+
+    whereClause.push({
+      parentId: { $in: R.pluck('id', teams) },
+      parentType: 'team',
+    });
+  }
+
+  const whereConstraint = { $or: whereClause };
+  const relatedObjects = await objectRepository.findBy(whereConstraint, {
     limit: payload.limit,
     offset: payload.offset,
     order: [['created_at', 'DESC']],

@@ -10,7 +10,7 @@ import * as commentService from '../comment';
 import * as messageService from '../message';
 import * as feedService from './index';
 
-describe('Service: Feed', () => {
+describe.only('Service: Feed', () => {
   describe('make', () => {
     let sandbox;
     let team;
