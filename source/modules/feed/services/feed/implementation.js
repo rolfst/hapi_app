@@ -1,7 +1,6 @@
 import R from 'ramda';
 import Promise from 'bluebird';
 import * as messageService from '../message';
-import * as networkService from '../../../core/services/network';
 
 const typeEq = R.propEq('objectType');
 const anyWithType = (type, objects) => R.any(typeEq(type), objects);
