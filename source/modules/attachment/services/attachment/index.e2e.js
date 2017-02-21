@@ -2,7 +2,6 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import * as testHelper from '../../../../shared/test-utils/helpers';
 import * as Storage from '../../../../shared/services/storage';
-import * as objectRepo from '../../../feed/repositories/object';
 import * as messageService from '../../../feed/services/message';
 import * as attachmentRepo from '../../repositories/attachment';
 import * as attachmentService from './index';
