@@ -91,10 +91,13 @@ describe('Service: Feed', () => {
       assert.equal(actual[0].parentId, admin.id);
       assert.equal(actual[0].sourceId, createdExchange.id);
       assert.equal(actual[1].objectType, 'feed_message');
+      assert.equal(actual[1].parentType, 'team');
       assert.equal(actual[1].source.text, 'First message for team');
       assert.equal(actual[2].objectType, 'feed_message');
+      assert.equal(actual[2].parentType, 'network');
       assert.equal(actual[2].source.text, 'Second message for feed');
       assert.equal(actual[3].objectType, 'feed_message');
+      assert.equal(actual[3].parentType, 'network');
       assert.equal(actual[3].source.text, 'Message for feed');
     });
 
