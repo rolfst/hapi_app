@@ -24,6 +24,7 @@ describe('Service: Feed', () => {
       admin = await testHelpers.createUser({ password: 'foo' });
       network = await testHelpers.createNetwork({ userId: admin.id });
       const otherNetwork = await testHelpers.createNetwork({ userId: admin.id });
+      const team = await testHelpers.addTeamToNetwork(network.id);
 
       await testHelpers.addUserToNetwork({ userId: admin.id, networkId: network.id });
       const serviceMessage = { network, credentials: admin };
@@ -49,6 +50,13 @@ describe('Service: Feed', () => {
           text: 'Second message for other feed',
         }, serviceMessage));
 
+      const createdMessage4 = await Promise.delay(1000)
+        .then(() => messageService.create({
+          parentType: 'team',
+          parentId: team.id,
+          text: 'First message for team',
+        }, serviceMessage));
+
       createdExchange = await Promise.delay(1000)
         .then(() => flexchangeService.createExchange({
           date: moment().toISOString(),
@@ -60,7 +68,7 @@ describe('Service: Feed', () => {
 
       await Promise.delay(1000); // We wait here for the EventEmitter actions to finish
 
-      createdMessages = [createdMessage1, createdMessage2, createdMessage3];
+      createdMessages = [createdMessage1, createdMessage2, createdMessage3, createdMessage4];
     });
 
     after(() => {
@@ -74,7 +82,7 @@ describe('Service: Feed', () => {
         parentId: network.id,
       }, { network, credentials: admin });
 
-      assert.lengthOf(actual, 3);
+      assert.lengthOf(actual, 4);
       assert.notProperty(actual[0], 'comments');
       assert.notProperty(actual[0], 'likes');
       assert.equal(actual[0].objectType, 'exchange');
@@ -82,9 +90,11 @@ describe('Service: Feed', () => {
       assert.equal(actual[0].parentId, admin.id);
       assert.equal(actual[0].sourceId, createdExchange.id);
       assert.equal(actual[1].objectType, 'feed_message');
-      assert.equal(actual[1].source.text, 'Second message for feed');
+      assert.equal(actual[1].source.text, 'First message for team');
       assert.equal(actual[2].objectType, 'feed_message');
-      assert.equal(actual[2].source.text, 'Message for feed');
+      assert.equal(actual[2].source.text, 'Second message for feed');
+      assert.equal(actual[3].objectType, 'feed_message');
+      assert.equal(actual[3].source.text, 'Message for feed');
     });
 
     it('should return feed models for subset with limit and offset query', async () => {
@@ -97,9 +107,9 @@ describe('Service: Feed', () => {
 
       assert.lengthOf(actual, 2);
       assert.equal(actual[0].objectType, 'feed_message');
-      assert.equal(actual[0].source.text, 'Second message for feed');
+      assert.equal(actual[0].source.text, 'First message for team');
       assert.equal(actual[1].objectType, 'feed_message');
-      assert.equal(actual[1].source.text, 'Message for feed');
+      assert.equal(actual[1].source.text, 'Second message for feed');
     });
 
     it('should include comments sub-resources via query parameter', async () => {
@@ -158,6 +168,12 @@ describe('Service: Feed', () => {
       assert.equal(commentedMessage.comments[0].messageId, createdMessages[0].sourceId);
       assert.equal(commentedMessage.comments[0].userId, admin.id);
       assert.equal(commentedMessage.comments[0].text, 'Cool comment as sub-resource');
+    });
+
+    it('should have 5 messages in the database', async () => {
+      const objects = await testHelpers.findAllObjects();
+
+      assert.equal(objects.length, 5);
     });
   });
 });

@@ -29,15 +29,21 @@ const findIncludes = (object, includes) => (typeEq('feed_message')) ?
 export const make = async (payload, message) => {
   logger.info(`Making feed for ${payload.parentType}`, { payload, message });
 
-  const relatedObjects = await objectRepository.findBy({
-    $or: [{
-      parentType: payload.parentType,
-      parentId: payload.parentId,
-    }, {
-      parentType: 'user',
-      parentId: message.credentials.id,
-    }],
-  }, {
+  const whereClause = await R.cond([
+    [R.equals('network'),
+    () => impl.createNetworkObjectQuery(payload.parentId, message.credentials.id)],
+    [R.T, () => ({
+      $or: [{
+        parentType: payload.parentType,
+        parentId: payload.parentId,
+      }, {
+        parentType: 'user',
+        parentId: message.credentials.id,
+      }],
+    })],
+  ])(payload.parentType);
+
+  const relatedObjects = await objectRepository.findBy(whereClause, {
     limit: payload.limit,
     offset: payload.offset,
     order: [['created_at', 'DESC']],

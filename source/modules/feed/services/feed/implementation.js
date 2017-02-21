@@ -1,6 +1,7 @@
 import R from 'ramda';
 import Promise from 'bluebird';
 import * as messageService from '../message';
+import * as networkService from '../../../core/services/network';
 
 const typeEq = R.propEq('objectType');
 const anyWithType = (type, objects) => R.any(typeEq(type), objects);
@@ -31,4 +32,35 @@ export const getIncludes = async (hasInclude, objects) => {
   }
 
   return Promise.props(includes);
+};
+
+const createTeamObjectQuery = (team) => team.id;
+
+/**
+ * Creates a query for a network including team objects
+ * @param {string} networkId - id for network to aquire all network related
+ * messages
+ * @param {string} userId - current user id
+ * @method createNetworkObjectQuery
+ * @return {object} query for objects
+ */
+export const createNetworkObjectQuery = async (networkId, userId) => {
+  const teams = await networkService.listTeamsForNetwork({ networkId },
+      { credentials: { id: userId } });
+  const teamIds = R.map(createTeamObjectQuery, teams);
+
+  return {
+    $or: [
+      {
+        parentId: { $in: teamIds },
+        parentType: 'team',
+      },
+      {
+        parentType: 'network',
+        parentId: networkId,
+      }, {
+        parentType: 'user',
+        parentId: userId,
+      }],
+  };
 };
