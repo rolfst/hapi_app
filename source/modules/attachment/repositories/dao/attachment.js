@@ -5,7 +5,7 @@ const Attachment = model.define('Attachment', {
   messageId: {
     type: Sequelize.INTEGER,
     field: 'message_id',
-    allowNull: false,
+    allowNull: true,
   },
   objectId: {
     type: Sequelize.INTEGER,
