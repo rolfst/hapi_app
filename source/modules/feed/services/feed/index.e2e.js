@@ -13,6 +13,7 @@ import * as feedService from './index';
 describe('Service: Feed', () => {
   describe('make', () => {
     let sandbox;
+    let team;
     let network;
     let admin;
     let createdMessages;
@@ -24,7 +25,7 @@ describe('Service: Feed', () => {
       admin = await testHelpers.createUser({ password: 'foo' });
       network = await testHelpers.createNetwork({ userId: admin.id });
       const otherNetwork = await testHelpers.createNetwork({ userId: admin.id });
-      const team = await testHelpers.addTeamToNetwork(network.id);
+      team = await testHelpers.addTeamToNetwork(network.id);
 
       await testHelpers.addUserToNetwork({ userId: admin.id, networkId: network.id });
       const serviceMessage = { network, credentials: admin };
@@ -174,6 +175,19 @@ describe('Service: Feed', () => {
       const objects = await testHelpers.findAllObjects();
 
       assert.equal(objects.length, 5);
+    });
+
+    it('should return feed models from team', async () => {
+      const actual = await feedService.make({
+        parentType: 'team',
+        parentId: team.id,
+      }, { network, credentials: admin });
+
+      assert.lengthOf(actual, 2);
+      assert.equal(actual[0].objectType, 'exchange');
+      assert.equal(actual[0].parentType, 'user');
+      assert.equal(actual[1].objectType, 'feed_message');
+      assert.equal(actual[1].source.text, 'First message for team');
     });
   });
 });
