@@ -15,7 +15,7 @@ export const authenticate = async (networkId, token = null) => {
   const user = await userRepo.findUserById(userId, null, false);
 
   return {
-    credentials: pick(user, 'id', 'username'),
+    credentials: pick(user, 'id', 'username', 'fullName', 'email', 'firstName', 'lastName'),
     artifacts: { integrations },
   };
 };
