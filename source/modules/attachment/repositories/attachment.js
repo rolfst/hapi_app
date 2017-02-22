@@ -34,8 +34,7 @@ export const findById = (id) => Attachment
  */
 export const create = (path) => Attachment
   .create({ path })
-  .then(createAttachmentModel)
-  .catch(R.always(null));
+  .then(createAttachmentModel);
 
 export const deleteById = (attachmentId) => Attachment
   .destroy({ where: { id: attachmentId } });

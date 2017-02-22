@@ -38,7 +38,7 @@ export const findByIds = async (messageIds) => {
  * @return {external:Promise.<FeedMessage>} {@link module:modules/feed~FeedMessage}
  */
 export const create = async (attributes) => {
-  const attributesWhitelist = ['userId', 'text'];
+  const attributesWhitelist = ['createdBy', 'text', 'parentType', 'parentId'];
   const result = await FeedMessage.create(R.pick(attributesWhitelist, attributes));
 
   return createFeedMessageModel(result);

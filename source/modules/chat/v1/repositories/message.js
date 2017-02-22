@@ -1,8 +1,9 @@
-import { map } from 'lodash';
-import sequelize from 'sequelize';
+import R from 'ramda';
+import Promise from 'bluebird';
 import { User } from '../../../../shared/models';
-import { Message, Conversation } from './dao';
+import * as objectRepo from '../../../feed/repositories/object';
 import createFeedMessageModel from '../models/message';
+import { Message } from './dao';
 
 /**
  * @module modules/chat/repositories/message
@@ -16,14 +17,20 @@ import createFeedMessageModel from '../models/message';
  * @method createMessage
  * @return {external:Promise} - Create message promise
  */
-export function createMessage(conversationId, creatorId, text) {
-  return Message.create({
+export async function createMessage(conversationId, creatorId, text) {
+  const createdMessage = await Message.create({ userId: creatorId, text });
+
+  const object = await objectRepo.create({
+    parentType: 'conversation',
     parentId: conversationId,
-    parentType: 'FlexAppeal\\Entities\\Conversation',
-    text,
-    createdBy: creatorId,
-    messageType: 'default',
+    objectType: 'private_message',
+    sourceId: createdMessage.id,
+    userId: creatorId,
   });
+
+  await Message.update({ objectId: object.id }, { where: { id: createdMessage.id } });
+
+  return createdMessage;
 }
 
 /**
@@ -34,7 +41,7 @@ export function createMessage(conversationId, creatorId, text) {
  */
 export const findMessageById = async (id) => {
   const result = await Message.findById(id, {
-    include: [{ model: Conversation, include: [User] }, User],
+    include: [{ model: User }],
   });
 
   return createFeedMessageModel(result);
@@ -49,10 +56,10 @@ export const findMessageById = async (id) => {
 export const findMessageByIds = async (messageIds) => {
   const result = await Message.findAll({
     where: { id: { $in: messageIds } },
-    include: [{ model: Conversation, include: [User] }, User],
+    include: [{ model: User }],
   });
 
-  return map(result, createFeedMessageModel);
+  return R.map(createFeedMessageModel, result);
 };
 
 /**
@@ -62,45 +69,25 @@ export const findMessageByIds = async (messageIds) => {
  * @return {external:Promise} - Get messages promise
  */
 export const findAllForConversation = async (conversationId) => {
-  const result = await Message.findAll({
-    attributes: ['id'],
-    where: { parentId: conversationId },
+  const messageObjects = await objectRepo.findBy({
+    parentType: 'conversation',
+    parentId: conversationId,
+    objectType: 'private_message',
   });
 
-  return findMessageByIds(map(result, 'id'));
+  const result = await Message.findAll({
+    where: { id: { $in: R.pluck('sourceId', messageObjects) } },
+    include: [{ model: User }],
+  });
+
+  const output = R.map(createFeedMessageModel, result);
+
+  return R.map(R.assoc('conversationId', conversationId), output);
 };
 
 // FIXME: temporary function so we don't break the apps
 export const findMessagesForConversations = async (conversationIds) => {
-  const result = await Message.findAll({
-    include: [{
-      attributes: [],
-      model: Conversation,
-      where: { id: { $in: conversationIds } },
-    }],
-  });
+  const result = await Promise.map(conversationIds, findAllForConversation);
 
-  const plainObjs = map(result, (item) => item.get({ plain: true }));
-  return findMessageByIds(map(plainObjs, 'id'));
-};
-
-/**
- * Find all messages for conversations
- * @param {string[]} conversationIds - Id of the conversation we want the messages from
- * @method findLastForConversations
- * @return {external:Promise} - Get messages promise
- */
-export const findLastForConversations = async (conversationIds) => {
-  const result = await Message.findAll({
-    attributes: [[sequelize.fn('MAX', sequelize.col('Message.id')), 'message_id']],
-    include: [{
-      attributes: [],
-      model: Conversation,
-      where: { id: { $in: conversationIds } },
-    }],
-    group: 'Message.parent_id',
-  });
-
-  const plainObjs = map(result, (item) => item.get({ plain: true }));
-  return findMessageByIds(map(plainObjs, 'message_id'));
+  return R.flatten(result);
 };

@@ -12,7 +12,7 @@ module.exports = {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
         references: {
-          model: 'feed_messages',
+          model: 'messages',
           key: 'id',
         },
         onDelete: 'cascade',

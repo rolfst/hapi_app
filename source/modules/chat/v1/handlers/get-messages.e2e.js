@@ -4,7 +4,7 @@ import * as blueprints from '../../../../shared/test-utils/blueprints';
 import * as testHelper from '../../../../shared/test-utils/helpers';
 import { getRequest } from '../../../../shared/test-utils/request';
 import * as conversationRepo from '../repositories/conversation';
-import { createMessage } from '../repositories/message';
+import * as conversationService from '../services/conversation';
 
 describe('Handler: Get messages (v1)', () => {
   let conversation;
@@ -23,9 +23,15 @@ describe('Handler: Get messages (v1)', () => {
       'PRIVATE', admin.id, participants);
 
     return Promise.all([
-      createMessage(conversation.id, admin.id, 'Test bericht 1'),
-      createMessage(conversation.id, admin.id, 'Test bericht 2'),
-      createMessage(conversation.id, employee.id, 'Test bericht 3'),
+      conversationService.createMessage({
+        id: conversation.id, text: 'Test bericht 1' }, {
+          credentials: admin, artifacts: { authenticationToken: 'FOO_TOKEN' } }),
+      conversationService.createMessage({
+        id: conversation.id, text: 'Test bericht 2' }, {
+          credentials: admin, artifacts: { authenticationToken: 'FOO_TOKEN' } }),
+      conversationService.createMessage({
+        id: conversation.id, text: 'Test bericht 3' }, {
+          credentials: employee, artifacts: { authenticationToken: 'FOO_TOKEN' } }),
     ]);
   });
 
@@ -33,12 +39,12 @@ describe('Handler: Get messages (v1)', () => {
 
   it('should return messages for conversation', async () => {
     const endpoint = `/v1/chats/conversations/${conversation.id}/messages`;
-
     const { result, statusCode } = await getRequest(endpoint, employee.token);
     const actualMessage = find(result.data, { text: 'Test bericht 1' });
 
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 3);
+    assert.equal(actualMessage.conversation_id, conversation.id);
     assert.isObject(actualMessage.created_by);
     assert.equal(actualMessage.created_by.id, admin.id);
   });
