@@ -152,6 +152,15 @@ export const getParent = async (payload, message) => {
   return result;
 };
 
+/**
+ * Get an object by object type and source id
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.objectType - The type of object
+ * @param {string} payload.sourceId - The id of the object
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method getObject
+ * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
+ */
 export const getObject = async (payload, message) => {
   logger.info('Retrieving object', { payload, message });
 

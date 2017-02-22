@@ -39,6 +39,12 @@ export const findBy = async (whereConstraint, options) => {
   return R.map(createDomainObject, result);
 };
 
+/**
+ * Find a single object by where constraint
+ * @param {object} whereConstraint - Object containing a where constraint
+ * @method findWhere
+ * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
+ */
 export const findWhere = async (whereConstraint) => {
   const result = await _Object.find({ where: whereConstraint });
 

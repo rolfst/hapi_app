@@ -38,6 +38,13 @@ export const removeAttachedObjects = (messageId) => Promise.all([
   objectService.remove({ parentType: 'feed_message', parentId: messageId }),
 ]);
 
+/**
+ * Check if the user has permission to view the message
+ * @param {string} messageId - The id of the message
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method assertThatUserBelongsToMessage
+ * @throws Error - 404
+ */
 export const assertThatUserBelongsToMessage = async (messageId, message) => {
   const payload = { objectType: 'feed_message', sourceId: messageId };
 

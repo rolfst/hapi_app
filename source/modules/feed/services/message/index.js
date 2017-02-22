@@ -109,12 +109,26 @@ export const list = async (payload, message) => {
   }, messageResult);
 };
 
+/**
+ * List likes for a single message
+ * @param {string} messageId - The id of the message
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method listLikes
+ * @return {external:Promise.<Like[]>} {@link module:feed~Like like}
+ */
 export const listLikes = async (messageId, message) => {
   await impl.assertThatUserBelongsToMessage(messageId, message);
 
   return likeRepository.findBy({ messageId });
 };
 
+/**
+ * List comments for a single message
+ * @param {string} messageId - The id of the message
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method listComments
+ * @return {external:Promise.<Comment[]>} {@link module:feed~Comment comment}
+ */
 export const listComments = async (messageId, message) => {
   await impl.assertThatUserBelongsToMessage(messageId, message);
 
