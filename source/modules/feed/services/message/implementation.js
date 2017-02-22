@@ -1,7 +1,10 @@
 import R from 'ramda';
 import Promise from 'bluebird';
+import createError from '../../../../shared/utils/create-error';
 import * as pollService from '../../../poll/services/poll';
 import * as objectService from '../object';
+import * as networkImpl from '../../../core/services/network/implementation';
+import * as teamImpl from '../../../core/services/team/implementation';
 
 /**
  * Creates a poll resource that consists of a poll object and a object object.
@@ -34,3 +37,19 @@ export const removeAttachedObjects = (messageId) => Promise.all([
   objectService.remove({ objectType: 'feed_message', sourceId: messageId }),
   objectService.remove({ parentType: 'feed_message', parentId: messageId }),
 ]);
+
+export const assertThatUserBelongsToMessage = async (messageId, message) => {
+  const payload = { objectType: 'feed_message', sourceId: messageId };
+
+  const { parentType, parentId } = await objectService.getObject(payload, message);
+  const userId = message.credentials.id;
+
+  try {
+    await R.cond([
+      [R.equals('network'), () => networkImpl.assertThatUserBelongsToTheNetwork],
+      [R.equals('team'), () => teamImpl.assertThatUserBelongsToTheTeam],
+    ])(parentType)(parentId, userId);
+  } catch (err) {
+    throw createError('404');
+  }
+};
