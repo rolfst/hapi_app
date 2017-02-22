@@ -12,6 +12,16 @@ const routes = [{
   validator: require('./validators/get-feed'),
   prefetch: false,
 }, {
+  method: 'GET',
+  url: '/v2/messages/{messageId}/likes',
+  handler: require('./handlers/get-likes'),
+  prefetch: false,
+}, {
+  method: 'GET',
+  url: '/v2/messages/{messageId}/comments',
+  handler: require('./handlers/get-comments'),
+  prefetch: false,
+}, {
   method: 'POST',
   url: '/v3/networks/{networkId}/feed',
   handler: require('./handlers/create-network-message'),
