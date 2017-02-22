@@ -18,6 +18,10 @@ UserModel.belongsToMany(ConversationModel, {
   timestamps: false,
 });
 
+PrivateMessageModel.belongsTo(UserModel, {
+  foreignKey: 'user_id',
+});
+
 export const Conversation = ConversationModel;
 export const ConversationUser = ConversationUserModel;
 export const PrivateMessage = PrivateMessageModel;

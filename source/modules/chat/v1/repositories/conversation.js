@@ -1,6 +1,8 @@
 import { map } from 'lodash';
+import R from 'ramda';
 import { db as Sequelize } from '../../../../connections';
 import { User } from '../../../../shared/models';
+import * as objectRepository from '../../../feed/repositories/object';
 import { Conversation, Message, ConversationUser } from './dao';
 import createConversationModel from '../models/conversation';
 
@@ -10,10 +12,6 @@ import createConversationModel from '../models/conversation';
 
 const defaultIncludes = [{
   model: User,
-}, {
-  model: Message,
-  required: false,
-  include: [{ model: User }],
 }];
 
 const toModel = (dao) => createConversationModel(dao);
@@ -30,6 +28,19 @@ export async function findConversationById(id) {
   });
 
   if (!conversation) return null;
+
+  const objects = await objectRepository.findBy({
+    parentType: 'conversation',
+    parentId: id,
+    objectType: 'private_message',
+  });
+
+  const messages = await Message.findAll({
+    where: { id: { $in: R.pluck('sourceId', objects) } },
+    include: [{ model: User }],
+  });
+
+  conversation.Messages = messages;
 
   return toModel(conversation);
 }
@@ -121,4 +132,3 @@ export function deleteConversationById(id) {
 export const deleteAllConversationsForUser = (userId) => {
   return ConversationUser.destroy({ where: { userId } });
 };
-

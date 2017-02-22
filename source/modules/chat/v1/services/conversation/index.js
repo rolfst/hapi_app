@@ -1,5 +1,7 @@
 import { uniq, filter, map, omit } from 'lodash';
+import R from 'ramda';
 import createError from '../../../../../shared/utils/create-error';
+import * as objectService from '../../../../feed/services/object';
 import * as conversationRepo from '../../repositories/conversation';
 import * as messageRepo from '../../repositories/message';
 import ChatDispatcher from '../../dispatcher';
@@ -78,14 +80,16 @@ export const getConversation = async (payload, message) => {
   const conversation = await conversationRepo.findConversationById(payload.id);
   if (!conversation) throw createError('404');
 
-  const [lastMessages, messages] = await Promise.all([
-    messageRepo.findLastForConversations([conversation.id]),
-    messageRepo.findAllForConversation(conversation.id),
-  ]);
-
   impl.assertThatUserIsPartOfTheConversation(conversation, message.credentials.id);
 
-  return { ...conversation, lastMessage: lastMessages[0], messages };
+  const messageObjects = await objectService.list({
+    parentType: 'conversation',
+    parentId: payload.id,
+  });
+
+  const messages = await messageRepo.findMessageByIds(R.pluck('sourceId', messageObjects));
+
+  return { ...conversation, lastMessage: R.last(messages), messages };
 };
 
 /**
@@ -114,9 +118,12 @@ export const listConversationsForUser = async (payload, message) => {
  * Promise containing a list of messages
  */
 export const listMessages = async (payload, message) => {
-  const conversation = await getConversation(payload, message);
+  const conversation = await conversationRepo.findConversationById(payload.id);
+  if (!conversation) throw createError('404');
 
-  return messageRepo.findAllForConversation(conversation.id);
+  impl.assertThatUserIsPartOfTheConversation(conversation, message.credentials.id);
+
+  return messageRepo.findAllForConversation(payload.id);
 };
 
 /**
@@ -154,6 +161,8 @@ export const createMessage = async (payload, message) => {
     conversation.id, credentials.id, text);
 
   const refreshedMessage = await getMessage({ messageId: createdMessage.id });
+  refreshedMessage.conversationId = payload.id;
+  refreshedMessage.conversation = conversation;
 
   ChatDispatcher.emit('message.created', {
     conversation,

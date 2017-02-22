@@ -16,17 +16,17 @@ export const assertThatUserIsPartOfTheConversation = (conversation, userId) => {
 export const searchMessageCreatorIdForConversation = (conversation) => {
   if (!conversation.lastMessage) return null;
 
-  return conversation.lastMessage.createdBy;
+  return conversation.lastMessage.userId;
 };
 
 export const replaceConversationUserIdWithObject = (conversation, users) => {
   const lastMessage = conversation.lastMessage;
 
   if (lastMessage) {
-    const matchingUser = find(users, { id: lastMessage.createdBy });
+    const matchingUser = find(users, { id: lastMessage.userId });
     const attrs = ['type', 'id', 'username', 'fullName', 'profileImg'];
 
-    lastMessage.createdBy = pick(matchingUser, attrs);
+    lastMessage.userId = pick(matchingUser, attrs);
   }
 
   return { ...conversation, lastMessage };

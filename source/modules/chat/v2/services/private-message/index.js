@@ -49,7 +49,7 @@ export async function create(payload, message) {
   });
 
   const createdMessage = await privateMessageRepository.create({
-    objectId: null, text: payload.text });
+    userId: message.credentials.id, objectId: null, text: payload.text });
 
   if (payload.attachments) {
     await Promise.map(R.flatten([payload.attachments]), (file) => attachmentService.create({

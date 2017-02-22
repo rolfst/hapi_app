@@ -5,7 +5,7 @@ import createConversationModel from './conversation';
 export default (dao) => ({
   type: 'conversation_message',
   id: dao.id.toString(),
-  conversationId: dao.parentId.toString(),
+  conversationId: null,
   conversation: dao.Conversation ? createConversationModel(dao.Conversation) : null,
   text: dao.text,
   createdBy: createUserModel(dao.User),
