@@ -215,7 +215,8 @@ describe('Service: Message', () => {
       assert.equal(createdMessage.children[0].parentType, 'feed_message');
       assert.equal(createdMessage.children[0].parentId, createdMessage.sourceId);
       assert.equal(createdMessage.children[0].objectType, 'attachment');
-      assert.equal(createdMessage.children[0].source.path, 'image.jpg');
+      assert.equal(createdMessage.children[0].source.path,
+        'https://assets.flex-appeal.nl/development/attachments/image.jpg');
     });
 
     it('should create an attachment entry if resource is present', async () => {
@@ -227,7 +228,8 @@ describe('Service: Message', () => {
       const attachmentEntry = await attachmentService.get({ attachmentId: objects[0].sourceId });
 
       assert.isDefined(attachmentEntry);
-      assert.equal(attachmentEntry.path, 'image.jpg');
+      assert.equal(attachmentEntry.path,
+        'https://assets.flex-appeal.nl/development/attachments/image.jpg');
     });
 
     it('should create a message entry', async () => {

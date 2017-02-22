@@ -24,13 +24,13 @@ describe('Service: Attachment', () => {
     });
 
     it('should create a attachment', async () => {
-      const imageLocation = 'test.jpg';
-      sandbox.stub(Storage, 'upload').returns(Promise.resolve(imageLocation));
+      const fileName = 'test.jpg';
+      sandbox.stub(Storage, 'upload').returns(Promise.resolve(fileName));
 
       const actual = await attachmentService.create({
         parentType: 'feed_message',
         parentId: '23',
-        file: { file: new Buffer('Foo'), filename: 'test.jpg' },
+        file: { file: new Buffer('Foo'), filename: fileName },
       }, { credentials: admin });
       const attachments = await attachmentRepo.findBy({ objectId: actual.objectId });
 
@@ -40,7 +40,7 @@ describe('Service: Attachment', () => {
       assert.equal(actual.type, 'attachment');
       assert.property(actual, 'objectId');
       assert.property(actual, 'path');
-      assert.equal(actual.path, imageLocation);
+      assert.equal(actual.path, 'https://assets.flex-appeal.nl/development/attachments/test.jpg');
       assert.property(actual, 'createdAt');
       assert.isNotNull(actual.createdAt);
     });
