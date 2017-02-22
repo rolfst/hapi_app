@@ -152,6 +152,16 @@ export const getParent = async (payload, message) => {
   return result;
 };
 
+export const getObject = async (payload, message) => {
+  logger.info('Retrieving object', { payload, message });
+
+  const object = await objectRepository.findWhere(payload);
+
+  if (!object) throw createError('404', 'Object not found');
+
+  return object;
+};
+
 /**
  * Get users for parent model of object
  * @param {object} payload - Object containing payload data

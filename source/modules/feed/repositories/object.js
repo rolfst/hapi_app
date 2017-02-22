@@ -39,6 +39,14 @@ export const findBy = async (whereConstraint, options) => {
   return R.map(createDomainObject, result);
 };
 
+export const findWhere = async (whereConstraint) => {
+  const result = await _Object.find({ where: whereConstraint });
+
+  if (!result) return null;
+
+  return createDomainObject(result);
+};
+
 /**
  * Delete objects by where constraint
  * @param {object} whereConstraint - Object containing a where constraint
