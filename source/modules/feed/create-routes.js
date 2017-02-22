@@ -42,6 +42,12 @@ const routes = [{
     output: 'file',
     parse: true,
   },
+}, {
+  method: 'POST',
+  url: '/v2/messages/{messageId}/comments',
+  handler: require('./handlers/create-comment'),
+  validator: require('./validators/create-comment'),
+  prefetch: false,
 }];
 
 export default createRoutes(routes);
