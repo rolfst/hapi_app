@@ -202,7 +202,7 @@ export const remove = async (payload, message) => {
  * @param {string} payload.objectId - The id of the object
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method get
- * @return {external:Promise.<number>}
+ * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
 export const get = async (payload, message) => {
   logger.info('retrieving object', { payload, message });
