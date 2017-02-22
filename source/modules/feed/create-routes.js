@@ -24,8 +24,13 @@ const routes = [{
 }, {
   method: 'POST',
   url: '/v3/teams/{teamId}/feed',
-  handler: require('./handlers/create-network-message'),
+  handler: require('./handlers/create-team-message'),
   validator: require('./validators/create-message'),
+  payload: {
+    maxBytes: 10000000,
+    output: 'file',
+    parse: true,
+  },
 }, {
   method: 'PUT',
   url: '/v3/messages/{messageId}',

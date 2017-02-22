@@ -4,8 +4,6 @@ import createError from '../../../../shared/utils/create-error';
 import * as pollService from '../../../poll/services/poll';
 import * as objectService from '../object';
 import * as userService from '../../../core/services/user';
-import * as networkService from '../../../core/services/network';
-import * as teamService from '../../../core/services/team';
 
 /**
  * Creates a poll resource that consists of a poll object and a object object.
@@ -40,25 +38,20 @@ export const removeAttachedObjects = (messageId) => Promise.all([
 ]);
 
 
-export const assertThatCurrentOwnerHasUpdateRights = async (objectId, credentials) => {
-  const object = await objectService.get({ objectId });
-  const getNetworkFromTeams = async (teams) => networkService.getNetwork(
-    { networkId: teams[0].networkId }, { credentials });
-  const getNetworkForTeam = async () => {
-    const teams = await teamService.list({ teamIds: [object.parentId] }, { credentials });
+export const assertThatCurrentOwnerHasUpdateRights = async (objectId, message) => {
+  const object = await objectService.get({ objectId }, message);
+  const objectParent = await objectService
+    .getParent(R.pick(['parentType', 'parentId'], object));
 
-    return getNetworkFromTeams(teams);
-  };
-  const network = await R.cond([
-    [R.equals('network'), () => networkService.getNetwork(
-      { networkId: object.parentId }, { credentials })],
-    [R.equals('team'), getNetworkForTeam],
+  const networkId = R.cond([
+    [R.equals('network'), R.always(objectParent.id)],
+    [R.equals('team'), R.always(objectParent.networkId)],
   ])(object.parentType);
 
   const user = await userService.getUserWithNetworkScope({
-    id: credentials.id, networkId: network.id });
+    id: message.credentials.id, networkId });
 
-  if (user.roleType === 'ADMIN' || object.userId === credentials.id) return;
-
-  throw createError('403');
+  if (!(user.roleType === 'ADMIN' || object.userId === message.credentials.id)) {
+    throw createError('403');
+  }
 };

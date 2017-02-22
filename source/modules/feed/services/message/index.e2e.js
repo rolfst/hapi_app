@@ -274,10 +274,7 @@ describe('Service: Message', () => {
         parentType: 'network',
         parentId: network.id,
         text: 'My cool message',
-        resources: [{
-          type: 'poll',
-          data: { options: ['Yes', 'No', 'Ok'] },
-        }],
+        poll: { options: ['Yes', 'No', 'Ok'] },
       }, {
         credentials: { id: admin.id },
         network: { id: network.id },

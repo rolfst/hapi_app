@@ -56,11 +56,9 @@ export const update = async (messageId, attributes) => {
   const result = await FeedMessage.findOne({
     where: { id: messageId },
   });
+  const message = await result.update(attributes);
 
-  await result.update(attributes);
-
-  const mes = await findById(messageId);
-  return mes;
+  return createFeedMessageModel(message);
 };
 
 export const destroy = (messageId) => FeedMessage.destroy({ where: { id: messageId } });
