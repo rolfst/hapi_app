@@ -109,6 +109,18 @@ export const list = async (payload, message) => {
   }, messageResult);
 };
 
+export const listLikes = async (messageId, message) => {
+  await impl.assertThatUserBelongsToMessage(messageId, message);
+
+  return likeRepository.findBy({ messageId });
+};
+
+export const listComments = async (messageId, message) => {
+  await impl.assertThatUserBelongsToMessage(messageId, message);
+
+  return commentRepository.findBy({ messageId });
+};
+
 /**
  * Creates a message as authenticated user with an associated object entry.
  * @param {object} payload - Object containing payload data
