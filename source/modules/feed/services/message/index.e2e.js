@@ -24,6 +24,8 @@ describe('Service: Message', () => {
         testHelpers.createUser({ password: 'foo' }),
       ]);
       network = await testHelpers.createNetwork({ userId: admin.id });
+      const team = await testHelpers.addTeamToNetwork(network.id);
+
       createdMessages = await Promise.all([
         messageService.create({
           parentType: 'network',
@@ -32,8 +34,8 @@ describe('Service: Message', () => {
           poll: { options: ['Yes', 'No', 'Ok'] },
         }, { network, credentials: admin }),
         messageService.create({
-          parentType: 'network',
-          parentId: network.id,
+          parentType: 'team',
+          parentId: team.id,
           text: 'My other cool message',
         }, { network, credentials: admin }),
       ]);
@@ -45,7 +47,7 @@ describe('Service: Message', () => {
       const actual = await messageService.list({
         messageIds: R.pluck('sourceId', createdMessages),
       }, {
-        credentials: admin,
+        credentials: employee,
       });
 
       assert.lengthOf(actual, 2);

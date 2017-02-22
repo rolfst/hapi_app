@@ -14,8 +14,8 @@ export const findById = (messageId) => PrivateMessage
   .findOne({ where: { id: messageId } })
   .then(createPrivateMessageModel);
 
-export const create = ({ objectId, text }) => PrivateMessage
-  .create({ objectId, text })
+export const create = ({ userId, objectId, text }) => PrivateMessage
+  .create({ userId, objectId, text })
   .then(createPrivateMessageModel);
 
 export const update = (messageId, attributes) => PrivateMessage

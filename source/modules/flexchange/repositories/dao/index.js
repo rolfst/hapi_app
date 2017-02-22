@@ -18,7 +18,7 @@ ExchangeResponseModel.belongsTo(ExchangeModel, {
 });
 
 ExchangeCommentModel.belongsTo(UserModel, {
-  foreignKey: 'created_by',
+  foreignKey: 'user_id',
 });
 
 ExchangeModel.hasMany(ActivityModel, {
@@ -49,12 +49,9 @@ ExchangeModel.hasOne(ExchangeResponseModel, {
   foreignKey: 'exchange_id',
 });
 
-ExchangeModel.belongsToMany(ExchangeCommentModel, {
-  foreignKey: 'parent_id',
-  otherKey: 'id',
-  through: 'comments',
+ExchangeModel.hasMany(ExchangeCommentModel, {
+  foreignKey: 'exchange_id',
   as: 'Comments',
-  scope: { parent_type: 'FlexAppeal\\Entities\\Exchange' },
 });
 
 ExchangeModel.belongsTo(UserModel, {
