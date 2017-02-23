@@ -15,7 +15,7 @@ const Conversation = model.define('Conversation', {
   tableName: 'conversations',
   timestamps: true,
   createdAt: 'created_at',
-  updatedAt: false,
+  updatedAt: 'updated_at',
   instanceMethods: {
     toJSON: function () { // eslint-disable-line func-names, object-shorthand
       let output = {
