@@ -101,7 +101,7 @@ export const findExistingConversation = async (participantIds) => {
  * @param {string} conversationId
  * @param {object} attributes
  * @param {date} attributes.updatedAt
- * @method updae
+ * @method update
  */
 export function update(conversationId, { updatedAt }) {
   return Conversation.findById(conversationId)

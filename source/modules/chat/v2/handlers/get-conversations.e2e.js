@@ -224,7 +224,7 @@ describe('Get conversations for logged user (v2)', () => {
         participantIds: [creator.id, participant1.id],
       }, { credentials: creator });
 
-      await Promise.delay(3000).then(() => privateMessageService.create({
+      await Promise.delay(2000).then(() => privateMessageService.create({
         conversationId: createdConversation.id,
         text: 'First message',
       }, {
