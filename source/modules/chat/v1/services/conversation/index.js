@@ -161,8 +161,11 @@ export const createMessage = async (payload, message) => {
     conversation.id, credentials.id, text);
 
   const refreshedMessage = await getMessage({ messageId: createdMessage.id });
+  await conversationRepo.update(id, { updatedAt: new Date() });
+  const updatedConversation = await getConversation({ id }, message);
   refreshedMessage.conversationId = payload.id;
-  refreshedMessage.conversation = conversation;
+  refreshedMessage.conversation = updatedConversation;
+
 
   ChatDispatcher.emit('message.created', {
     conversation,

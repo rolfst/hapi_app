@@ -96,3 +96,14 @@ export const findExistingConversation = async (participantIds) => {
 
   return conversations[0];
 };
+
+/**
+ * Updates a conversation with the current timestamp
+ * @param {string} conversationId
+ * @param {object} attributes
+ * @param {date} attributes.updatedAt
+ * @method update
+ */
+export function update(conversationId, { updatedAt }) {
+  return Conversation.update({ updatedAt }, { where: { id: conversationId } });
+}

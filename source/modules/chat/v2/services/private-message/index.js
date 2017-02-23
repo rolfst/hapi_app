@@ -67,6 +67,8 @@ export async function create(payload, message) {
     source: { ...createdMessage, objectId: createdObject.id },
   });
 
+  await conversationRepository.update(payload.conversationId, { updatedAt: new Date() });
+
   ChatDispatcher.emit('message.created', {
     conversation,
     object: output,

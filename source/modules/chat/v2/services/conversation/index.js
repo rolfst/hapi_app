@@ -9,7 +9,7 @@ import * as conversationRepo from '../../repositories/conversation';
 import * as impl from './implementation';
 
 const logger = Logger.createLogger('CHAT/service/conversation');
-const createOptions = R.pick(['limit', 'offset']);
+const createOptions = R.pick(['limit', 'offset', 'order']);
 const pluckUniqueParticipantIds = R.pipe(R.pluck('participantIds'), R.flatten, R.uniq);
 const groupByParentId = R.groupBy(R.prop('parentId'));
 const findIdEq = (id, collection) => R.find(R.propEq('id', id), collection);
@@ -65,7 +65,8 @@ export const listConversations = async (payload, message) => {
 
   const includes = impl.hasInclude(payload.include);
   const [conversations, objects] = await Promise.all([
-    conversationRepo.findByIds(payload.conversationIds, createOptions(payload)),
+    conversationRepo.findByIds(payload.conversationIds,
+      createOptions({ ...payload, order: 'updated_at DESC' })),
     objectRepository.findBy({
       parentType: 'conversation', parentId: { $in: payload.conversationIds } }),
   ]);
