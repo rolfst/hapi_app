@@ -4,7 +4,7 @@ import * as testHelper from '../../../../shared/test-utils/helpers';
 import { postRequest } from '../../../../shared/test-utils/request';
 import * as conversationRepo from '../repositories/conversation';
 
-describe.only('Handler: Create conversation (v2)', () => {
+describe('Handler: Create conversation (v2)', () => {
   let creator;
   let participant1;
   let participant2;
