@@ -1,7 +1,9 @@
 import R from 'ramda';
 import Promise from 'bluebird';
+import createError from '../../../../shared/utils/create-error';
 import * as pollService from '../../../poll/services/poll';
 import * as objectService from '../object';
+import * as userService from '../../../core/services/user';
 
 /**
  * Creates a poll resource that consists of a poll object and a object object.
@@ -34,3 +36,22 @@ export const removeAttachedObjects = (messageId) => Promise.all([
   objectService.remove({ objectType: 'feed_message', sourceId: messageId }),
   objectService.remove({ parentType: 'feed_message', parentId: messageId }),
 ]);
+
+
+export const assertThatCurrentOwnerHasUpdateRights = async (objectId, message) => {
+  const object = await objectService.get({ objectId }, message);
+  const objectParent = await objectService
+    .getParent(R.pick(['parentType', 'parentId'], object));
+
+  const networkId = R.cond([
+    [R.equals('network'), R.always(objectParent.id)],
+    [R.equals('team'), R.always(objectParent.networkId)],
+  ])(object.parentType);
+
+  const user = await userService.getUserWithNetworkScope({
+    id: message.credentials.id, networkId });
+
+  if (!(user.roleType === 'ADMIN' || object.userId === message.credentials.id)) {
+    throw createError('403');
+  }
+};

@@ -255,4 +255,82 @@ describe('Service: Message', () => {
       assert.isDefined(expected[0].sourceId);
     });
   });
+
+  describe('update', () => {
+    let createdMessage;
+    let createdTeamMessage;
+
+    before(async () => {
+      [admin, employee] = await Promise.all([
+        testHelpers.createUser({ password: 'foo' }),
+        testHelpers.createUser({ password: 'foo' }),
+      ]);
+      const teamMember = await testHelpers.createUser({ password: 'foo' });
+      network = await testHelpers.createNetwork({ userId: admin.id });
+      const team = await testHelpers.addTeamToNetwork(network.id);
+
+      await testHelpers.addUserToNetwork({ networkId: network.id, userId: employee.id });
+      await testHelpers.addUserToNetwork({ networkId: network.id, userId: teamMember.id });
+
+      createdMessage = await messageService.create({
+        parentType: 'network',
+        parentId: network.id,
+        text: 'My cool message',
+        poll: { options: ['Yes', 'No', 'Ok'] },
+      }, {
+        credentials: { id: admin.id },
+        network: { id: network.id },
+      });
+      createdTeamMessage = await messageService.create({
+        parentType: 'team',
+        parentId: team.id,
+        text: 'My cool message',
+      }, {
+        credentials: { id: teamMember.id },
+        network: { id: network.id },
+      });
+    });
+
+    after(() => testHelpers.cleanAll());
+
+    it('should update a message entry', async () => {
+      const updatedMessage = await messageService.update({
+        messageId: createdMessage.source.id,
+        text: 'My cool updated message',
+      }, { credentials: { id: admin.id } });
+      const expected = await messageService.get({ messageId: createdMessage.source.id });
+
+      assert.equal(updatedMessage.id, expected.id);
+      assert.isDefined(expected);
+      assert.property(expected, 'objectId');
+      assert.equal(expected.text, 'My cool updated message');
+      assert.property(expected, 'createdAt');
+      assert.isNotNull(expected.createdAt);
+    });
+
+    it('should update a team message entry by an admin', async () => {
+      const updatedMessage = await messageService.update({
+        messageId: createdTeamMessage.source.id,
+        text: 'My cool updated message',
+      }, { credentials: { id: admin.id } });
+      const expected = await messageService.get({ messageId: createdTeamMessage.source.id });
+
+      assert.equal(updatedMessage.id, expected.id);
+      assert.isDefined(expected);
+      assert.property(expected, 'objectId');
+      assert.equal(expected.text, 'My cool updated message');
+      assert.property(expected, 'createdAt');
+      assert.isNotNull(expected.createdAt);
+    });
+
+    it('should not allow an update by a different person a message entry', async () => {
+      const updatePromise = messageService.update({
+        messageId: createdMessage.source.id,
+        text: 'My cool updated message',
+      }, { credentials: { id: employee.id } });
+
+      return assert.isRejected(updatePromise,
+          /Error: User does not have enough privileges to access this resource./);
+    });
+  });
 });
