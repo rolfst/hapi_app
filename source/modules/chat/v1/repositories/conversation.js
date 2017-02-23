@@ -132,3 +132,18 @@ export function deleteConversationById(id) {
 export const deleteAllConversationsForUser = (userId) => {
   return ConversationUser.destroy({ where: { userId } });
 };
+
+/**
+ * Updates a conversation with the current timestamp
+ * @param {string} conversationId
+ * @param {object} attributes
+ * @param {date} attributes.updatedAt
+ * @method update
+ */
+export async function update(conversationId, { updatedAt }) {
+  const result = await Conversation.findById(conversationId);
+  if (!result) return null;
+
+  return result.update({ updatedAt })
+    .then(toModel);
+}

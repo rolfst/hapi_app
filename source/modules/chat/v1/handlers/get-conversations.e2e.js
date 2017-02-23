@@ -1,4 +1,5 @@
 import { assert } from 'chai';
+import Promise from 'bluebird';
 import * as blueprints from '../../../../shared/test-utils/blueprints';
 import * as testHelper from '../../../../shared/test-utils/helpers';
 import { getRequest } from '../../../../shared/test-utils/request';
@@ -9,6 +10,7 @@ describe('Get conversations for logged user', () => {
   let user;
   let admin;
   let userWithoutMessage;
+  let conversation;
 
   before(async () => {
     admin = await testHelper.createUser({ password: 'foo' });
@@ -19,11 +21,13 @@ describe('Get conversations for logged user', () => {
     await testHelper.addUserToNetwork({ networkId: network.id, userId: user.id });
     await testHelper.addUserToNetwork({ networkId: network.id, userId: userWithoutMessage.id });
 
-    const conversation = await conversationRepo.createConversation(
+    conversation = await conversationRepo.createConversation(
       'PRIVATE', admin.id, [user.id, admin.id]);
 
-    await messageRepo.createMessage(conversation.id, user.id, 'First message');
-    await messageRepo.createMessage(conversation.id, user.id, 'Last message');
+    await Promise.delay(1000)
+      .then(() => messageRepo.createMessage(conversation.id, user.id, 'First message'));
+    await Promise.delay(1000)
+      .then(() => messageRepo.createMessage(conversation.id, user.id, 'Last message'));
   });
 
   after(() => testHelper.cleanAll());
@@ -72,5 +76,14 @@ describe('Get conversations for logged user', () => {
 
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 0);
+  });
+
+  it('should have an new updatedAt', async () => {
+    const { result } = await getRequest('/v1/chats/users/me/conversations',
+        user.token);
+
+    assert.isNotNull(conversation, 'updatedAt');
+    assert.isNotNull(result.data[0], 'updatedAt');
+    assert.notEqual(conversation.updatedAt, result.data[0].updatedAt);
   });
 });
