@@ -7,7 +7,6 @@ describe('Handler: Create conversation (v2)', () => {
   let creator;
   let participant;
 
-  after(() => testHelper.cleanAll());
 
   describe('Good flow', () => {
     before(async () => {
@@ -18,6 +17,8 @@ describe('Handler: Create conversation (v2)', () => {
           username: 'conversation_participant' }),
       ]);
     });
+
+    after(() => testHelper.cleanAll());
 
     it('should create a conversation with logged user and a participant', async () => {
       const ENDPOINT_URL = '/v2/conversations';
@@ -35,6 +36,8 @@ describe('Handler: Create conversation (v2)', () => {
     before(async () => {
       creator = await testHelper.createUser({ ...blueprints.users.employee });
     });
+
+    after(() => testHelper.cleanAll());
 
     it('should fail when passing logged user as a participant', async () => {
       const ENDPOINT_URL = '/v2/conversations';
