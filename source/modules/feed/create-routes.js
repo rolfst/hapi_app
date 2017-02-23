@@ -48,6 +48,12 @@ const routes = [{
   handler: require('./handlers/create-comment'),
   validator: require('./validators/create-comment'),
   prefetch: false,
+}, {
+  method: 'PUT',
+  url: '/v3/messages/{messageId}',
+  handler: require('./handlers/update-message'),
+  validator: require('./validators/update-message'),
+  prefetch: false,
 }];
 
 export default createRoutes(routes);

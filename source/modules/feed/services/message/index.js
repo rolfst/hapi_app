@@ -208,6 +208,30 @@ export const create = async (payload, message) => {
 };
 
 /**
+ * Updates a message as authenticated user with an associated object entry.
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.parentType - The type of parent to create the object for
+ * @param {string} payload.parentId - The id of the parent
+ * @param {string} payload.text - The text of the message
+ * @param {object[]} payload.resources - The resources that belong to the message
+ * @param {string} payload.resources[].type - The type of the resource
+ * @param {object} payload.resources[].data - The data for the resource
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method update
+ * @return {external:Promise.<Message>} {@link module:feed~Message message}
+ */
+export const update = async (payload, message) => {
+  logger.info('Updating message', { payload, message });
+
+  const foundMessage = await messageRepository.findById(payload.messageId);
+
+  if (!foundMessage) throw createError('404');
+
+  await impl.assertThatCurrentOwnerHasUpdateRights(foundMessage.objectId, message);
+
+  return messageRepository.update(foundMessage.id, { text: payload.text });
+};
+/**
  * Likes a message
  * @param {object} payload - Object containing payload data
  * @param {string} payload.messageId - The id of the message to like
