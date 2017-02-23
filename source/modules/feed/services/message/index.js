@@ -192,18 +192,18 @@ export const create = async (payload, message) => {
  * @param {object} payload.resources[].data - The data for the resource
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method update
- * @return {external:Promise.<Message>} {@link module:feed~Message message}
+ * @return {external:Promise.<Object>} {@link module:feed~Object object}
  */
 export const update = async (payload, message) => {
   logger.info('Updating message', { payload, message });
 
   const foundMessage = await messageRepository.findById(payload.messageId);
-
   if (!foundMessage) throw createError('404');
 
   await impl.assertThatCurrentOwnerHasUpdateRights(foundMessage.objectId, message);
+  await messageRepository.update(foundMessage.id, { text: payload.text });
 
-  return messageRepository.update(foundMessage.id, { text: payload.text });
+  return objectService.getWithSourceAndChildren({ objectId: foundMessage.objectId }, message);
 };
 /**
  * Likes a message

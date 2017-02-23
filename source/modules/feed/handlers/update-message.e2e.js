@@ -38,6 +38,6 @@ describe('Handler: Update Message', () => {
     const { result } = await putRequest(`/v3/messages/${createdMessages[0].source.id}`,
         { text: 'My cool updated message' }, admin.token);
 
-    assert.equal(result.data.text, 'My cool updated message');
+    assert.equal(result.data.source.text, 'My cool updated message');
   });
 });

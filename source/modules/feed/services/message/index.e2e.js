@@ -300,7 +300,7 @@ describe('Service: Message', () => {
       }, { credentials: { id: admin.id } });
       const expected = await messageService.get({ messageId: createdMessage.source.id });
 
-      assert.equal(updatedMessage.id, expected.id);
+      assert.equal(updatedMessage.id, expected.objectId);
       assert.isDefined(expected);
       assert.property(expected, 'objectId');
       assert.equal(expected.text, 'My cool updated message');
@@ -315,7 +315,7 @@ describe('Service: Message', () => {
       }, { credentials: { id: admin.id } });
       const expected = await messageService.get({ messageId: createdTeamMessage.source.id });
 
-      assert.equal(updatedMessage.id, expected.id);
+      assert.equal(updatedMessage.id, expected.objectId);
       assert.isDefined(expected);
       assert.property(expected, 'objectId');
       assert.equal(expected.text, 'My cool updated message');
