@@ -65,7 +65,7 @@ export const assertThatUserBelongsToMessage = async (messageId, message) => {
 };
 
 export const assertThatCurrentOwnerHasUpdateRights = async (objectId, message) => {
-  const object = await objectService.get({ objectId }, message);
+  const object = await objectService.get({ id: objectId }, message);
   const objectParent = await objectService
     .getParent(R.pick(['parentType', 'parentId'], object));
 
