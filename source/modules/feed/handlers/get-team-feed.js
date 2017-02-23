@@ -5,7 +5,7 @@ import * as objectService from '../services/object';
 
 export default async (req, reply) => {
   try {
-    const payload = { parentType: 'team', parentId: req.params.teamId };
+    const payload = { ...req.query, parentType: 'team', parentId: req.params.teamId };
     const message = { ...req.pre, ...req.auth };
     const [feedItems, count] = await Promise.all([
       feedService.make(payload, message),
