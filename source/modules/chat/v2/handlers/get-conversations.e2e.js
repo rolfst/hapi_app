@@ -32,7 +32,7 @@ describe('Get conversations for logged user (v2)', () => {
         participantIds: [creator.id, participant1.id],
       }, { credentials: creator });
 
-      await conversationService.create({
+      const createdConversation2 = await conversationService.create({
         type: 'PRIVATE',
         participantIds: [creator.id, participant2.id],
       }, { credentials: creator });
@@ -44,6 +44,14 @@ describe('Get conversations for logged user (v2)', () => {
         credentials: participant1,
         artifacts: { authenticationToken: 'foo' },
       });
+
+      await Promise.delay(1000).then(() => privateMessageService.create({
+        conversationId: createdConversation2.id,
+        text: 'First message second conversation',
+      }, {
+        credentials: participant1,
+        artifacts: { authenticationToken: 'foo' },
+      }));
 
       await Promise.delay(1000).then(() => privateMessageService.create({
         conversationId: createdConversation1.id,
@@ -191,5 +199,48 @@ describe('Get conversations for logged user (v2)', () => {
         assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant2.id]);
         assert.property(conversationUnderTest, 'created_at');
       });
+  });
+
+  describe('update flow', () => {
+    before(async () => {
+      creator = await testHelper.createUser({
+        ...blueprints.users.creator,
+        username: 'conversation_creator' });
+      participant1 = await testHelper.createUser({
+        ...blueprints.users.employee,
+        username: 'conversation_participant1' });
+
+      const network = await testHelper.createNetwork({ userId: creator.id });
+
+      await testHelper.addUserToNetwork({ networkId: network.id, userId: participant1.id });
+      await testHelper.addUserToNetwork({ networkId: network.id, userId: creator.id });
+    });
+
+    after(() => testHelper.cleanAll());
+
+    it('should have different updatedAt after an update', async () => {
+      const createdConversation = await conversationService.create({
+        type: 'PRIVATE',
+        participantIds: [creator.id, participant1.id],
+      }, { credentials: creator });
+
+      await Promise.delay(3000).then(() => privateMessageService.create({
+        conversationId: createdConversation.id,
+        text: 'First message',
+      }, {
+        credentials: participant1,
+        artifacts: { authenticationToken: 'foo' },
+      }));
+
+      const updatedConversation = await conversationService.getConversation(createdConversation.id,
+        {
+          credentials: participant1,
+          artifacts: { authenticationToken: 'foo' },
+        });
+
+      assert.isNotNull(createdConversation, 'updatedAt');
+      assert.isNotNull(updatedConversation, 'updatedAt');
+      assert.notEqual(createdConversation.updatedAt, updatedConversation.updatedAt);
+    });
   });
 });
