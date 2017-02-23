@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
-import userRepo from '../source/modules/core/repositories/user';
-import networkRepo from '../source/modules/core/repositories/network';
-import Logger from '../source/shared/services/logger';
-
+const userRepo = require('../source/modules/core/repositories/user');
+const networkRepo = require('../source/modules/core/repositories/network');
+const Logger = require('../source/shared/services/logger');
 const args = require('yargs').argv;
+
 const logger = Logger.createLogger('SCRIPT/createNetworkForIntegration');
 
 /*
@@ -15,6 +15,7 @@ const logger = Logger.createLogger('SCRIPT/createNetworkForIntegration');
  *
  * API_ENV=testing babel-node scripts/new-network-for-integration.js \
  *   --name="My New Network" \
+ *   --email="thomas@flex-appeal.nl"
  *   --externalId="api.externalpartner.com/12333"
  *   --integration="PMT"
  */
@@ -28,9 +29,9 @@ const validateArgs = () => {
 
 const main = async () => {
   try {
-    const user = await userRepo.findUserBy({ email: 'intern@flex-appeal.nl' });
-
     validateArgs();
+
+    const user = await userRepo.findUserBy({ email: args.email || 'intern@flex-appeal.nl' });
 
     const network = await networkRepo.createIntegrationNetwork({
       userId: user.id,
@@ -39,7 +40,7 @@ const main = async () => {
       integrationName: args.integration,
     });
 
-    logger.info(`Successfully created network with id: ${network.id}.`);
+    logger.info(`Successfully created network with id: ${network.id}`);
 
     process.exit(0);
   } catch (err) {
