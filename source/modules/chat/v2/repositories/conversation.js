@@ -104,6 +104,5 @@ export const findExistingConversation = async (participantIds) => {
  * @method update
  */
 export function update(conversationId, { updatedAt }) {
-  return Conversation.findById(conversationId)
-    .then(conversation => conversation.update({ updatedAt }));
+  return Conversation.update({ updatedAt }, { where: { id: conversationId } });
 }

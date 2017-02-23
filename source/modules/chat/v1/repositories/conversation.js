@@ -140,8 +140,10 @@ export const deleteAllConversationsForUser = (userId) => {
  * @param {date} attributes.updatedAt
  * @method update
  */
-export function update(conversationId, { updatedAt }) {
-  return Conversation.findById(conversationId)
-    .then(conversation => conversation.update({ updatedAt }))
-    .then(conversation => toModel(conversation));
+export async function update(conversationId, { updatedAt }) {
+  const result = await Conversation.findById(conversationId);
+  if (!result) return null;
+
+  return result.update({ updatedAt })
+    .then(toModel);
 }
