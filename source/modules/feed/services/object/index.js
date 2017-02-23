@@ -199,6 +199,8 @@ export const remove = async (payload, message) => {
 /**
  * Retrieves an object
  * @param {object} payload - Object containing payload data
+ * @param {string} payload.objectType - The type of object
+ * @param {string} payload.sourceId - The id of the object
  * @param {string} payload.objectId - The id of the object
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method get
@@ -207,8 +209,11 @@ export const remove = async (payload, message) => {
 export const get = async (payload, message) => {
   logger.info('retrieving object', { payload, message });
 
-  const objects = await objectRepository.findBy({ id: payload.objectId });
+  const attributes = R.pick(['objectId', 'objectType', 'sourceId'], payload);
+  const objects = await objectRepository.findBy(attributes);
+  const object = R.head(objects);
 
-  return R.head(objects);
+  if (!object) throw createError('404', 'Object not found');
+
+  return object;
 };
-

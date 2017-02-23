@@ -256,7 +256,7 @@ describe('Service: Message', () => {
     });
   });
 
-  describe('update', () => {
+  describe('Update', () => {
     let createdMessage;
     let createdTeamMessage;
 
