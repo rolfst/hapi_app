@@ -7,6 +7,8 @@ module.exports = async (req, reply) => {
     const message = { ...req.pre, ...req.auth };
     const result = await conversationService.create(payload, message);
 
+    result.isNew = !!result.new;
+
     return reply({ data: responseUtil.toSnakeCase(result) });
   } catch (err) {
     return reply(err);
