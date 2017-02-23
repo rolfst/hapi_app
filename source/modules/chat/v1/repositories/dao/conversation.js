@@ -11,6 +11,10 @@ const Conversation = model.define('Conversation', {
     type: Sequelize.INTEGER,
     field: 'created_by',
   },
+  updatedAt: {
+    type: Sequelize.DATE,
+    field: 'updated_at',
+  },
 }, {
   tableName: 'conversations',
   timestamps: true,
