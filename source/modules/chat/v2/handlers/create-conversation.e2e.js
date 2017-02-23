@@ -39,7 +39,7 @@ describe('Handler: Create conversation (v2)', () => {
 
       assert.equal(statusCode, 200);
       assert.deepEqual(result.data.participant_ids, [participant1.id, creator.id]);
-      assert.isTrue(result.data.is_new);
+      assert.isTrue(result.is_new);
     });
 
     it('should return the existing conversation', async () => {
@@ -51,7 +51,7 @@ describe('Handler: Create conversation (v2)', () => {
 
       assert.equal(statusCode, 200);
       assert.equal(existingConversation.id, result.data.id);
-      assert.isFalse(result.data.is_new);
+      assert.isFalse(result.is_new);
     });
   });
 
