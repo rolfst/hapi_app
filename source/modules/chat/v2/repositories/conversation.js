@@ -65,6 +65,7 @@ export const create = async (attributes) => {
 
   const model = createConversationModel(conversation);
   model.participantIds = attributes.participantIds;
+  model.new = true;
 
   return model;
 };
