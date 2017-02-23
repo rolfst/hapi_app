@@ -24,6 +24,25 @@ const createOptionsFromPayload = R.pipe(
 );
 
 /**
+ * Get an object by object type and source id
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.objectType - The type of object
+ * @param {string} payload.sourceId - The id of the object
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method get
+ * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
+ */
+export const get = async (payload, message) => {
+  logger.info('Retrieving object', { payload, message });
+
+  const object = await objectRepository.findWhere(payload);
+
+  if (!object) throw createError('404', 'Object not found');
+
+  return object;
+};
+
+/**
  * Listing objects for a specific parent
  * @param {object} payload - Object containing payload data
  * @param {string} payload.limit - The limit for pagination
@@ -153,25 +172,6 @@ export const getParent = async (payload, message) => {
 };
 
 /**
- * Get an object by object type and source id
- * @param {object} payload - Object containing payload data
- * @param {string} payload.objectType - The type of object
- * @param {string} payload.sourceId - The id of the object
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method getObject
- * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
- */
-export const getObject = async (payload, message) => {
-  logger.info('Retrieving object', { payload, message });
-
-  const object = await objectRepository.findWhere(payload);
-
-  if (!object) throw createError('404', 'Object not found');
-
-  return object;
-};
-
-/**
  * Get users for parent model of object
  * @param {object} payload - Object containing payload data
  * @param {string} payload.parentType - The type of parent to retrieve
@@ -230,4 +230,3 @@ export const get = async (payload, message) => {
 
   return R.head(objects);
 };
-

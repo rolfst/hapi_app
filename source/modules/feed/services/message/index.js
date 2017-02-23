@@ -84,7 +84,7 @@ export const getLikes = async (payload, message) => {
  */
 export const list = async (payload, message) => {
   logger.info('Listing multiple messages', { payload, message });
-  // TODO Listing messages with their children objects
+
   const [messageResult, likeResult, commentResult] = await Promise.all([
     messageRepository.findByIds(payload.messageIds),
     likeRepository.findBy({ messageId: { $in: payload.messageIds } }),
@@ -111,28 +111,32 @@ export const list = async (payload, message) => {
 
 /**
  * List likes for a single message
- * @param {string} messageId - The id of the message
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.messageId - The id of the message
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method listLikes
  * @return {external:Promise.<Like[]>} {@link module:feed~Like like}
  */
-export const listLikes = async (messageId, message) => {
-  await impl.assertThatUserBelongsToMessage(messageId, message);
+export const listLikes = async (payload, message) => {
+  logger.info('Listing likes fo message', { payload, message });
+  await impl.assertThatUserBelongsToMessage(payload.messageId, message);
 
-  return likeRepository.findBy({ messageId });
+  return likeRepository.findBy({ messageId: payload.messageId });
 };
 
 /**
  * List comments for a single message
- * @param {string} messageId - The id of the message
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.messageId - The id of the message
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method listComments
  * @return {external:Promise.<Comment[]>} {@link module:feed~Comment comment}
  */
-export const listComments = async (messageId, message) => {
-  await impl.assertThatUserBelongsToMessage(messageId, message);
+export const listComments = async (payload, message) => {
+  logger.info('Listing multiple comments', { payload, message });
+  await impl.assertThatUserBelongsToMessage(payload.messageId, message);
 
-  return commentRepository.findBy({ messageId });
+  return commentRepository.findBy({ messageId: payload.messageId });
 };
 
 /**
