@@ -81,5 +81,6 @@ describe('Handler: Create message (v2)', () => {
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.source.text, 'My cool message');
+    assert.equal(result.data.children.length, 1);
   });
 });

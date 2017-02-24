@@ -37,6 +37,7 @@ export const list = async (payload, message) => {
 export async function create(payload, message) {
   logger.info('Creating private message', { payload, message });
 
+  let children = [];
   const conversation = await conversationRepository.findById(payload.conversationId);
   if (!conversation) throw createError('404');
 
@@ -52,11 +53,12 @@ export async function create(payload, message) {
     userId: message.credentials.id, objectId: null, text: payload.text });
 
   if (payload.attachments) {
-    await Promise.map(R.flatten([payload.attachments]), (file) => attachmentService.create({
-      file,
-      parentType: 'private_message',
-      parentId: createdMessage.id,
-    }, message));
+    children = await Promise.map(R.flatten([payload.attachments]),
+      (file) => attachmentService.create({
+        file,
+        parentType: 'private_message',
+        parentId: createdMessage.id,
+      }, message));
   }
 
   const createdObject = await objectService.create(createObjectPayload(createdMessage));
@@ -65,6 +67,7 @@ export async function create(payload, message) {
 
   const output = R.merge(createdObject, {
     source: { ...createdMessage, objectId: createdObject.id },
+    children,
   });
 
   ChatDispatcher.emit('message.created', {

@@ -1,16 +1,22 @@
 import { assert } from 'chai';
+import sinon from 'sinon';
 import Promise from 'bluebird';
 import blueprints from '../../../../shared/test-utils/blueprints';
 import * as testHelper from '../../../../shared/test-utils/helpers';
 import { getRequest } from '../../../../shared/test-utils/request';
+import * as Storage from '../../../../shared/services/storage';
 import * as privateMessageService from '../services/private-message';
 import * as conversationService from '../services/conversation';
 
 describe('Handler: Get messages (v2)', () => {
+  let sandbox;
   let createdConversation;
   let creator;
 
   before(async () => {
+    const hapiFile = testHelper.hapiFile('image.jpg');
+    sandbox = sinon.sandbox.create();
+    sandbox.stub(Storage, 'upload').returns(Promise.resolve('image.jpg'));
     const [admin, participant] = await Promise.all([
       testHelper.createUser({
         ...blueprints.users.admin,
@@ -44,6 +50,7 @@ describe('Handler: Get messages (v2)', () => {
     await Promise.delay(1000).then(() => privateMessageService.create({
       conversationId: createdConversation.id,
       text: 'Second message',
+      attachments: [hapiFile],
     }, {
       credentials: participant,
       artifacts: { authenticationToken: 'foo' },
@@ -58,7 +65,10 @@ describe('Handler: Get messages (v2)', () => {
     }));
   });
 
-  after(() => testHelper.cleanAll());
+  after(() => {
+    sandbox.restore();
+    return testHelper.cleanAll();
+  });
 
   it('should return messages for conversation (v2)', async () => {
     const endpoint = `/v2/conversations/${createdConversation.id}/messages`;
@@ -70,8 +80,11 @@ describe('Handler: Get messages (v2)', () => {
     assert.isString(result.data[0].source.id);
     assert.equal(result.data[0].source.text, 'Last message');
     assert.property(result.data[0], 'created_at');
+    assert.equal(result.data[0].children.length, 0);
     assert.equal(result.data[1].source.text, 'Second message');
+    assert.equal(result.data[1].children.length, 1);
     assert.equal(result.data[2].source.text, 'First message');
+    assert.equal(result.data[2].children.length, 0);
     assert.property(result, 'meta');
     assert.property(result.meta.pagination, 'offset');
     assert.property(result.meta.pagination, 'limit');

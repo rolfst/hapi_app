@@ -31,6 +31,8 @@ export const findSourcesForType = R.curry((message, values, type) => R.cond([
 export const findChildrenForType = R.curry((values, type) => R.cond([
   [R.equals('feed_message'), () => objectRepository.findBy({
     parentType: 'feed_message', parentId: { $in: values } })],
+  [R.equals('private_message'), () => objectRepository.findBy({
+    parentType: 'private_message', parentId: { $in: values } })],
 ])(type, values));
 
 export const addSourceToObject = R.curry((sources, object) =>

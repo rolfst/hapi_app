@@ -191,9 +191,8 @@ describe('Service: Message', () => {
     let createdMessage;
     let sandbox;
 
-    const hapiFile = testHelpers.hapiFile('image.jpg');
-
     before(async () => {
+      const hapiFile = testHelpers.hapiFile('image.jpg');
       sandbox = sinon.sandbox.create();
       sandbox.stub(Storage, 'upload').returns(Promise.resolve('image.jpg'));
 
