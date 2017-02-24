@@ -12,7 +12,7 @@ describe('Validator: create-message', () => {
     assert.isNull(actual.error);
   });
 
-  it('should succeed when only an attachment is provided', async () => {
+  it('should succeed when both text and attachment is provided', async () => {
     const hapiFile = testHelper.hapiFile('image.jpg');
     const payload = { text: 'just a text', attachments: [hapiFile] };
     const actual = Joi.validate({ payload }, scheme);
@@ -27,7 +27,7 @@ describe('Validator: create-message', () => {
     assert.isNull(actual.error);
   });
 
-  it('should succeed when no param is provided', async () => {
+  it('should fail when no param is provided', async () => {
     const actual = Joi.validate({}, scheme);
 
     assert.ifError(actual.error[0]);
