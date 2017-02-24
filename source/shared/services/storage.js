@@ -56,7 +56,6 @@ export function upload(file, prefix = null) {
         Bucket: process.env.S3_BUCKET,
         Key: uploadPath,
         Body: fileData,
-        ContentDisposition: file.headers['content-disposition'],
         ContentType: file.headers['content-type'],
       };
 
