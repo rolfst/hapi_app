@@ -35,14 +35,15 @@ describe('Validator: create-message', () => {
   });
 
   it('should return error when unknown param is provided', async () => {
-    const payload = {
-      unknown: 'hi',
-    };
-    const actual = Joi.validate({ payload }, scheme);
+    const payload = { unknown: 'hi' };
+    const actual = Joi.validate(payload, scheme);
+
+    assert.ifError(actual.error[0]);
+  });
 
   it('should fail when no param is provided', async () => {
     const actual = Joi.validate({}, scheme);
 
-    assert.ifError(actual.error[0]);
+    assert.ifError(actual.error);
   });
 });
