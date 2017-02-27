@@ -172,16 +172,17 @@ describe('Get conversations for logged user (v2)', () => {
       assert.lengthOf(result.data, 1);
       assert.equal(result.meta.pagination.total_count, 2);
       assert.equal(conversationUnderTest.type, 'conversation');
-      assert.equal(conversationUnderTest.id, createdConversation1.id);
+      assert.equal(conversationUnderTest.id, createdConversation2.id);
       assert.equal(conversationUnderTest.user_id, creator.id);
       assert.property(conversationUnderTest, 'last_message');
       assert.property(conversationUnderTest.last_message, 'id');
-      assert.equal(conversationUnderTest.last_message.source.text, 'Last message');
-      assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant1.id]);
+      assert.equal(conversationUnderTest.last_message.source.text,
+         'First message second conversation');
+      assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant2.id]);
       assert.property(conversationUnderTest, 'created_at');
     });
 
-    it('should return conversation collection with an amount of 1 starting at the second',
+    it('should return conversation collection with an amount of 1 being the first created',
       async () => {
         const { result, statusCode } = await getRequest(
           `${ENDPOINT_URL}?limit=1&offset=1`, creator.token);
@@ -190,13 +191,13 @@ describe('Get conversations for logged user (v2)', () => {
         assert.equal(statusCode, 200);
         assert.lengthOf(result.data, 1);
         assert.equal(conversationUnderTest.type, 'conversation');
-        assert.equal(conversationUnderTest.id, createdConversation2.id);
+        assert.equal(conversationUnderTest.id, createdConversation1.id);
         assert.equal(conversationUnderTest.user_id, creator.id);
         assert.property(conversationUnderTest, 'last_message');
         assert.property(conversationUnderTest.last_message, 'id');
         assert.equal(conversationUnderTest.last_message.source.text,
-          'First message second conversation');
-        assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant2.id]);
+          'Last message');
+        assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant1.id]);
         assert.property(conversationUnderTest, 'created_at');
       });
   });
@@ -209,6 +210,9 @@ describe('Get conversations for logged user (v2)', () => {
       participant1 = await testHelper.createUser({
         ...blueprints.users.employee,
         username: 'conversation_participant1' });
+      participant2 = await testHelper.createUser({
+        ...blueprints.users.employee,
+        username: 'conversation_participant2' });
 
       const network = await testHelper.createNetwork({ userId: creator.id });
 
@@ -241,6 +245,39 @@ describe('Get conversations for logged user (v2)', () => {
       assert.isNotNull(createdConversation, 'updatedAt');
       assert.isNotNull(updatedConversation, 'updatedAt');
       assert.notEqual(createdConversation.updatedAt, updatedConversation.updatedAt);
+    });
+
+    it('should should list conversations in correct order', async () => {
+      const createdConversation = await conversationService.create({
+        type: 'PRIVATE',
+        participantIds: [creator.id, participant1.id],
+      }, { credentials: creator });
+
+      const createdConversation2 = await conversationService.create({
+        type: 'PRIVATE',
+        participantIds: [creator.id, participant2.id],
+      }, { credentials: creator });
+
+      await privateMessageService.create({
+        conversationId: createdConversation.id,
+        text: 'First message',
+      }, {
+        credentials: participant1,
+        artifacts: { authenticationToken: 'foo' },
+      });
+
+      await Promise.delay(2000).then(() => privateMessageService.create({
+        conversationId: createdConversation2.id,
+        text: 'First message second conversation',
+      }, {
+        credentials: creator,
+        artifacts: { authenticationToken: 'foo' },
+      }));
+
+      const { result } = await getRequest(`${ENDPOINT_URL}?limit=1`, creator.token);
+      const conversationUnderTest = result.data[0];
+
+      assert.equal(conversationUnderTest.id, createdConversation2.id);
     });
   });
 });
