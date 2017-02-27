@@ -1,3 +1,4 @@
+import R from 'ramda';
 import EventEmitter from '../../shared/services/event-emitter';
 import * as notifier from '../../shared/services/notifier';
 import * as objectService from './services/object';
@@ -15,6 +16,7 @@ pubsub.asyncOn('message.created', async (payload) => {
   const notification = createdMessageNotification(payload.actor, payload.parent, payload.object);
   const parentUsers = await objectService
     .usersForParent({ parentType: payload.parent.type, parentId: payload.parent.id })
+    .then(R.reject(R.propEq('id', payload.actor.id)))
     .catch(() => Promise.resolve([]));
 
   notifier.send(parentUsers, notification, payload.networkId);
