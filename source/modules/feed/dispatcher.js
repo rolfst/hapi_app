@@ -14,12 +14,12 @@ const pubsub = EventEmitter.create();
  */
 pubsub.asyncOn('message.created', async (payload) => {
   const notification = createdMessageNotification(payload.actor, payload.parent, payload.object);
-  const parentUsers = await objectService
+  const usersToNotify = await objectService
     .usersForParent({ parentType: payload.parent.type, parentId: payload.parent.id })
     .then(R.reject(R.propEq('id', payload.actor.id)))
     .catch(() => Promise.resolve([]));
 
-  notifier.send(parentUsers, notification, payload.networkId);
+  notifier.send(usersToNotify, notification, payload.networkId);
 });
 
 export default pubsub;
