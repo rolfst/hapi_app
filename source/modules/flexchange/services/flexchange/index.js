@@ -99,7 +99,7 @@ export const listReceivers = async (payload, message) => {
     receivers = await userService.listUsersWithNetworkScope(userPayload, message);
   }
 
-  return receivers;
+  return R.reject(R.propEq('id', message.credentials.id), receivers);
 };
 
 /**
