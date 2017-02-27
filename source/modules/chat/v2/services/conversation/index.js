@@ -50,7 +50,7 @@ export const create = async (payload, message) => {
 };
 
 /**
- * Retrieve conversations by ids.
+ * Retrieve conversations by ids, ordered by updated at Desc.
  * @param {object} payload - Object containing payload data
  * @param {string[]} payload.conversationIds - The ids to retrieve
  * @param {string} [payload.limit] - The limit for the conversations resultset
