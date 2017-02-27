@@ -44,17 +44,20 @@ const getTeamsByExternalId = async (networkId, externalIds) => {
 };
 
 const replaceTeamIdsWithExternalId = (internalTeams) => (user) => {
-  const replacedIds = R.map(id => {
+  const externalIds = R.map(id => {
     const match = findById(internalTeams, id);
 
     return match ? match.externalId : null;
   }, R.defaultTo([], user.teamIds));
 
-  return R.assoc('teamIds', rejectNil(replacedIds), user);
+  const replacedIds = R.pipe(rejectNil, R.sort((a, b) => a - b))(externalIds);
+
+  return R.assoc('teamIds', replacedIds, user);
 };
 
 const swapTeamIdsWithExternalTeamIds = (externalUser) => R.pipe(
   obj => R.assoc('externalTeamIds', R.defaultTo([], obj.teamIds), obj),
+  R.over(R.lensProp('externalTeamIds'), R.sort((a, b) => a - b)),
   R.dissoc('teamIds')
 )(externalUser);
 
@@ -104,7 +107,7 @@ const addUser = (networkId) => (user) => userRepository
     networkId,
     userId: user.id,
     externalId: user.externalId,
-    deletedAt: null,
+    deletedAt: user.deletedAt || null,
     roleType: user.roleType || 'EMPLOYEE',
   })
   .catch((err) => logger.error('Error creating network link', { networkId, user, err }));
@@ -140,7 +143,15 @@ const createUser = (networkId) => (user) => userRepository
  * @return {Promise}
  */
 const removeUser = (networkId) => (user) => userRepository
-  .setNetworkLink({ networkId, externalId: user.externalId }, { deletedAt: new Date() })
+  .setNetworkLink({
+    networkId,
+    userId: user.id,
+  }, {
+    networkId,
+    userId: user.id,
+    externalId: user.externalId,
+    deletedAt: new Date(),
+  })
   .catch((err) => logger.error('Error removing user from network', { networkId, user, err }));
 
 /**
@@ -169,8 +180,6 @@ export const createTeamActions = (internalTeams, externalTeams) => {
     update: values(externalIdsToUpdate),
     delete: internalIds(externalIdsToRemove),
   };
-
-  logger.info('Created team actions', { actions: R.omit(['data'], actions) });
 
   return actions;
 };
@@ -211,21 +220,23 @@ export const createUserActions = (
   const groupedNetworkUsers = groupByEmail(networkUsers);
   const groupedExternalUsers = groupByEmail(externalUsers);
   const groupedSystemUser = groupByEmail(allUsersInSystem);
-  const externalUserEmails = pluckEmail(externalUsers);
 
-  const networkMatch = (email) => groupedNetworkUsers[email];
-  const externalMatch = (email) => groupedExternalUsers[email];
-  const systemMatch = (email) => groupedSystemUser[email];
-  const isActive = (matchFn) => (email) => R.isNil(R.prop('deletedAt', matchFn(email)));
-  const isInactive = (matchFn) => (email) => R.not(R.isNil(R.prop('deletedAt', matchFn(email))));
+  const networkMatch = (email) => R.defaultTo(null, groupedNetworkUsers[email]);
+  const externalMatch = (email) => R.defaultTo(null, groupedExternalUsers[email]);
+  const systemMatch = (email) => R.defaultTo(null, groupedSystemUser[email]);
+  const isActive = (matchFn) => (email) => {
+    if (R.isNil(matchFn(email))) return false;
+    return R.isNil(R.prop('deletedAt', matchFn(email)));
+  };
+  const isInactive = (matchFn) => (email) => R.not(isActive(matchFn)(email));
   const actionReducer = (pred) => R.reduce((acc, value) =>
-    R.ifElse(pred, () => R.append(value, acc), R.always(acc))(value), [], externalUserEmails);
+    R.ifElse(pred, () => R.append(value, acc), R.always(acc))(value), [],
+    R.uniq(R.concat(pluckEmail(externalUsers), pluckEmail(networkUsers))));
 
-  const removePredicate = R.allPass([
-    networkMatch,
+  const removePredicate = R.both(
     isActive(networkMatch),
-    isInactive(externalMatch),
-  ]);
+    isInactive(externalMatch)
+  );
 
   const createPredicate = R.allPass([
     R.complement(networkMatch),
@@ -236,11 +247,11 @@ export const createUserActions = (
   const addPredicate = R.ifElse(
     R.both(networkMatch, isActive(externalMatch)),
     R.complement(R.both(isActive(networkMatch), isActive(externalMatch))),
-    R.allPass([systemMatch, isActive(externalMatch)])
+    R.allPass([R.complement(networkMatch), systemMatch, externalMatch])
   );
 
   const changedTeamsPredicate = R.ifElse(
-    networkMatch,
+    R.both(networkMatch, externalMatch),
     R.converge(R.complement(R.equals), [
       R.pipe(networkMatch, R.prop('teamIds')),
       R.pipe(externalMatch, R.prop('externalTeamIds')),
@@ -267,14 +278,9 @@ export const createUserActions = (
   const createdActions = {
     create: values(actionReducer(createPredicate)),
     add: values(actionReducer(addPredicate)),
-    remove: values(R.concat(
-      R.difference(pluckEmail(networkUsers), externalUserEmails),
-      actionReducer(removePredicate)
-    )),
+    remove: values(actionReducer(removePredicate)),
     changedTeams: values(actionReducer(changedTeamsPredicate)),
   };
-
-  logger.info('Created user actions', { actions: R.omit(['data'], createdActions) });
 
   return createdActions;
 };

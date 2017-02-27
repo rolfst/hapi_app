@@ -14,8 +14,7 @@ const logger = Logger.createLogger('INTEGRATIONS/service/sync');
 /**
  * Synchronize a single network with his integration partner
  * @param {object} payload
- * @param {string} payload.networkId - The network to synchronize
- * @param {boolean} payload.internal - Wether the action is called internally i.e. via cronjob
+ * @param {string} payload.networkId - The network to synchroniz
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method syncWithIntegrationPartner
  * @return {external:Promise<Network[]>}
@@ -23,12 +22,6 @@ const logger = Logger.createLogger('INTEGRATIONS/service/sync');
 export const syncNetwork = async (payload, message) => {
   try {
     logger.info('Started network synchronization', { payload, message });
-
-    if (!payload.internal) {
-      const owner = await userRepository.findUserById(message.credentials.id, payload.networkId);
-
-      if (!R.propEq('role', 'ADMIN', owner)) throw createError('403');
-    }
 
     const network = await networkRepository.findNetworkById(payload.networkId);
     if (!network) throw createError('404', 'Network not found.');
@@ -50,7 +43,6 @@ export const syncNetwork = async (payload, message) => {
     await impl.executeTeamActions(network.id, teamActions);
 
     const internalTeamsAfterSync = await networkRepository.findTeamsForNetwork(network.id);
-
     const userActions = impl.createUserActions(
       allUsersInSystem,
       internalTeamsAfterSync,
@@ -60,10 +52,14 @@ export const syncNetwork = async (payload, message) => {
 
     await impl.executeUserActions(network.id, userActions);
 
-    return {
+    const actions = {
       teamActions: R.omit(['data'], teamActions),
-      userActions: R.omit(['data'], userActions),
+      userActions: R.map(R.map(R.pick(['id', 'externalId', 'email'])), R.omit(['data'], userActions)),
     };
+
+    logger.info('Successfully synced network', { payload, actions });
+
+    return actions;
   } catch (err) {
     logger.error('Failed network synchronization', { payload, message, err });
 
@@ -114,15 +110,10 @@ export const importNetwork = async (payload, message) => {
       externalId: externalAdmin.externalId,
     });
 
-    // mailConfig = configurationMail(network, admin);
-    // mailConfig = configurationMailNewAdmin(network, superUser, password);
-
     await networkRepository.setImportDateOnNetworkIntegration(network.id);
     const syncResult = await syncNetwork({ networkId: network.id, internal: true }, message);
 
     logger.info('Finished importing users for network', { syncResult });
-
-    // Mailer.send(mailConfig);
   } catch (err) {
     logger.error('Failed importing network', { payload, message, err });
 

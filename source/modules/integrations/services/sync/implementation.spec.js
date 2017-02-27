@@ -5,7 +5,7 @@ import * as teamRepository from '../../../core/repositories/team';
 import * as userRepository from '../../../core/repositories/user';
 import * as networkRepository from '../../../core/repositories/network';
 
-describe('Service: Sync Implementation', () => {
+describe.only('Service: Sync Implementation', () => {
   const internalTeams = [{
     id: '1',
     externalId: '240',
@@ -106,12 +106,13 @@ describe('Service: Sync Implementation', () => {
 
   describe('createUserActions', () => {
     it('should set correct user to be added to network', () => {
+      const now = new Date();
       const internalUsers = [{
         id: '1',
         externalId: '23',
         email: 'foo@baz.com',
         teamIds: [],
-        deletedAt: new Date(),
+        deletedAt: now,
       }];
 
       const usersInSystem = [{
@@ -126,6 +127,12 @@ describe('Service: Sync Implementation', () => {
         email: 'added@baz.com',
         teamIds: [],
         deletedAt: null,
+      }, {
+        id: '4',
+        externalId: null,
+        email: 'inactive@baz.com',
+        teamIds: [],
+        deletedAt: null,
       }];
 
       const externalUsers = [{
@@ -138,6 +145,11 @@ describe('Service: Sync Implementation', () => {
         email: 'added@baz.com',
         teamIds: [],
         deletedAt: null,
+      }, {
+        externalId: '239',
+        email: 'inactive@baz.com',
+        teamIds: [],
+        deletedAt: now,
       }];
 
       const userActions = impl.createUserActions(usersInSystem, [], internalUsers, externalUsers);
@@ -158,6 +170,13 @@ describe('Service: Sync Implementation', () => {
         teamIds: [],
         externalTeamIds: [],
         deletedAt: null,
+      }, {
+        id: '4',
+        externalId: '239',
+        email: 'inactive@baz.com',
+        teamIds: [],
+        externalTeamIds: [],
+        deletedAt: now,
       }]);
     });
 
@@ -199,6 +218,12 @@ describe('Service: Sync Implementation', () => {
         email: 'removed@baz.com',
         teamIds: [],
         deletedAt: null,
+      }, {
+        id: '3',
+        externalId: '25',
+        email: 'deleted@baz.com',
+        teamIds: [],
+        deletedAt: now,
       }];
 
       const usersInSystem = internalUsers;
@@ -216,18 +241,18 @@ describe('Service: Sync Implementation', () => {
       assert.deepEqual(userActions.add, []);
       assert.deepEqual(userActions.changedTeams, []);
       assert.deepEqual(userActions.remove, [{
-        id: '2',
-        externalId: '24',
-        email: 'removed@baz.com',
-        teamIds: [],
-        deletedAt: null,
-      }, {
         id: '1',
         externalId: '23',
         email: 'foo@baz.com',
         teamIds: [],
         externalTeamIds: [],
         deletedAt: now,
+      }, {
+        id: '2',
+        externalId: '24',
+        email: 'removed@baz.com',
+        teamIds: [],
+        deletedAt: null,
       }]);
     });
 
@@ -267,7 +292,7 @@ describe('Service: Sync Implementation', () => {
         id: '2',
         externalId: '254',
         email: 'changed@baz.com',
-        teamIds: ['240', '234', '232'],
+        teamIds: ['232', '234', '240'],
         externalTeamIds: ['240'],
         deletedAt: null,
       }]);
@@ -277,13 +302,13 @@ describe('Service: Sync Implementation', () => {
         id: '2',
         externalId: '254',
         email: 'changed@baz.com',
-        teamIds: ['240', '234', '232'],
+        teamIds: ['232', '234', '240'],
         externalTeamIds: ['240'],
         deletedAt: null,
       }]);
     });
 
-    it('should add correct values for team link changes', () => {
+    it('should add correct values for team link changes when user is in network', () => {
       const internalUsers = [{
         id: '1',
         externalId: '23',
@@ -303,7 +328,7 @@ describe('Service: Sync Implementation', () => {
       const externalUsers = [{
         externalId: '23',
         email: 'foo@baz.com',
-        teamIds: ['240', '234'],
+        teamIds: ['234', '240'],
         deletedAt: null,
       }, {
         externalId: '254',
@@ -319,7 +344,7 @@ describe('Service: Sync Implementation', () => {
         id: '2',
         externalId: '254',
         email: 'changed@baz.com',
-        teamIds: ['240', '234', '232'],
+        teamIds: ['232', '234', '240'],
         externalTeamIds: ['240'],
         deletedAt: null,
       }]);
@@ -395,6 +420,7 @@ describe('Service: Sync Implementation', () => {
           externalId: '21',
           email: 'new@baz.com',
           teamIds: ['1', '2'],
+          deletedAt: new Date(),
         }],
         remove: [],
         changedTeams: [],
@@ -411,7 +437,7 @@ describe('Service: Sync Implementation', () => {
       assert.equal(userRepository.setNetworkLink.firstCall.args[0].externalId, '21');
       assert.isNotNull(userRepository.setNetworkLink.firstCall.args[1], 'userId');
       assert.equal(userRepository.setNetworkLink.firstCall.args[1].networkId, '1');
-      assert.equal(userRepository.setNetworkLink.firstCall.args[1].deletedAt, null);
+      assert.isNotNull(userRepository.setNetworkLink.firstCall.args[1].deletedAt, null);
       assert.equal(userRepository.setNetworkLink.firstCall.args[1].roleType, 'EMPLOYEE');
       assert.equal(userRepository.setNetworkLink.firstCall.args[1].externalId, '21');
     });
@@ -432,8 +458,11 @@ describe('Service: Sync Implementation', () => {
 
       assert.equal(userRepository.setNetworkLink.callCount, 1);
       assert.equal(userRepository.setNetworkLink.firstCall.args[0].networkId, '1');
-      assert.equal(userRepository.setNetworkLink.firstCall.args[0].externalId, '244');
+      assert.equal(userRepository.setNetworkLink.firstCall.args[0].userId, '3');
       assert.isNotNull(userRepository.setNetworkLink.firstCall.args[1].deletedAt);
+      assert.equal(userRepository.setNetworkLink.firstCall.args[1].externalId, '244');
+      assert.equal(userRepository.setNetworkLink.firstCall.args[1].userId, '3');
+      assert.equal(userRepository.setNetworkLink.firstCall.args[1].networkId, '1');
     });
 
     it('should execute correct function for changedTeams', async () => {

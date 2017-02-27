@@ -4,7 +4,7 @@ export default async (req, reply) => {
   try {
     const message = { ...req.pre, ...req.auth };
     const payload = {
-      networkid: req.params.networkId,
+      networkId: req.params.networkId,
       ownerEmail: req.payload.external_email,
     };
 
