@@ -16,6 +16,7 @@ pubsub.asyncOn('message.created', async (payload) => {
   const socketPayload = { data: responseUtils.toSnakeCase(payload.object) };
 
   socketService.send('private_message:created', usersToNotify, socketPayload, payload.token);
+
   newMessageNotification.send(actor, payload.object, usersToNotify);
 });
 
