@@ -57,7 +57,7 @@ describe('Feed: Dispatcher', () => {
       sandbox.stub(objectService, 'usersForParent').returns(Promise.resolve(usersForParent));
 
       Dispatcher.emit('message.created', {
-        actor: { fullName: 'John Doe' },
+        actor: { id: '1', fullName: 'John Doe' },
         networkId: '123',
         parent: { type: 'team', id: '12', name: 'Foo team' },
         object: { id: '35234', source: { id: '435', text: 'Jessica cannot work today.' } },
@@ -65,10 +65,11 @@ describe('Feed: Dispatcher', () => {
 
       await Promise.delay(1000);
 
-      assert.deepEqual(notifier.send.firstCall.args, [usersForParent, {
-        text: 'John Doe in Foo team: Jessica cannot work today.',
-        data: { id: '435', type: 'message', track_name: 'message_created' },
-      }, '123']);
+      assert.deepEqual(notifier.send.firstCall.args, [
+        [{ id: '2', email: 'baz@example.com' }], {
+          text: 'John Doe in Foo team: Jessica cannot work today.',
+          data: { id: '435', type: 'message', track_name: 'message_created' },
+        }, '123']);
     });
 
     it('notification text without "in:" when parent name is not present', async () => {
@@ -76,7 +77,7 @@ describe('Feed: Dispatcher', () => {
       sandbox.stub(objectService, 'usersForParent').returns(Promise.resolve(usersForParent));
 
       Dispatcher.emit('message.created', {
-        actor: { fullName: 'John Doe' },
+        actor: { id: '1', fullName: 'John Doe' },
         networkId: '123',
         parent: { type: 'team', id: '12' },
         object: { id: '35234', source: { id: '435', text: 'Jessica cannot work today.' } },
@@ -84,10 +85,11 @@ describe('Feed: Dispatcher', () => {
 
       await Promise.delay(1000);
 
-      assert.deepEqual(notifier.send.firstCall.args, [usersForParent, {
-        text: 'John Doe: Jessica cannot work today.',
-        data: { id: '435', type: 'message', track_name: 'message_created' },
-      }, '123']);
+      assert.deepEqual(notifier.send.firstCall.args, [
+        [{ id: '2', email: 'baz@example.com' }], {
+          text: 'John Doe: Jessica cannot work today.',
+          data: { id: '435', type: 'message', track_name: 'message_created' },
+        }, '123']);
     });
   });
 });
