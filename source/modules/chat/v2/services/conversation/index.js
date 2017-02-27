@@ -66,7 +66,7 @@ export const listConversations = async (payload, message) => {
   const includes = impl.hasInclude(payload.include);
   const [conversations, objects] = await Promise.all([
     conversationRepo.findByIds(payload.conversationIds,
-      createOptions({ ...payload, order: 'updated_at DESC' })),
+      createOptions({ ...payload, order: [['updated_at', 'DESC']] })),
     objectRepository.findBy({
       parentType: 'conversation', parentId: { $in: payload.conversationIds } }),
   ]);
