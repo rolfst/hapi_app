@@ -69,14 +69,9 @@ describe('Service: Object', () => {
   });
 
   describe('count', () => {
-    let network2;
-    let employee;
-
     before(async () => {
       admin = await testHelpers.createUser({ password: 'foo' });
-      employee = await testHelpers.createUser({ password: 'foo' });
       network = await testHelpers.createNetwork({ userId: admin.id });
-      network2 = await testHelpers.createNetwork({ userId: employee.id });
 
       return Promise.all([
         objectService.create({
@@ -88,16 +83,9 @@ describe('Service: Object', () => {
         }),
         objectService.create({
           userId: admin.id,
-          parentType: 'network',
-          parentId: network.id,
-          objectType: 'feed_message',
-          sourceId: '39102',
-        }),
-        objectService.create({
-          userId: employee.id,
-          parentType: 'network',
-          parentId: network2.id,
-          objectType: 'feed_message',
+          parentType: 'user',
+          parentId: admin.id,
+          objectType: 'poll',
           sourceId: '39102',
         }),
       ]);
@@ -114,28 +102,8 @@ describe('Service: Object', () => {
         parentId: admin.id,
       }],
       }, { credentials: admin });
-      const networkObjects2 = await objectService.count({ where: [{
-        parentType: 'network',
-        parentId: network2.id,
-      }, {
-        parentType: 'user',
-        parentId: employee.id,
-      }],
-      }, { credentials: admin });
 
       assert.equal(networkObjects, 2);
-      assert.equal(networkObjects2, 1);
-    });
-
-    it('should only have objects for current user', async () => {
-      const actual = await objectService.list({
-        parentType: 'network',
-        parentId: network.id,
-      }, { credentials: admin });
-
-      assert.equal(actual.length, 2);
-      assert.equal(actual[0].parentId, network.id);
-      assert.equal(actual[2].parentId, network.id);
     });
   });
 
