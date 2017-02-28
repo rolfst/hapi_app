@@ -101,7 +101,7 @@ describe('Service: Object', () => {
 
     after(() => testHelpers.cleanAll());
 
-    it.only('should return correct count', async () => {
+    it('should return correct count', async () => {
       const networkObjects = await objectService.count({ where: [{
         parentType: 'network',
         parentId: network.id,
