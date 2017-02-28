@@ -32,46 +32,40 @@ export const getClient = () => {
 
 /**
  * Upload a fileStream to Amazon S3 Storage
- * @param {object} file - Object containing file meta data
- * @param {string} file.filename
- * @param {object} file.headers
+ * @param {Stream} file - Stream containing file
+ * @param {string} file.hapi.filename
+ * @param {object} file.hapi.headers
  * @param {string} prefix - The prefix that will be prepended to the filename
  * @method upload
  * @return {external:Promise.<String>} Returning the filename
  */
 export function upload(file, prefix = null) {
   const environment = getEnvironmentLocation();
-  const fileExtension = R.last(file.filename.split('.'));
+  const fileExtension = R.last(file.hapi.filename.split('.'));
   const generatedFileName = Math.random().toString(20).substr(2, 15);
   const newFilename = `${generatedFileName}.${fileExtension}`;
   const uploadPath = prefix ?
     `${environment}/${prefix}/${newFilename}` :
     `${environment}/${newFilename}`;
 
-  return new Promise((fulfill, reject) => {
-    fs.readFile(file.path, (fsErr, fileData) => {
-      if (fsErr) return reject(fsErr);
+  const params = {
+    Bucket: process.env.S3_BUCKET,
+    Key: uploadPath,
+    Body: file,
+    ContentType: file.hapi.headers['content-type'],
+  };
 
-      const params = {
-        Bucket: process.env.S3_BUCKET,
-        Key: uploadPath,
-        Body: fileData,
-        ContentType: file.headers['content-type'],
-      };
+  return new Promise((success, reject) => {
+    getClient().upload(params, (err, data) => {
+      if (err) {
+        logger.error('Error while uploading to Amazon S3', { err });
 
-      logger.info('Uploading file to S3', { params: R.omit(['Body'], params) });
+        return reject(createError('30001', err));
+      }
 
-      getClient().putObject(params).promise()
-        .then((response) => {
-          logger.info('S3 response', { response });
+      logger.info('Amazon S3 response', { response: data });
 
-          if (response.ETag) fulfill(newFilename);
-        })
-        .catch(err => {
-          logger.error('Error with S3', { err });
-
-          reject(createError('30001', err));
-        });
+      return success(newFilename);
     });
   });
 }
