@@ -73,6 +73,7 @@ describe('Service: Object', () => {
       admin = await testHelpers.createUser({ password: 'foo' });
       const employee = await testHelpers.createUser({ password: 'foo' });
       network = await testHelpers.createNetwork({ userId: admin.id });
+      const network2 = await testHelpers.createNetwork({ userId: admin.id });
 
       return Promise.all([
         objectService.create({
@@ -92,7 +93,7 @@ describe('Service: Object', () => {
         objectService.create({
           userId: employee.id,
           parentType: 'network',
-          parentId: network.id,
+          parentId: network2.id,
           objectType: 'feed_message',
           sourceId: '39102',
         }),
