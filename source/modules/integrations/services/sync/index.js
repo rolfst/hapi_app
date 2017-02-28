@@ -47,7 +47,7 @@ export const syncNetwork = async (payload, message) => {
       allUsersInSystem,
       internalTeamsAfterSync,
       internalUsers,
-      R.uniqBy(R.prop('email'), externalUsers)
+      externalUsers
     );
 
     await impl.executeUserActions(network.id, userActions);

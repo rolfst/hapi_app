@@ -105,155 +105,276 @@ describe.only('Service: Sync Implementation', () => {
   });
 
   describe('createUserActions', () => {
-    it('should set correct user to be added to network', () => {
-      const now = new Date();
-      const internalUsers = [{
-        id: '1',
-        externalId: '23',
-        email: 'foo@baz.com',
-        teamIds: [],
-        deletedAt: now,
-      }];
+    describe('Action: add', () => {
+      it('should add user that already exists but is deleted', () => {
+        const internalUsers = [{
+          id: '1',
+          externalId: '23',
+          email: 'foo@baz.com',
+          teamIds: [],
+          deletedAt: new Date(),
+        }];
 
-      const usersInSystem = [{
-        id: '1',
-        externalId: null,
-        email: 'foo@baz.com',
-        teamIds: [],
-        deletedAt: null,
-      }, {
-        id: '3',
-        externalId: null,
-        email: 'added@baz.com',
-        teamIds: [],
-        deletedAt: null,
-      }, {
-        id: '4',
-        externalId: null,
-        email: 'inactive@baz.com',
-        teamIds: [],
-        deletedAt: null,
-      }];
+        const usersInSystem = [{
+          id: '1',
+          externalId: null,
+          email: 'foo@baz.com',
+          teamIds: [],
+          deletedAt: null,
+        }];
 
-      const externalUsers = [{
-        externalId: '23',
-        email: 'foo@baz.com',
-        teamIds: [],
-        deletedAt: null,
-      }, {
-        externalId: '234',
-        email: 'added@baz.com',
-        teamIds: [],
-        deletedAt: null,
-      }, {
-        externalId: '239',
-        email: 'inactive@baz.com',
-        teamIds: [],
-        deletedAt: now,
-      }];
+        const externalUsers = [{
+          externalId: '23',
+          email: 'foo@baz.com',
+          teamIds: [],
+          deletedAt: null,
+        }];
 
-      const userActions = impl.createUserActions(usersInSystem, [], internalUsers, externalUsers);
+        const userActions = impl.createUserActions(usersInSystem, [], internalUsers, externalUsers);
+        assert.deepEqual(userActions.remove, []);
+        assert.deepEqual(userActions.changedTeams, []);
+        assert.deepEqual(userActions.add, [{
+          id: '1',
+          externalId: '23',
+          email: 'foo@baz.com',
+          teamIds: [],
+          externalTeamIds: [],
+          deletedAt: null,
+        }]);
+      });
 
-      assert.deepEqual(userActions.remove, []);
-      assert.deepEqual(userActions.changedTeams, []);
-      assert.deepEqual(userActions.add, [{
-        id: '1',
-        externalId: '23',
-        email: 'foo@baz.com',
-        teamIds: [],
-        externalTeamIds: [],
-        deletedAt: null,
-      }, {
-        id: '3',
-        externalId: '234',
-        email: 'added@baz.com',
-        teamIds: [],
-        externalTeamIds: [],
-        deletedAt: null,
-      }, {
-        id: '4',
-        externalId: '239',
-        email: 'inactive@baz.com',
-        teamIds: [],
-        externalTeamIds: [],
-        deletedAt: now,
-      }]);
+      it('should add user that is not member of the network', () => {
+        const internalUsers = [];
+        const usersInSystem = [{
+          id: '1',
+          externalId: '23',
+          email: 'added@baz.com',
+          teamIds: [],
+          deletedAt: null,
+        }];
+
+        const externalUsers = [{
+          externalId: '23',
+          email: 'added@baz.com',
+          teamIds: [],
+          deletedAt: null,
+        }];
+
+        const userActions = impl.createUserActions(usersInSystem, [], internalUsers, externalUsers);
+        assert.deepEqual(userActions.remove, []);
+        assert.deepEqual(userActions.changedTeams, []);
+        assert.deepEqual(userActions.add, [{
+          id: '1',
+          externalId: '23',
+          email: 'added@baz.com',
+          teamIds: [],
+          externalTeamIds: [],
+          deletedAt: null,
+        }]);
+      });
+
+      it('should ignore users that are inactive from the external system', () => {
+        const internalUsers = [{
+          id: '1',
+          externalId: '23',
+          email: 'added@baz.com',
+          teamIds: [],
+          deletedAt: new Date(),
+        }];
+
+        const usersInSystem = [{
+          id: '1',
+          externalId: null,
+          email: 'added@baz.com',
+          teamIds: [],
+          deletedAt: null,
+        }];
+
+        const externalUsers = [{
+          externalId: '23',
+          email: 'added@baz.com',
+          teamIds: [],
+          deletedAt: null,
+        }, {
+          externalId: '24',
+          email: 'inactive@baz.com',
+          teamIds: [],
+          deletedAt: new Date(),
+        }];
+
+        const userActions = impl.createUserActions(usersInSystem, [], internalUsers, externalUsers);
+        assert.deepEqual(userActions.remove, []);
+        assert.deepEqual(userActions.changedTeams, []);
+        assert.deepEqual(userActions.add, [{
+          id: '1',
+          externalId: '23',
+          email: 'added@baz.com',
+          externalTeamIds: [],
+          teamIds: [],
+          deletedAt: null,
+        }]);
+      });
+
+      it('should not add users that are active in network and external system', () => {
+        const internalUsers = [{
+          id: '1',
+          externalId: '23',
+          email: 'added@baz.com',
+          teamIds: [],
+          deletedAt: null,
+        }];
+
+        const usersInSystem = [{
+          id: '1',
+          externalId: null,
+          email: 'added@baz.com',
+          teamIds: [],
+          deletedAt: null,
+        }];
+
+        const externalUsers = [{
+          externalId: '23',
+          email: 'added@baz.com',
+          teamIds: [],
+          deletedAt: null,
+        }];
+
+        const userActions = impl.createUserActions(usersInSystem, [], internalUsers, externalUsers);
+        assert.deepEqual(userActions.remove, []);
+        assert.deepEqual(userActions.changedTeams, []);
+        assert.deepEqual(userActions.add, []);
+      });
     });
 
-    it('should set correct user to be created in system', () => {
-      const internalUsers = [];
-      const usersInSystem = [];
+    describe('Action: create', () => {
+      it('should create when external user is not present in our system', () => {
+        const internalUsers = [];
+        const usersInSystem = [];
 
-      const externalUsers = [{
-        externalId: '234',
-        email: 'new@baz.com',
-        teamIds: [],
-        deletedAt: null,
-      }];
+        const externalUsers = [{
+          externalId: '234',
+          email: 'new@baz.com',
+          teamIds: [],
+          deletedAt: null,
+        }];
 
-      const userActions = impl.createUserActions(usersInSystem, [], internalUsers, externalUsers);
+        const userActions = impl.createUserActions(usersInSystem, [], internalUsers, externalUsers);
 
-      assert.deepEqual(userActions.remove, []);
-      assert.deepEqual(userActions.add, []);
-      assert.deepEqual(userActions.changedTeams, []);
-      assert.deepEqual(userActions.create, [{
-        externalId: '234',
-        email: 'new@baz.com',
-        externalTeamIds: [],
-        deletedAt: null,
-      }]);
+        assert.deepEqual(userActions.remove, []);
+        assert.deepEqual(userActions.add, []);
+        assert.deepEqual(userActions.changedTeams, []);
+        assert.deepEqual(userActions.create, [{
+          externalId: '234',
+          email: 'new@baz.com',
+          externalTeamIds: [],
+          deletedAt: null,
+        }]);
+      });
     });
 
-    it('should set correct user to be removed from network', () => {
-      const now = new Date();
-      const internalUsers = [{
-        id: '1',
-        externalId: '23',
-        email: 'foo@baz.com',
-        teamIds: [],
-        deletedAt: null,
-      }, {
-        id: '2',
-        externalId: '24',
-        email: 'removed@baz.com',
-        teamIds: [],
-        deletedAt: null,
-      }, {
-        id: '3',
-        externalId: '25',
-        email: 'deleted@baz.com',
-        teamIds: [],
-        deletedAt: now,
-      }];
+    describe('Action: remove', () => {
+      it('should never remove guest users', () => {
+        const internalUsers = [{
+          id: '1',
+          externalId: null,
+          email: 'guest@baz.com',
+          teamIds: [],
+          deletedAt: null,
+        }];
 
-      const usersInSystem = internalUsers;
+        const usersInSystem = internalUsers;
+        const externalUsers = [];
 
-      const externalUsers = [{
-        externalId: '23',
-        email: 'foo@baz.com',
-        teamIds: [],
-        deletedAt: now,
-      }];
+        const userActions = impl.createUserActions(usersInSystem, [], internalUsers, externalUsers);
 
-      const userActions = impl.createUserActions(usersInSystem, [], internalUsers, externalUsers);
+        assert.deepEqual(userActions.create, []);
+        assert.deepEqual(userActions.add, []);
+        assert.deepEqual(userActions.changedTeams, []);
+        assert.deepEqual(userActions.remove, []);
+      });
 
-      assert.deepEqual(userActions.create, []);
-      assert.deepEqual(userActions.add, []);
-      assert.deepEqual(userActions.changedTeams, []);
-      assert.deepEqual(userActions.remove, [{
-        id: '1',
-        externalId: '23',
-        email: 'foo@baz.com',
-        teamIds: [],
-        externalTeamIds: [],
-        deletedAt: now,
-      }, {
-        id: '2',
-        externalId: '24',
-        email: 'removed@baz.com',
-        teamIds: [],
-        deletedAt: null,
-      }]);
+      it('should remove active users in network that are inactive in external system', () => {
+        const internalUsers = [{
+          id: '1',
+          externalId: '23',
+          email: 'removed@baz.com',
+          teamIds: [],
+          deletedAt: null,
+        }];
+
+        const usersInSystem = internalUsers;
+
+        const externalUsers = [{
+          externalId: '23',
+          email: 'removed@baz.com',
+          teamIds: [],
+          deletedAt: new Date(),
+        }];
+
+        const userActions = impl.createUserActions(usersInSystem, [], internalUsers, externalUsers);
+
+        assert.deepEqual(userActions.create, []);
+        assert.deepEqual(userActions.add, []);
+        assert.deepEqual(userActions.changedTeams, []);
+        assert.deepEqual(userActions.remove, [{
+          id: '1',
+          externalId: '23',
+          email: 'removed@baz.com',
+          teamIds: [],
+          deletedAt: null,
+        }]);
+      });
+
+      it('should remove users that are not present in external system ', () => {
+        const internalUsers = [{
+          id: '1',
+          externalId: '23',
+          email: 'removed@baz.com',
+          teamIds: [],
+          deletedAt: null,
+        }];
+
+        const usersInSystem = internalUsers;
+        const externalUsers = [];
+
+        const userActions = impl.createUserActions(usersInSystem, [], internalUsers, externalUsers);
+
+        assert.deepEqual(userActions.create, []);
+        assert.deepEqual(userActions.add, []);
+        assert.deepEqual(userActions.changedTeams, []);
+        assert.deepEqual(userActions.remove, [{
+          id: '1',
+          externalId: '23',
+          email: 'removed@baz.com',
+          teamIds: [],
+          deletedAt: null,
+        }]);
+      });
+
+      it('should ignore users that are inactive in network and external system ', () => {
+        const internalUsers = [{
+          id: '1',
+          externalId: '23',
+          email: 'removed@baz.com',
+          teamIds: [],
+          deletedAt: new Date(),
+        }];
+
+        const usersInSystem = internalUsers;
+        const externalUsers = [{
+          externalId: '23',
+          email: 'removed@baz.com',
+          teamIds: [],
+          deletedAt: new Date(),
+        }];
+
+        const userActions = impl.createUserActions(usersInSystem, [], internalUsers, externalUsers);
+
+        assert.deepEqual(userActions.create, []);
+        assert.deepEqual(userActions.add, []);
+        assert.deepEqual(userActions.changedTeams, []);
+        assert.deepEqual(userActions.remove, []);
+      });
     });
 
     it('should handle team changes and network add from the same user at the same time', () => {

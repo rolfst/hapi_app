@@ -215,8 +215,15 @@ export const executeTeamActions = (networkId, actions) => {
 export const createUserActions = (
   allUsersInSystem, internalTeams, _networkUsers, _externalUsers
 ) => {
-  const networkUsers = R.map(replaceTeamIdsWithExternalId(internalTeams), _networkUsers);
-  const externalUsers = R.map(swapTeamIdsWithExternalTeamIds, _externalUsers);
+  const networkUsers = R.pipe(
+    R.reject(R.propEq('externalId', null)),
+    R.map(replaceTeamIdsWithExternalId(internalTeams))
+  )(_networkUsers);
+  const externalUsers = R.pipe(
+    R.filter(R.propEq('deletedAt', null)),
+    R.uniqBy(R.prop('email')),
+    R.map(swapTeamIdsWithExternalTeamIds)
+  )(_externalUsers);
   const groupedNetworkUsers = groupByEmail(networkUsers);
   const groupedExternalUsers = groupByEmail(externalUsers);
   const groupedSystemUser = groupByEmail(allUsersInSystem);
@@ -233,10 +240,11 @@ export const createUserActions = (
     R.ifElse(pred, () => R.append(value, acc), R.always(acc))(value), [],
     R.uniq(R.concat(pluckEmail(externalUsers), pluckEmail(networkUsers))));
 
-  const removePredicate = R.both(
-    isActive(networkMatch),
-    isInactive(externalMatch)
-  );
+  const removePredicate = R.allPass([
+    R.both(networkMatch, R.complement(externalMatch)),
+    R.both(isActive(networkMatch), isInactive(externalMatch)),
+    R.complement(R.both(isInactive(networkMatch), isInactive(externalMatch))),
+  ]);
 
   const createPredicate = R.allPass([
     R.complement(networkMatch),
