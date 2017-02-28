@@ -65,8 +65,7 @@ export const update = async (payload, message) => {
  * @param {object} payload - Object containing payload data
  * @param {string} payload.parentId - The parent the attachment is created for
  * @param {string} payload.parentType - The type of parent the attachment is created for
- * @param {Stream} payload.file - The file to upload
- * {@link module:modules/attachment~Upload Upload}
+ * @param {Stream} payload.fileStream - The file to upload
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @example
  * const attachment = await attachmentService.create({...
@@ -77,9 +76,9 @@ export const update = async (payload, message) => {
  * @return {external:Promise.<Attachment>} {@link module:modules/attachment~Attachment Attachment}
  */
 export const create = async (payload, message) => {
-  logger.info('Creating attachment', { payload, message });
+  logger.info('Creating attachment', { payload: R.omit(['fileStream'], payload), message });
 
-  const path = await Storage.upload(payload.file, 'attachments');
+  const path = await Storage.upload(payload.fileStream, 'attachments');
   const createdAttachment = await attachmentRepo.create(path);
 
   const objectResource = await objectService.create({
@@ -97,5 +96,7 @@ export const create = async (payload, message) => {
     attachmentId: createdAttachment.id,
     attributes: attributesToUpdate }, message);
 
-  return R.merge(createdAttachment, { objectId: objectResource.id });
+  return R.merge(objectResource, {
+    source: R.merge(createdAttachment, { objectId: objectResource.id }),
+  });
 };
