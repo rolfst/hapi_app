@@ -9,7 +9,9 @@ export default async (req, reply) => {
     const message = { ...req.pre, ...req.auth };
     const [feedItems, count] = await Promise.all([
       feedService.make(payload, message),
-      objectService.count({ where: R.pick(['parentType', 'parentId'], payload) }, message),
+      objectService.count({ where: [
+        R.pick(['parentType', 'parentId'], payload),
+      ] }, message),
     ]);
 
     return reply({

@@ -83,19 +83,25 @@ describe('Service: Object', () => {
         }),
         objectService.create({
           userId: admin.id,
-          parentType: 'network',
-          parentId: network.id,
-          objectType: 'feed_message',
+          parentType: 'user',
+          parentId: admin.id,
+          objectType: 'poll',
           sourceId: '39102',
         }),
       ]);
     });
 
+    after(() => testHelpers.cleanAll());
+
     it('should return correct count', async () => {
-      const networkObjects = await objectService.count({ where: {
+      const networkObjects = await objectService.count({ where: [{
         parentType: 'network',
         parentId: network.id,
-      } });
+      }, {
+        parentType: 'user',
+        parentId: admin.id,
+      }],
+      }, { credentials: admin });
 
       assert.equal(networkObjects, 2);
     });

@@ -113,6 +113,7 @@ export const create = async (payload, message) => {
 /**
  * Count objects
  * @param {object} payload - Object containing payload data
+ * @param {array} payload.where - list containing constraints
  * @param {string} payload.where.userId - The id that instantiated the object
  * @param {string} payload.where.parentType - The type of parent to get objects for
  * @param {string} payload.where.parentId - The id of the parent
@@ -123,9 +124,9 @@ export const create = async (payload, message) => {
  */
 export const count = async (payload, message) => {
   logger.info('Counting objects', { payload, message });
-  const attributeWhitelist = ['parentType', 'parentId', 'userId', 'objectType'];
+  const whereConstraint = { $or: R.flatten([payload.where]) };
 
-  return objectRepository.count(R.pick(attributeWhitelist, payload.where));
+  return objectRepository.count(whereConstraint);
 };
 
 /**
