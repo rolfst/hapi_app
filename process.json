@@ -11,14 +11,12 @@
     "env": {
       "NODE_ENV": "production",
       "NODE_PATH": "build",
-      "API_ENV": "development",
-      "LOG_DIR": "/var/log/api.flex-appeal.nl"
+      "API_ENV": "development"
     },
     "env_production": {
       "NODE_ENV": "production",
       "NODE_PATH": "build",
-      "API_ENV": "production",
-      "LOG_DIR": "/var/log/api.flex-appeal.nl"
+      "API_ENV": "production"
     }
   }]
 }

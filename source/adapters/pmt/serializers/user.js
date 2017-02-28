@@ -1,4 +1,4 @@
-import { map, toString } from 'lodash';
+import R from 'ramda';
 import moment from 'moment';
 
 function formatPhoneNumber(number) {
@@ -26,7 +26,10 @@ export default (externalUser) => {
   let teamIds = [];
 
   if (properUser.scope && properUser.scope.length > 0) {
-    teamIds = map(map(properUser.scope, 'department'), toString);
+    teamIds = R.pipe(
+      R.pluck('department'),
+      R.sort((a, b) => a - b)
+    )(properUser.scope);
   } else if (properUser.department) {
     teamIds = [properUser.department];
   }

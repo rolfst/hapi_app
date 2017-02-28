@@ -9,7 +9,7 @@ import userSerializer from '../../../adapters/pmt/serializers/user';
 import * as networkRepo from '../../core/repositories/network';
 import * as teamRepo from '../../core/repositories/team';
 
-describe('Handler: Handle sync network', () => {
+describe('Handler: Handle single network sync', () => {
   nock.disableNetConnect();
   let pmtNetwork;
   let globalAdmin;

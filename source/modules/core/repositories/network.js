@@ -1,6 +1,4 @@
-import { uniq, map } from 'lodash';
 import R from 'ramda';
-import Promise from 'bluebird';
 import moment from 'moment';
 import { Network,
   Team,
@@ -33,7 +31,7 @@ export const findAll = async () => {
     include: defaultIncludes,
   });
 
-  return map(networks, createNetworkModel);
+  return R.map(createNetworkModel, networks);
 };
 
 /**
@@ -78,7 +76,7 @@ export const findNetworkByIds = async (ids) => {
     include: defaultIncludes,
   });
 
-  return map(result, createNetworkModel);
+  return R.map(createNetworkModel, result);
 };
 
 export const updateNetwork = async (networkId, attributes) => {
@@ -95,11 +93,8 @@ export const updateNetwork = async (networkId, attributes) => {
  * @return {external:Promise.<NetworkIntegration[]>}
  * {@link module:modules/core~NetworkIntegration NetworkIntegration}
  */
-export const findNetworkIntegration = async (networkId) => {
-  const result = await NetworkIntegration.findOne({ where: { networkId } });
-
-  return result;
-};
+export const findNetworkIntegration = async (networkId) => NetworkIntegration
+  .findOne({ where: { networkId } });
 
 /**
  * @param {string} networkId - network id
@@ -121,7 +116,8 @@ export const findNetworksForUser = async (userId) => {
   const pivotResult = await NetworkUser.findAll({
     where: { userId, deletedAt: null },
   });
-  const networkIds = uniq(map(pivotResult, 'networkId'));
+
+  const networkIds = R.pipe(R.pluck('networkId'), R.uniq)(pivotResult);
 
   return findNetworkByIds(networkIds);
 };
@@ -190,12 +186,9 @@ export const findAllUsersForNetwork = async (networkId) =>
  * @method findTeamsForNetwork
  * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team}
  */
-export const findTeamsForNetwork = async (networkId) => {
-  return Promise.map(Team.findAll({
-    where: { networkId },
-    include: [{ attributes: ['id'], model: User }],
-  }), createTeamModel);
-};
+export const findTeamsForNetwork = (networkId) => Team
+  .findAll({ where: { networkId }, include: [{ attributes: ['id'], model: User }] })
+  .then(R.map(createTeamModel));
 
 /**
  * @param {string} networkId - network where the integration is added to.

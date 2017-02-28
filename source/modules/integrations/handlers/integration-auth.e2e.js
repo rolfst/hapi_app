@@ -94,7 +94,6 @@ describe('Integration auth', () => {
       userId: employee.id, networkId: pmtNetwork.id });
 
     assert.equal(metaData.userToken, 'auth_token');
-    assert.equal(metaData.externalId, 1);
   });
 
   it('should return 403 error when someone is already authenticated with the same account', async () => { // eslint-disable-line max-len

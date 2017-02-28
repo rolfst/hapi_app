@@ -5,8 +5,7 @@ import { map, pick, find } from 'lodash';
 import { getRequest } from '../../../shared/test-utils/request';
 import * as testHelper from '../../../shared/test-utils/helpers';
 import * as stubs from '../../../shared/test-utils/stubs';
-import { create } from '../../core/repositories/team';
-import * as userRepo from '../../core/repositories/user';
+import * as teamRepo from '../../core/repositories/team';
 import { exchangeTypes } from '../repositories/dao/exchange';
 import * as exchangeRepo from '../repositories/exchange';
 
@@ -130,16 +129,16 @@ describe('Get exchanges for network', () => {
         { networkId: network.id, userId: employee.id, roleType: 'EMPLOYEE' });
 
       createdTeams = await Promise.all([
-        create({ networkId: network.id, name: 'Test team 1' }),
-        create({ networkId: network.id, name: 'Test team 2' }),
-        create({ networkId: network.id, name: 'Test team 3' }),
+        teamRepo.create({ networkId: network.id, name: 'Test team 1' }),
+        teamRepo.create({ networkId: network.id, name: 'Test team 2' }),
+        teamRepo.create({ networkId: network.id, name: 'Test team 3' }),
       ]);
 
       const [team1, team2, team3] = createdTeams;
 
       await Promise.all([
-        userRepo.addToTeam(employee.id, team2.id),
-        userRepo.addToTeam(employee.id, team3.id),
+        teamRepo.addUserToTeam(team2.id, employee.id),
+        teamRepo.addUserToTeam(team3.id, employee.id),
       ]);
 
       const exchanges = await exchangeRepo.findExchangesByNetwork(network.id);

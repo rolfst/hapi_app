@@ -3,9 +3,12 @@ import * as syncService from '../services/sync';
 export default async (req, reply) => {
   try {
     const message = { ...req.pre, ...req.auth };
-    const payload = { ...req.payload, ...req.params };
+    const payload = {
+      networkId: req.params.networkId,
+      ownerEmail: req.payload.external_email,
+    };
 
-    syncService.syncNetwork(payload, message);
+    await syncService.importNetwork(payload, message);
 
     return reply().code(202);
   } catch (err) {

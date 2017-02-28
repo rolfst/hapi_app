@@ -1,28 +1,49 @@
+import sinon from 'sinon';
 import { assert } from 'chai';
 import { map, find } from 'lodash';
 import Promise from 'bluebird';
-import * as testHelper from '../../../../shared/test-utils/helpers';
+import * as adapterUtil from '../../../../shared/utils/create-adapter';
+import * as integrationRepository from '../../../core/repositories/integration';
 import * as networkRepository from '../../../core/repositories/network';
 import * as teamRepository from '../../../core/repositories/team';
 import * as userRepository from '../../../core/repositories/user';
 import * as networkService from '../../../core/services/network';
-import * as serviceImpl from './implementation';
+import * as service from './index';
 
 describe('Network synchronisation', () => {
-  let integratedNetwork;
-  let admin;
+  let network;
 
   before(async () => {
-    admin = await testHelper.createUser({ password: 'pw' });
-    integratedNetwork = await networkRepository.createNetwork(admin.id, 'Foo network for sync');
+    await integrationRepository.createIntegration({
+      name: 'FOO_PARTNER',
+      token: 'foo_token',
+    });
+
+    network = await networkRepository.createIntegrationNetwork({
+      userId: global.users.admin.id,
+      externalId: 'api.coolintegration.nl',
+      name: 'Network with integration',
+      integrationName: 'FOO_PARTNER',
+    });
+
+    await networkRepository.setImportDateOnNetworkIntegration(network.id);
   });
 
-  after(() => testHelper.cleanAll());
+  after(async () => {
+    const users = await networkRepository.findUsersForNetwork(network.id);
+    const promises = map(users, user => userRepository.deleteById(user.id));
+
+    return Promise.all(promises);
+  });
 
   describe('Teams synchronisation', () => {
+    let sandbox;
+
+    before(() => (sandbox = sinon.sandbox.create()));
     afterEach(async () => {
+      sandbox.restore();
       // Delete all the teams so we have a network without any teams in every testcase
-      const teamsForNetwork = await networkRepository.findTeamsForNetwork(integratedNetwork.id);
+      const teamsForNetwork = await networkRepository.findTeamsForNetwork(network.id);
 
       return Promise.map(map(teamsForNetwork, 'id'), teamRepository.deleteById);
     });
@@ -42,16 +63,21 @@ describe('Network synchronisation', () => {
         description: null,
       }];
 
-      const internalTeam = {
-        networkId: integratedNetwork.id,
+      const internalTeams = [{
+        networkId: network.id,
         externalId: '2',
         name: 'Kassa',
         description: null,
-      };
+      }];
 
-      await teamRepository.create(internalTeam);
-      await serviceImpl.syncTeams(integratedNetwork.id, externalTeams);
-      const teamsForNetwork = await networkRepository.findTeamsForNetwork(integratedNetwork.id);
+      sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve({
+        fetchUsers: () => Promise.resolve([]),
+        fetchTeams: () => Promise.resolve(externalTeams),
+      }));
+
+      await teamRepository.create(internalTeams[0]);
+      await service.syncNetwork({ networkId: network.id, internal: true });
+      const teamsForNetwork = await networkRepository.findTeamsForNetwork(network.id);
       const syncedTeam = find(teamsForNetwork, { externalId: '1' });
 
       assert.lengthOf(teamsForNetwork, 2);
@@ -62,16 +88,21 @@ describe('Network synchronisation', () => {
     it('should remove teams from network', async () => {
       const externalTeams = [];
 
-      const internalTeam = {
-        networkId: integratedNetwork.id,
+      const internalTeams = [{
+        networkId: network.id,
         externalId: '2',
         name: 'Kassa',
         description: null,
-      };
+      }];
 
-      await teamRepository.create(internalTeam);
-      await serviceImpl.syncTeams(integratedNetwork.id, externalTeams);
-      const teamsForNetwork = await networkRepository.findTeamsForNetwork(integratedNetwork.id);
+      sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve({
+        fetchUsers: () => Promise.resolve([]),
+        fetchTeams: () => Promise.resolve(externalTeams),
+      }));
+
+      await teamRepository.create(internalTeams[0]);
+      await service.syncNetwork({ networkId: network.id, internal: true });
+      const teamsForNetwork = await networkRepository.findTeamsForNetwork(network.id);
 
       assert.lengthOf(teamsForNetwork, 0);
     });
@@ -85,28 +116,80 @@ describe('Network synchronisation', () => {
         description: null,
       }];
 
-      const internalTeam = {
-        networkId: integratedNetwork.id,
+      const internalTeams = [{
+        networkId: network.id,
         externalId: '2',
         name: 'Kassa',
         description: null,
-      };
+      }];
 
-      await teamRepository.create(internalTeam);
-      await serviceImpl.syncTeams(integratedNetwork.id, externalTeams);
-      const teamsForNetwork = await networkRepository.findTeamsForNetwork(integratedNetwork.id);
+      sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve({
+        fetchUsers: () => Promise.resolve([]),
+        fetchTeams: () => Promise.resolve(externalTeams),
+      }));
+
+      await teamRepository.create(internalTeams[0]);
+      await service.syncNetwork({ networkId: network.id, internal: true });
+      const teamsForNetwork = await networkRepository.findTeamsForNetwork(network.id);
       const changedTeam = find(teamsForNetwork, { externalId: '2' });
 
       assert.lengthOf(teamsForNetwork, 1);
       assert.isDefined(changedTeam);
       assert.equal(changedTeam.name, 'Kassa Oud');
     });
+
+    it('should only sync teams with defined externalId', async () => {
+      const externalTeams = [{
+        id: null,
+        networkId: null,
+        externalId: '1',
+        name: 'Vulploeg',
+        description: null,
+      }, {
+        id: null,
+        networkId: null,
+        externalId: '2',
+        name: 'Kassa',
+        description: null,
+      }];
+
+      const internalTeams = [{
+        networkId: network.id,
+        externalId: '2',
+        name: 'Kassa',
+        description: null,
+      }, {
+        networkId: network.id,
+        externalId: null,
+        name: 'Non syncing team',
+        description: null,
+      }];
+
+      sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve({
+        fetchUsers: () => Promise.resolve([]),
+        fetchTeams: () => Promise.resolve(externalTeams),
+      }));
+
+      await Promise.map(internalTeams, teamRepository.create);
+      await service.syncNetwork({ networkId: network.id, internal: true });
+      const teamsForNetwork = await networkRepository.findTeamsForNetwork(network.id);
+      const syncedTeam = find(teamsForNetwork, { externalId: '1' });
+
+      assert.lengthOf(teamsForNetwork, 3);
+      assert.isDefined(syncedTeam);
+      assert.equal(syncedTeam.name, 'Vulploeg');
+    });
   });
 
   describe('Users synchronisation with network link', () => {
+    let sandbox;
+
+    before(() => (sandbox = sinon.sandbox.create()));
+
     afterEach(async () => {
+      sandbox.restore();
       // Delete all the users so we have a network without any users in every testcase
-      const usersInNetwork = await networkRepository.findAllUsersForNetwork(integratedNetwork.id);
+      const usersInNetwork = await networkRepository.findAllUsersForNetwork(network.id);
 
       return Promise.map(map(usersInNetwork, 'id'), userRepository.deleteById);
     });
@@ -114,53 +197,55 @@ describe('Network synchronisation', () => {
     it('should add users to network', async () => {
       const externalUsers = [{
         externalId: '1',
-        username: 'bazfoo',
-        email: 'bazfoo@flex-appeal.nl',
+        email: 'bazfoo@hodor.nl',
         firstName: 'Baz',
         lastName: 'Foo',
         roleType: 'EMPLOYEE',
-        isActive: true,
         deletedAt: null,
         teamIds: [],
       }, {
         externalId: '2',
-        username: 'johndoe',
-        email: 'johndoe@flex-appeal.nl',
+        email: 'johndoe@hodor.nl',
         firstName: 'John',
         lastName: 'Doe',
         roleType: 'EMPLOYEE',
-        isActive: true,
         deletedAt: null,
         teamIds: [],
       }];
 
-      const internalUser = {
+      const internalUsers = [{
         externalId: '2',
-        username: 'johndoe',
-        email: 'johndoe@flex-appeal.nl',
+        username: 'johndoe@hodor.nl',
+        email: 'johndoe@hodor.nl',
         firstName: 'John',
         lastName: 'Doe',
         password: 'foo',
-      };
+        deletedAt: null,
+      }];
 
-      const createdUser = await userRepository.createUser(internalUser);
+      sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve({
+        fetchUsers: () => Promise.resolve(externalUsers),
+        fetchTeams: () => Promise.resolve([]),
+      }));
+
+      const createdUser = await userRepository.createUser(internalUsers[0]);
       await networkRepository.addUser({
         userId: createdUser.id,
-        networkId: integratedNetwork.id,
-        externalId: internalUser.externalId,
+        networkId: network.id,
+        externalId: internalUsers[0].externalId,
+        deletedAt: null,
       });
 
-      const allUsersInSystem = await userRepository.findAllUsers();
+      await service.syncNetwork({ networkId: network.id, internal: true });
 
-      await serviceImpl.syncUsersWithNetwork(integratedNetwork.id, externalUsers, allUsersInSystem);
       const activeUsersInNetwork = await networkService.listActiveUsersForNetwork({
-        networkId: integratedNetwork.id }, { credentials: integratedNetwork.superAdmin });
+        networkId: network.id }, { credentials: network.superAdmin });
       const syncedUser = find(activeUsersInNetwork, { externalId: '1' });
 
       assert.lengthOf(activeUsersInNetwork, 2);
       assert.isDefined(syncedUser);
       assert.equal(syncedUser.email, externalUsers[0].email);
-      assert.equal(syncedUser.username, externalUsers[0].username);
+      assert.equal(syncedUser.username, externalUsers[0].email);
       assert.equal(syncedUser.firstName, externalUsers[0].firstName);
       assert.equal(syncedUser.lastName, externalUsers[0].lastName);
       assert.equal(syncedUser.roleType, externalUsers[0].roleType);
@@ -168,9 +253,9 @@ describe('Network synchronisation', () => {
 
     it('should remove users from network', async () => {
       const externalUsers = [{
-        externalId: '1',
-        username: 'johndoe',
-        email: 'johndoe@flex-appeal.nl',
+        externalId: '2',
+        username: 'johndoe@hodor.nl',
+        email: 'johndoe@hodor.nl',
         firstName: 'John',
         lastName: 'Doe',
         roleType: 'EMPLOYEE',
@@ -179,28 +264,33 @@ describe('Network synchronisation', () => {
         teamIds: [],
       }];
 
-      const internalUser = {
+      const internalUsers = [{
         externalId: '2',
-        username: 'johndoe',
-        email: 'johndoe@flex-appeal.nl',
+        username: 'johndoe@hodor.nl',
+        email: 'johndoe@hodor.nl',
         firstName: 'John',
         lastName: 'Doe',
         password: 'foo',
-      };
+      }];
 
-      const createdUser = await userRepository.createUser(internalUser);
+      sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve({
+        fetchUsers: () => Promise.resolve(externalUsers),
+        fetchTeams: () => Promise.resolve([]),
+      }));
+
+      const createdUser = await userRepository.createUser(internalUsers[0]);
       await networkRepository.addUser({
         userId: createdUser.id,
-        networkId: integratedNetwork.id,
-        externalId: internalUser.externalId,
+        networkId: network.id,
+        externalId: internalUsers[0].externalId,
       });
 
-      const allUsersInSystem = await userRepository.findAllUsers();
-      await serviceImpl.syncUsersWithNetwork(integratedNetwork.id, externalUsers, allUsersInSystem);
+      await service.syncNetwork({ networkId: network.id, internal: true });
+
       const activeUsersInNetwork = await networkService.listActiveUsersForNetwork({
-        networkId: integratedNetwork.id }, { credentials: integratedNetwork.superAdmin });
+        networkId: network.id }, { credentials: network.superAdmin });
       const allUsersInNetwork = await networkService.listAllUsersForNetwork({
-        networkId: integratedNetwork.id }, { credentials: integratedNetwork.superAdmin });
+        networkId: network.id }, { credentials: network.superAdmin });
 
       assert.lengthOf(activeUsersInNetwork, 0);
       assert.lengthOf(allUsersInNetwork, 1);
@@ -209,37 +299,44 @@ describe('Network synchronisation', () => {
     it('should add users that were previously deleted from network', async () => {
       const externalUsers = [{
         externalId: '2',
-        username: 'johndoe',
-        email: 'johndoe@flex-appeal.nl',
+        username: 'johndoe@hodor.nl',
+        email: 'johndoe@hodor.nl',
         firstName: 'John',
         lastName: 'Doe',
         roleType: 'EMPLOYEE',
-        isActive: true,
         deletedAt: null,
         teamIds: [],
       }];
 
       const internalUser = {
         externalId: '2',
-        username: 'johndoe',
-        email: 'johndoe@flex-appeal.nl',
+        username: 'johndoe@hodor.nl',
+        email: 'johndoe@hodor.nl',
         firstName: 'John',
         lastName: 'Doe',
         password: 'foo',
       };
 
+      sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve({
+        fetchUsers: () => Promise.resolve(externalUsers),
+        fetchTeams: () => Promise.resolve([]),
+      }));
+
       const createdUser = await userRepository.createUser(internalUser);
-      await networkRepository.addUser({
+      await userRepository.setNetworkLink({
         userId: createdUser.id,
-        networkId: integratedNetwork.id,
+        networkId: network.id,
+      }, {
+        userId: createdUser.id,
+        networkId: network.id,
         deletedAt: new Date(),
         externalId: internalUser.externalId,
       });
 
-      const allUsersInSystem = await userRepository.findAllUsers();
-      await serviceImpl.syncUsersWithNetwork(integratedNetwork.id, externalUsers, allUsersInSystem);
+      await service.syncNetwork({ networkId: network.id, internal: true });
+
       const activeUsersInNetwork = await networkService.listActiveUsersForNetwork({
-        networkId: integratedNetwork.id }, { credentials: integratedNetwork.superAdmin });
+        networkId: network.id }, { credentials: network.superAdmin });
 
       assert.lengthOf(activeUsersInNetwork, 1);
     });
@@ -247,8 +344,8 @@ describe('Network synchronisation', () => {
     it('should transfer user from one network to another', async () => {
       const externalUsers = [{
         externalId: '1',
-        username: 'johndoe',
-        email: 'johndoe@flex-appeal.nl',
+        username: 'johndoe@hodor.nl',
+        email: 'johndoe@hodor.nl',
         firstName: 'John',
         lastName: 'Doe',
         roleType: 'EMPLOYEE',
@@ -257,7 +354,7 @@ describe('Network synchronisation', () => {
         teamIds: [],
       }, {
         externalId: '3',
-        username: 'bonzo',
+        username: 'bonzo@flex-appeal.nl',
         email: 'bonzo@flex-appeal.nl',
         firstname: 'bon',
         lastname: 'zo',
@@ -270,8 +367,8 @@ describe('Network synchronisation', () => {
 
       const userToTransfer = {
         externalId: '1',
-        username: 'johndoe',
-        email: 'johndoe@flex-appeal.nl',
+        username: 'johndoe@hodor.nl',
+        email: 'johndoe@hodor.nl',
         firstname: 'john',
         lastname: 'doe',
         password: 'foo',
@@ -279,42 +376,52 @@ describe('Network synchronisation', () => {
 
       const initialUsers = [userToTransfer, {
         externalId: '2',
-        username: 'alwin',
+        username: 'alwin@flex-appeal.nl',
         email: 'alwin@flex-appeal.nl',
         firstname: 'al',
         lastname: 'win',
         password: 'baz',
       }];
 
+      sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve({
+        fetchUsers: () => Promise.resolve(externalUsers),
+        fetchTeams: () => Promise.resolve([]),
+      }));
+
       const createdUsers = await userRepository.createBulkUsers(initialUsers);
       await Promise.all([
         networkRepository.addUser({
           userId: createdUsers[0].id,
-          networkId: integratedNetwork.id,
+          networkId: network.id,
           deletedAt: new Date(),
           externalId: initialUsers[0].externalId,
         }),
         networkRepository.addUser({
           userId: createdUsers[1].id,
-          networkId: integratedNetwork.id,
+          networkId: network.id,
           deletedAt: null,
           externalId: initialUsers[1].externalId,
         }),
       ]);
 
-      const newNetwork = await networkRepository
-        .createNetwork(admin.id, 'Foo network for transfer');
-      const activeUsersInNetwork = await networkService.listActiveUsersForNetwork({
-        networkId: integratedNetwork.id }, { credentials: integratedNetwork.superAdmin });
-      const allUsers = await userRepository.findAllUsers();
+      const newNetwork = await networkRepository.createIntegrationNetwork({
+        userId: global.users.admin.id,
+        externalId: 'api.transferednetwork.nl',
+        name: 'Foo network for transfer',
+        integrationName: 'FOO_PARTNER',
+      });
 
-      await serviceImpl.syncUsersWithNetwork(newNetwork.id, externalUsers, allUsers);
+      await networkRepository.setImportDateOnNetworkIntegration(newNetwork.id);
+      const activeUsersInNetwork = await networkService.listActiveUsersForNetwork({
+        networkId: network.id }, { credentials: network.superAdmin });
+
+      await service.syncNetwork({ networkId: newNetwork.id, internal: true });
 
       const [activeUsersInNetworkAfterUpdate, activeUsersInToTransferNetwork] = await Promise.all([
         networkService.listActiveUsersForNetwork({
-          networkId: integratedNetwork.id }, { credentials: integratedNetwork.superAdmin }),
+          networkId: network.id }, { credentials: network.superAdmin }),
         networkService.listActiveUsersForNetwork({
-          networkId: newNetwork.id }, { credentials: integratedNetwork.superAdmin }),
+          networkId: newNetwork.id }, { credentials: network.superAdmin }),
       ]);
 
       const transferedUser = find(activeUsersInToTransferNetwork,
@@ -328,10 +435,15 @@ describe('Network synchronisation', () => {
   });
 
   describe('Users synchronisation with team link', () => {
+    let sandbox;
+
+    before(() => (sandbox = sinon.sandbox.create()));
+
     afterEach(async () => {
+      sandbox.restore();
       // Delete all the teams and users so we have a fresh network in every testcase
-      const teamsForNetwork = await networkRepository.findTeamsForNetwork(integratedNetwork.id);
-      const usersInNetwork = await networkRepository.findAllUsersForNetwork(integratedNetwork.id);
+      const teamsForNetwork = await networkRepository.findTeamsForNetwork(network.id);
+      const usersInNetwork = await networkRepository.findAllUsersForNetwork(network.id);
 
       // We should delete the teams first to avoid a deadlock for at team_user pivot table
       await Promise.map(teamsForNetwork, team => teamRepository.deleteById(team.id));
@@ -342,7 +454,7 @@ describe('Network synchronisation', () => {
       const externalUsers = [{
         externalId: '2',
         username: 'johndoe',
-        email: 'johndoe@flex-appeal.nl',
+        email: 'johndoe@hodor.nl',
         firstName: 'John',
         lastName: 'Doe',
         roleType: 'EMPLOYEE',
@@ -351,13 +463,27 @@ describe('Network synchronisation', () => {
         teamIds: ['1', '2'], // These ids are equal to the internal team's externalId value
       }];
 
-      const internalTeams = [{
-        networkId: integratedNetwork.id,
+      const externalTeams = [{
+        id: null,
+        networkId: null,
         externalId: '1',
         name: 'Vulploeg',
         description: null,
       }, {
-        networkId: integratedNetwork.id,
+        id: null,
+        networkId: null,
+        externalId: '2',
+        name: 'Kassa',
+        description: null,
+      }];
+
+      const internalTeams = [{
+        networkId: network.id,
+        externalId: '1',
+        name: 'Vulploeg',
+        description: null,
+      }, {
+        networkId: network.id,
         externalId: '2',
         name: 'Kassa',
         description: null,
@@ -366,23 +492,29 @@ describe('Network synchronisation', () => {
       const internalUser = {
         externalId: '2',
         username: 'johndoe',
-        email: 'johndoe@flex-appeal.nl',
+        email: 'johndoe@hodor.nl',
         firstName: 'John',
         lastName: 'Doe',
         password: 'foo',
       };
+
+      sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve({
+        fetchUsers: () => Promise.resolve(externalUsers),
+        fetchTeams: () => Promise.resolve(externalTeams),
+      }));
 
       const createdTeams = await Promise.map(internalTeams, teamRepository.create);
       const createdUser = await userRepository.createUser(internalUser);
       await teamRepository.addUserToTeam(createdTeams[0].id, createdUser.id);
       await networkRepository.addUser({
         userId: createdUser.id,
-        networkId: integratedNetwork.id,
+        networkId: network.id,
         deletedAt: new Date(),
         externalId: internalUser.externalId,
       });
 
-      await serviceImpl.syncUsersWithTeams(integratedNetwork.id, externalUsers);
+      await service.syncNetwork({ networkId: network.id, internal: true });
+
       const membersOfCreatedTeams = await Promise.map(createdTeams,
         team => teamRepository.findMembers(team.id));
 
@@ -390,26 +522,40 @@ describe('Network synchronisation', () => {
       assert.lengthOf(membersOfCreatedTeams[1], 1);
     });
 
-    it.skip('should remove users from team', async () => {
+    it('should remove users from team', async () => {
       const externalUsers = [{
         externalId: '2',
-        username: 'johndoe',
-        email: 'johndoe@flex-appeal.nl',
+        username: 'removed@hodor.nl',
+        email: 'removed@hodor.nl',
         firstName: 'John',
         lastName: 'Doe',
         roleType: 'EMPLOYEE',
         isActive: true,
-        deletedAt: null,
+        deletedAt: new Date(),
         teamIds: ['2'], // These ids are equal to the internal team's externalId value
       }];
 
-      const internalTeams = [{
-        networkId: integratedNetwork.id,
+      const externalTeams = [{
+        id: null,
+        networkId: null,
         externalId: '1',
         name: 'Vulploeg',
         description: null,
       }, {
-        networkId: integratedNetwork.id,
+        id: null,
+        networkId: null,
+        externalId: '2',
+        name: 'Kassa',
+        description: null,
+      }];
+
+      const internalTeams = [{
+        networkId: network.id,
+        externalId: '1',
+        name: 'Vulploeg',
+        description: null,
+      }, {
+        networkId: network.id,
         externalId: '2',
         name: 'Kassa',
         description: null,
@@ -417,29 +563,34 @@ describe('Network synchronisation', () => {
 
       const internalUser = {
         externalId: '2',
-        username: 'johndoe',
-        email: 'johndoe@flex-appeal.nl',
+        username: 'removed@hodor.nl',
+        email: 'removed@hodor.nl',
         firstName: 'John',
         lastName: 'Doe',
         password: 'foo',
       };
 
+      sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve({
+        fetchUsers: () => Promise.resolve(externalUsers),
+        fetchTeams: () => Promise.resolve(externalTeams),
+      }));
+
       const createdTeams = await Promise.map(internalTeams, teamRepository.create);
       const createdUser = await userRepository.createUser(internalUser);
       await networkRepository.addUser({
         userId: createdUser.id,
-        networkId: integratedNetwork.id,
+        networkId: network.id,
         deletedAt: new Date(),
         externalId: internalUser.externalId,
       });
+
       await teamRepository.addUserToTeam(createdTeams[0].id, createdUser.id);
 
-      const count = await teamRepository.findMembers(createdTeams[0].id);
-      await serviceImpl.syncUsersWithTeams(integratedNetwork.id, externalUsers);
+      await service.syncNetwork({ networkId: network.id, internal: true });
+
       const membersOfCreatedTeams = await Promise.map(createdTeams,
         team => teamRepository.findMembers(team.id));
 
-      assert.lengthOf(count, 1);
       assert.lengthOf(membersOfCreatedTeams[0], 0);
       assert.lengthOf(membersOfCreatedTeams[1], 1);
     });

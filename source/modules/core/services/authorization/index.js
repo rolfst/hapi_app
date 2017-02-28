@@ -1,5 +1,7 @@
 import * as Logger from '../../../../shared/services/logger';
 import createError from '../../../../shared/utils/create-error';
+import * as userRepo from '../../repositories/user';
+import * as networkRepo from '../../repositories/network';
 import * as userService from '../user';
 
 /**
@@ -27,4 +29,14 @@ export async function assertRoleTypeForUser(payload, message) {
   if (scopedUser.roleType !== payload.roleType) throw createError('403');
 
   return;
+}
+
+export async function assertThatUserBelongsToTheNetwork(payload) {
+  const belongs = await userRepo.userBelongsToNetwork(payload.userId, payload.networkId);
+  const network = await networkRepo.findNetwork({ userId: payload.userId, id: payload.networkId });
+  const result = belongs || network;
+
+  if (!result) {
+    throw createError('10002');
+  }
 }
