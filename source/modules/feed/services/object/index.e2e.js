@@ -71,6 +71,7 @@ describe('Service: Object', () => {
   describe('count', () => {
     before(async () => {
       admin = await testHelpers.createUser({ password: 'foo' });
+      const employee = await testHelpers.createUser({ password: 'foo' });
       network = await testHelpers.createNetwork({ userId: admin.id });
 
       return Promise.all([
@@ -88,16 +89,29 @@ describe('Service: Object', () => {
           objectType: 'feed_message',
           sourceId: '39102',
         }),
+        objectService.create({
+          userId: employee.id,
+          parentType: 'network',
+          parentId: network.id,
+          objectType: 'feed_message',
+          sourceId: '39102',
+        }),
       ]);
     });
 
-    it('should return correct count', async () => {
-      const networkObjects = await objectService.count({ where: {
+    after(() => testHelpers.cleanAll());
+
+    it.only('should return correct count', async () => {
+      const networkObjects = await objectService.count({ where: [{
         parentType: 'network',
         parentId: network.id,
-      } });
+      }, {
+        parentType: 'user',
+        parentId: admin.id,
+      }],
+      }, { credentials: admin });
 
-      assert.equal(networkObjects, 2);
+      assert.equal(networkObjects, 3);
     });
   });
 

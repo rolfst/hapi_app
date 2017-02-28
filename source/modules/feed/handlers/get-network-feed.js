@@ -7,9 +7,13 @@ export default async (req, reply) => {
   try {
     const payload = { ...req.query, parentType: 'network', parentId: req.params.networkId };
     const message = { ...req.pre, ...req.auth };
+    const userConstraints = { parentType: 'user', parentId: message.credentials.id };
     const [feedItems, count] = await Promise.all([
       feedService.make(payload, message),
-      objectService.count({ where: R.pick(['parentType', 'parentId'], payload) }, message),
+      objectService.count({ where: [
+        userConstraints,
+        R.pick(['parentType', 'parentId'], payload),
+      ] }, message),
     ]);
 
     return reply({
