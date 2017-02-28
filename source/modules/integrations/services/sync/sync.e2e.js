@@ -1,9 +1,10 @@
 import sinon from 'sinon';
 import { assert } from 'chai';
-import { map, find } from 'lodash';
+import R from 'ramda';
+import { find } from 'lodash';
 import Promise from 'bluebird';
+import * as testHelpers from '../../../../shared/test-utils/helpers';
 import * as adapterUtil from '../../../../shared/utils/create-adapter';
-import * as integrationRepository from '../../../core/repositories/integration';
 import * as networkRepository from '../../../core/repositories/network';
 import * as teamRepository from '../../../core/repositories/team';
 import * as userRepository from '../../../core/repositories/user';
@@ -12,29 +13,27 @@ import * as service from './index';
 
 describe('Network synchronisation', () => {
   let network;
+  let admin;
 
   before(async () => {
-    await integrationRepository.createIntegration({
-      name: 'FOO_PARTNER',
-      token: 'foo_token',
+    admin = await testHelpers.createUser();
+
+    const networkWithIntegration = await testHelpers.createNetworkWithIntegration({
+      userId: admin.id,
+      externalId: 'pmtnetwork.api.flex-appeal.nl',
+      name: 'network-PMT',
+      integrationName: 'FOO_PARTNER',
+      integrationToken: 'foo_token',
+      userExternalId: admin.externalId,
+      userToken: 'ad34e192f03c',
     });
 
-    network = await networkRepository.createIntegrationNetwork({
-      userId: global.users.admin.id,
-      externalId: 'api.coolintegration.nl',
-      name: 'Network with integration',
-      integrationName: 'FOO_PARTNER',
-    });
+    network = networkWithIntegration.network;
 
     await networkRepository.setImportDateOnNetworkIntegration(network.id);
   });
 
-  after(async () => {
-    const users = await networkRepository.findUsersForNetwork(network.id);
-    const promises = map(users, user => userRepository.deleteById(user.id));
-
-    return Promise.all(promises);
-  });
+  after(() => testHelpers.cleanAll());
 
   describe('Teams synchronisation', () => {
     let sandbox;
@@ -45,7 +44,7 @@ describe('Network synchronisation', () => {
       // Delete all the teams so we have a network without any teams in every testcase
       const teamsForNetwork = await networkRepository.findTeamsForNetwork(network.id);
 
-      return Promise.map(map(teamsForNetwork, 'id'), teamRepository.deleteById);
+      return Promise.map(R.pluck('id', teamsForNetwork), teamRepository.deleteById);
     });
 
     it('should add teams to network', async () => {
@@ -190,8 +189,9 @@ describe('Network synchronisation', () => {
       sandbox.restore();
       // Delete all the users so we have a network without any users in every testcase
       const usersInNetwork = await networkRepository.findAllUsersForNetwork(network.id);
+      const pluckEmployeeIds = R.pipe(R.filter(R.propEq('roleType', 'EMPLOYEE')), R.pluck('id'));
 
-      return Promise.map(map(usersInNetwork, 'id'), userRepository.deleteById);
+      return Promise.map(pluckEmployeeIds(usersInNetwork), userRepository.deleteById);
     });
 
     it('should add users to network', async () => {
@@ -242,7 +242,7 @@ describe('Network synchronisation', () => {
         networkId: network.id }, { credentials: network.superAdmin });
       const syncedUser = find(activeUsersInNetwork, { externalId: '1' });
 
-      assert.lengthOf(activeUsersInNetwork, 2);
+      assert.lengthOf(activeUsersInNetwork, 3);
       assert.isDefined(syncedUser);
       assert.equal(syncedUser.email, externalUsers[0].email);
       assert.equal(syncedUser.username, externalUsers[0].email);
@@ -292,8 +292,8 @@ describe('Network synchronisation', () => {
       const allUsersInNetwork = await networkService.listAllUsersForNetwork({
         networkId: network.id }, { credentials: network.superAdmin });
 
-      assert.lengthOf(activeUsersInNetwork, 0);
-      assert.lengthOf(allUsersInNetwork, 1);
+      assert.lengthOf(activeUsersInNetwork, 1);
+      assert.lengthOf(allUsersInNetwork, 2);
     });
 
     it('should add users that were previously deleted from network', async () => {
@@ -338,7 +338,7 @@ describe('Network synchronisation', () => {
       const activeUsersInNetwork = await networkService.listActiveUsersForNetwork({
         networkId: network.id }, { credentials: network.superAdmin });
 
-      assert.lengthOf(activeUsersInNetwork, 1);
+      assert.lengthOf(activeUsersInNetwork, 2);
     });
 
     it('should transfer user from one network to another', async () => {
@@ -394,7 +394,7 @@ describe('Network synchronisation', () => {
           userId: createdUsers[0].id,
           networkId: network.id,
           deletedAt: new Date(),
-          externalId: initialUsers[0].externalId,
+          externalId: userToTransfer.externalId,
         }),
         networkRepository.addUser({
           userId: createdUsers[1].id,
@@ -405,11 +405,14 @@ describe('Network synchronisation', () => {
       ]);
 
       const newNetwork = await networkRepository.createIntegrationNetwork({
-        userId: global.users.admin.id,
+        userId: admin.id,
         externalId: 'api.transferednetwork.nl',
         name: 'Foo network for transfer',
         integrationName: 'FOO_PARTNER',
       });
+
+      await testHelpers.addUserToNetwork({
+        userId: admin.id, networkId: newNetwork.id, roleType: 'ADMIN' });
 
       await networkRepository.setImportDateOnNetworkIntegration(newNetwork.id);
       const activeUsersInNetwork = await networkService.listActiveUsersForNetwork({
@@ -425,11 +428,11 @@ describe('Network synchronisation', () => {
       ]);
 
       const transferedUser = find(activeUsersInToTransferNetwork,
-        user => user.email === initialUsers[0].email);
+        user => user.email === userToTransfer.email);
 
-      assert.lengthOf(activeUsersInNetwork, 1);
-      assert.lengthOf(activeUsersInNetworkAfterUpdate, 1);
-      assert.lengthOf(activeUsersInToTransferNetwork, 2);
+      assert.lengthOf(activeUsersInNetwork, 2);
+      assert.lengthOf(activeUsersInNetworkAfterUpdate, 2);
+      assert.lengthOf(activeUsersInToTransferNetwork, 3);
       assert.isDefined(transferedUser);
     });
   });
@@ -444,10 +447,12 @@ describe('Network synchronisation', () => {
       // Delete all the teams and users so we have a fresh network in every testcase
       const teamsForNetwork = await networkRepository.findTeamsForNetwork(network.id);
       const usersInNetwork = await networkRepository.findAllUsersForNetwork(network.id);
+      const employeesOfNetwork = R.reject(R.propEq('id', network.superAdmin.id));
+      const employeeIds = R.pluck('id', employeesOfNetwork(usersInNetwork));
 
       // We should delete the teams first to avoid a deadlock for at team_user pivot table
       await Promise.map(teamsForNetwork, team => teamRepository.deleteById(team.id));
-      await Promise.map(usersInNetwork, user => userRepository.deleteById(user.id));
+      await Promise.map(employeeIds, userRepository.deleteById);
     });
 
     it('should add users to team', async () => {
@@ -531,7 +536,7 @@ describe('Network synchronisation', () => {
         lastName: 'Doe',
         roleType: 'EMPLOYEE',
         isActive: true,
-        deletedAt: new Date(),
+        deletedAt: null,
         teamIds: ['2'], // These ids are equal to the internal team's externalId value
       }];
 
@@ -580,7 +585,7 @@ describe('Network synchronisation', () => {
       await networkRepository.addUser({
         userId: createdUser.id,
         networkId: network.id,
-        deletedAt: new Date(),
+        deletedAt: null,
         externalId: internalUser.externalId,
       });
 
@@ -591,7 +596,7 @@ describe('Network synchronisation', () => {
       const membersOfCreatedTeams = await Promise.map(createdTeams,
         team => teamRepository.findMembers(team.id));
 
-      assert.lengthOf(membersOfCreatedTeams[0], 0);
+      assert.lengthOf(membersOfCreatedTeams[0], 1);
       assert.lengthOf(membersOfCreatedTeams[1], 1);
     });
   });

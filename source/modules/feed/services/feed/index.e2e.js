@@ -16,6 +16,7 @@ describe('Service: Feed', () => {
     let team;
     let network;
     let admin;
+    let employee;
     let createdMessages;
     let createdExchange;
 
@@ -23,11 +24,13 @@ describe('Service: Feed', () => {
       sandbox = sinon.sandbox.create();
       sandbox.stub(notifier, 'send');
       admin = await testHelpers.createUser({ password: 'foo' });
+      employee = await testHelpers.createUser({ password: 'foo' });
       network = await testHelpers.createNetwork({ userId: admin.id });
       const otherNetwork = await testHelpers.createNetwork({ userId: admin.id });
       team = await testHelpers.addTeamToNetwork(network.id);
 
       await testHelpers.addUserToNetwork({ userId: admin.id, networkId: network.id });
+      await testHelpers.addUserToNetwork({ userId: employee.id, networkId: network.id });
       const serviceMessage = { network, credentials: admin };
 
       const createdMessage1 = await Promise.delay(1000)
@@ -81,14 +84,14 @@ describe('Service: Feed', () => {
       const actual = await feedService.make({
         parentType: 'network',
         parentId: network.id,
-      }, { network, credentials: admin });
+      }, { network, credentials: employee });
 
       assert.lengthOf(actual, 4);
       assert.notProperty(actual[0], 'comments');
       assert.notProperty(actual[0], 'likes');
       assert.equal(actual[0].objectType, 'exchange');
       assert.equal(actual[0].parentType, 'user');
-      assert.equal(actual[0].parentId, admin.id);
+      assert.equal(actual[0].parentId, employee.id);
       assert.equal(actual[0].sourceId, createdExchange.id);
       assert.equal(actual[1].objectType, 'feed_message');
       assert.equal(actual[1].parentType, 'team');
@@ -107,7 +110,7 @@ describe('Service: Feed', () => {
         parentId: network.id,
         offset: 1,
         limit: 2,
-      }, { network, credentials: admin });
+      }, { network, credentials: employee });
 
       assert.lengthOf(actual, 2);
       assert.equal(actual[0].objectType, 'feed_message');
@@ -184,7 +187,7 @@ describe('Service: Feed', () => {
       const actual = await feedService.make({
         parentType: 'team',
         parentId: team.id,
-      }, { network, credentials: admin });
+      }, { network, credentials: employee });
 
       assert.lengthOf(actual, 2);
       assert.equal(actual[0].objectType, 'exchange');

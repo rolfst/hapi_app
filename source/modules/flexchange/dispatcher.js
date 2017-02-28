@@ -21,7 +21,7 @@ pubsub.asyncOn('exchange.created', async (payload) => {
   }, { credentials, network });
 
   const createObjectsForReceivers = R.map((receiver) => objectService.create({
-    userId: receiver.id,
+    userId: exchange.userId,
     parentType: 'user',
     parentId: receiver.id,
     objectType: 'exchange',

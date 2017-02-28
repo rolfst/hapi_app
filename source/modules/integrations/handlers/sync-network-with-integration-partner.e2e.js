@@ -98,7 +98,7 @@ describe('Handler: Handle single network sync', () => {
         .reply(200, stubs.users_200);
 
       const endpoint = `/v2/network/${pmtNetwork.id}/sync`;
-      const { statusCode } = await getRequest(endpoint, globalAdmin.token);
+      const { statusCode } = await getRequest(endpoint, 'footoken');
 
       assert.equal(statusCode, 202);
     });

@@ -56,7 +56,7 @@ export const syncNetwork = async (payload, message) => {
       teamActions: R.omit(['data'], teamActions),
       userActions: R.pipe(
         R.omit(['data']),
-        R.map(R.pick(['id', 'externalId', 'email']))
+        R.map(R.map(R.pick(['id', 'externalId', 'email'])))
       )(userActions),
     };
 

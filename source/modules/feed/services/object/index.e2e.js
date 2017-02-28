@@ -110,6 +110,7 @@ describe('Service: Object', () => {
   describe('listWithSourceAndChildren', () => {
     before(async () => {
       admin = await testHelpers.createUser({ password: 'foo' });
+      network = await testHelpers.createNetwork({ userId: admin.id });
     });
 
     after(() => testHelpers.cleanAll());

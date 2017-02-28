@@ -36,7 +36,7 @@ describe('View users related to exchange', () => {
       const usersInNetwork = await networkRepo.findUsersForNetwork(network.id);
 
       assert.equal(statusCode, 200);
-      assert.equal(result.data.length, usersInNetwork.length);
+      assert.equal(result.data.length, usersInNetwork.length - 1);
       assert.isDefined(result.data[0].function);
 
       await exchangeRepo.deleteById(exchange.id);
@@ -92,7 +92,7 @@ describe('View users related to exchange', () => {
       const { result, statusCode } = await getRequest(endpoint, admin.token);
 
       assert.equal(statusCode, 200);
-      assert.equal(result.data.length, 2);
+      assert.equal(result.data.length, 1);
       assert.isDefined(result.data[0].function);
 
       await exchangeRepo.deleteById(exchange.id);
@@ -109,7 +109,7 @@ describe('View users related to exchange', () => {
       });
 
       const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}/users`;
-      const { result, statusCode } = await getRequest(endpoint, admin.token);
+      const { result, statusCode } = await getRequest(endpoint, employee.token);
 
       assert.equal(statusCode, 200);
       assert.equal(result.data.length, 1);
