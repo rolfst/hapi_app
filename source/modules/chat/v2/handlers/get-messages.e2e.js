@@ -68,6 +68,8 @@ describe('Handler: Get messages (v2)', () => {
       credentials: participant,
       artifacts: { authenticationToken: 'foo' },
     }));
+
+    Storage.upload.restore();
   });
 
   after(() => {
