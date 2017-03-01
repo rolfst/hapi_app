@@ -222,6 +222,7 @@ describe('Service: Message', () => {
       assert.equal(createdMessage.children[0].objectType, 'attachment');
       assert.equal(createdMessage.children[0].source.path,
         'https://assets.flex-appeal.nl/development/attachments/image.jpg');
+      assert.equal(createdMessage.children[0].source.objectId, createdMessage.children[0].id);
     });
 
     it('should create an attachment entry if resource is present', async () => {

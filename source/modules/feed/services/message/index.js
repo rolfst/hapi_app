@@ -191,7 +191,10 @@ export const create = async (payload, message) => {
       parentId: createdMessage.id,
       objectType: 'attachment',
       sourceId: attachmentId,
-    }));
+    }, message).then((attachmentObject) => attachmentService.update({
+      whereConstraint: { id: attachmentObject.sourceId },
+      attributes: { objectId: attachmentObject.id },
+    }, message)));
 
     await Promise.all([updateMessageIds, createObjects]);
   }

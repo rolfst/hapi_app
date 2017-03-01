@@ -37,7 +37,6 @@ export const list = async (payload, message) => {
 export async function create(payload, message) {
   logger.info('Creating private message', { payload, message });
 
-  let children = [];
   const conversation = await conversationRepository.findById(payload.conversationId);
   if (!conversation) throw createError('404');
 
@@ -56,23 +55,21 @@ export async function create(payload, message) {
     await attachmentService.assertAttachmentsExist({ attachmentIds: payload.files }, message);
 
     const filesArray = R.flatten([payload.files]);
-    children = await Promise.map(filesArray, (attachmentId) => objectService.create({
+    await Promise.map(filesArray, (attachmentId) => objectService.create({
       userId: message.credentials.id,
       parentType: 'private_message',
       parentId: createdMessage.id,
       objectType: 'attachment',
       sourceId: attachmentId,
-    }, message));
+    }, message).then((createdObject) => attachmentService.update({
+      whereConstraint: { id: createdObject.sourceId },
+      attributes: { objectId: createdObject.id },
+    }, message)));
   }
 
   const createdObject = await objectService.create(createObjectPayload(createdMessage));
-
-  privateMessageRepository.update(createdMessage.id, { objectId: createdObject.id });
-
-  const output = R.merge(createdObject, {
-    source: { ...createdMessage, objectId: createdObject.id },
-    children,
-  });
+  await privateMessageRepository.update(createdMessage.id, { objectId: createdObject.id });
+  const output = await objectService.getWithSourceAndChildren({ objectId: createdObject.id });
 
   await conversationRepository.update(payload.conversationId, { updatedAt: new Date() });
 
