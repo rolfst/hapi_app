@@ -1,19 +1,24 @@
-import fs from 'fs';
 import { assert } from 'chai';
+import stream from 'stream';
 import sinon from 'sinon';
 import AWS from 'aws-sdk';
-import * as testHelpers from '../test-utils/helpers';
 import * as Storage from './storage';
 
 describe('Service: Storage', () => {
   let sandbox;
 
-  const filePath = `${process.cwd()}/image.jpg`;
+  class HapiReadable extends stream.Readable {
+    constructor(opts) {
+      super(opts);
 
-  const hapiFile = testHelpers.hapiFile('image.jpg');
+      this.hapi = {};
+      this.hapi.headers = {};
+      this.hapi.filename = 'image.jpg';
+      this.hapi.headers['content-type'] = 'image/jpeg';
+    }
+  }
 
-  before(() => fs.writeFileSync(filePath, new Buffer('foo')));
-  after(() => fs.unlinkSync(filePath));
+  const file = new HapiReadable();
 
   beforeEach(async () => {
     sandbox = sinon.sandbox.create();
@@ -25,12 +30,12 @@ describe('Service: Storage', () => {
 
   it('should return a url in bucket', async () => {
     sandbox.stub(AWS, 'S3').returns({
-      putObject: () => ({
+      upload: () => ({
         promise: () => Promise.resolve({ ETag: '2322aab33cd302e' }),
       }),
     });
 
-    const result = await Storage.upload(hapiFile, {});
+    const result = await Storage.upload(file);
 
     assert.isDefined(result);
     assert.match(result, /(.jpg)/);
@@ -38,12 +43,12 @@ describe('Service: Storage', () => {
 
   it('should throw an exception', async () => {
     sandbox.stub(AWS, 'S3').returns({
-      putObject: () => ({
+      upload: () => ({
         promise: () => Promise.reject('Error in S3'),
       }),
     });
 
-    const result = Storage.upload(hapiFile, {});
+    const result = Storage.upload(file);
 
     return assert.isRejected(result, /Error: Error in S3/);
   });

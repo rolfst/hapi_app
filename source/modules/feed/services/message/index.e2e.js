@@ -1,6 +1,7 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import R from 'ramda';
+import stream from 'stream';
 import Promise from 'bluebird';
 import * as testHelpers from '../../../../shared/test-utils/helpers';
 import * as Storage from '../../../../shared/services/storage';
@@ -102,7 +103,7 @@ describe('Service: Message', () => {
     });
   });
 
-  describe('Create poll', () => {
+  describe.skip('Create poll', () => {
     let createdMessage;
 
     before(async () => {
@@ -192,18 +193,21 @@ describe('Service: Message', () => {
     let sandbox;
 
     before(async () => {
-      const hapiFile = testHelpers.hapiFile('image.jpg');
       sandbox = sinon.sandbox.create();
       sandbox.stub(Storage, 'upload').returns(Promise.resolve('image.jpg'));
 
       admin = await testHelpers.createUser({ password: 'foo' });
       network = await testHelpers.createNetwork({ userId: admin.id });
 
+      const attachment = await attachmentService.create({
+        fileStream: new stream.Readable(),
+      }, { network, credentials: admin });
+
       createdMessage = await messageService.create({
         parentType: 'network',
         parentId: network.id,
         text: 'My cool message',
-        attachments: [hapiFile],
+        files: [attachment.id],
       }, { network, credentials: admin });
     });
 
@@ -218,6 +222,7 @@ describe('Service: Message', () => {
       assert.equal(createdMessage.children[0].objectType, 'attachment');
       assert.equal(createdMessage.children[0].source.path,
         'https://assets.flex-appeal.nl/development/attachments/image.jpg');
+      assert.equal(createdMessage.children[0].source.objectId, createdMessage.children[0].id);
     });
 
     it('should create an attachment entry if resource is present', async () => {
@@ -252,6 +257,17 @@ describe('Service: Message', () => {
       assert.equal(expected[0].userId, admin.id);
       assert.equal(expected[0].objectType, 'attachment');
       assert.isDefined(expected[0].sourceId);
+    });
+
+    it('should throw error when providing invalid attachment ids', async () => {
+      const createMessagePromise = messageService.create({
+        parentType: 'network',
+        parentId: network.id,
+        text: 'My cool message',
+        files: [-1],
+      }, { network, credentials: admin });
+
+      return assert.isRejected(createMessagePromise, /Please provide valid attachment ids/);
     });
   });
 

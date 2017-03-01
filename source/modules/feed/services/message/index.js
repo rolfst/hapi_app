@@ -145,7 +145,7 @@ export const listComments = async (payload, message) => {
  * @param {string} payload.parentType - The type of parent to create the object for
  * @param {string} payload.parentId - The id of the parent
  * @param {string} payload.text - The text of the message
- * @param {object} payload.atachments - A collection of attachments
+ * @param {object} payload.files - The id of attachments that should be associated
  * @param {object} payload.poll - The poll
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method create
@@ -176,21 +176,28 @@ export const create = async (payload, message) => {
 
   await messageRepository.update(createdMessage.id, { objectId: createdObject.id });
 
-  const resourcePromises = [];
+  if (payload.files) {
+    await attachmentService.assertAttachmentsExist({ attachmentIds: payload.files }, message);
 
-  if (payload.attachments) {
-    resourcePromises.push(Promise.map(R.flatten([payload.attachments]), (attachment) =>
-      attachmentService.create({
-        parentId: createdMessage.id,
-        parentType: 'feed_message',
-        file: attachment }, message)));
+    const filesArray = R.flatten([payload.files]);
+    const updateMessageIds = Promise.map(filesArray, (attachmentId) => attachmentService.update({
+      whereConstraint: { id: attachmentId },
+      attributes: { messageId: createdMessage.id },
+    }));
+
+    const createObjects = Promise.map(filesArray, (attachmentId) => objectService.create({
+      userId: message.credentials.id,
+      parentType: 'feed_message',
+      parentId: createdMessage.id,
+      objectType: 'attachment',
+      sourceId: attachmentId,
+    }, message).then((attachmentObject) => attachmentService.update({
+      whereConstraint: { id: attachmentObject.sourceId },
+      attributes: { objectId: attachmentObject.id },
+    }, message)));
+
+    await Promise.all([updateMessageIds, createObjects]);
   }
-
-  if (payload.poll) {
-    resourcePromises.push(impl.createPollResource(createdMessage, message)(payload.poll));
-  }
-
-  await Promise.all(resourcePromises);
 
   const objectWithSourceAndChildren = await objectService.getWithSourceAndChildren({
     objectId: createdObject.id,

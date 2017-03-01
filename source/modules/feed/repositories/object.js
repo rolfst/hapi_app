@@ -62,6 +62,16 @@ export const count = async (whereConstraint) => {
 };
 
 /**
+ * Update a single object
+ * @param {string} objectId - The id of the object to update
+ * @param {object} attributes - The attributes to update
+ * @method update
+ * @return {boolean}
+ */
+export const update = async (objectId, attributes) => _Object
+  .update(attributes, { where: { id: objectId } });
+
+/**
  * Deletes an object by id
  * @param {string} - identifier for the object to delete
  * @method deleteById

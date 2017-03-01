@@ -1,10 +1,12 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import Promise from 'bluebird';
+import stream from 'stream';
 import blueprints from '../../../../shared/test-utils/blueprints';
 import * as testHelper from '../../../../shared/test-utils/helpers';
 import { getRequest } from '../../../../shared/test-utils/request';
 import * as Storage from '../../../../shared/services/storage';
+import * as attachmentService from '../../../attachment/services/attachment';
 import * as privateMessageService from '../services/private-message';
 import * as conversationService from '../services/conversation';
 
@@ -14,7 +16,6 @@ describe('Handler: Get messages (v2)', () => {
   let creator;
 
   before(async () => {
-    const hapiFile = testHelper.hapiFile('image.jpg');
     sandbox = sinon.sandbox.create();
     sandbox.stub(Storage, 'upload').returns(Promise.resolve('image.jpg'));
     const [admin, participant] = await Promise.all([
@@ -34,6 +35,10 @@ describe('Handler: Get messages (v2)', () => {
       testHelper.addUserToNetwork({ networkId: network.id, userId: creator.id }),
     ]);
 
+    const attachment = await attachmentService.create({
+      fileStream: new stream.Readable(),
+    });
+
     createdConversation = await conversationService.create({
       type: 'PRIVATE',
       participantIds: [creator.id, participant.id],
@@ -50,7 +55,7 @@ describe('Handler: Get messages (v2)', () => {
     await Promise.delay(1000).then(() => privateMessageService.create({
       conversationId: createdConversation.id,
       text: 'Second message',
-      attachments: [hapiFile],
+      files: [attachment.id],
     }, {
       credentials: participant,
       artifacts: { authenticationToken: 'foo' },
@@ -63,6 +68,8 @@ describe('Handler: Get messages (v2)', () => {
       credentials: participant,
       artifacts: { authenticationToken: 'foo' },
     }));
+
+    Storage.upload.restore();
   });
 
   after(() => {

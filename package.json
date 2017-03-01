@@ -54,8 +54,6 @@
     "yargs": "6.3.0"
   },
   "devDependencies": {
-    "form-data": "2.1.2",
-    "stream-to-promise": "2.2.0",
     "babel-cli": "6.6.5",
     "babel-eslint": "6.0.4",
     "babel-plugin-transform-async-to-generator": "6.8.0",

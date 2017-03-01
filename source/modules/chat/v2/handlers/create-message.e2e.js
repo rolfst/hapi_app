@@ -1,10 +1,11 @@
 import { assert } from 'chai';
-import FormData from 'form-data';
-import streamToPromise from 'stream-to-promise';
+import stream from 'stream';
 import sinon from 'sinon';
+import { postRequest } from '../../../../shared/test-utils/request';
 import * as Storage from '../../../../shared/services/storage';
 import blueprints from '../../../../shared/test-utils/blueprints';
 import * as testHelper from '../../../../shared/test-utils/helpers';
+import * as attachmentService from '../../../attachment/services/attachment';
 import * as conversationService from '../services/conversation';
 
 describe('Handler: Create message (v2)', () => {
@@ -34,19 +35,9 @@ describe('Handler: Create message (v2)', () => {
 
   it('should return object model with new message as source', async () => {
     const ENDPOINT_URL = `/v2/conversations/${createdConversation.id}/messages`;
-    const formData = new FormData();
-    formData.append('text', 'My cool message');
-
-    const payload = await streamToPromise(formData);
-    const { result, statusCode } = await global.server.inject({
-      payload,
-      method: 'POST',
-      url: ENDPOINT_URL,
-      headers: {
-        ...formData.getHeaders(),
-        'X-API-Token': creator.token,
-      },
-    });
+    const { result, statusCode } = await postRequest(ENDPOINT_URL, {
+      text: 'My cool message',
+    }, creator.token);
 
     assert.equal(statusCode, 200);
     assert.equal(result.data.object_type, 'private_message');
@@ -57,25 +48,16 @@ describe('Handler: Create message (v2)', () => {
   });
 
   it('should handle file upload', async () => {
-    const hapiFile = testHelper.hapiFile('image.jpg');
     sinon.stub(Storage, 'upload').returns(Promise.resolve('image.jpg'));
-
     const ENDPOINT_URL = `/v2/conversations/${createdConversation.id}/messages`;
-    const formData = new FormData();
-    formData.append('text', 'My cool message');
-    formData.append('attachments', JSON.stringify(hapiFile));
-
-    const payload = await streamToPromise(formData);
-
-    const { result, statusCode } = await global.server.inject({
-      payload,
-      method: 'POST',
-      url: ENDPOINT_URL,
-      headers: {
-        ...formData.getHeaders(),
-        'X-API-Token': creator.token,
-      },
+    const attachment = await attachmentService.create({
+      fileStream: new stream.Readable(),
     });
+
+    const { result, statusCode } = await postRequest(ENDPOINT_URL, {
+      text: 'My cool message',
+      files: [attachment.id],
+    }, creator.token);
 
     Storage.upload.restore();
 
@@ -88,5 +70,16 @@ describe('Handler: Create message (v2)', () => {
     assert.equal(result.data.children[0].source.object_id, result.data.children[0].id);
     assert.equal(result.data.children[0].source.id, result.data.children[0].source_id);
     assert.property(result.data.children[0].source, 'path');
+  });
+
+  it('should throw error when providing invalid attachment ids', async () => {
+    const ENDPOINT_URL = `/v2/conversations/${createdConversation.id}/messages`;
+    const { result, statusCode } = await postRequest(ENDPOINT_URL, {
+      text: 'My cool message',
+      files: [-1],
+    }, creator.token);
+
+    assert.equal(statusCode, 403);
+    assert.equal(result.detail, 'Please provide valid attachment ids');
   });
 });
