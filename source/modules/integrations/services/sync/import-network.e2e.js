@@ -10,7 +10,7 @@ import * as adapterUtil from '../../../../shared/utils/create-adapter';
 import * as passwordUtil from '../../../../shared/utils/password';
 import configurationMailNewAdmin from '../../../../shared/mails/configuration-invite-newadmin';
 import * as mailer from '../../../../shared/services/mailer';
-import userSerializer from '../../../../adapters/pmt/serializers/user';
+import userSerializer from '../../../integrations/adapters/pmt/serializers/user';
 import * as networkRepo from '../../../core/repositories/network';
 import * as userService from '../../../core/services/user';
 import * as userRepo from '../../../core/repositories/user';

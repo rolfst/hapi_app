@@ -2,7 +2,7 @@ import nock from 'nock';
 import { assert } from 'chai';
 import { getRequest } from '../../../shared/test-utils/request';
 import * as testHelper from '../../../shared/test-utils/helpers';
-import * as stubs from '../../../adapters/pmt/test-utils/stubs';
+import * as stubs from '../../integrations/adapters/pmt/test-utils/stubs';
 
 describe('Available users for shift', () => {
   let admin;
