@@ -1,6 +1,6 @@
 import { map } from 'lodash';
 import R from 'ramda';
-import { db as Sequelize } from '../../../../shared/configs/sequelize';
+import Sequelize from '../../../../shared/configs/sequelize';
 import { User } from '../../../core/repositories/dao';
 import * as objectRepository from '../../../core/repositories/object';
 import { Conversation, Message, ConversationUser } from './dao';
