@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import blueprints from '../../../../../shared/test-utils/blueprints';
 import * as userRepo from '../../../../core/repositories/user';
-import * as objectService from '../../../../feed/services/object';
+import * as objectService from '../../../../core/services/object';
 import * as messageService from '../private-message';
 import * as conversationService from '../../services/conversation';
 

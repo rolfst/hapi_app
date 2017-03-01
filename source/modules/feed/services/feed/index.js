@@ -6,7 +6,7 @@ import * as objectRepository from '../../repositories/object';
 import * as impl from './implementation';
 
 /**
- * @module modules/feed/services/object
+ * @module modules/feed/services/feed
  */
 
 const logger = Logger.getLogger('FEED/service/feed');

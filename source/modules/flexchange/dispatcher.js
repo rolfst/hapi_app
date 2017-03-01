@@ -2,7 +2,7 @@ import R from 'ramda';
 import * as Analytics from '../../shared/services/analytics';
 import EventEmitter from '../../shared/services/event-emitter';
 import * as Intercom from '../../shared/services/intercom';
-import * as objectService from '../feed/services/object';
+import * as objectService from '../core/services/object';
 import newExchangeEvent from './analytics/new-exchange-event';
 import approveExchangeEvent from './analytics/approve-exchange-event';
 import * as creatorNotifier from './notifications/creator-approved';

@@ -9,7 +9,7 @@ import * as userRepo from '../../../core/repositories/user';
 import * as activityRepo from '../../../core/repositories/activity';
 import * as userService from '../../../core/services/user';
 import * as teamService from '../../../core/services/team';
-import * as objectService from '../../../feed/services/object';
+import * as objectService from '../../../core/services/object';
 import * as networkService from '../../../core/services/network';
 import { exchangeTypes } from '../../repositories/dao/exchange';
 import * as commentRepo from '../../repositories/comment';

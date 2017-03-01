@@ -9,7 +9,7 @@ import * as objectRepository from '../../repositories/object';
 import * as impl from './implementation';
 
 /**
- * @module modules/feed/services/object
+ * @module modules/core/services/object
  */
 
 const logger = Logger.getLogger('FEED/service/object');
