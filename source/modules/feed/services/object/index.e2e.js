@@ -1,6 +1,10 @@
 import { assert } from 'chai';
 import R from 'ramda';
+import sinon from 'sinon';
+import stream from 'stream';
 import * as testHelpers from '../../../../shared/test-utils/helpers';
+import * as Storage from '../../../../shared/services/storage';
+import * as attachmentService from '../../../attachment/services/attachment';
 import * as conversationService from '../../../chat/v2/services/conversation';
 import * as privateMessageService from '../../../chat/v2/services/private-message';
 import * as feedMessageService from '../message';
@@ -116,11 +120,16 @@ describe('Service: Object', () => {
     after(() => testHelpers.cleanAll());
 
     it('should return children', async () => {
+      sinon.stub(Storage, 'upload').returns(Promise.resolve('image.jpg'));
+      const attachment = await attachmentService.create({
+        fileStream: new stream.Readable(),
+      });
+
       const createdMessageObject = await feedMessageService.create({
         parentType: 'network',
         parentId: network.id,
         text: 'Do you want to join us tomorrow?',
-        poll: { options: ['Yes', 'No', 'Ok'] },
+        files: [attachment.id],
       }, { network, credentials: admin });
 
       const createdMessageObject2 = await feedMessageService.create({
@@ -146,7 +155,7 @@ describe('Service: Object', () => {
       assert.lengthOf(objectWithChildren.children, 1);
       assert.equal(objectWithChildren.children[0].parentType, 'feed_message');
       assert.equal(objectWithChildren.children[0].parentId, createdMessageObject.sourceId);
-      assert.equal(objectWithChildren.children[0].source.type, 'poll');
+      assert.equal(objectWithChildren.children[0].source.type, 'attachment');
     });
 
     it('should support object_type: private_message', async () => {
