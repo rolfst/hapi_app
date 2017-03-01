@@ -40,15 +40,15 @@ describe('Service: Attachment', () => {
         file: { file: new Buffer('Foo'), filename: fileName },
       }, { credentials: admin });
 
-      const attachments = await attachmentRepo.findBy({ objectId: actual.objectId });
+      const attachments = await attachmentRepo.findBy({ id: actual.sourceId });
 
       Storage.upload.restore();
 
       assert.equal(attachments.length, 1);
-      assert.equal(actual.type, 'attachment');
-      assert.property(actual, 'objectId');
-      assert.property(actual, 'path');
-      assert.equal(actual.path, 'https://assets.flex-appeal.nl/development/attachments/test.jpg');
+      assert.equal(actual.objectType, 'attachment');
+      assert.property(actual.source, 'objectId');
+      assert.property(actual.source, 'path');
+      assert.equal(actual.source.path, 'https://assets.flex-appeal.nl/development/attachments/test.jpg');
       assert.property(actual, 'createdAt');
       assert.isNotNull(actual.createdAt);
     });
@@ -69,7 +69,7 @@ describe('Service: Attachment', () => {
       }, { credentials: admin });
 
       // Only directly accessing DAO for backwards compatibility purpose
-      const attachment = await AttachmentDAO.findOne({ where: { objectId: actual.objectId } });
+      const attachment = await AttachmentDAO.findOne({ where: { id: actual.sourceId } });
 
       Storage.upload.restore();
 

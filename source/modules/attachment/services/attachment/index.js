@@ -93,9 +93,9 @@ export const create = async (payload, message) => {
   const attributesToUpdate = { objectId: objectResource.id };
   if (payload.parentType === 'feed_message') attributesToUpdate.messageId = payload.parentId;
 
-  await update({
+  const finalResource = await update({
     attachmentId: createdAttachment.id,
     attributes: attributesToUpdate }, message);
 
-  return R.merge(createdAttachment, { objectId: objectResource.id });
+  return R.merge(objectResource, { source: R.merge(createdAttachment, finalResource) });
 };

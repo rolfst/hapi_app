@@ -82,5 +82,11 @@ describe('Handler: Create message (v2)', () => {
     assert.equal(statusCode, 200);
     assert.equal(result.data.source.text, 'My cool message');
     assert.equal(result.data.children.length, 1);
+    assert.equal(result.data.children[0].parent_id, result.data.source_id);
+    assert.property(result.data.children[0], 'source');
+    assert.equal(result.data.children[0].source.type, 'attachment');
+    assert.equal(result.data.children[0].source.object_id, result.data.children[0].id);
+    assert.equal(result.data.children[0].source.id, result.data.children[0].source_id);
+    assert.property(result.data.children[0].source, 'path');
   });
 });

@@ -210,7 +210,7 @@ export const remove = async (payload, message) => {
 export const get = async (payload, message) => {
   logger.info('retrieving object', { payload, message });
 
-  const attributes = R.pick(['objectId', 'objectType', 'sourceId'], payload);
+  const attributes = R.pick(['id', 'objectType', 'sourceId'], payload);
   const objects = await objectRepository.findBy(attributes);
   const object = R.head(objects);
 
