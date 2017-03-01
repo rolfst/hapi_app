@@ -76,7 +76,8 @@ describe('Get conversations for logged user (v2)', () => {
       assert.property(conversationUnderTest, 'last_message');
       assert.equal(conversationUnderTest.last_message.source.type, 'private_message');
       assert.equal(conversationUnderTest.last_message.source.text, 'Last message');
-      assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant1.id]);
+      assert.include(conversationUnderTest.participant_ids, creator.id);
+      assert.include(conversationUnderTest.participant_ids, participant1.id);
       assert.property(conversationUnderTest, 'created_at');
       assert.property(result, 'meta');
       assert.property(result.meta.pagination, 'offset');
