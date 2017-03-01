@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 import * as dateUtils from '../../../../shared/utils/date';
-import { db as model } from '../../../../connections';
+import model from '../../../../shared/configs/sequelize';
 
 export const ActivityTypes = {
   EXCHANGE_CREATED: 'exchange_created',

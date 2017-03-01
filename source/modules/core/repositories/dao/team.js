@@ -1,7 +1,7 @@
 import Sequelize from 'sequelize';
-import { db } from '../../../../connections';
+import model from '../../../../shared/configs/sequelize';
 
-const Team = db.define('Team', {
+const Team = model.define('Team', {
   networkId: {
     type: Sequelize.INTEGER,
     field: 'network_id',

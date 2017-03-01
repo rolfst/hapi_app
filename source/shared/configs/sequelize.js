@@ -1,11 +1,11 @@
 /* eslint no-console: "off" */
 import Sequelize from 'sequelize';
-import config from './database.js';
-import * as Logger from './shared/services/logger';
+import * as Logger from '../services/logger';
+import config from './database';
 
 const logger = Logger.createLogger('DB/query');
 
-export const db = (() => {
+export default (() => {
   const { host, database, username, password, dialect, port } = config[process.env.API_ENV];
 
   const logging = process.env.SQL_LOGGING === 'true' ?
@@ -24,16 +24,3 @@ export const db = (() => {
     { host, port, dialect, logging, define, dialectOptions }
   );
 })();
-
-export const server = {
-  host: process.env.HOST || '127.0.0.1',
-  port: process.env.PORT || 8000,
-  routes: {
-    cors: {
-      origin: ['*'],
-      headers: ['Origin', 'X-API-Token', 'Content-Type', 'Accept'],
-    },
-  },
-};
-
-export default { db, server };

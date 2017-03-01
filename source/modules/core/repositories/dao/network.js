@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 import { flatten } from 'lodash';
-import { db as model } from '../../../../connections';
+import model from '../../../../shared/configs/sequelize';
 import * as dateUtils from '../../../../shared/utils/date';
 
 const Network = model.define('Network', {

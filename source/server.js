@@ -4,7 +4,7 @@ import routes from './create-routes';
 import jwtStrategy from './shared/middlewares/authenticator-strategy';
 import integrationStrategy from './shared/middlewares/integration-strategy';
 import * as serverUtil from './shared/utils/server';
-import { server as serverConnection } from './connections';
+import serverConfig from './shared/configs/server';
 
 const createServer = () => {
   const ravenClient = new raven.Client(process.env.SENTRY_DSN, {
@@ -13,7 +13,7 @@ const createServer = () => {
   });
 
   const server = new Hapi.Server(serverUtil.makeConfig());
-  server.connection(serverConnection);
+  server.connection(serverConfig);
 
   // Register plugins
   server.register(require('hapi-async-handler'));
