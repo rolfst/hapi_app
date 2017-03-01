@@ -1,8 +1,8 @@
-import { ActivityTypes } from '../../../../shared/models/activity';
-import UserModel from '../../../../shared/models/user';
-import ActivityModel from '../../../../shared/models/activity';
-import TeamModel from '../../../../shared/models/team';
-import NetworkModel from '../../../../shared/models/network';
+import { ActivityTypes } from '../../../repositories/dao/activity';
+import UserModel from '../../../repositories/dao/user';
+import ActivityModel from '../../../repositories/dao/activity';
+import TeamModel from '../../../repositories/dao/team';
+import NetworkModel from '../../../repositories/dao/network';
 import { exchangeTypes } from './exchange';
 import ExchangeModel from './exchange';
 import ExchangeCommentModel from './exchange-comment';

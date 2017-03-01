@@ -1,5 +1,5 @@
 import uuid from 'uuid-v4';
-import { UserDevice } from '../../../shared/models';
+import { UserDevice } from './dao';
 
 /**
  * @module modules/core/repositories/authentication

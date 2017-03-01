@@ -1,5 +1,5 @@
 import createError from '../../../../shared/utils/create-error';
-import { TeamUser } from '../../../../shared/models';
+import { TeamUser } from '../../../repositories/dao';
 
 /**
  * Check if the user has is connected to the team

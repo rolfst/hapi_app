@@ -1,6 +1,6 @@
 import R from 'ramda';
 import Promise from 'bluebird';
-import { User } from '../../../../shared/models';
+import { User } from '../../../repositories/dao';
 import * as objectRepo from '../../../feed/repositories/object';
 import createFeedMessageModel from '../models/message';
 import { Message } from './dao';
