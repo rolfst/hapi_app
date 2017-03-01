@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 import nock from 'nock';
-import createError from '../../shared/utils/create-error';
+import createError from '../../../../shared/utils/create-error';
+import * as testHelper from '../../../../shared/test-utils/helpers';
 import * as stubs from './test-utils/stubs';
 import client from './client';
-import * as testHelper from '../../shared/test-utils/helpers';
 
 nock.disableNetConnect();
 

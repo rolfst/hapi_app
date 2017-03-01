@@ -1,4 +1,4 @@
-import UserModel from '../../../repositories/dao/user';
+import UserModel from '../../../core/repositories/dao/user';
 import PollModel from './poll';
 import PollOptionModel from './poll-option';
 import PollVoteModel from './poll-vote';

@@ -3,7 +3,7 @@ import * as Logger from '../../../../../shared/services/logger';
 import createError from '../../../../../shared/utils/create-error';
 import * as userRepository from '../../../../core/repositories/user';
 import * as objectService from '../../../../core/services/object';
-import * as objectRepository from '../../../../feed/repositories/object';
+import * as objectRepository from '../../../../core/repositories/object';
 import * as conversationRepoV1 from '../../../v1/repositories/conversation';
 import * as conversationRepo from '../../repositories/conversation';
 import * as impl from './implementation';

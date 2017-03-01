@@ -1,7 +1,7 @@
 import Sequelize from 'sequelize';
 import { db as model } from '../../../../connections';
 import * as dateUtils from '../../../../shared/utils/date';
-import { User } from '../../../repositories/dao';
+import { User } from '../../../core/repositories/dao';
 
 const ExchangeComment = model.define('ExchangeComment', {
   exchangeId: {

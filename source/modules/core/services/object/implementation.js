@@ -3,8 +3,8 @@ import * as flexchangeService from '../../../flexchange/services/flexchange';
 import * as pollService from '../../../poll/services/poll';
 import * as attachmentService from '../../../attachment/services/attachment';
 import * as privateMessageService from '../../../chat/v2/services/private-message';
+import * as feedMessageService from '../../../feed/services/message';
 import * as objectRepository from '../../repositories/object';
-import * as feedMessageService from '../message';
 
 const whereTypeAndId = (type, id) => R.both(R.propEq('type', type), R.propEq('id', id));
 const findSource = (type, id, sources) => R.find(whereTypeAndId(type, id), sources) || null;

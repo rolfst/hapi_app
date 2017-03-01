@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import nock from 'nock';
-import * as testHelper from '../../../shared/test-utils/helpers';
+import * as testHelper from '../../../../../shared/test-utils/helpers';
 import * as stubs from '../test-utils/stubs';
 import * as blueprints from '../test-utils/blueprints';
 import hook from './fetch-teams';

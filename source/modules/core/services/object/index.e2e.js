@@ -7,7 +7,7 @@ import * as Storage from '../../../../shared/services/storage';
 import * as attachmentService from '../../../attachment/services/attachment';
 import * as conversationService from '../../../chat/v2/services/conversation';
 import * as privateMessageService from '../../../chat/v2/services/private-message';
-import * as feedMessageService from '../message';
+import * as feedMessageService from '../../../feed/services/message';
 import * as objectService from './index';
 
 describe('Service: Object', () => {

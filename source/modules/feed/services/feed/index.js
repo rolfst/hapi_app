@@ -1,8 +1,8 @@
 import R from 'ramda';
 import * as Logger from '../../../../shared/services/logger';
 import * as networkService from '../../../core/services/network';
-import * as objectService from '../object';
-import * as objectRepository from '../../repositories/object';
+import * as objectRepository from '../../../core/repositories/object';
+import * as objectService from '../../../core/services/object';
 import * as impl from './implementation';
 
 /**

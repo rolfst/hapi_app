@@ -2,10 +2,9 @@ import R from 'ramda';
 import Promise from 'bluebird';
 import createError from '../../../../shared/utils/create-error';
 import * as pollService from '../../../poll/services/poll';
-import * as networkImpl from '../../../core/services/network/implementation';
-import * as teamImpl from '../../../core/services/team/implementation';
+import * as authorizationService from '../../../core/services/authorization';
 import * as userService from '../../../core/services/user';
-import * as objectService from '../object';
+import * as objectService from '../../../core/services/object';
 
 /**
  * Creates a poll resource that consists of a poll object and a object object.
@@ -53,12 +52,14 @@ export const assertThatUserBelongsToMessage = async (messageId, message) => {
   const userId = message.credentials.id;
 
   try {
-    const assertionFn = R.cond([
-      [R.equals('network'), () => networkImpl.assertThatUserBelongsToTheNetwork],
-      [R.equals('team'), () => teamImpl.assertThatUserBelongsToTheTeam],
+    await R.cond([
+      [R.equals('network'), () => authorizationService.assertThatUserBelongsToTheNetwork({
+        userId, networkId: parentId,
+      })],
+      [R.equals('team'), () => authorizationService.assertThatUserBelongsToTheTeam({
+        userId, teamId: parentId,
+      })],
     ])(parentType);
-
-    await assertionFn(parentId, userId);
   } catch (err) {
     throw createError('403');
   }

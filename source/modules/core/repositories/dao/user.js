@@ -1,7 +1,7 @@
 import Sequelize from 'sequelize';
-import { db as model } from '../../connections';
-import * as password from '../utils/password';
-import * as dateUtils from '../utils/date';
+import * as password from '../../../../shared/utils/password';
+import * as dateUtils from '../../../../shared/utils/date';
+import { db as model } from '../../../../connections';
 
 const User = model.define('User', {
   username: {

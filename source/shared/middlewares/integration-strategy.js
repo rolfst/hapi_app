@@ -1,7 +1,7 @@
 import { pick } from 'lodash';
+import { Integration } from '../../modules/core/repositories/dao';
 import createError from '../utils/create-error';
-import { Integration } from '../models';
-import * as Logger from '../../shared/services/logger';
+import * as Logger from '../services/logger';
 
 const logger = Logger.createLogger('SHARED/middleware/integrationStrategy');
 

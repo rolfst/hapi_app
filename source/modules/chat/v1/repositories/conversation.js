@@ -1,8 +1,8 @@
 import { map } from 'lodash';
 import R from 'ramda';
 import { db as Sequelize } from '../../../../connections';
-import { User } from '../../../repositories/dao';
-import * as objectRepository from '../../../feed/repositories/object';
+import { User } from '../../../core/repositories/dao';
+import * as objectRepository from '../../../core/repositories/object';
 import { Conversation, Message, ConversationUser } from './dao';
 import createConversationModel from '../models/conversation';
 

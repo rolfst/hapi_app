@@ -1,6 +1,6 @@
 import R from 'ramda';
 import { db as Sequelize } from '../../../../connections';
-import { User } from '../../../repositories/dao';
+import { User } from '../../../core/repositories/dao';
 import { Conversation, ConversationUser } from './dao';
 import createConversationModel from '../models/conversation';
 

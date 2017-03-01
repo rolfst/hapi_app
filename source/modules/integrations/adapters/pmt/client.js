@@ -1,6 +1,6 @@
 import fetch from 'isomorphic-fetch';
-import createError from '../../shared/utils/create-error';
-import * as Logger from '../../shared/services/logger';
+import createError from '../../../../shared/utils/create-error';
+import * as Logger from '../../../../shared/services/logger';
 
 const logger = Logger.createLogger('PMT/adapter/client');
 

@@ -1,8 +1,8 @@
-import { ActivityTypes } from '../../../repositories/dao/activity';
-import UserModel from '../../../repositories/dao/user';
-import ActivityModel from '../../../repositories/dao/activity';
-import TeamModel from '../../../repositories/dao/team';
-import NetworkModel from '../../../repositories/dao/network';
+import { ActivityTypes } from '../../../core/repositories/dao/activity';
+import UserModel from '../../../core/repositories/dao/user';
+import ActivityModel from '../../../core/repositories/dao/activity';
+import TeamModel from '../../../core/repositories/dao/team';
+import NetworkModel from '../../../core/repositories/dao/network';
 import { exchangeTypes } from './exchange';
 import ExchangeModel from './exchange';
 import ExchangeCommentModel from './exchange-comment';

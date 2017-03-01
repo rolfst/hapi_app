@@ -3,11 +3,11 @@ import Promise from 'bluebird';
 import * as Logger from '../../../../shared/services/logger';
 import createError from '../../../../shared/utils/create-error';
 import * as attachmentService from '../../../attachment/services/attachment';
+import * as objectService from '../../../core/services/object';
 import FeedDispatcher from '../../dispatcher';
 import * as messageRepository from '../../repositories/message';
 import * as likeRepository from '../../repositories/like';
 import * as commentRepository from '../../repositories/comment';
-import * as objectService from '../object';
 import * as impl from './implementation';
 
 /**
