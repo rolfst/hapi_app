@@ -79,6 +79,15 @@ export const create = async (payload, message) => {
   return attachmentRepo.create(path);
 };
 
+/**
+ * Assert if attachments exists
+ * @param {object} payload - Object containing payload data
+ * @param {string[]} payload.attachmentIds - Ids of the attachments to assert
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method assertAttachmentsExist
+ * @throws 403 Error
+ * @return {void}
+ */
 export const assertAttachmentsExist = async (payload, message) => {
   const attachments = await list({ attachmentIds: payload.attachmentIds }, message);
 
