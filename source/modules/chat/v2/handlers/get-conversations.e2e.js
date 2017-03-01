@@ -178,7 +178,8 @@ describe('Get conversations for logged user (v2)', () => {
       assert.property(conversationUnderTest.last_message, 'id');
       assert.equal(conversationUnderTest.last_message.source.text,
          'First message second conversation');
-      assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant2.id]);
+      assert.include(conversationUnderTest.participant_ids, creator.id);
+      assert.include(conversationUnderTest.participant_ids, participant2.id);
       assert.property(conversationUnderTest, 'created_at');
     });
 
@@ -197,12 +198,13 @@ describe('Get conversations for logged user (v2)', () => {
         assert.property(conversationUnderTest.last_message, 'id');
         assert.equal(conversationUnderTest.last_message.source.text,
           'Last message');
-        assert.deepEqual(conversationUnderTest.participant_ids, [creator.id, participant1.id]);
+        assert.include(conversationUnderTest.participant_ids, creator.id);
+        assert.include(conversationUnderTest.participant_ids, participant1.id);
         assert.property(conversationUnderTest, 'created_at');
       });
   });
 
-  describe('update flow', () => {
+  describe('Update flow', () => {
     before(async () => {
       creator = await testHelper.createUser({
         ...blueprints.users.creator,
