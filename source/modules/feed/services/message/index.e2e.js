@@ -103,7 +103,7 @@ describe('Service: Message', () => {
     });
   });
 
-  describe('Create poll', () => {
+  describe.skip('Create poll', () => {
     let createdMessage;
 
     before(async () => {
@@ -199,17 +199,15 @@ describe('Service: Message', () => {
       admin = await testHelpers.createUser({ password: 'foo' });
       network = await testHelpers.createNetwork({ userId: admin.id });
 
-      const attachmentObject = await attachmentService.create({
-        parentType: 'network',
-        parentId: network.id,
-        file: new stream.Readable(),
+      const attachment = await attachmentService.create({
+        fileStream: new stream.Readable(),
       }, { network, credentials: admin });
 
       createdMessage = await messageService.create({
         parentType: 'network',
         parentId: network.id,
         text: 'My cool message',
-        children: [attachmentObject.id],
+        files: [attachment.id],
       }, { network, credentials: admin });
     });
 
@@ -258,6 +256,17 @@ describe('Service: Message', () => {
       assert.equal(expected[0].userId, admin.id);
       assert.equal(expected[0].objectType, 'attachment');
       assert.isDefined(expected[0].sourceId);
+    });
+
+    it('should throw error when providing invalid attachment ids', async () => {
+      const createMessagePromise = messageService.create({
+        parentType: 'network',
+        parentId: network.id,
+        text: 'My cool message',
+        files: [-1],
+      }, { network, credentials: admin });
+
+      return assert.isRejected(createMessagePromise, /Please provide valid attachment ids/);
     });
   });
 

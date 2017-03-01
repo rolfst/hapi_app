@@ -7,7 +7,6 @@ import FeedDispatcher from '../../dispatcher';
 import * as messageRepository from '../../repositories/message';
 import * as likeRepository from '../../repositories/like';
 import * as commentRepository from '../../repositories/comment';
-import * as objectRepository from '../../repositories/object';
 import * as objectService from '../object';
 import * as impl from './implementation';
 
@@ -146,7 +145,7 @@ export const listComments = async (payload, message) => {
  * @param {string} payload.parentType - The type of parent to create the object for
  * @param {string} payload.parentId - The id of the parent
  * @param {string} payload.text - The text of the message
- * @param {object} payload.children - The children objects that should be associated
+ * @param {object} payload.files - The id of attachments that should be associated
  * @param {object} payload.poll - The poll
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method create
@@ -177,12 +176,24 @@ export const create = async (payload, message) => {
 
   await messageRepository.update(createdMessage.id, { objectId: createdObject.id });
 
-  if (payload.children) {
-    await Promise.map(R.flatten([payload.children]), (childObject) =>
-      objectRepository.update(childObject, {
-        parentType: 'feed_message',
-        parentId: createdMessage.id,
-      }));
+  if (payload.files) {
+    await attachmentService.assertAttachmentsExist({ attachmentIds: payload.files }, message);
+
+    const filesArray = R.flatten([payload.files]);
+    const updateMessageIds = Promise.map(filesArray, (attachmentId) => attachmentService.update({
+      whereConstraint: { id: attachmentId },
+      attributes: { messageId: createdMessage.id },
+    }));
+
+    const createObjects = Promise.map(filesArray, (attachmentId) => objectService.create({
+      userId: message.credentials.id,
+      parentType: 'feed_message',
+      parentId: createdMessage.id,
+      objectType: 'attachment',
+      sourceId: attachmentId,
+    }));
+
+    await Promise.all([updateMessageIds, createObjects]);
   }
 
   const objectWithSourceAndChildren = await objectService.getWithSourceAndChildren({
