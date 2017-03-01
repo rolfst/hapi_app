@@ -5,7 +5,7 @@ const routes = [{
   url: '/v2/networks/{networkId}/files',
   handler: require('./handlers/upload-file'),
   payload: {
-    maxBytes: 8000000,
+    maxBytes: 4000000,
     output: 'stream',
     parse: true,
   },
