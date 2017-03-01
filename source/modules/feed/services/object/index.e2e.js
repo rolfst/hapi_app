@@ -149,6 +149,8 @@ describe('Service: Object', () => {
       const objectWithChildren = R.find(R.propEq('id', createdMessageObject.id), actual);
       const objectWithoutChildren = R.find(R.propEq('id', createdMessageObject2.id), actual);
 
+      Storage.upload.restore();
+
       assert.lengthOf(actual, 2);
       assert.deepEqual(objectWithoutChildren.children, []);
       assert.property(objectWithChildren, 'children');
