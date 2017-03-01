@@ -1,5 +1,4 @@
 import R from 'ramda';
-import fs from 'fs';
 import Promise from 'bluebird';
 import AWS from 'aws-sdk';
 import createError from '../utils/create-error';
@@ -55,17 +54,15 @@ export function upload(file, prefix = null) {
     ContentType: file.hapi.headers['content-type'],
   };
 
-  return new Promise((success, reject) => {
-    getClient().upload(params, (err, data) => {
-      if (err) {
-        logger.error('Error while uploading to Amazon S3', { err });
-
-        return reject(createError('30001', err));
-      }
-
+  return getClient().upload(params).promise()
+    .then(data => {
       logger.info('Amazon S3 response', { response: data });
 
-      return success(newFilename);
+      return newFilename;
+    })
+    .catch(err => {
+      logger.error('Error while uploading to Amazon S3', { err });
+
+      throw createError('30001', err);
     });
-  });
 }
