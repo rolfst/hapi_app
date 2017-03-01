@@ -1,7 +1,6 @@
 import Sequelize from 'sequelize';
 import { flatten } from 'lodash';
 import { db as model } from '../../connections';
-import * as networkUtil from '../utils/network';
 import * as dateUtils from '../utils/date';
 
 const Network = model.define('Network', {
@@ -58,7 +57,7 @@ const Network = model.define('Network', {
         type: 'network',
         id: this.id.toString(),
         name: this.name,
-        has_integration: networkUtil.hasIntegration(this),
+        has_integration: this.Integrations.length > 0,
         enabled_components: flatten(this.enabledComponents.split(',').map(replaceChars)),
         user: this.SuperAdmin.toSimpleJSON(),
         created_at: dateUtils.toISOString(this.createdAt),
