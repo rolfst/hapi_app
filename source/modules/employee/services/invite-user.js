@@ -4,7 +4,6 @@ import * as passwordUtil from '../../../shared/utils/password';
 import * as mailer from '../../../shared/services/mailer';
 import { UserRoles } from '../../../shared/services/permission';
 import createError from '../../../shared/utils/create-error';
-import camelCaseKeys from '../../../shared/utils/camel-case-keys';
 import signupMail from '../../../shared/mails/signup';
 import addedToNetworkMail from '../../../shared/mails/added-to-network';
 import * as userService from '../../core/services/user';
@@ -95,7 +94,7 @@ export const inviteExistingUser = async (network, user, roleType) => {
  * invited user
  */
 export const inviteUser = async (payload, message) => {
-  const { firstName, lastName, email, teamIds, roleType } = camelCaseKeys(payload);
+  const { firstName, lastName, email, teamIds, roleType } = payload;
   const { network } = message;
 
   const role = roleType ? roleType.toUpperCase() : 'EMPLOYEE';
@@ -123,11 +122,12 @@ export const inviteUser = async (payload, message) => {
 
 
 /**
- * Invites users to a network
+ * Invites multiple users to a network
+ * @param {object} payload - The user properties for the new user
+ * @param {string[]} payload.userIds - The user ids to invite
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method inviteUser
- * @return {external:Promise.<User>} {@link module:modules/core~User} Promise containing the
- * invited user
+ * @method inviteUsers
+ * @return {void}
  */
 export const inviteUsers = async (payload, message) => {
   const { network } = message;

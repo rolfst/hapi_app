@@ -1,18 +1,16 @@
-import { pick } from 'lodash';
-import camelCaseKeys from '../../../shared/utils/camel-case-keys';
+import R from 'ramda';
 import * as service from '../services/flexchange';
 
 export default async (req, reply) => {
   try {
     const message = { ...req.auth, ...req.pre };
-
-    const whitelist = pick(req.payload,
-      'title', 'description', 'date',
-      'type', 'shift_id', 'start_time',
-      'end_time', 'values', 'team_id'
-    );
-
-    const payload = camelCaseKeys(whitelist);
+    const payload = {
+      ...R.omit(['shift_id', 'start_time', 'end_time', 'team_id'], req.payload),
+      shiftId: req.payload.shift_id,
+      startTime: req.payload.start_time,
+      endTime: req.payload.end_time,
+      teamId: req.payload.teamId,
+    };
 
     const response = await service.createExchange(payload, message);
 

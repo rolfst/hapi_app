@@ -1,7 +1,5 @@
-import { pick } from 'lodash';
 import moment from 'moment';
 import createError from '../../../shared/utils/create-error';
-import camelCaseKeys from '../../../shared/utils/camel-case-keys';
 import * as Logger from '../../../shared/services/logger';
 import { updateExchangeById } from '../repositories/exchange';
 
@@ -9,8 +7,12 @@ const logger = Logger.createLogger('FLEXCHANGE/handler/updateExchange');
 
 export default async (req, reply) => {
   try {
-    const whitelist = pick(req.payload, 'title', 'description', 'start_time', 'end_time');
-    const data = camelCaseKeys(whitelist);
+    const data = {
+      title: req.payload.title,
+      description: req.payload.description,
+      startTime: req.payload.start_time,
+      endTime: req.payload.end_time,
+    };
     const message = { ...req.pre, ...req.auth };
     const payload = { ...req.params, ...req.payload };
 
