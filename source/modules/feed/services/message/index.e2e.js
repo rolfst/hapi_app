@@ -1,6 +1,7 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import R from 'ramda';
+import stream from 'stream';
 import Promise from 'bluebird';
 import * as testHelpers from '../../../../shared/test-utils/helpers';
 import * as Storage from '../../../../shared/services/storage';
@@ -192,18 +193,23 @@ describe('Service: Message', () => {
     let sandbox;
 
     before(async () => {
-      const hapiFile = testHelpers.hapiFile('image.jpg');
       sandbox = sinon.sandbox.create();
       sandbox.stub(Storage, 'upload').returns(Promise.resolve('image.jpg'));
 
       admin = await testHelpers.createUser({ password: 'foo' });
       network = await testHelpers.createNetwork({ userId: admin.id });
 
+      const attachmentObject = await attachmentService.create({
+        parentType: 'network',
+        parentId: network.id,
+        file: new stream.Readable(),
+      }, { network, credentials: admin });
+
       createdMessage = await messageService.create({
         parentType: 'network',
         parentId: network.id,
         text: 'My cool message',
-        attachments: [hapiFile],
+        children: [attachmentObject.id],
       }, { network, credentials: admin });
     });
 
