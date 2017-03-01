@@ -29,10 +29,6 @@ const routes = [{
   handler: require('./handlers/create-message'),
   validator: require('./validators/create-message'),
   prefetch: false,
-  payload: {
-    maxBytes: 10000000,
-    output: 'file',
-  },
 }];
 
 export default createRoutes(routes);
