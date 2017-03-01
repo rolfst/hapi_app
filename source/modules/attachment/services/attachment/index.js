@@ -1,8 +1,7 @@
 import R from 'ramda';
 import * as Storage from '../../../../shared/services/storage';
 import * as Logger from '../../../../shared/services/logger';
-import { createError } from '../../../../shared/utils/create-error';
-import * as objectService from '../../../feed/services/object';
+import createError from '../../../../shared/utils/create-error';
 import * as attachmentRepo from '../../repositories/attachment';
 
 /**
@@ -29,14 +28,14 @@ export const list = async (payload, message) => {
 /**
  * Gets a attachment
  * @param {object} payload - Object containing payload data
- * @param {string} payload.attachmentId - Id of the attachment to get
+ * @param {string} payload.whereConstraint - The where constraint to find attachment
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method get
  * @return {external:Promise.<attachment>} {@link module:modules/attachment~Attachment Attachment}
  */
 export const get = async (payload, message) => {
   logger.info('Finding attachment', { payload, message });
-  const attachment = await attachmentRepo.findById(payload.attachmentId);
+  const attachment = R.head(await attachmentRepo.findBy(payload.whereConstraint));
 
   if (!attachment) throw createError('404');
 
@@ -46,7 +45,7 @@ export const get = async (payload, message) => {
 /**
  * Updates an attachment
  * @param {object} payload - Object containing payload data
- * @param {string} payload.attachmentId - Id of the attachment to update
+ * @param {string} payload.whereConstraint - Id of the attachment to update
  * @param {string} payload.attributes - Attributes to update
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method get
@@ -54,17 +53,14 @@ export const get = async (payload, message) => {
  */
 export const update = async (payload, message) => {
   logger.info('Updating attachment', { payload, message });
-  const attachment = await attachmentRepo.findById(payload.attachmentId);
-  if (!attachment) throw createError('404');
+  const attachment = await get({ whereConstraint: payload.whereConstraint });
 
-  return attachmentRepo.update(R.merge({ id: payload.attachmentId }, payload.attributes));
+  return attachmentRepo.update(R.merge({ id: attachment.id }, payload.attributes));
 };
 
 /**
  * Creates a attachment
  * @param {object} payload - Object containing payload data
- * @param {string} payload.parentId - The parent the attachment is created for
- * @param {string} payload.parentType - The type of parent the attachment is created for
  * @param {Stream} payload.fileStream - The file to upload
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @example
@@ -79,24 +75,14 @@ export const create = async (payload, message) => {
   logger.info('Creating attachment', { payload: R.omit(['fileStream'], payload), message });
 
   const path = await Storage.upload(payload.fileStream, 'attachments');
-  const createdAttachment = await attachmentRepo.create(path);
 
-  const objectResource = await objectService.create({
-    userId: message.credentials.id,
-    parentType: payload.parentType,
-    parentId: payload.parentId,
-    objectType: 'attachment',
-    sourceId: createdAttachment.id,
-  }, message);
+  return attachmentRepo.create(path);
+};
 
-  const attributesToUpdate = { objectId: objectResource.id };
-  if (payload.parentType === 'feed_message') attributesToUpdate.messageId = payload.parentId;
+export const assertAttachmentsExist = async (payload, message) => {
+  const attachments = await list({ attachmentIds: payload.attachmentIds }, message);
 
-  await update({
-    attachmentId: createdAttachment.id,
-    attributes: attributesToUpdate }, message);
-
-  return R.merge(objectResource, {
-    source: R.merge(createdAttachment, { objectId: objectResource.id }),
-  });
+  if (attachments.length !== payload.attachmentIds.length) {
+    throw createError('403', 'Please provide valid attachment ids');
+  }
 };
