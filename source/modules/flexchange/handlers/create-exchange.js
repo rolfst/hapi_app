@@ -9,7 +9,7 @@ export default async (req, reply) => {
       shiftId: req.payload.shift_id,
       startTime: req.payload.start_time,
       endTime: req.payload.end_time,
-      teamId: req.payload.teamId,
+      teamId: req.payload.team_id,
     };
 
     const response = await service.createExchange(payload, message);

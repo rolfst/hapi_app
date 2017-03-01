@@ -136,6 +136,7 @@ describe('Create exchange', () => {
     }, admin.token);
 
     const actual = await exchangeRepo.findExchangeById(result.data.id);
+    console.log(actual);
 
     assert.equal(actual.shiftId, 1);
     assert.equal(actual.type, 'USER');

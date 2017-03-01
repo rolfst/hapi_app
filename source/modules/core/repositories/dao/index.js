@@ -8,6 +8,7 @@ import NetworkUserModel from './network-user';
 import NetworkIntegrationModel from './network-service';
 import TeamUserModel from './team-user';
 import UserDeviceModel from './user-device';
+import ObjectModel from './object';
 
 ActivityModel.belongsTo(UserModel, {
   foreignKey: 'user_id',
@@ -75,3 +76,4 @@ export const NetworkUser = NetworkUserModel;
 export const TeamUser = TeamUserModel;
 export const UserDevice = UserDeviceModel;
 export const NetworkIntegration = NetworkIntegrationModel;
+export const _Object = ObjectModel;
