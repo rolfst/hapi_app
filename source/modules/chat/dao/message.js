@@ -9,7 +9,7 @@ const Message = model.define('Message', {
   messageType: { type: Sequelize.STRING, field: 'message_type' },
   createdBy: { type: Sequelize.INTEGER, field: 'created_by' },
 }, {
-  tableName: 'old_messages',
+  tableName: 'messages',
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',
