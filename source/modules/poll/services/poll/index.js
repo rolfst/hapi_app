@@ -49,7 +49,7 @@ export const create = async (payload, message) => {
   });
 
   const createOptions = R.addIndex(R.map)(impl.createOption(poll.id));
-  poll.options = await Promise.all(createOptions(payload.pollOptions));
+  poll.options = await Promise.all(createOptions(payload.options));
 
   return poll;
 };

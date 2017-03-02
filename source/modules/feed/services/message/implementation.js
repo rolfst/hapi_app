@@ -14,9 +14,10 @@ import * as objectService from '../../../core/services/object';
  * @return {external:Promise.<Object>}
  */
 export const createPollResource = (createdMessage, message) => R.pipeP(
-  (pollOptions) => pollService.create({
+  (poll) => pollService.create({
     networkId: message.network.id,
-    options: pollOptions,
+    options: poll.pollOptions,
+    question: poll.question,
   }, message),
   (createdPoll) => objectService.create({
     userId: message.credentials.id,

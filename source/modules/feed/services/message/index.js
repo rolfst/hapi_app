@@ -204,8 +204,9 @@ export const create = async (payload, message) => {
     await Promise.all([updateMessageIds, createObjects]);
   }
 
-  if (checkPayload('pollOptions')) {
-    await impl.createPollResource(createdMessage, message)(payload.pollOptions);
+  if (checkPayload('pollOptions') && checkPayload('question')) {
+    await impl.createPollResource(createdMessage, message)(
+      R.pick(['pollOptions', 'question'], payload));
   }
 
   const objectWithSourceAndChildren = await objectService.getWithSourceAndChildren({

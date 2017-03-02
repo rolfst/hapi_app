@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import * as testHelper from '../../../../shared/test-utils/helpers';
 import * as pollService from './index';
 
-describe.only('Service: Poll', () => {
+describe('Service: Poll', () => {
   let employee;
   let flexAppeal;
   let pmt;
@@ -30,14 +30,14 @@ describe.only('Service: Poll', () => {
     message = { credentials: { id: employee.id } };
     defaultPayload = {
       networkId: flexAppeal.id, question: 'help in what way?',
-      pollOptions: ['Option A', 'Option B', 'Option C'],
+      options: ['Option A', 'Option B', 'Option C'],
     };
     defaultVotePayload = { networkId: flexAppeal.id };
   });
 
   after(() => testHelper.cleanAll());
 
-  it.only('should create a poll', async () => {
+  it('should create a poll', async () => {
     const poll = await pollService.create(defaultPayload, message);
     const actual = poll;
 

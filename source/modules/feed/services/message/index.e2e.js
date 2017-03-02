@@ -114,6 +114,7 @@ describe('Service: Message', () => {
         parentType: 'network',
         parentId: network.id,
         text: 'My cool message',
+        question: 'Should we help?',
         pollOptions: ['Yes', 'No', 'Ok'],
       }, { network, credentials: admin });
     });
