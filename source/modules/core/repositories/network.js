@@ -1,17 +1,17 @@
 import R from 'ramda';
 import moment from 'moment';
-import { Network,
-  Team,
-  User,
-  NetworkUser,
-  Integration,
-  NetworkIntegration } from '../../../shared/models';
 import createError from '../../../shared/utils/create-error';
 import createNetworkModel from '../models/network';
 import createNetworkLinkModel from '../models/network-link';
 import createUserModel from '../models/user';
 import createTeamModel from '../models/team';
 import * as userRepo from './user';
+import { Network,
+  Team,
+  User,
+  NetworkUser,
+  Integration,
+  NetworkIntegration } from './dao';
 
 /**
  * @module modules/core/repositories/network

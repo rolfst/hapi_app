@@ -3,7 +3,7 @@ import Promise from 'bluebird';
 import * as Logger from '../../../../../shared/services/logger';
 import createError from '../../../../../shared/utils/create-error';
 import * as attachmentService from '../../../../attachment/services/attachment';
-import * as objectService from '../../../../feed/services/object';
+import * as objectService from '../../../../core/services/object';
 import * as privateMessageRepository from '../../repositories/private-message';
 import * as conversationRepository from '../../repositories/conversation';
 import ChatDispatcher from '../../dispatcher';

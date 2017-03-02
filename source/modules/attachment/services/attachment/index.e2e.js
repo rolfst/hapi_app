@@ -11,10 +11,13 @@ describe('Service: Attachment', () => {
   let admin;
   let sandbox;
   let network;
+  let fileName;
 
   describe('create', () => {
     before(async () => {
       sandbox = sinon.sandbox.create();
+      fileName = 'image.jpg';
+      sandbox.stub(Storage, 'upload').returns(Promise.resolve(fileName));
 
       admin = await testHelper.createUser();
       network = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
@@ -26,28 +29,20 @@ describe('Service: Attachment', () => {
     });
 
     it('should create a attachment', async () => {
-      const fileName = 'test.jpg';
-      sandbox.stub(Storage, 'upload').returns(Promise.resolve(fileName));
-
       const actual = await attachmentService.create({
         fileStream: new stream.Readable(),
       }, { credentials: admin });
-
-      Storage.upload.restore();
 
       assert.isDefined(actual);
       assert.equal(actual.type, 'attachment');
       assert.property(actual, 'objectId');
       assert.property(actual, 'path');
-      assert.equal(actual.path, 'https://assets.flex-appeal.nl/development/attachments/test.jpg');
+      assert.equal(actual.path, `https://assets.flex-appeal.nl/development/attachments/${fileName}`);
       assert.property(actual, 'createdAt');
       assert.isNotNull(actual.createdAt);
     });
 
     it('should set message_id for backwards compatibility', async () => {
-      const fileName = 'test.jpg';
-      sandbox.stub(Storage, 'upload').returns(Promise.resolve(fileName));
-
       const attachment = await attachmentService.create({
         fileStream: new stream.Readable(),
       }, { credentials: admin });
@@ -63,8 +58,6 @@ describe('Service: Attachment', () => {
       const attachmentResult = await AttachmentDAO.findOne({
         where: { id: attachment.id },
       });
-
-      Storage.upload.restore();
 
       assert.equal(attachmentResult.messageId, createdMessage.sourceId);
     });

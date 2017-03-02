@@ -1,12 +1,9 @@
-import Promise from 'bluebird';
 import R from 'ramda';
 import * as Logger from '../../../../shared/services/logger';
 import createError from '../../../../shared/utils/create-error';
-import * as integrationsAdapter from '../../../../shared/utils/integrations-adapter';
 import * as networkRepo from '../../repositories/network';
 import * as userService from '../user';
 import * as teamService from '../team';
-import * as impl from './implementation';
 
 /**
  * @module modules/core/services/network
@@ -63,32 +60,6 @@ export const addUserToNetwork = async (payload, message) => {
   };
 
   return networkRepo.addUser(attributes);
-};
-
-/**
- * Retrieve prisinte networks from an integration.
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method listPristineNetworks
- * @return {external:Promise} -
- * Promise containing collection of a pristine network with integrationName
- * and admins for the network.
- */
-export const listPristineNetworks = async (payload, message) => {
-  logger.info('Listing all pristine networks', { payload, message });
-
-  const baseUrl = 'https://partner2.testpmt.nl/rest.php';
-  const clients = await integrationsAdapter.clients(baseUrl);
-  const externalIds = R.pluck('externalId', clients);
-
-  const networksFromIntegration = await R.pipeP(
-    ids => Promise.map(ids, integrationsAdapter.pristineNetworks),
-    R.flatten)(externalIds);
-
-  const pristineNetworks = impl.filterExistingNetworks(networksFromIntegration, message);
-  const pristineNetworksWithAdmins = await Promise.map(pristineNetworks, (pristineNetwork) =>
-    impl.mergeAdminsIntoPristineNetwork(pristineNetwork, message));
-
-  return pristineNetworksWithAdmins;
 };
 
 /**

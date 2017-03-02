@@ -3,9 +3,9 @@ import Promise from 'bluebird';
 import moment from 'moment';
 import _ from 'lodash';
 import * as testHelper from '../../../shared/test-utils/helpers';
-import { ActivityTypes } from '../../../shared/models/activity';
 import * as Logger from '../../../shared/services/logger';
 import { getRequest } from '../../../shared/test-utils/request';
+import { ActivityTypes } from '../../core/repositories/dao/activity';
 import * as exchangeRepo from '../repositories/exchange';
 import * as commentRepo from '../repositories/comment';
 

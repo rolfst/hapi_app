@@ -5,7 +5,7 @@ import Promise from 'bluebird';
 import * as testHelper from '../../../shared/test-utils/helpers';
 import { getRequest } from '../../../shared/test-utils/request';
 import * as stubs from '../../../shared/test-utils/stubs';
-import userSerializer from '../../../adapters/pmt/serializers/user';
+import userSerializer from '../../integrations/adapters/pmt/serializers/user';
 import * as networkRepo from '../../core/repositories/network';
 import * as teamRepo from '../../core/repositories/team';
 

@@ -9,7 +9,7 @@ import * as stubs from '../../../shared/test-utils/stubs';
 import * as notifier from '../../../shared/services/notifier';
 import { postRequest } from '../../../shared/test-utils/request';
 import * as teamRepo from '../../core/repositories/team';
-import * as objectService from '../../feed/services/object';
+import * as objectService from '../../core/services/object';
 import { exchangeTypes } from '../repositories/dao/exchange';
 import * as exchangeRepo from '../repositories/exchange';
 import * as exchangeService from '../services/flexchange';

@@ -1,6 +1,6 @@
 'use strict';
 require('babel-register');
-const { User, Network } = require('../source/shared/models');
+const { User, Network } = require('../source/modules/core/repositories/dao');
 
 module.exports = {
   up: function (queryInterface, Sequelize) {

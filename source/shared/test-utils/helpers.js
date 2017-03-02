@@ -8,7 +8,7 @@ import * as userRepo from '../../modules/core/repositories/user';
 import * as networkRepo from '../../modules/core/repositories/network';
 import * as teamRepo from '../../modules/core/repositories/team';
 import * as activityRepo from '../../modules/core/repositories/activity';
-import * as objectRepo from '../../modules/feed/repositories/object';
+import * as objectRepo from '../../modules/core/repositories/object';
 import * as pollRepo from '../../modules/poll/repositories/poll';
 import { postRequest } from './request';
 

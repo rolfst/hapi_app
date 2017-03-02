@@ -1,7 +1,7 @@
 import { uniq, filter, map, omit } from 'lodash';
 import R from 'ramda';
 import createError from '../../../../../shared/utils/create-error';
-import * as objectService from '../../../../feed/services/object';
+import * as objectService from '../../../../core/services/object';
 import * as conversationRepo from '../../repositories/conversation';
 import * as messageRepo from '../../repositories/message';
 import ChatDispatcher from '../../dispatcher';
