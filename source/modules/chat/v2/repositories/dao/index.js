@@ -1,4 +1,4 @@
-import UserModel from '../../../../../shared/models/user';
+import UserModel from '../../../../core/repositories/dao/user';
 import ConversationModel from './conversation';
 import ConversationUserModel from './conversation-user';
 import PrivateMessageModel from './private-message';

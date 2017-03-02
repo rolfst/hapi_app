@@ -1,7 +1,7 @@
 import Sequelize from 'sequelize';
-import { db as model } from '../../../../connections';
+import model from '../../../../shared/configs/sequelize';
 import * as dateUtils from '../../../../shared/utils/date';
-import { User } from '../../../../shared/models';
+import { User } from '../../../core/repositories/dao';
 
 const ExchangeResponse = model.define('ExchangeResponse', {
   userId: {

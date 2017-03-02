@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import Promise from 'bluebird';
 import * as notifier from '../../shared/services/notifier';
-import * as objectService from './services/object';
+import * as objectService from '../core/services/object';
 import Dispatcher from './dispatcher';
 
 describe('Feed: Dispatcher', () => {

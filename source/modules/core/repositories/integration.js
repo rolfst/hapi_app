@@ -1,4 +1,4 @@
-import { Integration } from '../../../shared/models';
+import { Integration } from './dao';
 
 /**
  * @module modules/core/repositories/integration

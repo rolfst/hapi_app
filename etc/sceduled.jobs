@@ -1,2 +1,0 @@
-NODE_API_PATH=/Users/rolfstrijdhorst/workspace/node-api
-30 11 * * * cd $NODE_API_PATH && npm run jobs

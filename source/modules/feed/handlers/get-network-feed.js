@@ -1,7 +1,7 @@
 import R from 'ramda';
 import * as responseUtil from '../../../shared/utils/response';
+import * as objectService from '../../core/services/object';
 import * as feedService from '../services/feed';
-import * as objectService from '../services/object';
 
 export default async (req, reply) => {
   try {

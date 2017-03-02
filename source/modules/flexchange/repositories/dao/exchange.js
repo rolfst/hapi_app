@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 import moment from 'moment';
-import { db as model } from '../../../../connections';
+import model from '../../../../shared/configs/sequelize';
 import * as dateUtils from '../../../../shared/utils/date';
 import makeCreatedInObject from '../../utils/created-in-text';
 

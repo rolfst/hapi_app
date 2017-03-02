@@ -1,7 +1,7 @@
 import R from 'ramda';
 import EventEmitter from '../../shared/services/event-emitter';
 import * as notifier from '../../shared/services/notifier';
-import * as objectService from './services/object';
+import * as objectService from '../core/services/object';
 import createdMessageNotification from './notifications/message-created';
 
 const pubsub = EventEmitter.create();

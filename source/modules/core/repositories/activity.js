@@ -1,4 +1,4 @@
-import { Activity, Team, Network, User } from '../../../shared/models';
+import { Activity, Team, Network, User } from './dao';
 
 /**
  * @module modules/core/repositories/activity

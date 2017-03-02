@@ -7,7 +7,7 @@ import * as testHelpers from '../../../../shared/test-utils/helpers';
 import * as Storage from '../../../../shared/services/storage';
 import * as pollService from '../../../poll/services/poll';
 import * as attachmentService from '../../../attachment/services/attachment';
-import * as objectService from '../object';
+import * as objectService from '../../../core/services/object';
 import * as commentService from '../comment';
 import * as messageService from './index';
 

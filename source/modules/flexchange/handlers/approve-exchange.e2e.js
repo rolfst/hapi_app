@@ -2,9 +2,9 @@ import { assert } from 'chai';
 import moment from 'moment';
 import * as testHelper from '../../../shared/test-utils/helpers';
 import { patchRequest } from '../../../shared/test-utils/request';
+import * as objectRepository from '../../core/repositories/object';
 import { exchangeTypes } from '../repositories/dao/exchange';
 import * as exchangeService from '../services/flexchange';
-import * as objectRepository from '../../feed/repositories/object';
 
 describe('Approve exchange', () => {
   let admin;

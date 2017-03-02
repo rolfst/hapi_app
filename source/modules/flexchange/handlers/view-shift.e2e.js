@@ -4,8 +4,8 @@ import moment from 'moment';
 import nock from 'nock';
 import * as testHelper from '../../../shared/test-utils/helpers';
 import * as sharedStubs from '../../../shared/test-utils/stubs';
-import * as stubs from '../../../adapters/pmt/test-utils/stubs';
 import { getRequest } from '../../../shared/test-utils/request';
+import * as stubs from '../../integrations/adapters/pmt/test-utils/stubs';
 import { exchangeTypes } from '../repositories/dao/exchange';
 import { createExchange } from '../repositories/exchange';
 

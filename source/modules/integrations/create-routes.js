@@ -13,11 +13,6 @@ const routes = [{
   validator: require('./validators/import-network'),
 }, {
   method: 'GET',
-  url: '/v2/pristine_networks',
-  handler: require('./handlers/pristine-networks'),
-  prefetch: false,
-}, {
-  method: 'GET',
   url: '/v2/integrations/sync',
   handler: require('./handlers/sync-with-integration-partner'),
   strategy: 'integration',
