@@ -1,24 +1,38 @@
 import { assert } from 'chai';
 import qs from 'qs';
 import moment from 'moment';
-import { map, find } from 'lodash';
+import { map, pick, find } from 'lodash';
 import { getRequest } from '../../../shared/test-utils/request';
-import * as networkService from '../../core/services/network';
-import { create } from '../../core/repositories/team';
-import * as userRepo from '../../core/repositories/user';
+import * as testHelper from '../../../shared/test-utils/helpers';
+import * as stubs from '../../../shared/test-utils/stubs';
+import * as teamRepo from '../../core/repositories/team';
 import { exchangeTypes } from '../repositories/dao/exchange';
 import * as exchangeRepo from '../repositories/exchange';
 
 describe('Get exchanges for network', () => {
+  const pristineNetwork = stubs.pristine_networks_admins[0];
+
   describe('Integrated network', () => {
     let integratedNetwork;
-    let createdExchanges;
+    let admin;
+    let employee;
 
     before(async () => {
-      integratedNetwork = global.networks.pmt;
-      const { employee, admin } = global.users;
+      [admin, employee] = await Promise.all([
+        testHelper.createUser(),
+        testHelper.createUser(),
+      ]);
 
-      await networkService.addUserToNetwork({
+      const { network: netw } = await testHelper.createNetworkWithIntegration({
+        userId: admin.id,
+        token: 'footoken',
+        ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
+      });
+      integratedNetwork = netw;
+      const plainNetwork = await testHelper.createNetwork(
+        { userId: admin.id, name: 'flexappeal' });
+
+      await testHelper.addUserToNetwork({
         userId: employee.id,
         networkId: integratedNetwork.id,
       });
@@ -42,7 +56,9 @@ describe('Get exchanges for network', () => {
       });
 
       const exchangeForOtherNetwork = exchangeRepo.createExchange(
-        global.users.admin.id, global.networks.flexAppeal.id, {
+        admin.id,
+        plainNetwork.id,
+        {
           date: moment().format('YYYY-MM-DD'),
           type: exchangeTypes.NETWORK,
           description: 'Test shift in other network',
@@ -58,7 +74,7 @@ describe('Get exchanges for network', () => {
           teamId: 80,
         });
 
-      createdExchanges = await Promise.all([
+      await Promise.all([
         exchangeToAdmin,
         exchangeForEmployee,
         exchangeForOtherNetwork,
@@ -66,14 +82,11 @@ describe('Get exchanges for network', () => {
       ]);
     });
 
-    after(async () => {
-      await Promise.all(createdExchanges.map(e => e.destroy()));
-      await userRepo.removeFromNetwork(global.users.employee.id, integratedNetwork.id);
-    });
+    after(() => testHelper.cleanAll());
 
     it('should return exchanges for admin', async () => {
       const endpoint = `/v2/networks/${integratedNetwork.id}/exchanges`;
-      const { result, statusCode } = await getRequest(endpoint);
+      const { result, statusCode } = await getRequest(endpoint, admin.token);
 
       const invidualExchange = find(result.data, { description: 'Exchange for shift 1337' });
 
@@ -84,8 +97,7 @@ describe('Get exchanges for network', () => {
 
     it('should return exchanges for employee', async () => {
       const endpoint = `/v2/networks/${integratedNetwork.id}/exchanges`;
-      const token = global.tokens.employee;
-      const { result, statusCode } = await getRequest(endpoint, global.server, token);
+      const { result, statusCode } = await getRequest(endpoint, employee.token);
 
       const invidualExchange = find(result.data, { description: 'Exchange for shift 1339' });
 
@@ -97,29 +109,42 @@ describe('Get exchanges for network', () => {
 
   describe('Normal network', () => {
     let createdTeams;
+    let admin;
     let network;
-    let createdExchanges;
+    let employee;
 
     before(async () => {
-      network = global.networks.flexAppeal;
+      admin = await testHelper.createUser({
+        username: 'admin@flex-appeal.nl', password: 'foo' });
+      employee = await testHelper.createUser({
+        username: 'employee@flex-appeal.nl', password: 'baz' });
+      network = await testHelper.createNetwork({ userId: admin.id, name: 'test' });
+      const { network: netw } = await testHelper.createNetworkWithIntegration({
+        userId: admin.id,
+        token: 'footoken',
+        ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
+      });
+      const integrationNetwork = netw;
+      testHelper.addUserToNetwork(
+        { networkId: network.id, userId: employee.id, roleType: 'EMPLOYEE' });
 
       createdTeams = await Promise.all([
-        create({ networkId: network.id, name: 'Test team 1' }),
-        create({ networkId: network.id, name: 'Test team 2' }),
-        create({ networkId: network.id, name: 'Test team 3' }),
+        teamRepo.create({ networkId: network.id, name: 'Test team 1' }),
+        teamRepo.create({ networkId: network.id, name: 'Test team 2' }),
+        teamRepo.create({ networkId: network.id, name: 'Test team 3' }),
       ]);
 
       const [team1, team2, team3] = createdTeams;
 
       await Promise.all([
-        userRepo.addToTeam(global.users.employee.id, team2.id),
-        userRepo.addToTeam(global.users.employee.id, team3.id),
+        teamRepo.addUserToTeam(team2.id, employee.id),
+        teamRepo.addUserToTeam(team3.id, employee.id),
       ]);
 
       const exchanges = await exchangeRepo.findExchangesByNetwork(network.id);
       await Promise.all(map(exchanges, e => exchangeRepo.deleteById(e.id)));
 
-      const exchangeForTeams = exchangeRepo.createExchange(global.users.admin.id, network.id, {
+      const exchangeForTeams = exchangeRepo.createExchange(admin.id, network.id, {
         date: moment().format('YYYY-MM-DD'),
         description: 'Test shift for teams',
         type: exchangeTypes.TEAM,
@@ -127,39 +152,39 @@ describe('Get exchanges for network', () => {
       });
 
       const exchangeForTeamWhereEmployeeDoesNotBelongTo = exchangeRepo.createExchange(
-        global.users.admin.id, network.id, {
+        admin.id, network.id, {
           date: moment().format('YYYY-MM-DD'),
           type: exchangeTypes.TEAM,
           values: [team1.id],
         });
 
-      const exchangeForNetwork = exchangeRepo.createExchange(global.users.employee.id, network.id, {
+      const exchangeForNetwork = exchangeRepo.createExchange(employee.id, network.id, {
         date: moment().format('YYYY-MM-DD'),
         type: exchangeTypes.NETWORK,
         description: 'Test shift 2',
       });
 
       const exchangeForOtherNetwork = exchangeRepo.createExchange(
-        global.users.admin.id, global.networks.pmt.id, {
+        admin.id, integrationNetwork.id, {
           date: moment().format('YYYY-MM-DD'),
           type: exchangeTypes.NETWORK,
           description: 'Test shift in other network',
         });
 
       const exchangeInTheFutureForNetwork = exchangeRepo.createExchange(
-        global.users.admin.id, network.id, {
+        admin.id, network.id, {
           type: exchangeTypes.NETWORK,
           date: moment().add(2, 'weeks').format('YYYY-MM-DD'),
           description: 'Test shift 3',
         });
 
-      const exchangeInPast = exchangeRepo.createExchange(global.users.admin.id, network.id, {
+      const exchangeInPast = exchangeRepo.createExchange(admin.id, network.id, {
         type: exchangeTypes.NETWORK,
         date: moment().subtract(2, 'weeks').format('YYYY-MM-DD'),
         description: 'Test shift in past',
       });
 
-      createdExchanges = await Promise.all([
+      return Promise.all([
         exchangeForTeamWhereEmployeeDoesNotBelongTo,
         exchangeForTeams,
         exchangeForNetwork,
@@ -169,11 +194,11 @@ describe('Get exchanges for network', () => {
       ]);
     });
 
-    after(() => Promise.all(createdExchanges.map(e => e.destroy())));
+    after(() => testHelper.cleanAll());
 
     it('should return exchanges for admin', async () => {
       const endpoint = `/v2/networks/${network.id}/exchanges`;
-      const { result, statusCode } = await getRequest(endpoint);
+      const { result, statusCode } = await getRequest(endpoint, admin.token);
 
       const [team1, team2] = createdTeams;
       const teamExchange = find(result.data, { description: 'Test shift for teams' });
@@ -189,7 +214,7 @@ describe('Get exchanges for network', () => {
 
     it('should return exchanges for employee', async () => {
       const endpoint = `/v2/networks/${network.id}/exchanges`;
-      const { result } = await getRequest(endpoint, global.server, global.tokens.employee);
+      const { result } = await getRequest(endpoint, employee.token);
 
       const [team1, team2] = createdTeams;
       const teamExchange = find(result.data, { description: 'Test shift for teams' });
@@ -208,7 +233,7 @@ describe('Get exchanges for network', () => {
       });
 
       const endpoint = `/v2/networks/${network.id}/exchanges?${query}`;
-      const { result, statusCode } = await getRequest(endpoint);
+      const { result, statusCode } = await getRequest(endpoint, admin.token);
 
       assert.lengthOf(result.data, 3);
       assert.equal(statusCode, 200);
@@ -220,7 +245,7 @@ describe('Get exchanges for network', () => {
       });
 
       const endpoint = `/v2/networks/${network.id}/exchanges?${query}`;
-      const { result, statusCode } = await getRequest(endpoint);
+      const { result, statusCode } = await getRequest(endpoint, admin.token);
 
       assert.lengthOf(result.data, 4);
       assert.equal(statusCode, 200);
@@ -232,7 +257,7 @@ describe('Get exchanges for network', () => {
       });
 
       const endpoint = `/v2/networks/${network.id}/exchanges?${query}`;
-      const { statusCode } = await getRequest(endpoint);
+      const { statusCode } = await getRequest(endpoint, admin.token);
 
       assert.equal(statusCode, 422);
     });

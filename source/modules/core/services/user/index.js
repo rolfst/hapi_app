@@ -1,10 +1,10 @@
 import { map, find } from 'lodash';
 import Promise from 'bluebird';
+import createError from '../../../../shared/utils/create-error';
 import * as Logger from '../../../../shared/services/logger';
 import * as userRepo from '../../repositories/user';
-import * as networkService from '../../services/network';
 import * as networkRepo from '../../repositories/network';
-import * as impl from './implementation';
+import * as networkService from '../../services/network';
 
 /**
  * @module modules/core/services/user
@@ -44,7 +44,14 @@ export async function listUsersWithNetworkScope(payload, message) {
   return Promise.map(users, async (user) => {
     const metaData = find(metaDataList, { userId: user.id });
 
-    return impl.createScopedUser(user, metaData, network);
+    return {
+      ...user,
+      roleType: metaData.roleType,
+      externalId: metaData.externalId,
+      deletedAt: metaData.deletedAt,
+      invitedAt: metaData.invitedAt,
+      integrationAuth: !!metaData.userToken,
+    };
   });
 }
 
@@ -58,10 +65,21 @@ export async function listUsersWithNetworkScope(payload, message) {
  * @return {external:Promise.<User[]>} {@link module:modules/core~User} Promise containing
  * collection of users
  */
-export async function getUserWithNetworkScope(payload) {
+export async function getUserWithNetworkScope(payload, message) {
+  logger.info('Get user with network scope', { payload, message });
   const user = await userRepo.findUserById(payload.id, payload.networkId);
   const network = await networkRepo.findNetworkById(payload.networkId);
-  const metaData = await userRepo.findNetworkLink({ userId: user.id, networkId: network.id });
+  const networkLink = await userRepo.findNetworkLink({ userId: user.id, networkId: network.id });
 
-  return impl.createScopedUser(user, metaData, network);
+  if (!networkLink) throw createError('10002');
+
+
+  return {
+    ...user,
+    roleType: networkLink.roleType,
+    externalId: networkLink.externalId,
+    deletedAt: networkLink.deletedAt,
+    invitedAt: networkLink.invitedAt,
+    integrationAuth: !!networkLink.userToken,
+  };
 }

@@ -1,5 +1,5 @@
 import fetch from 'isomorphic-fetch';
-import { map } from 'lodash';
+import R from 'ramda';
 import * as Logger from './logger';
 
 const logger = Logger.createLogger('SHARED/services/socket');
@@ -7,17 +7,28 @@ const logger = Logger.createLogger('SHARED/services/socket');
 export const WEBSOCKET_URL = process.env.API_ENV === 'production' ?
   'https://realtime.flex-appeal.nl' : 'https://test.realtime.flex-appeal.nl';
 
-export const send = (eventName, users, payload, token) => {
-  if (process.env.API_ENV === 'testing') return;
+export const send = async (eventName, users, payload, token) => {
+  const userIds = R.pluck('id', users);
 
-  const userIds = map(users, 'id');
-  logger.info('Sending socket event', { userIds, eventName, payload });
+  try {
+    const response = await fetch(`${WEBSOCKET_URL}/${eventName}?token=${token}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ payload: JSON.stringify(payload), userIds }),
+    });
 
-  fetch(`${WEBSOCKET_URL}/${eventName}?token=${token}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ payload: JSON.stringify(payload), userIds }),
-  });
+    const jsonResponse = await response.json();
+
+    if (response.ok) {
+      logger.info('Successfully send socket event', {
+        userIds, eventName, payload, token, jsonResponse });
+    } else {
+      logger.error('Error sending socket event', {
+        userIds, eventName, payload, jsonResponse });
+    }
+  } catch (err) {
+    logger.error('Error sending socket event', { err });
+  }
 };

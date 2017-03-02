@@ -1,5 +1,5 @@
 import Sequelize from 'sequelize';
-import { db as model } from '../../../../../connections';
+import model from '../../../../../shared/configs/sequelize';
 import * as dateUtils from '../../../../../shared/utils/date';
 
 const Conversation = model.define('Conversation', {
@@ -11,11 +11,15 @@ const Conversation = model.define('Conversation', {
     type: Sequelize.INTEGER,
     field: 'created_by',
   },
+  updatedAt: {
+    type: Sequelize.DATE,
+    field: 'updated_at',
+  },
 }, {
   tableName: 'conversations',
   timestamps: true,
   createdAt: 'created_at',
-  updatedAt: false,
+  updatedAt: 'updated_at',
   instanceMethods: {
     toJSON: function () { // eslint-disable-line func-names, object-shorthand
       let output = {

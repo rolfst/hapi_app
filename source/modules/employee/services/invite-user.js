@@ -4,13 +4,13 @@ import * as passwordUtil from '../../../shared/utils/password';
 import * as mailer from '../../../shared/services/mailer';
 import { UserRoles } from '../../../shared/services/permission';
 import createError from '../../../shared/utils/create-error';
-import camelCaseKeys from '../../../shared/utils/camel-case-keys';
 import signupMail from '../../../shared/mails/signup';
 import addedToNetworkMail from '../../../shared/mails/added-to-network';
 import * as userService from '../../core/services/user';
 import * as networkRepo from '../../core/repositories/network';
 import * as userRepo from '../../core/repositories/user';
 import * as teamRepo from '../../core/repositories/team';
+import EmployeeDispatcher from '../dispatcher';
 import * as impl from './implementation';
 
 /**
@@ -69,7 +69,9 @@ export const inviteExistingUser = async (network, user, roleType) => {
     await networkRepo.addUser({ userId, networkId, roleType });
   }
 
-  await userRepo.setNetworkLink({ networkId, userId, roleType, deletedAt: null });
+  await userRepo.setNetworkLink({
+    networkId, userId,
+  }, { networkId, userId, roleType, deletedAt: null });
 
   mailer.send(addedToNetworkMail(network, user));
 
@@ -92,7 +94,7 @@ export const inviteExistingUser = async (network, user, roleType) => {
  * invited user
  */
 export const inviteUser = async (payload, message) => {
-  const { firstName, lastName, email, teamIds, roleType } = camelCaseKeys(payload);
+  const { firstName, lastName, email, teamIds, roleType } = payload;
   const { network } = message;
 
   const role = roleType ? roleType.toUpperCase() : 'EMPLOYEE';
@@ -106,16 +108,26 @@ export const inviteUser = async (payload, message) => {
 
   if (teamIds && teamIds.length > 0) await teamRepo.addUserToTeams(teamIds, user.id);
 
-  return userService.getUserWithNetworkScope({ id: user.id, networkId: network.id });
+  const createdUser = await userService.getUserWithNetworkScope({
+    id: user.id, networkId: network.id });
+
+  EmployeeDispatcher.emit('user.created', {
+    user: createdUser,
+    network: message.network,
+    credentials: message.credentials,
+  });
+
+  return createdUser;
 };
 
 
 /**
- * Invites users to a network
+ * Invites multiple users to a network
+ * @param {object} payload - The user properties for the new user
+ * @param {string[]} payload.userIds - The user ids to invite
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method inviteUser
- * @return {external:Promise.<User>} {@link module:modules/core~User} Promise containing the
- * invited user
+ * @method inviteUsers
+ * @return {void}
  */
 export const inviteUsers = async (payload, message) => {
   const { network } = message;
@@ -134,7 +146,8 @@ export const inviteUsers = async (payload, message) => {
   const usersToSendMailto = await impl.generatePasswordsForMembers(toNotifyUsers);
 
   await Promise.map(usersToSendMailto, user =>
-    userRepo.setNetworkLink({ userId: user.id, networkId: network.id, invitedAt: new Date() }));
+    userRepo.setNetworkLink({ userId: user.id, networkId: network.id }, {
+      invitedAt: new Date(), userId: user.id, networkId: network.id }));
 
   map(usersToSendMailto, (user) => mailer.send(signupMail(network, user, user.plainPassword)));
 };

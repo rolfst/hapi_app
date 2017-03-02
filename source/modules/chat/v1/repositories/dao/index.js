@@ -1,4 +1,4 @@
-import UserModel from '../../../../../shared/models/user';
+import UserModel from '../../../../core/repositories/dao/user';
 import ConversationModel from './conversation';
 import ConversationUserModel from './conversation-user';
 import MessageModel from './message';
@@ -10,27 +10,8 @@ ConversationModel.belongsToMany(UserModel, {
   timestamps: false,
 });
 
-ConversationModel.hasMany(MessageModel, {
-  foreignKey: 'parent_id',
-  scope: {
-    parent_type: 'FlexAppeal\\Entities\\Conversation',
-  },
-});
-
-ConversationModel.hasMany(MessageModel, {
-  foreignKey: 'parent_id',
-  as: 'LastMessage',
-  scope: {
-    parent_type: 'FlexAppeal\\Entities\\Conversation',
-  },
-});
-
 MessageModel.belongsTo(UserModel, {
-  foreignKey: 'created_by',
-});
-
-MessageModel.belongsTo(ConversationModel, {
-  foreignKey: 'parent_id',
+  foreignKey: 'user_id',
 });
 
 UserModel.belongsToMany(ConversationModel, {

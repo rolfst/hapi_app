@@ -10,6 +10,10 @@ const defaultIncludes = [{
   include: [{ model: PollVote, as: 'Votes' }],
 }];
 
+export const findBy = async (whereConstraint) => Poll
+  .findAll({ include: defaultIncludes, where: whereConstraint })
+  .then(R.map(createPollModel));
+
 /**
  * Find a specific poll by id
  * @param {string} id - Id of the poll
@@ -66,3 +70,11 @@ export const vote = async (attributes) => {
 export const clearVotes = (pollId, userId) => (
   PollVote.destroy({ where: { pollId, userId } })
 );
+
+export const findAll = async () => {
+  return Poll.findAll();
+};
+
+export const deleteById = async (pollId) => {
+  return Poll.destroy({ where: { id: pollId } });
+};

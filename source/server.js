@@ -1,14 +1,10 @@
 import Hapi from 'hapi';
-import { omit } from 'lodash';
 import raven from 'raven';
 import routes from './create-routes';
 import jwtStrategy from './shared/middlewares/authenticator-strategy';
 import integrationStrategy from './shared/middlewares/integration-strategy';
 import * as serverUtil from './shared/utils/server';
-import { server as serverConnection } from './connections';
-import * as Logger from './shared/services/logger';
-
-const logger = Logger.createLogger('SERVER');
+import serverConfig from './shared/configs/server';
 
 const createServer = () => {
   const ravenClient = new raven.Client(process.env.SENTRY_DSN, {
@@ -17,7 +13,7 @@ const createServer = () => {
   });
 
   const server = new Hapi.Server(serverUtil.makeConfig());
-  server.connection(serverConnection);
+  server.connection(serverConfig);
 
   // Register plugins
   server.register(require('hapi-async-handler'));
@@ -29,37 +25,15 @@ const createServer = () => {
   server.auth.strategy('integration', 'integration');
 
   // Register server extensions
-  server.ext('onRequest', serverUtil.onRequest);
+  server.ext('onRequest', serverUtil.onRequest(ravenClient));
   server.ext('onPreResponse', serverUtil.onPreResponse(ravenClient));
 
   server.ext('onPostAuth', (req, reply) => {
-    const requestContext = {
-      id: req.id,
-      payload: omit(req.payload, 'password'),
-      user_agent: req.headers['user-agent'],
-      method: req.method,
-      url: req.path,
-      headers: req.headers,
-    };
-
-    ravenClient.setExtraContext({ request: requestContext });
-    ravenClient.setUserContext(req.auth.credentials);
+    if (ravenClient && typeof ravenClient.setUserContext === 'function') {
+      ravenClient.setUserContext(req.auth.credentials);
+    }
 
     reply.continue();
-  });
-
-  server.on('request-internal', (request, event, tags) => {
-    if (process.env.NODE_ENV === 'production') return false;
-
-    if (tags.error && tags.internal) {
-      if (process.env.NODE_ENV === 'debug') {
-        logger.error(request.getLog());
-
-        return false;
-      }
-
-      ravenClient.captureException(event.data);
-    }
   });
 
   // Register routes

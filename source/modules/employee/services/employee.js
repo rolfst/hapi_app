@@ -1,5 +1,6 @@
 import * as userRepo from '../../core/repositories/user';
 import * as userService from '../../core/services/user';
+import EmployeeDispatcher from '../dispatcher';
 
 /**
  * @module modules/employee/services/employee
@@ -18,10 +19,18 @@ import * as userService from '../../core/services/user';
  */
 export const updateEmployee = async (payload, message) => {
   // TODO move this functionality to the core module
-  const updatedUser = await userRepo.updateUser(message.credentials.id, payload.attributes);
+  await userRepo.updateUser(message.credentials.id, payload.attributes);
 
-  return userService.getUserWithNetworkScope({
-    id: updatedUser.id, networkId: message.network.id }, message);
+  const updatedUser = await userService.getUserWithNetworkScope({
+    id: message.credentials.id, networkId: message.network.id }, message);
+
+  EmployeeDispatcher.emit('user.updated', {
+    user: updatedUser,
+    network: message.network,
+    credentials: message.credentials,
+  });
+
+  return updatedUser;
 };
 
 /**

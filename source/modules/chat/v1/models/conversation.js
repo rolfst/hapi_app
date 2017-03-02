@@ -7,6 +7,7 @@ export default (dao) => ({
   type: 'conversation',
   id: dao.id.toString(),
   createdAt: dateUtils.toISOString(dao.created_at),
+  updatedAt: dateUtils.toISOString(dao.updated_at),
   lastMessage: (dao.Messages && dao.Messages.length > 0) ?
     createMessageModel(last(dao.Messages)) : null,
   messages: (dao.Messages && dao.Messages.length > 0) ?

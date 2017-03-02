@@ -2,9 +2,9 @@ import moment from 'moment';
 import R from 'ramda';
 import { map, omit, merge } from 'lodash';
 import createError from '../../../shared/utils/create-error';
-import { ActivityTypes } from '../../../shared/models/activity';
+import { ActivityTypes } from '../../core/repositories/dao/activity';
 import { createActivity } from '../../core/repositories/activity';
-import { User, Team } from '../../../shared/models';
+import { User, Team } from '../../core/repositories/dao';
 import makeCreatedInObject from '../utils/created-in-text';
 import createExchangeModel from '../models/exchange';
 import { exchangeTypes } from './dao/exchange';
@@ -164,10 +164,14 @@ export const findExchangesByUserAndNetwork = async (userId, networkId, filter = 
   return findExchangeByIds(map(exchanges, 'id'), userId, constraint);
 };
 
-export async function findExchangesForValues(type, networkId, values, userId, filter = {}) {
-  const validExchangeResult = await Exchange.findAll({
+export async function findExchangeIdsForValues(type, networkId, values, userId, filter = {}) {
+  const whereConstraint = { type, networkId };
+  const dateFilter = createDateFilter(filter.start);
+  if (dateFilter) whereConstraint.date = dateFilter;
+
+  const exchangeResult = await Exchange.findAll({
     attributes: ['id'],
-    where: { type, networkId },
+    where: whereConstraint,
     include: [{
       model: ExchangeValue,
       required: true,
@@ -175,11 +179,7 @@ export async function findExchangesForValues(type, networkId, values, userId, fi
     }],
   });
 
-  const validExchangeIds = validExchangeResult.map(exchange => exchange.id);
-  const dateFilter = createDateFilter(filter.start);
-  const constraint = dateFilter ? { where: { date: dateFilter } } : {};
-
-  return findExchangeByIds(validExchangeIds, userId, constraint);
+  return R.pluck('id', exchangeResult);
 }
 
 /**

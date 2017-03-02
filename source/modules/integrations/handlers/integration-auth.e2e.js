@@ -3,17 +3,17 @@ import { assert } from 'chai';
 import nock from 'nock';
 import { postRequest } from '../../../shared/test-utils/request';
 import * as adapterUtil from '../../../shared/utils/create-adapter';
+import * as testHelper from '../../../shared/test-utils/helpers';
 import blueprints from '../../../shared/test-utils/blueprints';
 import createError from '../../../shared/utils/create-error';
 import tokenUtil from '../../../shared/utils/token';
-import { createIntegration } from '../../core/repositories/integration';
-import * as networkRepo from '../../core/repositories/network';
-import * as networkService from '../../core/services/network';
 import * as userRepo from '../../core/repositories/user';
 
 describe('Integration auth', () => {
-  let integration;
-  let network;
+  let sandbox;
+  let employee;
+  let pmtNetwork;
+  let flexappealNetwork;
   let hookStub;
 
   const authResult = {
@@ -25,48 +25,46 @@ describe('Integration auth', () => {
   const employeeCredentials = blueprints.users.employee;
 
   before(async () => {
+    sandbox = sinon.sandbox.create();
+    const [admin, user] = await Promise.all([
+      testHelper.createUser({ password: 'foo' }),
+      testHelper.createUser({ password: 'bar' }),
+    ]);
+    employee = user;
+
+    flexappealNetwork = await testHelper.createNetwork({ userId: admin.id, name: 'flexAppeal' });
+    const { network } = await testHelper.createNetworkWithIntegration(
+      { userId: admin.id,
+        name: 'flexAppeal',
+        externalId: 'api.coolintegration.nl',
+        integrationName: 'NEW_INTEGRATION',
+        integrationToken: 'integrationtoken',
+      });
+    pmtNetwork = network;
+
     const fakeAdapter = {
       authenticate: () => Promise.resolve(authResult),
     };
+    hookStub = sandbox.stub(fakeAdapter, 'authenticate').returns(Promise.resolve(authResult));
+    sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve(fakeAdapter));
 
-    hookStub = sinon.stub(fakeAdapter, 'authenticate').returns(Promise.resolve(authResult));
-    sinon.stub(adapterUtil, 'createAdapter').returns(Promise.resolve(fakeAdapter));
-
-    integration = await createIntegration({
-      name: 'NEW_INTEGRATION',
-      token: 'integrationtoken',
-    });
-
-    network = await networkRepo.createIntegrationNetwork({
-      userId: global.users.admin.id,
-      externalId: 'api.coolintegration.nl',
-      name: 'Network with integration',
-      integrationName: 'NEW_INTEGRATION',
-    });
-
-    await networkService.addUserToNetwork({
-      userId: global.users.employee.id,
-      networkId: global.networks.pmt.id,
-    });
-
-    await networkService.addUserToNetwork({
-      userId: global.users.employee.id,
-      networkId: network.id,
-    });
+    return Promise.all([
+      testHelper.addUserToNetwork({ userId: employee.id, networkId: pmtNetwork.id }),
+      testHelper.addUserToNetwork({ userId: employee.id, networkId: flexappealNetwork.id }),
+    ]);
   });
 
   after(async () => {
-    await userRepo.removeFromNetwork(global.users.employee.id, global.networks.pmt.id);
-    await integration.destroy();
-    await networkRepo.deleteById(network.id);
+    sandbox.restore();
+    return testHelper.cleanAll();
   });
 
   it('hook should be called with the credentials', async () => {
-    const endpoint = `/v2/networks/${network.id}/integration_auth`;
+    const endpoint = `/v2/networks/${flexappealNetwork.id}/integration_auth`;
     const { statusCode } = await postRequest(endpoint, {
       username: employeeCredentials.username,
       password: employeeCredentials.password,
-    }, global.server, global.tokens.employee);
+    }, employee.token);
 
     assert.equal(statusCode, 200);
     assert.isTrue(hookStub.calledWithMatch(
@@ -74,43 +72,42 @@ describe('Integration auth', () => {
   });
 
   it('should return new access token', async () => {
-    const endpoint = `/v2/networks/${network.id}/integration_auth`;
+    const endpoint = `/v2/networks/${flexappealNetwork.id}/integration_auth`;
     const { result: { data } } = await postRequest(endpoint, {
       username: employeeCredentials.username,
       password: employeeCredentials.password,
-    }, global.server, global.tokens.employee);
+    }, employee.token);
 
     const decodedToken = tokenUtil.decode(data.access_token);
 
-    assert.equal(decodedToken.sub, global.users.employee.id);
+    assert.equal(decodedToken.sub, employee.id);
   });
 
   it('should add integration token for user in network', async () => {
-    const endpoint = `/v2/networks/${network.id}/integration_auth`;
+    const endpoint = `/v2/networks/${pmtNetwork.id}/integration_auth`;
     await postRequest(endpoint, {
       username: 'foo',
       password: 'baz',
-    }, global.server, global.tokens.employee);
+    }, employee.token);
 
     const metaData = await userRepo.findNetworkLink({
-      userId: global.users.employee.id, networkId: network.id });
+      userId: employee.id, networkId: pmtNetwork.id });
 
     assert.equal(metaData.userToken, 'auth_token');
-    assert.equal(metaData.externalId, 1);
   });
 
   it('should return 403 error when someone is already authenticated with the same account', async () => { // eslint-disable-line max-len
     adapterUtil.createAdapter.restore();
     // Mock the same request being made in the setup for the admin to force the same externalId
-    nock(global.networks.pmt.externalId)
+    nock(pmtNetwork.externalId)
       .post('/login')
       .reply(200, { logged_in_user_token: '379ce9b4176cb89354c1f74b3a2c1c7a', user_id: 8023 });
 
-    const endpoint = `/v2/networks/${global.networks.pmt.id}/integration_auth`;
+    const endpoint = `/v2/networks/${pmtNetwork.id}/integration_auth`;
     const { statusCode } = await postRequest(endpoint, {
       username: 'foo',
       password: 'wrong_pass',
-    }, global.server, global.tokens.employee);
+    }, employee.token);
 
     assert.equal(statusCode, 403);
   });
@@ -122,11 +119,11 @@ describe('Integration auth', () => {
 
     sinon.stub(adapterUtil, 'createAdapter').returns(Promise.resolve(fakeAdapter));
 
-    const endpoint = `/v2/networks/${network.id}/integration_auth`;
+    const endpoint = `/v2/networks/${flexappealNetwork.id}/integration_auth`;
     const { statusCode } = await postRequest(endpoint, {
       username: 'foo',
       password: 'wrong_pass',
-    }, global.server, global.tokens.employee);
+    }, employee.token);
 
     adapterUtil.createAdapter.restore();
 

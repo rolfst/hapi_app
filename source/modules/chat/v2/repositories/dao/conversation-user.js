@@ -1,5 +1,5 @@
 import Sequelize from 'sequelize';
-import { db as model } from '../../../../../connections';
+import model from '../../../../../shared/configs/sequelize';
 
 const ConversationUser = model.define('ConversationUser', {
   conversationId: {

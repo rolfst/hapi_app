@@ -79,9 +79,19 @@
     "detail": "The network has no integration or is not imported yet",
     "code": 403
   },
+  "10010": {
+    "type": "not_in_team",
+    "detail": "The user does not belong to the team.",
+    "code": 403
+  },
   "20001": {
     "type": "bad_number_of_arguments",
     "detail": "A bad number of arguments is provided for this method",
+    "code": 500
+  },
+  "30001": {
+    "type": "error_in_upload",
+    "detail": "Something went wrong while uploading your file",
     "code": 500
   }
 }
