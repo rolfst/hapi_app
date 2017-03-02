@@ -16,6 +16,10 @@ import * as impl from './implementation';
 
 const logger = Logger.getLogger('FEED/service/message');
 
+const isDefined = R.complement(R.isNil);
+const isNotEmpty = R.complement(R.isEmpty);
+const isAvailable = R.both(isDefined, isNotEmpty);
+
 /**
  * Get a single message
  * @param {object} payload - Object containing payload data
@@ -154,6 +158,7 @@ export const listComments = async (payload, message) => {
 export const create = async (payload, message) => {
   logger.info('Creating message', { payload, message });
 
+  const checkPayload = R.compose(isAvailable, R.prop(R.__, payload));
   const parent = await objectService.getParent(R.pick(['parentType', 'parentId'], payload));
 
   const parentEntity = `${payload.parentType.slice(0, 1)
@@ -176,7 +181,7 @@ export const create = async (payload, message) => {
 
   await messageRepository.update(createdMessage.id, { objectId: createdObject.id });
 
-  if (payload.files) {
+  if (checkPayload('files')) {
     await attachmentService.assertAttachmentsExist({ attachmentIds: payload.files }, message);
 
     const filesArray = R.flatten([payload.files]);
@@ -197,6 +202,10 @@ export const create = async (payload, message) => {
     }, message)));
 
     await Promise.all([updateMessageIds, createObjects]);
+  }
+
+  if (checkPayload('pollOptions')) {
+    await impl.createPollResource(createdMessage, message)(payload.pollOptions);
   }
 
   const objectWithSourceAndChildren = await objectService.getWithSourceAndChildren({

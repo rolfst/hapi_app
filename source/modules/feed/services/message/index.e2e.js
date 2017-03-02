@@ -103,7 +103,7 @@ describe('Service: Message', () => {
     });
   });
 
-  describe.skip('Create poll', () => {
+  describe('Create poll', () => {
     let createdMessage;
 
     before(async () => {
@@ -114,7 +114,7 @@ describe('Service: Message', () => {
         parentType: 'network',
         parentId: network.id,
         text: 'My cool message',
-        poll: { options: ['Yes', 'No', 'Ok'] },
+        pollOptions: ['Yes', 'No', 'Ok'],
       }, { network, credentials: admin });
     });
 
