@@ -6,10 +6,10 @@ import { TeamUser } from '../../repositories/dao';
 import * as userService from '../user';
 
 /**
- * @module modules/core/services/network
+ * @module modules/core/services/authorization
  */
 
-const logger = Logger.getLogger('CORE/service/network');
+const logger = Logger.getLogger('CORE/service/authorization');
 
 /**
  * Assert role type for user

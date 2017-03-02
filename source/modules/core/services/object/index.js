@@ -12,7 +12,7 @@ import * as impl from './implementation';
  * @module modules/core/services/object
  */
 
-const logger = Logger.getLogger('FEED/service/object');
+const logger = Logger.getLogger('CORE/service/object');
 
 const objectsForTypeValuePair = (fn, pairs) => R.pipe(R.mapObjIndexed(fn), R.values)(pairs);
 const getSources = R.pipeP(Promise.all, R.flatten, R.reject(R.isNil));
