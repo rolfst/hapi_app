@@ -4,5 +4,7 @@ export default {
   payload: Joi.object().keys({
     text: Joi.string(),
     files: Joi.any(),
-  }).or('text', 'files'),
+    poll_question: Joi.string(),
+    poll_options: Joi.array().items(Joi.string(), Joi.number()),
+  }).disallow([null, {}]).and('poll_question', 'poll_options'),
 };
