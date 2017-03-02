@@ -45,10 +45,11 @@ export const create = async (payload, message) => {
   const poll = await pollRepository.create({
     networkId: payload.networkId,
     userId: message.credentials.id,
+    question: payload.question,
   });
 
   const createOptions = R.addIndex(R.map)(impl.createOption(poll.id));
-  poll.options = await Promise.all(createOptions(payload.options));
+  poll.options = await Promise.all(createOptions(payload.pollOptions));
 
   return poll;
 };
