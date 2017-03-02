@@ -72,11 +72,12 @@ export const update = async (payload, message) => {
  * @return {external:Promise.<Attachment>} {@link module:modules/attachment~Attachment Attachment}
  */
 export const create = async (payload, message) => {
+  logger.info('Create attachment', { payload: R.omit(['fileStream'], payload), message });
+
   if (typeof payload.fileStream.on !== 'function') {
     throw createError('422', 'Please provide a file');
   }
 
-  logger.info('Creating attachment', { payload: R.omit(['fileStream'], payload), message });
   const path = await Storage.upload(payload.fileStream, 'attachments');
 
   return attachmentRepo.create(path);
