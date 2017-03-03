@@ -139,6 +139,17 @@ describe('Service: Feed', () => {
       assert.equal(commentedMessage.comments[0].text, 'Cool comment as sub-resource');
     });
 
+    it('should include messages for teams in network feed', async () => {
+      const actual = await feedService.makeForNetwork({
+        networkId: network.id,
+      }, { network, credentials: admin });
+
+      const teamMessage = R.find(R.propEq('parentType', 'team'), actual);
+
+      assert.isDefined(teamMessage);
+      assert.equal(teamMessage.source.text, 'First message for team');
+    });
+
     it('should include likes sub-resources via query parameter', async () => {
       await messageService.like({
         messageId: createdMessages[1].sourceId,
@@ -183,11 +194,9 @@ describe('Service: Feed', () => {
         teamId: team.id,
       }, { network, credentials: employee });
 
-      assert.lengthOf(actual, 2);
-      assert.equal(actual[0].objectType, 'exchange');
-      assert.equal(actual[0].parentType, 'user');
-      assert.equal(actual[1].objectType, 'feed_message');
-      assert.equal(actual[1].source.text, 'First message for team');
+      assert.lengthOf(actual, 1);
+      assert.equal(actual[0].objectType, 'feed_message');
+      assert.equal(actual[0].source.text, 'First message for team');
     });
   });
 });
