@@ -1,6 +1,5 @@
 import R from 'ramda';
 import Promise from 'bluebird';
-import * as networkService from '../../../core/services/network';
 import * as objectRepository from '../../../core/repositories/object';
 import * as objectService from '../../../core/services/object';
 import * as messageService from '../message';
