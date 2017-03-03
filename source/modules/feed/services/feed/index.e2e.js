@@ -81,9 +81,8 @@ describe('Service: Feed', () => {
     });
 
     it('should return feed models in descending order by creation date', async () => {
-      const actual = await feedService.make({
-        parentType: 'network',
-        parentId: network.id,
+      const actual = await feedService.makeForNetwork({
+        networkId: network.id,
       }, { network, credentials: employee });
 
       assert.lengthOf(actual, 4);
@@ -105,9 +104,8 @@ describe('Service: Feed', () => {
     });
 
     it('should return feed models for subset with limit and offset query', async () => {
-      const actual = await feedService.make({
-        parentType: 'network',
-        parentId: network.id,
+      const actual = await feedService.makeForNetwork({
+        networkId: network.id,
         offset: 1,
         limit: 2,
       }, { network, credentials: employee });
@@ -126,9 +124,8 @@ describe('Service: Feed', () => {
         text: 'Cool comment as sub-resource',
       });
 
-      const actual = await feedService.make({
-        parentType: 'network',
-        parentId: network.id,
+      const actual = await feedService.makeForNetwork({
+        networkId: network.id,
         include: ['comments'],
       }, { network, credentials: admin });
 
@@ -148,9 +145,8 @@ describe('Service: Feed', () => {
         userId: admin.id,
       });
 
-      const actual = await feedService.make({
-        parentType: 'network',
-        parentId: network.id,
+      const actual = await feedService.makeForNetwork({
+        networkId: network.id,
         include: ['likes'],
       }, { network, credentials: admin });
 
@@ -161,9 +157,8 @@ describe('Service: Feed', () => {
     });
 
     it('should be able to include multiple sub-resources via query parameter', async () => {
-      const actual = await feedService.make({
-        parentType: 'network',
-        parentId: network.id,
+      const actual = await feedService.makeForNetwork({
+        networkId: network.id,
         include: ['likes', 'comments'],
       }, { network, credentials: admin });
 
@@ -184,9 +179,8 @@ describe('Service: Feed', () => {
     });
 
     it('should return feed models from team', async () => {
-      const actual = await feedService.make({
-        parentType: 'team',
-        parentId: team.id,
+      const actual = await feedService.makeForTeam({
+        teamId: team.id,
       }, { network, credentials: employee });
 
       assert.lengthOf(actual, 2);
