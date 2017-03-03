@@ -4,11 +4,15 @@ import * as responseUtil from '../../../shared/utils/response';
 
 export default async (req, reply) => {
   try {
-    const { poll_question: question, poll_options: pollOptions } = req.payload;
-    const normalPayload = R.omit(['poll_question', 'poll_options'], req.payload);
-    const defaultPayload = { parentType: 'network', parentId: req.params.networkId };
+    const payload = {
+      pollQuestion: req.payload.poll_question,
+      pollOptions: req.payload.poll_options,
+      parentType: 'network',
+      parentId: req.params.networkId,
+      text: req.payload.text || null,
+      files: req.payload.files || [],
+    };
 
-    const payload = R.mergeAll([defaultPayload, normalPayload, { question, pollOptions }]);
     const message = { ...req.pre, ...req.auth };
     const feedItems = await messageService.create(payload, message);
 
