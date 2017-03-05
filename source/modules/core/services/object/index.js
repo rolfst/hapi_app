@@ -113,18 +113,20 @@ export const create = async (payload, message) => {
 /**
  * Count objects
  * @param {object} payload - Object containing payload data
- * @param {array} payload.where - list containing constraints
- * @param {string} payload.where.userId - The id that instantiated the object
- * @param {string} payload.where.parentType - The type of parent to get objects for
- * @param {string} payload.where.parentId - The id of the parent
- * @param {string} payload.where.objectType - The type of object
+ * @param {string} payload.userId - The id that instantiated the object
+ * @param {string} payload.parentType - The type of parent to get objects for
+ * @param {string} payload.parentId - The id of the parent
+ * @param {string} payload.objectType - The type of object
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method count
  * @return {external:Promise.<number>}
  */
 export const count = async (payload, message) => {
   logger.info('Counting objects', { payload, message });
-  const whereConstraint = { $or: R.flatten([payload.where]) };
+
+  const whitelistAttrs = ['userId', 'parentType', 'parentId', 'objectType'];
+  const attributes = R.flatten([R.pick(whitelistAttrs, payload)]);
+  const whereConstraint = { $or: attributes };
 
   return objectRepository.count(whereConstraint);
 };

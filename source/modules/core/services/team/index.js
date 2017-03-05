@@ -14,6 +14,30 @@ import * as userService from '../user';
 const logger = Logger.getLogger('CORE/service/team');
 
 /**
+ * Get single team
+ * @param {object} payload
+ * @param {string} payload.teamId
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method list
+ * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team} -
+ */
+export async function get(payload, message) {
+  logger.info('Get team', { payload, message });
+
+  const team = await teamRepository.findTeamById(payload.teamId);
+  if (!team) throw createError('404', 'Team not found');
+
+  return {
+    ...R.omit(['createdAt'], team),
+    memberCount: team.memberIds.length,
+    isMember: message ? // FIXME: Temporarily because of sync script that has no message
+      R.contains(message.credentials.id.toString(), team.memberIds) : false,
+    isSynced: !!team.externalId,
+    createdAt: team.createdAt, // created_at should always be at the bottom of the response item
+  };
+}
+
+/**
  * List teams
  * @param {object} payload
  * @param {string} payload.teamIds

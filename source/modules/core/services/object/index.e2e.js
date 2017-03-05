@@ -98,16 +98,13 @@ describe('Service: Object', () => {
     after(() => testHelpers.cleanAll());
 
     it('should return correct count', async () => {
-      const networkObjects = await objectService.count({ where: [{
-        parentType: 'network',
-        parentId: network.id,
-      }, {
-        parentType: 'user',
-        parentId: admin.id,
-      }],
-      }, { credentials: admin });
+      const message = { credentials: admin };
+      const [networkCount, userCount] = await Promise.all([
+        objectService.count({ parentType: 'network', parentId: network.id }, message),
+        objectService.count({ parentType: 'user', parentId: admin.id }, message),
+      ]);
 
-      assert.equal(networkObjects, 2);
+      assert.equal(R.sum([networkCount, userCount]), 2);
     });
   });
 

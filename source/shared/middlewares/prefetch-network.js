@@ -12,7 +12,7 @@ export default async (req, reply) => {
 
   try {
     logger.info('Fetching network', { payload, message });
-    const network = await networkService.getNetwork(payload, message);
+    const network = await networkService.get(payload, message);
     await authorizationService.assertThatUserBelongsToTheNetwork({
       userId: message.credentials.id,
       networkId: network.id,

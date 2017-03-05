@@ -185,7 +185,9 @@ export const remove = async (payload, message) => {
   return Promise.all([
     conversationRepoV1.deleteConversationById(payload.conversationId),
     objectService.remove({
-      parentType: 'conversation', parentId: payload.conversationId }, message),
+      parentType: 'conversation',
+      parentId: payload.conversationId,
+    }, message),
   ]);
 };
 
@@ -203,9 +205,8 @@ export async function countMessages(payload, message) {
   await impl.assertThatUserIsPartOfTheConversation(message.credentials.id, payload.conversationId);
 
   return objectService.count({
-    where: {
-      parentType: 'conversation',
-      parentId: payload.conversationId,
-      objectType: 'private_message',
-    } });
+    parentType: 'conversation',
+    parentId: payload.conversationId,
+    objectType: 'private_message',
+  });
 }
