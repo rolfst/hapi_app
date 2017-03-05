@@ -14,7 +14,7 @@ export const createNotification = (exchange, comment) => {
 };
 
 export const send = async (comment) => {
-  const exchange = await exchangeRepo.findExchangeById(comment.parentId);
+  const exchange = await exchangeRepo.findExchangeById(comment.exchangeId);
 
   const comments = await findCommentsByExchange(exchange);
 

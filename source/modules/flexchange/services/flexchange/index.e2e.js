@@ -1,36 +1,64 @@
 import { assert } from 'chai';
+import sinon from 'sinon';
 import moment from 'moment';
+import * as testHelper from '../../../../shared/test-utils/helpers';
+import * as notifier from '../../../../shared/services/notifier';
 import * as exchangeRepository from '../../repositories/exchange';
 import * as exchangeService from './index';
 
 describe('Service: Flexchange', () => {
   describe('list', () => {
+    let sandbox;
+    let admin;
+    let network;
     let createdExchange1;
+    let createdExchange2;
 
     before(async () => {
+      sandbox = sinon.sandbox.create();
+      sandbox.stub(notifier, 'send').returns(null);
+
+      admin = await testHelper.createUser();
+      network = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
+
       createdExchange1 = await exchangeService.createExchange({
         date: moment().toISOString(),
         startTime: moment().toISOString(),
         endTime: moment().add(2, 'hours').toISOString(),
         type: 'ALL',
-        values: [global.networks.flexAppeal.id],
+        values: [network.id],
       }, {
-        network: { id: global.networks.flexAppeal.id },
-        credentials: { id: global.users.admin.id },
+        network: { id: network.id },
+        credentials: { id: admin.id },
       });
+
+      createdExchange2 = await exchangeService.createExchange({
+        date: moment().toISOString(),
+        title: 'Test shift',
+        type: 'ALL',
+        values: [network.id],
+      }, {
+        network: { id: network.id },
+        credentials: { id: admin.id },
+      });
+    });
+
+    after(() => {
+      sandbox.restore();
+      return testHelper.cleanAll();
     });
 
     it('should return correct properties in exchange model', async () => {
       const actual = await exchangeService.list({
-        networkId: global.networks.flexAppeal.id,
-        exchangeIds: [createdExchange1.id],
+        exchangeIds: [createdExchange1.id, createdExchange2.id],
       }, {
-        credentials: { id: global.users.admin.id },
+        network: { id: network.id },
+        credentials: { id: admin.id },
       });
 
       const expectedCreatedIn = {
         type: 'network',
-        id: global.networks.flexAppeal.id.toString(),
+        id: network.id.toString(),
       };
 
       assert.equal(actual[0].type, 'exchange');
@@ -41,25 +69,26 @@ describe('Service: Flexchange', () => {
       assert.equal(actual[0].description, null);
       assert.strictEqual(actual[0].acceptCount, 0);
       assert.strictEqual(actual[0].declineCount, 0);
-      assert.strictEqual(actual[0].userId, global.users.admin.id);
+      assert.strictEqual(actual[0].userId, admin.id);
       assert.equal(actual[0].responseStatus, null);
       assert.strictEqual(actual[0].isApproved, false);
       assert.deepEqual(actual[0].createdIn, expectedCreatedIn);
-      assert.strictEqual(actual[0].user.id, global.users.admin.id);
+      assert.strictEqual(actual[0].user.id, admin.id);
       assert.strictEqual(actual[0].approvedUserId, null);
       assert.strictEqual(actual[0].approvedUser, null);
       assert.deepEqual(actual[0].responses, []);
+      assert.equal(actual[1].title, 'Test shift');
     });
 
     describe('Response statusses', () => {
       it('should show correct responses for ACCEPTED', async () => {
-        await exchangeRepository.acceptExchange(createdExchange1.id, global.users.admin.id);
+        await exchangeRepository.acceptExchange(createdExchange1.id, admin.id);
 
         const actual = await exchangeService.list({
-          networkId: global.networks.flexAppeal.id,
           exchangeIds: [createdExchange1.id],
         }, {
-          credentials: { id: global.users.admin.id },
+          network: { id: network.id },
+          credentials: { id: admin.id },
         });
 
         const actualResponse = actual[0].responses[0];
@@ -69,21 +98,21 @@ describe('Service: Flexchange', () => {
         assert.strictEqual(actual[0].approvedUserId, null);
         assert.strictEqual(actual[0].approvedUser, null);
         assert.equal(actualResponse.type, 'exchange_response');
-        assert.strictEqual(actualResponse.userId, global.users.admin.id);
+        assert.strictEqual(actualResponse.userId, admin.id);
         assert.isTrue(actualResponse.response);
         assert.isNull(actualResponse.isApproved);
         assert.property(actualResponse, 'createdAt');
-        assert.strictEqual(actualResponse.user.id, global.users.admin.id);
+        assert.strictEqual(actualResponse.user.id, admin.id);
       });
 
       it('should show correct responses for DECLINED', async () => {
-        await exchangeRepository.declineExchange(createdExchange1.id, global.users.admin.id);
+        await exchangeRepository.declineExchange(createdExchange1.id, admin.id);
 
         const actual = await exchangeService.list({
-          networkId: global.networks.flexAppeal.id,
           exchangeIds: [createdExchange1.id],
         }, {
-          credentials: { id: global.users.admin.id },
+          network: { id: network.id },
+          credentials: { id: admin.id },
         });
 
         const actualResponse = actual[0].responses[0];
@@ -93,23 +122,23 @@ describe('Service: Flexchange', () => {
         assert.strictEqual(actual[0].approvedUserId, null);
         assert.strictEqual(actual[0].approvedUser, null);
         assert.equal(actualResponse.type, 'exchange_response');
-        assert.strictEqual(actualResponse.userId, global.users.admin.id);
+        assert.strictEqual(actualResponse.userId, admin.id);
         assert.isFalse(actualResponse.response);
         assert.isNull(actualResponse.isApproved);
         assert.property(actualResponse, 'createdAt');
-        assert.strictEqual(actualResponse.user.id, global.users.admin.id);
+        assert.strictEqual(actualResponse.user.id, admin.id);
       });
 
       it('should show correct responses for REJECTED', async () => {
-        await exchangeRepository.acceptExchange(createdExchange1.id, global.users.admin.id);
+        await exchangeRepository.acceptExchange(createdExchange1.id, admin.id);
         await exchangeRepository.rejectExchange(
-          createdExchange1, global.users.admin, global.users.admin.id);
+          createdExchange1, admin, admin.id);
 
         const actual = await exchangeService.list({
-          networkId: global.networks.flexAppeal.id,
           exchangeIds: [createdExchange1.id],
         }, {
-          credentials: { id: global.users.admin.id },
+          network: { id: network.id },
+          credentials: { id: admin.id },
         });
 
         const actualResponse = actual[0].responses[0];
@@ -117,25 +146,25 @@ describe('Service: Flexchange', () => {
         assert.equal(actual[0].responseStatus, 'REJECTED');
         assert.lengthOf(actual[0].responses, 1);
         assert.equal(actualResponse.type, 'exchange_response');
-        assert.strictEqual(actualResponse.userId, global.users.admin.id);
+        assert.strictEqual(actualResponse.userId, admin.id);
         assert.isTrue(actualResponse.response);
         assert.isFalse(actualResponse.isApproved);
         assert.property(actualResponse, 'createdAt');
         assert.strictEqual(actual[0].approvedUserId, null);
         assert.strictEqual(actual[0].approvedUser, null);
-        assert.strictEqual(actualResponse.user.id, global.users.admin.id);
+        assert.strictEqual(actualResponse.user.id, admin.id);
       });
 
       it('should show correct responses for APPROVED', async () => {
-        await exchangeRepository.acceptExchange(createdExchange1.id, global.users.admin.id);
+        await exchangeRepository.acceptExchange(createdExchange1.id, admin.id);
         await exchangeRepository.approveExchange(
-          createdExchange1, global.users.admin, global.users.admin.id);
+          createdExchange1, admin, admin.id);
 
         const actual = await exchangeService.list({
-          networkId: global.networks.flexAppeal.id,
           exchangeIds: [createdExchange1.id],
         }, {
-          credentials: { id: global.users.admin.id },
+          network: { id: network.id },
+          credentials: { id: admin.id },
         });
 
         const actualResponse = actual[0].responses[0];
@@ -143,13 +172,13 @@ describe('Service: Flexchange', () => {
         assert.equal(actual[0].responseStatus, 'APPROVED');
         assert.lengthOf(actual[0].responses, 1);
         assert.equal(actualResponse.type, 'exchange_response');
-        assert.strictEqual(actualResponse.userId, global.users.admin.id);
+        assert.strictEqual(actualResponse.userId, admin.id);
         assert.isTrue(actualResponse.response);
         assert.isTrue(actualResponse.isApproved);
         assert.property(actualResponse, 'createdAt');
-        assert.strictEqual(actual[0].approvedUserId, global.users.admin.id);
-        assert.strictEqual(actual[0].approvedUser.id, global.users.admin.id);
-        assert.strictEqual(actualResponse.user.id, global.users.admin.id);
+        assert.strictEqual(actual[0].approvedUserId, admin.id);
+        assert.strictEqual(actual[0].approvedUser.id, admin.id);
+        assert.strictEqual(actualResponse.user.id, admin.id);
       });
     });
   });

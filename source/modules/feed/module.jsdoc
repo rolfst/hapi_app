@@ -1,0 +1,50 @@
+/**
+ * @module modules/feed
+ * @description This Module contains the Feed domain of the NodeJS Flex-Appeal API
+ * It contains the functionality concerning:
+ * <ul>
+ *   <li>{@link module:modules/feed~Message Message}</li>
+ *   <li>{@link module:modules/feed~Object Object}</li>
+ *   <li>{@link module:modules/feed~Comment Comment}</li>
+ *   <li>{@link module:modules/feed~Like Like}</li>
+ * </ul>
+ */
+
+
+/**
+ * @typedef {object} Message
+ * @property {string} id - The unique identifier of the message
+ * @property {string} userId - The id of the user that created the message
+ * @property {string} text - The text contents of the message
+ * @property {string} createdAt - ISO formatted date when the message is created
+ * @property {string} updatedAt - ISO formatted date when the message is updated
+ */
+
+/**
+ * @typedef {object} Object
+ * @property {string} id - The unique identifier of the object
+ * @property {string} userId - The id of the user that instantiated the object
+ * @property {string} objectType - The type of object
+ * @property {string} sourceId - The id of the source based on the value of objectType
+ * @property {string} parentType - The type of the parent the object is created for
+ * @property {string} parentId - The id of the parent
+ * @property {string} createdAt - ISO formatted date when the object is created
+ * @property {string} updatedAt - ISO formatted date when the object is updated
+ */
+
+ /**
+  * @typedef {object} Comment
+  * @property {string} id - The unique identifier of the comment
+  * @property {string} userId - The id of the user that created the comment
+  * @property {string} messageId - The message where the comment is created for
+  * @property {string} text - The text contents of the comment
+  * @property {string} createdAt - ISO formatted date when the message is created
+  */
+
+  /**
+   * @typedef {object} Comment
+   * @property {string} id - The unique identifier of the comment
+   * @property {string} messageId - The message where the comment is created for
+   * @property {string} userId - The id of the user that created the comment
+   * @property {string} createdAt - ISO formatted date when the message is created
+   */

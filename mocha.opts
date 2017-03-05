@@ -1,0 +1,3 @@
+--compilers js:babel-register
+--timeout 10000
+--require ./e2e-bootstrap

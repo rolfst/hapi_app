@@ -13,11 +13,8 @@ import ExchangeValue from './dao/exchange-value';
  * @method createValuesForExchange
  * @return {external:Promise} Create exchange values promise
  */
-export function createValuesForExchange(exchangeId, values) {
-  const data = values.map(value => ({ exchangeId, value }));
-
-  return ExchangeValue.bulkCreate(data);
-}
+export const createValuesForExchange = (exchangeId, values) => ExchangeValue
+  .bulkCreate(R.map(value => ({ exchangeId, value }), values));
 
 export const findAllWhere = (whereConstraint) => ExchangeValue
   .findAll({ where: whereConstraint })

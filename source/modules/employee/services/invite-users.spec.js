@@ -2,6 +2,7 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import { map } from 'lodash';
 import * as passwordUtil from '../../../shared/utils/password';
+import * as notifier from '../../../shared/services/notifier';
 import * as mailer from '../../../shared/services/mailer';
 import signupMail from '../../../shared/mails/signup';
 import * as userRepo from '../../core/repositories/user';
@@ -48,6 +49,8 @@ describe('Invite users', () => {
   after(() => sandbox.restore());
 
   it('should send correct emails', async () => {
+    sandbox.stub(notifier, 'send').returns(null);
+    sandbox.stub(mailer, 'send').returns(null);
     sandbox.stub(userRepo, 'userBelongsToNetwork').returns(Promise.resolve(true));
     sandbox.stub(userService, 'getUserWithNetworkScope').returns(Promise.resolve(adminUser));
     sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');

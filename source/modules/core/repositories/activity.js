@@ -1,4 +1,4 @@
-import { Activity, Team, Network, User } from '../../../shared/models';
+import { Activity, Team, Network, User } from './dao';
 
 /**
  * @module modules/core/repositories/activity
@@ -12,6 +12,10 @@ const defaultIncludes = [{
     model: Network,
   }],
 }];
+
+export const findBy = (whereConstraint) => Activity.findAll({
+  where: whereConstraint,
+});
 
 /**
  * Finds all activities for a user
@@ -51,3 +55,24 @@ export function findActivitiesForSource(sourceModel) {
 export function createActivity({ activityType, userId, sourceId, metaData }) {
   return Activity.create({ activityType, userId, sourceId, metaData });
 }
+
+/**
+ * Finds all Activities
+ * @method findAll
+ * @return {external:Promise.<Activity[]>} {@link module:shared~Activity Activity}
+ */
+export async function findAll() {
+  return Activity.findAll({ include: defaultIncludes });
+}
+
+/**
+ * Deletes all Activities
+ * @method deleteById
+ * @return {external:Promise.<number>} - number of deleted activities
+ */
+export async function deleteById(activityId) {
+  return Activity.destroy({ where: { id: activityId } });
+}
+
+export const deleteBy = (whereConstraint) =>
+  Activity.destroy({ where: whereConstraint });

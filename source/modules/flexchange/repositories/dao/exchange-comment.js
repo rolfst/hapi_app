@@ -1,17 +1,12 @@
 import Sequelize from 'sequelize';
-import { db as model } from '../../../../connections';
+import model from '../../../../shared/configs/sequelize';
 import * as dateUtils from '../../../../shared/utils/date';
-import { User } from '../../../../shared/models';
+import { User } from '../../../core/repositories/dao';
 
 const ExchangeComment = model.define('ExchangeComment', {
-  parentId: {
+  exchangeId: {
     type: Sequelize.INTEGER,
-    field: 'parent_id',
-    allowNull: false,
-  },
-  parentType: {
-    type: Sequelize.STRING,
-    field: 'parent_type',
+    field: 'exchange_id',
     allowNull: false,
   },
   text: {
@@ -20,11 +15,11 @@ const ExchangeComment = model.define('ExchangeComment', {
   },
   createdBy: {
     type: Sequelize.INTEGER,
-    field: 'created_by',
+    field: 'user_id',
     allowNull: false,
   },
 }, {
-  tableName: 'comments',
+  tableName: 'exchange_comments',
   createdAt: 'created_at',
   updatedAt: 'updated_at',
   defaultScope: {

@@ -1,8 +1,9 @@
 import { map } from 'lodash';
-import { db as Sequelize } from '../../../../connections';
-import createError from '../../../../shared/utils/create-error';
-import { User } from '../../../../shared/models';
-import { Conversation, Message, ConversationUser } from '../../dao';
+import R from 'ramda';
+import Sequelize from '../../../../shared/configs/sequelize';
+import { User } from '../../../core/repositories/dao';
+import * as objectRepository from '../../../core/repositories/object';
+import { Conversation, Message, ConversationUser } from './dao';
 import createConversationModel from '../models/conversation';
 
 /**
@@ -11,10 +12,6 @@ import createConversationModel from '../models/conversation';
 
 const defaultIncludes = [{
   model: User,
-}, {
-  model: Message,
-  required: false,
-  include: [{ model: User }],
 }];
 
 const toModel = (dao) => createConversationModel(dao);
@@ -31,6 +28,19 @@ export async function findConversationById(id) {
   });
 
   if (!conversation) return null;
+
+  const objects = await objectRepository.findBy({
+    parentType: 'conversation',
+    parentId: id,
+    objectType: 'private_message',
+  });
+
+  const messages = await Message.findAll({
+    where: { id: { $in: R.pluck('sourceId', objects) } },
+    include: [{ model: User }],
+  });
+
+  conversation.Messages = messages;
 
   return toModel(conversation);
 }
@@ -110,13 +120,7 @@ export const createConversation = async (type, creatorId, participants) => {
  * @return {external:Promise} - Delete conversation promise
  */
 export function deleteConversationById(id) {
-  return Conversation
-    .findById(id)
-    .then(conversation => {
-      if (!conversation) throw createError('404');
-
-      return conversation.destroy();
-    });
+  return Conversation.destroy({ where: { id } });
 }
 
 /**
@@ -128,3 +132,18 @@ export function deleteConversationById(id) {
 export const deleteAllConversationsForUser = (userId) => {
   return ConversationUser.destroy({ where: { userId } });
 };
+
+/**
+ * Updates a conversation with the current timestamp
+ * @param {string} conversationId
+ * @param {object} attributes
+ * @param {date} attributes.updatedAt
+ * @method update
+ */
+export async function update(conversationId, { updatedAt }) {
+  const result = await Conversation.findById(conversationId);
+  if (!result) return null;
+
+  return result.update({ updatedAt })
+    .then(toModel);
+}

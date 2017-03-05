@@ -9,9 +9,7 @@ const logger = Logger.createLogger('AUTHENTICATION/handler/authenticate');
  * before going further. When the user is authenticated with the Flex-Appeal database
  * we try to authenticate the user with each integration of the network the user
  * belongs to. When the user is authenticated with an integration, we will
- * set the user_tokens retrieved from the integration. We also append the integrations
- * to the payload of the access token, so we can validate the user for requests that
- * are especially designed for networks that have an integration enabled.
+ * set the user_tokens retrieved from the integration.
  */
 export default async (request, reply) => {
   try {

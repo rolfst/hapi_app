@@ -1,12 +1,9 @@
-import Promise from 'bluebird';
 import R from 'ramda';
 import * as Logger from '../../../../shared/services/logger';
 import createError from '../../../../shared/utils/create-error';
-import * as integrationsAdapter from '../../../../shared/utils/integrations-adapter';
 import * as networkRepo from '../../repositories/network';
 import * as userService from '../user';
 import * as teamService from '../team';
-import * as impl from './implementation';
 
 /**
  * @module modules/core/services/network
@@ -49,7 +46,7 @@ export const create = async (payload, message) => {
  * @param {boolean} payload.active - Flag if the user is active
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method addUserToNetwork
- * @return {external:Promise.<Network>} {@link module:modules/core~User User} -
+ * @return {external:Promise.<NetworkUser>} {@link module:shared~NetworkUser NetworkUser}
  * Promise containing a User
  */
 export const addUserToNetwork = async (payload, message) => {
@@ -66,32 +63,6 @@ export const addUserToNetwork = async (payload, message) => {
 };
 
 /**
- * Retrieve prisinte networks from an integration.
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method listPristineNetworks
- * @return {external:Promise} -
- * Promise containing collection of a pristine network with integrationName
- * and admins for the network.
- */
-export const listPristineNetworks = async (payload, message) => {
-  logger.info('Listing all pristine networks', { payload, message });
-
-  const baseUrl = 'https://partner2.testpmt.nl/rest.php';
-  const clients = await integrationsAdapter.clients(baseUrl);
-  const externalIds = R.pluck('externalId', clients);
-
-  const networksFromIntegration = await R.pipeP(
-    ids => Promise.map(ids, integrationsAdapter.pristineNetworks),
-    R.flatten)(externalIds);
-
-  const pristineNetworks = impl.filterExistingNetworks(networksFromIntegration, message);
-  const pristineNetworksWithAdmins = await Promise.map(pristineNetworks, (pristineNetwork) =>
-    impl.mergeAdminsIntoPristineNetwork(pristineNetwork, message));
-
-  return pristineNetworksWithAdmins;
-};
-
-/**
  * Retrieve active users that belong to the network.
  * @param {object} payload - Object containing payload data
  * @param {string} payload.networkId - The id of the network to find the users in
@@ -104,12 +75,9 @@ export const listActiveUsersForNetwork = async (payload, message) => {
   logger.info('Listing active users for network', { payload, message });
 
   const network = await networkRepo.findNetworkById(payload.networkId);
-  const usersFromNetwork = await networkRepo.findUsersForNetwork(network.id);
+  if (!network) throw createError('404', 'Network not found.');
 
-  return userService.listUsersWithNetworkScope({
-    userIds: R.pluck('id', usersFromNetwork),
-    networkId: payload.networkId,
-  }, message);
+  return networkRepo.findUsersForNetwork(network.id);
 };
 
 /**
@@ -136,7 +104,7 @@ export const listAllUsersForNetwork = async (payload, message) => {
 /**
  * Retrieve a single network;
  * @param {object} payload - Object containing payload data
- * @param {number} payload.id - The id of the network to get
+ * @param {number} payload.networkId - The id of the network to get
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method getNetwork
  * @return {external:Promise.<Network>} {@link module:modules/core~Network Network} -
@@ -144,7 +112,7 @@ export const listAllUsersForNetwork = async (payload, message) => {
  */
 export const getNetwork = async (payload, message) => {
   logger.info('Retrieving single network', { payload, message });
-  const network = await networkRepo.findNetworkById(payload.id);
+  const network = await networkRepo.findNetworkById(payload.networkId);
 
   if (!network) throw createError('404', 'Network not found.');
 

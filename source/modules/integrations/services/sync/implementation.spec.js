@@ -5,7 +5,7 @@ import * as teamRepository from '../../../core/repositories/team';
 import * as userRepository from '../../../core/repositories/user';
 import * as networkRepository from '../../../core/repositories/network';
 
-describe.only('Service: Sync Implementation', () => {
+describe('Service: Sync Implementation', () => {
   const internalTeams = [{
     id: '1',
     externalId: '240',

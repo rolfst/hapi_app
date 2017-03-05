@@ -10,7 +10,7 @@ module.exports = {
       },
       message_id: {
         type: Sequelize.INTEGER.UNSIGNED,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'messages',
           key: 'id',

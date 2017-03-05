@@ -2,9 +2,9 @@ import { map } from 'lodash';
 import sequelize from 'sequelize';
 import Promise from 'bluebird';
 import R from 'ramda';
-import { Team, User, TeamUser } from '../../../shared/models';
-import * as userRepo from './user';
 import createTeamModel from '../models/team';
+import * as userRepo from './user';
+import { Team, User, TeamUser } from './dao';
 
 /**
  * @module modules/core/repositories/team
@@ -100,7 +100,7 @@ export const findMembers = async (teamId) => {
     where: { teamId },
   });
 
-  return userRepo.findUsersByIds(map(result, 'userId'));
+  return userRepo.findByIds(map(result, 'userId'));
 };
 
 /**

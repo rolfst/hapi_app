@@ -54,7 +54,10 @@ export const syncNetwork = async (payload, message) => {
 
     const actions = {
       teamActions: R.omit(['data'], teamActions),
-      userActions: R.map(R.map(R.pick(['id', 'externalId', 'email'])), R.omit(['data'], userActions)),
+      userActions: R.pipe(
+        R.omit(['data']),
+        R.map(R.map(R.pick(['id', 'externalId', 'email'])))
+      )(userActions),
     };
 
     logger.info('Successfully synced network', { payload, actions });

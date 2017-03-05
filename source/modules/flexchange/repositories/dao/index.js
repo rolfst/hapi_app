@@ -1,8 +1,8 @@
-import { ActivityTypes } from '../../../../shared/models/activity';
-import UserModel from '../../../../shared/models/user';
-import ActivityModel from '../../../../shared/models/activity';
-import TeamModel from '../../../../shared/models/team';
-import NetworkModel from '../../../../shared/models/network';
+import { ActivityTypes } from '../../../core/repositories/dao/activity';
+import UserModel from '../../../core/repositories/dao/user';
+import ActivityModel from '../../../core/repositories/dao/activity';
+import TeamModel from '../../../core/repositories/dao/team';
+import NetworkModel from '../../../core/repositories/dao/network';
 import { exchangeTypes } from './exchange';
 import ExchangeModel from './exchange';
 import ExchangeCommentModel from './exchange-comment';
@@ -18,7 +18,7 @@ ExchangeResponseModel.belongsTo(ExchangeModel, {
 });
 
 ExchangeCommentModel.belongsTo(UserModel, {
-  foreignKey: 'created_by',
+  foreignKey: 'user_id',
 });
 
 ExchangeModel.hasMany(ActivityModel, {
@@ -49,12 +49,9 @@ ExchangeModel.hasOne(ExchangeResponseModel, {
   foreignKey: 'exchange_id',
 });
 
-ExchangeModel.belongsToMany(ExchangeCommentModel, {
-  foreignKey: 'parent_id',
-  otherKey: 'id',
-  through: 'comments',
+ExchangeModel.hasMany(ExchangeCommentModel, {
+  foreignKey: 'exchange_id',
   as: 'Comments',
-  scope: { parent_type: 'FlexAppeal\\Entities\\Exchange' },
 });
 
 ExchangeModel.belongsTo(UserModel, {

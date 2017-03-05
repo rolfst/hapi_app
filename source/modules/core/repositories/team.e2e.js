@@ -1,16 +1,16 @@
 import { assert } from 'chai';
 import Promise from 'bluebird';
+import * as testHelper from '../../../shared/test-utils/helpers';
 import * as userRepo from './user';
 import * as networkRepo from './network';
 import * as teamRepo from './team';
 
 describe('Team repository', () => {
-  let user;
   let network;
   let network2;
 
   before(async () => {
-    user = await userRepo.createUser({
+    const user = await userRepo.createUser({
       username: 'duplicateTeam@flex-appeal.nl',
       firstName: 'dup',
       lastName: 'team',
@@ -22,7 +22,7 @@ describe('Team repository', () => {
     network2 = await networkRepo.createNetwork(user.id, 'secondNetwork');
   });
 
-  after(() => userRepo.deleteById(user.id));
+  after(() => testHelper.cleanAll());
 
   afterEach(async () => {
     const [teams, teams2] = await Promise.all([

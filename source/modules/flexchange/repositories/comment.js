@@ -1,5 +1,5 @@
 import createError from '../../../shared/utils/create-error';
-import { ActivityTypes } from '../../../shared/models/activity';
+import { ActivityTypes } from '../../core/repositories/dao/activity';
 import { createActivity } from '../../core/repositories/activity';
 import ExchangeComment from './dao/exchange-comment';
 
@@ -34,8 +34,7 @@ export function findCommentById(commentId) {
  */
 export async function createExchangeComment(exchangeId, { text, userId }) {
   const exchangeComment = await ExchangeComment.create({
-    parentId: exchangeId,
-    parentType: 'FlexAppeal\\Entities\\Exchange',
+    exchangeId,
     text,
     createdBy: userId,
   });

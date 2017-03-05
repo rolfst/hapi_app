@@ -12,6 +12,7 @@ export default (dao) => ({
   date: dateUtils.toISOString(dao.date),
   startTime: dao.startTime ? dateUtils.toISOString(dao.startTime) : null,
   endTime: dao.endTime ? dateUtils.toISOString(dao.endTime) : null,
+  title: dao.title,
   description: dao.description || null,
   acceptCount: dao.acceptCount || 0,
   declineCount: dao.declineCount || 0,
