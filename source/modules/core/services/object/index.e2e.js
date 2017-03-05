@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import R from 'ramda';
+import Promise from 'bluebird';
 import sinon from 'sinon';
 import stream from 'stream';
 import * as testHelpers from '../../../../shared/test-utils/helpers';
@@ -27,13 +28,13 @@ describe('Service: Object', () => {
         sourceId: '1931',
       });
 
-      await objectService.create({
+      await Promise.delay(200).then(() => objectService.create({
         userId: admin.id,
         parentType: 'network',
         parentId: network.id,
         objectType: 'feed_message',
         sourceId: '1932',
-      });
+      }));
     });
 
     after(() => testHelpers.cleanAll());
