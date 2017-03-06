@@ -12,6 +12,24 @@ import * as teamService from '../team';
 const logger = Logger.getLogger('CORE/service/network');
 
 /**
+ * Retrieve a single network;
+ * @param {object} payload - Object containing payload data
+ * @param {number} payload.networkId - The id of the network to get
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method get
+ * @return {external:Promise.<Network>} {@link module:modules/core~Network Network} -
+ * Promise containing network
+ */
+export const get = async (payload, message) => {
+  logger.info('Retrieving single network', { payload, message });
+  const network = await networkRepo.findNetworkById(payload.networkId);
+
+  if (!network) throw createError('404', 'Network not found');
+
+  return network;
+};
+
+/**
  * Create a new network.
  * @param {object} payload - Object containing payload data
  * @param {string} payload.userId - The id of the owner of the network
@@ -99,24 +117,6 @@ export const listAllUsersForNetwork = async (payload, message) => {
     userIds: R.pluck('id', usersFromNetwork),
     networkId: payload.networkId,
   }, message);
-};
-
-/**
- * Retrieve a single network;
- * @param {object} payload - Object containing payload data
- * @param {number} payload.networkId - The id of the network to get
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method getNetwork
- * @return {external:Promise.<Network>} {@link module:modules/core~Network Network} -
- * Promise containing network
- */
-export const getNetwork = async (payload, message) => {
-  logger.info('Retrieving single network', { payload, message });
-  const network = await networkRepo.findNetworkById(payload.networkId);
-
-  if (!network) throw createError('404', 'Network not found.');
-
-  return network;
 };
 
 /**

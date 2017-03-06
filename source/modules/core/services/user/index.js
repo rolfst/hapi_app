@@ -37,7 +37,7 @@ export async function listUsersWithNetworkScope(payload, message) {
   logger.info('Listing users with network scope', { payload, message });
 
   const users = await userRepo.findByIds(payload.userIds);
-  const network = await networkService.getNetwork({ networkId: payload.networkId }, message);
+  const network = await networkService.get({ networkId: payload.networkId }, message);
   const metaDataList = await userRepo.findMultipleUserMetaDataForNetwork(
     map(users, 'id'), network.id);
 
