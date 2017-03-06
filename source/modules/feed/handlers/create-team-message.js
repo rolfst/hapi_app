@@ -1,4 +1,3 @@
-import R from 'ramda';
 import * as messageService from '../services/message';
 import * as responseUtil from '../../../shared/utils/response';
 
