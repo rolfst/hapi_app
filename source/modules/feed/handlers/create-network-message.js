@@ -4,7 +4,7 @@ import * as responseUtil from '../../../shared/utils/response';
 export default async (req, reply) => {
   try {
     const payload = {
-      pollQuestion: req.payload.poll_question,
+      question: req.payload.poll_question,
       pollOptions: req.payload.poll_options,
       parentType: 'network',
       parentId: req.params.networkId,

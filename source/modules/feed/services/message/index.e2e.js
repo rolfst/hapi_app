@@ -32,6 +32,7 @@ describe('Service: Message', () => {
           parentType: 'network',
           parentId: network.id,
           text: 'My cool message',
+          question: 'Are we cool?',
           poll: { options: ['Yes', 'No', 'Ok'] },
         }, { network, credentials: admin }),
         messageService.create({
@@ -292,6 +293,7 @@ describe('Service: Message', () => {
         parentType: 'network',
         parentId: network.id,
         text: 'My cool message',
+        question: 'Are we ok?',
         poll: { options: ['Yes', 'No', 'Ok'] },
       }, {
         credentials: { id: admin.id },
