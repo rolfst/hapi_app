@@ -65,6 +65,7 @@ describe('Service: Invite user', () => {
       assert.equal(actual.username, email);
       assert.equal(actual.email, email);
       assert.equal(actual.roleType, 'ADMIN');
+      assert.isNotNull(actual.invitedAt);
     });
 
     it('should add to the network as employee', async () => {
@@ -132,6 +133,7 @@ describe('Service: Invite user', () => {
       assert.equal(actual.lastName, payload.lastName);
       assert.equal(actual.username, payload.email);
       assert.equal(actual.email, payload.email);
+      assert.isNotNull(actual.invitedAt);
     });
 
     it('should dispatch user.created event', async () => {
