@@ -1,4 +1,5 @@
 import { map, find } from 'lodash';
+import R from 'ramda';
 import Promise from 'bluebird';
 import createError from '../../../../shared/utils/create-error';
 import * as Logger from '../../../../shared/services/logger';
@@ -40,8 +41,9 @@ export async function listUsersWithNetworkScope(payload, message) {
   const network = await networkService.get({ networkId: payload.networkId }, message);
   const metaDataList = await userRepo.findMultipleUserMetaDataForNetwork(
     map(users, 'id'), network.id);
+  const usersInNetwork = R.filter(user => R.find(R.propEq('userId', user.id), metaDataList), users);
 
-  return Promise.map(users, async (user) => {
+  return Promise.map(usersInNetwork, async (user) => {
     const metaData = find(metaDataList, { userId: user.id });
 
     return {

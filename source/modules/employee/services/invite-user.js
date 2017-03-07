@@ -146,6 +146,7 @@ export const inviteUsers = async (payload, message) => {
 
   const networkMembers = await userService.listUsersWithNetworkScope({
     userIds: payload.userIds, networkId: network.id }, message);
+
   const preparedUsers = reject(networkMembers, 'invitedAt');
   const toNotifyUsers = intersectionBy(preparedUsers, networkMembers, 'id');
   const usersToSendMailto = await impl.generatePasswordsForMembers(toNotifyUsers);
