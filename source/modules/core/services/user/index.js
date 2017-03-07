@@ -67,12 +67,14 @@ export async function listUsersWithNetworkScope(payload, message) {
  */
 export async function getUserWithNetworkScope(payload, message) {
   logger.info('Get user with network scope', { payload, message });
-  const user = await userRepo.findUserById(payload.id, payload.networkId);
-  const network = await networkRepo.findNetworkById(payload.networkId);
+  const [user, network] = await Promise.all([
+    userRepo.findUserById(payload.id, payload.networkId),
+    networkRepo.findNetworkById(payload.networkId),
+  ]);
+
   const networkLink = await userRepo.findNetworkLink({ userId: user.id, networkId: network.id });
 
   if (!networkLink) throw createError('10002');
-
 
   return {
     ...user,
