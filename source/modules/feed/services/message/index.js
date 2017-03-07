@@ -59,26 +59,6 @@ export const getComments = async (payload, message) => {
 };
 
 /**
- * Get likes for message of multiple messages
- * @param {object} payload - Object containing payload data
- * @param {string} payload.messageId - The id of the message to retrieve
- * @param {string[]} payload.messageIds - The id of the message to retrieve
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method getLikes
- * @return {external:Promise.<Like[]>} {@link module:feed~Like like}
- */
-export const getLikes = async (payload, message) => {
-  logger.info('Get likes for message', { payload, message });
-
-  let whereConstraint = {};
-
-  if (payload.messageId) whereConstraint = { messageId: payload.messageId };
-  else if (payload.messageIds) whereConstraint = { messageId: { $in: payload.messageIds } };
-
-  return likeRepository.findBy(whereConstraint);
-};
-
-/**
  * Listing messages
  * @param {object} payload - Object containing payload data
  * @param {string[]} payload.messageIds - The ids of the messages to list
@@ -114,18 +94,23 @@ export const list = async (payload, message) => {
 };
 
 /**
- * List likes for a single message
+ * List likes for message or multiple messages
  * @param {object} payload - Object containing payload data
- * @param {string} payload.messageId - The id of the message
+ * @param {string} payload.messageId - The id of the message to retrieve
+ * @param {string[]} payload.messageIds - The id of the message to retrieve
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method listLikes
  * @return {external:Promise.<Like[]>} {@link module:feed~Like like}
  */
 export const listLikes = async (payload, message) => {
-  logger.info('Listing likes fo message', { payload, message });
-  await impl.assertThatUserBelongsToMessage(payload.messageId, message);
+  logger.info('Listing likes for message', { payload, message });
 
-  return likeRepository.findBy({ messageId: payload.messageId });
+  let whereConstraint = {};
+
+  if (payload.messageId) whereConstraint = { messageId: payload.messageId };
+  else if (payload.messageIds) whereConstraint = { messageId: { $in: payload.messageIds } };
+
+  return likeRepository.findBy(whereConstraint);
 };
 
 /**

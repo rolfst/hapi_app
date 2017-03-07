@@ -1,6 +1,8 @@
 import R from 'ramda';
 import * as Logger from '../../../../shared/services/logger';
+import createError from '../../../../shared/utils/create-error';
 import * as networkService from '../../../core/services/network';
+import * as userService from '../../../core/services/user';
 import * as teamService from '../../../core/services/team';
 import * as impl from './implementation';
 
@@ -26,11 +28,16 @@ const feedOptions = R.pick(['limit', 'offset', 'include']);
 export const makeForNetwork = async (payload, message) => {
   logger.info('Making feed for network', { payload, message });
 
-  const teams = await networkService.listTeamsForNetwork({
-    networkId: payload.networkId }, message);
+  const [user, teams] = await Promise.all([
+    userService.getUserWithNetworkScope({
+      id: message.credentials.id, networkId: payload.networkId }, message),
+    networkService.listTeamsForNetwork({ networkId: payload.networkId }, message),
+  ]);
+
+  const filterTeams = (user.roleType === 'ADMIN') ? R.always(teams) : R.filter(R.prop('isMember'));
 
   const extraWhereConstraint = [{
-    parentId: { $in: pluckId(teams) },
+    parentId: { $in: R.pipe(filterTeams, pluckId)(teams) },
     parentType: 'team',
   }, {
     parentType: 'user',
@@ -56,8 +63,13 @@ export const makeForNetwork = async (payload, message) => {
 export const makeForTeam = async (payload, message) => {
   logger.info('Making feed for team', { payload, message });
 
-  const network = await teamService.get({ teamId: payload.teamId }, message)
-    .then((team) => networkService.get({ networkId: team.networkId }, message));
+  const team = await teamService.get({ teamId: payload.teamId }, message);
+  const user = await userService.getUserWithNetworkScope({
+    id: message.credentials.id, networkId: team.networkId }, message);
+
+  if (R.not(team.isMember) && user.roleType !== 'ADMIN') throw createError('403');
+
+  const network = await networkService.get({ networkId: team.networkId }, message);
   const feedPayload = { parentType: 'team', parentId: payload.teamId };
 
   return impl.makeFeed(feedPayload, feedOptions(payload), R.assoc('network', network, message));

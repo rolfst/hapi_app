@@ -210,7 +210,7 @@ export const remove = async (payload, message) => {
  * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
 export const get = async (payload, message) => {
-  logger.info('retrieving object', { payload, message });
+  logger.info('Retrieving object', { payload, message });
 
   const attributes = R.pick(['id', 'objectType', 'sourceId'], payload);
   const objects = await objectRepository.findBy(attributes);

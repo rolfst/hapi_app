@@ -32,7 +32,7 @@ export const getIncludes = async (hasInclude, objects) => {
     }
 
     if (hasInclude('likes')) {
-      includes.likes = messageService.getLikes({ messageIds });
+      includes.likes = messageService.listLikes({ messageIds });
     }
   }
 
