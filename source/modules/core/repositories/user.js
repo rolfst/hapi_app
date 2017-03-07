@@ -281,6 +281,9 @@ export const setNetworkLink = async (whereConstraint, _attributes) => {
   return result.update({ ...R.omit(['userId', 'networkId', 'externalId'], attributes) });
 };
 
+export const updateNetworkLink = (whereConstraint, attributes) =>
+  NetworkUser.update(attributes, { where: whereConstraint });
+
 /**
  * @param {string} userId - identifier for user to delete
  * @method deleteById
