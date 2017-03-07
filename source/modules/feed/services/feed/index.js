@@ -67,7 +67,7 @@ export const makeForTeam = async (payload, message) => {
   const user = await userService.getUserWithNetworkScope({
     id: message.credentials.id, networkId: team.networkId }, message);
 
-  if (R.not(team.isMember) && user.roleType === 'EMPLOYEE') throw createError('403');
+  if (R.not(team.isMember) && user.roleType !== 'ADMIN') throw createError('403');
 
   const network = await networkService.get({ networkId: team.networkId }, message);
   const feedPayload = { parentType: 'team', parentId: payload.teamId };
