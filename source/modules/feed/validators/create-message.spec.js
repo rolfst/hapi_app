@@ -19,9 +19,9 @@ describe('Validator: create-message', () => {
 
   it('should succeed when only files property and an empty text property are provided', () => {
     const payload = { text: null, files: ['123'] };
-    const actual = Joi.validate({ payload }, scheme);
+    const actual = Joi.validate(payload, scheme.payload);
 
-    assert.isNotNull(actual.error);
+    assert.isNull(actual.error);
   });
 
   it('should succeed when both text and files are provided', () => {
