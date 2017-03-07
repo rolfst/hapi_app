@@ -34,10 +34,10 @@ export const makeForNetwork = async (payload, message) => {
     networkService.listTeamsForNetwork({ networkId: payload.networkId }, message),
   ]);
 
-  const teamIds = (user.roleType === 'ADMIN') ? R.always(teams) : R.filter(R.prop('isMember'));
+  const filterTeams = (user.roleType === 'ADMIN') ? R.always(teams) : R.filter(R.prop('isMember'));
 
   const extraWhereConstraint = [{
-    parentId: { $in: R.pipe(teamIds, pluckId)(teams) },
+    parentId: { $in: R.pipe(filterTeams, pluckId)(teams) },
     parentType: 'team',
   }, {
     parentType: 'user',
