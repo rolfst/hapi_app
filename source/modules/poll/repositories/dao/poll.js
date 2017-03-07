@@ -12,6 +12,11 @@ const Poll = model.define('Poll', {
     field: 'network_id',
     allowNull: false,
   },
+  question: {
+    type: Sequelize.STRING,
+    field: 'question',
+    allowNull: false,
+  },
 }, {
   tableName: 'polls',
   timestamps: true,

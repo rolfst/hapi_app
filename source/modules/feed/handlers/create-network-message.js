@@ -3,7 +3,15 @@ import * as responseUtil from '../../../shared/utils/response';
 
 export default async (req, reply) => {
   try {
-    const payload = { parentType: 'network', parentId: req.params.networkId, ...req.payload };
+    const payload = {
+      pollQuestion: req.payload.poll_question,
+      pollOptions: req.payload.poll_options,
+      parentType: 'network',
+      parentId: req.params.networkId,
+      text: req.payload.text || null,
+      files: req.payload.files || [],
+    };
+
     const message = { ...req.pre, ...req.auth };
     const feedItems = await messageService.create(payload, message);
 

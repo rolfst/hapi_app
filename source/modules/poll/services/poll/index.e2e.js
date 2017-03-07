@@ -28,7 +28,10 @@ describe('Service: Poll', () => {
     flexAppeal = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
 
     message = { credentials: { id: employee.id } };
-    defaultPayload = { networkId: flexAppeal.id, options: ['Option A', 'Option B', 'Option C'] };
+    defaultPayload = {
+      networkId: flexAppeal.id, question: 'help in what way?',
+      options: ['Option A', 'Option B', 'Option C'],
+    };
     defaultVotePayload = { networkId: flexAppeal.id };
   });
 
@@ -42,6 +45,7 @@ describe('Service: Poll', () => {
     assert.equal(actual.networkId, flexAppeal.id);
     assert.equal(actual.userId, employee.id);
     assert.equal(actual.totalVoteCount, 0);
+    assert.equal(actual.question, 'help in what way?');
     assert.lengthOf(actual.options, 3);
     assert.equal(actual.options[0].text, 'Option A');
     assert.equal(actual.options[1].text, 'Option B');
