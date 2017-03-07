@@ -1,5 +1,6 @@
 import R from 'ramda';
 import * as Logger from '../../../../shared/services/logger';
+import createError from '../../../../shared/utils/create-error';
 import * as networkService from '../../../core/services/network';
 import * as teamService from '../../../core/services/team';
 import * as impl from './implementation';
@@ -30,7 +31,7 @@ export const makeForNetwork = async (payload, message) => {
     networkId: payload.networkId }, message);
 
   const extraWhereConstraint = [{
-    parentId: { $in: pluckId(teams) },
+    parentId: { $in: R.pipe(R.filter(R.prop('isMember')), pluckId)(teams) },
     parentType: 'team',
   }, {
     parentType: 'user',
@@ -56,8 +57,10 @@ export const makeForNetwork = async (payload, message) => {
 export const makeForTeam = async (payload, message) => {
   logger.info('Making feed for team', { payload, message });
 
-  const network = await teamService.get({ teamId: payload.teamId }, message)
-    .then((team) => networkService.get({ networkId: team.networkId }, message));
+  const team = await teamService.get({ teamId: payload.teamId }, message);
+  if (R.not(team.isMember)) throw createError('403');
+
+  const network = await networkService.get({ networkId: team.networkId }, message);
   const feedPayload = { parentType: 'team', parentId: payload.teamId };
 
   return impl.makeFeed(feedPayload, feedOptions(payload), R.assoc('network', network, message));
