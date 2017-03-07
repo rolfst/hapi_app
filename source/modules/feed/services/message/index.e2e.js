@@ -32,8 +32,8 @@ describe('Service: Message', () => {
           parentType: 'network',
           parentId: network.id,
           text: 'My cool message',
-          question: 'Are we cool?',
-          poll: { options: ['Yes', 'No', 'Ok'] },
+          pollQuestion: 'Are we cool?',
+          pollOptions: ['Yes', 'No', 'Ok'],
         }, { network, credentials: admin }),
         messageService.create({
           parentType: 'team',
@@ -115,7 +115,7 @@ describe('Service: Message', () => {
         parentType: 'network',
         parentId: network.id,
         text: 'My cool message',
-        question: 'Should we help?',
+        pollQuestion: 'Should we help?',
         pollOptions: ['Yes', 'No', 'Ok'],
       }, { network, credentials: admin });
     });
@@ -293,7 +293,7 @@ describe('Service: Message', () => {
         parentType: 'network',
         parentId: network.id,
         text: 'My cool message',
-        question: 'Are we ok?',
+        pollQuestion: 'Are we ok?',
         poll: { options: ['Yes', 'No', 'Ok'] },
       }, {
         credentials: { id: admin.id },

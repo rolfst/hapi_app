@@ -150,7 +150,8 @@ export const listComments = async (payload, message) => {
  * @param {string} payload.parentId - The id of the parent
  * @param {string} payload.text - The text of the message
  * @param {object} payload.files - The id of attachments that should be associated
- * @param {object} payload.poll - The poll
+ * @param {object} payload.pollQuestion - The poll question
+ * @param {array} payload.pollOptions - The poll options
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method create
  * @return {external:Promise.<Message>} {@link module:feed~Message message}
@@ -204,9 +205,9 @@ export const create = async (payload, message) => {
     await Promise.all([updateMessageIds, createObjects]);
   }
 
-  if (checkPayload('pollOptions') && checkPayload('question')) {
+  if (checkPayload('pollOptions') && checkPayload('pollQuestion')) {
     await impl.createPollResource(createdMessage, message)(
-      R.pick(['pollOptions', 'question'], payload));
+      R.pick(['pollOptions', 'pollQuestion'], payload));
   }
 
   const objectWithSourceAndChildren = await objectService.getWithSourceAndChildren({
