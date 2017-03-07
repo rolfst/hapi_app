@@ -104,7 +104,6 @@ export const list = async (payload, message) => {
  */
 export const listLikes = async (payload, message) => {
   logger.info('Listing likes for message', { payload, message });
-  await impl.assertThatUserBelongsToMessage(payload.messageId, message);
 
   let whereConstraint = {};
 
