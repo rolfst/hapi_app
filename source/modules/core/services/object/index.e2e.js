@@ -28,7 +28,7 @@ describe('Service: Object', () => {
         sourceId: '1931',
       });
 
-      await Promise.delay(200).then(() => objectService.create({
+      await Promise.delay(1000).then(() => objectService.create({
         userId: admin.id,
         parentType: 'network',
         parentId: network.id,

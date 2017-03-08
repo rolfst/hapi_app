@@ -4,7 +4,6 @@ import Promise from 'bluebird';
 import createError from '../../../../shared/utils/create-error';
 import * as Logger from '../../../../shared/services/logger';
 import * as userRepo from '../../repositories/user';
-import * as teamRepo from '../../repositories/team';
 import * as networkRepo from '../../repositories/network';
 import * as networkService from '../../services/network';
 
