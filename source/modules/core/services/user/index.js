@@ -4,6 +4,7 @@ import Promise from 'bluebird';
 import createError from '../../../../shared/utils/create-error';
 import * as Logger from '../../../../shared/services/logger';
 import * as userRepo from '../../repositories/user';
+import * as teamRepo from '../../repositories/team';
 import * as networkRepo from '../../repositories/network';
 import * as networkService from '../../services/network';
 
@@ -37,7 +38,7 @@ export const getUser = async (payload) => {
 export async function listUsersWithNetworkScope(payload, message) {
   logger.info('Listing users with network scope', { payload, message });
 
-  const users = await userRepo.findByIds(payload.userIds);
+  const users = await userRepo.findByIds(payload.userIds, payload.networkId);
   const network = await networkService.get({ networkId: payload.networkId }, message);
   const metaDataList = await userRepo.findMultipleUserMetaDataForNetwork(
     map(users, 'id'), network.id);
