@@ -596,7 +596,7 @@ describe('Network synchronisation', () => {
       const membersOfCreatedTeams = await Promise.map(createdTeams,
         team => teamRepository.findMembers(team.id));
 
-      assert.lengthOf(membersOfCreatedTeams[0], 1);
+      assert.lengthOf(membersOfCreatedTeams[0], 0);
       assert.lengthOf(membersOfCreatedTeams[1], 1);
     });
   });

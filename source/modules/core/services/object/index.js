@@ -18,7 +18,9 @@ const objectsForTypeValuePair = (fn, pairs) => R.pipe(R.mapObjIndexed(fn), R.val
 const getSources = R.pipeP(Promise.all, R.flatten, R.reject(R.isNil));
 const groupByObjectType = R.groupBy(R.prop('objectType'));
 const sourceIdsPerType = R.pipe(groupByObjectType, R.map(R.pluck('sourceId')));
-const createOptionsFromPayload = R.pick(['offset', 'limit']);
+const createOptionsFromPayload = R.pipe(
+  R.pick(['offset', 'limit']),
+  R.assoc('order', [['createdAt', 'desc']]));
 
 /**
  * Listing objects for a specific parent
@@ -37,7 +39,7 @@ export const list = async (payload, message) => {
   const objects = await objectRepository.findBy({
     parentType: payload.parentType,
     parentId: payload.parentId,
-  }, R.pipe(createOptionsFromPayload)(payload));
+  }, createOptionsFromPayload(payload));
 
   return objects;
 };
@@ -54,9 +56,7 @@ export const listWithSourceAndChildren = async (payload, message) => {
   logger.info('Listing objects with sources', { payload, message });
 
   const objects = await objectRepository.findBy({
-    id: { $in: payload.objectIds } }, R.pipe(
-      createOptionsFromPayload,
-      R.assoc('order', [['createdAt', 'desc']]))(payload)
+    id: { $in: payload.objectIds } }, createOptionsFromPayload(payload)
     );
 
   const promisedChildren = objectsForTypeValuePair(
