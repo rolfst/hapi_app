@@ -10,11 +10,11 @@ describe('Validator: create-message', () => {
     assert.isNull(actual.error);
   });
 
-  it('should not succeed when only files property and an empty text property are provided', () => {
+  it('should succeed when only files property and an empty text property are provided', () => {
     const payload = { text: '', files: ['123'] };
     const actual = Joi.validate({ payload }, scheme);
 
-    assert.isNotNull(actual.error);
+    assert.isNull(actual.error);
   });
 
   it('should succeed when only files property and an empty text property are provided', () => {
@@ -38,11 +38,11 @@ describe('Validator: create-message', () => {
     assert.isNull(actual.error);
   });
 
-  it('should not succeed when only an empty text value is provided', async () => {
+  it('should succeed when only an empty text value is provided', async () => {
     const payload = { text: '' };
     const actual = Joi.validate(payload, scheme.payload);
 
-    assert.isNotNull(actual.error);
+    assert.isNull(actual.error);
   });
 
   it('should return error when no param is provided', async () => {
