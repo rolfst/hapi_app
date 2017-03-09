@@ -55,6 +55,7 @@ export const authenticate = async (payload, message) => {
   Analytics.registerProfile(user);
 
   if (user.lastLogin === null) Analytics.track(firstLoginEvent(), user.id);
+  userRepo.updateNetworkLink({ userId: user.id }, { lastActive: new Date() });
 
   return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, user };
 };
