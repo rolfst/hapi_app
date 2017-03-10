@@ -16,6 +16,10 @@ import * as impl from './implementation';
 
 const logger = Logger.getLogger('FEED/service/message');
 
+const isDefined = R.complement(R.isNil);
+const isNotEmpty = R.complement(R.isEmpty);
+const isAvailable = R.both(isDefined, isNotEmpty);
+
 /**
  * Get a single message
  * @param {object} payload - Object containing payload data
@@ -55,26 +59,6 @@ export const getComments = async (payload, message) => {
 };
 
 /**
- * Get likes for message of multiple messages
- * @param {object} payload - Object containing payload data
- * @param {string} payload.messageId - The id of the message to retrieve
- * @param {string[]} payload.messageIds - The id of the message to retrieve
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method getLikes
- * @return {external:Promise.<Like[]>} {@link module:feed~Like like}
- */
-export const getLikes = async (payload, message) => {
-  logger.info('Get likes for message', { payload, message });
-
-  let whereConstraint = {};
-
-  if (payload.messageId) whereConstraint = { messageId: payload.messageId };
-  else if (payload.messageIds) whereConstraint = { messageId: { $in: payload.messageIds } };
-
-  return likeRepository.findBy(whereConstraint);
-};
-
-/**
  * Listing messages
  * @param {object} payload - Object containing payload data
  * @param {string[]} payload.messageIds - The ids of the messages to list
@@ -110,18 +94,23 @@ export const list = async (payload, message) => {
 };
 
 /**
- * List likes for a single message
+ * List likes for message or multiple messages
  * @param {object} payload - Object containing payload data
- * @param {string} payload.messageId - The id of the message
+ * @param {string} payload.messageId - The id of the message to retrieve
+ * @param {string[]} payload.messageIds - The id of the message to retrieve
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method listLikes
  * @return {external:Promise.<Like[]>} {@link module:feed~Like like}
  */
 export const listLikes = async (payload, message) => {
-  logger.info('Listing likes fo message', { payload, message });
-  await impl.assertThatUserBelongsToMessage(payload.messageId, message);
+  logger.info('Listing likes for message', { payload, message });
 
-  return likeRepository.findBy({ messageId: payload.messageId });
+  let whereConstraint = {};
+
+  if (payload.messageId) whereConstraint = { messageId: payload.messageId };
+  else if (payload.messageIds) whereConstraint = { messageId: { $in: payload.messageIds } };
+
+  return likeRepository.findBy(whereConstraint);
 };
 
 /**
@@ -146,7 +135,8 @@ export const listComments = async (payload, message) => {
  * @param {string} payload.parentId - The id of the parent
  * @param {string} payload.text - The text of the message
  * @param {object} payload.files - The id of attachments that should be associated
- * @param {object} payload.poll - The poll
+ * @param {object} payload.pollQuestion - The poll question
+ * @param {array} payload.pollOptions - The poll options
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method create
  * @return {external:Promise.<Message>} {@link module:feed~Message message}
@@ -154,6 +144,7 @@ export const listComments = async (payload, message) => {
 export const create = async (payload, message) => {
   logger.info('Creating message', { payload, message });
 
+  const checkPayload = R.compose(isAvailable, R.prop(R.__, payload));
   const parent = await objectService.getParent(R.pick(['parentType', 'parentId'], payload));
 
   const parentEntity = `${payload.parentType.slice(0, 1)
@@ -176,7 +167,7 @@ export const create = async (payload, message) => {
 
   await messageRepository.update(createdMessage.id, { objectId: createdObject.id });
 
-  if (payload.files) {
+  if (checkPayload('files')) {
     await attachmentService.assertAttachmentsExist({ attachmentIds: payload.files }, message);
 
     const filesArray = R.flatten([payload.files]);
@@ -197,6 +188,11 @@ export const create = async (payload, message) => {
     }, message)));
 
     await Promise.all([updateMessageIds, createObjects]);
+  }
+
+  if (checkPayload('pollOptions') && checkPayload('pollQuestion')) {
+    await impl.createPollResource(createdMessage, message)(
+      R.pick(['pollOptions', 'pollQuestion'], payload));
   }
 
   const objectWithSourceAndChildren = await objectService.getWithSourceAndChildren({

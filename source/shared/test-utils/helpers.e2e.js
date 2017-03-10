@@ -101,7 +101,7 @@ describe('Test Helper', () => {
         integrationName: testHelper.DEFAULT_INTEGRATION.name,
       });
 
-      const network = await networkService.getNetwork({
+      const network = await networkService.get({
         networkId: createdNetwork.id }, { credentials: { id: user.id } });
       const integrations = await integrationRepo.findAll();
       const integration = R.find(R.propEq('name', testHelper.DEFAULT_INTEGRATION.name),
@@ -123,7 +123,7 @@ describe('Test Helper', () => {
         integrationName: testHelper.DEFAULT_INTEGRATION.name,
       });
 
-      const network = await networkService.getNetwork({
+      const network = await networkService.get({
         networkId: createdNetwork.id }, { credentials: { id: user.id } });
 
       assert.equal(network.name, 'customName');

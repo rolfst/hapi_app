@@ -5,19 +5,25 @@ import * as feedService from '../services/feed';
 
 export default async (req, reply) => {
   try {
-    const payload = { ...req.query, parentType: 'network', parentId: req.params.networkId };
     const message = { ...req.pre, ...req.auth };
-    const [feedItems, count] = await Promise.all([
-      feedService.make(payload, message),
-      objectService.count({ where: [
-        { parentType: 'user', parentId: message.credentials.id },
-        R.pick(['parentType', 'parentId'], payload),
-      ] }, message),
-    ]);
+    const totalCountPromise = Promise.all([
+      objectService.count({ parentType: 'network', parentId: req.params.networkId }, message),
+      objectService.count({ parentType: 'user', parentId: message.credentials.id }, message),
+    ]).then(R.sum);
+
+    const feedPromise = feedService.makeForNetwork({
+      ...req.query, networkId: req.params.networkId }, message);
+    const [feedItems, count] = await Promise.all([feedPromise, totalCountPromise]);
 
     return reply({
       data: responseUtil.toSnakeCase(feedItems),
-      meta: { pagination: { limit: payload.limit, offset: payload.offset, total_count: count } },
+      meta: {
+        pagination: {
+          limit: req.query.limit,
+          offset: req.query.offset,
+          total_count: count,
+        },
+      },
     });
   } catch (err) {
     return reply(err);

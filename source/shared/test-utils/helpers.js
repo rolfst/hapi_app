@@ -70,17 +70,20 @@ export function addUserToNetwork(networkUserAttributes) {
  * @method createNetwork
  * @return {external:Promise<Network>} {@link module:modules/core~Network Network} - created network
  */
-export function createNetwork({
+export async function createNetwork({
   userId, externalId, integrationName, name = randomString(), userExternalId, userToken }) {
   const networkAttributes = { userId, externalId, integrationName, name };
 
-  return networkService.create(networkAttributes)
-    .then(network => {
-      addUserToNetwork({
-        networkId: network.id, userId, roleType: 'ADMIN', externalId: userExternalId, userToken });
+  const network = await networkService.create(networkAttributes);
+  await addUserToNetwork({
+    userId,
+    userToken,
+    networkId: network.id,
+    roleType: 'ADMIN',
+    externalId: userExternalId,
+  });
 
-      return network;
-    });
+  return network;
 }
 
 /**

@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import R from 'ramda';
+import Promise from 'bluebird';
 import sinon from 'sinon';
 import stream from 'stream';
 import * as testHelpers from '../../../../shared/test-utils/helpers';
@@ -27,13 +28,13 @@ describe('Service: Object', () => {
         sourceId: '1931',
       });
 
-      await objectService.create({
+      await Promise.delay(1000).then(() => objectService.create({
         userId: admin.id,
         parentType: 'network',
         parentId: network.id,
         objectType: 'feed_message',
         sourceId: '1932',
-      });
+      }));
     });
 
     after(() => testHelpers.cleanAll());
@@ -45,14 +46,14 @@ describe('Service: Object', () => {
       }, { credentials: admin });
 
       assert.lengthOf(actual, 2);
-      assert.equal(actual[0].userId, admin.id);
-      assert.equal(actual[0].objectType, 'poll');
-      assert.equal(actual[0].sourceId, '1931');
+      assert.equal(actual[0].objectType, 'feed_message');
+      assert.equal(actual[0].sourceId, '1932');
       assert.equal(actual[0].parentType, 'network');
-      assert.equal(actual[1].objectType, 'feed_message');
-      assert.equal(actual[1].sourceId, '1932');
+      assert.equal(actual[0].parentId, network.id);
+      assert.equal(actual[1].userId, admin.id);
+      assert.equal(actual[1].objectType, 'poll');
+      assert.equal(actual[1].sourceId, '1931');
       assert.equal(actual[1].parentType, 'network');
-      assert.equal(actual[1].parentId, network.id);
     });
 
     it('should be able to paginate result', async () => {
@@ -63,10 +64,9 @@ describe('Service: Object', () => {
         offset: 1,
       }, { credentials: admin });
 
-      assert.lengthOf(actual, 1);
       assert.equal(actual[0].userId, admin.id);
-      assert.equal(actual[0].objectType, 'feed_message');
-      assert.equal(actual[0].sourceId, '1932');
+      assert.equal(actual[0].objectType, 'poll');
+      assert.equal(actual[0].sourceId, '1931');
       assert.equal(actual[0].parentType, 'network');
       assert.equal(actual[0].parentId, network.id);
     });
@@ -98,16 +98,13 @@ describe('Service: Object', () => {
     after(() => testHelpers.cleanAll());
 
     it('should return correct count', async () => {
-      const networkObjects = await objectService.count({ where: [{
-        parentType: 'network',
-        parentId: network.id,
-      }, {
-        parentType: 'user',
-        parentId: admin.id,
-      }],
-      }, { credentials: admin });
+      const message = { credentials: admin };
+      const [networkCount, userCount] = await Promise.all([
+        objectService.count({ parentType: 'network', parentId: network.id }, message),
+        objectService.count({ parentType: 'user', parentId: admin.id }, message),
+      ]);
 
-      assert.equal(networkObjects, 2);
+      assert.equal(R.sum([networkCount, userCount]), 2);
     });
   });
 

@@ -1,8 +1,9 @@
 import R from 'ramda';
 import * as Logger from '../../../../shared/services/logger';
+import createError from '../../../../shared/utils/create-error';
 import * as networkService from '../../../core/services/network';
-import * as objectRepository from '../../../core/repositories/object';
-import * as objectService from '../../../core/services/object';
+import * as userService from '../../../core/services/user';
+import * as teamService from '../../../core/services/team';
 import * as impl from './implementation';
 
 /**
@@ -10,67 +11,66 @@ import * as impl from './implementation';
  */
 
 const logger = Logger.getLogger('FEED/service/feed');
-const typeEq = R.propEq('objectType');
-const messageIdEq = R.propEq('messageId');
-const findIncludes = (object, includes) => (typeEq('feed_message')) ?
-  R.defaultTo(null, R.filter(messageIdEq(object.sourceId), includes)) : null;
+const pluckId = R.pluck('id');
+const feedOptions = R.pick(['limit', 'offset', 'include']);
 
 /**
- * Making a feed for a parent
+ * Making a feed for a network
  * @param {object} payload - Object containing payload data
- * @param {string} payload.parentType - The type of parent to get objects for
- * @param {string} payload.parentId - The id of the parent
+ * @param {string} payload.networkId - The id of network to create feed for
  * @param {string} payload.include - The sub resources to include
  * @param {number} payload.limit - The limit of the resultset for pagination
  * @param {number} payload.offset - The offset of the resultset for pagination
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method make
- * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
+ * @method makeForNetwork
+ * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
-export const make = async (payload, message) => {
-  logger.info(`Making feed for ${payload.parentType}`, { payload, message });
+export const makeForNetwork = async (payload, message) => {
+  logger.info('Making feed for network', { payload, message });
 
-  const whereClause = [{
-    parentType: 'user',
-    parentId: message.credentials.id,
-  }, {
-    parentType: payload.parentType,
-    parentId: payload.parentId,
-  }];
-
-  if (R.equals('network', payload.parentType)) {
-    const teams = await networkService.listTeamsForNetwork(
-      { networkId: payload.parentId }, message);
-
-    whereClause.push({
-      parentId: { $in: R.pluck('id', teams) },
-      parentType: 'team',
-    });
-  }
-
-  const whereConstraint = { $or: whereClause };
-  const relatedObjects = await objectRepository.findBy(whereConstraint, {
-    limit: payload.limit,
-    offset: payload.offset,
-    order: [['created_at', 'DESC']],
-  });
-
-  const hasInclude = R.contains(R.__, payload.include || []);
-  const includes = await impl.getIncludes(hasInclude, relatedObjects);
-
-  const objectsWithSources = await objectService.listWithSourceAndChildren({
-    objectIds: R.pluck('id', relatedObjects) }, message);
-  const addComments = (object) =>
-    R.assoc('comments', findIncludes(object, includes.comments), object);
-  const addLikes = (object) =>
-    R.assoc('likes', findIncludes(object, includes.likes), object);
-
-  const createObjectWithIncludes = R.cond([
-    [() => R.and(hasInclude('comments'), hasInclude('likes')), R.pipe(addComments, addLikes)],
-    [() => hasInclude('comments'), addComments],
-    [() => hasInclude('likes'), addLikes],
-    [R.T, R.identity],
+  const [user, teams] = await Promise.all([
+    userService.getUserWithNetworkScope({
+      id: message.credentials.id, networkId: payload.networkId }, message),
+    networkService.listTeamsForNetwork({ networkId: payload.networkId }, message),
   ]);
 
-  return R.map(createObjectWithIncludes, objectsWithSources);
+  const filterTeams = (user.roleType === 'ADMIN') ? R.always(teams) : R.filter(R.prop('isMember'));
+
+  const extraWhereConstraint = [{
+    parentId: { $in: R.pipe(filterTeams, pluckId)(teams) },
+    parentType: 'team',
+  }, {
+    parentType: 'user',
+    parentId: message.credentials.id,
+  }];
+
+  const feedPayload = { parentType: 'network', parentId: payload.networkId };
+
+  return impl.makeFeed(feedPayload, feedOptions(payload), message, extraWhereConstraint);
+};
+
+/**
+ * Making a feed for a team
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.teamId - The id of team to create feed for
+ * @param {string} payload.include - The sub resources to include
+ * @param {number} payload.limit - The limit of the resultset for pagination
+ * @param {number} payload.offset - The offset of the resultset for pagination
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method makeForTeam
+ * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
+ */
+export const makeForTeam = async (payload, message) => {
+  logger.info('Making feed for team', { payload, message });
+
+  const team = await teamService.get({ teamId: payload.teamId }, message);
+  const user = await userService.getUserWithNetworkScope({
+    id: message.credentials.id, networkId: team.networkId }, message);
+
+  if (R.not(team.isMember) && user.roleType !== 'ADMIN') throw createError('403');
+
+  const network = await networkService.get({ networkId: team.networkId }, message);
+  const feedPayload = { parentType: 'team', parentId: payload.teamId };
+
+  return impl.makeFeed(feedPayload, feedOptions(payload), R.assoc('network', network, message));
 };

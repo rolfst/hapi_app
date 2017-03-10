@@ -134,6 +134,11 @@ export const findTeamsByExternalId = (networkId, externalIds) => {
 /**
  * Creates a new team
  * @param {Team} attributes - The team to create
+ * @param {string} attributes.networkId
+ * @param {string} attributes.name
+ * @param {string} attributes.description
+ * @param {string} attributes.externalId
+ * @param {string} attributes.isChannel
  * @method create
  * @return {external:Promise.<Team>} {@link module:modules/core~Team Team}
  */

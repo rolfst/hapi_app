@@ -32,7 +32,8 @@ describe('Service: Message', () => {
           parentType: 'network',
           parentId: network.id,
           text: 'My cool message',
-          poll: { options: ['Yes', 'No', 'Ok'] },
+          pollQuestion: 'Are we cool?',
+          pollOptions: ['Yes', 'No', 'Ok'],
         }, { network, credentials: admin }),
         messageService.create({
           parentType: 'team',
@@ -103,7 +104,7 @@ describe('Service: Message', () => {
     });
   });
 
-  describe.skip('Create poll', () => {
+  describe('Create poll', () => {
     let createdMessage;
 
     before(async () => {
@@ -114,7 +115,8 @@ describe('Service: Message', () => {
         parentType: 'network',
         parentId: network.id,
         text: 'My cool message',
-        poll: { options: ['Yes', 'No', 'Ok'] },
+        pollQuestion: 'Should we help?',
+        pollOptions: ['Yes', 'No', 'Ok'],
       }, { network, credentials: admin });
     });
 
@@ -291,6 +293,7 @@ describe('Service: Message', () => {
         parentType: 'network',
         parentId: network.id,
         text: 'My cool message',
+        pollQuestion: 'Are we ok?',
         poll: { options: ['Yes', 'No', 'Ok'] },
       }, {
         credentials: { id: admin.id },

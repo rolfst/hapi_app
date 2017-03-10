@@ -1,4 +1,5 @@
 import { map, find } from 'lodash';
+import R from 'ramda';
 import Promise from 'bluebird';
 import createError from '../../../../shared/utils/create-error';
 import * as Logger from '../../../../shared/services/logger';
@@ -36,12 +37,13 @@ export const getUser = async (payload) => {
 export async function listUsersWithNetworkScope(payload, message) {
   logger.info('Listing users with network scope', { payload, message });
 
-  const users = await userRepo.findByIds(payload.userIds);
-  const network = await networkService.getNetwork({ networkId: payload.networkId }, message);
+  const users = await userRepo.findByIds(payload.userIds, payload.networkId);
+  const network = await networkService.get({ networkId: payload.networkId }, message);
   const metaDataList = await userRepo.findMultipleUserMetaDataForNetwork(
     map(users, 'id'), network.id);
+  const usersInNetwork = R.filter(user => R.find(R.propEq('userId', user.id), metaDataList), users);
 
-  return Promise.map(users, async (user) => {
+  return Promise.map(usersInNetwork, async (user) => {
     const metaData = find(metaDataList, { userId: user.id });
 
     return {
@@ -67,12 +69,14 @@ export async function listUsersWithNetworkScope(payload, message) {
  */
 export async function getUserWithNetworkScope(payload, message) {
   logger.info('Get user with network scope', { payload, message });
-  const user = await userRepo.findUserById(payload.id, payload.networkId);
-  const network = await networkRepo.findNetworkById(payload.networkId);
+  const [user, network] = await Promise.all([
+    userRepo.findUserById(payload.id, payload.networkId),
+    networkRepo.findNetworkById(payload.networkId),
+  ]);
+
   const networkLink = await userRepo.findNetworkLink({ userId: user.id, networkId: network.id });
 
   if (!networkLink) throw createError('10002');
-
 
   return {
     ...user,

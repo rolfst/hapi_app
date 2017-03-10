@@ -20,8 +20,7 @@ const groupByObjectType = R.groupBy(R.prop('objectType'));
 const sourceIdsPerType = R.pipe(groupByObjectType, R.map(R.pluck('sourceId')));
 const createOptionsFromPayload = R.pipe(
   R.pick(['offset', 'limit']),
-  R.assoc('order', [['createdAt', 'desc']])
-);
+  R.assoc('order', [['createdAt', 'desc']]));
 
 /**
  * Listing objects for a specific parent
@@ -57,7 +56,8 @@ export const listWithSourceAndChildren = async (payload, message) => {
   logger.info('Listing objects with sources', { payload, message });
 
   const objects = await objectRepository.findBy({
-    id: { $in: payload.objectIds } }, createOptionsFromPayload(payload));
+    id: { $in: payload.objectIds } }, createOptionsFromPayload(payload)
+    );
 
   const promisedChildren = objectsForTypeValuePair(
     impl.findChildrenForType, sourceIdsPerType(objects));
@@ -113,18 +113,20 @@ export const create = async (payload, message) => {
 /**
  * Count objects
  * @param {object} payload - Object containing payload data
- * @param {array} payload.where - list containing constraints
- * @param {string} payload.where.userId - The id that instantiated the object
- * @param {string} payload.where.parentType - The type of parent to get objects for
- * @param {string} payload.where.parentId - The id of the parent
- * @param {string} payload.where.objectType - The type of object
+ * @param {string} payload.userId - The id that instantiated the object
+ * @param {string} payload.parentType - The type of parent to get objects for
+ * @param {string} payload.parentId - The id of the parent
+ * @param {string} payload.objectType - The type of object
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method count
  * @return {external:Promise.<number>}
  */
 export const count = async (payload, message) => {
   logger.info('Counting objects', { payload, message });
-  const whereConstraint = { $or: R.flatten([payload.where]) };
+
+  const whitelistAttrs = ['userId', 'parentType', 'parentId', 'objectType'];
+  const attributes = R.flatten([R.pick(whitelistAttrs, payload)]);
+  const whereConstraint = { $or: attributes };
 
   return objectRepository.count(whereConstraint);
 };
@@ -208,7 +210,7 @@ export const remove = async (payload, message) => {
  * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
 export const get = async (payload, message) => {
-  logger.info('retrieving object', { payload, message });
+  logger.info('Retrieving object', { payload, message });
 
   const attributes = R.pick(['id', 'objectType', 'sourceId'], payload);
   const objects = await objectRepository.findBy(attributes);

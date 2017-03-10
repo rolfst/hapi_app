@@ -37,8 +37,7 @@ export const findById = async (id, includes = defaultIncludes) => {
  * @return {external:Promise} - Create poll promise
  */
 export const create = async (attributes) => {
-  const whitelist = ['userId', 'networkId'];
-  const poll = await Poll.create(R.pick(whitelist, attributes));
+  const poll = await Poll.create(attributes);
 
   return createPollModel(poll);
 };

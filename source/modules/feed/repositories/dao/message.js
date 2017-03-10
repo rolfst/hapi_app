@@ -25,7 +25,7 @@ const Message = model.define('FeedMessage', {
   text: {
     type: Sequelize.STRING,
     field: 'text',
-    allowNull: false,
+    allowNull: true,
   },
   likesCount: {
     type: Sequelize.INTEGER,

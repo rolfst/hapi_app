@@ -41,7 +41,12 @@ export const inviteNewUser = async (network, { firstName, lastName, email, roleT
   };
 
   const user = await userRepo.createUser(attributes);
-  await networkRepo.addUser({ userId: user.id, networkId: network.id, roleType });
+  await networkRepo.addUser({
+    userId: user.id,
+    networkId: network.id,
+    roleType,
+    invitedAt: new Date(),
+  });
 
   mailer.send(signupMail(network, user, plainPassword));
 
@@ -71,7 +76,7 @@ export const inviteExistingUser = async (network, user, roleType) => {
 
   await userRepo.setNetworkLink({
     networkId, userId,
-  }, { networkId, userId, roleType, deletedAt: null });
+  }, { networkId, userId, roleType, deletedAt: null, invitedAt: new Date() });
 
   mailer.send(addedToNetworkMail(network, user));
 
@@ -141,6 +146,7 @@ export const inviteUsers = async (payload, message) => {
 
   const networkMembers = await userService.listUsersWithNetworkScope({
     userIds: payload.userIds, networkId: network.id }, message);
+
   const preparedUsers = reject(networkMembers, 'invitedAt');
   const toNotifyUsers = intersectionBy(preparedUsers, networkMembers, 'id');
   const usersToSendMailto = await impl.generatePasswordsForMembers(toNotifyUsers);

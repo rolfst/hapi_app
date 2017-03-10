@@ -33,6 +33,8 @@ export const delegate = async (payload, message) => {
   const user = await userRepo.findUserById(decodedToken.sub, null, false);
   const { accessToken } = await impl.createAuthenticationTokens(user.id, message.deviceName);
 
+  userRepo.updateNetworkLink({ userId: user.id }, { lastActive: new Date() });
+
   return { accessToken };
 };
 
@@ -53,6 +55,7 @@ export const authenticate = async (payload, message) => {
   Analytics.registerProfile(user);
 
   if (user.lastLogin === null) Analytics.track(firstLoginEvent(), user.id);
+  userRepo.updateNetworkLink({ userId: user.id }, { lastActive: new Date() });
 
   return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, user };
 };

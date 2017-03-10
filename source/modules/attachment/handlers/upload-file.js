@@ -5,9 +5,9 @@ export default async (req, reply) => {
   try {
     const message = { ...req.pre, ...req.auth };
     const payload = { ...req.auth, fileStream: req.payload.file };
-    const likes = await attachmentService.create(payload, message);
+    const attachment = await attachmentService.create(payload, message);
 
-    return reply({ data: responseUtil.toSnakeCase(likes) });
+    return reply({ data: responseUtil.toSnakeCase(attachment) });
   } catch (err) {
     return reply(err);
   }
