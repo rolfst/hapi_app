@@ -30,7 +30,6 @@
     "bluebird": "3.3.4",
     "boom": "3.1.2",
     "bunyan": "1.8.4",
-    "commander": "2.9.0",
     "cron": "1.2.1",
     "dotenv": "2.0.0",
     "hapi": "13.2.1",
