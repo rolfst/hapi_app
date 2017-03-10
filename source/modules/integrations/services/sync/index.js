@@ -77,7 +77,7 @@ export const syncNetwork = async (payload, message) => {
  * be assigned as owner of the network
  * @param {boolean} payload.networkId - The id of the network to import
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method syncWithIntegrationPartner
+ * @method importNetwork
  * @return {external:Promise<Network[]>}
  */
 export const importNetwork = async (payload, message) => {
