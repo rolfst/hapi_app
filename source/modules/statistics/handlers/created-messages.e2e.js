@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import { getRequest } from '../../../shared/test-utils/request';
 import * as testHelper from '../../../shared/test-utils/helpers';
-import * as mixpanel from '../../../shared/services/mixpanel';
+import * as Mixpanel from '../../../shared/services/mixpanel';
 
 describe('Handler: created messages', () => {
   let sandbox;
@@ -13,7 +13,7 @@ describe('Handler: created messages', () => {
     admin = await testHelper.createUser({ password: 'foo' });
     network = await testHelper.createNetwork({ userId: admin.id, name: 'flexAppeal' });
     sandbox = sinon.sandbox.create();
-    sandbox.stub(mixpanel, 'executeQuery').returns(Promise.resolve({ payload: {} }));
+    sandbox.stub(Mixpanel, 'executeQuery').returns(Promise.resolve({ payload: {} }));
   });
 
   after(() => {

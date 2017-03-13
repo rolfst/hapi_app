@@ -1,7 +1,7 @@
 import createError from '../../../../shared/utils/create-error';
 import tokenUtil from '../../../../shared/utils/token';
 import * as userRepo from '../../../core/repositories/user';
-import * as mixpanel from '../../../../shared/services/mixpanel';
+import * as Mixpanel from '../../../../shared/services/mixpanel';
 import firstLoginEvent from '../../analytics/first-login-event';
 import * as impl from './implementation';
 
@@ -52,9 +52,9 @@ export const authenticate = async (payload, message) => {
   const user = await impl.authenticateUser(payload);
   const tokens = await impl.getAuthenticationTokens(user, message.deviceName);
 
-  mixpanel.registerProfile(user);
+  Mixpanel.registerProfile(user);
 
-  if (user.lastLogin === null) mixpanel.track(firstLoginEvent(), user.id);
+  if (user.lastLogin === null) Mixpanel.track(firstLoginEvent(), user.id);
   userRepo.updateNetworkLink({ userId: user.id }, { lastActive: new Date() });
 
   return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, user };

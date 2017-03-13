@@ -1,5 +1,5 @@
 import R from 'ramda';
-import * as mixpanel from '../../shared/services/mixpanel';
+import * as Mixpanel from '../../shared/services/mixpanel';
 import EventEmitter from '../../shared/services/event-emitter';
 import * as Intercom from '../../shared/services/intercom';
 import * as objectService from '../core/services/object';
@@ -31,7 +31,7 @@ pubsub.asyncOn('exchange.created', async (payload) => {
   Promise.all(createObjectsForReceivers);
 
   createdNotifier.send(exchangeReceivers, payload.exchange);
-  mixpanel.track(newExchangeEvent(network.id, exchange), credentials.id);
+  Mixpanel.track(newExchangeEvent(network.id, exchange), credentials.id);
   Intercom.createEvent(credentials.username, 'exchange.create', intercomEventPayload);
   Intercom.incrementAttribute(credentials.username, 'created_shifts');
 });
@@ -42,7 +42,7 @@ pubsub.asyncOn('exchange.approved', (payload) => {
   objectService.remove({ objectType: 'exchange', sourceId: exchange.id });
   creatorNotifier.send(exchange);
   substituteNotifier.send(exchange);
-  mixpanel.track(approveExchangeEvent(network, payload.exchange), credentials.id);
+  Mixpanel.track(approveExchangeEvent(network, payload.exchange), credentials.id);
   Intercom.incrementAttribute(approvedUser.email, 'exchanged_shifts');
 });
 

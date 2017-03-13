@@ -1,5 +1,6 @@
 import moment from 'moment';
-import * as mixpanel from '../../../../shared/services/mixpanel';
+import * as Mixpanel from '../../../../shared/services/mixpanel';
+import createError from '../../../../shared/utils/create-error';
 import * as Logger from '../../../../shared/services/logger';
 
 const logger = Logger.createLogger('STATISTICS/service/events');
@@ -34,18 +35,18 @@ function createEventQuery(payload) {
 
 /*
  * @param {string} unit the range of time that will be returned "month, week, days
- * @param {date} [startDate]
- * @param {date} [endDate]
+ * @param {date} [start]
+ * @param {date} [end]
  * @method createDateRange
  * @return {object} - {startDate, endDate}
  */
-function createDateRange(unit, startDate, endDate) {
-  if (!['month', 'week', 'days'].includes(unit) throw createError('500'));
+function createDateRange(unit, start, end) {
+  if (!['month', 'week', 'days'].includes(unit)) throw createError('500');
 
-  const startDate = startDate || moment().subtract(1, unit).toDate();
-  const endDate = payload.endDate || moment().toDate();
+  const startDate = start || moment().subtract(1, unit).toDate();
+  const endDate = end || moment().toDate();
 
-  return {startDate, endDate};
+  return { startDate, endDate };
 }
 
 /*
@@ -63,5 +64,5 @@ export async function getCreatedMessages(payload, message) {
   const jql = createEventQuery({
     event: 'Created Message', networkId: payload.networkId, startDate, endDate });
 
-  return mixpanel.executeQuery(jql, message);
+  return Mixpanel.executeQuery(jql, message);
 }
