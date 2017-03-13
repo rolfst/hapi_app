@@ -1,5 +1,5 @@
 import Hapi from 'hapi';
-import raven from 'raven';
+import createSentryClient from './shared/services/sentry';
 import routes from './create-routes';
 import jwtStrategy from './shared/middlewares/authenticator-strategy';
 import integrationStrategy from './shared/middlewares/integration-strategy';
@@ -7,10 +7,7 @@ import * as serverUtil from './shared/utils/server';
 import serverConfig from './shared/configs/server';
 
 const createServer = () => {
-  const ravenClient = new raven.Client(process.env.SENTRY_DSN, {
-    release: require('../package.json').version,
-    environment: process.env.NODE_ENV,
-  });
+  const sentryClient = createSentryClient();
 
   const server = new Hapi.Server(serverUtil.makeConfig());
   server.connection(serverConfig);
@@ -25,12 +22,12 @@ const createServer = () => {
   server.auth.strategy('integration', 'integration');
 
   // Register server extensions
-  server.ext('onRequest', serverUtil.onRequest(ravenClient));
-  server.ext('onPreResponse', serverUtil.onPreResponse(ravenClient));
+  server.ext('onRequest', serverUtil.onRequest(sentryClient));
+  server.ext('onPreResponse', serverUtil.onPreResponse(sentryClient));
 
   server.ext('onPostAuth', (req, reply) => {
-    if (ravenClient && typeof ravenClient.setUserContext === 'function') {
-      ravenClient.setUserContext(req.auth.credentials);
+    if (sentryClient && typeof sentryClient.setUserContext === 'function') {
+      sentryClient.setUserContext(req.auth.credentials);
     }
 
     reply.continue();
