@@ -1,9 +1,9 @@
 import Mixpanel from 'mixpanel';
 import { assert } from 'chai';
 import sinon from 'sinon';
-import * as Analytics from './analytics';
+import * as mixpanel from './mixpanel';
 
-describe('Service: Analytics', () => {
+describe('Service: mixpanel', () => {
   let sandbox;
 
   afterEach(() => sandbox.restore());
@@ -22,7 +22,7 @@ describe('Service: Analytics', () => {
     const mixpanelClient = Mixpanel.init('foo_token');
     sandbox.stub(Mixpanel, 'init').returns(mixpanelClient);
     const methodSpy = sinon.spy(mixpanelClient, 'track');
-    Analytics.track(eventStub, 3);
+    mixpanel.track(eventStub, 3);
     methodSpy.restore();
 
     assert.isTrue(methodSpy.calledOnce);
@@ -34,6 +34,6 @@ describe('Service: Analytics', () => {
   it('should fail when no distinctId is present', () => {
     const mixpanelClient = Mixpanel.init('foo_token');
     sandbox.stub(Mixpanel, 'init').returns(mixpanelClient);
-    assert.throws(() => Analytics.track(eventStub, null, mixpanelClient));
+    assert.throws(() => mixpanel.track(eventStub, null, mixpanelClient));
   });
 });

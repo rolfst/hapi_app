@@ -1,12 +1,37 @@
-import fetch from 'isomorphic-fetch';
 import R from 'ramda';
-import createError from '../../../shared/utils/create-error';
-import * as Logger from '../../../shared/services/logger';
+import Mixpanel from 'mixpanel';
+import createError from '../utils/create-error';
+import * as Logger from './logger';
 
-const logger = Logger.createLogger('STATISTICS/repositories/events');
+const logger = Logger.createLogger('SHARED/services/mixpanel');
 
 const API_KEY = process.env.MIXPANEL_TOKEN;
 const MP_API_JQL_URI = `https://${API_KEY}@mixpanel.com/api/2.0/jql/`;
+
+export function getClient() {
+  return Mixpanel.init(API_KEY);
+}
+
+export function registerProfile(user) {
+  if (!user.id) throw new Error('User need to have at least an identifier.');
+
+  const payload = {
+    $first_name: user.firstName,
+    $last_name: user.lastName,
+    $email: user.email,
+    $phone: user.phoneNum,
+  };
+
+  getClient().people.set(user.id, payload);
+}
+
+export function track(event, distinctId = null) {
+  if (!distinctId) throw new Error('Missing distinctId parameter.');
+  logger.info('Tracking event', { event, distinctId });
+
+  return getClient().track(event.name, { ...event.data, distinct_id: distinctId });
+}
+
 
 const createFormEncodedString = (data) => {
   return Object.keys(data).map((key) => {
@@ -46,44 +71,18 @@ async function handleRequest(response, endpoint) {
  * @param {date} payload.startDate
  * @param {date} payload.endDate
  * @param {Message} message - {@link module:shared~Message Message}
- * @method findAllBy
+ * @method executeQuery
  * @return {external:Promise<EventStatistic>} {@link
  * module:source/modules/statisctis~EventStatistic EventStatistic}
  */
-export async function findAllBy(payload, message) {
-  const startDate = payload.startDate.toISOString().substr(0, 10);
-  const endDate = payload.endDate.toISOString().substr(0, 10);
-
-  const jql = `
-    function main() {
-    const createdEventDate = (evt) => evt.properties['Created At'].toISOString().substr(0, 10);
-
-    return Events({
-      from_date: '${startDate}',
-      to_date:   '${endDate}',
-      event_selectors: [{ event: '${payload.event}' }]
-    })
-    .filter((evt) => (${payload.networkId} === evt.properties['Network Id']))
-    .groupBy(["properties.Network Id", createdEventDate], mixpanel.reducer.count())
-    .reduce((acc, items) => {
-      return items.reduce((acc, item) => {
-        const eventDate = item.key[1];
-
-        acc[eventDate] = item.value;
-
-        return acc;
-      }, {});
-    });
-  }
-  `;
-
+export async function executeQuery(query, message) {
   const options = {
     method: 'POST',
     headers: {
       'Cache-Control': 'no-cache',
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: createFormEncodedString({ script: jql }),
+    body: createFormEncodedString({ script: query }),
   };
 
   logger.info('Fetching from mixpanel', { options, message });
