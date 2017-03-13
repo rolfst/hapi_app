@@ -22,7 +22,7 @@ describe('created messages', () => {
 
   it('should return a createdMessages statistic', async () => {
     sandbox.stub(eventRepo, 'findAllBy').returns(Promise.resolve({ payload: {} }));
-    const endpoint = `/v2/networks/${network.id}/statistics/createdmessages`;
+    const endpoint = `/v2/networks/${network.id}/statistics/created-messages`;
     const { statusCode } = await getRequest(endpoint, admin.token);
 
     assert.equal(statusCode, 200);
