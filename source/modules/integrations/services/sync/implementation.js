@@ -224,21 +224,21 @@ export const createUserActions = (
     R.uniqBy(R.prop('email')),
     R.map(swapTeamIdsWithExternalTeamIds)
   )(_externalUsers);
-  const groupedNetworkUsers = groupByEmail(networkUsers);
-  const groupedExternalUsers = groupByEmail(externalUsers);
+  const groupedNetworkUsers = groupByExternalId(networkUsers);
+  const groupedExternalUsers = groupByExternalId(externalUsers);
   const groupedSystemUser = groupByEmail(allUsersInSystem);
 
-  const networkMatch = (email) => R.defaultTo(null, groupedNetworkUsers[email]);
-  const externalMatch = (email) => R.defaultTo(null, groupedExternalUsers[email]);
-  const systemMatch = (email) => R.defaultTo(null, groupedSystemUser[email]);
-  const isActive = (matchFn) => (email) => {
-    if (R.isNil(matchFn(email))) return false;
-    return R.isNil(R.prop('deletedAt', matchFn(email)));
+  const networkMatch = (user) => R.defaultTo(null, groupedNetworkUsers[user.externalId]);
+  const externalMatch = (user) => R.defaultTo(null, groupedExternalUsers[user.externalId]);
+  const systemMatch = (user) => R.defaultTo(null, groupedSystemUser[user.email]);
+  const isActive = (matchFn) => (user) => {
+    if (R.isNil(matchFn(user))) return false;
+    return R.isNil(R.prop('deletedAt', matchFn(user)));
   };
-  const isInactive = (matchFn) => (email) => R.not(isActive(matchFn)(email));
-  const actionReducer = (pred) => R.reduce((acc, value) =>
+  const isInactive = (matchFn) => (user) => R.not(isActive(matchFn)(user));
+  const actionReducer = (pred, identifierProperty = 'externalId') => R.reduce((acc, value) =>
     R.ifElse(pred, () => R.append(value, acc), R.always(acc))(value), [],
-    R.uniq(R.concat(pluckEmail(externalUsers), pluckEmail(networkUsers))));
+    R.uniqBy(R.prop(identifierProperty), R.concat(externalUsers, networkUsers)));
 
   const removePredicate = R.allPass([
     R.both(networkMatch, R.complement(externalMatch)),
@@ -247,9 +247,11 @@ export const createUserActions = (
   ]);
 
   const createPredicate = R.allPass([
-    R.complement(networkMatch),
-    R.complement(systemMatch),
     externalMatch,
+    R.pipe(externalMatch, R.complement(systemMatch)),
+    R.ifElse(networkMatch,
+      (user) => user.email !== externalMatch(user).email,
+      R.T),
   ]);
 
   const addPredicate = R.ifElse(
@@ -267,27 +269,26 @@ export const createUserActions = (
     R.F
   );
 
-  // TODO Big performance impact
-  const data = R.mergeWith(
-    R.merge,
-    R.pipe(
-      R.filter(user => groupedSystemUser[user.email]),
-      groupByEmail
-    )(allUsersInSystem),
-    R.mergeWith(
-      R.merge,
-      R.pipe(R.filter(R.prop('externalId')), groupByEmail)(networkUsers),
-      R.pipe(R.filter(R.prop('externalId')), groupByEmail)(externalUsers)
-    )
-  );
+  const allOccurringEmails = R.uniq(R.flatten([
+    pluckEmail(allUsersInSystem), pluckEmail(networkUsers), pluckEmail(externalUsers),
+  ]));
 
-  const values = R.map(email => data[email]);
+  const findByEmail = (email, collection) => R.find(R.propEq('email', email), collection);
+  const data = R.reduce((acc, email) => {
+    return R.append(R.mergeAll([
+      findByEmail(email, allUsersInSystem),
+      findByEmail(email, networkUsers),
+      findByEmail(email, externalUsers),
+    ]), acc);
+  }, [], allOccurringEmails);
+
+  const userByEmail = (user) => findByEmail(user.email, data);
 
   const createdActions = {
-    create: values(actionReducer(createPredicate)),
-    add: values(actionReducer(addPredicate)),
-    remove: values(actionReducer(removePredicate)),
-    changedTeams: values(actionReducer(changedTeamsPredicate)),
+    create: R.map(userByEmail, actionReducer(createPredicate)),
+    add: R.map(userByEmail, actionReducer(addPredicate)),
+    remove: R.map(userByEmail, actionReducer(removePredicate)),
+    changedTeams: R.map(userByEmail, actionReducer(changedTeamsPredicate)),
   };
 
   return createdActions;
