@@ -1,7 +1,29 @@
+import R from 'ramda';
+import Mixpanel from 'mixpanel';
 import EventEmitter from '../../shared/services/event-emitter';
 import * as Intercom from '../../shared/services/intercom';
+import * as networkService from '../core/services/network';
 
 const pubsub = EventEmitter.create();
+
+function getClient() {
+  return Mixpanel.init(process.env.MIXPANEL_TOKEN);
+}
+
+async function registerProfile(user) {
+  if (!user.id) throw new Error('User need to have at least an identifier.');
+
+  const networks = await networkService.listNetworksForUser(user.id);
+
+  const payload = {
+    $first_name: user.firstName,
+    $last_name: user.lastName,
+    $email: user.email,
+    $networks: R.map((network) => network.id, networks),
+  };
+
+  getClient().people.set(user.id, payload);
+}
 
 pubsub.asyncOn('user.created', (payload) => {
   Intercom.getClient().users.create({
@@ -12,6 +34,8 @@ pubsub.asyncOn('user.created', (payload) => {
     companies: [{ company_id: payload.network.id }],
     custom_attributes: { role: payload.user.roleType },
   });
+
+  registerProfile(payload.user);
 });
 
 pubsub.asyncOn('user.updated', (payload) => {
