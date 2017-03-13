@@ -1,12 +1,16 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import { map } from 'lodash';
+import Promise from 'bluebird';
+import R from 'ramda';
+import mixpanel from 'mixpanel';
+import * as Intercom from '../../../shared/services/intercom';
 import * as passwordUtil from '../../../shared/utils/password';
 import * as notifier from '../../../shared/services/notifier';
 import * as mailer from '../../../shared/services/mailer';
 import signupMail from '../../../shared/mails/signup';
 import * as userRepo from '../../core/repositories/user';
 import * as userService from '../../core/services/user';
+import * as networkRepo from '../../core/repositories/network';
 import * as service from './invite-user';
 import * as impl from './implementation';
 
@@ -45,32 +49,61 @@ describe('Invite users', () => {
     network,
   };
 
-  before(() => (sandbox = sinon.sandbox.create()));
-  after(() => sandbox.restore());
+  describe('invite users', () => {
+    before(() => (sandbox = sinon.sandbox.create()));
+    after(() => sandbox.restore());
 
-  it('should send correct emails', async () => {
-    sandbox.stub(notifier, 'send').returns(null);
-    sandbox.stub(mailer, 'send').returns(null);
-    sandbox.stub(userRepo, 'userBelongsToNetwork').returns(Promise.resolve(true));
-    sandbox.stub(userService, 'getUserWithNetworkScope').returns(Promise.resolve(adminUser));
-    sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
-    sandbox.stub(impl, 'generatePasswordsForMembers', users => {
-      return users;
+    it('should send correct emails', async () => {
+      sandbox.stub(notifier, 'send').returns(null);
+      sandbox.stub(mailer, 'send').returns(null);
+      sandbox.stub(userRepo, 'userBelongsToNetwork').returns(Promise.resolve(true));
+      sandbox.stub(userService, 'getUserWithNetworkScope').returns(Promise.resolve(adminUser));
+      sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
+      sandbox.stub(impl, 'generatePasswordsForMembers', users => {
+        return users;
+      });
+      sandbox.stub(userRepo, 'setNetworkLink').returns(Promise.resolve({
+        userId: '1', networkId: network.Id, invitedAt: new Date() }));
+      sandbox.stub(userService, 'listUsersWithNetworkScope')
+        .returns(Promise.resolve(allUsersFromIntegration));
+
+      const passwordMailConfig = signupMail(message.network, aUser);
+      const noPasswordMailAdminConfig = signupMail(message.network, adminUser);
+      const noPasswordMailConfig = signupMail(message.network, invitedUser);
+      const userIdsToNotify = R.map(allUsersFromIntegration, user => user.id);
+
+      await service.inviteUsers({ userIds: userIdsToNotify, networkId: network.id }, message);
+
+      assert.equal(mailer.send.calledWithMatch(passwordMailConfig), true);
+      assert.equal(mailer.send.calledWithMatch(noPasswordMailConfig), false);
+      assert.equal(mailer.send.calledWithMatch(noPasswordMailAdminConfig), true);
     });
-    sandbox.stub(userRepo, 'setNetworkLink').returns(Promise.resolve({
-      userId: '1', networkId: network.Id, invitedAt: new Date() }));
-    sandbox.stub(userService, 'listUsersWithNetworkScope')
-      .returns(Promise.resolve(allUsersFromIntegration));
+  });
 
-    const passwordMailConfig = signupMail(message.network, aUser);
-    const noPasswordMailAdminConfig = signupMail(message.network, adminUser);
-    const noPasswordMailConfig = signupMail(message.network, invitedUser);
-    const userIdsToNotify = map(allUsersFromIntegration, user => user.id);
+  describe('invite user', () => {
+    let peopleMock;
 
-    await service.inviteUsers({ userIds: userIdsToNotify, networkId: network.id }, message);
+    before(() => {
+      sandbox = sinon.sandbox.create();
+      peopleMock = { set: sandbox.spy() };
+      sandbox.stub(mixpanel, 'init').returns({ people: peopleMock });
+      sandbox.stub(mailer, 'send').returns(null);
+      sandbox.stub(Intercom, 'getClient').returns({ users: { create: () => true } });
+      sandbox.stub(userRepo, 'userBelongsToNetwork').returns(Promise.resolve(true));
+      sandbox.stub(userRepo, 'findUserBy').returns(Promise.resolve(false));
+      sandbox.stub(userRepo, 'createUser').returns(Promise.resolve(false));
+      sandbox.stub(networkRepo, 'addUser').returns(Promise.resolve(false));
+      sandbox.stub(userService, 'getUserWithNetworkScope').returns(Promise.resolve(adminUser));
+      sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
+    });
 
-    assert.equal(mailer.send.calledWithMatch(passwordMailConfig), true);
-    assert.equal(mailer.send.calledWithMatch(noPasswordMailConfig), false);
-    assert.equal(mailer.send.calledWithMatch(noPasswordMailAdminConfig), true);
+    after(() => sandbox.restore());
+
+    it('should call mixpanel', async () => {
+      await service.inviteUser(invitedUser, message);
+      await Promise.delay(1000); // await because an event should be triggered async
+
+      assert.equal(peopleMock.set.calledOnce, true);
+    });
   });
 });
