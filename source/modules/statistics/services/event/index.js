@@ -32,11 +32,34 @@ function createEventQuery(payload) {
   `;
 }
 
+/*
+ * @param {string} unit the range of time that will be returned "month, week, days
+ * @param {date} [startDate]
+ * @param {date} [endDate]
+ * @method createDateRange
+ * @return {object} - {startDate, endDate}
+ */
+function createDateRange(unit, startDate, endDate) {
+  if (!['month', 'week', 'days'].includes(unit) throw createError('500'));
+
+  const startDate = startDate || moment().subtract(1, unit).toDate();
+  const endDate = payload.endDate || moment().toDate();
+
+  return {startDate, endDate};
+}
+
+/*
+ * @param {string} networkId
+ * @param {date} [startDate]
+ * @param {date} [endDate]
+ * @method getCreatedMessages
+ * @return {external:Promise.<Statistic>} - {@link
+ * module:modules/statistics~EventStatistic EventStatistic}
+ */
 export async function getCreatedMessages(payload, message) {
   logger.info('Retrieving Created Messages', { payload, message });
 
-  const startDate = payload.startDate || moment().subtract(1, 'month').toDate();
-  const endDate = payload.endDate || moment().toDate();
+  const { startDate, endDate } = createDateRange('month', payload.startDate, payload.endDate);
   const jql = createEventQuery({
     event: 'Created Message', networkId: payload.networkId, startDate, endDate });
 
