@@ -4,7 +4,7 @@ import { getRequest } from '../../../shared/test-utils/request';
 import * as testHelper from '../../../shared/test-utils/helpers';
 import * as eventRepo from '../repositories/event';
 
-describe.only('created messages', () => {
+describe('created messages', () => {
   let sandbox;
   let network;
   let admin;
