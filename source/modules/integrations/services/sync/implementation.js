@@ -274,7 +274,7 @@ export const createUserActions = (
   ]));
 
   const findByEmail = (email, collection) => R.find(R.propEq('email', email), collection);
-  const data = R.reduce((acc, email) => {
+  const lookupData = R.reduce((acc, email) => {
     return R.append(R.mergeAll([
       findByEmail(email, allUsersInSystem),
       findByEmail(email, networkUsers),
@@ -282,7 +282,7 @@ export const createUserActions = (
     ]), acc);
   }, [], allOccurringEmails);
 
-  const userByEmail = (user) => findByEmail(user.email, data);
+  const userByEmail = (user) => findByEmail(user.email, lookupData);
 
   const createdActions = {
     create: R.map(userByEmail, actionReducer(createPredicate)),
