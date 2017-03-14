@@ -21,6 +21,7 @@ describe('Service: Object', () => {
       network = await testHelpers.createNetwork({ userId: admin.id });
 
       await objectService.create({
+        networkId: network.id,
         userId: admin.id,
         parentType: 'network',
         parentId: network.id,
@@ -29,6 +30,7 @@ describe('Service: Object', () => {
       });
 
       await Promise.delay(1000).then(() => objectService.create({
+        networkId: network.id,
         userId: admin.id,
         parentType: 'network',
         parentId: network.id,
@@ -79,6 +81,7 @@ describe('Service: Object', () => {
 
       return Promise.all([
         objectService.create({
+          networkId: network.id,
           userId: admin.id,
           parentType: 'network',
           parentId: network.id,
@@ -86,6 +89,7 @@ describe('Service: Object', () => {
           sourceId: '39102',
         }),
         objectService.create({
+          networkId: network.id,
           userId: admin.id,
           parentType: 'user',
           parentId: admin.id,

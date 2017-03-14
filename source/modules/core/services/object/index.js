@@ -96,6 +96,7 @@ export const getWithSourceAndChildren = async (payload, message) => {
  * Create object
  * @param {object} payload - Object containing payload data
  * @param {string} payload.userId - The id that instantiated the object
+ * @param {string} payload.networkId - The network the object belongs to
  * @param {string} payload.parentType - The type of parent to get objects for
  * @param {string} payload.parentId - The id of the parent
  * @param {string} payload.objectType - The type of object
