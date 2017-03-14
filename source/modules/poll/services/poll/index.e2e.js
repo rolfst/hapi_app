@@ -63,6 +63,7 @@ describe('Service: Poll', () => {
     assert.equal(actual.options[0].vote_count, 0);
     assert.equal(actual.options[1].vote_count, 1);
     assert.equal(actual.options[2].vote_count, 0);
+    assert.deepEqual(actual.voteResult, [actual.options[1].id]);
   });
 
   it('should be able to vote for multiple options', async () => {
@@ -75,6 +76,7 @@ describe('Service: Poll', () => {
     assert.equal(actual.options[0].vote_count, 0);
     assert.equal(actual.options[1].vote_count, 1);
     assert.equal(actual.options[2].vote_count, 1);
+    assert.deepEqual(actual.voteResult, [actual.options[1].id, actual.options[2].id]);
   });
 
   it('should be able to vote after already having voted', async () => {
@@ -90,6 +92,7 @@ describe('Service: Poll', () => {
     assert.equal(actual.options[0].vote_count, 1);
     assert.equal(actual.options[1].vote_count, 0);
     assert.equal(actual.options[2].vote_count, 0);
+    assert.deepEqual(actual.voteResult, [actual.options[0].id]);
   });
 
   it('should fail when poll doesn\'t exist', async () => {
