@@ -15,7 +15,7 @@ export const createOption = R.curry((pollId, text, order) => (
  * @return {boolean|Error}
  */
 export const assertThatPollExistsAndUserHasPermission = async (networkId, pollId) => {
-  const poll = await pollRepository.findById(pollId, null);
+  const poll = await pollRepository.findById(pollId, null, null);
 
   if (!networkId || networkId !== poll.networkId || !poll) {
     throw createError('403');

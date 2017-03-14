@@ -12,7 +12,7 @@ const logger = Logger.getLogger('POLL/service/poll');
 export const list = async (payload, message) => {
   logger.info('Finding multiple polls', { payload, message });
 
-  return pollRepository.findBy({ id: { $in: payload.pollIds } });
+  return pollRepository.findBy({ id: { $in: payload.pollIds } }, message.credentials.id);
 };
 
 /**
@@ -25,7 +25,7 @@ export const list = async (payload, message) => {
  */
 export const get = async (payload, message) => {
   logger.info('Finding poll', { payload, message });
-  const poll = await pollRepository.findById(payload.pollId);
+  const poll = await pollRepository.findById(payload.pollId, message.credentials.id);
 
   return poll;
 };
@@ -75,5 +75,5 @@ export const vote = async (payload, message) => {
 
   await Promise.all(R.map(voteForOption, payload.optionIds));
 
-  return pollRepository.findById(payload.pollId);
+  return pollRepository.findById(payload.pollId, message.credentials.id);
 };

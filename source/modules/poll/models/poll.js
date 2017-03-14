@@ -14,7 +14,20 @@ const getUniqueVoteUsers = R.pipe(
   R.uniq
 );
 
-export default (dao) => ({
+const filterForLoggedUser = (loggedUserId) => R.filter(R.propEq('userId', loggedUserId));
+const userIdsToString = R.map(R.evolve({ userId: R.toString }));
+const getVoteResult = (poll, loggedUserId) => R.pipe(
+  R.pluck('Votes'),
+  R.flatten,
+  R.pluck('dataValues'),
+  userIdsToString,
+  filterForLoggedUser(loggedUserId),
+  R.pluck('optionId'),
+  R.map(R.toString),
+  R.ifElse(R.length, R.identity, R.always(null))
+)(poll.Options);
+
+export default (dao, loggedUserId) => ({
   type: 'poll',
   id: dao.id.toString(),
   networkId: dao.networkId ? dao.networkId.toString() : null,
@@ -22,5 +35,6 @@ export default (dao) => ({
   question: dao.question,
   options: dao.Options ? getOptions(dao.Options) : [],
   totalVoteCount: dao.Options ? getUniqueVoteUsers(dao.Options).length : 0,
+  voteResult: dao.Options && loggedUserId ? getVoteResult(dao, loggedUserId) : null,
   createdAt: dateUtils.toISOString(dao.created_at),
 });
