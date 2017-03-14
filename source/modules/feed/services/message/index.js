@@ -21,24 +21,6 @@ const isNotEmpty = R.complement(R.isEmpty);
 const isAvailable = R.both(isDefined, isNotEmpty);
 
 /**
- * Get a single message
- * @param {object} payload - Object containing payload data
- * @param {string} payload.messageId - The id of the message to retrieve
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method get
- * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
- */
-export const get = async (payload, message) => {
-  logger.info('Finding message', { payload, message });
-  const result = await messageRepository.findById(payload.messageId);
-
-  if (!result) throw createError('404');
-  // TODO find child object
-
-  return result;
-};
-
-/**
  * Get comments for message of multiple messages
  * @param {object} payload - Object containing payload data
  * @param {string} payload.messageId - The id of the message to retrieve
@@ -47,7 +29,7 @@ export const get = async (payload, message) => {
  * @method getComments
  * @return {external:Promise.<Comment[]>} {@link module:feed~Comment comment}
  */
-export const getComments = async (payload, message) => {
+export const listComments = async (payload, message) => {
   logger.info('Get comments for message', { payload, message });
 
   let whereConstraint = {};
@@ -114,18 +96,33 @@ export const listLikes = async (payload, message) => {
 };
 
 /**
- * List comments for a single message
+ * Get a single message
  * @param {object} payload - Object containing payload data
- * @param {string} payload.messageId - The id of the message
+ * @param {}
+ * @param {string} payload.messageId - The id of the message to retrieve
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method listComments
- * @return {external:Promise.<Comment[]>} {@link module:feed~Comment comment}
+ * @method get
+ * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
  */
-export const listComments = async (payload, message) => {
-  logger.info('Listing multiple comments', { payload, message });
-  await impl.assertThatUserBelongsToMessage(payload.messageId, message);
+export const getAsObject = async (payload, message) => {
+  logger.info('Finding message', { payload, message });
+  const result = await messageRepository.findById(payload.messageId);
 
-  return commentRepository.findBy({ messageId: payload.messageId });
+  if (!result) throw createError('404');
+
+  const objectWithSourceAndChildren = await objectService.getWithSourceAndChildren({
+    objectId: result.objectId,
+  }, message);
+
+  if (R.contains('comments', payload.include || [])) {
+    objectWithSourceAndChildren.comments = listComments({ messageId: payload.messageId });
+  }
+
+  if (R.contains('likes', payload.include || [])) {
+    objectWithSourceAndChildren.likes = listLikes({ messageId: payload.messageId });
+  }
+
+  return Promise.props(objectWithSourceAndChildren);
 };
 
 /**
