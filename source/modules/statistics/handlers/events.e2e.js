@@ -22,16 +22,23 @@ describe('Handler: created messages', () => {
   });
 
   it('should return a createdMessages statistic', async () => {
-    const endpoint = `/v2/networks/${network.id}/statistics/created_message`;
+    const endpoint = `/v2/networks/${network.id}/statistics/created_messages`;
     const { statusCode } = await getRequest(endpoint, admin.token);
 
     assert.equal(statusCode, 200);
   });
 
   it('should return an error because of a wrong statistics view', async () => {
-    const endpoint = `/v2/networks/${network.id}/statistics/created_messages`;
+    const endpoint = `/v2/networks/${network.id}/statistics/created_message`;
     const { statusCode } = await getRequest(endpoint, admin.token);
 
     assert.equal(statusCode, 422);
+  });
+
+  it.only('should return a created shifts statistic', async () => {
+    const endpoint = `/v2/networks/${network.id}/statistics/created_shifts`;
+    const { statusCode } = await getRequest(endpoint, admin.token);
+
+    assert.equal(statusCode, 200);
   });
 });
