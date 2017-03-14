@@ -9,7 +9,12 @@ export default async (req, reply) => {
     const payload = { ...req.params, ...req.query };
 
     const handler = R.cond([
-      [R.path(['params', 'viewName']), () => eventService.getCreatedMessages],
+      [R.pathEq(['params', 'viewName'], 'created_messages'),
+        () => eventService.getCreatedMessages],
+      [R.pathEq(['params', 'viewName'], 'created_shifts'),
+        () => eventService.getCreatedShifts],
+      [R.pathEq(['params', 'viewName'], 'approved_shifts'),
+        () => eventService.getApprovedShifts],
       [R.T, () => null], // this should never have passed the validation
     ])(req);
 

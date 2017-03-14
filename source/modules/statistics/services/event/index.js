@@ -66,3 +66,21 @@ export async function getCreatedMessages(payload, message) {
 
   return Mixpanel.executeQuery(jql, message);
 }
+
+/*
+ * @param {string} networkId
+ * @param {date} [startDate]
+ * @param {date} [endDate]
+ * @method getApprovedShifts
+ * @return {external:Promise.<Statistic>} - {@link
+ * module:modules/statistics~EventStatistic EventStatistic}
+ */
+export async function getApprovedShifts(payload, message) {
+  logger.info('Retrieving Approved shifts', { payload, message });
+
+  const { startDate, endDate } = createDateRange('month', payload.startDate, payload.endDate);
+  const jql = createEventQuery({
+    event: 'Shift Takeover', networkId: payload.networkId, startDate, endDate });
+
+  return Mixpanel.executeQuery(jql, message);
+}
