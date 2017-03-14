@@ -247,16 +247,15 @@ export const update = async (payload, message) => {
 export const like = async (payload, message) => {
   logger.info('Liking message', { payload, message });
 
-  const messageToLike = await get({ messageId: payload.messageId }, message);
+  const messageToLike = await getAsObject({ messageId: payload.messageId }, message);
   if (!messageToLike) throw createError('404');
 
   await likeRepository.create(messageToLike.id, payload.userId);
 
-  return {
-    ...messageToLike,
-    hasLiked: true,
-    likesCount: messageToLike.likesCount + 1,
-  };
+  messageToLike.source.hasLiked = true;
+  messageToLike.source.likesCount++;
+
+  return messageToLike;
 };
 
 /**
