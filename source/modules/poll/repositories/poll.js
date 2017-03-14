@@ -10,9 +10,9 @@ const defaultIncludes = [{
   include: [{ model: PollVote, as: 'Votes' }],
 }];
 
-export const findBy = async (whereConstraint, loggedUserId = null) => Poll
+export const findBy = async (whereConstraint) => Poll
   .findAll({ include: defaultIncludes, where: whereConstraint })
-  .then(R.map((poll) => createPollModel(poll, loggedUserId)));
+  .then(R.map(createPollModel));
 
 /**
  * Find a specific poll by id
@@ -25,7 +25,7 @@ export const findById = async (id, loggedUserId = null, includes = defaultInclud
 
   if (!poll) return null;
 
-  return createPollModel(poll, loggedUserId);
+  return createPollModel(poll);
 };
 
 /**
