@@ -1,6 +1,7 @@
 import R from 'ramda';
 import * as Logger from '../../../../shared/services/logger';
 import * as pollRepository from '../../repositories/poll';
+import * as pollVoteRepository from '../../repositories/poll-vote';
 import * as impl from './implementation';
 
 /**
@@ -9,10 +10,24 @@ import * as impl from './implementation';
 
 const logger = Logger.getLogger('POLL/service/poll');
 
+const addResultToPoll = R.curry((results, poll) => {
+  const result = results[poll.id] ? R.pluck('optionId', results[poll.id]) : null;
+
+  return R.assoc('voteResult', result, poll);
+});
+
 export const list = async (payload, message) => {
   logger.info('Finding multiple polls', { payload, message });
 
-  return pollRepository.findBy({ id: { $in: payload.pollIds } }, message.credentials.id);
+  const promises = [
+    pollRepository.findBy({ id: { $in: payload.pollIds } }),
+    pollVoteRepository.findBy({ pollId: { $in: payload.pollIds }, userId: message.credentials.id }),
+  ];
+
+  const [polls, votes] = await Promise.all(promises);
+  const resultsByPoll = R.groupBy(R.prop('pollId'), votes);
+
+  return R.map(addResultToPoll(resultsByPoll), polls);
 };
 
 /**
@@ -25,9 +40,16 @@ export const list = async (payload, message) => {
  */
 export const get = async (payload, message) => {
   logger.info('Finding poll', { payload, message });
-  const poll = await pollRepository.findById(payload.pollId, message.credentials.id);
 
-  return poll;
+  const promises = [
+    pollRepository.findById(payload.pollId),
+    pollVoteRepository.findBy({ pollId: payload.pollId, userId: message.credentials.id }),
+  ];
+
+  const [poll, votes] = Promise.all(promises);
+  const result = votes.length ? R.pluck('optionId', votes) : null;
+
+  return R.assoc('voteResults', result, poll);
 };
 
 /**
