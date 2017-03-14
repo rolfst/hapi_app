@@ -97,5 +97,8 @@ export const vote = async (payload, message) => {
 
   await Promise.all(R.map(voteForOption, payload.optionIds));
 
-  return pollRepository.findById(payload.pollId, message.credentials.id);
+  const poll = await pollRepository.findById(payload.pollId, message.credentials.id);
+  poll.voteResult = payload.optionIds;
+
+  return poll;
 };
