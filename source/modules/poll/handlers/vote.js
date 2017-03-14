@@ -7,7 +7,7 @@ export default async (req, reply) => {
     const payload = {
       networkId: req.params.networkId,
       pollId: req.params.pollId,
-      optionIds: req.payload.optionIds,
+      optionIds: req.payload.option_ids,
     };
 
     const poll = await PollService.vote(payload, message);
