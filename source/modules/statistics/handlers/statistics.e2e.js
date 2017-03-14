@@ -35,7 +35,7 @@ describe('Handler: created messages', () => {
     assert.equal(statusCode, 422);
   });
 
-  it.only('should return a created shifts statistic', async () => {
+  it('should return a created shifts statistic', async () => {
     const endpoint = `/v2/networks/${network.id}/statistics/created_shifts`;
     const { statusCode } = await getRequest(endpoint, admin.token);
 
