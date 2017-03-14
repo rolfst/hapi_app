@@ -4,7 +4,7 @@ module.exports = {
   up: function (queryInterface, Sequelize) {
     return queryInterface.addColumn('objects', 'network_id', {
       type: Sequelize.INTEGER.UNSIGNED,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: 'networks',
         key: 'id',
