@@ -10,8 +10,8 @@ export default async (req, reply) => {
     const viewEq = R.pathEq(['params', 'viewName']);
 
     const handler = R.cond([
-      [viewEq('created_messages')), () => eventService.getCreatedMessages],
-      [viewEq('created_shifts')), () => eventService.getCreatedShifts],
+      [viewEq('created_messages'), () => eventService.getCreatedMessages],
+      [viewEq('created_shifts'), () => eventService.getCreatedShifts],
       [R.T, () => null],
     ])(req);
 
