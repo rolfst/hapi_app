@@ -7,16 +7,15 @@ export default async (req, reply) => {
   try {
     const message = { ...req.pre, ...req.auth };
     const payload = { ...req.params, ...req.query };
+    const viewEq = R.pathEq(['params', 'viewName']);
 
     const handler = R.cond([
-      [R.pathEq(['params', 'viewName'], 'created_messages'),
-        () => eventService.getCreatedMessages],
-      [R.pathEq(['params', 'viewName'], 'created_shifts'),
-        () => eventService.getCreatedShifts],
-      [R.T, () => null], // this should never have passed the validation
+      [viewEq('created_messages')), () => eventService.getCreatedMessages],
+      [viewEq('created_shifts')), () => eventService.getCreatedShifts],
+      [R.T, () => null],
     ])(req);
 
-    if (!handler) throw createError('500');
+    if (!handler) throw createError('404', 'View does not exist.');
 
     const stats = await handler(payload, message);
 
