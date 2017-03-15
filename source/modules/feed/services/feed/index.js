@@ -44,7 +44,11 @@ export const makeForNetwork = async (payload, message) => {
     parentId: message.credentials.id,
   }];
 
-  const feedPayload = { parentType: 'network', parentId: payload.networkId };
+  const feedPayload = {
+    networkId: payload.networkId,
+    parentType: 'network',
+    parentId: payload.networkId,
+  };
 
   return impl.makeFeed(feedPayload, feedOptions(payload), message, extraWhereConstraint);
 };
@@ -70,7 +74,11 @@ export const makeForTeam = async (payload, message) => {
   if (R.not(team.isMember) && user.roleType !== 'ADMIN') throw createError('403');
 
   const network = await networkService.get({ networkId: team.networkId }, message);
-  const feedPayload = { parentType: 'team', parentId: payload.teamId };
+  const feedPayload = {
+    networkId: team.networkId,
+    parentType: 'team',
+    parentId: payload.teamId,
+  };
 
   return impl.makeFeed(feedPayload, feedOptions(payload), R.assoc('network', network, message));
 };
