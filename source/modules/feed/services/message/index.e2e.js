@@ -10,6 +10,7 @@ import * as attachmentService from '../../../attachment/services/attachment';
 import * as objectService from '../../../core/services/object';
 import * as commentService from '../comment';
 import * as messageService from './index';
+import * as messageRepo from '../../repositories/message';
 
 describe('Service: Message', () => {
   let admin;
@@ -65,9 +66,10 @@ describe('Service: Message', () => {
     it('should return correct like count', async () => {
       await Promise.all([
         messageService.like({
-          messageId: createdMessages[0].sourceId, userId: admin.id }),
+          messageId: createdMessages[0].sourceId,
+          userId: admin.id }, { credentials: admin }),
         messageService.like({
-          messageId: createdMessages[0].sourceId, userId: employee.id }),
+          messageId: createdMessages[0].sourceId, userId: employee.id }, { credentials: admin }),
       ]);
 
       const actual = await messageService.list({
@@ -135,7 +137,7 @@ describe('Service: Message', () => {
     });
 
     it('should create a message entry', async () => {
-      const expected = await messageService.get({ messageId: createdMessage.sourceId });
+      const expected = await messageRepo.findById(createdMessage.sourceId);
 
       assert.isDefined(expected);
       assert.property(expected, 'objectId');
@@ -241,7 +243,7 @@ describe('Service: Message', () => {
     });
 
     it('should create a message entry', async () => {
-      const expected = await messageService.get({ messageId: createdMessage.sourceId });
+      const expected = await messageRepo.findById(createdMessage.sourceId);
 
       assert.isDefined(expected);
       assert.property(expected, 'objectId');
@@ -315,8 +317,9 @@ describe('Service: Message', () => {
       const updatedMessage = await messageService.update({
         messageId: createdMessage.source.id,
         text: 'My cool updated message',
-      }, { credentials: { id: admin.id } });
-      const expected = await messageService.get({ messageId: createdMessage.source.id });
+      }, { credentials: admin });
+
+      const expected = await messageRepo.findById(createdMessage.sourceId);
 
       assert.equal(updatedMessage.id, expected.objectId);
       assert.isDefined(expected);
@@ -330,8 +333,9 @@ describe('Service: Message', () => {
       const updatedMessage = await messageService.update({
         messageId: createdTeamMessage.source.id,
         text: 'My cool updated message',
-      }, { credentials: { id: admin.id } });
-      const expected = await messageService.get({ messageId: createdTeamMessage.source.id });
+      }, { credentials: admin });
+
+      const expected = await messageRepo.findById(createdTeamMessage.sourceId);
 
       assert.equal(updatedMessage.id, expected.objectId);
       assert.isDefined(expected);

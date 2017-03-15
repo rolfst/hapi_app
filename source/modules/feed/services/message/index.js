@@ -98,8 +98,8 @@ export const listLikes = async (payload, message) => {
 /**
  * Get a single message
  * @param {object} payload - Object containing payload data
- * @param {}
  * @param {string} payload.messageId - The id of the message to retrieve
+ * @param {Array} payload.include - The includes
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method get
  * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
@@ -115,11 +115,11 @@ export const getAsObject = async (payload, message) => {
   }, message);
 
   if (R.contains('comments', payload.include || [])) {
-    objectWithSourceAndChildren.comments = listComments({ messageId: payload.messageId });
+    objectWithSourceAndChildren.comments = listComments({ messageId: payload.messageId }, message);
   }
 
   if (R.contains('likes', payload.include || [])) {
-    objectWithSourceAndChildren.likes = listLikes({ messageId: payload.messageId });
+    objectWithSourceAndChildren.likes = listLikes({ messageId: payload.messageId }, message);
   }
 
   return Promise.props(objectWithSourceAndChildren);
@@ -250,7 +250,7 @@ export const like = async (payload, message) => {
   const messageToLike = await getAsObject({ messageId: payload.messageId }, message);
   if (!messageToLike) throw createError('404');
 
-  await likeRepository.create(messageToLike.id, payload.userId);
+  await likeRepository.create(payload.messageId, payload.userId);
 
   messageToLike.source.hasLiked = true;
   messageToLike.source.likesCount++;
