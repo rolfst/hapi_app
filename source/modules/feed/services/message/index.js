@@ -209,6 +209,7 @@ export const create = async (payload, message) => {
     networkId,
     actor: message.credentials,
     object: objectWithSourceAndChildren,
+    credentials: message.credentials,
   });
 
   return objectWithSourceAndChildren;
