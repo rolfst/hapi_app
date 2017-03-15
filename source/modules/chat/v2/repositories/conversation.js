@@ -107,3 +107,12 @@ export const findExistingConversation = async (participantIds) => {
 export function update(conversationId, { updatedAt }) {
   return Conversation.update({ updatedAt }, { where: { id: conversationId } });
 }
+
+/**
+ * Deletes a conversation
+ * @param {string} conversationId
+ * @method deleteById
+ */
+export const deleteById = (conversationId) => Conversation.destroy({
+  where: { id: conversationId },
+});

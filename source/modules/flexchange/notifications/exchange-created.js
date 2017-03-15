@@ -1,6 +1,4 @@
 import moment from 'moment';
-import 'moment/locale/nl';
-moment.locale('nl');
 import * as notifier from '../../../shared/services/notifier';
 import * as notificationUtils from '../utils/notification';
 

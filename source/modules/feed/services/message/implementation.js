@@ -20,6 +20,7 @@ export const createPollResource = (createdMessage, message) => R.pipeP(
     question: payload.pollQuestion,
   }, message),
   (createdPoll) => objectService.create({
+    networkId: message.network.id,
     userId: message.credentials.id,
     parentType: 'feed_message',
     parentId: createdMessage.id,

@@ -28,7 +28,7 @@ export const getIncludes = async (hasInclude, objects) => {
     const messageIds = getSourceIdsForType('feed_message', objects);
 
     if (hasInclude('comments')) {
-      includes.comments = messageService.getComments({ messageIds });
+      includes.comments = messageService.listComments({ messageIds });
     }
 
     if (hasInclude('likes')) {
@@ -45,6 +45,7 @@ export const makeFeed = async (payload, options, message, extraWhereConstraint =
       parentType: payload.parentType,
       parentId: payload.parentId,
     }],
+    $and: { networkId: payload.networkId },
   };
 
   const relatedObjects = await objectRepository.findBy(whereConstraint, {
