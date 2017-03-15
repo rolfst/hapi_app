@@ -4,7 +4,7 @@ import { getRequest } from '../../../shared/test-utils/request';
 import * as testHelper from '../../../shared/test-utils/helpers';
 import * as Mixpanel from '../../../shared/services/mixpanel';
 
-describe('Handler: created messages', () => {
+describe('Handler: Statistics', () => {
   let sandbox;
   let network;
   let admin;
@@ -21,24 +21,24 @@ describe('Handler: created messages', () => {
     return testHelper.cleanAll();
   });
 
-  it('should return a createdMessages statistic', async () => {
+  it('should accept created_messages view', async () => {
     const endpoint = `/v2/networks/${network.id}/statistics/created_messages`;
     const { statusCode } = await getRequest(endpoint, admin.token);
 
     assert.equal(statusCode, 200);
   });
 
-  it('should return an error because of a wrong statistics view', async () => {
-    const endpoint = `/v2/networks/${network.id}/statistics/created_message`;
-    const { statusCode } = await getRequest(endpoint, admin.token);
-
-    assert.equal(statusCode, 422);
-  });
-
-  it('should return a created shifts statistic', async () => {
+  it('should accept created_shifts view', async () => {
     const endpoint = `/v2/networks/${network.id}/statistics/created_shifts`;
     const { statusCode } = await getRequest(endpoint, admin.token);
 
     assert.equal(statusCode, 200);
+  });
+
+  it('should fail when view is not found', async () => {
+    const endpoint = `/v2/networks/${network.id}/statistics/wrong_view`;
+    const { statusCode } = await getRequest(endpoint, admin.token);
+
+    assert.equal(statusCode, 422);
   });
 });
