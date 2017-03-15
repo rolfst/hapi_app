@@ -46,7 +46,7 @@ describe('Service: Comment (feed)', () => {
         text: 'Cool comment',
       });
 
-      return assert.isRejected(commentPromise, /The resource could not be found./);
+      return assert.isRejected(commentPromise, /Message not found./);
     });
   });
 

@@ -165,7 +165,7 @@ describe('Service: Feed', () => {
       await messageService.like({
         messageId: createdMessages[1].sourceId,
         userId: admin.id,
-      });
+      }, { credentials: admin });
 
       const actual = await feedService.makeForNetwork({
         networkId: network.id,
