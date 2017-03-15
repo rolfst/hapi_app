@@ -146,6 +146,10 @@ export const create = async (payload, message) => {
 
   const checkPayload = R.compose(isAvailable, R.prop(R.__, payload));
   const parent = await objectService.getParent(R.pick(['parentType', 'parentId'], payload));
+  const networkId = R.ifElse(
+    R.propEq('type', 'team'),
+    R.prop('networkId'),
+    R.prop('id'))(parent);
 
   const parentEntity = `${payload.parentType.slice(0, 1)
       .toUpperCase()}${payload.parentType.slice(1)}`;
@@ -158,6 +162,7 @@ export const create = async (payload, message) => {
   });
 
   const createdObject = await objectService.create({
+    networkId,
     userId: message.credentials.id,
     parentType: payload.parentType,
     parentId: payload.parentId,
@@ -177,6 +182,7 @@ export const create = async (payload, message) => {
     }));
 
     const createObjects = Promise.map(filesArray, (attachmentId) => objectService.create({
+      networkId,
       userId: message.credentials.id,
       parentType: 'feed_message',
       parentId: createdMessage.id,
@@ -198,11 +204,6 @@ export const create = async (payload, message) => {
   const objectWithSourceAndChildren = await objectService.getWithSourceAndChildren({
     objectId: createdObject.id,
   }, message);
-
-  const networkId = R.ifElse(
-    R.propEq('type', 'team'),
-    R.prop('networkId'),
-    R.prop('id'))(parent);
 
   FeedDispatcher.emit('message.created', {
     parent,

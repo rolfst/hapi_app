@@ -30,10 +30,9 @@ describe('Handler: update team', () => {
   });
 
   after(async () => {
-    return Promise.all([
-      testHelper.deleteUser(employee),
-      testHelper.deleteUser(admin),
-    ]);
+    await testHelper.deleteUser(employee);
+
+    return testHelper.deleteUser(admin);
   });
 
   it('should update an existing team', async () => {
