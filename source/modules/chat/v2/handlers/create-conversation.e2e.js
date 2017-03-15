@@ -39,6 +39,8 @@ describe('Handler: Create conversation (v2)', () => {
         participantIds: [participant1.id],
       }, creator.token);
 
+      await conversationRepo.deleteById(result.data.id);
+
       assert.equal(statusCode, 200);
       assert.deepEqual(result.data.participant_ids, [participant1.id, creator.id]);
       assert.isTrue(result.is_new);
