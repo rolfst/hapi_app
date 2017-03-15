@@ -1,6 +1,7 @@
 import * as Logger from '../../../../shared/services/logger';
+import createError from '../../../../shared/utils/create-error';
+import * as messageRepository from '../../repositories/message';
 import * as commentRepository from '../../repositories/comment';
-import * as impl from './implementation';
 
 /**
  * @module modules/feed/services/comment
@@ -37,7 +38,8 @@ export const list = async (payload, message) => {
 export const create = async (payload, message) => {
   logger.info('Creating comment for feed message', { payload, message });
 
-  await impl.assertThatMessageExists(payload.messageId);
+  const messageToComment = await messageRepository.findById(payload.messageId);
+  if (!messageToComment) throw createError('404', 'Message not found');
 
   return commentRepository.create({
     messageId: payload.messageId,
