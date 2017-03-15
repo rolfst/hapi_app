@@ -47,7 +47,6 @@ describe('Feed: Dispatcher', () => {
       sandbox.stub(networkService, 'get').returns(Promise.resolve({
         networkId: '123', name: 'testNetwork' }));
 
-      debugger;
       Dispatcher.emit('message.created', {
         actor: { fullName: 'John Doe' },
         networkId: '123',
@@ -84,7 +83,7 @@ describe('Feed: Dispatcher', () => {
         }, '123']);
     });
 
-    it.only('should send statistic', async () => {
+    it('should send statistic', async () => {
       sandbox.stub(notifier, 'send');
       sandbox.stub(objectService, 'usersForParent').returns(Promise.resolve(usersForParent));
       sandbox.stub(networkService, 'get').returns(Promise.resolve({
