@@ -50,9 +50,10 @@ function createDateRange(unit, start, end) {
 }
 
 /*
- * @param {string} networkId
- * @param {date} [startDate]
- * @param {date} [endDate]
+ * @param {object} payload
+ * @param {string} payload.networkId
+ * @param {date} [payload.startDate]
+ * @param {date} [payload.endDate]
  * @method getCreatedMessages
  * @return {external:Promise.<Statistic>} - {@link
  * module:modules/statistics~EventStatistic EventStatistic}
@@ -63,6 +64,25 @@ export async function getCreatedMessages(payload, message) {
   const { startDate, endDate } = createDateRange('month', payload.startDate, payload.endDate);
   const jql = createEventQuery({
     event: 'Created Message', networkId: payload.networkId, startDate, endDate });
+
+  return Mixpanel.executeQuery(jql, message);
+}
+
+/*
+ * @param {object} payload
+ * @param {string} payload.networkId
+ * @param {date} [payload.startDate]
+ * @param {date} [payload.endDate]
+ * @method getCreatedShifts
+ * @return {external:Promise.<Statistic>} - {@link
+ * module:modules/statistics~EventStatistic EventStatistic}
+ */
+export async function getCreatedShifts(payload, message) {
+  logger.info('Retrieving Created shifts', { payload, message });
+
+  const { startDate, endDate } = createDateRange('month', payload.startDate, payload.endDate);
+  const jql = createEventQuery({
+    event: 'Created Shift', networkId: payload.networkId, startDate, endDate });
 
   return Mixpanel.executeQuery(jql, message);
 }
