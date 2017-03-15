@@ -22,7 +22,7 @@ pubsub.asyncOn('message.created', async (payload) => {
     .usersForParent({ parentType: payload.parent.type, parentId: payload.parent.id })
     .then(R.reject(R.propEq('id', payload.actor.id)))
     .catch(() => Promise.resolve([]));
-  
+
   const [network, usersToNotify] = await Promise.all([networkP, usersToNotifyP]);
 
   Notifier.send(usersToNotify, notification, payload.networkId);
