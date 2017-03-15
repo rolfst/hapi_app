@@ -39,7 +39,7 @@ export const create = async (payload, message) => {
   logger.info('Creating comment for feed message', { payload, message });
 
   const messageToComment = await messageRepository.findById(payload.messageId);
-  if (!messageToComment) throw createError('404', 'Message not found');
+  if (!messageToComment) throw createError('404', 'Message not found.');
 
   return commentRepository.create({
     messageId: payload.messageId,
