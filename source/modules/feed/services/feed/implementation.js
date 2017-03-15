@@ -45,6 +45,7 @@ export const makeFeed = async (payload, options, message, extraWhereConstraint =
       parentType: payload.parentType,
       parentId: payload.parentId,
     }],
+    $and: { networkId: payload.networkId },
   };
 
   const relatedObjects = await objectRepository.findBy(whereConstraint, {

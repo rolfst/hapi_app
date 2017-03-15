@@ -7,6 +7,11 @@ const _Object = model.define('_Object', {
     field: 'user_id',
     allowNull: false,
   },
+  networkId: {
+    type: Sequelize.INTEGER,
+    field: 'network_id',
+    allowNull: true,
+  },
   objectType: {
     type: Sequelize.STRING,
     field: 'object_type',
