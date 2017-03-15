@@ -1,9 +1,6 @@
 import moment from 'moment';
-import 'moment/locale/nl';
 import * as notifier from '../../../shared/services/notifier';
 import * as notificationUtils from '../utils/notification';
-
-moment.locale('nl');
 
 export const createNotification = (exchange) => {
   const date = moment(exchange.date).calendar(null, {

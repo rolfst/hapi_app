@@ -1,9 +1,5 @@
-import moment from 'moment';
-import 'moment/locale/nl';
 import * as notifier from '../../../shared/services/notifier';
 import * as networkRepo from '../../core/repositories/network';
-
-moment.locale('nl');
 
 export const createNotification = (exchange, substituteUser) => {
   const substitute = substituteUser.fullName;
