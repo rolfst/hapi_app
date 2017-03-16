@@ -10,6 +10,7 @@ describe('Handler: Create conversation (v2)', () => {
   let participant2;
   let existingConversation;
 
+  after(() => testHelper.cleanAll());
 
   describe('Good flow', () => {
     before(async () => {
@@ -29,7 +30,7 @@ describe('Handler: Create conversation (v2)', () => {
       });
     });
 
-    after(() => testHelper.cleanAll());
+    after(() => conversationRepo.deleteById(existingConversation.id));
 
     it('should create a conversation with logged user and a participant', async () => {
       const ENDPOINT_URL = '/v2/conversations';
@@ -37,6 +38,8 @@ describe('Handler: Create conversation (v2)', () => {
         type: 'private',
         participantIds: [participant1.id],
       }, creator.token);
+
+      await conversationRepo.deleteById(result.data.id);
 
       assert.equal(statusCode, 200);
       assert.deepEqual(result.data.participant_ids, [participant1.id, creator.id]);
@@ -60,8 +63,6 @@ describe('Handler: Create conversation (v2)', () => {
     before(async () => {
       creator = await testHelper.createUser({ ...blueprints.users.employee });
     });
-
-    after(() => testHelper.cleanAll());
 
     it('should fail when passing logged user as a participant', async () => {
       const ENDPOINT_URL = '/v2/conversations';

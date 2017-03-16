@@ -1,8 +1,10 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import Promise from 'bluebird';
+import * as Mixpanel from '../../shared/services/mixpanel';
 import * as notifier from '../../shared/services/notifier';
 import * as objectService from '../core/services/object';
+import * as networkService from '../core/services/network';
 import Dispatcher from './dispatcher';
 
 describe('Feed: Dispatcher', () => {
@@ -20,12 +22,15 @@ describe('Feed: Dispatcher', () => {
     it('should call getUsersForParent with correct args', async () => {
       sandbox.stub(notifier, 'send');
       sandbox.stub(objectService, 'usersForParent').returns(Promise.resolve(usersForParent));
+      sandbox.stub(networkService, 'get').returns(Promise.resolve({
+        networkId: '123', name: 'testNetwork' }));
 
       Dispatcher.emit('message.created', {
         actor: { fullName: 'John Doe' },
         networkId: '123',
         parent: { type: 'team', id: '12', name: 'Foo team' },
         object: { id: '35234', source: { id: '435', text: 'Jessica cannot work today.' } },
+        credentials: { id: '111' },
       });
 
       await Promise.delay(1000);
@@ -39,12 +44,15 @@ describe('Feed: Dispatcher', () => {
     it('should return empty array when getUsersForParent doesnt support type', async () => {
       sandbox.stub(notifier, 'send');
       sandbox.stub(objectService, 'usersForParent').returns(Promise.reject(new Error('Failure')));
+      sandbox.stub(networkService, 'get').returns(Promise.resolve({
+        networkId: '123', name: 'testNetwork' }));
 
       Dispatcher.emit('message.created', {
         actor: { fullName: 'John Doe' },
         networkId: '123',
         parent: { type: 'nonexistingtype', id: '12', name: 'Foo team' },
         object: { id: '35234', source: { id: '435', text: 'Jessica cannot work today.' } },
+        credentials: { id: '111' },
       });
 
       await Promise.delay(1000);
@@ -55,12 +63,15 @@ describe('Feed: Dispatcher', () => {
     it('should send notification', async () => {
       sandbox.stub(notifier, 'send');
       sandbox.stub(objectService, 'usersForParent').returns(Promise.resolve(usersForParent));
+      sandbox.stub(networkService, 'get').returns(Promise.resolve({
+        networkId: '123', name: 'testNetwork' }));
 
       Dispatcher.emit('message.created', {
         actor: { id: '1', fullName: 'John Doe' },
         networkId: '123',
         parent: { type: 'team', id: '12', name: 'Foo team' },
         object: { id: '35234', source: { id: '435', text: 'Jessica cannot work today.' } },
+        credentials: { id: '111' },
       });
 
       await Promise.delay(1000);
@@ -72,15 +83,41 @@ describe('Feed: Dispatcher', () => {
         }, '123']);
     });
 
+    it('should send statistic', async () => {
+      sandbox.stub(notifier, 'send');
+      sandbox.stub(objectService, 'usersForParent').returns(Promise.resolve(usersForParent));
+      sandbox.stub(networkService, 'get').returns(Promise.resolve({
+        networkId: '123', name: 'testNetwork' }));
+      sandbox.stub(Mixpanel, 'track').returns(Promise.resolve(true));
+
+      Dispatcher.emit('message.created', {
+        actor: { id: '1', fullName: 'John Doe' },
+        networkId: '123',
+        parent: { type: 'team', id: '12', name: 'Foo team' },
+        object: { id: '35234', source: { id: '435', text: 'Jessica cannot work today.' } },
+        credentials: { id: '111' },
+      });
+
+      await Promise.delay(1000);
+
+      assert.deepEqual(Mixpanel.track.firstCall.args, [
+        { name: 'Created Message',
+          data: { 'Network Id': '123', 'Network Name': 'testNetwork', 'Placed In': 'Team' },
+        }, '111']);
+    });
+
     it('notification text without "in:" when parent name is not present', async () => {
       sandbox.stub(notifier, 'send');
       sandbox.stub(objectService, 'usersForParent').returns(Promise.resolve(usersForParent));
+      sandbox.stub(networkService, 'get').returns(Promise.resolve({
+        networkId: '123', name: 'testNetwork' }));
 
       Dispatcher.emit('message.created', {
         actor: { id: '1', fullName: 'John Doe' },
         networkId: '123',
         parent: { type: 'team', id: '12' },
         object: { id: '35234', source: { id: '435', text: 'Jessica cannot work today.' } },
+        credentials: { id: '111' },
       });
 
       await Promise.delay(1000);

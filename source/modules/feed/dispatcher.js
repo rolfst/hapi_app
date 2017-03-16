@@ -1,7 +1,9 @@
 import R from 'ramda';
 import EventEmitter from '../../shared/services/event-emitter';
-import * as notifier from '../../shared/services/notifier';
+import * as Notifier from '../../shared/services/notifier';
+import * as Mixpanel from '../../shared/services/mixpanel';
 import * as objectService from '../core/services/object';
+import * as networkService from '../core/services/network';
 import createdMessageNotification from './notifications/message-created';
 
 const pubsub = EventEmitter.create();
@@ -14,12 +16,24 @@ const pubsub = EventEmitter.create();
  */
 pubsub.asyncOn('message.created', async (payload) => {
   const notification = createdMessageNotification(payload.actor, payload.parent, payload.object);
-  const usersToNotify = await objectService
+
+  const networkP = networkService.get({ networkId: payload.networkId }, {});
+  const usersToNotifyP = objectService
     .usersForParent({ parentType: payload.parent.type, parentId: payload.parent.id })
     .then(R.reject(R.propEq('id', payload.actor.id)))
     .catch(() => Promise.resolve([]));
 
-  notifier.send(usersToNotify, notification, payload.networkId);
+  const [network, usersToNotify] = await Promise.all([networkP, usersToNotifyP]);
+
+  Notifier.send(usersToNotify, notification, payload.networkId);
+  Mixpanel.track({
+    name: 'Created Message',
+    data: {
+      'Network Id': network.networkId,
+      'Network Name': network.name,
+      'Placed In': payload.parent.type === 'team' ? 'Team' : 'Network',
+    },
+  }, payload.credentials.id);
 });
 
 export default pubsub;

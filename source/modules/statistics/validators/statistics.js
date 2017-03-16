@@ -3,7 +3,7 @@ import Joi from 'joi';
 export default {
   params: Joi.object().keys({
     networkId: Joi.string().required(),
-    viewName: Joi.string().valid('created_messages', 'approved_shifts'),
+    viewName: Joi.string().valid('created_messages', 'approved_shifts', 'created_shifts'),
   }),
   query: Joi.object().keys({
     startDate: Joi.date(),

@@ -6,6 +6,7 @@ import createDomainObject from '../models/object';
  * Creating an object
  * @param {object} attributes - Object containing the attributes
  * @param {string} attributes.userId - The id that instantiated the object
+ * @param {string} attributes.networkId - The network where the object is created for
  * @param {string} attributes.parentType - The type of parent to get objects for
  * @param {string} attributes.parentId - The id of the parent
  * @param {string} attributes.objectType - The type of object
@@ -14,7 +15,7 @@ import createDomainObject from '../models/object';
  * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
 export const create = async (attributes) => {
-  const whitelist = ['userId', 'parentType', 'parentId', 'objectType', 'sourceId'];
+  const whitelist = ['userId', 'networkId', 'parentType', 'parentId', 'objectType', 'sourceId'];
   const result = await _Object.create(R.pick(whitelist, attributes));
 
   return createDomainObject(result);

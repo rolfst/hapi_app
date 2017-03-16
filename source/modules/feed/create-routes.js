@@ -13,6 +13,12 @@ const routes = [{
   prefetch: false,
 }, {
   method: 'GET',
+  url: '/v2/messages/{messageId}',
+  handler: require('./handlers/get-message'),
+  validator: require('./validators/get-message'),
+  prefetch: false,
+}, {
+  method: 'GET',
   url: '/v2/messages/{messageId}/likes',
   handler: require('./handlers/get-likes'),
   prefetch: false,
