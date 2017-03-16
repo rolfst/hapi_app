@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-export default {
+module.exports = {
   payload: {
     username: Joi.string().required(),
     password: Joi.string().required(),

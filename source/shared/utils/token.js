@@ -1,6 +1,6 @@
 const jwt = require('jwt-simple');
 
-export default {
+module.exports = {
   encode(payload) {
     return jwt.encode(payload, process.env.JWT_SECRET);
   },

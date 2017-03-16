@@ -8,6 +8,8 @@ const networkRepository = require('../../../core/repositories/network');
 
 const logger = Logger.createLogger('INTEGRATIONS/service/sync');
 
+const isSyncable = R.and(R.prop('hasIntegration'), R.prop('importedAt'));
+
 const rejectNil = R.reject(R.isNil);
 const pluckEmail = R.pluck('email');
 const pluckExternalIds = R.pipe(R.pluck('externalId'), rejectNil);
@@ -29,7 +31,6 @@ const createTeams = (networkId) => (teams) => Promise.map(teams, (team) =>
 const deleteTeams = (teamIds) => Promise.map(teamIds, teamRepository.deleteById);
 const mergeAndGroupByExternalId = (internalCollection, externalCollection) =>
   R.merge(groupByExternalId(internalCollection), groupByExternalId(externalCollection));
-export const isSyncable = R.and(R.prop('hasIntegration'), R.prop('importedAt'));
 const getTeamsByExternalId = async (networkId, externalIds) => {
   const groupedTeams = await R.pipeP(
     networkRepository.findTeamsForNetwork,
@@ -130,8 +131,8 @@ const createUser = (networkId) => (user) => userRepository
     dateOfBirth: user.dateOfBirth,
     password: passwordUtil.plainRandom(),
   })
-  .then((createdUser) => addUser(networkId)({ ...user, id: createdUser.id }))
-  .then((networkLink) => setTeamLink(networkId)({ ...user, id: networkLink.userId, teamIds: [] }))
+  .then((createdUser) => addUser(networkId)(R.merge(user, { id: createdUser.id })))
+  .then((networkLink) => setTeamLink(networkId)(R.merge(user, { id: networkLink.userId, teamIds: [] })))
   .catch((err) => logger.error('Error creating user', { networkId, user, err }));
 
 /**
@@ -163,7 +164,7 @@ const removeUser = (networkId) => (user) => userRepository
  * @method createTeamActions
  * @return Returns an object containing the actions to execute.
  */
-export const createTeamActions = (internalTeams, externalTeams) => {
+const createTeamActions = (internalTeams, externalTeams) => {
   const internalTeamExternalIds = pluckExternalIds(internalTeams);
   const externalTeamExternalIds = pluckExternalIds(externalTeams);
 
@@ -188,10 +189,10 @@ export const createTeamActions = (internalTeams, externalTeams) => {
  * We invoke functions for each action.
  * @param {string} networkId - The id of the network to execute upon.
  * @param {object} actions - The actions retrieved from the createTeamActions method.
- * @method createTeamActions
+ * @method executeTeamActions
  * @return {Promise} containing the result from the invoked functions.
  */
-export const executeTeamActions = (networkId, actions) => {
+const executeTeamActions = (networkId, actions) => {
   const evolvedObj = R.evolve({
     add: createTeams(networkId),
     update: updateTeams(networkId),
@@ -212,7 +213,7 @@ export const executeTeamActions = (networkId, actions) => {
  * @method createUserActions
  * @return Returns an object containing the actions to execute.
  */
-export const createUserActions = (
+const createUserActions = (
   allUsersInSystem, internalTeams, _networkUsers, _externalUsers
 ) => {
   const networkUsers = R.pipe(
@@ -294,7 +295,7 @@ export const createUserActions = (
   return createdActions;
 };
 
-export const executeUserActions = (networkId, actions) => {
+const executeUserActions = (networkId, actions) => {
   const curriedPromiseMap = (actionFn) => (data) => Promise.map(data, actionFn);
   const evolvedObj = R.evolve({
     add: curriedPromiseMap(addUser(networkId)),
@@ -304,4 +305,13 @@ export const executeUserActions = (networkId, actions) => {
   })(actions);
 
   return Promise.props(evolvedObj);
+};
+
+// exports of functions
+module.export = {
+  createUserActions,
+  executeUserActions,
+  createTeamActions,
+  executeTeamActions,
+  isSyncable,
 };

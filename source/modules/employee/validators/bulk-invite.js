@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-export default {
+module.exports = {
   payload: {
     user_ids: Joi.array().required(),
   },

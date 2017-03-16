@@ -14,4 +14,4 @@ const routes = [{
   auth: false,
 }];
 
-export default createRoutes(routes);
+module.exports = createRoutes(routes);

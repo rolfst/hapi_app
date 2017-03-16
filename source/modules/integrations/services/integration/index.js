@@ -1,12 +1,12 @@
-const { pick } = require('lodash');
+const R = require('ramda');
 const { createAdapter } = require('../../../../shared/utils/create-adapter');
 const userRepo = require('../../../core/repositories/user');
 const authenticationRepo = require('../../../core/repositories/authentication');
 const createAccessToken = require('../../../authentication/utils/create-access-token');
 const impl = require('./implementation');
 
-export async function authenticate(payload, message) {
-  const credentials = pick(payload, 'username', 'password');
+async function authenticate(payload, message) {
+  const credentials = R.pick(['username', 'password'], payload);
   const adapter = await createAdapter(message.network, 0, { proceedWithoutToken: true });
   const authResult = await adapter.authenticate(credentials);
 
@@ -30,3 +30,8 @@ export async function authenticate(payload, message) {
 
   return createAccessToken(message.credentials.id, device.device_id);
 }
+
+// exports of functions
+module.export = {
+  authenticate,
+};

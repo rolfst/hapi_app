@@ -24,12 +24,19 @@ const transformSnakeCase = (obj) => {
   return result;
 };
 
-export const error = errorObject => ({ error: errorObject });
+const error = errorObject => ({ error: errorObject });
 
-export const serialize = response => {
+const serialize = response => {
   return (isArray(response)) ? response.map(item => item.toJSON()) : response.toJSON();
 };
 
-export const toSnakeCase = (response) => {
+const toSnakeCase = (response) => {
   return isArray(response) ? response.map(transformSnakeCase) : transformSnakeCase(response);
+};
+
+// exports of functions
+module.export = {
+  error,
+  serialize,
+  toSnakeCase,
 };

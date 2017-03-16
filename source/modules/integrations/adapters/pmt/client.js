@@ -36,7 +36,7 @@ const handleRequest = async (response, endpoint) => {
   return { status, json };
 };
 
-export async function makeRequest(endpoint, token = null, method = 'GET', data = {}, message) {
+async function makeRequest(endpoint, token = null, method = 'GET', data = {}, message) {
   const options = {
     method,
     headers: {
@@ -64,7 +64,8 @@ export async function makeRequest(endpoint, token = null, method = 'GET', data =
   return { payload: json, status };
 }
 
-export default {
+module.exports = {
+  makeRequest,
   post: (endpoint, token, data, message) => makeRequest(endpoint, token, 'POST', data, message),
   get: (endpoint, token, message) => makeRequest(endpoint, token, 'GET', message),
   put: (endpoint, token, data, message) => makeRequest(endpoint, token, 'PUT', data, message),

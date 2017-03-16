@@ -4,7 +4,7 @@ const createUserModel = require('./user');
 
 const replaceChars = (string) => string.match(/([A-Z])\w+/g);
 
-export default (dao) => ({
+module.exports = (dao) => ({
   type: 'network',
   id: dao.id.toString(),
   externalId: dao.externalId ? dao.externalId.toString() : null,

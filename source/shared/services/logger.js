@@ -8,8 +8,8 @@ const bunyan = require('bunyan');
 
 const environment = process.env.API_ENV;
 const defaultConfig = process.env.CI ?
-   require('../configs/logs-ci').default :
-   require(`../configs/logs-${environment}`).default;
+   require('../configs/logs-ci') :
+   require(`../configs/logs-${environment}`);
 
 const makeMessage = R.pipe(
   R.pick(['credentials', 'artifacts', 'network']),
@@ -22,8 +22,8 @@ const buildLogContext = (args = {}) => {
   if (args.payload) {
     payloadWithoutStreams = Object.keys(args.payload).reduce((obj, key) => {
       return (args.payload[key] instanceof stream.Readable) ?
-        { ...obj, [key]: 'Readable Stream' } :
-        { ...obj, [key]: args.payload[key] };
+        R.merge(obj, { [key]: 'Readable Stream' }) :
+        R.merge(obj, { [key]: args.payload[key] });
     }, {});
   }
 
@@ -39,14 +39,14 @@ const buildLogContext = (args = {}) => {
   };
 };
 
-export const getLogger = (name) => bunyan.createLogger({ name, ...defaultConfig });
+const getLogger = (name) => bunyan.createLogger(R.merge({ name }, defaultConfig));
 
 /**
  * @param {string|Logger} loggerOrName
  * @method createLogger
  * @return {void}
  */
-export const createLogger = (loggerOrName) => {
+const createLogger = (loggerOrName) => {
   const logger = typeof loggerOrName === 'string' ?
     getLogger(loggerOrName) : loggerOrName;
 
@@ -104,4 +104,7 @@ export const createLogger = (loggerOrName) => {
   };
 };
 
-export default createLogger;
+module.exports = {
+  getLogger,
+  createLogger,
+};

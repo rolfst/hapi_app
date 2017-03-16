@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-export default {
+module.exports = {
   payload: Joi.object().keys({
     name: Joi.string().required(),
     description: Joi.string(),

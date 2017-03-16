@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const tokenUtil = require('../../../shared/utils/token');
 
-export default (userId, deviceId) => {
+module.exports = (userId, deviceId) => {
   const payload = {
     type: 'refresh_token',
     sub: userId,

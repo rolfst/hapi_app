@@ -22,7 +22,7 @@ const logger = Logger.getLogger('CORE/service/authorization');
  * @throws Error - 403
  * @return {void}
  */
-export async function assertRoleTypeForUser(payload, message) {
+async function assertRoleTypeForUser(payload, message) {
   logger.info('Asserting role type for user', { payload, message });
 
   const scopedUser = await userService.getUserWithNetworkScope(
@@ -42,7 +42,7 @@ export async function assertRoleTypeForUser(payload, message) {
  * @throws Error - 10002
  * @return {void}
  */
-export async function assertThatUserBelongsToTheNetwork(payload) {
+async function assertThatUserBelongsToTheNetwork(payload) {
   const belongs = await userRepo.userBelongsToNetwork(payload.userId, payload.networkId);
   const network = await networkRepo.findNetwork({ userId: payload.userId, id: payload.networkId });
   const result = belongs || network;
@@ -61,10 +61,17 @@ export async function assertThatUserBelongsToTheNetwork(payload) {
  * @throws Error - 10010
  * @return {void}
  */
-export const assertThatUserBelongsToTheTeam = async (payload) => {
+const assertThatUserBelongsToTheTeam = async (payload) => {
   const result = await TeamUser.find({ where: {
     teamId: payload.teamId, userId: payload.userId,
   } });
 
   if (!result) throw createError('10010');
+};
+
+// exports of functions
+module.export = {
+  assertRoleTypeForUser,
+  assertThatUserBelongsToTheNetwork,
+  assertThatUserBelongsToTheTeam,
 };

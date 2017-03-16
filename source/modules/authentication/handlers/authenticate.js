@@ -1,4 +1,4 @@
-const { pick, omit } = require('lodash');
+const R = require('ramda');
 const authenticationService = require('../services/authentication');
 const Logger = require('../../../shared/services/logger');
 
@@ -11,13 +11,13 @@ const logger = Logger.createLogger('AUTHENTICATION/handler/authenticate');
  * belongs to. When the user is authenticated with an integration, we will
  * set the user_tokens retrieved from the integration.
  */
-export default async (request, reply) => {
+module.exports = async (request, reply) => {
   try {
-    const message = { ...request.pre, ...request.auth };
-    const payload = pick(request.payload, 'username', 'password');
+    const message = R.merge(request.pre, request.auth);
+    const payload = R.pick(['username', 'password'], request.payload);
 
     message.deviceName = request.headers['user-agent'];
-    logger.info('Authenticating', { ...omit(payload, 'password'), message });
+    logger.info('Authenticating', R.merge(R.omit(['password'], payload), message));
     const result = await authenticationService.authenticate(payload, message);
     const data = {
       access_token: result.accessToken,

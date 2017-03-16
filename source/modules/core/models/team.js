@@ -1,7 +1,7 @@
 const R = require('ramda');
 const dateUtils = require('../../../shared/utils/date');
 
-export default (dao) => ({
+module.exports = (dao) => ({
   type: 'team',
   id: dao.id.toString(),
   networkId: dao.networkId.toString(),

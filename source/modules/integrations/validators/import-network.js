@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-export default {
+module.exports = {
   payload: {
     external_email: Joi.string().required(),
   },

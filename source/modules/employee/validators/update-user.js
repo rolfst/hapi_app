@@ -1,6 +1,6 @@
 const { string, date } = require('joi');
 
-export default {
+module.exports = {
   payload: {
     first_name: string(),
     last_name: string(),

@@ -1,3 +1,4 @@
+const R = require('ramda');
 const Logger = require('../../shared/services/logger');
 const networkService = require('../../modules/core/services/network');
 const authorizationService = require('../../modules/core/services/authorization');
@@ -7,8 +8,8 @@ const serverUtil = require('../utils/server');
 const logger = Logger.createLogger('MIDDLEWARE/prefetchNetwork');
 
 module.exports = async (req, reply) => {
-  const message = { ...req.auth };
-  const payload = { ...req.params };
+  const message = R.merge(req.auth, req.pre);
+  const payload = R.merge(req.params, req.payload, req.query);
 
   try {
     logger.info('Fetching network', { payload, message });

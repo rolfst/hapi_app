@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const { sample, random } = require('lodash');
 
-export const plainRandom = () => {
+const plainRandom = () => {
   const words = [
     'appel', 'peer', 'schommel', 'standaard', 'lamp', 'envelop',
     'lepel', 'bestek', 'auto', 'vrachtwagen', 'mes', 'sjaal',
@@ -16,8 +16,13 @@ export const plainRandom = () => {
   return `${word}${number}`;
 };
 
-export const make = (passwordText) => {
+const make = (passwordText) => {
   const hash = bcrypt.hashSync(passwordText, bcrypt.genSaltSync());
 
   return hash.replace('$2a$', '$2y$');
+};
+
+module.exports = {
+  make,
+  plainRandom,
 };

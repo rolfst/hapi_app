@@ -2,7 +2,7 @@ const _ = require('lodash');
 const moment = require('moment');
 const tokenUtil = require('../../../shared/utils/token');
 
-export default (userId, deviceId) => {
+module.exports = (userId, deviceId) => {
   const payload = {
     type: 'access_token',
     exp: moment().add(1, 'hour').unix(),

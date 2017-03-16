@@ -15,4 +15,4 @@ const pmtAdapter = ({ externalId }, token) => ({
   viewShift: viewShift(externalId, token),
 });
 
-export default pmtAdapter;
+module.exports = pmtAdapter;

@@ -24,4 +24,4 @@ const routes = [{
   strategy: 'integration',
 }];
 
-export default createRoutes(routes);
+module.exports = createRoutes(routes);

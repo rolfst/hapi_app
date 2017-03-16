@@ -5,7 +5,7 @@ const Logger = require('../../../shared/services/logger');
 const logger = Logger.createLogger('EMPLOYEE/handler/bulkInviteUsers');
 
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
     const payload = { userIds: req.payload.user_ids };
     const message = { ...req.pre, ...req.auth };

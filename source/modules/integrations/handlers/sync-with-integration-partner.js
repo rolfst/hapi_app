@@ -1,12 +1,13 @@
+const R = require('ramda');
 const syncService = require('../services/sync');
 const Logger = require('../../../shared/services/logger');
 
 const logger = Logger.createLogger('INTEGRATIONS/handler/syncWithIntegrationPartner');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const message = { ...req.pre, ...req.auth };
-    const payload = { ...req.payload, ...req.params };
+    const payload = R.merge(req.params, req.payload);
+    const message = R.merge(req.pre, req.auth);
 
     logger.info('Syncing network', { payload, message });
     syncService.syncWithIntegrationPartner(payload, message);

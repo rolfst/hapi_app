@@ -15,7 +15,7 @@ const { Team, User, TeamUser } = require('./dao');
  * @method findTeamById
  * @return {external:Promise.<Team>} {@link module:modules/core~Team Team}
  */
-export async function findTeamById(teamId) {
+async function findTeamById(teamId) {
   const result = await Team.findById(teamId, {
     include: [{ attributes: ['id'], model: User }],
   });
@@ -28,11 +28,11 @@ export async function findTeamById(teamId) {
  * @method findBy
  * @return {external:Promise.<Team>} {@link module:modules/core~Team Team}
  */
-export const findBy = async (attributes) => {
-  return Team.findOne({ where: { ...attributes } });
+const findBy = async (attributes) => {
+  return Team.findOne({ where: attributes });
 };
 
-export async function setUsersForTeam(teamId, userIds) {
+async function setUsersForTeam(teamId, userIds) {
   const team = await await Team.findById(teamId, {
     include: [{ attributes: ['id'], model: User }],
   });
@@ -48,7 +48,7 @@ export async function setUsersForTeam(teamId, userIds) {
  * @method addUserToTeams
  * @return {external:Promise.<TeamUser[]>} {@link module:modules/core~TeamUser TeamUser}
  */
-export function addUserToTeams(teamIds, userId) {
+function addUserToTeams(teamIds, userId) {
   const values = teamIds.map(teamId => ({ teamId, userId }));
 
   return TeamUser.bulkCreate(values);
@@ -60,7 +60,7 @@ export function addUserToTeams(teamIds, userId) {
  * @method addUserToTeam
  * @return {external:Promise.<TeamUser>} {@link module:modules/core~TeamUser TeamUser}
  */
-export function addUserToTeam(teamId, userId) {
+function addUserToTeam(teamId, userId) {
   return TeamUser.create({ teamId, userId });
 }
 
@@ -70,13 +70,13 @@ export function addUserToTeam(teamId, userId) {
  * @method removeUserFromTeam
  * @return {external:Promise.<number>} number of modified users
  */
-export function removeUserFromTeam(teamId, userId) {
+function removeUserFromTeam(teamId, userId) {
   return TeamUser.destroy({
     where: { teamId, userId },
   });
 }
 
-export const findTeamsForNetworkThatUserBelongsTo = async (userId, networkId) => {
+const findTeamsForNetworkThatUserBelongsTo = async (userId, networkId) => {
   const result = await Team.findAll({
     where: { networkId },
     include: [{
@@ -94,7 +94,7 @@ export const findTeamsForNetworkThatUserBelongsTo = async (userId, networkId) =>
  * @method findMembers
  * @return {external:Promise.<User[]>} {@link module:modules/core~User User}
  */
-export const findMembers = async (teamId) => {
+const findMembers = async (teamId) => {
   const result = await TeamUser.findAll({
     attributes: ['userId'],
     where: { teamId },
@@ -108,7 +108,7 @@ export const findMembers = async (teamId) => {
  * @method findByIds
  * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team}
  */
-export const findByIds = async (teamIds) => {
+const findByIds = async (teamIds) => {
   const result = await Team.findAll({
     where: { id: { $in: teamIds } },
     include: [{ attributes: ['id'], model: User }],
@@ -125,7 +125,7 @@ export const findByIds = async (teamIds) => {
  * @method findTeamsByExternalId
  * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team}
  */
-export const findTeamsByExternalId = (networkId, externalIds) => {
+const findTeamsByExternalId = (networkId, externalIds) => {
   return Team.findAll({
     where: { externalId: { $in: externalIds }, networkId },
   });
@@ -142,7 +142,7 @@ export const findTeamsByExternalId = (networkId, externalIds) => {
  * @method create
  * @return {external:Promise.<Team>} {@link module:modules/core~Team Team}
  */
-export async function create(attributes) {
+async function create(attributes) {
   const team = await Team.create(attributes);
 
   return createTeamModel(team);
@@ -154,7 +154,7 @@ export async function create(attributes) {
  * @method createBulkTeams
  * @return {external:Promise.<Team>} {@link module:modules/core~Team Team}
  */
-export function createBulkTeams(teams) {
+function createBulkTeams(teams) {
   return Promise.map(teams, create);
 }
 
@@ -165,7 +165,7 @@ export function createBulkTeams(teams) {
  * @method validateTeamIds
  * @return {external:Promise.<boolean>} - Promise with boolean if all ids are valid
  */
-export async function validateTeamIds(ids, networkId) {
+async function validateTeamIds(ids, networkId) {
   const teamsCount = await Team.count({
     where: {
       id: { $in: ids },
@@ -182,7 +182,7 @@ export async function validateTeamIds(ids, networkId) {
  * @method deleteById
  * @return {external:Promise.<number>} - Promise with the amount of objects deleted
  */
-export const deleteById = async (teamId) => {
+const deleteById = async (teamId) => {
   return Team.destroy({ where: { id: teamId } });
 };
 
@@ -192,7 +192,7 @@ export const deleteById = async (teamId) => {
  * @method findusersbyteamids
  * @return {external:Promise.<User[]>} {@link module:modules/core~User User}
  */
-export function findUsersByTeamIds(ids) {
+function findUsersByTeamIds(ids) {
   return User
     .findAll({
       include: [{ model: Team }],
@@ -207,9 +207,29 @@ export function findUsersByTeamIds(ids) {
  * @method update
  * @return {external:Promise}
  */
-export const update = async (teamIdOrWhereConstraint, attributes) => {
+const update = async (teamIdOrWhereConstraint, attributes) => {
   const whereConstraint = (typeof teamIdOrWhereConstraint === 'object') ?
     teamIdOrWhereConstraint : { id: teamIdOrWhereConstraint };
 
   return Team.update(attributes, { where: whereConstraint });
+};
+
+// exports of functions
+module.export = {
+  addUserToTeam,
+  addUserToTeams,
+  create,
+  createBulkTeams,
+  deleteById,
+  findBy,
+  findByIds,
+  findMembers,
+  findTeamsByExternalId,
+  findTeamById,
+  findTeamsForNetworkThatUserBelongsTo,
+  findUsersByTeamIds,
+  removeUserFromTeam,
+  setUsersForTeam,
+  update,
+  validateTeamIds,
 };

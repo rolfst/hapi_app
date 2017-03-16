@@ -19,7 +19,7 @@ const impl = require('./implementation');
  * {@link module:/modules/authentication~AuthenticatedUser AuthenticatedUser}
  *
  */
-export const delegate = async (payload, message) => {
+const delegate = async (payload, message) => {
   let decodedToken;
 
   try {
@@ -48,7 +48,7 @@ export const delegate = async (payload, message) => {
  * @return {external:Promise.<AuthenticatedUser>}
  * {@link module:/modules/authentication~AuthenticatedUser AuthenticatedUser}
  */
-export const authenticate = async (payload, message) => {
+const authenticate = async (payload, message) => {
   const user = await impl.authenticateUser(payload);
   const tokens = await impl.getAuthenticationTokens(user, message.deviceName);
 
@@ -58,4 +58,10 @@ export const authenticate = async (payload, message) => {
   userRepo.updateNetworkLink({ userId: user.id }, { lastActive: new Date() });
 
   return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, user };
+};
+
+// exports of functions
+module.export = {
+  delegate,
+  authenticate,
 };

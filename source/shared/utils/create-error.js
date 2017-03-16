@@ -14,4 +14,4 @@ const createError = (code, developerMessage) => {
   });
 };
 
-export default createError;
+module.exports = createError;

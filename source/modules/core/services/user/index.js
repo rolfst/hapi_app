@@ -20,7 +20,7 @@ const logger = Logger.getLogger('CORE/service/user');
  * @method getUser
  * @return {external:Promise.<User>} {@link module:modules/core~User User} model
  */
-export const getUser = async (payload) => {
+const getUser = async (payload) => {
   return userRepo.findUserById(payload.userId, null, false);
 };
 
@@ -34,7 +34,7 @@ export const getUser = async (payload) => {
  * @return {external:Promise.<User[]>} {@link module:modules/core~User} Promise containing
  * collection of users
  */
-export async function listUsersWithNetworkScope(payload, message) {
+async function listUsersWithNetworkScope(payload, message) {
   logger.info('Listing users with network scope', { payload, message });
 
   const users = await userRepo.findByIds(payload.userIds, payload.networkId);
@@ -46,14 +46,14 @@ export async function listUsersWithNetworkScope(payload, message) {
   return Promise.map(usersInNetwork, async (user) => {
     const metaData = find(metaDataList, { userId: user.id });
 
-    return {
-      ...user,
-      roleType: metaData.roleType,
-      externalId: metaData.externalId,
-      deletedAt: metaData.deletedAt,
-      invitedAt: metaData.invitedAt,
-      integrationAuth: !!metaData.userToken,
-    };
+    return R.merge(user,
+      {
+        roleType: metaData.roleType,
+        externalId: metaData.externalId,
+        deletedAt: metaData.deletedAt,
+        invitedAt: metaData.invitedAt,
+        integrationAuth: !!metaData.userToken,
+      });
   });
 }
 
@@ -67,7 +67,7 @@ export async function listUsersWithNetworkScope(payload, message) {
  * @return {external:Promise.<User[]>} {@link module:modules/core~User} Promise containing
  * collection of users
  */
-export async function getUserWithNetworkScope(payload, message) {
+async function getUserWithNetworkScope(payload, message) {
   logger.info('Get user with network scope', { payload, message });
   const [user, network] = await Promise.all([
     userRepo.findUserById(payload.id, payload.networkId),
@@ -78,12 +78,18 @@ export async function getUserWithNetworkScope(payload, message) {
 
   if (!networkLink) throw createError('10002');
 
-  return {
-    ...user,
-    roleType: networkLink.roleType,
-    externalId: networkLink.externalId,
-    deletedAt: networkLink.deletedAt,
-    invitedAt: networkLink.invitedAt,
-    integrationAuth: !!networkLink.userToken,
-  };
+  return R.merge(user,
+    {
+      roleType: networkLink.roleType,
+      externalId: networkLink.externalId,
+      deletedAt: networkLink.deletedAt,
+      invitedAt: networkLink.invitedAt,
+      integrationAuth: !!networkLink.userToken,
+    });
 }
+
+module.exports = {
+  getUserWithNetworkScope,
+  listUsersWithNetworkScope,
+  getUser,
+};

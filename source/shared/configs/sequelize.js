@@ -5,7 +5,7 @@ const config = require('./database');
 
 const logger = Logger.createLogger('DB/query');
 
-export default (() => {
+module.exports = (() => {
   const { host, database, username, password, dialect, port } = config[process.env.API_ENV];
 
   const logging = process.env.SQL_LOGGING === 'true' ?

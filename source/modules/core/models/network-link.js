@@ -1,4 +1,4 @@
-export default (dao) => ({
+module.exports = (dao) => ({
   type: 'network_link',
   networkId: dao.networkId.toString(),
   userId: dao.userId.toString(),

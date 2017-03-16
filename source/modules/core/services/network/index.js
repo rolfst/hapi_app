@@ -20,7 +20,7 @@ const logger = Logger.getLogger('CORE/service/network');
  * @return {external:Promise.<Network>} {@link module:modules/core~Network Network} -
  * Promise containing network
  */
-export const get = async (payload, message) => {
+const get = async (payload, message) => {
   logger.info('Retrieving single network', { payload, message });
   const network = await networkRepo.findNetworkById(payload.networkId);
 
@@ -41,7 +41,7 @@ export const get = async (payload, message) => {
  * @return {external:Promise.<Network>} {@link module:modules/core~Network Network} -
  * new network object
  */
-export const create = async (payload, message) => {
+const create = async (payload, message) => {
   logger.info('Creating network', { payload, message });
 
   const whitelistAttrs = R.pick(['userId', 'name', 'externalId', 'integrationName'], payload);
@@ -67,15 +67,15 @@ export const create = async (payload, message) => {
  * @return {external:Promise.<NetworkUser>} {@link module:shared~NetworkUser NetworkUser}
  * Promise containing a User
  */
-export const addUserToNetwork = async (payload, message) => {
+const addUserToNetwork = async (payload, message) => {
   logger.info('Adding user to network', { payload, message });
 
   const attrsWhitelist = ['userId', 'networkId', 'externalId', 'userToken'];
-  const attributes = {
-    ...R.pick(attrsWhitelist, payload),
-    roleType: payload.roleType || 'EMPLOYEE',
-    deletedAt: payload.active === false ? new Date() : null,
-  };
+  const attributes = R.merge(
+    R.pick(attrsWhitelist, payload),
+    { roleType: payload.roleType || 'EMPLOYEE' },
+    { deletedAt: payload.active === false ? new Date() : null }
+  );
 
   return networkRepo.addUser(attributes);
 };
@@ -89,7 +89,7 @@ export const addUserToNetwork = async (payload, message) => {
  * @return {external:Promise.<User[]>} {@link module:modules/core~User User} -
  * Promise containing collection of users
  */
-export const listActiveUsersForNetwork = async (payload, message) => {
+const listActiveUsersForNetwork = async (payload, message) => {
   logger.info('Listing active users for network', { payload, message });
 
   const network = await networkRepo.findNetworkById(payload.networkId);
@@ -107,7 +107,7 @@ export const listActiveUsersForNetwork = async (payload, message) => {
  * @return {external:Promise.<User[]>} {@link module:modules/core~User User} -
  * Promise containing collection of users
  */
-export const listAllUsersForNetwork = async (payload, message) => {
+const listAllUsersForNetwork = async (payload, message) => {
   logger.info('List all users for network', { payload });
 
   const network = await networkRepo.findNetworkById(payload.networkId);
@@ -128,7 +128,7 @@ export const listAllUsersForNetwork = async (payload, message) => {
  * @return {external:Promise.<Network>} {@link module:modules/core~Network Network} -
  * Promise containing a collections networks
  */
-export const listNetworksForUser = async (payload) => {
+const listNetworksForUser = async (payload) => {
   logger.info('List all networks for user', { payload });
 
   return networkRepo.findNetworksForUser(payload.id);
@@ -142,10 +142,20 @@ export const listNetworksForUser = async (payload) => {
  * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team} -
  * Promise containing updated teams
  */
-export const listTeamsForNetwork = async (payload, message) => {
+const listTeamsForNetwork = async (payload, message) => {
   const result = await networkRepo.findTeamsForNetwork(payload.networkId);
   logger.info('List teams for network', {
     payload, teamCount: result.length, message: message || null });
 
   return teamService.list({ teamIds: R.pluck('id', result) }, message);
+};
+
+module.exports = {
+  listTeamsForNetwork,
+  listNetworksForUser,
+  listAllUsersForNetwork,
+  get,
+  create,
+  addUserToNetwork,
+  listActiveUsersForNetwork,
 };

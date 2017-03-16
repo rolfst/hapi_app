@@ -1,12 +1,13 @@
+const R = require('ramda');
 const responseUtil = require('../../../shared/utils/response');
 const Logger = require('../../../shared/services/logger');
 const networkService = require('../services/network');
 
 const logger = Logger.createLogger('CORE/handler/networksForUser');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const message = { ...req.pre, ...req.auth };
+    const message = R.merge(req.pre, req.auth);
     const payload = { id: req.auth.credentials.id };
 
     logger.info('Retrieving networks for user', { message, payload });

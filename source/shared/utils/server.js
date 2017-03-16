@@ -1,12 +1,12 @@
 const Url = require('url');
 const Qs = require('qs');
-const { pick, omit } = require('lodash');
+const R = require('ramda');
 const createError = require('./create-error');
 const Logger = require('../services/logger');
 
 const logger = Logger.createLogger('NODE-API/server/response');
 
-export const onRequest = (ravenClient) => (req, reply) => {
+const onRequest = (ravenClient) => (req, reply) => {
   const uri = req.raw.req.url;
   const parsed = Url.parse(uri, false);
   parsed.query = Qs.parse(parsed.query);
@@ -14,7 +14,7 @@ export const onRequest = (ravenClient) => (req, reply) => {
 
   const requestContext = {
     id: req.id,
-    payload: omit(req.payload, 'password'),
+    payload: R.omit('password', req.payload),
     user_agent: req.headers['user-agent'],
     method: req.method,
     url: req.path,
@@ -30,7 +30,7 @@ export const onRequest = (ravenClient) => (req, reply) => {
   return reply.continue();
 };
 
-export const transformBoomToErrorResponse = (boom) => ({
+const transformBoomToErrorResponse = (boom) => ({
   type: boom.data.errorType,
   detail: boom.output.payload.message,
   error_code: boom.data.errorCode || boom.output.payload.statusCode.toString(),
@@ -57,13 +57,13 @@ const logError = (ravenClient, message, payload, error) => {
   }
 };
 
-export const onPreResponse = (ravenClient) => (req, reply) => {
-  const message = { ...req.auth, ...req.credentials };
-  const errorPayload = {
-    ...pick(req, 'info', 'headers', 'payload', 'params', 'query'),
-    method: req.method,
-    url: req.path,
-  };
+const onPreResponse = (ravenClient) => (req, reply) => {
+  const message = R.merge(req.auth, req.credentials);
+  const errorPayload = R.merge(R.pick(['info', 'headers', 'payload', 'params', 'query'], req),
+    {
+      method: req.method,
+      url: req.path,
+    });
 
   if (req.response instanceof Error && req.response.isBoom) {
     let error = req.response;
@@ -93,8 +93,16 @@ export const onPreResponse = (ravenClient) => (req, reply) => {
   return reply.continue();
 };
 
-export const makeConfig = () => {
+const makeConfig = () => {
   const options = {};
 
   return options;
+};
+
+// exports of functions
+module.export = {
+  makeConfig,
+  onPreResponse,
+  onRequest,
+  transformBoomToErrorResponse
 };

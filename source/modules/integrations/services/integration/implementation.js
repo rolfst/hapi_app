@@ -1,7 +1,7 @@
 const createError = require('../../../../shared/utils/create-error');
 const userRepo = require('../../../core/repositories/user');
 
-export const assertExternalIdNotPresentInNetwork = async (userId, networkId, externalId) => {
+const assertExternalIdNotPresentInNetwork = async (userId, networkId, externalId) => {
   const networkLink = await userRepo.findNetworkLink({ networkId, externalId });
 
   if (networkLink && networkLink.userId !== userId) {
@@ -9,4 +9,9 @@ export const assertExternalIdNotPresentInNetwork = async (userId, networkId, ext
   }
 
   return false;
+};
+
+// exports of functions
+module.export = {
+  assertExternalIdNotPresentInNetwork,
 };

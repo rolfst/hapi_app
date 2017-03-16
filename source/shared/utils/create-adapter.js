@@ -20,7 +20,7 @@ const assertNetworkHasExternalId = (network) => {
   }
 };
 
-export const createAdapter = async (network, userId, options = {}) => {
+const createAdapter = async (network, userId, options = {}) => {
   assertNetworkHasIntegration(network);
   assertNetworkHasExternalId(network);
 
@@ -42,4 +42,9 @@ export const createAdapter = async (network, userId, options = {}) => {
   if (!integration) throw createError('403', 'Couldn\'t find integration with adapter.');
 
   return integration.adapter(network, userToken);
+};
+
+// exports of functions
+module.export = {
+  createAdapter
 };

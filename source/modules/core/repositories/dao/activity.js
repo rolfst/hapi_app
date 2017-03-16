@@ -11,7 +11,6 @@ const ActivityTypes = {
   EXCHANGE_COMMENT: 'exchange_comment',
 };
 
-debugger;
 const Activity = model.define('Activity', {
   userId: {
     type: Sequelize.INTEGER,

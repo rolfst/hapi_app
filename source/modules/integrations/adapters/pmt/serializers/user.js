@@ -6,7 +6,7 @@ function formatPhoneNumber(number) {
   return number.toString().replace(/\D/g, '');
 }
 
-export default (externalUser) => {
+module.exports = (externalUser) => {
   const defaultProps = {
     id: null,
     department: null,
@@ -22,7 +22,7 @@ export default (externalUser) => {
     home_phone_number: null,
   };
 
-  const properUser = { ...defaultProps, ...externalUser };
+  const properUser = R.merge(defaultProps, externalUser);
   let teamIds = [];
 
   if (properUser.scope && properUser.scope.length > 0) {

@@ -24,4 +24,4 @@ const routes = [{
   validator: require('./validators/bulk-invite'),
 }];
 
-export default createRoutes(routes);
+module.exports = createRoutes(routes);

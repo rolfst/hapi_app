@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-export default {
+module.exports = {
   query: {
     refresh_token: Joi.string().required(),
   },

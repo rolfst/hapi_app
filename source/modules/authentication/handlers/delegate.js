@@ -1,12 +1,13 @@
+const R = require('ramda');
 const Logger = require('../../../shared/services/logger');
 const authenticationService = require('../services/authentication');
 
 const logger = Logger.createLogger('AUTHENCTIATION/handler/delegate');
 
-export default async (request, reply) => {
+module.exports = async (request, reply) => {
   try {
     const payload = { refreshToken: request.query.refresh_token };
-    const message = { ...request.pre, ...request.auth };
+    const message = R.merge(request.pre, request.auth);
     message.deviceName = request.headers['user-agent'];
 
     logger.info('Delegate', { payload, message });

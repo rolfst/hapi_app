@@ -19,7 +19,7 @@ const logger = Logger.createLogger('INTEGRATIONS/service/sync');
  * @method syncWithIntegrationPartner
  * @return {external:Promise<Network[]>}
  */
-export const syncNetwork = async (payload, message) => {
+const syncNetwork = async (payload, message) => {
   try {
     logger.info('Started network synchronization', { payload, message });
 
@@ -80,7 +80,7 @@ export const syncNetwork = async (payload, message) => {
  * @method importNetwork
  * @return {external:Promise<Network[]>}
  */
-export const importNetwork = async (payload, message) => {
+const importNetwork = async (payload, message) => {
   try {
     logger.info('Started network import', { payload, message });
 
@@ -98,7 +98,7 @@ export const importNetwork = async (payload, message) => {
 
     if (!admin) {
       const password = passwordUtil.plainRandom();
-      admin = await userRepository.createUser({ ...externalAdmin, password });
+      admin = await userRepository.createUser(R.merge(externalAdmin, { password }));
     }
 
     await networkRepository.updateNetwork(network.id, { userId: admin.id });
@@ -131,7 +131,7 @@ export const importNetwork = async (payload, message) => {
  * @method syncWithIntegrationPartner
  * @return {external:Promise<Network[]>}
  */
-export async function syncWithIntegrationPartner(payload, message) {
+async function syncWithIntegrationPartner(payload, message) {
   const logError = (err) => logger.error('Error syncing integration partners', { err, message });
 
   try {
@@ -151,3 +151,10 @@ export async function syncWithIntegrationPartner(payload, message) {
     throw err;
   }
 }
+
+// exports of functions
+module.export = {
+  importNetwork,
+  syncNetwork,
+  syncWithIntegrationPartner,
+};

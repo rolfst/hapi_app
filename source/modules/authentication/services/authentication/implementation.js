@@ -6,17 +6,17 @@ const userRepo = require('../../../core/repositories/user');
 const createAccessToken = require('../../utils/create-access-token');
 const createRefreshToken = require('../../utils/create-refresh-token');
 
-export const checkPassword = (hash, plain) => {
+const checkPassword = (hash, plain) => {
   // We have to replace the first characters because of the
   // difference between the PHP bcrypt hasher and JavaScript's
   return bcrypt.compareSync(plain, hash.replace('$2y$', '$2a$'));
 };
 
-export const updateLastLogin = async (user) => {
+const updateLastLogin = async (user) => {
   userRepo.updateUser(user.id, { lastLogin: moment().toISOString() });
 };
 
-export const authenticateUser = async ({ username, password }) => {
+const authenticateUser = async ({ username, password }) => {
   const user = await userRepo.findCredentialsForUser(username);
 
   if (!user) throw createError('10004');
@@ -28,7 +28,7 @@ export const authenticateUser = async ({ username, password }) => {
   return user;
 };
 
-export const createAuthenticationTokens = async (userId, deviceName) => {
+const createAuthenticationTokens = async (userId, deviceName) => {
   const device = await authenticationRepo.findOrCreateUserDevice(userId, deviceName);
   const accessToken = createAccessToken(userId, device.device_id);
   const refreshToken = await createRefreshToken(userId, device.device_id);
@@ -36,11 +36,20 @@ export const createAuthenticationTokens = async (userId, deviceName) => {
   return { accessToken, refreshToken };
 };
 
-export const getAuthenticationTokens = async (user, deviceName) => {
+const getAuthenticationTokens = async (user, deviceName) => {
   const { accessToken, refreshToken } = await createAuthenticationTokens(
     user.id, deviceName);
 
   updateLastLogin(user);
 
   return { accessToken, refreshToken };
+};
+
+// exports of functions
+module.export = {
+  authenticateUser,
+  checkPassword,
+  createAuthenticationTokens,
+  getAuthenticationTokens,
+  updateLastLogin,
 };

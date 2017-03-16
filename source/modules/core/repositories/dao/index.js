@@ -1,5 +1,5 @@
 const sequelize = require('sequelize');
-const ActivityModel = require('./activity');
+const ActivityModel = require('./activity').Activity;
 const NetworkModel = require('./network');
 const UserModel = require('./user');
 const TeamModel = require('./team');
@@ -67,7 +67,7 @@ TeamModel.belongsToMany(UserModel, {
   timestamps: false,
 });
 
-model.exports = {
+module.exports = {
   Activity: ActivityModel,
   Network: NetworkModel,
   User: UserModel,

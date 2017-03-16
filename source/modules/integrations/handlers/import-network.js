@@ -1,8 +1,9 @@
+const R = require('ramda');
 const syncService = require('../services/sync');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const message = { ...req.pre, ...req.auth };
+    const message = R.merge(req.pre, req.auth);
     const payload = {
       networkId: req.params.networkId,
       ownerEmail: req.payload.external_email,
