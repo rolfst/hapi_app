@@ -1,7 +1,7 @@
 const R = require('ramda');
 const service = require('../services/flexchange');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
     const message = { ...req.auth, ...req.pre };
     const payload = {

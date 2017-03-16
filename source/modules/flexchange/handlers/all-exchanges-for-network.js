@@ -4,7 +4,7 @@ const flexchangeService = require('../services/flexchange');
 
 const FILTER_PROPERTIES = ['start', 'end'];
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
     const message = { ...req.pre, ...req.auth };
     const payload = { ...req.params, filter: R.pick(FILTER_PROPERTIES, req.query) };

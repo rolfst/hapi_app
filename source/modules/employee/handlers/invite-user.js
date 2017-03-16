@@ -1,21 +1,10 @@
+const createServicePayload = require('../../../shared/utils/create-service-payload');
 const service = require('../services/invite-user');
 const responseUtil = require('../../../shared/utils/response');
-const Logger = require('../../../shared/services/logger');
 
-const logger = Logger.createLogger('EMPLOYEE/handler/inviteUser');
-
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const message = { ...req.pre, ...req.auth };
-    const payload = {
-      firstName: req.payload.first_name,
-      lastName: req.payload.last_name,
-      email: req.payload.email,
-      teamIds: req.payload.team_ids,
-      roleType: req.payload.role_type,
-    };
-
-    logger.info('Inviting an user', { payload, message });
+    const { payload, message } = createServicePayload(req);
     const invitedUser = await service.inviteUser(payload, message);
 
     return reply({ success: true, data: responseUtil.toSnakeCase(invitedUser) });

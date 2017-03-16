@@ -1,16 +1,10 @@
-const R = require('ramda');
+const createServicePayload = require('../../../shared/utils/create-service-payload');
 const integrationService = require('../services/integration');
-const Logger = require('../../../shared/services/logger');
-
-const logger = Logger.createLogger('INTEGRATIONS/handler/integrationAuth');
 
 module.exports = async (req, reply) => {
   try {
-    const payload = R.merge(req.params, req.payload);
-    const message = R.merge(req.pre, req.auth, { deviceName: req.headers['user-agent'] });
-
-    logger.info('Authenticating with integration', { payload: R.omit(['password'], payload),
-      message });
+    const { payload, message } = createServicePayload(req);
+    message.deviceName = req.headers['user-agent'];
     const accessToken = await integrationService.authenticate(payload, message);
 
     return reply({ data: { access_token: accessToken } });

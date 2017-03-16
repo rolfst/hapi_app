@@ -2,6 +2,6 @@ const Joi = require('joi');
 
 export default {
   payload: {
-    file: Joi.required(),
+    file: Joi.required().rename('fileStream'),
   },
 };

@@ -1,12 +1,12 @@
 const R = require('ramda');
+const createServicePayload = require('../../../shared/utils/create-service-payload');
 const createError = require('../../../shared/utils/create-error');
 const responseUtil = require('../../../shared/utils/response');
 const eventService = require('../services/event');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const message = { ...req.pre, ...req.auth };
-    const payload = { ...req.params, ...req.query };
+    const { message, payload } = createServicePayload(req);
     const viewEq = R.pathEq(['params', 'viewName']);
 
     const handler = R.cond([

@@ -1,12 +1,11 @@
+const createServicePayload = require('../../../../shared/utils/create-service-payload');
 const responseUtil = require('../../../../shared/utils/response');
 const conversationService = require('../services/conversation');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const { conversationId } = req.params;
-    const message = { ...req.pre, ...req.auth };
-
-    const conversation = await conversationService.getConversation(conversationId, message);
+    const { payload, message } = createServicePayload(req);
+    const conversation = await conversationService.getConversation(payload, message);
 
     return reply({ data: responseUtil.toSnakeCase(conversation) });
   } catch (err) {

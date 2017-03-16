@@ -2,7 +2,7 @@ const responseUtil = require('../../../shared/utils/response');
 const objectService = require('../../core/services/object');
 const feedService = require('../services/feed');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
     const message = { ...req.pre, ...req.auth };
     const [feedItems, count] = await Promise.all([

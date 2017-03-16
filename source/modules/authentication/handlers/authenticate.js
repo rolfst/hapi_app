@@ -1,8 +1,5 @@
-const R = require('ramda');
+const createServicePayload = require('../../../shared/utils/create-service-payload');
 const authenticationService = require('../services/authentication');
-const Logger = require('../../../shared/services/logger');
-
-const logger = Logger.createLogger('AUTHENTICATION/handler/authenticate');
 
 /*
  * The authentication script first authenticates with the Flex-Appeal database
@@ -11,13 +8,11 @@ const logger = Logger.createLogger('AUTHENTICATION/handler/authenticate');
  * belongs to. When the user is authenticated with an integration, we will
  * set the user_tokens retrieved from the integration.
  */
-module.exports = async (request, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const message = R.merge(request.pre, request.auth);
-    const payload = R.pick(['username', 'password'], request.payload);
+    const { payload, message } = createServicePayload(req);
+    message.deviceName = req.headers['user-agent'];
 
-    message.deviceName = request.headers['user-agent'];
-    logger.info('Authenticating', R.merge(R.omit(['password'], payload), message));
     const result = await authenticationService.authenticate(payload, message);
     const data = {
       access_token: result.accessToken,

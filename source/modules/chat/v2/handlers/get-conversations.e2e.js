@@ -239,11 +239,12 @@ describe('Get conversations for logged user (v2)', () => {
         artifacts: { authenticationToken: 'foo' },
       }));
 
-      const updatedConversation = await conversationService.getConversation(createdConversation.id,
-        {
-          credentials: participant1,
-          artifacts: { authenticationToken: 'foo' },
-        });
+      const updatedConversation = await conversationService.getConversation({
+        conversationId: createdConversation.id,
+      }, {
+        credentials: participant1,
+        artifacts: { authenticationToken: 'foo' },
+      });
 
       assert.isNotNull(createdConversation, 'updatedAt');
       assert.isNotNull(updatedConversation, 'updatedAt');

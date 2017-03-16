@@ -102,10 +102,11 @@ export const listConversations = async (payload, message) => {
  * @method getConversation
  * @return {external:Promise.<Conversation>} {@link module:modules/chat~Conversation}
  */
-export const getConversation = async(conversationId, message) => {
-  logger.info('get conversation', { conversationId, message });
+export const getConversation = async(payload, message) => {
+  logger.info('Get conversation', { payload, message });
 
-  const conversations = await listConversations({ conversationIds: [conversationId], limit: 1 });
+  const conversations = await listConversations({
+    conversationIds: [payload.conversationId], limit: 1 });
   const conversation = R.head(conversations);
 
   if (!conversation) throw createError('404');

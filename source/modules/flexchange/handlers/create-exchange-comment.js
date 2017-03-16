@@ -7,7 +7,7 @@ const logger = Logger.createLogger('FLEXCHANGE/handler/createExchangeComment');
 
 const FILTER_PROPERTIES = ['start', 'end'];
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
     const message = { ...req.pre, ...req.auth };
     const payload = { ...pick(req.params, ['exchangeId']), ...pick(req.payload, ['text']) };

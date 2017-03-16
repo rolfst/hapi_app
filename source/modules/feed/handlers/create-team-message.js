@@ -1,17 +1,13 @@
+const createServicePayload = require('../../../shared/utils/create-service-payload');
 const messageService = require('../services/message');
 const responseUtil = require('../../../shared/utils/response');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const payload = {
-      pollQuestion: req.payload.poll_question,
-      pollOptions: req.payload.poll_options,
-      parentType: 'team',
-      parentId: req.params.teamId,
-      text: req.payload.text || null,
-      files: req.payload.files || [],
-    };
-    const message = { ...req.pre, ...req.auth };
+    const { payload, message } = createServicePayload(req);
+    payload.parentType = 'team';
+    payload.parentId = req.params.teamId;
+
     const feedItems = await messageService.create(payload, message);
 
     return reply({ data: responseUtil.toSnakeCase(feedItems) });

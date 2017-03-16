@@ -1,10 +1,12 @@
+const createServicePayload = require('../../../../shared/utils/create-service-payload');
 const responseUtil = require('../../../../shared/utils/response');
 const conversationService = require('../services/conversation');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const payload = { userId: req.auth.credentials.id, ...req.query };
-    const message = { ...req.pre, ...req.auth };
+    const { payload, message } = createServicePayload(req);
+    payload.userId = req.auth.credentials.id;
+
     const [conversations, count] = await Promise.all([
       conversationService.listConversationsForUser(payload, message),
       conversationService.countConversations(payload, message),
