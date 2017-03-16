@@ -13,11 +13,11 @@ const EmployeeDispatcher = require('../dispatcher');
  * @param {User} payload.attributes - The id for the user to find
  * @param {number} payload.networkId - The id of network to apply scope
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method getUserWithNetworkScope
+ * @method updateEmployee
  * @return {external:Promise.<User[]>} {@link module:modules/core~User} Promise containing
  * collection of users
  */
-export const updateEmployee = async (payload, message) => {
+const updateEmployee = async (payload, message) => {
   // TODO move this functionality to the core module
   await userRepo.updateUser(message.credentials.id, payload.attributes);
 
@@ -41,7 +41,13 @@ export const updateEmployee = async (payload, message) => {
  * @return {external:Promise.<User>} {@link module:modules/core~User} Promise containing
  * collection of users
  */
-export const getEmployee = async (payload, message) => {
+const getEmployee = async (payload, message) => {
   return userService.getUserWithNetworkScope({
     id: message.credentials.id, networkId: message.network.id }, message);
+};
+
+// exports of functions
+module.export = {
+  getEmployee,
+  updateEmployee,
 };

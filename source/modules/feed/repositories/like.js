@@ -32,3 +32,10 @@ export const create = async (messageId, userId) => Like
  */
 export const remove = async (messageId, userId) => Like
   .destroy({ where: { messageId, userId } });
+
+// exports of functions
+module.export = {
+  create,
+  findBy,
+  remove,
+};
