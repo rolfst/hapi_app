@@ -16,6 +16,11 @@ const appendPasswordToUser = async (user) => {
   return employee;
 };
 
-export const generatePasswordsForMembers = async (members) => {
+const generatePasswordsForMembers = async (members) => {
   return Promise.map(members, await appendPasswordToUser);
+};
+
+// exports of functions
+module.export = {
+  generatePasswordsForMembers,
 };

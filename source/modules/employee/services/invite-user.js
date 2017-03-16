@@ -30,7 +30,7 @@ const impl = require('./implementation');
  * @return {external:Promise.<User>} {@link module:modules/core~User} Promise containing
  * the invited user
  */
-export const inviteNewUser = async (network, { firstName, lastName, email, roleType }) => {
+const inviteNewUser = async (network, { firstName, lastName, email, roleType }) => {
   const plainPassword = passwordUtil.plainRandom();
   const attributes = {
     firstName,
@@ -63,7 +63,7 @@ export const inviteNewUser = async (network, { firstName, lastName, email, roleT
  * @return {external:Promise.<User>} {@link module:modules/core~User} Promise containing
  * the invited user
  */
-export const inviteExistingUser = async (network, user, roleType) => {
+const inviteExistingUser = async (network, user, roleType) => {
   const userBelongsToNetwork = await userRepo.userBelongsToNetwork(user.id, network.id);
   const networkId = network.id;
   const userId = user.id;
@@ -98,7 +98,7 @@ export const inviteExistingUser = async (network, user, roleType) => {
  * @return {external:Promise.<User>} {@link module:modules/core~User} Promise containing the
  * invited user
  */
-export const inviteUser = async (payload, message) => {
+const inviteUser = async (payload, message) => {
   const { firstName, lastName, email, teamIds, roleType } = payload;
   const { network } = message;
 
@@ -134,7 +134,7 @@ export const inviteUser = async (payload, message) => {
  * @method inviteUsers
  * @return {void}
  */
-export const inviteUsers = async (payload, message) => {
+const inviteUsers = async (payload, message) => {
   const { network } = message;
   const identifiedUser = await userService.getUserWithNetworkScope({
     id: message.credentials.id, networkId: network.id }, message);
@@ -156,4 +156,12 @@ export const inviteUsers = async (payload, message) => {
       invitedAt: new Date(), userId: user.id, networkId: network.id }));
 
   map(usersToSendMailto, (user) => mailer.send(signupMail(network, user, user.plainPassword)));
+};
+
+// exports of functions
+module.export = {
+  inviteExistingUser,
+  inviteNewUser,
+  inviteUser,
+  inviteUsers,
 };
