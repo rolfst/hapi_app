@@ -1,6 +1,6 @@
-import { assert } from 'chai';
-import moment from 'moment';
-import * as unit from './notification';
+const { assert } = require('chai');
+const moment = require('moment');
+const unit = require('./notification');
 
 describe('notificationUtils', () => {
   describe('formatTime', () => {

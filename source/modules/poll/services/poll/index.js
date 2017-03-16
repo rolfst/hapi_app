@@ -1,7 +1,7 @@
-import R from 'ramda';
-import * as Logger from '../../../../shared/services/logger';
-import * as pollRepository from '../../repositories/poll';
-import * as impl from './implementation';
+const R = require('ramda');
+const Logger = require('../../../../shared/services/logger');
+const pollRepository = require('../../repositories/poll');
+const impl = require('./implementation');
 
 /**
  * @module modules/POLL/services/poll

@@ -1,6 +1,6 @@
-import tokenUtil from '../utils/token';
-import * as userRepo from '../../modules/core/repositories/user';
-import * as authenticationService from '../../modules/authentication/services/authentication';
+const tokenUtil = require('../utils/token');
+const userRepo = require('../../modules/core/repositories/user');
+const authenticationService = require('../../modules/authentication/services/authentication');
 
 /**
  * @module shared/test-utils/authencticate

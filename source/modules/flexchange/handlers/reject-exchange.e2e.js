@@ -1,14 +1,14 @@
-import { assert } from 'chai';
-import moment from 'moment';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import { patchRequest } from '../../../shared/test-utils/request';
-import { exchangeTypes } from '../repositories/dao/exchange';
-import {
+const { assert } = require('chai');
+const moment = require('moment');
+const testHelper = require('../../../shared/test-utils/helpers');
+const { patchRequest } = require('../../../shared/test-utils/request');
+const { exchangeTypes } = require('../repositories/dao/exchange');
+const {
   createExchange,
   acceptExchange,
   declineExchange,
   approveExchange,
-} from '../repositories/exchange';
+} = require('../repositories/exchange');
 
 describe('Reject exchange', () => {
   let admin;

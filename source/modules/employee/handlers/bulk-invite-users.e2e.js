@@ -1,13 +1,13 @@
-import { assert } from 'chai';
-import Promise from 'bluebird';
-import sinon from 'sinon';
-import { flatten, sortBy, partialRight, flow, map } from 'lodash';
-import { postRequest } from '../../../shared/test-utils/request';
-import * as mailer from '../../../shared/services/mailer';
-import * as stubs from '../../../shared/test-utils/stubs';
-import { UserRoles } from '../../../shared/services/permission';
-import * as userService from '../../core/services/user';
-import * as testHelpers from '../../../shared/test-utils/helpers';
+const { assert } = require('chai');
+const Promise = require('bluebird');
+const sinon = require('sinon');
+const { flatten, sortBy, partialRight, flow, map } = require('lodash');
+const { postRequest } = require('../../../shared/test-utils/request');
+const mailer = require('../../../shared/services/mailer');
+const stubs = require('../../../shared/test-utils/stubs');
+const { UserRoles } = require('../../../shared/services/permission');
+const userService = require('../../core/services/user');
+const testHelpers = require('../../../shared/test-utils/helpers');
 
 describe('Handler: Bulk invite users', () => {
   let sandbox;

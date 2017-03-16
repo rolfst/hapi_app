@@ -1,8 +1,8 @@
-import R from 'ramda';
-import Sequelize from '../../../../shared/configs/sequelize';
-import { User } from '../../../core/repositories/dao';
-import { Conversation, ConversationUser } from './dao';
-import createConversationModel from '../models/conversation';
+const R = require('ramda');
+const Sequelize = require('../../../../shared/configs/sequelize');
+const { User } = require('../../../core/repositories/dao');
+const { Conversation, ConversationUser } = require('./dao');
+const createConversationModel = require('../models/conversation');
 
 /**
  * Find multiple conversations

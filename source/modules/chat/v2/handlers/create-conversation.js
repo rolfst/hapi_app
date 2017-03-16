@@ -1,6 +1,6 @@
-import R from 'ramda';
-import * as responseUtil from '../../../../shared/utils/response';
-import * as conversationService from '../services/conversation';
+const R = require('ramda');
+const responseUtil = require('../../../../shared/utils/response');
+const conversationService = require('../services/conversation');
 
 module.exports = async (req, reply) => {
   try {

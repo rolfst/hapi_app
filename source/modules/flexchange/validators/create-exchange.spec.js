@@ -1,8 +1,8 @@
-import { assert } from 'chai';
-import moment from 'moment';
-import Joi from 'joi';
-import { omit } from 'lodash';
-import scheme from './create-exchange';
+const { assert } = require('chai');
+const moment = require('moment');
+const Joi = require('joi');
+const { omit } = require('lodash');
+const scheme = require('./create-exchange');
 
 describe('Create exchange validator', () => {
   it('only accepts TEAM, ALL and USER values as type', () => {

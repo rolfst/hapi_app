@@ -1,5 +1,5 @@
-import bcrypt from 'bcrypt';
-import { sample, random } from 'lodash';
+const bcrypt = require('bcrypt');
+const { sample, random } = require('lodash');
 
 export const plainRandom = () => {
   const words = [

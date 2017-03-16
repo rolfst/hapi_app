@@ -1,8 +1,8 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import * as loggerService from '../services/logger';
-import createError from './create-error';
-import * as unit from './server';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const loggerService = require('../services/logger');
+const createError = require('./create-error');
+const unit = require('./server');
 
 describe('serverUtil', () => {
   describe('transformBoomToErrorResponse', () => {

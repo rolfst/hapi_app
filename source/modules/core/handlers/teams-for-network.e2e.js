@@ -1,7 +1,7 @@
-import { assert } from 'chai';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import { getRequest } from '../../../shared/test-utils/request';
-import * as teamRepository from '../repositories/team';
+const { assert } = require('chai');
+const testHelper = require('../../../shared/test-utils/helpers');
+const { getRequest } = require('../../../shared/test-utils/request');
+const teamRepository = require('../repositories/team');
 
 describe('Handler: Teams for network', () => {
   let network;

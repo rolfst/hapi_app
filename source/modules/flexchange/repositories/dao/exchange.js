@@ -1,8 +1,8 @@
-import Sequelize from 'sequelize';
-import moment from 'moment';
-import model from '../../../../shared/configs/sequelize';
-import * as dateUtils from '../../../../shared/utils/date';
-import makeCreatedInObject from '../../utils/created-in-text';
+const Sequelize = require('sequelize');
+const moment = require('moment');
+const model = require('../../../../shared/configs/sequelize');
+const dateUtils = require('../../../../shared/utils/date');
+const makeCreatedInObject = require('../../utils/created-in-text');
 
 export const exchangeTypes = {
   NETWORK: 'ALL',

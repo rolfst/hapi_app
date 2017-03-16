@@ -1,9 +1,9 @@
-import { assert } from 'chai';
-import R from 'ramda';
-import Promise from 'bluebird';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as repository from './user';
-import * as teamRepository from './team';
+const { assert } = require('chai');
+const R = require('ramda');
+const Promise = require('bluebird');
+const testHelper = require('../../../shared/test-utils/helpers');
+const repository = require('./user');
+const teamRepository = require('./team');
 
 describe('User Repository', () => {
   let createdUser;

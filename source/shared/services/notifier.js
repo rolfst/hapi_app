@@ -1,7 +1,7 @@
-import Parse from 'parse/node';
-import R from 'ramda';
-import * as Logger from './logger';
-import * as Mixpanel from './mixpanel';
+const Parse = require('parse/node');
+const R = require('ramda');
+const Logger = require('./logger');
+const Mixpanel = require('./mixpanel');
 
 const logger = Logger.createLogger('SHARED/services/notifier');
 

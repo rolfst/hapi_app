@@ -1,18 +1,18 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import Promise from 'bluebird';
-import R from 'ramda';
-import mixpanel from 'mixpanel';
-import * as Intercom from '../../../shared/services/intercom';
-import * as passwordUtil from '../../../shared/utils/password';
-import * as notifier from '../../../shared/services/notifier';
-import * as mailer from '../../../shared/services/mailer';
-import signupMail from '../../../shared/mails/signup';
-import * as userRepo from '../../core/repositories/user';
-import * as userService from '../../core/services/user';
-import * as networkRepo from '../../core/repositories/network';
-import * as service from './invite-user';
-import * as impl from './implementation';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const Promise = require('bluebird');
+const R = require('ramda');
+const mixpanel = require('mixpanel');
+const Intercom = require('../../../shared/services/intercom');
+const passwordUtil = require('../../../shared/utils/password');
+const notifier = require('../../../shared/services/notifier');
+const mailer = require('../../../shared/services/mailer');
+const signupMail = require('../../../shared/mails/signup');
+const userRepo = require('../../core/repositories/user');
+const userService = require('../../core/services/user');
+const networkRepo = require('../../core/repositories/network');
+const service = require('./invite-user');
+const impl = require('./implementation');
 
 describe('Invite users', () => {
   let sandbox;

@@ -1,5 +1,5 @@
-import * as syncService from '../services/sync';
-import * as Logger from '../../../shared/services/logger';
+const syncService = require('../services/sync');
+const Logger = require('../../../shared/services/logger');
 
 const logger = Logger.createLogger('INTEGRATIONS/handler/syncWithIntegrationPartner');
 

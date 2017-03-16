@@ -1,5 +1,5 @@
-import * as Logger from '../../../shared/services/logger';
-import * as authenticationService from '../services/authentication';
+const Logger = require('../../../shared/services/logger');
+const authenticationService = require('../services/authentication');
 
 const logger = Logger.createLogger('AUTHENCTIATION/handler/delegate');
 

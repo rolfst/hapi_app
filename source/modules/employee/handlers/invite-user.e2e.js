@@ -1,6 +1,6 @@
-import { assert } from 'chai';
-import * as testHelpers from '../../../shared/test-utils/helpers';
-import { postRequest } from '../../../shared/test-utils/request';
+const { assert } = require('chai');
+const testHelpers = require('../../../shared/test-utils/helpers');
+const { postRequest } = require('../../../shared/test-utils/request');
 
 describe('Handler: Invite user', () => {
   let admin;

@@ -1,8 +1,8 @@
-import R from 'ramda';
-import moment from 'moment';
-import * as Mixpanel from '../../../../shared/services/mixpanel';
-import createError from '../../../../shared/utils/create-error';
-import * as Logger from '../../../../shared/services/logger';
+const R = require('ramda');
+const moment = require('moment');
+const Mixpanel = require('../../../../shared/services/mixpanel');
+const createError = require('../../../../shared/utils/create-error');
+const Logger = require('../../../../shared/services/logger');
 
 const logger = Logger.createLogger('STATISTICS/service/events');
 
@@ -110,3 +110,9 @@ export async function getCreatedShifts(payload, message) {
 
   return Mixpanel.executeQuery(jql, message);
 }
+
+module.exports = {
+  getCreatedMessages,
+  getApprovedShifts,
+  getCreatedShifts,
+};

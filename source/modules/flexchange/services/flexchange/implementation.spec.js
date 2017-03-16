@@ -1,5 +1,5 @@
-import { assert } from 'chai';
-import * as impl from './implementation';
+const { assert } = require('chai');
+const impl = require('./implementation');
 
 describe('Flexchange service', () => {
   describe('mergeShiftWithExchangeAndTeam', () => {

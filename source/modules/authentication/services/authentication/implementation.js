@@ -1,10 +1,10 @@
-import moment from 'moment';
-import bcrypt from 'bcrypt';
-import createError from '../../../../shared/utils/create-error';
-import * as authenticationRepo from '../../../core/repositories/authentication';
-import * as userRepo from '../../../core/repositories/user';
-import createAccessToken from '../../utils/create-access-token';
-import createRefreshToken from '../../utils/create-refresh-token';
+const moment = require('moment');
+const bcrypt = require('bcrypt');
+const createError = require('../../../../shared/utils/create-error');
+const authenticationRepo = require('../../../core/repositories/authentication');
+const userRepo = require('../../../core/repositories/user');
+const createAccessToken = require('../../utils/create-access-token');
+const createRefreshToken = require('../../utils/create-refresh-token');
 
 export const checkPassword = (hash, plain) => {
   // We have to replace the first characters because of the

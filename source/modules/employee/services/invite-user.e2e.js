@@ -1,12 +1,12 @@
-import { assert } from 'chai';
-import { find, pick } from 'lodash';
-import sinon from 'sinon';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as networkRepo from '../../core/repositories/network';
-import * as userRepo from '../../core/repositories/user';
-import * as teamRepo from '../../core/repositories/team';
-import EmployeeDispatcher from '../dispatcher';
-import * as service from './invite-user';
+const { assert } = require('chai');
+const { find, pick } = require('lodash');
+const sinon = require('sinon');
+const testHelper = require('../../../shared/test-utils/helpers');
+const networkRepo = require('../../core/repositories/network');
+const userRepo = require('../../core/repositories/user');
+const teamRepo = require('../../core/repositories/team');
+const EmployeeDispatcher = require('../dispatcher');
+const service = require('./invite-user');
 
 describe('Service: Invite user', () => {
   let employee;

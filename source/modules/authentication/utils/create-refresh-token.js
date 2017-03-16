@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import tokenUtil from '../../../shared/utils/token';
+const _ = require('lodash');
+const tokenUtil = require('../../../shared/utils/token');
 
 export default (userId, deviceId) => {
   const payload = {

@@ -1,6 +1,6 @@
-import R from 'ramda';
-import createExchangeResponseModel from '../models/exchange-response';
-import { ExchangeResponse } from './dao';
+const R = require('ramda');
+const createExchangeResponseModel = require('../models/exchange-response');
+const { ExchangeResponse } = require('./dao');
 
 /**
  * @module modules/flexchange/repositories/exchange-response

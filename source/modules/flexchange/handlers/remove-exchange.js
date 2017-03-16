@@ -1,5 +1,5 @@
-import * as Logger from '../../../shared/services/logger';
-import * as flexchangeService from '../services/flexchange';
+const Logger = require('../../../shared/services/logger');
+const flexchangeService = require('../services/flexchange');
 
 const logger = Logger.createLogger('FLEXCHANGE/handler/removeExchanges');
 

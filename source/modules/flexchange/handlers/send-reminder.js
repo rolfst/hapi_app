@@ -1,5 +1,5 @@
-import * as Logger from '../../../shared/services/logger';
-import * as reminderService from '../services/reminder';
+const Logger = require('../../../shared/services/logger');
+const reminderService = require('../services/reminder');
 
 const logger = Logger.createLogger('FLEXCHANGE/handler/sendReminder');
 

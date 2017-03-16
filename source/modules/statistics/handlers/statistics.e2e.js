@@ -1,8 +1,8 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import { getRequest } from '../../../shared/test-utils/request';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as Mixpanel from '../../../shared/services/mixpanel';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const { getRequest } = require('../../../shared/test-utils/request');
+const testHelper = require('../../../shared/test-utils/helpers');
+const Mixpanel = require('../../../shared/services/mixpanel');
 
 describe('Handler: Statistics', () => {
   let sandbox;

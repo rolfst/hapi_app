@@ -1,6 +1,6 @@
-import R from 'ramda';
-import createPrivateMessageModel from '../models/private-message';
-import { PrivateMessage } from './dao';
+const R = require('ramda');
+const createPrivateMessageModel = require('../models/private-message');
+const { PrivateMessage } = require('./dao');
 
 export const findBy = (whereConstraint) => PrivateMessage
   .findAll({ where: whereConstraint })

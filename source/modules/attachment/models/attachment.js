@@ -1,5 +1,5 @@
-import * as dateUtils from '../../../shared/utils/date';
-import * as Storage from '../../../shared/services/storage';
+const dateUtils = require('../../../shared/utils/date');
+const Storage = require('../../../shared/services/storage');
 
 export default (dao) => ({
   type: 'attachment',

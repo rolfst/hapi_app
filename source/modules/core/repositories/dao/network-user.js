@@ -1,5 +1,5 @@
-import Sequelize from 'sequelize';
-import model from '../../../../shared/configs/sequelize';
+const Sequelize = require('sequelize');
+const model = require('../../../../shared/configs/sequelize');
 
 const NetworkUser = model.define('NetworkUser', {
   networkId: {
@@ -60,4 +60,4 @@ const NetworkUser = model.define('NetworkUser', {
   updatedAt: false,
 });
 
-export default NetworkUser;
+module.exports = NetworkUser;

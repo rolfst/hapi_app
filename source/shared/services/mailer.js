@@ -1,7 +1,7 @@
-import nodemailer from 'nodemailer';
-import SendGridSMTP from 'smtpapi';
-import { mapValues } from 'lodash';
-import * as Logger from './logger';
+const nodemailer = require('nodemailer');
+const SendGridSMTP = require('smtpapi');
+const { mapValues } = require('lodash');
+const Logger = require('./logger');
 
 const logger = Logger.createLogger('SHARED/services/mailer');
 
@@ -79,4 +79,13 @@ export const send = (mail, message = null) => {
   return transporter.sendMail(mailOptions, (err) => {
     if (err) logger.warn('Error when sending mail', { err, message, mail_options: mailOptions });
   });
+};
+
+module.exports = {
+  send,
+  createMailOptions,
+  createSMTPHeader,
+  mapsToSubstitutes,
+  prepare,
+  flattenBulkMails,
 };

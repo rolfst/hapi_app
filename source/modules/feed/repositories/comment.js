@@ -1,6 +1,6 @@
-import R from 'ramda';
-import { Comment } from './dao';
-import createCommentModel from '../models/comment';
+const R = require('ramda');
+const { Comment } = require('./dao');
+const createCommentModel = require('../models/comment');
 
 /**
  * Find comments by where constraint

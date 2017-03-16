@@ -1,4 +1,4 @@
-import { map, isString, isArray, forIn, mapKeys, snakeCase, isObject } from 'lodash';
+const { map, isString, isArray, forIn, mapKeys, snakeCase, isObject } = require('lodash');
 
 const transformSnakeCase = (obj) => {
   if (isString(obj)) return obj;

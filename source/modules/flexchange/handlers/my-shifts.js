@@ -1,6 +1,6 @@
-import { omit } from 'lodash';
-import * as Logger from '../../../shared/services/logger';
-import * as flexchangeService from '../services/flexchange';
+const { omit } = require('lodash');
+const Logger = require('../../../shared/services/logger');
+const flexchangeService = require('../services/flexchange');
 
 const logger = Logger.createLogger('FLEXCHANGE/handler/myShifts');
 

@@ -1,6 +1,6 @@
-import R from 'ramda';
-import { _Object } from './dao';
-import createDomainObject from '../models/object';
+const R = require('ramda');
+const { _Object } = require('./dao');
+const createDomainObject = require('../models/object');
 
 /**
  * Creating an object

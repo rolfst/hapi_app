@@ -1,8 +1,7 @@
-import 'babel-polyfill';
 require('dotenv').config();
-import 'newrelic';
-import Parse from 'parse/node';
-import * as Logger from './shared/services/logger';
+require('newrelic');
+const Parse = require('parse/node');
+const Logger = require('./shared/services/logger');
 
 const logger = Logger.createLogger('SERVER');
 const createServer = require('./server').default;

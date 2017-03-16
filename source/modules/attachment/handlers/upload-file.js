@@ -1,5 +1,5 @@
-import * as responseUtil from '../../../shared/utils/response';
-import * as attachmentService from '../services/attachment';
+const responseUtil = require('../../../shared/utils/response');
+const attachmentService = require('../services/attachment');
 
 export default async (req, reply) => {
   try {

@@ -1,13 +1,13 @@
-import R from 'ramda';
-import Promise from 'bluebird';
-import * as passwordUtil from '../../../../shared/utils/password';
-import { createAdapter } from '../../../../shared/utils/create-adapter';
-import * as Logger from '../../../../shared/services/logger';
-import createError from '../../../../shared/utils/create-error';
-import * as userRepository from '../../../core/repositories/user';
-import * as networkRepository from '../../../core/repositories/network';
-import * as networkService from '../../../core/services/network';
-import * as impl from './implementation';
+const R = require('ramda');
+const Promise = require('bluebird');
+const passwordUtil = require('../../../../shared/utils/password');
+const { createAdapter } = require('../../../../shared/utils/create-adapter');
+const Logger = require('../../../../shared/services/logger');
+const createError = require('../../../../shared/utils/create-error');
+const userRepository = require('../../../core/repositories/user');
+const networkRepository = require('../../../core/repositories/network');
+const networkService = require('../../../core/services/network');
+const impl = require('./implementation');
 
 const logger = Logger.createLogger('INTEGRATIONS/service/sync');
 

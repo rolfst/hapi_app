@@ -1,7 +1,7 @@
-import moment from 'moment';
-import createError from '../../../shared/utils/create-error';
-import * as Logger from '../../../shared/services/logger';
-import { updateExchangeById } from '../repositories/exchange';
+const moment = require('moment');
+const createError = require('../../../shared/utils/create-error');
+const Logger = require('../../../shared/services/logger');
+const { updateExchangeById } = require('../repositories/exchange');
 
 const logger = Logger.createLogger('FLEXCHANGE/handler/updateExchange');
 

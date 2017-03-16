@@ -1,6 +1,6 @@
-import * as responseUtil from '../../../shared/utils/response';
-import * as Logger from '../../../shared/services/logger';
-import * as employeeService from '../services/employee';
+const responseUtil = require('../../../shared/utils/response');
+const Logger = require('../../../shared/services/logger');
+const employeeService = require('../services/employee');
 
 const logger = Logger.createLogger('EMPLOYEE/handler/viewProfile');
 

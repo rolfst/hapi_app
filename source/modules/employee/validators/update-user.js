@@ -1,4 +1,4 @@
-import { string, date } from 'joi';
+const { string, date } = require('joi');
 
 export default {
   payload: {

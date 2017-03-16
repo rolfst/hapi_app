@@ -1,7 +1,7 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import * as userRepo from '../../modules/core/repositories/user';
-import * as unit from './create-adapter';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const userRepo = require('../../modules/core/repositories/user');
+const unit = require('./create-adapter');
 
 describe('createAdapter', () => {
   const integrationName = 'foo';

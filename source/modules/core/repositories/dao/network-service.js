@@ -1,5 +1,5 @@
-import Sequelize from 'sequelize';
-import model from '../../../../shared/configs/sequelize';
+const Sequelize = require('sequelize');
+const model = require('../../../../shared/configs/sequelize');
 
 const NetworkIntegration = model.define('NetworkIntegration', {
   networkId: {
@@ -22,4 +22,4 @@ const NetworkIntegration = model.define('NetworkIntegration', {
   updatedAt: false,
 });
 
-export default NetworkIntegration;
+module.exports = NetworkIntegration;

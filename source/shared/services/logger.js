@@ -1,6 +1,6 @@
-import R from 'ramda';
-import stream from 'stream';
-import bunyan from 'bunyan';
+const R = require('ramda');
+const stream = require('stream');
+const bunyan = require('bunyan');
 
 /**
  * @module shared/services/logger

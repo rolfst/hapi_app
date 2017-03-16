@@ -1,5 +1,5 @@
-import uuid from 'uuid-v4';
-import { UserDevice } from './dao';
+const uuid = require('uuid-v4');
+const { UserDevice } = require('./dao');
 
 /**
  * @module modules/core/repositories/authentication

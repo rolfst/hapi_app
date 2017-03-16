@@ -1,8 +1,8 @@
-import R from 'ramda';
-import * as Storage from '../../../../shared/services/storage';
-import * as Logger from '../../../../shared/services/logger';
-import createError from '../../../../shared/utils/create-error';
-import * as attachmentRepo from '../../repositories/attachment';
+const R = require('ramda');
+const Storage = require('../../../../shared/services/storage');
+const Logger = require('../../../../shared/services/logger');
+const createError = require('../../../../shared/utils/create-error');
+const attachmentRepo = require('../../repositories/attachment');
 
 /**
  * @module modules/attachment/services/attachment

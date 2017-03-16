@@ -1,12 +1,12 @@
-import R from 'ramda';
-import Promise from 'bluebird';
-import * as Logger from '../../../../../shared/services/logger';
-import createError from '../../../../../shared/utils/create-error';
-import * as attachmentService from '../../../../attachment/services/attachment';
-import * as objectService from '../../../../core/services/object';
-import * as privateMessageRepository from '../../repositories/private-message';
-import * as conversationRepository from '../../repositories/conversation';
-import ChatDispatcher from '../../dispatcher';
+const R = require('ramda');
+const Promise = require('bluebird');
+const Logger = require('../../../../../shared/services/logger');
+const createError = require('../../../../../shared/utils/create-error');
+const attachmentService = require('../../../../attachment/services/attachment');
+const objectService = require('../../../../core/services/object');
+const privateMessageRepository = require('../../repositories/private-message');
+const conversationRepository = require('../../repositories/conversation');
+const ChatDispatcher = require('../../dispatcher');
 
 const logger = Logger.createLogger('CHAT/service/conversation');
 

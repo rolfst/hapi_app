@@ -1,5 +1,5 @@
-import * as responseUtil from '../../../shared/utils/response';
-import * as networkService from '../services/network';
+const responseUtil = require('../../../shared/utils/response');
+const networkService = require('../services/network');
 
 export default async (req, reply) => {
   try {

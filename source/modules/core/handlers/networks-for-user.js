@@ -1,6 +1,6 @@
-import * as responseUtil from '../../../shared/utils/response';
-import * as Logger from '../../../shared/services/logger';
-import * as networkService from '../services/network';
+const responseUtil = require('../../../shared/utils/response');
+const Logger = require('../../../shared/services/logger');
+const networkService = require('../services/network');
 
 const logger = Logger.createLogger('CORE/handler/networksForUser');
 

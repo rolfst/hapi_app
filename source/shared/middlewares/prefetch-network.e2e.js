@@ -1,9 +1,9 @@
-import { Server } from 'hapi';
-import { assert } from 'chai';
-import jwtStrategy from './authenticator-strategy';
-import * as testHelper from '../test-utils/helpers';
-import { getRequest } from '../test-utils/request';
-import preFetchNetwork from '../middlewares/prefetch-network';
+const { Server } = require('hapi');
+const { assert } = require('chai');
+const jwtStrategy = require('./authenticator-strategy');
+const testHelper = require('../test-utils/helpers');
+const { getRequest } = require('../test-utils/request');
+const preFetchNetwork = require('../middlewares/prefetch-network');
 
 describe('Plugin: Network', () => {
   let server;

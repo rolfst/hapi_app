@@ -1,9 +1,9 @@
-import { assert } from 'chai';
-import blueprints from '../../../../../shared/test-utils/blueprints';
-import * as userRepo from '../../../../core/repositories/user';
-import * as objectService from '../../../../core/services/object';
-import * as messageService from '../private-message';
-import * as conversationService from '../../services/conversation';
+const { assert } = require('chai');
+const blueprints = require('../../../../../shared/test-utils/blueprints');
+const userRepo = require('../../../../core/repositories/user');
+const objectService = require('../../../../core/services/object');
+const messageService = require('../private-message');
+const conversationService = require('../../services/conversation');
 
 describe('Service: Conversation (v2)', () => {
   describe('remove', () => {

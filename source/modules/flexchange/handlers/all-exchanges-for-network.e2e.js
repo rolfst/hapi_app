@@ -1,13 +1,13 @@
-import { assert } from 'chai';
-import qs from 'qs';
-import moment from 'moment';
-import { map, pick, find } from 'lodash';
-import { getRequest } from '../../../shared/test-utils/request';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as stubs from '../../../shared/test-utils/stubs';
-import * as teamRepo from '../../core/repositories/team';
-import { exchangeTypes } from '../repositories/dao/exchange';
-import * as exchangeRepo from '../repositories/exchange';
+const { assert } = require('chai');
+const qs = require('qs');
+const moment = require('moment');
+const { map, pick, find } = require('lodash');
+const { getRequest } = require('../../../shared/test-utils/request');
+const testHelper = require('../../../shared/test-utils/helpers');
+const stubs = require('../../../shared/test-utils/stubs');
+const teamRepo = require('../../core/repositories/team');
+const { exchangeTypes } = require('../repositories/dao/exchange');
+const exchangeRepo = require('../repositories/exchange');
 
 describe('Get exchanges for network', () => {
   const pristineNetwork = stubs.pristine_networks_admins[0];

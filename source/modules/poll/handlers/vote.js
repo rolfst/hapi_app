@@ -1,5 +1,5 @@
-import * as PollService from '../services/poll';
-import * as responseUtil from '../../../shared/utils/response';
+const PollService = require('../services/poll');
+const responseUtil = require('../../../shared/utils/response');
 
 export default async (req, reply) => {
   try {

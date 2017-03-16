@@ -1,4 +1,4 @@
-import Joi from 'joi';
+const Joi = require('joi');
 
 export default {
   params: Joi.object().keys({

@@ -1,6 +1,6 @@
-import FeedMessageModel from './message';
-import LikeModel from './like';
-import CommentModel from './comment';
+const FeedMessageModel = require('./message');
+const LikeModel = require('./like');
+const CommentModel = require('./comment');
 
 module.exports = {
   FeedMessage: FeedMessageModel,

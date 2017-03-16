@@ -1,10 +1,10 @@
-import { assert } from 'chai';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import Promise from 'bluebird';
-import blueprints from '../../../../shared/test-utils/blueprints';
-import { getRequest } from '../../../../shared/test-utils/request';
-import * as privateMessageService from '../services/private-message';
-import * as conversationService from '../services/conversation';
+const { assert } = require('chai');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const Promise = require('bluebird');
+const blueprints = require('../../../../shared/test-utils/blueprints');
+const { getRequest } = require('../../../../shared/test-utils/request');
+const privateMessageService = require('../services/private-message');
+const conversationService = require('../services/conversation');
 
 describe('Get conversations for logged user (v2)', () => {
   let creator;

@@ -1,5 +1,5 @@
-import * as Logger from '../../../../shared/services/logger';
-import { deleteConversationById } from '../repositories/conversation';
+const Logger = require('../../../../shared/services/logger');
+const { deleteConversationById } = require('../repositories/conversation');
 
 const logger = Logger.createLogger('CHAT/handler/deleteCoversation');
 

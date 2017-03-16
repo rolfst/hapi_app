@@ -1,6 +1,6 @@
-import { assert } from 'chai';
-import createError from './create-error';
-import * as responseUtil from './response';
+const { assert } = require('chai');
+const createError = require('./create-error');
+const responseUtil = require('./response');
 
 describe('responseUtil', () => {
   describe('error', () => {

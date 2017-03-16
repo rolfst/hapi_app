@@ -1,6 +1,6 @@
-import R from 'ramda';
-import { FeedMessage } from './dao';
-import createFeedMessageModel from '../models/message';
+const R = require('ramda');
+const { FeedMessage } = require('./dao');
+const createFeedMessageModel = require('../models/message');
 
 /**
  * Find a message by id

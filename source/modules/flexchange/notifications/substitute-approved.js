@@ -1,6 +1,6 @@
-import moment from 'moment';
-import * as notifier from '../../../shared/services/notifier';
-import * as notificationUtils from '../utils/notification';
+const moment = require('moment');
+const notifier = require('../../../shared/services/notifier');
+const notificationUtils = require('../utils/notification');
 
 export const createNotification = (exchange) => {
   const creator = exchange.User.fullName;

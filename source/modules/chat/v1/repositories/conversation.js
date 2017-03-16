@@ -1,10 +1,10 @@
-import { map } from 'lodash';
-import R from 'ramda';
-import Sequelize from '../../../../shared/configs/sequelize';
-import { User } from '../../../core/repositories/dao';
-import * as objectRepository from '../../../core/repositories/object';
-import { Conversation, Message, ConversationUser } from './dao';
-import createConversationModel from '../models/conversation';
+const { map } = require('lodash');
+const R = require('ramda');
+const Sequelize = require('../../../../shared/configs/sequelize');
+const { User } = require('../../../core/repositories/dao');
+const objectRepository = require('../../../core/repositories/object');
+const { Conversation, Message, ConversationUser } = require('./dao');
+const createConversationModel = require('../models/conversation');
 
 /**
  * @module modules/chat/repositories/conversation

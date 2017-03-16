@@ -1,9 +1,9 @@
-import { assert } from 'chai';
-import { find } from 'lodash';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import blueprints from '../../../shared/test-utils/blueprints';
-import stubs from '../../../shared/test-utils/stubs';
-import { getRequest } from '../../../shared/test-utils/request';
+const { assert } = require('chai');
+const { find } = require('lodash');
+const testHelper = require('../../../shared/test-utils/helpers');
+const blueprints = require('../../../shared/test-utils/blueprints');
+const stubs = require('../../../shared/test-utils/stubs');
+const { getRequest } = require('../../../shared/test-utils/request');
 
 describe('Networks for logged user', async () => {
   let requestResult;

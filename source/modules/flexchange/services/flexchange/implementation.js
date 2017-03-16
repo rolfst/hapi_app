@@ -1,7 +1,7 @@
-import { omit, find } from 'lodash';
-import R from 'ramda';
-import createError from '../../../../shared/utils/create-error';
-import * as exchangeRepo from '../../repositories/exchange';
+const { omit, find } = require('lodash');
+const R = require('ramda');
+const createError = require('../../../../shared/utils/create-error');
+const exchangeRepo = require('../../repositories/exchange');
 
 export const validateExchangeResponse = (exchangeResponse) => {
   if (exchangeResponse.approved) {

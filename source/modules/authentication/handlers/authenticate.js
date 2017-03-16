@@ -1,6 +1,6 @@
-import { pick, omit } from 'lodash';
-import * as authenticationService from '../services/authentication';
-import * as Logger from '../../../shared/services/logger';
+const { pick, omit } = require('lodash');
+const authenticationService = require('../services/authentication');
+const Logger = require('../../../shared/services/logger');
 
 const logger = Logger.createLogger('AUTHENTICATION/handler/authenticate');
 

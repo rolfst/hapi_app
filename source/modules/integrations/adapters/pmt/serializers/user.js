@@ -1,5 +1,5 @@
-import R from 'ramda';
-import moment from 'moment';
+const R = require('ramda');
+const moment = require('moment');
 
 function formatPhoneNumber(number) {
   if (!number) return null;

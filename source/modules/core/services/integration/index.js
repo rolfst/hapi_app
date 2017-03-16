@@ -1,4 +1,4 @@
-import * as integrationRepo from '../../repositories/integration';
+const integrationRepo = require('../../repositories/integration');
 
 /**
  * @module modules/core/services/integration

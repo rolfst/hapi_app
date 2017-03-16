@@ -1,5 +1,5 @@
-import moment from 'moment';
-import * as Intercom from 'intercom-client';
+const moment = require('moment');
+const Intercom = require('intercom-client');
 
 export const getClient = () =>
   new Intercom.Client({ token: process.env.INTERCOM_TOKEN || 'foofortesting' });

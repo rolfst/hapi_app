@@ -1,6 +1,6 @@
-import * as responseUtil from '../../../shared/utils/response';
-import * as Logger from '../../../shared/services/logger';
-import * as flexchangeService from '../services/flexchange';
+const responseUtil = require('../../../shared/utils/response');
+const Logger = require('../../../shared/services/logger');
+const flexchangeService = require('../services/flexchange');
 
 const logger = Logger.createLogger('FLEXCHANGE/handler/exchangeActivityFeed');
 

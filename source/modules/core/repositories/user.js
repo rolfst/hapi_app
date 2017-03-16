@@ -1,11 +1,11 @@
-import { map, pick, sample } from 'lodash';
-import R from 'ramda';
-import Promise from 'bluebird';
-import createError from '../../../shared/utils/create-error';
-import createUserModel from '../models/user';
-import createNetworkLinkModel from '../models/network-link';
-import createCredentialsModel from '../models/credentials';
-import { User, Network, NetworkUser, Team } from './dao';
+const { map, pick, sample } = require('lodash');
+const R = require('ramda');
+const Promise = require('bluebird');
+const createError = require('../../../shared/utils/create-error');
+const createUserModel = require('../models/user');
+const createNetworkLinkModel = require('../models/network-link');
+const createCredentialsModel = require('../models/credentials');
+const { User, Network, NetworkUser, Team } = require('./dao');
 
 /**
  * @module modules/core/repositories/user

@@ -1,6 +1,6 @@
-import R from 'ramda';
-import { Like } from './dao';
-import createLikeModel from '../models/like';
+const R = require('ramda');
+const { Like } = require('./dao');
+const createLikeModel = require('../models/like');
 
 /**
  * Find likes by where constraint

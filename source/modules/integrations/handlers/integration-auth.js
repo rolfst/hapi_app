@@ -1,6 +1,6 @@
-import { omit } from 'lodash';
-import * as integrationService from '../services/integration';
-import * as Logger from '../../../shared/services/logger';
+const { omit } = require('lodash');
+const integrationService = require('../services/integration');
+const Logger = require('../../../shared/services/logger');
 
 const logger = Logger.createLogger('INTEGRATIONS/handler/integrationAuth');
 

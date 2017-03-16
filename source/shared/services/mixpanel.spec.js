@@ -1,7 +1,7 @@
-import _Mixpanel from 'mixpanel';
-import { assert } from 'chai';
-import sinon from 'sinon';
-import * as Mixpanel from './mixpanel';
+const _Mixpanel = require('mixpanel');
+const { assert } = require('chai');
+const sinon = require('sinon');
+const Mixpanel = require('./mixpanel');
 
 describe('Service: mixpanel', () => {
   let sandbox;

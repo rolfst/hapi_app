@@ -1,7 +1,7 @@
-import * as Logger from '../../../../shared/services/logger';
-import createError from '../../../../shared/utils/create-error';
-import * as messageRepository from '../../repositories/message';
-import * as commentRepository from '../../repositories/comment';
+const Logger = require('../../../../shared/services/logger');
+const createError = require('../../../../shared/utils/create-error');
+const messageRepository = require('../../repositories/message');
+const commentRepository = require('../../repositories/comment');
 
 /**
  * @module modules/feed/services/comment

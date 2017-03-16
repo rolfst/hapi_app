@@ -1,11 +1,11 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import client from './client';
-import stubs from './test-utils/stubs';
-import blueprints from './test-utils/blueprints';
-import fetchTeams from './hooks/fetch-teams';
-import * as userConnector from './hooks/fetch-users';
-import teamSerializer from './serializers/team';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const client = require('./client');
+const stubs = require('./test-utils/stubs');
+const blueprints = require('./test-utils/blueprints');
+const fetchTeams = require('./hooks/fetch-teams');
+const userConnector = require('./hooks/fetch-users');
+const teamSerializer = require('./serializers/team');
 
 describe('PMT Hooks', () => {
   const fakeBaseStoreUrl = 'http://mypmtstore.nl';

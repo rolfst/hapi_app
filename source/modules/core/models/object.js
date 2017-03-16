@@ -1,4 +1,4 @@
-import * as dateUtils from '../../../shared/utils/date';
+const dateUtils = require('../../../shared/utils/date');
 
 export default (dataModel) => ({
   id: dataModel.id.toString(),

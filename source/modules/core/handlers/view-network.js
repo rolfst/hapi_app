@@ -1,5 +1,5 @@
-import * as responseUtil from '../../../shared/utils/response';
-import * as Logger from '../../../shared/services/logger';
+const responseUtil = require('../../../shared/utils/response');
+const Logger = require('../../../shared/services/logger');
 
 const logger = Logger.createLogger('CORE/handler/viewNetwork');
 

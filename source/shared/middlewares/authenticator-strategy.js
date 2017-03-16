@@ -1,9 +1,9 @@
-import { pick } from 'lodash';
-import tokenUtil from '../utils/token';
-import * as serverUtil from '../utils/server';
-import createError from '../utils/create-error';
-import * as userRepo from '../../modules/core/repositories/user';
-import * as Logger from '../../shared/services/logger';
+const { pick } = require('lodash');
+const tokenUtil = require('../utils/token');
+const serverUtil = require('../utils/server');
+const createError = require('../utils/create-error');
+const userRepo = require('../../modules/core/repositories/user');
+const Logger = require('../../shared/services/logger');
 
 const logger = Logger.createLogger('SHARED/middleware/authenticatorStrategy');
 

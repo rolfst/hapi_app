@@ -1,17 +1,17 @@
-import { map, intersectionBy, reject } from 'lodash';
-import Promise from 'bluebird';
-import * as passwordUtil from '../../../shared/utils/password';
-import * as mailer from '../../../shared/services/mailer';
-import { UserRoles } from '../../../shared/services/permission';
-import createError from '../../../shared/utils/create-error';
-import signupMail from '../../../shared/mails/signup';
-import addedToNetworkMail from '../../../shared/mails/added-to-network';
-import * as userService from '../../core/services/user';
-import * as networkRepo from '../../core/repositories/network';
-import * as userRepo from '../../core/repositories/user';
-import * as teamRepo from '../../core/repositories/team';
-import EmployeeDispatcher from '../dispatcher';
-import * as impl from './implementation';
+const { map, intersectionBy, reject } = require('lodash');
+const Promise = require('bluebird');
+const passwordUtil = require('../../../shared/utils/password');
+const mailer = require('../../../shared/services/mailer');
+const { UserRoles } = require('../../../shared/services/permission');
+const createError = require('../../../shared/utils/create-error');
+const signupMail = require('../../../shared/mails/signup');
+const addedToNetworkMail = require('../../../shared/mails/added-to-network');
+const userService = require('../../core/services/user');
+const networkRepo = require('../../core/repositories/network');
+const userRepo = require('../../core/repositories/user');
+const teamRepo = require('../../core/repositories/team');
+const EmployeeDispatcher = require('../dispatcher');
+const impl = require('./implementation');
 
 /**
  * @module modules/employee/services/inviteUser

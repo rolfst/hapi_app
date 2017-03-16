@@ -1,6 +1,6 @@
-import * as Logger from '../../../../shared/services/logger';
-import * as responseUtil from '../../../../shared/utils/response';
-import * as conversationService from '../services/conversation';
+const Logger = require('../../../../shared/services/logger');
+const responseUtil = require('../../../../shared/utils/response');
+const conversationService = require('../services/conversation');
 
 const logger = Logger.createLogger('CHAT/handler/getConversations');
 

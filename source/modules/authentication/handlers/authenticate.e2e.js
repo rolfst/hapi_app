@@ -1,7 +1,7 @@
 /* global assert */
-import blueprints from '../../../shared/test-utils/blueprints';
-import { postRequest } from '../../../shared/test-utils/request';
-import * as testHelper from '../../../shared/test-utils/helpers';
+const blueprints = require('../../../shared/test-utils/blueprints');
+const { postRequest } = require('../../../shared/test-utils/request');
+const testHelper = require('../../../shared/test-utils/helpers');
 
 
 describe('Authenticate', () => {

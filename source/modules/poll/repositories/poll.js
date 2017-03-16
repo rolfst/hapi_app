@@ -1,7 +1,7 @@
-import R from 'ramda';
-import { Poll, PollOption, PollVote } from './dao';
-import createPollModel from '../models/poll';
-import createPollVoteModel from '../models/poll-vote';
+const R = require('ramda');
+const { Poll, PollOption, PollVote } = require('./dao');
+const createPollModel = require('../models/poll');
+const createPollVoteModel = require('../models/poll-vote');
 
 const defaultIncludes = [{
   model: PollOption,

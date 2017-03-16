@@ -1,10 +1,10 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import createError from '../utils/create-error';
-import tokenUtil from '../utils/token';
-import * as loggerService from '../services/logger';
-import * as userRepo from '../../modules/core/repositories/user';
-import strategy, { authenticate } from './authenticator-strategy';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const createError = require('../utils/create-error');
+const tokenUtil = require('../utils/token');
+const loggerService = require('../services/logger');
+const userRepo = require('../../modules/core/repositories/user');
+const strategy, { authenticate } = require('./authenticator-strategy');
 
 describe('Middleware: AuthenticatorStrategy', () => {
   describe('Business logic', () => {

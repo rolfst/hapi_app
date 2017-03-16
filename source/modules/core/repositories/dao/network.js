@@ -1,7 +1,7 @@
-import Sequelize from 'sequelize';
-import { flatten } from 'lodash';
-import model from '../../../../shared/configs/sequelize';
-import * as dateUtils from '../../../../shared/utils/date';
+const Sequelize = require('sequelize');
+const { flatten } = require('lodash');
+const model = require('../../../../shared/configs/sequelize');
+const dateUtils = require('../../../../shared/utils/date');
 
 const Network = model.define('Network', {
   externalId: {
@@ -66,4 +66,4 @@ const Network = model.define('Network', {
   },
 });
 
-export default Network;
+module.exports = Network;

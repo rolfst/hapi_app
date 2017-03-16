@@ -1,6 +1,6 @@
-import { assert } from 'chai';
-import Joi from 'joi';
-import scheme from './create-message';
+const { assert } = require('chai');
+const Joi = require('joi');
+const scheme = require('./create-message');
 
 describe('Validator: create-message', () => {
   it('should succeed when only files property is provided', async () => {

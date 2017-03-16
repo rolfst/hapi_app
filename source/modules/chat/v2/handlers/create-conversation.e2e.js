@@ -1,8 +1,8 @@
-import { assert } from 'chai';
-import blueprints from '../../../../shared/test-utils/blueprints';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import { postRequest } from '../../../../shared/test-utils/request';
-import * as conversationRepo from '../repositories/conversation';
+const { assert } = require('chai');
+const blueprints = require('../../../../shared/test-utils/blueprints');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const { postRequest } = require('../../../../shared/test-utils/request');
+const conversationRepo = require('../repositories/conversation');
 
 describe('Handler: Create conversation (v2)', () => {
   let creator;

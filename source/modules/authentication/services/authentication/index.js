@@ -1,9 +1,9 @@
-import createError from '../../../../shared/utils/create-error';
-import tokenUtil from '../../../../shared/utils/token';
-import * as userRepo from '../../../core/repositories/user';
-import * as Mixpanel from '../../../../shared/services/mixpanel';
-import firstLoginEvent from '../../analytics/first-login-event';
-import * as impl from './implementation';
+const createError = require('../../../../shared/utils/create-error');
+const tokenUtil = require('../../../../shared/utils/token');
+const userRepo = require('../../../core/repositories/user');
+const Mixpanel = require('../../../../shared/services/mixpanel');
+const firstLoginEvent = require('../../analytics/first-login-event');
+const impl = require('./implementation');
 
 /**
  * @module modules/authentication/services/authentication

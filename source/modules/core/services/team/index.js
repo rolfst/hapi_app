@@ -1,11 +1,11 @@
-import { map } from 'lodash';
-import Promise from 'bluebird';
-import R from 'ramda';
-import createError from '../../../../shared/utils/create-error';
-import * as Logger from '../../../../shared/services/logger';
-import * as authorizationService from '../../services/authorization';
-import * as teamRepository from '../../repositories/team';
-import * as userService from '../user';
+const { map } = require('lodash');
+const Promise = require('bluebird');
+const R = require('ramda');
+const createError = require('../../../../shared/utils/create-error');
+const Logger = require('../../../../shared/services/logger');
+const authorizationService = require('../../services/authorization');
+const teamRepository = require('../../repositories/team');
+const userService = require('../user');
 
 /**
  * @module modules/core/services/team

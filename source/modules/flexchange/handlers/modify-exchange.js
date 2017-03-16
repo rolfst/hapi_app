@@ -1,7 +1,7 @@
-import { pick } from 'lodash';
-import * as Logger from '../../../shared/services/logger';
-import * as responseUtils from '../../../shared/utils/response';
-import * as flexchangeService from '../services/flexchange';
+const { pick } = require('lodash');
+const Logger = require('../../../shared/services/logger');
+const responseUtils = require('../../../shared/utils/response');
+const flexchangeService = require('../services/flexchange');
 
 const logger = Logger.createLogger('FLEXCHANGE/handler/modifyExchange');
 

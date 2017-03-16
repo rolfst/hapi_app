@@ -1,10 +1,10 @@
-import Hapi from 'hapi';
-import createSentryClient from './shared/services/sentry';
-import routes from './create-routes';
-import jwtStrategy from './shared/middlewares/authenticator-strategy';
-import integrationStrategy from './shared/middlewares/integration-strategy';
-import * as serverUtil from './shared/utils/server';
-import serverConfig from './shared/configs/server';
+const Hapi = require('hapi');
+const createSentryClient = require('./shared/services/sentry');
+const routes = require('./create-routes');
+const jwtStrategy = require('./shared/middlewares/authenticator-strategy');
+const integrationStrategy = require('./shared/middlewares/integration-strategy');
+const serverUtil = require('./shared/utils/server');
+const serverConfig = require('./shared/configs/server');
 
 const createServer = () => {
   const sentryClient = createSentryClient();
@@ -39,4 +39,4 @@ const createServer = () => {
   return server;
 };
 
-export default createServer;
+module.exports = createServer;

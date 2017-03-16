@@ -1,7 +1,7 @@
-import EventEmitter from '../../../shared/services/event-emitter';
-import * as socketService from '../../../shared/services/socket';
-import * as responseUtils from '../../../shared/utils/response';
-import * as newMessageNotification from './notifications/new-message';
+const EventEmitter = require('../../../shared/services/event-emitter');
+const socketService = require('../../../shared/services/socket');
+const responseUtils = require('../../../shared/utils/response');
+const newMessageNotification = require('./notifications/new-message');
 
 const pubsub = EventEmitter.create();
 

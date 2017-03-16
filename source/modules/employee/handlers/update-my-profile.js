@@ -1,7 +1,7 @@
-import { mapKeys, camelCase } from 'lodash';
-import * as service from '../services/employee';
-import * as responseUtil from '../../../shared/utils/response';
-import * as Logger from '../../../shared/services/logger';
+const { mapKeys, camelCase } = require('lodash');
+const service = require('../services/employee');
+const responseUtil = require('../../../shared/utils/response');
+const Logger = require('../../../shared/services/logger');
 
 const logger = Logger.createLogger('EMPLOYEE/handler/updateMyProfile');
 

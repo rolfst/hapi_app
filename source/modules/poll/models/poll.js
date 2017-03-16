@@ -1,6 +1,6 @@
-import R from 'ramda';
-import * as dateUtils from '../../../shared/utils/date';
-import createOptionModel from './poll-option';
+const R = require('ramda');
+const dateUtils = require('../../../shared/utils/date');
+const createOptionModel = require('./poll-option');
 
 const getOptions = R.pipe(
   R.sortBy(R.prop('order')),

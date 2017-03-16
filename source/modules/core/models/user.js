@@ -1,5 +1,5 @@
-import { map, pick, toString } from 'lodash';
-import * as dateUtils from '../../../shared/utils/date';
+const { map, pick, toString } = require('lodash');
+const dateUtils = require('../../../shared/utils/date');
 
 const whitelistAttrs = [
   'firstName',

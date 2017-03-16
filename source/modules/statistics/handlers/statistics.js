@@ -1,7 +1,7 @@
-import R from 'ramda';
-import createError from '../../../shared/utils/create-error';
-import * as responseUtil from '../../../shared/utils/response';
-import * as eventService from '../services/event';
+const R = require('ramda');
+const createError = require('../../../shared/utils/create-error');
+const responseUtil = require('../../../shared/utils/response');
+const eventService = require('../services/event');
 
 export default async (req, reply) => {
   try {

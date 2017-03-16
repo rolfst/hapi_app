@@ -1,13 +1,13 @@
-import { assert } from 'chai';
-import Promise from 'bluebird';
-import moment from 'moment';
-import _ from 'lodash';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as Logger from '../../../shared/services/logger';
-import { getRequest } from '../../../shared/test-utils/request';
-import { ActivityTypes } from '../../core/repositories/dao/activity';
-import * as exchangeRepo from '../repositories/exchange';
-import * as commentRepo from '../repositories/comment';
+const { assert } = require('chai');
+const Promise = require('bluebird');
+const moment = require('moment');
+const _ = require('lodash');
+const testHelper = require('../../../shared/test-utils/helpers');
+const Logger = require('../../../shared/services/logger');
+const { getRequest } = require('../../../shared/test-utils/request');
+const { ActivityTypes } = require('../../core/repositories/dao/activity');
+const exchangeRepo = require('../repositories/exchange');
+const commentRepo = require('../repositories/comment');
 
 const logger = Logger.createLogger('FLEXCHANGE/test/exchangeActivityFeed');
 

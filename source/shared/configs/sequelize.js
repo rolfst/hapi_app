@@ -1,7 +1,7 @@
 /* eslint no-console: "off" */
-import Sequelize from 'sequelize';
-import * as Logger from '../services/logger';
-import config from './database';
+const Sequelize = require('sequelize');
+const Logger = require('../services/logger');
+const config = require('./database');
 
 const logger = Logger.createLogger('DB/query');
 

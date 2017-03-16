@@ -1,4 +1,4 @@
-import mailTemplateConfig from '../configs/mail-templates';
+const mailTemplateConfig = require('../configs/mail-templates');
 
 export default (network, user) => {
   const data = {

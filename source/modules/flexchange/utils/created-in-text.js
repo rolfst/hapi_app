@@ -1,4 +1,4 @@
-import { exchangeTypes } from '../repositories/dao/exchange';
+const { exchangeTypes } = require('../repositories/dao/exchange');
 
 export default (exchange) => {
   let exchangeValueOutput;

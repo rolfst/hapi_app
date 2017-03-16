@@ -1,11 +1,11 @@
-import { assert } from 'chai';
-import moment from 'moment';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as teamRepo from '../../core/repositories/team';
-import * as networkRepo from '../../core/repositories/network';
-import { exchangeTypes } from '../repositories/dao/exchange';
-import { getRequest } from '../../../shared/test-utils/request';
-import * as exchangeRepo from '../repositories/exchange';
+const { assert } = require('chai');
+const moment = require('moment');
+const testHelper = require('../../../shared/test-utils/helpers');
+const teamRepo = require('../../core/repositories/team');
+const networkRepo = require('../../core/repositories/network');
+const { exchangeTypes } = require('../repositories/dao/exchange');
+const { getRequest } = require('../../../shared/test-utils/request');
+const exchangeRepo = require('../repositories/exchange');
 
 describe('View users related to exchange', () => {
   describe('Network without integration', () => {

@@ -1,7 +1,7 @@
-import UserModel from '../../../core/repositories/dao/user';
-import PollModel from './poll';
-import PollOptionModel from './poll-option';
-import PollVoteModel from './poll-vote';
+const UserModel = require('../../../core/repositories/dao/user');
+const PollModel = require('./poll');
+const PollOptionModel = require('./poll-option');
+const PollVoteModel = require('./poll-vote');
 
 PollModel.belongsTo(UserModel, {
   foreignKey: 'user_id',

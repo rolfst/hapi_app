@@ -1,9 +1,9 @@
-import R from 'ramda';
-import * as Logger from '../../../../shared/services/logger';
-import createError from '../../../../shared/utils/create-error';
-import * as networkRepo from '../../repositories/network';
-import * as userService from '../user';
-import * as teamService from '../team';
+const R = require('ramda');
+const Logger = require('../../../../shared/services/logger');
+const createError = require('../../../../shared/utils/create-error');
+const networkRepo = require('../../repositories/network');
+const userService = require('../user');
+const teamService = require('../team');
 
 /**
  * @module modules/core/services/network

@@ -1,9 +1,9 @@
-import { assert } from 'chai';
-import nock from 'nock';
-import * as testHelper from '../../../../../shared/test-utils/helpers';
-import * as stubs from '../test-utils/stubs';
-import * as blueprints from '../test-utils/blueprints';
-import hook from './fetch-teams';
+const { assert } = require('chai');
+const nock = require('nock');
+const testHelper = require('../../../../../shared/test-utils/helpers');
+const stubs = require('../test-utils/stubs');
+const blueprints = require('../test-utils/blueprints');
+const hook = require('./fetch-teams');
 
 const ENDPOINT = '/departments';
 

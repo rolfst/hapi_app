@@ -1,13 +1,13 @@
-import sinon from 'sinon';
-import { assert } from 'chai';
-import nock from 'nock';
-import { postRequest } from '../../../shared/test-utils/request';
-import * as adapterUtil from '../../../shared/utils/create-adapter';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import blueprints from '../../../shared/test-utils/blueprints';
-import createError from '../../../shared/utils/create-error';
-import tokenUtil from '../../../shared/utils/token';
-import * as userRepo from '../../core/repositories/user';
+const sinon = require('sinon');
+const { assert } = require('chai');
+const nock = require('nock');
+const { postRequest } = require('../../../shared/test-utils/request');
+const adapterUtil = require('../../../shared/utils/create-adapter');
+const testHelper = require('../../../shared/test-utils/helpers');
+const blueprints = require('../../../shared/test-utils/blueprints');
+const createError = require('../../../shared/utils/create-error');
+const tokenUtil = require('../../../shared/utils/token');
+const userRepo = require('../../core/repositories/user');
 
 describe('Integration auth', () => {
   let sandbox;

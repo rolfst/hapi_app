@@ -1,8 +1,8 @@
-import nock from 'nock';
-import { assert } from 'chai';
-import { getRequest } from '../../../shared/test-utils/request';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as stubs from '../../integrations/adapters/pmt/test-utils/stubs';
+const nock = require('nock');
+const { assert } = require('chai');
+const { getRequest } = require('../../../shared/test-utils/request');
+const testHelper = require('../../../shared/test-utils/helpers');
+const stubs = require('../../integrations/adapters/pmt/test-utils/stubs');
 
 describe('Available users for shift', () => {
   let admin;

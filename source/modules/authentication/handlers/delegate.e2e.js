@@ -1,8 +1,8 @@
 /* global assert */
-import { getRequest, postRequest } from '../../../shared/test-utils/request';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import tokenUtil from '../../../shared/utils/token';
-import createRefreshToken from '../utils/create-refresh-token';
+const { getRequest, postRequest } = require('../../../shared/test-utils/request');
+const testHelper = require('../../../shared/test-utils/helpers');
+const tokenUtil = require('../../../shared/utils/token');
+const createRefreshToken = require('../utils/create-refresh-token');
 
 describe('Delegate', () => {
   let createdUser;

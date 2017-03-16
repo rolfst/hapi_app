@@ -1,6 +1,6 @@
-import NativeEventEmitter from 'events';
-import Promise from 'bluebird';
-import * as Logger from './logger';
+const NativeEventEmitter = require('events');
+const Promise = require('bluebird');
+const Logger = require('./logger');
 
 class EventEmitter extends NativeEventEmitter {
   constructor() {

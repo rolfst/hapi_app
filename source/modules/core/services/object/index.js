@@ -1,12 +1,12 @@
-import R from 'ramda';
-import Promise from 'bluebird';
-import createError from '../../../../shared/utils/create-error';
-import * as Logger from '../../../../shared/services/logger';
-import * as networkRepository from '../../../core/repositories/network';
-import * as teamRepository from '../../../core/repositories/team';
-import * as userRepository from '../../../core/repositories/user';
-import * as objectRepository from '../../repositories/object';
-import * as impl from './implementation';
+const R = require('ramda');
+const Promise = require('bluebird');
+const createError = require('../../../../shared/utils/create-error');
+const Logger = require('../../../../shared/services/logger');
+const networkRepository = require('../../../core/repositories/network');
+const teamRepository = require('../../../core/repositories/team');
+const userRepository = require('../../../core/repositories/user');
+const objectRepository = require('../../repositories/object');
+const impl = require('./implementation');
 
 /**
  * @module modules/core/services/object

@@ -1,7 +1,7 @@
-import { assert } from 'chai';
-import moment from 'moment';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as exchangeRepo from './exchange';
+const { assert } = require('chai');
+const moment = require('moment');
+const testHelper = require('../../../shared/test-utils/helpers');
+const exchangeRepo = require('./exchange');
 
 describe('Exchange Repo', () => {
   describe('findAllAcceptedExchanges ', () => {

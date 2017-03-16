@@ -1,4 +1,4 @@
-import * as notifier from '../../../../shared/services/notifier';
+const notifier = require('../../../../shared/services/notifier');
 
 export const createNotification = (message) => {
   return {

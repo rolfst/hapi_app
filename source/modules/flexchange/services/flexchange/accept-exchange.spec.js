@@ -1,9 +1,9 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import * as userService from '../../../core/services/user';
-import * as exchangeRepo from '../../repositories/exchange';
-import * as service from '../../services/flexchange';
-import * as notification from '../../notifications/accepted-exchange';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const userService = require('../../../core/services/user');
+const exchangeRepo = require('../../repositories/exchange');
+const service = require('../../services/flexchange');
+const notification = require('../../notifications/accepted-exchange');
 
 describe('Accept exchange', () => {
   let sandbox;

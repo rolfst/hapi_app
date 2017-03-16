@@ -1,7 +1,7 @@
-import createError from '../../../shared/utils/create-error';
-import { ActivityTypes } from '../../core/repositories/dao/activity';
-import { createActivity } from '../../core/repositories/activity';
-import ExchangeComment from './dao/exchange-comment';
+const createError = require('../../../shared/utils/create-error');
+const { ActivityTypes } = require('../../core/repositories/dao/activity');
+const { createActivity } = require('../../core/repositories/activity');
+const ExchangeComment = require('./dao/exchange-comment');
 
 /**
  * @module modules/flexchange/repositories/comment

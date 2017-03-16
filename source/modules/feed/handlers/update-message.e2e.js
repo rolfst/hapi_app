@@ -1,7 +1,7 @@
-import { assert } from 'chai';
-import { putRequest } from '../../../shared/test-utils/request';
-import * as testHelpers from '../../../shared/test-utils/helpers';
-import * as messageService from '../services/message';
+const { assert } = require('chai');
+const { putRequest } = require('../../../shared/test-utils/request');
+const testHelpers = require('../../../shared/test-utils/helpers');
+const messageService = require('../services/message');
 
 describe('Handler: Update Message', () => {
   let admin;

@@ -1,6 +1,6 @@
-import R from 'ramda';
-import { Attachment } from './dao';
-import createAttachmentModel from '../models/attachment';
+const R = require('ramda');
+const { Attachment } = require('./dao');
+const createAttachmentModel = require('../models/attachment');
 
 /**
  * @module modules/attachment/repositories/attachment

@@ -1,10 +1,10 @@
-import R from 'ramda';
-import Promise from 'bluebird';
-import createError from '../../../../shared/utils/create-error';
-import * as pollService from '../../../poll/services/poll';
-import * as authorizationService from '../../../core/services/authorization';
-import * as userService from '../../../core/services/user';
-import * as objectService from '../../../core/services/object';
+const R = require('ramda');
+const Promise = require('bluebird');
+const createError = require('../../../../shared/utils/create-error');
+const pollService = require('../../../poll/services/poll');
+const authorizationService = require('../../../core/services/authorization');
+const userService = require('../../../core/services/user');
+const objectService = require('../../../core/services/object');
 
 /**
  * Creates a poll resource that consists of a poll object and a object object.

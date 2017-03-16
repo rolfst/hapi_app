@@ -1,12 +1,12 @@
-import { assert } from 'chai';
-import qs from 'qs';
-import moment from 'moment';
-import { find } from 'lodash';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import { getRequest } from '../../../shared/test-utils/request';
-import { exchangeTypes } from '../repositories/dao/exchange';
-import { create } from '../../core/repositories/team';
-import { createExchange } from '../repositories/exchange';
+const { assert } = require('chai');
+const qs = require('qs');
+const moment = require('moment');
+const { find } = require('lodash');
+const testHelper = require('../../../shared/test-utils/helpers');
+const { getRequest } = require('../../../shared/test-utils/request');
+const { exchangeTypes } = require('../repositories/dao/exchange');
+const { create } = require('../../core/repositories/team');
+const { createExchange } = require('../repositories/exchange');
 
 describe('Get exchanges for team', () => {
   let team;

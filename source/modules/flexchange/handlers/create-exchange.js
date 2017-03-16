@@ -1,5 +1,5 @@
-import R from 'ramda';
-import * as service from '../services/flexchange';
+const R = require('ramda');
+const service = require('../services/flexchange');
 
 export default async (req, reply) => {
   try {

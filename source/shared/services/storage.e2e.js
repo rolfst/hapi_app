@@ -1,8 +1,8 @@
-import { assert } from 'chai';
-import stream from 'stream';
-import sinon from 'sinon';
-import AWS from 'aws-sdk';
-import * as Storage from './storage';
+const { assert } = require('chai');
+const stream = require('stream');
+const sinon = require('sinon');
+const AWS = require('aws-sdk');
+const Storage = require('./storage');
 
 describe('Service: Storage', () => {
   let sandbox;

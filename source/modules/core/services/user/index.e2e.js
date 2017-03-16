@@ -1,8 +1,8 @@
-import { assert } from 'chai';
-import R from 'ramda';
-import * as testHelpers from '../../../../shared/test-utils/helpers';
-import * as teamRepository from '../../repositories/team';
-import * as userService from './index';
+const { assert } = require('chai');
+const R = require('ramda');
+const testHelpers = require('../../../../shared/test-utils/helpers');
+const teamRepository = require('../../repositories/team');
+const userService = require('./index');
 
 describe('Service: User', () => {
   describe('listUsersWithNetworkScope', () => {

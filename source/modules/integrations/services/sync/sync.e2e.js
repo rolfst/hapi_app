@@ -1,15 +1,15 @@
-import sinon from 'sinon';
-import { assert } from 'chai';
-import R from 'ramda';
-import { find } from 'lodash';
-import Promise from 'bluebird';
-import * as testHelpers from '../../../../shared/test-utils/helpers';
-import * as adapterUtil from '../../../../shared/utils/create-adapter';
-import * as networkRepository from '../../../core/repositories/network';
-import * as teamRepository from '../../../core/repositories/team';
-import * as userRepository from '../../../core/repositories/user';
-import * as networkService from '../../../core/services/network';
-import * as service from './index';
+const sinon = require('sinon');
+const { assert } = require('chai');
+const R = require('ramda');
+const { find } = require('lodash');
+const Promise = require('bluebird');
+const testHelpers = require('../../../../shared/test-utils/helpers');
+const adapterUtil = require('../../../../shared/utils/create-adapter');
+const networkRepository = require('../../../core/repositories/network');
+const teamRepository = require('../../../core/repositories/team');
+const userRepository = require('../../../core/repositories/user');
+const networkService = require('../../../core/services/network');
+const service = require('./index');
 
 describe('Network synchronisation', () => {
   let network;

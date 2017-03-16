@@ -1,10 +1,10 @@
-import { assert } from 'chai';
-import { find } from 'lodash';
-import * as blueprints from '../../../../shared/test-utils/blueprints';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import { getRequest } from '../../../../shared/test-utils/request';
-import * as conversationRepo from '../repositories/conversation';
-import * as conversationService from '../services/conversation';
+const { assert } = require('chai');
+const { find } = require('lodash');
+const blueprints = require('../../../../shared/test-utils/blueprints');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const { getRequest } = require('../../../../shared/test-utils/request');
+const conversationRepo = require('../repositories/conversation');
+const conversationService = require('../services/conversation');
 
 describe('Handler: Get messages (v1)', () => {
   let conversation;

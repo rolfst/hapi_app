@@ -1,6 +1,6 @@
-import R from 'ramda';
-import createError from '../../../../../shared/utils/create-error';
-import * as conversationRepo from '../../repositories/conversation';
+const R = require('ramda');
+const createError = require('../../../../../shared/utils/create-error');
+const conversationRepo = require('../../repositories/conversation');
 
 const parseIncludes = R.split(',');
 

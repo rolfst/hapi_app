@@ -1,13 +1,13 @@
-import { assert } from 'chai';
-import { pick } from 'lodash';
-import moment from 'moment';
-import nock from 'nock';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as sharedStubs from '../../../shared/test-utils/stubs';
-import { getRequest } from '../../../shared/test-utils/request';
-import * as stubs from '../../integrations/adapters/pmt/test-utils/stubs';
-import { exchangeTypes } from '../repositories/dao/exchange';
-import { createExchange } from '../repositories/exchange';
+const { assert } = require('chai');
+const { pick } = require('lodash');
+const moment = require('moment');
+const nock = require('nock');
+const testHelper = require('../../../shared/test-utils/helpers');
+const sharedStubs = require('../../../shared/test-utils/stubs');
+const { getRequest } = require('../../../shared/test-utils/request');
+const stubs = require('../../integrations/adapters/pmt/test-utils/stubs');
+const { exchangeTypes } = require('../repositories/dao/exchange');
+const { createExchange } = require('../repositories/exchange');
 
 describe('Handler: View shift', () => {
   const pristineNetwork = sharedStubs.pristine_networks_admins[0];

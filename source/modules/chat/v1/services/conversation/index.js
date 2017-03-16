@@ -1,11 +1,11 @@
-import { uniq, filter, map, omit } from 'lodash';
-import R from 'ramda';
-import createError from '../../../../../shared/utils/create-error';
-import * as objectService from '../../../../core/services/object';
-import * as conversationRepo from '../../repositories/conversation';
-import * as messageRepo from '../../repositories/message';
-import ChatDispatcher from '../../dispatcher';
-import * as impl from './implementation';
+const { uniq, filter, map, omit } = require('lodash');
+const R = require('ramda');
+const createError = require('../../../../../shared/utils/create-error');
+const objectService = require('../../../../core/services/object');
+const conversationRepo = require('../../repositories/conversation');
+const messageRepo = require('../../repositories/message');
+const ChatDispatcher = require('../../dispatcher');
+const impl = require('./implementation');
 
 /**
  * @module modules/chat/services/conversation

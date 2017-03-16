@@ -1,7 +1,7 @@
-import { find } from 'lodash';
-import createError from './create-error';
-import * as userRepo from '../../modules/core/repositories/user';
-import pmtAdapter from '../../modules/integrations/adapters/pmt/adapter';
+const { find } = require('lodash');
+const createError = require('./create-error');
+const userRepo = require('../../modules/core/repositories/user');
+const pmtAdapter = require('../../modules/integrations/adapters/pmt/adapter');
 
 const availableIntegrations = [{
   name: 'PMT',

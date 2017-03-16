@@ -1,10 +1,10 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import moment from 'moment';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import * as notifier from '../../../../shared/services/notifier';
-import * as exchangeRepository from '../../repositories/exchange';
-import * as exchangeService from './index';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const moment = require('moment');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const notifier = require('../../../../shared/services/notifier');
+const exchangeRepository = require('../../repositories/exchange');
+const exchangeService = require('./index');
 
 describe('Service: Flexchange', () => {
   describe('list', () => {

@@ -1,12 +1,12 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import moment from 'moment';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as notifier from '../../../shared/services/notifier';
-import { patchRequest } from '../../../shared/test-utils/request';
-import * as objectRepository from '../../core/repositories/object';
-import { exchangeTypes } from '../repositories/dao/exchange';
-import * as exchangeService from '../services/flexchange';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const moment = require('moment');
+const testHelper = require('../../../shared/test-utils/helpers');
+const notifier = require('../../../shared/services/notifier');
+const { patchRequest } = require('../../../shared/test-utils/request');
+const objectRepository = require('../../core/repositories/object');
+const { exchangeTypes } = require('../repositories/dao/exchange');
+const exchangeService = require('../services/flexchange');
 
 describe('Accept exchange', () => {
   let sandbox;

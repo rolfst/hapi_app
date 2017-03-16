@@ -1,6 +1,6 @@
-import { assert } from 'chai';
-import moment from 'moment-timezone';
-import { createNotification } from './exchange-created';
+const { assert } = require('chai');
+const moment = require('moment-timezone');
+const { createNotification } = require('./exchange-created');
 
 describe('Exchange created notification', () => {
   const createExchange = (baseMoment) => ({

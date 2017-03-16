@@ -1,5 +1,5 @@
-import { assert } from 'chai';
-import { createNotification } from './accepted-exchange';
+const { assert } = require('chai');
+const { createNotification } = require('./accepted-exchange');
 
 describe('Accepted exchange notification', () => {
   it('should return a correct notification object', () => {

@@ -1,5 +1,5 @@
-import { find, pick } from 'lodash';
-import * as conversationRepo from '../../repositories/conversation';
+const { find, pick } = require('lodash');
+const conversationRepo = require('../../repositories/conversation');
 
 export const findExistingConversation = async (participantIds) => {
   return conversationRepo.findExistingConversation(participantIds);

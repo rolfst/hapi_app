@@ -1,10 +1,10 @@
-import { assert } from 'chai';
-import Promise from 'bluebird';
-import * as blueprints from '../../../../shared/test-utils/blueprints';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import { getRequest } from '../../../../shared/test-utils/request';
-import * as messageRepo from '../repositories/message';
-import * as conversationRepo from '../repositories/conversation';
+const { assert } = require('chai');
+const Promise = require('bluebird');
+const blueprints = require('../../../../shared/test-utils/blueprints');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const { getRequest } = require('../../../../shared/test-utils/request');
+const messageRepo = require('../repositories/message');
+const conversationRepo = require('../repositories/conversation');
 
 describe('Get conversations for logged user', () => {
   let user;

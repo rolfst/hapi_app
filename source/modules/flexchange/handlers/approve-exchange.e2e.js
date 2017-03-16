@@ -1,10 +1,10 @@
-import { assert } from 'chai';
-import moment from 'moment';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import { patchRequest } from '../../../shared/test-utils/request';
-import * as objectRepository from '../../core/repositories/object';
-import { exchangeTypes } from '../repositories/dao/exchange';
-import * as exchangeService from '../services/flexchange';
+const { assert } = require('chai');
+const moment = require('moment');
+const testHelper = require('../../../shared/test-utils/helpers');
+const { patchRequest } = require('../../../shared/test-utils/request');
+const objectRepository = require('../../core/repositories/object');
+const { exchangeTypes } = require('../repositories/dao/exchange');
+const exchangeService = require('../services/flexchange');
 
 describe('Approve exchange', () => {
   let admin;

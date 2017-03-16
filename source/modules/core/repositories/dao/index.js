@@ -1,14 +1,14 @@
-import sequelize from 'sequelize';
-import ActivityModel from './activity';
-import NetworkModel from './network';
-import UserModel from './user';
-import TeamModel from './team';
-import IntegrationModel from './integration';
-import NetworkUserModel from './network-user';
-import NetworkIntegrationModel from './network-service';
-import TeamUserModel from './team-user';
-import UserDeviceModel from './user-device';
-import ObjectModel from './object';
+const sequelize = require('sequelize');
+const ActivityModel = require('./activity');
+const NetworkModel = require('./network');
+const UserModel = require('./user');
+const TeamModel = require('./team');
+const IntegrationModel = require('./integration');
+const NetworkUserModel = require('./network-user');
+const NetworkIntegrationModel = require('./network-service');
+const TeamUserModel = require('./team-user');
+const UserDeviceModel = require('./user-device');
+const ObjectModel = require('./object');
 
 ActivityModel.belongsTo(UserModel, {
   foreignKey: 'user_id',
@@ -67,13 +67,15 @@ TeamModel.belongsToMany(UserModel, {
   timestamps: false,
 });
 
-export const Activity = ActivityModel;
-export const Network = NetworkModel;
-export const User = UserModel;
-export const Team = TeamModel;
-export const Integration = IntegrationModel;
-export const NetworkUser = NetworkUserModel;
-export const TeamUser = TeamUserModel;
-export const UserDevice = UserDeviceModel;
-export const NetworkIntegration = NetworkIntegrationModel;
-export const _Object = ObjectModel;
+model.exports = {
+  Activity: ActivityModel,
+  Network: NetworkModel,
+  User: UserModel,
+  Team: TeamModel,
+  Integration: IntegrationModel,
+  NetworkUser: NetworkUserModel,
+  TeamUser: TeamUserModel,
+  UserDevice: UserDeviceModel,
+  NetworkIntegration: NetworkIntegrationModel,
+  _Object: ObjectModel,
+};

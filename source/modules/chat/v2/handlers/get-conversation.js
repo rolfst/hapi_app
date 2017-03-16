@@ -1,5 +1,5 @@
-import * as responseUtil from '../../../../shared/utils/response';
-import * as conversationService from '../services/conversation';
+const responseUtil = require('../../../../shared/utils/response');
+const conversationService = require('../services/conversation');
 
 export default async (req, reply) => {
   try {

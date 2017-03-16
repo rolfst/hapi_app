@@ -1,5 +1,5 @@
-import { assert } from 'chai';
-import * as impl from './implementation';
+const { assert } = require('chai');
+const impl = require('./implementation');
 
 describe('Service: Object Implementation', () => {
   describe('findChildren', () => {

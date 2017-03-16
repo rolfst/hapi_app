@@ -1,6 +1,6 @@
-import { map } from 'lodash';
-import client from '../client';
-import teamSerializer from '../serializers/team';
+const { map } = require('lodash');
+const client = require('../client');
+const teamSerializer = require('../serializers/team');
 
 export default (baseStoreUrl) => async () => {
   const result = await client.get(`${baseStoreUrl}/departments`);

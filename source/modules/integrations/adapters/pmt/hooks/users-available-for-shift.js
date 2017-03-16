@@ -1,6 +1,6 @@
-import createError from '../../../../../shared/utils/create-error';
-import client from '../client';
-import userSerializer from '../serializers/user';
+const createError = require('../../../../../shared/utils/create-error');
+const client = require('../client');
+const userSerializer = require('../serializers/user');
 
 export default (baseStoreUrl, token) => async (shiftId) => {
   const endpoint = `${baseStoreUrl}/shift/${shiftId}/available`;

@@ -1,4 +1,4 @@
-import moment from 'moment-timezone';
+const moment = require('moment-timezone');
 
 const createUTCDate = (time, dateFormat = 'DD-MM-YYYY HH:mm:ss') =>
   moment.tz(time, dateFormat, 'Europe/Amsterdam').tz('UTC');

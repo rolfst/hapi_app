@@ -1,5 +1,5 @@
-import * as responseUtil from '../../../../shared/utils/response';
-import * as privateMessageService from '../services/private-message';
+const responseUtil = require('../../../../shared/utils/response');
+const privateMessageService = require('../services/private-message');
 
 module.exports = async (req, reply) => {
   try {

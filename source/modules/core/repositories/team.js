@@ -1,10 +1,10 @@
-import { map } from 'lodash';
-import sequelize from 'sequelize';
-import Promise from 'bluebird';
-import R from 'ramda';
-import createTeamModel from '../models/team';
-import * as userRepo from './user';
-import { Team, User, TeamUser } from './dao';
+const { map } = require('lodash');
+const sequelize = require('sequelize');
+const Promise = require('bluebird');
+const R = require('ramda');
+const createTeamModel = require('../models/team');
+const userRepo = require('./user');
+const { Team, User, TeamUser } = require('./dao');
 
 /**
  * @module modules/core/repositories/team

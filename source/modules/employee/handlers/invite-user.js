@@ -1,6 +1,6 @@
-import * as service from '../services/invite-user';
-import * as responseUtil from '../../../shared/utils/response';
-import * as Logger from '../../../shared/services/logger';
+const service = require('../services/invite-user');
+const responseUtil = require('../../../shared/utils/response');
+const Logger = require('../../../shared/services/logger');
 
 const logger = Logger.createLogger('EMPLOYEE/handler/inviteUser');
 

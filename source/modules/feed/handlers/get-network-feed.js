@@ -1,7 +1,7 @@
-import R from 'ramda';
-import * as responseUtil from '../../../shared/utils/response';
-import * as objectService from '../../core/services/object';
-import * as feedService from '../services/feed';
+const R = require('ramda');
+const responseUtil = require('../../../shared/utils/response');
+const objectService = require('../../core/services/object');
+const feedService = require('../services/feed');
 
 export default async (req, reply) => {
   try {

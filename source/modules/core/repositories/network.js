@@ -1,17 +1,17 @@
-import R from 'ramda';
-import moment from 'moment';
-import createError from '../../../shared/utils/create-error';
-import createNetworkModel from '../models/network';
-import createNetworkLinkModel from '../models/network-link';
-import createUserModel from '../models/user';
-import createTeamModel from '../models/team';
-import * as userRepo from './user';
-import { Network,
+const R = require('ramda');
+const moment = require('moment');
+const createError = require('../../../shared/utils/create-error');
+const createNetworkModel = require('../models/network');
+const createNetworkLinkModel = require('../models/network-link');
+const createUserModel = require('../models/user');
+const createTeamModel = require('../models/team');
+const userRepo = require('./user');
+const { Network,
   Team,
   User,
   NetworkUser,
   Integration,
-  NetworkIntegration } from './dao';
+  NetworkIntegration } = require('./dao');
 
 /**
  * @module modules/core/repositories/network

@@ -1,9 +1,9 @@
-import * as Logger from '../../../../shared/services/logger';
-import createError from '../../../../shared/utils/create-error';
-import * as userRepo from '../../repositories/user';
-import * as networkRepo from '../../repositories/network';
-import { TeamUser } from '../../repositories/dao';
-import * as userService from '../user';
+const Logger = require('../../../../shared/services/logger');
+const createError = require('../../../../shared/utils/create-error');
+const userRepo = require('../../repositories/user');
+const networkRepo = require('../../repositories/network');
+const { TeamUser } = require('../../repositories/dao');
+const userService = require('../user');
 
 /**
  * @module modules/core/services/authorization

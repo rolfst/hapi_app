@@ -1,4 +1,4 @@
-import * as syncService from '../services/sync';
+const syncService = require('../services/sync');
 
 export default async (req, reply) => {
   try {

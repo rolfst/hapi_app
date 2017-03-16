@@ -1,7 +1,7 @@
-import R from 'ramda';
-import Mixpanel from 'mixpanel';
-import createError from '../utils/create-error';
-import * as Logger from './logger';
+const R = require('ramda');
+const Mixpanel = require('mixpanel');
+const createError = require('../utils/create-error');
+const Logger = require('./logger');
 
 const logger = Logger.createLogger('SHARED/services/mixpanel');
 

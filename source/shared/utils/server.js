@@ -1,8 +1,8 @@
-import Url from 'url';
-import Qs from 'qs';
-import { pick, omit } from 'lodash';
-import createError from './create-error';
-import * as Logger from '../services/logger';
+const Url = require('url');
+const Qs = require('qs');
+const { pick, omit } = require('lodash');
+const createError = require('./create-error');
+const Logger = require('../services/logger');
 
 const logger = Logger.createLogger('NODE-API/server/response');
 

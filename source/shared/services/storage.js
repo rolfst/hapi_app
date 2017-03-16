@@ -1,8 +1,8 @@
-import R from 'ramda';
-import Promise from 'bluebird';
-import AWS from 'aws-sdk';
-import createError from '../utils/create-error';
-import * as Logger from './logger';
+const R = require('ramda');
+const Promise = require('bluebird');
+const AWS = require('aws-sdk');
+const createError = require('../utils/create-error');
+const Logger = require('./logger');
 
 const logger = Logger.getLogger('SHARED/service/upload');
 

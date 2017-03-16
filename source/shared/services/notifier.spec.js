@@ -1,8 +1,8 @@
-import _Mixpanel from 'mixpanel';
-import { assert } from 'chai';
-import sinon from 'sinon';
-import Parse from 'parse/node';
-import * as notifier from './notifier';
+const _Mixpanel = require('mixpanel');
+const { assert } = require('chai');
+const sinon = require('sinon');
+const Parse = require('parse/node');
+const notifier = require('./notifier');
 
 describe('Notifier', () => {
   let sandbox;

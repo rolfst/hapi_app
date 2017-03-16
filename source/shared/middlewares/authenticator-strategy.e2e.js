@@ -1,10 +1,10 @@
-import { Server } from 'hapi';
-import { assert } from 'chai';
-import jwtStrategy from './authenticator-strategy';
-import * as testHelper from '../test-utils/helpers';
-import { getRequest } from '../test-utils/request';
-import { createRoute } from '../utils/create-routes';
-import preFetchNetwork from './prefetch-network';
+const { Server } = require('hapi');
+const { assert } = require('chai');
+const jwtStrategy = require('./authenticator-strategy');
+const testHelper = require('../test-utils/helpers');
+const { getRequest } = require('../test-utils/request');
+const { createRoute } = require('../utils/create-routes');
+const preFetchNetwork = require('./prefetch-network');
 
 const expiredToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNDcwMzA4OTY0LCJpc3MiOiJodHRwczpcL1wvYXBpLmZsZXgtYXBwZWFsLm5sIiwiaWF0IjoxNDcwMzA1MzY0LCJzdWIiOjY0LCJkZXZpY2UiOiI2NUJGQjcwRTc3Rjg0OEVFQUQ3MzBFQ0U2RDkyRkY2NyIsImp0aSI6MzMxODg4N30.MdrwMF1VrSAhmwg0oKbQ0Tl6_Nu1WKVxrm1uMGsvR9E'; // eslint-disable-line
 

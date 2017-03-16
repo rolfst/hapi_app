@@ -1,12 +1,12 @@
-import R from 'ramda';
-import * as Logger from '../../../../../shared/services/logger';
-import createError from '../../../../../shared/utils/create-error';
-import * as userRepository from '../../../../core/repositories/user';
-import * as objectService from '../../../../core/services/object';
-import * as objectRepository from '../../../../core/repositories/object';
-import * as conversationRepoV1 from '../../../v1/repositories/conversation';
-import * as conversationRepo from '../../repositories/conversation';
-import * as impl from './implementation';
+const R = require('ramda');
+const Logger = require('../../../../../shared/services/logger');
+const createError = require('../../../../../shared/utils/create-error');
+const userRepository = require('../../../../core/repositories/user');
+const objectService = require('../../../../core/services/object');
+const objectRepository = require('../../../../core/repositories/object');
+const conversationRepoV1 = require('../../../v1/repositories/conversation');
+const conversationRepo = require('../../repositories/conversation');
+const impl = require('./implementation');
 
 const logger = Logger.createLogger('CHAT/service/conversation');
 const createOptions = R.pick(['limit', 'offset', 'order']);

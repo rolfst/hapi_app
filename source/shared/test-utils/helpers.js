@@ -1,16 +1,16 @@
-import R from 'ramda';
-import Promise from 'bluebird';
-import authenticate from './authenticate';
-import blueprints from './blueprints';
-import * as networkService from '../../modules/core/services/network';
-import * as integrationRepo from '../../modules/core/repositories/integration';
-import * as userRepo from '../../modules/core/repositories/user';
-import * as networkRepo from '../../modules/core/repositories/network';
-import * as teamRepo from '../../modules/core/repositories/team';
-import * as activityRepo from '../../modules/core/repositories/activity';
-import * as objectRepo from '../../modules/core/repositories/object';
-import * as pollRepo from '../../modules/poll/repositories/poll';
-import { postRequest } from './request';
+const R = require('ramda');
+const Promise = require('bluebird');
+const authenticate = require('./authenticate');
+const blueprints = require('./blueprints');
+const networkService = require('../../modules/core/services/network');
+const integrationRepo = require('../../modules/core/repositories/integration');
+const userRepo = require('../../modules/core/repositories/user');
+const networkRepo = require('../../modules/core/repositories/network');
+const teamRepo = require('../../modules/core/repositories/team');
+const activityRepo = require('../../modules/core/repositories/activity');
+const objectRepo = require('../../modules/core/repositories/object');
+const pollRepo = require('../../modules/poll/repositories/poll');
+const { postRequest } = require('./request');
 
 /**
  * @module shared/test-utils/TestHelper

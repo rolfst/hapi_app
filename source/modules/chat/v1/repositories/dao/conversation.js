@@ -1,6 +1,6 @@
-import Sequelize from 'sequelize';
-import model from '../../../../../shared/configs/sequelize';
-import * as dateUtils from '../../../../../shared/utils/date';
+const Sequelize = require('sequelize');
+const model = require('../../../../../shared/configs/sequelize');
+const dateUtils = require('../../../../../shared/utils/date');
 
 const Conversation = model.define('Conversation', {
   type: {

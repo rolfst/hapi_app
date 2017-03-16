@@ -1,5 +1,5 @@
-import Sequelize from 'sequelize';
-import model from '../../../../shared/configs/sequelize';
+const Sequelize = require('sequelize');
+const model = require('../../../../shared/configs/sequelize');
 
 const _Object = model.define('_Object', {
   userId: {
@@ -47,4 +47,4 @@ const _Object = model.define('_Object', {
   updatedAt: 'updated_at',
 });
 
-export default _Object;
+module.exports = _Object;

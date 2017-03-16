@@ -1,5 +1,5 @@
-import R from 'ramda';
-import * as dateUtils from '../../../../shared/utils/date';
+const R = require('ramda');
+const dateUtils = require('../../../../shared/utils/date');
 
 const toId = R.pipe(R.prop('id'), R.toString);
 

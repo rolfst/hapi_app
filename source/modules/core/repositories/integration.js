@@ -1,4 +1,4 @@
-import { Integration } from './dao';
+const { Integration } = require('./dao');
 
 /**
  * @module modules/core/repositories/integration

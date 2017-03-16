@@ -1,13 +1,13 @@
-import { assert } from 'chai';
-import nock from 'nock';
-import { map, differenceBy } from 'lodash';
-import Promise from 'bluebird';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import { getRequest } from '../../../shared/test-utils/request';
-import * as stubs from '../../../shared/test-utils/stubs';
-import userSerializer from '../../integrations/adapters/pmt/serializers/user';
-import * as networkRepo from '../../core/repositories/network';
-import * as teamRepo from '../../core/repositories/team';
+const { assert } = require('chai');
+const nock = require('nock');
+const { map, differenceBy } = require('lodash');
+const Promise = require('bluebird');
+const testHelper = require('../../../shared/test-utils/helpers');
+const { getRequest } = require('../../../shared/test-utils/request');
+const stubs = require('../../../shared/test-utils/stubs');
+const userSerializer = require('../../integrations/adapters/pmt/serializers/user');
+const networkRepo = require('../../core/repositories/network');
+const teamRepo = require('../../core/repositories/team');
 
 describe('Handle sync networks of linked to integration', () => {
   nock.disableNetConnect();

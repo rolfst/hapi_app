@@ -1,24 +1,24 @@
-import { sortBy, map, includes } from 'lodash';
-import R from 'ramda';
-import moment from 'moment';
-import * as Logger from '../../../../shared/services/logger';
-import { createAdapter } from '../../../../shared/utils/create-adapter';
-import createError from '../../../../shared/utils/create-error';
-import * as teamRepo from '../../../core/repositories/team';
-import * as userRepo from '../../../core/repositories/user';
-import * as activityRepo from '../../../core/repositories/activity';
-import * as userService from '../../../core/services/user';
-import * as teamService from '../../../core/services/team';
-import * as objectService from '../../../core/services/object';
-import * as networkService from '../../../core/services/network';
-import { exchangeTypes } from '../../repositories/dao/exchange';
-import * as commentRepo from '../../repositories/comment';
-import * as exchangeRepo from '../../repositories/exchange';
-import * as exchangeValueRepo from '../../repositories/exchange-value';
-import * as exchangeResponseRepo from '../../repositories/exchange-response';
-import * as acceptanceNotifier from '../../notifications/accepted-exchange';
-import FlexchangeDispatcher from '../../dispatcher';
-import * as impl from './implementation';
+const { sortBy, map, includes } = require('lodash');
+const R = require('ramda');
+const moment = require('moment');
+const Logger = require('../../../../shared/services/logger');
+const { createAdapter } = require('../../../../shared/utils/create-adapter');
+const createError = require('../../../../shared/utils/create-error');
+const teamRepo = require('../../../core/repositories/team');
+const userRepo = require('../../../core/repositories/user');
+const activityRepo = require('../../../core/repositories/activity');
+const userService = require('../../../core/services/user');
+const teamService = require('../../../core/services/team');
+const objectService = require('../../../core/services/object');
+const networkService = require('../../../core/services/network');
+const { exchangeTypes } = require('../../repositories/dao/exchange');
+const commentRepo = require('../../repositories/comment');
+const exchangeRepo = require('../../repositories/exchange');
+const exchangeValueRepo = require('../../repositories/exchange-value');
+const exchangeResponseRepo = require('../../repositories/exchange-response');
+const acceptanceNotifier = require('../../notifications/accepted-exchange');
+const FlexchangeDispatcher = require('../../dispatcher');
+const impl = require('./implementation');
 
 /**
  * @module modules/flexchange/services/flexchange

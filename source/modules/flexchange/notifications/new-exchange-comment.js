@@ -1,7 +1,7 @@
-import _ from 'lodash';
-import * as notifier from '../../../shared/services/notifier';
-import * as exchangeRepo from '../repositories/exchange';
-import { findCommentsByExchange } from '../repositories/comment';
+const _ = require('lodash');
+const notifier = require('../../../shared/services/notifier');
+const exchangeRepo = require('../repositories/exchange');
+const { findCommentsByExchange } = require('../repositories/comment');
 
 export const createNotification = (exchange, comment) => {
   const creator = comment.User.fullName;

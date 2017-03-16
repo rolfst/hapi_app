@@ -1,6 +1,6 @@
-import { assert } from 'chai';
-import moment from 'moment';
-import userSerializer from './user';
+const { assert } = require('chai');
+const moment = require('moment');
+const userSerializer = require('./user');
 
 describe('PMT: User Serializer', () => {
   const defaultExternalUser = {

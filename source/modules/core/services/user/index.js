@@ -1,11 +1,11 @@
-import { map, find } from 'lodash';
-import R from 'ramda';
-import Promise from 'bluebird';
-import createError from '../../../../shared/utils/create-error';
-import * as Logger from '../../../../shared/services/logger';
-import * as userRepo from '../../repositories/user';
-import * as networkRepo from '../../repositories/network';
-import * as networkService from '../../services/network';
+const { map, find } = require('lodash');
+const R = require('ramda');
+const Promise = require('bluebird');
+const createError = require('../../../../shared/utils/create-error');
+const Logger = require('../../../../shared/services/logger');
+const userRepo = require('../../repositories/user');
+const networkRepo = require('../../repositories/network');
+const networkService = require('../../services/network');
 
 /**
  * @module modules/core/services/user

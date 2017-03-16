@@ -1,5 +1,5 @@
-import * as notifier from '../../../shared/services/notifier';
-import * as networkRepo from '../../core/repositories/network';
+const notifier = require('../../../shared/services/notifier');
+const networkRepo = require('../../core/repositories/network');
 
 export const createNotification = (exchange, substituteUser) => {
   const substitute = substituteUser.fullName;

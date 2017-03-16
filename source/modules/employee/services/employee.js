@@ -1,6 +1,6 @@
-import * as userRepo from '../../core/repositories/user';
-import * as userService from '../../core/services/user';
-import EmployeeDispatcher from '../dispatcher';
+const userRepo = require('../../core/repositories/user');
+const userService = require('../../core/services/user');
+const EmployeeDispatcher = require('../dispatcher');
 
 /**
  * @module modules/employee/services/employee

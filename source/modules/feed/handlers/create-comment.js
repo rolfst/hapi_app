@@ -1,5 +1,5 @@
-import * as responseUtil from '../../../shared/utils/response';
-import * as commentService from '../services/comment';
+const responseUtil = require('../../../shared/utils/response');
+const commentService = require('../services/comment');
 
 export default async (req, reply) => {
   try {

@@ -1,8 +1,8 @@
-import R from 'ramda';
-import Promise from 'bluebird';
-import * as objectRepository from '../../../core/repositories/object';
-import * as objectService from '../../../core/services/object';
-import * as messageService from '../message';
+const R = require('ramda');
+const Promise = require('bluebird');
+const objectRepository = require('../../../core/repositories/object');
+const objectService = require('../../../core/services/object');
+const messageService = require('../message');
 
 const typeEq = R.propEq('objectType');
 const pluckId = R.pluck('id');

@@ -1,8 +1,8 @@
-import Sequelize from 'sequelize';
-import * as dateUtils from '../../../../shared/utils/date';
-import model from '../../../../shared/configs/sequelize';
+const Sequelize = require('sequelize');
+const dateUtils = require('../../../../shared/utils/date');
+const model = require('../../../../shared/configs/sequelize');
 
-export const ActivityTypes = {
+const ActivityTypes = {
   EXCHANGE_CREATED: 'exchange_created',
   EXCHANGE_ACCEPTED: 'exchange_accepted',
   EXCHANGE_DECLINED: 'exchange_declined',
@@ -11,6 +11,7 @@ export const ActivityTypes = {
   EXCHANGE_COMMENT: 'exchange_comment',
 };
 
+debugger;
 const Activity = model.define('Activity', {
   userId: {
     type: Sequelize.INTEGER,
@@ -65,4 +66,7 @@ const Activity = model.define('Activity', {
   },
 });
 
-export default Activity;
+module.exports = {
+  Activity,
+  ActivityTypes,
+};

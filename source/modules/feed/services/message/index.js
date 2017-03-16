@@ -1,14 +1,14 @@
-import R from 'ramda';
-import Promise from 'bluebird';
-import * as Logger from '../../../../shared/services/logger';
-import createError from '../../../../shared/utils/create-error';
-import * as attachmentService from '../../../attachment/services/attachment';
-import * as objectService from '../../../core/services/object';
-import FeedDispatcher from '../../dispatcher';
-import * as messageRepository from '../../repositories/message';
-import * as likeRepository from '../../repositories/like';
-import * as commentRepository from '../../repositories/comment';
-import * as impl from './implementation';
+const R = require('ramda');
+const Promise = require('bluebird');
+const Logger = require('../../../../shared/services/logger');
+const createError = require('../../../../shared/utils/create-error');
+const attachmentService = require('../../../attachment/services/attachment');
+const objectService = require('../../../core/services/object');
+const FeedDispatcher = require('../../dispatcher');
+const messageRepository = require('../../repositories/message');
+const likeRepository = require('../../repositories/like');
+const commentRepository = require('../../repositories/comment');
+const impl = require('./implementation');
 
 /**
  * @module modules/feed/services/message

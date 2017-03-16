@@ -1,7 +1,7 @@
-import { assert } from 'chai';
-import { omit } from 'lodash';
-import preFetchNetwork from '../middlewares/prefetch-network';
-import * as systemUnderTest from './create-routes';
+const { assert } = require('chai');
+const { omit } = require('lodash');
+const preFetchNetwork = require('../middlewares/prefetch-network');
+const systemUnderTest = require('./create-routes');
 
 describe('createRoutes', () => {
   describe('createRoute', () => {

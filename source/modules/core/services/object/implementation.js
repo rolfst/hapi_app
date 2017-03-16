@@ -1,10 +1,10 @@
-import R from 'ramda';
-import * as flexchangeService from '../../../flexchange/services/flexchange';
-import * as pollService from '../../../poll/services/poll';
-import * as attachmentService from '../../../attachment/services/attachment';
-import * as privateMessageService from '../../../chat/v2/services/private-message';
-import * as feedMessageService from '../../../feed/services/message';
-import * as objectRepository from '../../repositories/object';
+const R = require('ramda');
+const flexchangeService = require('../../../flexchange/services/flexchange');
+const pollService = require('../../../poll/services/poll');
+const attachmentService = require('../../../attachment/services/attachment');
+const privateMessageService = require('../../../chat/v2/services/private-message');
+const feedMessageService = require('../../../feed/services/message');
+const objectRepository = require('../../repositories/object');
 
 const whereTypeAndId = (type, id) => R.both(R.propEq('type', type), R.propEq('id', id));
 const findSource = (type, id, sources) => R.find(whereTypeAndId(type, id), sources) || null;

@@ -1,6 +1,6 @@
-import { get, omit, map, intersectionBy } from 'lodash';
-import client from '../client';
-import userSerializer from '../serializers/user';
+const { get, omit, map, intersectionBy } = require('lodash');
+const client = require('../client');
+const userSerializer = require('../serializers/user');
 
 export function fetchUsers(baseStoreUrl) {
   return async () => {

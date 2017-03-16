@@ -1,6 +1,6 @@
-import R from 'ramda';
-import { PollOption } from './dao';
-import createPollOptionModel from '../models/poll-option';
+const R = require('ramda');
+const { PollOption } = require('./dao');
+const createPollOptionModel = require('../models/poll-option');
 
 /**
  * Create a new poll option

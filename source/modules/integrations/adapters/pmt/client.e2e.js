@@ -1,9 +1,9 @@
-import { assert } from 'chai';
-import nock from 'nock';
-import createError from '../../../../shared/utils/create-error';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import * as stubs from './test-utils/stubs';
-import client from './client';
+const { assert } = require('chai');
+const nock = require('nock');
+const createError = require('../../../../shared/utils/create-error');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const stubs = require('./test-utils/stubs');
+const client = require('./client');
 
 nock.disableNetConnect();
 

@@ -1,4 +1,4 @@
-import { Activity, Team, Network, User } from './dao';
+const { Activity, Team, Network, User } = require('./dao');
 
 /**
  * @module modules/core/repositories/activity

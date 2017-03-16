@@ -1,11 +1,11 @@
-import Promise from 'bluebird';
-import moment from 'moment';
-import { filter, map, uniqBy, pick } from 'lodash';
-import * as notifier from '../../../shared/services/notifier';
-import * as networkRepo from '../../core/repositories/network';
-import * as exchangeRepo from '../repositories/exchange';
-import createReminderExchangeNotification from '../notifications/accepted-exchange-reminder';
-import * as Logger from '../../../shared/services/logger';
+const Promise = require('bluebird');
+const moment = require('moment');
+const { filter, map, uniqBy, pick } = require('lodash');
+const notifier = require('../../../shared/services/notifier');
+const networkRepo = require('../../core/repositories/network');
+const exchangeRepo = require('../repositories/exchange');
+const createReminderExchangeNotification = require('../notifications/accepted-exchange-reminder');
+const Logger = require('../../../shared/services/logger');
 
 const logger = Logger.createLogger('FLEXCHANGE/service/reminder');
 

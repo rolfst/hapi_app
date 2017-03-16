@@ -1,7 +1,7 @@
-import { assert } from 'chai';
-import _ from 'lodash';
-import mailFixture from '../test-utils/stubs/mail';
-import * as mailer from './mailer';
+const { assert } = require('chai');
+const _ = require('lodash');
+const mailFixture = require('../test-utils/stubs/mail');
+const mailer = require('./mailer');
 
 describe('Mailer', () => {
   const users = [{

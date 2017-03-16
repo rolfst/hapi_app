@@ -1,7 +1,7 @@
-import { assert } from 'chai';
-import R from 'ramda';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as networkRepository from './network';
+const { assert } = require('chai');
+const R = require('ramda');
+const testHelper = require('../../../shared/test-utils/helpers');
+const networkRepository = require('./network');
 
 describe('Repository: Network', () => {
   let network;

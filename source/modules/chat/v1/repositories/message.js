@@ -1,9 +1,9 @@
-import R from 'ramda';
-import Promise from 'bluebird';
-import { User } from '../../../core/repositories/dao';
-import * as objectRepo from '../../../core/repositories/object';
-import createFeedMessageModel from '../models/message';
-import { Message } from './dao';
+const R = require('ramda');
+const Promise = require('bluebird');
+const { User } = require('../../../core/repositories/dao');
+const objectRepo = require('../../../core/repositories/object');
+const createFeedMessageModel = require('../models/message');
+const { Message } = require('./dao');
 
 /**
  * @module modules/chat/repositories/message

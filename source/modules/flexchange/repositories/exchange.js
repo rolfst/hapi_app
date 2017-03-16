@@ -1,19 +1,19 @@
-import moment from 'moment';
-import R from 'ramda';
-import { map, omit, merge } from 'lodash';
-import createError from '../../../shared/utils/create-error';
-import { ActivityTypes } from '../../core/repositories/dao/activity';
-import { createActivity } from '../../core/repositories/activity';
-import { User, Team } from '../../core/repositories/dao';
-import makeCreatedInObject from '../utils/created-in-text';
-import createExchangeModel from '../models/exchange';
-import { exchangeTypes } from './dao/exchange';
-import {
+const moment = require('moment');
+const R = require('ramda');
+const { map, omit, merge } = require('lodash');
+const createError = require('../../../shared/utils/create-error');
+const { ActivityTypes } = require('../../core/repositories/dao/activity');
+const { createActivity } = require('../../core/repositories/activity');
+const { User, Team } = require('../../core/repositories/dao');
+const makeCreatedInObject = require('../utils/created-in-text');
+const createExchangeModel = require('../models/exchange');
+const { exchangeTypes } = require('./dao/exchange');
+const {
   Exchange, ExchangeResponse, ExchangeComment, ExchangeValue,
-} from './dao';
-import { createExchangeResponse } from './exchange-response';
-import { createValuesForExchange } from './exchange-value';
-import * as exchangeResponseRepo from './exchange-response';
+} = require('./dao');
+const { createExchangeResponse } = require('./exchange-response');
+const { createValuesForExchange } = require('./exchange-value');
+const exchangeResponseRepo = require('./exchange-response');
 
 /**
  * @module modules/flexchange/repositories/exchange

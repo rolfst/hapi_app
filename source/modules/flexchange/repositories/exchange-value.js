@@ -1,6 +1,6 @@
-import R from 'ramda';
-import createExchangeValueModel from '../models/exchange-value';
-import ExchangeValue from './dao/exchange-value';
+const R = require('ramda');
+const createExchangeValueModel = require('../models/exchange-value');
+const ExchangeValue = require('./dao/exchange-value');
 
 /**
  * @module modules/flexchange/repositories/exchangeValue

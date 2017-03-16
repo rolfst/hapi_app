@@ -1,12 +1,12 @@
-import * as Logger from '../../shared/services/logger';
-import * as networkService from '../../modules/core/services/network';
-import * as authorizationService from '../../modules/core/services/authorization';
-import createError from '../utils/create-error';
-import * as serverUtil from '../utils/server';
+const Logger = require('../../shared/services/logger');
+const networkService = require('../../modules/core/services/network');
+const authorizationService = require('../../modules/core/services/authorization');
+const createError = require('../utils/create-error');
+const serverUtil = require('../utils/server');
 
 const logger = Logger.createLogger('MIDDLEWARE/prefetchNetwork');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   const message = { ...req.auth };
   const payload = { ...req.params };
 

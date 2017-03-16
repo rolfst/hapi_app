@@ -1,7 +1,7 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import bcrypt from 'bcrypt';
-import * as password from './password';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const bcrypt = require('bcrypt');
+const password = require('./password');
 
 describe('password', () => {
   it('should make password hash', () => {

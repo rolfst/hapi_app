@@ -1,6 +1,6 @@
-import { assert } from 'chai';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import * as pollService from './index';
+const { assert } = require('chai');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const pollService = require('./index');
 
 describe('Service: Poll', () => {
   let employee;

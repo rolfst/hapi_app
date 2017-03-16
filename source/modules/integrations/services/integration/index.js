@@ -1,9 +1,9 @@
-import { pick } from 'lodash';
-import { createAdapter } from '../../../../shared/utils/create-adapter';
-import * as userRepo from '../../../core/repositories/user';
-import * as authenticationRepo from '../../../core/repositories/authentication';
-import createAccessToken from '../../../authentication/utils/create-access-token';
-import * as impl from './implementation';
+const { pick } = require('lodash');
+const { createAdapter } = require('../../../../shared/utils/create-adapter');
+const userRepo = require('../../../core/repositories/user');
+const authenticationRepo = require('../../../core/repositories/authentication');
+const createAccessToken = require('../../../authentication/utils/create-access-token');
+const impl = require('./implementation');
 
 export async function authenticate(payload, message) {
   const credentials = pick(payload, 'username', 'password');

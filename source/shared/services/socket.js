@@ -1,6 +1,6 @@
-import fetch from 'isomorphic-fetch';
-import R from 'ramda';
-import * as Logger from './logger';
+const fetch = require('isomorphic-fetch');
+const R = require('ramda');
+const Logger = require('./logger');
 
 const logger = Logger.createLogger('SHARED/services/socket');
 
