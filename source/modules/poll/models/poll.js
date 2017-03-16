@@ -14,7 +14,7 @@ const getUniqueVoteUsers = R.pipe(
   R.uniq
 );
 
-export default (dao) => ({
+module.exports = (dao) => ({
   type: 'poll',
   id: dao.id.toString(),
   networkId: dao.networkId ? dao.networkId.toString() : null,

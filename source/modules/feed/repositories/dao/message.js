@@ -50,4 +50,4 @@ const Message = model.define('FeedMessage', {
   updatedAt: 'updated_at',
 });
 
-export default Message;
+module.exports = Message;

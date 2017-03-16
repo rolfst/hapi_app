@@ -32,4 +32,4 @@ const routes = [{
 
 const addPrefetchValue = (route) => ({ ...route, prefetch: false });
 
-export default createRoutes(routes.map(addPrefetchValue));
+module.exports = createRoutes(routes.map(addPrefetchValue));

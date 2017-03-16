@@ -150,4 +150,4 @@ const Exchange = model.define('Exchange', {
   },
 });
 
-export default Exchange;
+module.exports = Exchange;

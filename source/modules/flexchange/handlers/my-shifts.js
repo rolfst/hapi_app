@@ -10,7 +10,7 @@ const transformItem = item => ({
   team_id: item.teamId ? item.teamId.toString() : null,
 });
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
     const message = { ...req.pre, ...req.auth };
 

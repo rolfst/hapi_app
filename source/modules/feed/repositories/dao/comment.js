@@ -31,4 +31,4 @@ const FeedComment = model.define('FeedComment', {
   updatedAt: 'updated_at',
 });
 
-export default FeedComment;
+module.exports = FeedComment;

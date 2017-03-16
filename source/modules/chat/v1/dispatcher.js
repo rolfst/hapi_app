@@ -14,4 +14,4 @@ pubsub.asyncOn('message.created', (payload) => {
   newMessageNotification.send(payload.message, usersToNotify);
 });
 
-export default pubsub;
+module.exports = pubsub;

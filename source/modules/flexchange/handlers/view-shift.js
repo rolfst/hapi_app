@@ -4,7 +4,7 @@ const flexchangeService = require('../services/flexchange');
 
 const logger = Logger.createLogger('FLEXCHANGE/handler/viewShift');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
     const payload = { shiftId: req.params.shiftId };
     const message = { ...req.pre, ...req.auth };

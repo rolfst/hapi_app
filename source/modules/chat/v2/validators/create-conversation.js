@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-export default {
+module.exports = {
   payload: {
     type: Joi.string().valid('private', 'group').required(),
     participantIds: Joi.array().unique().required(),

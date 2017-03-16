@@ -1,6 +1,6 @@
 const mailTemplateConfig = require('../configs/mail-templates');
 
-export default (network, user, password) => {
+module.exports = (network, user, password) => {
   const data = {
     '-firstName-': user.firstName,
     '-companyName-': network.name, // TODO: UTF-8 encode

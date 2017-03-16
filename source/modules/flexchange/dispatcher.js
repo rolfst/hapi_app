@@ -47,4 +47,4 @@ pubsub.asyncOn('exchange.approved', (payload) => {
   Intercom.incrementAttribute(approvedUser.email, 'exchanged_shifts');
 });
 
-export default pubsub;
+module.exports = pubsub;

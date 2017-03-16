@@ -20,7 +20,7 @@ export const authenticate = async (networkId, token = null) => {
   };
 };
 
-export default () => ({
+module.exports = () => ({
   async authenticate(request, reply) {
     let artifacts = { requestId: request.id };
 

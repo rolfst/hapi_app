@@ -24,4 +24,4 @@ const PollVote = model.define('PollVote', {
   updatedAt: false,
 });
 
-export default PollVote;
+module.exports = PollVote;

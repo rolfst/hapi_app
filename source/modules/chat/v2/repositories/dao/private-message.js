@@ -23,4 +23,4 @@ const PrivateMessage = model.define('PrivateMessage', {
   updatedAt: false,
 });
 
-export default PrivateMessage;
+module.exports = PrivateMessage;

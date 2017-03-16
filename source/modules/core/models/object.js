@@ -1,6 +1,6 @@
 const dateUtils = require('../../../shared/utils/date');
 
-export default (dataModel) => ({
+module.exports = (dataModel) => ({
   id: dataModel.id.toString(),
   userId: dataModel.userId.toString(),
   objectType: dataModel.objectType,

@@ -22,6 +22,6 @@ class EventEmitter extends NativeEventEmitter {
   }
 }
 
-export default {
+module.exports = {
   create: () => new EventEmitter(),
 };

@@ -5,7 +5,7 @@ const { updateExchangeById } = require('../repositories/exchange');
 
 const logger = Logger.createLogger('FLEXCHANGE/handler/updateExchange');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
     const data = {
       title: req.payload.title,

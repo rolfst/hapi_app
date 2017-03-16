@@ -53,4 +53,4 @@ pubsub.asyncOn('user.deleted', (payload) => {
   });
 });
 
-export default pubsub;
+module.exports = pubsub;

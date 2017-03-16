@@ -24,4 +24,4 @@ const ExchangeValue = model.define('ExchangeValue', {
   },
 });
 
-export default ExchangeValue;
+module.exports = ExchangeValue;

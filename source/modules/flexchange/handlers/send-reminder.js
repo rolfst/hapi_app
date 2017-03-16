@@ -4,7 +4,7 @@ const reminderService = require('../services/reminder');
 const logger = Logger.createLogger('FLEXCHANGE/handler/sendReminder');
 
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
     const message = { ...req.pre, ...req.auth };
 

@@ -1,4 +1,4 @@
-export default (user) => {
+module.exports = (user) => {
   const data = {
     firstName: user.firstName,
     lastName: user.lastName,

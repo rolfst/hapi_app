@@ -3,7 +3,7 @@ const dateUtils = require('../../../../shared/utils/date');
 
 const toId = R.pipe(R.prop('id'), R.toString);
 
-export default (dao) => ({
+module.exports = (dao) => ({
   type: 'conversation',
   id: dao.id.toString(),
   userId: dao.createdBy.toString(),

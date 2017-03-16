@@ -1,6 +1,6 @@
 const sinon = require('sinon');
 
-export default {
+module.exports = {
   users: {
     create: sinon.stub(),
     update: sinon.stub(),

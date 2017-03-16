@@ -52,4 +52,4 @@ const routes = [{
   prefetch: false,
 }];
 
-export default createRoutes(routes);
+module.exports = createRoutes(routes);

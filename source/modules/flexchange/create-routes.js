@@ -86,4 +86,4 @@ const routes = [{
   handler: require(`${basePath}/remove-exchange`),
 }];
 
-export default createRoutes(routes);
+module.exports = createRoutes(routes);

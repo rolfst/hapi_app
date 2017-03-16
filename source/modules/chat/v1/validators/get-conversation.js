@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-export default {
+module.exports = {
   query: {
     include: Joi.any().valid(['messages']),
   },

@@ -20,4 +20,4 @@ pubsub.asyncOn('message.created', async (payload) => {
   newMessageNotification.send(actor, payload.object, usersToNotify);
 });
 
-export default pubsub;
+module.exports = pubsub;

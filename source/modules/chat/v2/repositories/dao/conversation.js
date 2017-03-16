@@ -50,4 +50,4 @@ const Conversation = model.define('Conversation', {
   },
 });
 
-export default Conversation;
+module.exports = Conversation;

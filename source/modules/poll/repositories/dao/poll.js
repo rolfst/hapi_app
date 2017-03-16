@@ -24,4 +24,4 @@ const Poll = model.define('Poll', {
   updatedAt: false,
 });
 
-export default Poll;
+module.exports = Poll;

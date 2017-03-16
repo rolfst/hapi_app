@@ -1,6 +1,6 @@
 const { exchangeTypes } = require('../repositories/dao/exchange');
 
-export default (exchange) => {
+module.exports = (exchange) => {
   let exchangeValueOutput;
 
   if (exchange.type === exchangeTypes.NETWORK) {

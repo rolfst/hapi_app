@@ -20,7 +20,7 @@ const authenticationService = require('../../modules/authentication/services/aut
  * @method default
  * @returns {@link module:shared/test-utils/authenticate.AuthorizedUser}
  */
-export default async (credentials, message) => {
+module.exports = async (credentials, message) => {
   const { accessToken } = await authenticationService.authenticate(credentials, message);
   const decodedToken = tokenUtil.decode(accessToken);
   const user = await userRepo.findUserById(decodedToken.sub, null, false);

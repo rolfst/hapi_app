@@ -1,6 +1,6 @@
 const dateUtils = require('../../../shared/utils/date');
 
-export default (dao) => ({
+module.exports = (dao) => ({
   id: dao.id.toString(),
   userId: dao.userId.toString(),
   messageId: dao.messageId.toString(),

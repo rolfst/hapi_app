@@ -22,4 +22,4 @@ const Like = model.define('Like', {
   updatedAt: false,
 });
 
-export default Like;
+module.exports = Like;

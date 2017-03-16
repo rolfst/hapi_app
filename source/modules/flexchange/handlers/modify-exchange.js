@@ -12,7 +12,7 @@ const services = {
   reject: flexchangeService.rejectExchange,
 };
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
     const params = pick(req.params, ['exchangeId']);
     const payload = {

@@ -45,4 +45,4 @@ const ExchangeComment = model.define('ExchangeComment', {
   },
 });
 
-export default ExchangeComment;
+module.exports = ExchangeComment;

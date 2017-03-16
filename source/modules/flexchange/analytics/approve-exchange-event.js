@@ -1,6 +1,6 @@
 const moment = require('moment');
 
-export default function (network, exchange) {
+module.exports = function (network, exchange) {
   return {
     name: 'Shift Takeover',
     data: {

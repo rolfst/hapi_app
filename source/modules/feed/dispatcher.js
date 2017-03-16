@@ -36,4 +36,4 @@ pubsub.asyncOn('message.created', async (payload) => {
   }, payload.credentials.id);
 });
 
-export default pubsub;
+module.exports = pubsub;

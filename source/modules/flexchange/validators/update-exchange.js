@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-export default {
+module.exports = {
   payload: Joi.object().keys({
     title: Joi.string().min(5),
     description: Joi.string().allow(null).empty(''),

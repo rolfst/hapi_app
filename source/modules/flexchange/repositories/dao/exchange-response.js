@@ -49,4 +49,4 @@ const ExchangeResponse = model.define('ExchangeResponse', {
   },
 });
 
-export default ExchangeResponse;
+module.exports = ExchangeResponse;

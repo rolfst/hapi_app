@@ -4,7 +4,7 @@ const flexchangeService = require('../services/flexchange');
 
 const logger = Logger.createLogger('FLEXCHANGE/handler/viewExchangeComments');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
     const payload = { exchangeId: req.params.exchangeId };
     const message = { ...req.pre, ...req.auth };

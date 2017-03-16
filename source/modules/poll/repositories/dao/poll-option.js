@@ -14,4 +14,4 @@ const PollOption = model.define('PollOption', {
   timestamps: false,
 });
 
-export default PollOption;
+module.exports = PollOption;

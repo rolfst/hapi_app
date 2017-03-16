@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-export default {
+module.exports = {
   query: {
     include: Joi.any().valid(['participants']),
     limit: Joi.number().min(0).max(50).default(10, 'The default limit'),

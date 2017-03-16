@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-export default {
+module.exports = {
   params: Joi.object().keys({
     networkId: Joi.string().required(),
     viewName: Joi.string().valid('created_messages', 'approved_shifts', 'created_shifts'),

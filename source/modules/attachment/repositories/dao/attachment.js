@@ -24,4 +24,4 @@ const Attachment = model.define('Attachment', {
   updatedAt: false,
 });
 
-export default Attachment;
+module.exports = Attachment;

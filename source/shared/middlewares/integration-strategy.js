@@ -5,7 +5,7 @@ const Logger = require('../services/logger');
 
 const logger = Logger.createLogger('SHARED/middleware/integrationStrategy');
 
-export default () => {
+module.exports = () => {
   return {
     authenticate: async(request, reply) => {
       try {

@@ -7,4 +7,4 @@ const routes = [{
   validator: require('./validators/vote'),
 }];
 
-export default createRoutes(routes);
+module.exports = createRoutes(routes);

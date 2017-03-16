@@ -15,4 +15,4 @@ const ConversationUser = model.define('ConversationUser', {
   timestamps: false,
 });
 
-export default ConversationUser;
+module.exports = ConversationUser;
