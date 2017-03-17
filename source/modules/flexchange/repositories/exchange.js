@@ -40,11 +40,11 @@ const createDateFilter = (start, end) => {
 };
 
 // NEW REFACTORED METHODS
-export const findAllBy = (whereConstraint) => Exchange
+const findAllBy = (whereConstraint) => Exchange
   .findAll({ where: whereConstraint })
   .then(R.map(createExchangeModel));
 
-export const findByIds = async (exchangeIds) => {
+const findByIds = async (exchangeIds) => {
   const result = await Exchange.findAll({ where: { id: { $in: exchangeIds } } });
 
   return R.map(createExchangeModel, result);
@@ -56,7 +56,7 @@ export const findByIds = async (exchangeIds) => {
  * @method findAllAcceptedExchanges
  * @returns {Array<Exchange>} - Promise of list with Exchange objects
  */
-export const findAllAcceptedExchanges = async (date = null) => {
+const findAllAcceptedExchanges = async (date = null) => {
   const query = {
     acceptCount: { $gt: 0 },
     approvedBy: { $eq: null },
@@ -82,7 +82,7 @@ export const findAllAcceptedExchanges = async (date = null) => {
  * @method findExchangeById
  * @return {external:Promise.<Exchange>} Find exchange promise
  */
-export async function findExchangeById(exchangeId, userId) {
+async function findExchangeById(exchangeId, userId) {
   const extraIncludes = [{
     model: ExchangeResponse,
     as: 'ResponseStatus',
@@ -102,7 +102,7 @@ export async function findExchangeById(exchangeId, userId) {
 
 // FIXME: Should be replaced when flexchange will be used with
 // models instead of DAO's containing so many includes
-export const findPlainExchangesById = async (exchangeIds) => {
+const findPlainExchangesById = async (exchangeIds) => {
   const result = await Exchange.findAll({
     where: { id: { $in: exchangeIds } },
     include: [{ attributes: ['value'], model: ExchangeValue }],
@@ -119,7 +119,7 @@ export const findPlainExchangesById = async (exchangeIds) => {
  * @method findExchangeByIds
  * @return {external:Promise.<Exchange>} Find exchanges promise
  */
-export function findExchangeByIds(exchangeIds, userId, extraConstraint = {}) {
+function findExchangeByIds(exchangeIds, userId, extraConstraint = {}) {
   const extraIncludes = [{
     model: ExchangeResponse,
     as: 'ResponseStatus',
@@ -137,7 +137,7 @@ export function findExchangeByIds(exchangeIds, userId, extraConstraint = {}) {
   return Exchange.findAll(merge(options, extraConstraint));
 }
 
-export async function findExchangesByShiftIds(shiftIds) {
+async function findExchangesByShiftIds(shiftIds) {
   const exchanges = await Exchange.findAll({
     include: defaultIncludes,
     where: { shiftId: { $in: shiftIds } },
@@ -152,7 +152,7 @@ export async function findExchangesByShiftIds(shiftIds) {
  * @method findExchangesByUserAndNetwork
  * @return {Promise} Get exchanges promise
  */
-export const findExchangesByUserAndNetwork = async (userId, networkId, filter = {}) => {
+const findExchangesByUserAndNetwork = async (userId, networkId, filter = {}) => {
   const exchanges = await Exchange.findAll({
     attributes: ['id'],
     where: { userId, networkId },
@@ -164,7 +164,7 @@ export const findExchangesByUserAndNetwork = async (userId, networkId, filter = 
   return findExchangeByIds(map(exchanges, 'id'), userId, constraint);
 };
 
-export async function findExchangeIdsForValues(type, networkId, values, userId, filter = {}) {
+async function findExchangeIdsForValues(type, networkId, values, userId, filter = {}) {
   const whereConstraint = { type, networkId };
   const dateFilter = createDateFilter(filter.start);
   if (dateFilter) whereConstraint.date = dateFilter;
@@ -188,7 +188,7 @@ export async function findExchangeIdsForValues(type, networkId, values, userId, 
  * @method findExchangesByNetwork
  * @return {Promise} Get exchanges promise
  */
-export const findExchangesByNetwork = async (networkId, options = {}) => {
+const findExchangesByNetwork = async (networkId, options = {}) => {
   const opts = { where: { networkId } };
   if (options.start || options.end) opts.where.date = createDateFilter(options.start, options.end);
   if (options.attributes) opts.attributes = options.attributes;
@@ -204,7 +204,7 @@ export const findExchangesByNetwork = async (networkId, options = {}) => {
  * @method findExchangesByTeam
  * @return {Promise} Get exchanges promise
  */
-export const findExchangesByTeam = async (teamId, userId, filter = {}) => {
+const findExchangesByTeam = async (teamId, userId, filter = {}) => {
   const teamDAO = await Team.findById(teamId);
   const exchanges = await teamDAO.getExchanges();
 
@@ -220,7 +220,7 @@ export const findExchangesByTeam = async (teamId, userId, filter = {}) => {
  * @method deleteById
  * @return {Promise} Delete exchange promise
  */
-export function deleteById(exchangeId) {
+function deleteById(exchangeId) {
   return Exchange.destroy({ where: { id: exchangeId } });
 }
 
@@ -232,8 +232,9 @@ export function deleteById(exchangeId) {
  * @method createExchange
  * @return {Promise} Create exchange promise
  */
-export async function createExchange(userId, networkId, attributes) {
-  const exchange = await Exchange.create({ ...omit(attributes, 'values'), userId, networkId });
+async function createExchange(userId, networkId, attributes) {
+  const exchange = await Exchange.create(R.merge(
+        R.omit(['values'], attributes), { userId, networkId }));
   let exchangeValues;
 
   if (exchange.type === exchangeTypes.NETWORK) {
@@ -256,7 +257,7 @@ export async function createExchange(userId, networkId, attributes) {
   return findExchangeById(exchange.id);
 }
 
-export const getRespondedToExchange = async (userId, networkId) => {
+const getRespondedToExchange = async (userId, networkId) => {
   const exchanges = await Exchange.findAll({
     attributes: ['id'],
     where: { networkId },
@@ -278,7 +279,7 @@ export const getRespondedToExchange = async (userId, networkId) => {
  * @method updateExchangeById
  * @return {Promise} Update exchange promise
  */
-export function updateExchangeById(exchangeId, payload) {
+function updateExchangeById(exchangeId, payload) {
   return Exchange.findById(exchangeId)
     .then(exchange => exchange.update(payload));
 }
@@ -290,7 +291,7 @@ export function updateExchangeById(exchangeId, payload) {
  * @method incrementExchangeAcceptCount
  * @return {Promise} New promise with incremented value
  */
-export function incrementExchangeAcceptCount(exchange, amount = 1) {
+function incrementExchangeAcceptCount(exchange, amount = 1) {
   return exchange.increment({ acceptCount: amount });
 }
 
@@ -301,7 +302,7 @@ export function incrementExchangeAcceptCount(exchange, amount = 1) {
  * @method decrementExchangeAcceptCount
  * @return {Promise} New promise with decremented value
  */
-export function decrementExchangeAcceptCount(exchange, amount = 1) {
+function decrementExchangeAcceptCount(exchange, amount = 1) {
   return exchange.decrement({ acceptCount: amount });
 }
 
@@ -312,7 +313,7 @@ export function decrementExchangeAcceptCount(exchange, amount = 1) {
  * @method incrementExchangeDeclineCount
  * @return {Promise} New promise with incremented value
  */
-export function incrementExchangeDeclineCount(exchange, amount = 1) {
+function incrementExchangeDeclineCount(exchange, amount = 1) {
   return exchange.increment({ declineCount: amount });
 }
 
@@ -323,7 +324,7 @@ export function incrementExchangeDeclineCount(exchange, amount = 1) {
  * @method decrementExchangeDeclineCount
  * @return {Promise} New promise with decremented value
  */
-export function decrementExchangeDeclineCount(exchange, amount = 1) {
+function decrementExchangeDeclineCount(exchange, amount = 1) {
   return exchange.decrement({ declineCount: amount });
 }
 
@@ -335,7 +336,7 @@ export function decrementExchangeDeclineCount(exchange, amount = 1) {
  * @method respondToExchange
  * @return {Promise} Respond to exchange promise
  */
-export async function respondToExchange(exchangeId, userId, response) {
+async function respondToExchange(exchangeId, userId, response) {
   const data = { userId, exchangeId, response };
   const exchange = await findExchangeById(exchangeId, userId);
 
@@ -366,7 +367,7 @@ export async function respondToExchange(exchangeId, userId, response) {
  * @method acceptExchange
  * @return {Promise} Add exchange response promise
  */
-export async function acceptExchange(exchangeId, userId) {
+async function acceptExchange(exchangeId, userId) {
   const exchange = await respondToExchange(exchangeId, userId, 1);
 
   createActivity({
@@ -385,7 +386,7 @@ export async function acceptExchange(exchangeId, userId) {
  * @method declineExchange
  * @return {Promise} Add exchange response promise
  */
-export async function declineExchange(exchangeId, userId) {
+async function declineExchange(exchangeId, userId) {
   const exchange = await respondToExchange(exchangeId, userId, 0);
 
   createActivity({
@@ -405,7 +406,7 @@ export async function declineExchange(exchangeId, userId) {
  * @method approveExchange
  * @return {Promise} Promise containing the updated exchange
  */
-export async function approveExchange(exchange, approvingUser, userIdToApprove) {
+async function approveExchange(exchange, approvingUser, userIdToApprove) {
   const constraint = { exchangeId: exchange.id, userId: userIdToApprove };
   const exchangeResponse = await exchangeResponseRepo.findResponseWhere(constraint);
 
@@ -436,7 +437,7 @@ export async function approveExchange(exchange, approvingUser, userIdToApprove) 
  * @method rejectExchange
  * @return {external:Promise<Exchange>} Promise containing the updated exchange
  */
-export async function rejectExchange(exchange, rejectingUser, userIdToReject) {
+async function rejectExchange(exchange, rejectingUser, userIdToReject) {
   const constraint = { exchangeId: exchange.id, userId: userIdToReject };
   const exchangeResponse = await exchangeResponseRepo.findResponseWhere(constraint);
 
@@ -455,3 +456,31 @@ export async function rejectExchange(exchange, rejectingUser, userIdToReject) {
 
   return exchange.reload();
 }
+
+// exports of functions
+module.export = {
+  acceptExchange,
+  approveExchange,
+  createExchange,
+  declineExchange,
+  decrementExchangeAcceptCount,
+  decrementExchangeDeclineCount,
+  deleteById,
+  findAllAcceptedExchanges,
+  findAllBy,
+  findByIds,
+  findExchangeById,
+  findExchangeByIds,
+  findExchangeIdsForValues,
+  findExchangesByNetwork,
+  findExchangesByShiftIds,
+  findExchangesByTeam,
+  findExchangesByUserAndNetwork,
+  findPlainExchangesById,
+  getRespondedToExchange,
+  incrementExchangeAcceptCount,
+  incrementExchangeDeclineCount,
+  rejectExchange,
+  respondToExchange,
+  updateExchangeById,
+};

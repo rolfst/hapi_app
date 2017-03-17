@@ -17,7 +17,7 @@ const logger = Logger.getLogger('FEED/service/comment');
  * @method list
  * @return {external:Promise.<Comment[]>} {@link module:modules/feed~Comment}
  */
-export const list = async (payload, message) => {
+const list = async (payload, message) => {
   logger.info('List comments', { payload, message });
 
   return commentRepository.findBy({
@@ -35,7 +35,7 @@ export const list = async (payload, message) => {
  * @method create
  * @return {external:Promise.<Comment>} {@link module:modules/feed~Comment}
  */
-export const create = async (payload, message) => {
+const create = async (payload, message) => {
   logger.info('Creating comment for feed message', { payload, message });
 
   const messageToComment = await messageRepository.findById(payload.messageId);
@@ -46,4 +46,10 @@ export const create = async (payload, message) => {
     userId: payload.userId,
     text: payload.text,
   });
+};
+
+// exports of functions
+module.export = {
+  create,
+  list,
 };

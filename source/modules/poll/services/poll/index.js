@@ -9,7 +9,7 @@ const impl = require('./implementation');
 
 const logger = Logger.getLogger('POLL/service/poll');
 
-export const list = async (payload, message) => {
+const list = async (payload, message) => {
   logger.info('Finding multiple polls', { payload, message });
 
   return pollRepository.findBy({ id: { $in: payload.pollIds } });
@@ -23,7 +23,7 @@ export const list = async (payload, message) => {
  * @method get
  * @return {external:Promise.<Poll>}
  */
-export const get = async (payload, message) => {
+const get = async (payload, message) => {
   logger.info('Finding poll', { payload, message });
   const poll = await pollRepository.findById(payload.pollId);
 
@@ -39,7 +39,7 @@ export const get = async (payload, message) => {
  * @method create
  * @return {external:Promise.<Poll>}
  */
-export const create = async (payload, message) => {
+const create = async (payload, message) => {
   logger.info('Creating poll', { payload, message });
 
   const poll = await pollRepository.create({
@@ -64,7 +64,7 @@ export const create = async (payload, message) => {
  * @method vote
  * @return {external:Promise.<Poll>}
  */
-export const vote = async (payload, message) => {
+const vote = async (payload, message) => {
   logger.info('Voting on poll', { payload, message });
 
   await impl.assertThatPollExistsAndUserHasPermission(payload.networkId, payload.pollId);
@@ -76,4 +76,12 @@ export const vote = async (payload, message) => {
   await Promise.all(R.map(voteForOption, payload.optionIds));
 
   return pollRepository.findById(payload.pollId);
+};
+
+// exports of functions
+module.export = {
+  create,
+  get,
+  list,
+  vote,
 };

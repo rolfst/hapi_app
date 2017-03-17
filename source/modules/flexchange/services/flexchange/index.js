@@ -35,7 +35,7 @@ const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
  * @method list
  * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange}
  */
-export const list = async (payload, message) => {
+const list = async (payload, message) => {
   logger.info('Listing exchanges', { payload, message });
 
   const [exchanges, responsesForExchanges, valuesForExchanges] = await Promise.all([
@@ -82,7 +82,7 @@ export const list = async (payload, message) => {
  * @return {external:Promise.<User[]>} {@link module:modules/core~User User} -
  * Promise with list of receivers for this exchange
  */
-export const listReceivers = async (payload, message) => {
+const listReceivers = async (payload, message) => {
   logger.info('Listing receivers for exchange', { payload, message });
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, message.credentials.id);
   const valueIds = R.pluck('value', exchange.ExchangeValues);
@@ -111,7 +111,7 @@ export const listReceivers = async (payload, message) => {
  * @return {external:Promise.<Exchange>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with the accepted exchange
  */
-export const acceptExchange = async (payload, message) => {
+const acceptExchange = async (payload, message) => {
   logger.info('Accepting exchange', { payload, message });
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, message.credentials.id);
 
@@ -152,7 +152,7 @@ export const acceptExchange = async (payload, message) => {
  * @return {external:Promise.<Exchange>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with the accepted exchange
  */
-export const approveExchange = async (payload, message) => {
+const approveExchange = async (payload, message) => {
   logger.info('Approving exchange', { payload, message });
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, message.credentials.id);
 
@@ -191,7 +191,7 @@ export const approveExchange = async (payload, message) => {
  * @return {external:Promise.<Exchange>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with the accepted exchange
  */
-export const listRespondedTo = async (payload, message) => {
+const listRespondedTo = async (payload, message) => {
   const { network, credentials } = message;
 
   return exchangeRepo.getRespondedToExchange(credentials.id, network.id);
@@ -206,7 +206,7 @@ export const listRespondedTo = async (payload, message) => {
  * @return {external:Promise.<Exchange>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with the declined exchange
  */
-export const declineExchange = async (payload, message) => {
+const declineExchange = async (payload, message) => {
   logger.info('Declining exchange', { payload, message });
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, message.credentials.id);
   const { ResponseStatus } = exchange;
@@ -236,7 +236,7 @@ export const declineExchange = async (payload, message) => {
  * @return {external:Promise.<Shift[]>} {@link module:modules/flexchange~Shift Shift} -
  * Promise with list of shifts
  */
-export const listMyShifts = async (payload, message) => {
+const listMyShifts = async (payload, message) => {
   logger.info('Listing my shifts', { payload, message });
   const { network } = message;
 
@@ -253,7 +253,7 @@ export const listMyShifts = async (payload, message) => {
   return impl.mapShiftsWithExchangeAndTeam(shifts, exchanges, teams);
 };
 
-export const deleteExchange = async (payload, message) => {
+const deleteExchange = async (payload, message) => {
   logger.info('Deleting exchange', { payload, message });
 
   return Promise.all([
@@ -279,7 +279,7 @@ export const deleteExchange = async (payload, message) => {
  * @return {external:Promise.<Exchange>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with the rejected exchange
  */
-export const rejectExchange = async (payload, message) => {
+const rejectExchange = async (payload, message) => {
   logger.info('Rejecting exchange', { payload, message });
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId,
     message.credentials.id);
@@ -307,7 +307,7 @@ export const rejectExchange = async (payload, message) => {
  * @return {external:Promise.<Exchange>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with an Exchange
  */
-export const getExchange = async (payload, message) => {
+const getExchange = async (payload, message) => {
   const { credentials } = message;
 
   return exchangeRepo.findExchangeById(payload.exchangeId, credentials.id);
@@ -322,7 +322,7 @@ export const getExchange = async (payload, message) => {
  * @return {external:Promise.<Comment>} {@link module:modules/flexchange~Comment Comment} -
  * Promise with a list of comments for an exchange
  */
-export const listComments = async (payload, message) => {
+const listComments = async (payload, message) => {
   logger.info('Listing comments for exchange', { payload, message });
   const userId = message.credentials.id;
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, userId);
@@ -339,7 +339,7 @@ export const listComments = async (payload, message) => {
  * @return {external:Promise.<Shift>} {@link module:modules/flexchange~Shift Shift} -
  * Promise with a Shift
  */
-export const getShift = async (payload, message) => {
+const getShift = async (payload, message) => {
   if (!message.network.hasIntegration) throw createError('10001');
 
   const adapter = await createAdapter(message.network, message.credentials.id);
@@ -364,7 +364,7 @@ export const getShift = async (payload, message) => {
  * @return {external:Promise.<User[]>} {@link module:modules/core~User User} -
  * Promise with a list of Users
  */
-export const listAvailableUsersForShift = async (payload, message) => {
+const listAvailableUsersForShift = async (payload, message) => {
   logger.info('Listing available users for shift', { payload, message });
   if (!message.network.hasIntegration) throw createError('10001');
 
@@ -388,7 +388,7 @@ export const listAvailableUsersForShift = async (payload, message) => {
  * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with a list of Exchanges for team
  */
-export const listExchangesForTeam = async (payload, message) => {
+const listExchangesForTeam = async (payload, message) => {
   const team = await teamRepo.findTeamById(payload.teamId);
   const exchanges = await exchangeRepo.findExchangesByTeam(
     team.id, message.credentials.id, payload.filter);
@@ -406,9 +406,12 @@ export const listExchangesForTeam = async (payload, message) => {
  * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with a list of Exchanges for a user
  */
-export const listPersonalizedExchanges = async (payload, message) => {
+const listPersonalizedExchanges = async (payload, message) => {
+  const FILTER_PROPERTIES = ['start', 'end'];
+  const filter = R.pick(FILTER_PROPERTIES, payload);
+
   return exchangeRepo.findExchangesByUserAndNetwork(
-    payload.userId, message.network.id, payload.filter);
+    message.credentials.id, message.network.id, filter);
 };
 
 /**
@@ -420,7 +423,7 @@ export const listPersonalizedExchanges = async (payload, message) => {
  * @method listExchangesForUser
  * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange} -
  */
-export const listExchangesForUser = async (payload, message) => {
+const listExchangesForUser = async (payload, message) => {
   logger.info('Listing all exchanges for user', { payload, message });
 
   const user = await userService.getUserWithNetworkScope({
@@ -430,7 +433,7 @@ export const listExchangesForUser = async (payload, message) => {
 
   if (user.roleType === 'ADMIN') {
     const exchanges = await exchangeRepo.findExchangesByNetwork(
-      message.network.id, { ...payload.filter });
+      message.network.id, payload.filter);
     exchangeIds = R.pluck('id', exchanges);
   } else if (user.roleType === 'EMPLOYEE') {
     exchangeIds = await impl.getExchangeIdsForEmployee(message.network, user, payload.filter);
@@ -467,7 +470,7 @@ const createValidator = (exchangeType) => {
  * @return {external:Promise.<Exchange>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with the newly created Exchange
  */
-export const createExchange = async (payload, message) => {
+const createExchange = async (payload, message) => {
   logger.info('Creating an exchange', { payload, message });
 
   if (payload.startTime && payload.endTime && moment(payload.endTime).isBefore(payload.startTime)) {
@@ -486,10 +489,8 @@ export const createExchange = async (payload, message) => {
   }
 
   const createdExchange = await exchangeRepo.createExchange(
-    message.credentials.id, message.network.id, {
-      ...payload,
-      date: moment(payload.date).format('YYYY-MM-DD'),
-    });
+      message.credentials.id, message.network.id, R.merge(payload,
+        { date: moment(payload.date).format('YYYY-MM-DD') }));
 
   if (createdExchange) {
     FlexchangeDispatcher.emit('exchange.created', {
@@ -511,7 +512,7 @@ export const createExchange = async (payload, message) => {
  * @return {external:Promise.<Activity[]>} {@link module:modules/shared~Activity Activity} -
  * Promise with a list of Exchanges for a user
  */
-export const listActivities = async (payload) => {
+const listActivities = async (payload) => {
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId);
   const values = await activityRepo.findActivitiesForSource(exchange);
 
@@ -529,7 +530,7 @@ export const listActivities = async (payload) => {
  * {@link module:modules/flexchange~ExchangeComment Exchange} - Promise with a list of Exchanges
  * for a user
  */
-export const createExchangeComment = async (payload, message) => {
+const createExchangeComment = async (payload, message) => {
   const data = { text: payload.text, userId: message.credentials.id };
   const createdExchangeComment = await commentRepo.createExchangeComment(payload.exchangeId, data);
 
@@ -551,11 +552,35 @@ export const createExchangeComment = async (payload, message) => {
  * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with a list of Exchanges for a user
  */
-export const listMyAcceptedExchanges = async (payload, message) => {
+const listMyAcceptedExchanges = async (payload, message) => {
   const responses = await exchangeResponseRepo.findAcceptedExchangeResponsesForUser(
     message.credentials.id);
   const exchanges = await exchangeRepo.findExchangeByIds(
     map(responses, 'exchangeId'), message.credentials.id);
 
   return exchanges;
+};
+
+// exports of functions
+module.export = {
+  acceptExchange,
+  approveExchange,
+  createExchange,
+  createExchangeComment,
+  declineExchange,
+  deleteExchange,
+  getExchange,
+  getShift,
+  list,
+  listActivities,
+  listAvailableUsersForShift,
+  listComments,
+  listExchangesForTeam,
+  listExchangesForUser,
+  listMyAcceptedExchanges,
+  listMyShifts,
+  listPersonalizedExchanges,
+  listReceivers,
+  listRespondedTo,
+  rejectExchange,
 };

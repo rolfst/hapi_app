@@ -25,7 +25,7 @@ const feedOptions = R.pick(['limit', 'offset', 'include']);
  * @method makeForNetwork
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
-export const makeForNetwork = async (payload, message) => {
+const makeForNetwork = async (payload, message) => {
   logger.info('Making feed for network', { payload, message });
 
   const [user, teams] = await Promise.all([
@@ -64,7 +64,7 @@ export const makeForNetwork = async (payload, message) => {
  * @method makeForTeam
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
-export const makeForTeam = async (payload, message) => {
+const makeForTeam = async (payload, message) => {
   logger.info('Making feed for team', { payload, message });
 
   const team = await teamService.get({ teamId: payload.teamId }, message);
@@ -81,4 +81,10 @@ export const makeForTeam = async (payload, message) => {
   };
 
   return impl.makeFeed(feedPayload, feedOptions(payload), R.assoc('network', network, message));
+};
+
+// exports of functions
+module.export = {
+  makeForNetwork,
+  makeForTeam,
 };

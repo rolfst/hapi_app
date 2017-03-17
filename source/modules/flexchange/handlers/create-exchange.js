@@ -1,17 +1,9 @@
-const R = require('ramda');
+const createServicePayload = require('../../../shared/utils/create-service-payload');
 const service = require('../services/flexchange');
 
 module.exports = async (req, reply) => {
   try {
-    const message = { ...req.auth, ...req.pre };
-    const payload = {
-      ...R.omit(['shift_id', 'start_time', 'end_time', 'team_id'], req.payload),
-      shiftId: req.payload.shift_id,
-      startTime: req.payload.start_time,
-      endTime: req.payload.end_time,
-      teamId: req.payload.team_id,
-    };
-
+    const { payload, message } = createServicePayload(req);
     const response = await service.createExchange(payload, message);
 
     return reply({ success: true, data: response.toJSON() });

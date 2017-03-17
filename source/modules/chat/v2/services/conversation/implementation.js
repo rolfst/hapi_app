@@ -4,11 +4,17 @@ const conversationRepo = require('../../repositories/conversation');
 
 const parseIncludes = R.split(',');
 
-export const hasInclude = R.curry((includes, selector) =>
+const hasInclude = R.curry((includes, selector) =>
   R.contains(selector, parseIncludes(includes || '')));
 
-export const assertThatUserIsPartOfTheConversation = async (userId, conversationId) => {
+const assertThatUserIsPartOfTheConversation = async (userId, conversationId) => {
   const result = await R.pipeP(conversationRepo.findByIds, R.head)([conversationId]);
 
   if (!result || !R.contains(userId, result.participantIds)) throw createError('404');
+};
+
+// exports of functions
+module.export = {
+  assertThatUserIsPartOfTheConversation,
+  hasInclude,
 };

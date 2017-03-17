@@ -2,6 +2,6 @@ const Joi = require('joi');
 
 module.exports = {
   payload: Joi.object().keys({
-    option_ids: Joi.array().required(),
-  }),
+    optionIds: Joi.array().required(),
+  }).rename('options_ids', 'optionIds'),
 };

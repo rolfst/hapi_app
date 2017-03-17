@@ -1,3 +1,4 @@
+const R = require('ramda');
 const createRoutes = require('../../../shared/utils/create-routes');
 
 const routes = [{
@@ -30,6 +31,6 @@ const routes = [{
   handler: require('./handlers/delete-conversation'),
 }];
 
-const addPrefetchValue = (route) => ({ ...route, prefetch: false });
+const addPrefetchValue = (route) => R.merge(route, { prefetch: false });
 
 module.exports = createRoutes(routes.map(addPrefetchValue));

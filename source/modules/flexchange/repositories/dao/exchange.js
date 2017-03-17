@@ -1,10 +1,11 @@
 const Sequelize = require('sequelize');
+const R = require('ramda');
 const moment = require('moment');
 const model = require('../../../../shared/configs/sequelize');
 const dateUtils = require('../../../../shared/utils/date');
 const makeCreatedInObject = require('../../utils/created-in-text');
 
-export const exchangeTypes = {
+const exchangeTypes = {
   NETWORK: 'ALL',
   TEAM: 'TEAM',
   USER: 'USER',
@@ -142,7 +143,7 @@ const Exchange = model.define('Exchange', {
       }
 
       if (this.ExchangeValues) {
-        output = { ...output, created_in: makeCreatedInObject(this) };
+        output = R.merge(output, { created_in: makeCreatedInObject(this) });
       }
 
       return output;
@@ -150,4 +151,7 @@ const Exchange = model.define('Exchange', {
   },
 });
 
-module.exports = Exchange;
+module.exports = {
+  Exchange,
+  exchangeTypes,
+};

@@ -20,7 +20,7 @@ const impl = require('./implementation');
  * @method list
  * @return {external:Promise.<Integration[]>} {@link module:modules/core~Integration Integration} -
  */
-export const create = async (payload, message) => {
+const create = async (payload, message) => {
   const participants = uniq([...payload.participants, message.credentials.id]);
 
   if (participants.length < 2) {
@@ -49,7 +49,7 @@ export const create = async (payload, message) => {
  * @return {external:Promise.<Conversation[]>} {@link module:modules/chat~Conversation Conversation}
  * - Promise containing a list of conversations§
  */
-export const listConversations = async (payload) => {
+const listConversations = async (payload) => {
   const conversations = await conversationRepo.findConversationsById(payload.ids);
   const messages = await messageRepo.findMessagesForConversations(map(conversations, 'id'));
 
@@ -59,11 +59,11 @@ export const listConversations = async (payload) => {
       (message) => omit(message, 'conversation', 'update_at')
     );
 
-    return {
-      ...conversation,
-      lastMessage: conversationMessages[conversationMessages.length - 1],
-      messages: conversationMessages,
-    };
+    return R.merge(conversation,
+      {
+        lastMessage: conversationMessages[conversationMessages.length - 1],
+        messages: conversationMessages,
+      });
   });
 };
 
@@ -76,7 +76,7 @@ export const listConversations = async (payload) => {
  * @return {external:Promise.<Conversation>} {@link module:modules/chat~Conversation} -
  * Promise containing a single conversation
  */
-export const getConversation = async (payload, message) => {
+const getConversation = async (payload, message) => {
   const conversation = await conversationRepo.findConversationById(payload.id);
   if (!conversation) throw createError('404');
 
@@ -89,7 +89,7 @@ export const getConversation = async (payload, message) => {
 
   const messages = await messageRepo.findMessageByIds(R.pluck('sourceId', messageObjects));
 
-  return { ...conversation, lastMessage: R.last(messages), messages };
+  return R.mergeAll([conversation, { lastMessage: R.last(messages) }, messages]);
 };
 
 /**
@@ -97,12 +97,11 @@ export const getConversation = async (payload, message) => {
  * @param {object} payload - Object containing payload data
  * @param {number} payload.id - The id of the user
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method getConversationsForUser
+ * @method listConversationsForUser
  * @return {external:Promise.<Conversation[]>} {@link module:modules/chat~Conversation} -
  * Promise containing a list of conversations
  */
-
-export const listConversationsForUser = async (payload, message) => {
+const listConversationsForUser = async (payload, message) => {
   const conversationIds = await conversationRepo.findIdsForUser(payload.id);
 
   return listConversations({ ids: conversationIds }, message);
@@ -117,7 +116,7 @@ export const listConversationsForUser = async (payload, message) => {
  * @return {external:Promise.<Message[]>} {@link module:modules/chat~Message} -
  * Promise containing a list of messages
  */
-export const listMessages = async (payload, message) => {
+const listMessages = async (payload, message) => {
   const conversation = await conversationRepo.findConversationById(payload.id);
   if (!conversation) throw createError('404');
 
@@ -135,7 +134,7 @@ export const listMessages = async (payload, message) => {
  * @return {external:Promise.<Message>} {@link module:modules/chat~Message} -
  * Promise containing a message
  */
-export const getMessage = async (payload) => {
+const getMessage = async (payload) => {
   const message = await messageRepo.findMessageById(payload.messageId);
   if (!message) throw createError('404');
 
@@ -152,7 +151,7 @@ export const getMessage = async (payload) => {
  * @return {external:Promise.<Message>} {@link module:modules/chat~Message} - Promise containing
  * the created message
  */
-export const createMessage = async (payload, message) => {
+const createMessage = async (payload, message) => {
   const { id, text } = payload;
   const { credentials } = message;
   const conversation = await getConversation({ id }, message);
@@ -174,4 +173,15 @@ export const createMessage = async (payload, message) => {
   });
 
   return refreshedMessage;
+};
+
+// exports of functions
+module.export = {
+  create,
+  createMessage,
+  getConversation,
+  getMessage,
+  listConversationsForUser,
+  listConversations,
+  listMessages,
 };

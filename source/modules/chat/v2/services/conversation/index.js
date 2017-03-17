@@ -211,3 +211,15 @@ export async function countMessages(payload, message) {
     objectType: 'private_message',
   });
 }
+
+// exports of functions
+module.export = {
+  countConversations,
+  countMessages,
+  create,
+  getConversation,
+  listConversations,
+  listConversationsForUser,
+  listMessages,
+  remove,
+};

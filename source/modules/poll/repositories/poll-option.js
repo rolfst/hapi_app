@@ -11,9 +11,14 @@ const createPollOptionModel = require('../models/poll-option');
  * @method create
  * @return {external:Promise} - Create poll option promise
  */
-export const create = async (attributes) => {
+const create = async (attributes) => {
   const whitelist = ['pollId', 'text', 'order'];
   const pollOption = await PollOption.create(R.pick(whitelist, attributes));
 
   return createPollOptionModel(pollOption);
+};
+
+// exports of functions
+module.export = {
+  create,
 };

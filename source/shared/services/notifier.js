@@ -12,18 +12,18 @@ function createQuery(emails) {
   return query;
 }
 
-export function trackPushNotification(notification, user) {
+function trackPushNotification(notification, user) {
   return Mixpanel.track({ name: 'Push Notification Sent', data: notification.data }, user.id);
 }
 
-export function send(users, notification, networkId = null) {
-  const data = {
-    ...notification.data,
-    alert: notification.text,
-    sound: 'default',
-    badge: 'Increment',
-    network_id: networkId,
-  };
+function send(users, notification, networkId = null) {
+  const data = R.merge(notification.data,
+    {
+      alert: notification.text,
+      sound: 'default',
+      badge: 'Increment',
+      network_id: networkId,
+    });
 
   const emails = R.reject(R.isNil, R.pluck('email', users));
 
@@ -33,3 +33,9 @@ export function send(users, notification, networkId = null) {
     .then(() => users.forEach(user => trackPushNotification(notification, user)))
     .catch(err => logger.error('Error sending push notification', { err }));
 }
+
+// exports of functions
+module.export = {
+  send,
+  trackPushNotification,
+};

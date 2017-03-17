@@ -18,7 +18,7 @@ const logger = Logger.createLogger('CHAT/service/conversation');
  * @method list
  * @return {external:Promise.<PrivateMessage[]>} {@link module:modules/chat~PrivateMessage}
  */
-export const list = async (payload, message) => {
+const list = async (payload, message) => {
   logger.info('Listing private messages', { payload, message });
 
   return privateMessageRepository.findByIds(payload.messageIds);
@@ -34,7 +34,7 @@ export const list = async (payload, message) => {
  * @method create
  * @return {external:Promise.<PrivateMessage>} {@link module:modules/chat~PrivateMessage}
  */
-export async function create(payload, message) {
+async function create(payload, message) {
   logger.info('Creating private message', { payload, message });
 
   const conversation = await conversationRepository.findById(payload.conversationId);
@@ -83,3 +83,9 @@ export async function create(payload, message) {
 
   return output;
 }
+
+// exports of functions
+module.export = {
+  create,
+  list,
+};

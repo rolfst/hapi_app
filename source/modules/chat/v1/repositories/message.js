@@ -17,7 +17,7 @@ const { Message } = require('./dao');
  * @method createMessage
  * @return {external:Promise} - Create message promise
  */
-export async function createMessage(conversationId, creatorId, text) {
+async function createMessage(conversationId, creatorId, text) {
   const createdMessage = await Message.create({ userId: creatorId, text });
 
   const object = await objectRepo.create({
@@ -39,7 +39,7 @@ export async function createMessage(conversationId, creatorId, text) {
  * @method findMessageById
  * @return {external:Promise} - Find message promise
  */
-export const findMessageById = async (id) => {
+const findMessageById = async (id) => {
   const result = await Message.findById(id, {
     include: [{ model: User }],
   });
@@ -53,7 +53,7 @@ export const findMessageById = async (id) => {
  * @method findMessageByIds
  * @return {external:Promise} - Find message promise
  */
-export const findMessageByIds = async (messageIds) => {
+const findMessageByIds = async (messageIds) => {
   const result = await Message.findAll({
     where: { id: { $in: messageIds } },
     include: [{ model: User }],
@@ -68,7 +68,7 @@ export const findMessageByIds = async (messageIds) => {
  * @method findAllForConversation
  * @return {external:Promise} - Get messages promise
  */
-export const findAllForConversation = async (conversationId) => {
+const findAllForConversation = async (conversationId) => {
   const messageObjects = await objectRepo.findBy({
     parentType: 'conversation',
     parentId: conversationId,
@@ -86,8 +86,17 @@ export const findAllForConversation = async (conversationId) => {
 };
 
 // FIXME: temporary function so we don't break the apps
-export const findMessagesForConversations = async (conversationIds) => {
+const findMessagesForConversations = async (conversationIds) => {
   const result = await Promise.map(conversationIds, findAllForConversation);
 
   return R.flatten(result);
+};
+
+// exports of functions
+module.export = {
+  createMessage,
+  findAllForConversation,
+  findMessageById,
+  findMessageByIds,
+  findMessagesForConversations,
 };

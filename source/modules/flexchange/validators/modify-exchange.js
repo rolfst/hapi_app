@@ -1,7 +1,7 @@
 const Joi = require('joi');
 
 module.exports = {
-  payload: {
+  payload: Joi.object().keys({
     action: Joi.any().required().valid(['accept', 'decline', 'approve', 'reject']),
     user_id: Joi.number().when('action', {
       is: 'approve',
@@ -10,5 +10,6 @@ module.exports = {
       is: 'reject',
       then: Joi.any().required(),
     }),
-  },
+  })
+    .rename('user_id', 'userId'),
 };

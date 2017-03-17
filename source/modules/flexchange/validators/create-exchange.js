@@ -7,15 +7,20 @@ module.exports = {
     description: Joi.string().allow(null).empty(''),
     values: Joi.array(),
     date: Joi.date().format('YYYY-MM-DD').required(),
-    shift_id: Joi.number().when('type', {
+    shiftId: Joi.number().when('type', {
       is: ['USER'],
       then: Joi.required(),
     }).when('type', {
       is: ['ALL', 'TEAM'],
       then: Joi.forbidden(),
     }),
-    team_id: Joi.number(),
-    start_time: Joi.date().iso().required(),
-    end_time: Joi.date().iso().required(),
-  }).and('start_time', 'end_time').and('shift_id', 'team_id'),
+    teamId: Joi.number(),
+    startTime: Joi.date().iso().required(),
+    endTime: Joi.date().iso().required(),
+  })
+    .rename('start_time', 'startTime')
+    .rename('end_time', 'endTime')
+    .rename('shift_id', 'shiftId')
+    .rename('team_id', 'teamId')
+    .and('startTime', 'endTime').and('shiftId', 'teamId'),
 };

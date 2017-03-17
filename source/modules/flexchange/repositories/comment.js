@@ -13,7 +13,7 @@ const ExchangeComment = require('./dao/exchange-comment');
  * @method findCommentById
  * @return {external:Promise} Find exchange comment promise
  */
-export function findCommentById(commentId) {
+function findCommentById(commentId) {
   return ExchangeComment
     .findById(commentId)
     .then(comment => {
@@ -32,7 +32,7 @@ export function findCommentById(commentId) {
  * @method createExchangeComment
  * @return {external:Promise} - Create exchange comment promise
  */
-export async function createExchangeComment(exchangeId, { text, userId }) {
+async function createExchangeComment(exchangeId, { text, userId }) {
   const exchangeComment = await ExchangeComment.create({
     exchangeId,
     text,
@@ -57,6 +57,13 @@ export async function createExchangeComment(exchangeId, { text, userId }) {
  * @method findCommentsByExchange
  * @return {external:Promise} - Promise with list of all comments exchange comment promise
  */
-export function findCommentsByExchange(exchange) {
+function findCommentsByExchange(exchange) {
   return exchange.getComments();
 }
+
+// exports of functions
+module.export = {
+  createExchangeComment,
+  findCommentById,
+  findCommentsByExchange,
+};

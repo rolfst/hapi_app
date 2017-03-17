@@ -22,7 +22,7 @@ const createNotificationData = async (exchange) => {
   return { network, admins: usersToNotify };
 };
 
-export const sendReminder = async () => {
+const sendReminder = async () => {
   logger.info('Start send reminders for accepted exchanges');
 
   try {
@@ -44,3 +44,9 @@ export const sendReminder = async () => {
 };
 
 if (require.main === module) sendReminder();
+
+
+// exports of functions
+module.export = {
+  sendReminder
+};

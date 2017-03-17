@@ -1,10 +1,9 @@
-const { ActivityTypes } = require('../../../core/repositories/dao/activity');
+const { ActivityTypes,
+  Activity: ActivityModel } = require('../../../core/repositories/dao/activity');
 const UserModel = require('../../../core/repositories/dao/user');
-const ActivityModel = require('../../../core/repositories/dao/activity');
 const TeamModel = require('../../../core/repositories/dao/team');
 const NetworkModel = require('../../../core/repositories/dao/network');
-const { exchangeTypes } = require('./exchange');
-const ExchangeModel = require('./exchange');
+const { exchangeTypes, Exchange: ExchangeModel } = require('./exchange');
 const ExchangeCommentModel = require('./exchange-comment');
 const ExchangeResponseModel = require('./exchange-response');
 const ExchangeValueModel = require('./exchange-value');
@@ -88,7 +87,10 @@ TeamModel.belongsToMany(ExchangeModel, {
   timestamps: false,
 });
 
-export const Exchange = ExchangeModel;
-export const ExchangeComment = ExchangeCommentModel;
-export const ExchangeResponse = ExchangeResponseModel;
-export const ExchangeValue = ExchangeValueModel;
+// exports of functions
+module.export = {
+  Exchange: ExchangeModel,
+  ExchangeComment: ExchangeCommentModel,
+  ExchangeResponse: ExchangeResponseModel,
+  ExchangeValue: ExchangeValueModel,
+};

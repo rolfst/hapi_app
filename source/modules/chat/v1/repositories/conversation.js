@@ -22,7 +22,7 @@ const toModel = (dao) => createConversationModel(dao);
  * @method findConversationById
  * @return {external:Promise} - Find conversation promise
  */
-export async function findConversationById(id) {
+async function findConversationById(id) {
   const conversation = await Conversation.findById(id, {
     include: defaultIncludes,
   });
@@ -51,7 +51,7 @@ export async function findConversationById(id) {
  * @method findConversationsById
  * @return {external:Promise} - Find conversation promise
  */
-export const findConversationsById = async (conversationIds) => {
+const findConversationsById = async (conversationIds) => {
   const results = await Conversation.findAll({
     where: { id: { $in: conversationIds } },
     include: defaultIncludes,
@@ -66,7 +66,7 @@ export const findConversationsById = async (conversationIds) => {
  * @method findIdsForUser
  * @return {external:Promise.<string[]>} - Returns conversation ids
  */
-export const findIdsForUser = async (userId) => {
+const findIdsForUser = async (userId) => {
   const pivotResult = await ConversationUser.findAll({
     attributes: ['conversation_id'],
     where: { userId },
@@ -82,7 +82,7 @@ export const findIdsForUser = async (userId) => {
  * @method findExistingConversation
  * @return {external:Promise} - Find conversation promise
  */
-export async function findExistingConversation(participantIds) {
+async function findExistingConversation(participantIds) {
   const result = await Conversation.findAll({
     attributes: ['id', [Sequelize.fn('COUNT', '`ConversationUser`.`id`'), 'users_in_conversation']],
     include: [{
@@ -106,7 +106,7 @@ export async function findExistingConversation(participantIds) {
  * @method createConversation
  * @return {external:Promise} - Create conversation promise
  */
-export const createConversation = async (type, creatorId, participants) => {
+const createConversation = async (type, creatorId, participants) => {
   const conversation = await Conversation.create({ type, createdBy: creatorId });
   await conversation.setUsers(participants);
 
@@ -119,7 +119,7 @@ export const createConversation = async (type, creatorId, participants) => {
  * @method deleteConversationById
  * @return {external:Promise} - Delete conversation promise
  */
-export function deleteConversationById(id) {
+function deleteConversationById(id) {
   return Conversation.destroy({ where: { id } });
 }
 
@@ -129,7 +129,7 @@ export function deleteConversationById(id) {
  * @method deleteAllConversationsForUser
  * @return {external:Promise} - Get conversations promise
  */
-export const deleteAllConversationsForUser = (userId) => {
+const deleteAllConversationsForUser = (userId) => {
   return ConversationUser.destroy({ where: { userId } });
 };
 
@@ -140,10 +140,22 @@ export const deleteAllConversationsForUser = (userId) => {
  * @param {date} attributes.updatedAt
  * @method update
  */
-export async function update(conversationId, { updatedAt }) {
+async function update(conversationId, { updatedAt }) {
   const result = await Conversation.findById(conversationId);
   if (!result) return null;
 
   return result.update({ updatedAt })
     .then(toModel);
 }
+
+// exports of functions
+module.export = {
+  createConversation,
+  deleteAllConversationsForUser,
+  deleteConversationById,
+  findConversationById,
+  findConversationsById,
+  findExistingConversation,
+  findIdsForUser,
+  update,
+};

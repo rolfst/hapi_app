@@ -17,6 +17,10 @@ PollOptionModel.hasMany(PollVoteModel, {
   as: 'Votes',
 });
 
-export const Poll = PollModel;
-export const PollOption = PollOptionModel;
-export const PollVote = PollVoteModel;
+
+// exports of functions
+module.export = {
+  Poll: PollModel,
+  PollOption: PollOptionModel,
+  PollVote: PollVoteModel,
+};

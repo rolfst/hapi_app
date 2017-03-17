@@ -13,7 +13,7 @@ const objectService = require('../../../core/services/object');
  * @method createPollResource
  * @return {external:Promise.<Object>}
  */
-export const createPollResource = (createdMessage, message) => R.pipeP(
+const createPollResource = (createdMessage, message) => R.pipeP(
   (payload) => pollService.create({
     networkId: message.network.id,
     options: payload.pollOptions,
@@ -35,7 +35,7 @@ export const createPollResource = (createdMessage, message) => R.pipeP(
  * @method removeAttachedObjects
  * @return {Promise}
  */
-export const removeAttachedObjects = (messageId) => Promise.all([
+const removeAttachedObjects = (messageId) => Promise.all([
   objectService.remove({ objectType: 'feed_message', sourceId: messageId }),
   objectService.remove({ parentType: 'feed_message', parentId: messageId }),
 ]);
@@ -47,7 +47,7 @@ export const removeAttachedObjects = (messageId) => Promise.all([
  * @method assertThatUserBelongsToMessage
  * @throws Error - 404
  */
-export const assertThatUserBelongsToMessage = async (messageId, message) => {
+const assertThatUserBelongsToMessage = async (messageId, message) => {
   const payload = { objectType: 'feed_message', sourceId: messageId };
 
   const { parentType, parentId } = await objectService.get(payload, message);
@@ -67,7 +67,7 @@ export const assertThatUserBelongsToMessage = async (messageId, message) => {
   }
 };
 
-export const assertThatCurrentOwnerHasUpdateRights = async (objectId, message) => {
+const assertThatCurrentOwnerHasUpdateRights = async (objectId, message) => {
   const object = await objectService.get({ id: objectId }, message);
   const objectParent = await objectService
     .getParent(R.pick(['parentType', 'parentId'], object));
@@ -83,4 +83,12 @@ export const assertThatCurrentOwnerHasUpdateRights = async (objectId, message) =
   if (!(user.roleType === 'ADMIN' || object.userId === message.credentials.id)) {
     throw createError('403');
   }
+};
+
+// exports of functions
+module.export = {
+  assertThatCurrentOwnerHasUpdateRights,
+  assertThatUserBelongsToMessage,
+  createPollResource,
+  removeAttachedObjects,
 };

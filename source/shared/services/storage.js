@@ -6,7 +6,7 @@ const Logger = require('./logger');
 
 const logger = Logger.getLogger('SHARED/service/upload');
 
-export const getEnvironmentLocation = () => {
+const getEnvironmentLocation = () => {
   const mapping = {
     testing: 'development',
     development: 'development',
@@ -17,7 +17,7 @@ export const getEnvironmentLocation = () => {
   return mapping[process.env.API_ENV];
 };
 
-export const getClient = () => {
+const getClient = () => {
   AWS.config.setPromisesDependency(Promise);
 
   const options = {
@@ -38,7 +38,7 @@ export const getClient = () => {
  * @method upload
  * @return {external:Promise.<String>} Returning the filename
  */
-export function upload(file, prefix = null) {
+function upload(file, prefix = null) {
   const environment = getEnvironmentLocation();
   const fileExtension = R.last(file.hapi.filename.split('.'));
   const generatedFileName = Math.random().toString(20).substr(2, 15);
@@ -66,3 +66,10 @@ export function upload(file, prefix = null) {
       throw createError('30001', err);
     });
 }
+
+// exports of functions
+module.export = {
+  getClient,
+  getEnvironmentLocation,
+  upload,
+};

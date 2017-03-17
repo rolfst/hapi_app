@@ -33,7 +33,7 @@ const createOptionsFromPayload = R.pipe(
  * @method list
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
-export const list = async (payload, message) => {
+const list = async (payload, message) => {
   logger.info('Listing objects', { payload, message });
 
   const objects = await objectRepository.findBy({
@@ -52,7 +52,7 @@ export const list = async (payload, message) => {
  * @method listWithSourceAndChildren
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
-export const listWithSourceAndChildren = async (payload, message) => {
+const listWithSourceAndChildren = async (payload, message) => {
   logger.info('Listing objects with sources', { payload, message });
 
   const objects = await objectRepository.findBy({
@@ -88,7 +88,7 @@ export const listWithSourceAndChildren = async (payload, message) => {
  * @method getWithSourceAndChildren
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
-export const getWithSourceAndChildren = async (payload, message) => {
+const getWithSourceAndChildren = async (payload, message) => {
   return R.head(await listWithSourceAndChildren({ objectIds: [payload.objectId] }, message));
 };
 
@@ -105,7 +105,7 @@ export const getWithSourceAndChildren = async (payload, message) => {
  * @method create
  * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
-export const create = async (payload, message) => {
+const create = async (payload, message) => {
   logger.info('Creating object', { payload, message });
 
   return objectRepository.create(payload);
@@ -122,7 +122,7 @@ export const create = async (payload, message) => {
  * @method count
  * @return {external:Promise.<number>}
  */
-export const count = async (payload, message) => {
+const count = async (payload, message) => {
   logger.info('Counting objects', { payload, message });
 
   const whitelistAttrs = ['userId', 'parentType', 'parentId', 'objectType'];
@@ -141,7 +141,7 @@ export const count = async (payload, message) => {
  * @method getParent
  * @return {external:Promise}
  */
-export const getParent = async (payload, message) => {
+const getParent = async (payload, message) => {
   logger.info('Retrieving parent for object', { payload, message });
 
   const result = await R.cond([
@@ -165,7 +165,7 @@ export const getParent = async (payload, message) => {
  * @method usersForParent
  * @return {external:Promise}
  */
-export const usersForParent = async (payload, message) => {
+const usersForParent = async (payload, message) => {
   logger.info('Retrieving users for parent of object', { payload, message });
 
   const result = await R.cond([
@@ -192,7 +192,7 @@ export const usersForParent = async (payload, message) => {
  * @method remove
  * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
-export const remove = async (payload, message) => {
+const remove = async (payload, message) => {
   logger.info('Deleting objects', { payload, message });
 
   await objectRepository.deleteBy(payload);
@@ -210,7 +210,7 @@ export const remove = async (payload, message) => {
  * @method get
  * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
-export const get = async (payload, message) => {
+const get = async (payload, message) => {
   logger.info('Retrieving object', { payload, message });
 
   const attributes = R.pick(['id', 'objectType', 'sourceId'], payload);
@@ -220,4 +220,17 @@ export const get = async (payload, message) => {
   if (!object) throw createError('404', 'Object not found');
 
   return object;
+};
+
+// exports of functions
+module.export = {
+  count,
+  create,
+  get,
+  getParent,
+  getWithSourceAndChildren,
+  list,
+  listWithSourceAndChildren,
+  remove,
+  usersForParent,
 };

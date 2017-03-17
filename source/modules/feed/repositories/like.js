@@ -8,7 +8,7 @@ const createLikeModel = require('../models/like');
  * @method findBy
  * @return {external:Promise.<Like[]>} {@link module:modules/feed~Like}
  */
-export const findBy = async (whereConstraint) => Like
+const findBy = async (whereConstraint) => Like
   .findAll({ where: whereConstraint })
   .then(R.map(createLikeModel));
 
@@ -19,7 +19,7 @@ export const findBy = async (whereConstraint) => Like
  * @method create
  * @return {external:Promise.<Like>} {@link module:modules/feed~Like}
  */
-export const create = async (messageId, userId) => Like
+const create = async (messageId, userId) => Like
   .create({ messageId, userId })
   .then(createLikeModel);
 
@@ -30,7 +30,7 @@ export const create = async (messageId, userId) => Like
  * @method remove
  * @return {external:Promise}
  */
-export const remove = async (messageId, userId) => Like
+const remove = async (messageId, userId) => Like
   .destroy({ where: { messageId, userId } });
 
 // exports of functions

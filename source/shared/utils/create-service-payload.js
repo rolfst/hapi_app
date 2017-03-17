@@ -1,4 +1,4 @@
-import R from 'ramda';
+const R = require('ramda');
 
 module.exports = (request) => ({
   message: R.mergeAll([request.auth, request.pre]),

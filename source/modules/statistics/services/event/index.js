@@ -61,7 +61,7 @@ function createDateRange(unit, start, end) {
  * @return {external:Promise.<Statistic>} - {@link
  * module:modules/statistics~EventStatistic EventStatistic}
  */
-export async function getCreatedMessages(payload, message) {
+async function getCreatedMessages(payload, message) {
   logger.info('Retrieving Created Messages', { payload, message });
 
   const unit = defaultToMonth(payload.unit);
@@ -81,7 +81,7 @@ export async function getCreatedMessages(payload, message) {
  * @return {external:Promise.<Statistic>} - {@link
  * module:modules/statistics~EventStatistic EventStatistic}
  */
-export async function getApprovedShifts(payload, message) {
+async function getApprovedShifts(payload, message) {
   logger.info('Retrieving Approved shifts', { payload, message });
 
   const unit = defaultToMonth(payload.unit);
@@ -101,7 +101,7 @@ export async function getApprovedShifts(payload, message) {
  * @return {external:Promise.<Statistic>} - {@link
  * module:modules/statistics~EventStatistic EventStatistic}
  */
-export async function getCreatedShifts(payload, message) {
+async function getCreatedShifts(payload, message) {
   logger.info('Retrieving Created shifts', { payload, message });
 
   const { startDate, endDate } = createDateRange('month', payload.startDate, payload.endDate);
@@ -112,7 +112,8 @@ export async function getCreatedShifts(payload, message) {
 }
 
 module.exports = {
-  getCreatedMessages,
   getApprovedShifts,
+  getCreatedMessages,
   getCreatedShifts,
 };
+

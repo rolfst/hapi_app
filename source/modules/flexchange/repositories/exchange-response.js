@@ -12,11 +12,11 @@ const { ExchangeResponse } = require('./dao');
  * @method findResponseWhere
  * @return {external:Promise} Find exchange response promise
  */
-export const findResponseWhere = (constraint) => {
+const findResponseWhere = (constraint) => {
   return ExchangeResponse.findOne({ where: constraint });
 };
 
-export const findAllWhere = (whereConstraint) => ExchangeResponse
+const findAllWhere = (whereConstraint) => ExchangeResponse
   .unscoped()
   .findAll({ where: whereConstraint })
   .then(R.map(createExchangeResponseModel));
@@ -27,7 +27,7 @@ export const findAllWhere = (whereConstraint) => ExchangeResponse
  * @method findAcceptedExchangeResponsesForUser
  * @return {external:Promise} - Promise with accepted exchange responses
  */
-export function findAcceptedExchangeResponsesForUser(userId) {
+function findAcceptedExchangeResponsesForUser(userId) {
   return ExchangeResponse.findAll({
     where: { userId, response: 1 },
   });
@@ -40,7 +40,7 @@ export function findAcceptedExchangeResponsesForUser(userId) {
  * @method removeExchangeResponseForExchangeAndUser
  * @return {external:Promise} - Promise
  */
-export function removeExchangeResponseForExchangeAndUser(exchangeId, userId) {
+function removeExchangeResponseForExchangeAndUser(exchangeId, userId) {
   return ExchangeResponse.destroy({
     where: { exchangeId, userId },
   });
@@ -52,6 +52,14 @@ export function removeExchangeResponseForExchangeAndUser(exchangeId, userId) {
  * @method createExchangeResponse
  * @return {external:Promise} Find exchange response promise
  */
-export function createExchangeResponse(data) {
+function createExchangeResponse(data) {
   return ExchangeResponse.create(data);
 }
+
+// exports of functions
+module.export = {
+  createExchangeResponse,
+  findAllWhere,
+  findResponseWhere,
+  removeExchangeResponseForExchangeAndUser,
+};

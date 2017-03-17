@@ -20,7 +20,7 @@ const getSourceIdsForType = (type, objects) => R.pipe(
  * @method getIncludes
  * @return {external:Promise}
  */
-export const getIncludes = async (hasInclude, objects) => {
+const getIncludes = async (hasInclude, objects) => {
   const hasType = (type) => anyWithType(type, objects);
   const includes = { comments: [], likes: [] };
 
@@ -39,7 +39,7 @@ export const getIncludes = async (hasInclude, objects) => {
   return Promise.props(includes);
 };
 
-export const makeFeed = async (payload, options, message, extraWhereConstraint = {}) => {
+const makeFeed = async (payload, options, message, extraWhereConstraint = {}) => {
   const whereConstraint = {
     $or: [...extraWhereConstraint, {
       parentType: payload.parentType,
@@ -73,4 +73,10 @@ export const makeFeed = async (payload, options, message, extraWhereConstraint =
   ]);
 
   return R.map(createObjectWithIncludes, objectsWithSources);
+};
+
+// exports of functions
+module.export = {
+  getIncludes,
+  makeFeed,
 };

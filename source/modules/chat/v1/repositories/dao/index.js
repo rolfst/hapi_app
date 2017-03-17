@@ -22,6 +22,10 @@ UserModel.belongsToMany(ConversationModel, {
   timestamps: false,
 });
 
-export const Conversation = ConversationModel;
-export const Message = MessageModel;
-export const ConversationUser = ConversationUserModel;
+
+// exports of functions
+module.export = {
+  Conversation: ConversationModel,
+  Message: MessageModel,
+  ConversationUser: ConversationUserModel,
+};

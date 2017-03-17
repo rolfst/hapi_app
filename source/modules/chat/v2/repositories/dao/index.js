@@ -22,6 +22,10 @@ PrivateMessageModel.belongsTo(UserModel, {
   foreignKey: 'user_id',
 });
 
-export const Conversation = ConversationModel;
-export const ConversationUser = ConversationUserModel;
-export const PrivateMessage = PrivateMessageModel;
+
+// exports of functions
+module.export = {
+  Conversation: ConversationModel,
+  ConversationUser: ConversationUserModel,
+  PrivateMessage: PrivateMessageModel,
+};

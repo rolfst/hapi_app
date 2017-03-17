@@ -20,7 +20,7 @@ const compareObject = R.curry((object1, object2) => R.and(
  * @method findSourcesForType
  * @return {Promise}
  */
-export const findSourcesForType = R.curry((message, values, type) => R.cond([
+const findSourcesForType = R.curry((message, values, type) => R.cond([
   [R.equals('private_message'), () => privateMessageService.list({ messageIds: values }, message)],
   [R.equals('feed_message'), () => feedMessageService.list({ messageIds: values }, message)],
   [R.equals('exchange'), () => flexchangeService.list({ exchangeIds: values }, message)],
@@ -28,15 +28,23 @@ export const findSourcesForType = R.curry((message, values, type) => R.cond([
   [R.equals('attachment'), () => attachmentService.list({ attachmentIds: values }, message)],
 ])(type, values));
 
-export const findChildrenForType = R.curry((values, type) => R.cond([
+const findChildrenForType = R.curry((values, type) => R.cond([
   [R.equals('feed_message'), () => objectRepository.findBy({
     parentType: 'feed_message', parentId: { $in: values } })],
   [R.equals('private_message'), () => objectRepository.findBy({
     parentType: 'private_message', parentId: { $in: values } })],
 ])(type, values));
 
-export const addSourceToObject = R.curry((sources, object) =>
+const addSourceToObject = R.curry((sources, object) =>
   R.merge(object, { source: findSource(object.objectType, object.sourceId, sources) }));
 
-export const findChildren = (objectsWithSource, object) =>
+const findChildren = (objectsWithSource, object) =>
   R.filter(compareObject(R.__, object), objectsWithSource);
+
+// exports of functions
+module.export = {
+  addSourceToObject,
+  findChildren,
+  findChildrenForType,
+  findSourcesForType,
+};

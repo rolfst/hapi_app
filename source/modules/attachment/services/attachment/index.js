@@ -19,7 +19,7 @@ const logger = Logger.getLogger('attachment/service/attachment');
  * @return {external:Promise.<Attachment[]>} {@link
  * module:modules/attachment~Attachment Attachment}
  */
-export const list = async (payload, message) => {
+const list = async (payload, message) => {
   logger.info('Finding multiple attachments', { payload, message });
 
   return attachmentRepo.findBy({ id: { $in: payload.attachmentIds } });
@@ -33,7 +33,7 @@ export const list = async (payload, message) => {
  * @method get
  * @return {external:Promise.<attachment>} {@link module:modules/attachment~Attachment Attachment}
  */
-export const get = async (payload, message) => {
+const get = async (payload, message) => {
   logger.info('Finding attachment', { payload, message });
   const attachment = R.head(await attachmentRepo.findBy(payload.whereConstraint));
 
@@ -51,7 +51,7 @@ export const get = async (payload, message) => {
  * @method get
  * @return {external:Promise.<attachment>} {@link module:modules/attachment~Attachment Attachment}
  */
-export const update = async (payload, message) => {
+const update = async (payload, message) => {
   logger.info('Updating attachment', { payload, message });
   const attachment = await get({ whereConstraint: payload.whereConstraint });
 
@@ -71,7 +71,7 @@ export const update = async (payload, message) => {
  * @method create
  * @return {external:Promise.<Attachment>} {@link module:modules/attachment~Attachment Attachment}
  */
-export const create = async (payload, message) => {
+const create = async (payload, message) => {
   logger.info('Create attachment', { payload: R.omit(['fileStream'], payload), message });
 
   if (typeof payload.fileStream.on !== 'function') {
@@ -92,10 +92,19 @@ export const create = async (payload, message) => {
  * @throws 403 Error
  * @return {void}
  */
-export const assertAttachmentsExist = async (payload, message) => {
+const assertAttachmentsExist = async (payload, message) => {
   const attachments = await list({ attachmentIds: payload.attachmentIds }, message);
 
   if (attachments.length !== payload.attachmentIds.length) {
     throw createError('403', 'Please provide valid attachment ids');
   }
+};
+
+// exports of functions
+module.export = {
+  assertAttachmentsExist,
+  create,
+  get,
+  list,
+  update,
 };

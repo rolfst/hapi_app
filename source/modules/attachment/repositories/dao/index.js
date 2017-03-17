@@ -1,3 +1,5 @@
 const AttachmentModel = require('./attachment');
 
-export const Attachment = AttachmentModel;
+const Attachment = AttachmentModel;
+
+module.exports = Attachment;

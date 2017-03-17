@@ -2,7 +2,7 @@ const moment = require('moment');
 const notifier = require('../../../shared/services/notifier');
 const notificationUtils = require('../utils/notification');
 
-export const createNotification = (exchange) => {
+const createNotification = (exchange) => {
   const date = moment(exchange.date).calendar(null, {
     sameDay: '[voor] [vandaag]',
     nextDay: '[voor] [morgen]',
@@ -17,8 +17,14 @@ export const createNotification = (exchange) => {
   };
 };
 
-export const send = async (users, exchange) => {
+const send = async (users, exchange) => {
   const notification = createNotification(exchange);
 
   notifier.send(users, notification);
+};
+
+// exports of functions
+module.export = {
+  createNotification,
+  send,
 };

@@ -3,7 +3,7 @@ const createError = require('../../../../shared/utils/create-error');
 const pollRepository = require('../../repositories/poll');
 const pollOptionRepository = require('../../repositories/poll-option');
 
-export const createOption = R.curry((pollId, text, order) => (
+const createOption = R.curry((pollId, text, order) => (
   pollOptionRepository.create({ pollId, text, order })
 ));
 
@@ -14,7 +14,7 @@ export const createOption = R.curry((pollId, text, order) => (
  * @method assertThatPollExists
  * @return {boolean|Error}
  */
-export const assertThatPollExistsAndUserHasPermission = async (networkId, pollId) => {
+const assertThatPollExistsAndUserHasPermission = async (networkId, pollId) => {
   const poll = await pollRepository.findById(pollId, null);
 
   if (!networkId || networkId !== poll.networkId || !poll) {
@@ -22,4 +22,10 @@ export const assertThatPollExistsAndUserHasPermission = async (networkId, pollId
   }
 
   return true;
+};
+
+// exports of functions
+module.export = {
+  assertThatPollExistsAndUserHasPermission,
+  createOption,
 };

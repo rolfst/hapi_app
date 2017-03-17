@@ -3,7 +3,7 @@ const notifier = require('../../../shared/services/notifier');
 const exchangeRepo = require('../repositories/exchange');
 const { findCommentsByExchange } = require('../repositories/comment');
 
-export const createNotification = (exchange, comment) => {
+const createNotification = (exchange, comment) => {
   const creator = comment.User.fullName;
   const text = comment.text;
 
@@ -13,7 +13,7 @@ export const createNotification = (exchange, comment) => {
   };
 };
 
-export const send = async (comment) => {
+const send = async (comment) => {
   const exchange = await exchangeRepo.findExchangeById(comment.exchangeId);
 
   const comments = await findCommentsByExchange(exchange);
@@ -25,4 +25,10 @@ export const send = async (comment) => {
   const notification = createNotification(exchange, comment);
 
   notifier.send(usersToNotify, notification);
+};
+
+// exports of functions
+module.export = {
+  createNotification,
+  send,
 };

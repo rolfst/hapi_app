@@ -1,10 +1,10 @@
 const moment = require('moment');
 const Intercom = require('intercom-client');
 
-export const getClient = () =>
+const getClient = () =>
   new Intercom.Client({ token: process.env.INTERCOM_TOKEN || 'foofortesting' });
 
-export const incrementAttribute = (email, attributeName) => {
+const incrementAttribute = (email, attributeName) => {
   const client = getClient();
   const updatingUser = client.users.find({ email });
 
@@ -15,9 +15,16 @@ export const incrementAttribute = (email, attributeName) => {
   } });
 };
 
-export const createEvent = (email, eventName, meta) => getClient().events.create({
+const createEvent = (email, eventName, meta) => getClient().events.create({
   email,
   event_name: eventName,
   created_at: moment().unix(),
   metadata: meta,
 });
+
+// exports of functions
+module.export = {
+  createEvent,
+  getClient,
+  incrementAttribute,
+};

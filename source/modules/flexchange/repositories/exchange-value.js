@@ -13,9 +13,15 @@ const ExchangeValue = require('./dao/exchange-value');
  * @method createValuesForExchange
  * @return {external:Promise} Create exchange values promise
  */
-export const createValuesForExchange = (exchangeId, values) => ExchangeValue
+const createValuesForExchange = (exchangeId, values) => ExchangeValue
   .bulkCreate(R.map(value => ({ exchangeId, value }), values));
 
-export const findAllWhere = (whereConstraint) => ExchangeValue
+const findAllWhere = (whereConstraint) => ExchangeValue
   .findAll({ where: whereConstraint })
   .then(R.map(createExchangeValueModel));
+
+// exports of functions
+module.export = {
+  createValuesForExchange,
+  findAllWhere,
+};
