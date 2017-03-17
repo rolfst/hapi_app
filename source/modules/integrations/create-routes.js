@@ -13,13 +13,13 @@ const routes = [{
   validator: require('./validators/import-network'),
 }, {
   method: 'GET',
-  url: '/v2/integrations/sync',
+  url: '/v2/networks/sync',
   handler: require('./handlers/sync-with-integration-partner'),
   strategy: 'integration',
   prefetch: false,
 }, {
   method: 'GET',
-  url: '/v2/network/{networkId}/sync',
+  url: '/v2/networks/{networkId}/sync',
   handler: require('./handlers/sync-network-with-integration-partner'),
   strategy: 'integration',
 }];
