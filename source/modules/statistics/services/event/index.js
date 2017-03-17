@@ -1,9 +1,12 @@
+import R from 'ramda';
 import moment from 'moment';
 import * as Mixpanel from '../../../../shared/services/mixpanel';
 import createError from '../../../../shared/utils/create-error';
 import * as Logger from '../../../../shared/services/logger';
 
 const logger = Logger.createLogger('STATISTICS/service/events');
+
+const defaultToMonth = R.defaultTo('month');
 
 function createEventQuery(payload) {
   const startDate = payload.startDate.toISOString().substr(0, 10);
@@ -61,9 +64,30 @@ function createDateRange(unit, start, end) {
 export async function getCreatedMessages(payload, message) {
   logger.info('Retrieving Created Messages', { payload, message });
 
-  const { startDate, endDate } = createDateRange('month', payload.startDate, payload.endDate);
+  const unit = defaultToMonth(payload.unit);
+  const { startDate, endDate } = createDateRange(unit, payload.startDate, payload.endDate);
   const jql = createEventQuery({
     event: 'Created Message', networkId: payload.networkId, startDate, endDate });
+
+  return Mixpanel.executeQuery(jql, message);
+}
+
+/*
+ * @param {object} payload
+ * @param {string} payload.networkId
+ * @param {date} [payload.startDate]
+ * @param {date} [payload.endDate]
+ * @method getApprovedShifts
+ * @return {external:Promise.<Statistic>} - {@link
+ * module:modules/statistics~EventStatistic EventStatistic}
+ */
+export async function getApprovedShifts(payload, message) {
+  logger.info('Retrieving Approved shifts', { payload, message });
+
+  const unit = defaultToMonth(payload.unit);
+  const { startDate, endDate } = createDateRange(unit, payload.startDate, payload.endDate);
+  const jql = createEventQuery({
+    event: 'Shift Takeover', networkId: payload.networkId, startDate, endDate });
 
   return Mixpanel.executeQuery(jql, message);
 }
