@@ -282,7 +282,7 @@ const remove = async (payload, message) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   create,
   getAsObject,
   like,

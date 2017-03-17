@@ -1,18 +1,19 @@
 const R = require('ramda');
+const createServicePayload = require('../../../shared/utils/create-service-payload');
 const responseUtil = require('../../../shared/utils/response');
 const objectService = require('../../core/services/object');
 const feedService = require('../services/feed');
 
 module.exports = async (req, reply) => {
   try {
-    const message = { ...req.pre, ...req.auth };
+    const { message } = createServicePayload(req);
     const totalCountPromise = Promise.all([
       objectService.count({ parentType: 'network', parentId: req.params.networkId }, message),
       objectService.count({ parentType: 'user', parentId: message.credentials.id }, message),
     ]).then(R.sum);
 
-    const feedPromise = feedService.makeForNetwork({
-      ...req.query, networkId: req.params.networkId }, message);
+    const feedPromise = feedService.makeForNetwork(R.merge(
+      req.query, { networkId: req.params.networkId }), message);
     const [feedItems, count] = await Promise.all([feedPromise, totalCountPromise]);
 
     return reply({

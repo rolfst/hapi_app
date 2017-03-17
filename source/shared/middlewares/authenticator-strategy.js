@@ -1,3 +1,4 @@
+const R = require('ramda');
 const { pick } = require('lodash');
 const tokenUtil = require('../utils/token');
 const serverUtil = require('../utils/server');
@@ -7,7 +8,7 @@ const Logger = require('../../shared/services/logger');
 
 const logger = Logger.createLogger('SHARED/middleware/authenticatorStrategy');
 
-export const authenticate = async (networkId, token = null) => {
+const authenticate = async (networkId, token = null) => {
   if (!token) throw createError('401');
 
   const { sub: userId, integrations } = tokenUtil.decode(token);
@@ -29,7 +30,7 @@ module.exports = () => ({
       const token = request.raw.req.headers['x-api-token'];
       const authenticationResult = await authenticate(networkId, token);
 
-      artifacts = { ...artifacts, ...authenticationResult.artifacts };
+      artifacts = R.merge(artifacts, authenticationResult.artifacts);
       artifacts.authenticationToken = token;
 
       return reply.continue({ credentials: authenticationResult.credentials, artifacts });
@@ -50,3 +51,4 @@ module.exports = () => ({
     }
   },
 });
+

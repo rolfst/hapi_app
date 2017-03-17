@@ -93,7 +93,7 @@ const findMessagesForConversations = async (conversationIds) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   createMessage,
   findAllForConversation,
   findMessageById,

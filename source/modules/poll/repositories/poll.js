@@ -79,7 +79,7 @@ const deleteById = async (pollId) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   clearVotes,
   create,
   deleteById,

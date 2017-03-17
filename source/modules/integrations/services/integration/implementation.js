@@ -12,6 +12,6 @@ const assertExternalIdNotPresentInNetwork = async (userId, networkId, externalId
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   assertExternalIdNotPresentInNetwork,
 };

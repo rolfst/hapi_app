@@ -34,7 +34,7 @@ const remove = async (messageId, userId) => Like
   .destroy({ where: { messageId, userId } });
 
 // exports of functions
-module.export = {
+module.exports = {
   create,
   findBy,
   remove,

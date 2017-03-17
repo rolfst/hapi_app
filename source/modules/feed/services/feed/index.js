@@ -84,7 +84,7 @@ const makeForTeam = async (payload, message) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   makeForNetwork,
   makeForTeam,
 };

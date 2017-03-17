@@ -85,7 +85,7 @@ async function create(payload, message) {
 }
 
 // exports of functions
-module.export = {
+module.exports = {
   create,
   list,
 };

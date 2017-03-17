@@ -458,7 +458,7 @@ async function rejectExchange(exchange, rejectingUser, userIdToReject) {
 }
 
 // exports of functions
-module.export = {
+module.exports = {
   acceptExchange,
   approveExchange,
   createExchange,

@@ -153,7 +153,7 @@ async function syncWithIntegrationPartner(payload, message) {
 }
 
 // exports of functions
-module.export = {
+module.exports = {
   importNetwork,
   syncNetwork,
   syncWithIntegrationPartner,

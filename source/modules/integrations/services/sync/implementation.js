@@ -308,7 +308,7 @@ const executeUserActions = (networkId, actions) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   createUserActions,
   executeUserActions,
   createTeamActions,

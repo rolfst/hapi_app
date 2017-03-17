@@ -19,7 +19,7 @@ PollOptionModel.hasMany(PollVoteModel, {
 
 
 // exports of functions
-module.export = {
+module.exports = {
   Poll: PollModel,
   PollOption: PollOptionModel,
   PollVote: PollVoteModel,

@@ -1,17 +1,13 @@
-const { pick } = require('lodash');
+const createServicePayload = require('../../../shared/utils/create-service-payload');
 const responseUtil = require('../../../shared/utils/response');
 const Logger = require('../../../shared/services/logger');
 const flexchangeService = require('../services/flexchange');
 
 const logger = Logger.createLogger('FLEXCHANGE/handler/allExchangesForTeam');
 
-const FILTER_PROPERTIES = ['start', 'end'];
-
 module.exports = async (req, reply) => {
   try {
-    const message = { ...req.pre, ...req.auth };
-    const payload = { ...pick(req.params, ['teamId']) };
-    payload.filter = pick(req.query, FILTER_PROPERTIES);
+    const { payload, message } = createServicePayload(req);
 
     logger.info('Listing all exchanges for team', { payload, message });
     const exchanges = await flexchangeService.listExchangesForTeam(payload, message);

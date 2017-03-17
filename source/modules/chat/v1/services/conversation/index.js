@@ -176,7 +176,7 @@ const createMessage = async (payload, message) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   create,
   createMessage,
   getConversation,

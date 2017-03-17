@@ -68,7 +68,7 @@ function upload(file, prefix = null) {
 }
 
 // exports of functions
-module.export = {
+module.exports = {
   getClient,
   getEnvironmentLocation,
   upload,

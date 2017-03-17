@@ -1,3 +1,4 @@
+const R = require('ramda');
 const tokenUtil = require('../utils/token');
 const userRepo = require('../../modules/core/repositories/user');
 const authenticationService = require('../../modules/authentication/services/authentication');
@@ -25,9 +26,9 @@ module.exports = async (credentials, message) => {
   const decodedToken = tokenUtil.decode(accessToken);
   const user = await userRepo.findUserById(decodedToken.sub, null, false);
 
-  return {
-    ...user,
-    token: accessToken,
-    integrations: decodedToken.integrations,
-  };
+  return R.merge(user,
+    {
+      token: accessToken,
+      integrations: decodedToken.integrations,
+    });
 };

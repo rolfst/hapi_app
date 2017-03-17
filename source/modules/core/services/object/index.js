@@ -223,7 +223,7 @@ const get = async (payload, message) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   count,
   create,
   get,

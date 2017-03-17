@@ -19,6 +19,6 @@ const create = async (attributes) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   create,
 };

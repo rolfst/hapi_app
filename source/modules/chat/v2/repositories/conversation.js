@@ -118,7 +118,7 @@ const deleteById = (conversationId) => Conversation.destroy({
 });
 
 // exports of functions
-module.export = {
+module.exports = {
   countConversationsForUser,
   create,
   deleteById,

@@ -52,7 +52,7 @@ const update = (attachment) => Attachment
   .then(R.always(attachment));
 
 // exports of functions
-module.export = {
+module.exports = {
   create,
   deleteById,
   findBy,

@@ -57,7 +57,7 @@ function createExchangeResponse(data) {
 }
 
 // exports of functions
-module.export = {
+module.exports = {
   createExchangeResponse,
   findAllWhere,
   findResponseWhere,

@@ -101,7 +101,7 @@ const assertAttachmentsExist = async (payload, message) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   assertAttachmentsExist,
   create,
   get,

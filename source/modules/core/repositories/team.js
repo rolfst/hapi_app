@@ -215,7 +215,7 @@ const update = async (teamIdOrWhereConstraint, attributes) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   addUserToTeam,
   addUserToTeams,
   create,

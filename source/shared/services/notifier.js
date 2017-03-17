@@ -35,7 +35,7 @@ function send(users, notification, networkId = null) {
 }
 
 // exports of functions
-module.export = {
+module.exports = {
   send,
   trackPushNotification,
 };

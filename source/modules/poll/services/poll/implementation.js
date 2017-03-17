@@ -25,7 +25,7 @@ const assertThatPollExistsAndUserHasPermission = async (networkId, pollId) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   assertThatPollExistsAndUserHasPermission,
   createOption,
 };

@@ -35,7 +35,7 @@ const toSnakeCase = (response) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   error,
   serialize,
   toSnakeCase,

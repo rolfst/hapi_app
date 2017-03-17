@@ -149,7 +149,7 @@ async function update(conversationId, { updatedAt }) {
 }
 
 // exports of functions
-module.export = {
+module.exports = {
   createConversation,
   deleteAllConversationsForUser,
   deleteConversationById,

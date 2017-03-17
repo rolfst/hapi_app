@@ -32,6 +32,6 @@ async function authenticate(payload, message) {
 }
 
 // exports of functions
-module.export = {
+module.exports = {
   authenticate,
 };

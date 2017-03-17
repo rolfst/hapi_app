@@ -28,7 +28,7 @@ const send = async (comment) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   createNotification,
   send,
 };

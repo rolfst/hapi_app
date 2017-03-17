@@ -22,7 +22,7 @@ const update = (messageId, attributes) => PrivateMessage
   .update(attributes, { where: { id: messageId } });
 
 // exports of functions
-module.export = {
+module.exports = {
   create,
   findBy,
   findById,

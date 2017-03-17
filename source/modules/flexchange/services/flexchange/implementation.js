@@ -134,7 +134,7 @@ const replaceUsersInResponses = (users, responses) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   addValues,
   createDateWhereConstraint,
   createResponseStatus,

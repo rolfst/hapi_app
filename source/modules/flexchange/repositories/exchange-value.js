@@ -21,7 +21,7 @@ const findAllWhere = (whereConstraint) => ExchangeValue
   .then(R.map(createExchangeValueModel));
 
 // exports of functions
-module.export = {
+module.exports = {
   createValuesForExchange,
   findAllWhere,
 };

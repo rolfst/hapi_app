@@ -7,7 +7,7 @@ const createTimeText = (exchange) => (
 );
 
 // exports of functions
-module.export = {
+module.exports = {
   createTimeText,
   formatTime,
 };

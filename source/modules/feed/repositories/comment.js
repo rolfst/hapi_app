@@ -23,7 +23,7 @@ const create = async (attributes) => Comment
   .then(createCommentModel);
 
 // exports of functions
-module.export = {
+module.exports = {
   create,
   findBy,
 };

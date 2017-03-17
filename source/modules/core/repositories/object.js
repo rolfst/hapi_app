@@ -90,7 +90,7 @@ function findAll() {
 }
 
 // exports of functions
-module.export = {
+module.exports = {
   count,
   deleteBy,
   deleteById,

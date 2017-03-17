@@ -45,6 +45,6 @@ const createAdapter = async (network, userId, options = {}) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   createAdapter
 };

@@ -159,7 +159,7 @@ const inviteUsers = async (payload, message) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   inviteExistingUser,
   inviteNewUser,
   inviteUser,

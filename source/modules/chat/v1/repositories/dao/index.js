@@ -24,7 +24,7 @@ UserModel.belongsToMany(ConversationModel, {
 
 
 // exports of functions
-module.export = {
+module.exports = {
   Conversation: ConversationModel,
   Message: MessageModel,
   ConversationUser: ConversationUserModel,

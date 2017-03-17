@@ -11,7 +11,7 @@ const { Integration } = require('./dao');
  * @return {external:Promise.<Integration>} {@link module:modules/core~Integration Integration}
  * - Promise with integration
  */
-export function createIntegration({ name, token }) {
+function createIntegration({ name, token }) {
   return Integration.create({ name, token });
 }
 
@@ -20,7 +20,7 @@ export function createIntegration({ name, token }) {
  * @param {string} integrationId
  * @method deleteById
  */
-export const deleteById = async (integrationId) => {
+const deleteById = async (integrationId) => {
   return Integration.destroy({ where: { id: integrationId } });
 };
 
@@ -30,6 +30,13 @@ export const deleteById = async (integrationId) => {
  * @return {external:Promise.<Integration[]>} {@link module:modules/core~Integration Integration}
  * - Promise with all integrations
  */
-export const findAll = async () => {
+const findAll = async () => {
   return Integration.findAll();
+};
+
+// exports of functions
+module.exports = {
+  createIntegration,
+  deleteById,
+  findAll,
 };

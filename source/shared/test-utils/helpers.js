@@ -16,13 +16,13 @@ const { postRequest } = require('./request');
  * @module shared/test-utils/TestHelper
  */
 
-export const DEFAULT_INTEGRATION = { name: 'PMT', token: 'footoken' };
-export const DEFAULT_NETWORK_EXTERNALID = 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi';
+const DEFAULT_INTEGRATION = { name: 'PMT', token: 'footoken' };
+const DEFAULT_NETWORK_EXTERNALID = 'https://partner2.testpmt.nl/rest.php/jumbowolfskooi';
 
-export const randomString = (prefix = 'test-object') =>
+const randomString = (prefix = 'test-object') =>
   `${prefix}-${Math.floor(Math.random() * 1000)}`;
 
-export const hapiFile = (fileName) => ({
+const hapiFile = (fileName) => ({
   filename: fileName,
   path: `${process.cwd()}/${fileName}`,
   headers: {
@@ -39,7 +39,7 @@ export const hapiFile = (fileName) => ({
  * @method createIntegration
  * @return {external:Promise<Integration>} {@link module:modules/core~Integration}
  */
-export function createIntegration(attributes = DEFAULT_INTEGRATION) {
+function createIntegration(attributes = DEFAULT_INTEGRATION) {
   return integrationRepo.createIntegration(attributes);
 }
 
@@ -54,7 +54,7 @@ export function createIntegration(attributes = DEFAULT_INTEGRATION) {
  * @method addUserToNetwork
  * @return {external:Promise.<NetworkUser>} {@link module:shared~NetworkUser NetworkUser}
  */
-export function addUserToNetwork(networkUserAttributes) {
+function addUserToNetwork(networkUserAttributes) {
   return networkService.addUserToNetwork(networkUserAttributes);
 }
 
@@ -70,7 +70,7 @@ export function addUserToNetwork(networkUserAttributes) {
  * @method createNetwork
  * @return {external:Promise<Network>} {@link module:modules/core~Network Network} - created network
  */
-export async function createNetwork({
+async function createNetwork({
   userId, externalId, integrationName, name = randomString(), userExternalId, userToken }) {
   const networkAttributes = { userId, externalId, integrationName, name };
 
@@ -99,7 +99,7 @@ export async function createNetwork({
  * @method createNetworkWithIntegration
  * @return {external:Promise<Object>}
  */
-export async function createNetworkWithIntegration({
+async function createNetworkWithIntegration({
   userId,
   externalId,
   name = randomString(),
@@ -119,11 +119,11 @@ export async function createNetworkWithIntegration({
  * @method findAllNetworks
  * @return {external:Promise<Network[]>} {@link module:modules/core~Network Network}
  */
-export function findAllNetworks() {
+function findAllNetworks() {
   return networkRepo.findAll();
 }
 
-export function addTeamToNetwork(networkId, name = randomString(), description = null) {
+function addTeamToNetwork(networkId, name = randomString(), description = null) {
   return teamRepo.create({ networkId, name, description });
 }
 
@@ -134,7 +134,7 @@ export function addTeamToNetwork(networkId, name = randomString(), description =
  * @method getLoginToken
  * returns all the tokes for the user during login
  */
-export async function getLoginToken({ username, password }) {
+async function getLoginToken({ username, password }) {
   const url = '/v2/authenticate';
   const { result } = await postRequest(url, { username, password });
 
@@ -152,14 +152,13 @@ export async function getLoginToken({ username, password }) {
  * @method createUser
  * @return {external:Promise<User>} {@link module:modules/core~User User}
  */
-export async function createUser(userAttributes = {}) {
+async function createUser(userAttributes = {}) {
   const username = `test-user-${Math.floor(Math.random() * 1000)}`;
-  const attributes = {
+  const attributes = R.merge({
     username,
     email: `${username}@example.com`,
     password: `pw#${Math.floor(Math.random() * 1000)}`,
-    ...userAttributes,
-  };
+  }, userAttributes);
 
   const user = await userRepo.createUser(R.merge(blueprints.users.admin, attributes));
   const token = await getLoginToken(attributes);
@@ -182,8 +181,7 @@ export async function createUser(userAttributes = {}) {
  * @return {external:Promise.<object>} {@link module:shared~User user},
  * {@link module:shared~Network network}
  */
-export async function createUserForNewNetwork(
-  userAttributes, { name = randomString() }) {
+async function createUserForNewNetwork( userAttributes, { name = randomString() }) {
   const user = await createUser(userAttributes);
   const network = await createNetwork({ userId: user.id, name });
   await addUserToNetwork({ networkId: network.id, userId: user.id, roleType: 'ADMIN' });
@@ -201,7 +199,7 @@ export async function createUserForNewNetwork(
  * @return {external:Promise<AuthorizedUser>}
  * @link module:shared/test-utils/authenticate.AuthorizedUser}
  */
-export function authenticateUser(userCredentials) {
+function authenticateUser(userCredentials) {
   return authenticate(userCredentials, { deviceName: 'testDevice' });
 }
 
@@ -211,7 +209,7 @@ export function authenticateUser(userCredentials) {
  * @method deleteUser
  * @return {external:Promise.<number[]>}
  */
-export function deleteUser(user) {
+function deleteUser(user) {
   return userRepo.deleteById(user.id);
 }
 
@@ -220,7 +218,7 @@ export function deleteUser(user) {
  * @method findAllUsers
  * @return {external:Promise<User[]>} {@link module:shared~User User}
  */
-export function findAllUsers() {
+function findAllUsers() {
   return userRepo.findAllUsers();
 }
 
@@ -230,7 +228,7 @@ export function findAllUsers() {
  * @method deleteIntegration
  * @return {external:Promise}
  */
-export function deleteIntegration(integration) {
+function deleteIntegration(integration) {
   return integrationRepo.deleteById(integration.id);
 }
 
@@ -239,7 +237,7 @@ export function deleteIntegration(integration) {
  * @method findAllIntegrations
  * @return {external:Promise.IntegrationsModel[]>}
  */
-export function findAllIntegrations() {
+function findAllIntegrations() {
   return integrationRepo.findAll();
 }
 
@@ -248,7 +246,7 @@ export function findAllIntegrations() {
  * @method findAllActivities
  * @return {external:Promise.<Activity[]} {@link module:shared~Activity Activity}
  */
-export function findAllActivities() {
+function findAllActivities() {
   return activityRepo.findAll();
 }
 
@@ -258,7 +256,7 @@ export function findAllActivities() {
  * @method deleteActivity
  * @return {external:Promise.<number[]>} number of deleted activities
  */
-export function deleteActivity(activity) {
+function deleteActivity(activity) {
   return activityRepo.deleteById(activity.id);
 }
 
@@ -268,7 +266,7 @@ export function deleteActivity(activity) {
  * @method deleteObject
  * @return {external:Promise.<number[]>} number of deleted objects
  */
-export function deleteObject(object) {
+function deleteObject(object) {
   return objectRepo.deleteById(object.id);
 }
 
@@ -277,7 +275,7 @@ export function deleteObject(object) {
  * @method findAllObjects
  * @return {external:Promise.<Object[]} {@link module:shared~Object Object}
  */
-export async function findAllObjects() {
+async function findAllObjects() {
   return objectRepo.findAll();
 }
 
@@ -286,7 +284,7 @@ export async function findAllObjects() {
  * @method findAllPolls
  * @return {external:Promise.<Poll[]} {@link module:modules/poll~Poll Poll}
  */
-export async function findAllPolls() {
+async function findAllPolls() {
   return pollRepo.findAll();
 }
 
@@ -296,7 +294,7 @@ export async function findAllPolls() {
  * @method deletePoll
  * @return {external:Promise.<number[]>} number of deleted polls
  */
-export async function deletePoll(poll) {
+async function deletePoll(poll) {
   return pollRepo.deleteById(poll.id);
 }
 
@@ -304,7 +302,7 @@ export async function deletePoll(poll) {
  * Deletes all data in the database
  * @method cleanAll
  */
-export async function cleanAll() {
+async function cleanAll() {
   const networks = await findAllNetworks();
   const admins = R.map((network) => network.superAdmin, networks);
   await Promise.all(R.map(deleteUser, admins));
@@ -324,3 +322,31 @@ export async function cleanAll() {
   const polls = findAllPolls();
   await Promise.all(R.map(deletePoll, polls));
 }
+
+// exports of functions
+module.exports = {
+  DEFAULT_INTEGRATION,
+  DEFAULT_NETWORK_EXTERNALID,
+  addTeamToNetwork,
+  addUserToNetwork,
+  authenticateUser,
+  cleanAll,
+  createIntegration,
+  createNetwork,
+  createNetworkWithIntegration,
+  createUser,
+  createUserForNewNetwork,
+  deleteActivity,
+  deleteIntegration,
+  deleteObject,
+  deletePoll,
+  deleteUser,
+  findAllActivities,
+  findAllIntegrations,
+  findAllObjects,
+  findAllPolls,
+  findAllUsers,
+  getLoginToken,
+  hapiFile,
+  randomString,
+};

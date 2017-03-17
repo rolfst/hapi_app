@@ -88,7 +88,7 @@ TeamModel.belongsToMany(ExchangeModel, {
 });
 
 // exports of functions
-module.export = {
+module.exports = {
   Exchange: ExchangeModel,
   ExchangeComment: ExchangeCommentModel,
   ExchangeResponse: ExchangeResponseModel,

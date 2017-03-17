@@ -100,9 +100,9 @@ const makeConfig = () => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   makeConfig,
   onPreResponse,
   onRequest,
-  transformBoomToErrorResponse
+  transformBoomToErrorResponse,
 };

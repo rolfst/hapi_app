@@ -16,7 +16,7 @@ const send = (actor, object, usersToNotify) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   createNotification,
   send,
 };

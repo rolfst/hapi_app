@@ -45,7 +45,7 @@ function findOrCreateUserDevice(userId, deviceName) {
 }
 
 // exports of functions
-module.export = {
+module.exports = {
   createUserDevice,
   findOrCreateUserDevice,
   findUserDevice,

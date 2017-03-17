@@ -24,7 +24,7 @@ PrivateMessageModel.belongsTo(UserModel, {
 
 
 // exports of functions
-module.export = {
+module.exports = {
   Conversation: ConversationModel,
   ConversationUser: ConversationUserModel,
   PrivateMessage: PrivateMessageModel,

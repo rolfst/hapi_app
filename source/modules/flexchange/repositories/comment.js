@@ -62,7 +62,7 @@ function findCommentsByExchange(exchange) {
 }
 
 // exports of functions
-module.export = {
+module.exports = {
   createExchangeComment,
   findCommentById,
   findCommentsByExchange,

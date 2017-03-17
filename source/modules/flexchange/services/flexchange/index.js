@@ -25,6 +25,8 @@ const impl = require('./implementation');
  */
 const logger = Logger.createLogger('FLEXCHANGE/service/exchange');
 
+const FILTER_PROPERTIES = ['start', 'end'];
+
 const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
 
 /**
@@ -382,16 +384,18 @@ const listAvailableUsersForShift = async (payload, message) => {
  * Lists exchanges for a team.
  * @param {object} payload - Object containing payload data
  * @param {string} payload.teamId - The id of the shift to fetch
- * @param {object} payload.filter - The filter attributes of the shift to fetch
+ * @param {string} payload.start - start of the offset
+ * @param {string} payload.end - end of the offset
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method listExchangesForTeam
  * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with a list of Exchanges for team
  */
 const listExchangesForTeam = async (payload, message) => {
+  const filter = R.pick(FILTER_PROPERTIES, payload);
   const team = await teamRepo.findTeamById(payload.teamId);
   const exchanges = await exchangeRepo.findExchangesByTeam(
-    team.id, message.credentials.id, payload.filter);
+    team.id, message.credentials.id, filter);
 
   return exchanges;
 };
@@ -400,14 +404,14 @@ const listExchangesForTeam = async (payload, message) => {
  * Lists exchanges for a user.
  * @param {object} payload - Object containing payload data
  * @param {string} payload.userId - The id of the shift to fetch
- * @param {object} payload.filter - The filter attributes of the shift to fetch
+ * @param {string} payload.start - start of the offset
+ * @param {string} payload.end - end of the offset
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method listPersonalizedExchanges
  * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange} -
  * Promise with a list of Exchanges for a user
  */
 const listPersonalizedExchanges = async (payload, message) => {
-  const FILTER_PROPERTIES = ['start', 'end'];
   const filter = R.pick(FILTER_PROPERTIES, payload);
 
   return exchangeRepo.findExchangesByUserAndNetwork(
@@ -418,7 +422,8 @@ const listPersonalizedExchanges = async (payload, message) => {
  * Lists exchanges for a network of the current current user in the current network.
  * @param {object} payload - Object containing payload data
  * @param {object} payload.networkId - The network to list exchanges for
- * @param {object} payload.filter - The filter
+ * @param {string} payload.start - start of the offset
+ * @param {string} payload.end - end of the offset
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method listExchangesForUser
  * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange} -
@@ -426,6 +431,7 @@ const listPersonalizedExchanges = async (payload, message) => {
 const listExchangesForUser = async (payload, message) => {
   logger.info('Listing all exchanges for user', { payload, message });
 
+  const filter = R.pick(FILTER_PROPERTIES, payload);
   const user = await userService.getUserWithNetworkScope({
     id: message.credentials.id, networkId: message.network.id }, message);
 
@@ -433,15 +439,15 @@ const listExchangesForUser = async (payload, message) => {
 
   if (user.roleType === 'ADMIN') {
     const exchanges = await exchangeRepo.findExchangesByNetwork(
-      message.network.id, payload.filter);
+      message.network.id, filter);
     exchangeIds = R.pluck('id', exchanges);
   } else if (user.roleType === 'EMPLOYEE') {
-    exchangeIds = await impl.getExchangeIdsForEmployee(message.network, user, payload.filter);
+    exchangeIds = await impl.getExchangeIdsForEmployee(message.network, user, filter);
   }
 
   const createdExchangesByUser = await exchangeRepo.findAllBy(R.merge({
     userId: user.id, networkId: message.network.id,
-  }, impl.createDateWhereConstraint(payload.filter.start, payload.filter.end)));
+  }, impl.createDateWhereConstraint(filter.start, filter.end)));
 
   return list({
     exchangeIds: R.concat(exchangeIds, R.pluck('id', createdExchangesByUser)) },
@@ -476,7 +482,6 @@ const createExchange = async (payload, message) => {
   if (payload.startTime && payload.endTime && moment(payload.endTime).isBefore(payload.startTime)) {
     throw createError('422', 'Attribute end_time should be after start_time');
   }
-
   if (payload.shiftId && !message.network.hasIntegration) {
     throw createError('10001');
   }
@@ -562,7 +567,7 @@ const listMyAcceptedExchanges = async (payload, message) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   acceptExchange,
   approveExchange,
   createExchange,

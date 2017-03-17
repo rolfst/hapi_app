@@ -21,7 +21,7 @@ const send = async (network, exchange, userThatAccepts) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   createNotification,
   send,
 };

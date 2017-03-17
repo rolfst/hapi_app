@@ -34,7 +34,7 @@ const replaceConversationUserIdWithObject = (conversation, users) => {
 };
 
 // exports of functions
-module.export = {
+module.exports = {
   assertThatUserIsPartOfTheConversation,
   createConversationWithParticipants,
   findExistingConversation,

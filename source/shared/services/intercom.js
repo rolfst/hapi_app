@@ -23,7 +23,7 @@ const createEvent = (email, eventName, meta) => getClient().events.create({
 });
 
 // exports of functions
-module.export = {
+module.exports = {
   createEvent,
   getClient,
   incrementAttribute,
