@@ -11,7 +11,7 @@ const privateMessageService = require('../../../chat/v2/services/private-message
 const feedMessageService = require('../../../feed/services/message');
 const objectService = require('./index');
 
-describe.only('Service: Object', () => {
+describe('Service: Object', () => {
   let admin;
   let network;
 
