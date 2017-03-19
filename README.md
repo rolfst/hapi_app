@@ -49,8 +49,8 @@ API_ENV=testing node --inspect --debug-brk node_modules/.bin/_mocha --opts ./moc
 This will halt the execution of the test till a debug client can attach itself to the process and this will pause the debugger on the first line.
 
 ## File Structure
-
-|-- migrations  
+```
+|-- migrations  
 |-- scripts  
 |-- source  
     |-- modules  
@@ -68,7 +68,8 @@ This will halt the execution of the test till a debug client can attach itself t
         |-- middlewares  
         |-- services  
         |-- test-utils  
-        |-- utils  
+        |-- utils
+```
 
 ## Authentication
 Users can authenticate with our API via the `/authenticate` endpoint which creates a JWT token. This JWT token expires 60 minutes after issued. In HapiJS authentication is done via strategies. We make use of two different strategies in our application:
