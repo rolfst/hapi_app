@@ -3,7 +3,7 @@ const Promise = require('bluebird');
 const Logger = require('../../../../shared/services/logger');
 const createError = require('../../../../shared/utils/create-error');
 const attachmentService = require('../../../attachment/services/attachment');
-const objectService = require('../../../core/services/object');
+const oService = require('../../../core/services/object');
 const FeedDispatcher = require('../../dispatcher');
 const messageRepository = require('../../repositories/message');
 const likeRepository = require('../../repositories/like');
@@ -112,7 +112,7 @@ const getAsObject = async (payload, message) => {
 
   if (!result) throw createError('404');
 
-  const objectWithSourceAndChildren = await objectService.getWithSourceAndChildren({
+  const objectWithSourceAndChildren = await oService.getWithSourceAndChildren({
     objectId: result.objectId,
   }, message);
 
@@ -144,7 +144,7 @@ const create = async (payload, message) => {
   logger.info('Creating message', { payload, message });
 
   const checkPayload = R.compose(isAvailable, R.prop(R.__, payload));
-  const parent = await objectService.getParent(R.pick(['parentType', 'parentId'], payload));
+  const parent = await oService.getParent(R.pick(['parentType', 'parentId'], payload));
   const networkId = R.ifElse(
     R.propEq('type', 'team'),
     R.prop('networkId'),
@@ -160,7 +160,7 @@ const create = async (payload, message) => {
     createdBy: message.credentials.id,
   });
 
-  const createdObject = await objectService.create({
+  const createdObject = await oService.create({
     networkId,
     userId: message.credentials.id,
     parentType: payload.parentType,
@@ -180,7 +180,7 @@ const create = async (payload, message) => {
       attributes: { messageId: createdMessage.id },
     }));
 
-    const createObjects = Promise.map(filesArray, (attachmentId) => objectService.create({
+    const createObjects = Promise.map(filesArray, (attachmentId) => oService.create({
       networkId,
       userId: message.credentials.id,
       parentType: 'feed_message',
@@ -200,7 +200,7 @@ const create = async (payload, message) => {
       R.pick(['pollOptions', 'pollQuestion'], payload));
   }
 
-  const objectWithSourceAndChildren = await objectService.getWithSourceAndChildren({
+  const objectWithSourceAndChildren = await oService.getWithSourceAndChildren({
     objectId: createdObject.id,
   }, message);
 
@@ -237,7 +237,7 @@ const update = async (payload, message) => {
   await impl.assertThatCurrentOwnerHasUpdateRights(foundMessage.objectId, message);
   await messageRepository.update(foundMessage.id, { text: payload.text });
 
-  return objectService.getWithSourceAndChildren({ objectId: foundMessage.objectId }, message);
+  return oService.getWithSourceAndChildren({ objectId: foundMessage.objectId }, message);
 };
 /**
  * Likes a message

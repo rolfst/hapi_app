@@ -92,6 +92,7 @@ function findAll() {
 // exports of functions
 module.exports = {
   count,
+  create,
   deleteBy,
   deleteById,
   findAll,
