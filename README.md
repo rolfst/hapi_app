@@ -2,7 +2,7 @@
 
 ## General
 This repository contains the server side JavaScript part of the Flex-Appeal API.
-The project is build with the great API framework (https://hapijs.com/)[HapiJS].
+The project is build with the great API framework (HapiJS)[https://hapijs.com].
 
 ## Usage
 
