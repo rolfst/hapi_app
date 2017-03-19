@@ -55,7 +55,7 @@ Users can authenticate with our API via the `/authenticate` endpoint which creat
 
 Every strategy will add data to the request object to identify the authenticated user. The authenticated user can be retrieved via `request.auth.credentials`.
 
-Learn more on authentication with Hapi via (https://hapijs.com/api/13.2.1#serverauthstrategyname-scheme-mode-options)[this] link.
+Learn more on authentication with Hapi via [https://hapijs.com/api/13.2.1#serverauthstrategyname-scheme-mode-options](this) link.
 
 ## Logging
 We use a library called Bunyan to log request and error data through our application. Every error will get logged to `stdout`, because our process manager (PM2) will output the logs to a specific file that is configured with logrotate to compress the logfiles. 
@@ -67,6 +67,6 @@ At the top of each service we instantiate a logger instance with `const logger =
 Each logger instance has it's convention to start with the module name, followed by the type of file (service, repository, handler etc.) and their name. So a service called swag, inside an authorization module would be written as `AUTHORIZATION/service/swag`. This way we can easily identify the location of the log when we are inspecting them.
 
 ## Code Style/Guidelines
-Through our application we make use of ES6. The syntax can be overwhelming at first when you're coming from ES5, but will pay of quite well. We also follow the style guide made by AirBnb. This can be found (https://github.com/airbnb/javascript)[here]. These guidelines are also implemented in our linter, that checks if the code doesn't violate AirBnb's style guide.
+Through our application we make use of ES6. The syntax can be overwhelming at first when you're coming from ES5, but will pay of quite well. We also follow the style guide made by AirBnb. This can be found [https://github.com/airbnb/javascript](here). These guidelines are also implemented in our linter, that checks if the code doesn't violate AirBnb's style guide.
 
 If you want to check for lint errors you may use `npm run lint`.
