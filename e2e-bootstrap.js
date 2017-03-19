@@ -10,6 +10,6 @@ global.assert = chai.assert;
 dotenv.config();
 
 moment.tz.setDefault('UTC');
-const createServer = require('./source/server').default;
+const createServer = require('./source/server');
 global.server = createServer(8000);
 nock.disableNetConnect();
