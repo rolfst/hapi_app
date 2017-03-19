@@ -1,4 +1,4 @@
-# NODE-API
+# Flex-Appeal NodeJS API Documentation
 
 ## General
 This repository contains the server side JavaScript part of the Flex-Appeal API.
@@ -56,6 +56,47 @@ Users can authenticate with our API via the `/authenticate` endpoint which creat
 Every strategy will add data to the request object to identify the authenticated user. The authenticated user can be retrieved via `request.auth.credentials`.
 
 Learn more on authentication with Hapi via [this](https://hapijs.com/api/13.2.1#serverauthstrategyname-scheme-mode-options) link.
+
+## Layers
+We follow the following convention all the way from an incoming HTTP request, to the desired output. This sections explains the different layers in our application and what happens in each layer.
+
+Layers: HTTP Request -> Handler -> Service -> Repository
+
+### Handler
+The handler can also be seen as the controller. This is a really small function that dispatches the data to our service, which will handle the DB transaction and gather the data. An example of a handler:
+
+```
+import * as responseUtil from '../../../shared/utils/response';
+import * as messageService from '../services/message';
+
+export default async (req, reply) => {
+  try {
+    const payload = { ...req.params };
+    const message = { ...req.pre, ...req.auth };
+    const output = await messageService.listComments(payload, message);
+
+    return reply({ data: responseUtil.toSnakeCase(output) });
+  } catch (err) {
+    return reply(err);
+  }
+};
+```
+
+As you can see we also follow the convention of only passing `payload` and `message` to our service. This is a default signature that every service allows.
+
+### Service
+A service contains business logic to gather sets of data that are requested. Every service implements the same signature, which only has two parameters. The first is `payload` which contains an object of the data needed to succesfully get the data. The second is `message` which contains meta data that is bound to the request. Every message contains the following:
+
+- artifacts.requestId - The ID attached to the request. This is so we are able to trace a specific error through our different layers.
+- network - The network that belongs to the request. This set when the endpoint contains `{networkId}` as segment and the `prefetch` option in the route is set to `true`.
+- credentials - The authenticated user
+
+### Repository
+The repository directly talks to our data layer. We make use of the ORM called Sequelize to access the database.
+
+## Configuration
+For configuration we use [dotenv](https://github.com/motdotla/dotenv) so we are able to have a `.env` file that writes variables into our NodeJS process.
+These configuration values can be retrieved via `process.env.MY_KEY`.
 
 ## Logging
 We use a library called Bunyan to log request and error data through our application. Every error will get logged to `stdout`, because our process manager (PM2) will output the logs to a specific file that is configured with logrotate to compress the logfiles. 
