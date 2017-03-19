@@ -50,25 +50,25 @@ This will halt the execution of the test till a debug client can attach itself t
 
 ## File Structure
 
-|-- migrations
-|-- scripts
-|-- source
-    |-- modules
-        |-- my-cool-module
-            |-- handlers
-            |-- models
-            |-- repositories
-                |-- dao
-            |-- services
-            |-- validators
-            create-routes.js
-    |-- shared
-        |-- configs
-        |-- mails
-        |-- middlewares
-        |-- services
-        |-- test-utils
-        |-- utils
+|-- migrations  
+|-- scripts  
+|-- source  
+    |-- modules  
+        |-- my-cool-module  
+            |-- handlers  
+            |-- models  
+            |-- repositories  
+                |-- dao  
+            |-- services  
+            |-- validators  
+            create-routes.js  
+    |-- shared  
+        |-- configs  
+        |-- mails  
+        |-- middlewares  
+        |-- services  
+        |-- test-utils  
+        |-- utils  
 
 ## Authentication
 Users can authenticate with our API via the `/authenticate` endpoint which creates a JWT token. This JWT token expires 60 minutes after issued. In HapiJS authentication is done via strategies. We make use of two different strategies in our application:
