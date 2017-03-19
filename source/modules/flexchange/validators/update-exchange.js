@@ -6,5 +6,8 @@ module.exports = {
     description: Joi.string().allow(null).empty(''),
     start_time: Joi.date().iso(),
     end_time: Joi.date().iso(),
-  }).and('start_time', 'end_time'),
+  })
+    .rename('start_time', 'startTime')
+    .rename('end_time', 'endTime')
+    .and('startTime', 'endtime'),
 };
