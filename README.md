@@ -81,12 +81,12 @@ Every strategy will add data to the request object to identify the authenticated
 Learn more on authentication with Hapi via [this](https://hapijs.com/api/13.2.1#serverauthstrategyname-scheme-mode-options) link.
 
 ## Layers
-We follow the following convention all the way from an incoming HTTP request, to the desired output. This sections explains the different layers in our application and what happens in each layer.
+We follow the following convention all the way from an incoming HTTP request, to the desired output. This sections explains the different layers in our application and what happens in each layer.  
 
 Layers: HTTP Request -> Handler -> Service -> Repository
 
 ### Handler
-The handler can also be seen as the controller. This is a really small function that dispatches the data to our service, which will handle the DB transaction and gather the data. An example of a handler:
+The handler can also be seen as the controller. This is a really small function that dispatches the data to our service, which will handle the DB transaction and gather the data. An example of a handler:  
 
 ```
 import * as responseUtil from '../../../shared/utils/response';
@@ -118,19 +118,19 @@ A service contains business logic to gather sets of data that are requested. Eve
 The repository directly talks to our data layer. We make use of the ORM called Sequelize to access the database.
 
 ## Configuration
-For configuration we use [dotenv](https://github.com/motdotla/dotenv) so we are able to have a `.env` file that writes variables into our NodeJS process.
+For configuration we use [dotenv](https://github.com/motdotla/dotenv) so we are able to have a `.env` file that writes variables into our NodeJS process.  
 These configuration values can be retrieved via `process.env.MY_KEY`.
 
 ## Logging
 We use a library called Bunyan to log request and error data through our application. Every error will get logged to `stdout`, because our process manager (PM2) will output the logs to a specific file that is configured with logrotate to compress the logfiles. 
 
-Most of our logging is done in the service layer, where we always log incoming data. 
+Most of our logging is done in the service layer, where we always log incoming data.  
 Example: `logger.info('My cool function is being called', { payload, message });`
 
 At the top of each service we instantiate a logger instance with `const logger = Logger.getLogger('module/type/name');`.
 Each logger instance has it's convention to start with the module name, followed by the type of file (service, repository, handler etc.) and their name. So a service called swag, inside an authorization module would be written as `AUTHORIZATION/service/swag`. This way we can easily identify the location of the log when we are inspecting them.
 
 ## Code Style/Guidelines
-Through our application we make use of ES6. The syntax can be overwhelming at first when you're coming from ES5, but will pay of quite well. We also follow the style guide made by AirBnb. This can be found [here](https://github.com/airbnb/javascript). These guidelines are also implemented in our linter, that checks if the code doesn't violate AirBnb's style guide.
+Through our application we make use of ES6. The syntax can be overwhelming at first when you're coming from ES5, but will pay of quite well. We also follow the style guide made by AirBnb. This can be found [here](https://github.com/airbnb/javascript). These guidelines are also implemented in our linter, that checks if the code doesn't violate AirBnb's style guide.  
 
 If you want to check for lint errors you may use `npm run lint`.
