@@ -3,6 +3,7 @@ const chaiAsPromised = require('chai-as-promised');
 const dotenv = require('dotenv');
 const moment = require('moment-timezone');
 const nock = require('nock');
+require('./source/shared/services/BindingService');
 
 chai.use(chaiAsPromised);
 global.assert = chai.assert;

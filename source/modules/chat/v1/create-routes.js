@@ -1,5 +1,5 @@
 const R = require('ramda');
-const createRoutes = require('../../../shared/utils/create-routes');
+const { createRoutes } = require('../../../shared/utils/create-routes');
 
 const routes = [{
   method: 'GET',

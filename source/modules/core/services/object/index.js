@@ -14,8 +14,9 @@ const impl = require('./implementation');
 
 const logger = Logger.getLogger('CORE/service/object');
 
-const objectsForTypeValuePair = (fn, pairs) => R.pipe(R.mapObjIndexed(fn), R.values)(pairs);
-const getSources = R.pipeP(Promise.all, R.flatten, R.reject(R.isNil));
+const objectsForTypeValuePair = (fn, pairs) => Object.keys(pairs)
+  .map((key) => fn(pairs[key], key));
+const getSources = R.pipeP(Promise.all, R.values, R.flatten, R.reject(R.isNil));
 const groupByObjectType = R.groupBy(R.prop('objectType'));
 const sourceIdsPerType = R.pipe(groupByObjectType, R.map(R.pluck('sourceId')));
 const createOptionsFromPayload = R.pipe(
@@ -63,8 +64,8 @@ const listWithSourceAndChildren = async (payload, message) => {
     impl.findChildrenForType, sourceIdsPerType(objects));
   const children = await getSources(promisedChildren);
 
-  const promisedSources = objectsForTypeValuePair(impl.findSourcesForType(message),
-    R.merge(sourceIdsPerType(objects), sourceIdsPerType(children)));
+  const sourceIds = R.merge(sourceIdsPerType(objects), sourceIdsPerType(children));
+  const promisedSources = objectsForTypeValuePair(impl.findSourcesForType(message), sourceIds);
   const sources = await getSources(promisedSources);
 
   const objectsWithSource = R.map(impl.addSourceToObject(sources), R.concat(objects, children));

@@ -1,3 +1,4 @@
+/* global BindingTypeService */
 const R = require('ramda');
 const Promise = require('bluebird');
 const Logger = require('../../../../shared/services/logger');
@@ -66,15 +67,12 @@ const list = async (payload, message) => {
     const likes = likesForMessage(feedMessage.id);
     const comments = commentsForMessage(feedMessage.id);
 
-    return R.mergeAll([
-      feedMessage,
-      {
-        hasLiked: R.pipe(R.pluck('userId'), R.contains(message.credentials.id))(likes),
-        likesCount: likes.length,
-        commentsCount: comments.length,
-      },
-      messageResult]);
-  });
+    return R.merge(feedMessage, {
+      hasLiked: R.pipe(R.pluck('userId'), R.contains(message.credentials.id))(likes),
+      likesCount: likes.length,
+      commentsCount: comments.length,
+    });
+  }, messageResult);
 };
 
 /**
@@ -280,6 +278,8 @@ const remove = async (payload, message) => {
 
   return true;
 };
+
+BindingTypeService.registerSource('feed_message', list);
 
 // exports of functions
 module.exports = {

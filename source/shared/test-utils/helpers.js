@@ -343,6 +343,7 @@ module.exports = {
   deleteUser,
   findAllActivities,
   findAllIntegrations,
+  findAllNetworks,
   findAllObjects,
   findAllPolls,
   findAllUsers,

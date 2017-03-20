@@ -1,4 +1,4 @@
-const createRoutes = require('../../shared/utils/create-routes');
+const { createRoutes } = require('../../shared/utils/create-routes');
 
 const baseImport = './handlers';
 const basePath = '/v2/networks/{networkId}';

@@ -32,4 +32,7 @@ const createRoute = ({
   return route;
 };
 
-module.exports = (routeObjects) => routeObjects.map(createRoute);
+module.exports = {
+  createRoutes: (routeObjects) => routeObjects.map(createRoute),
+  createRoute,
+};
