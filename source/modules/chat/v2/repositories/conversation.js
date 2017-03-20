@@ -124,6 +124,7 @@ module.exports = {
   deleteById,
   findById,
   findByIds,
+  findExistingConversation,
   findIdsForUser,
   update,
 };

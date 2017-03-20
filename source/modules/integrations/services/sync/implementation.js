@@ -132,7 +132,8 @@ const createUser = (networkId) => (user) => userRepository
     password: passwordUtil.plainRandom(),
   })
   .then((createdUser) => addUser(networkId)(R.merge(user, { id: createdUser.id })))
-  .then((networkLink) => setTeamLink(networkId)(R.merge(user, { id: networkLink.userId, teamIds: [] })))
+  .then((networkLink) => setTeamLink(networkId)(R.merge(user,
+    { id: networkLink.userId, teamIds: [] })))
   .catch((err) => logger.error('Error creating user', { networkId, user, err }));
 
 /**

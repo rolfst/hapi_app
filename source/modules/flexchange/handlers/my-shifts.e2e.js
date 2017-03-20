@@ -2,7 +2,7 @@ const { assert } = require('chai');
 const nock = require('nock');
 const moment = require('moment');
 const sinon = require('sinon');
-const { pick } = require('lodash');
+const R = require('ramda');
 const testHelper = require('../../../shared/test-utils/helpers');
 const stubs = require('../../../shared/test-utils/stubs');
 const teamRepo = require('../../core/repositories/team');
@@ -20,12 +20,14 @@ describe('My shifts', () => {
     sandbox = sinon.sandbox.create();
 
     admin = await testHelper.createUser();
-    const { network } = await testHelper.createNetworkWithIntegration({
-      ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
-      userId: admin.id,
-      token: 'footoken',
-      userToken: 'foo',
-    });
+    const { network } = await testHelper.createNetworkWithIntegration(R.merge(
+      R.pick(['externalId', 'name', 'integrationName'], pristineNetwork),
+      {
+        userId: admin.id,
+        token: 'footoken',
+        userToken: 'foo',
+      }
+    ));
     integratedNetwork = network;
   });
 

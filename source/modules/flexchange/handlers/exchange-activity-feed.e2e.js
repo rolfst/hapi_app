@@ -1,6 +1,7 @@
 const { assert } = require('chai');
 const Promise = require('bluebird');
 const moment = require('moment');
+const R = require('ramda');
 const _ = require('lodash');
 const testHelper = require('../../../shared/test-utils/helpers');
 const Logger = require('../../../shared/services/logger');
@@ -54,10 +55,10 @@ describe('Exchange activity feed', () => {
 
     logger.debug('@@@@@@@ DEBUG for occasional failure @@@@@@@@', response.result);
 
-    result = response.result.data.map(item => ({
-      ...item,
-      data: _.omit(item.data, 'date'),
-    }));
+    result = response.result.data.map(item => (R.merge(
+      item,
+      { data: _.omit(item.data, 'date') }
+    )));
   });
 
   after(() => testHelper.cleanAll());

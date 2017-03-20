@@ -2,7 +2,7 @@ const { assert } = require('chai');
 const sinon = require('sinon');
 const nock = require('nock');
 const Promise = require('bluebird');
-const { pick, find, map } = require('lodash');
+const { find, map } = require('lodash');
 const R = require('ramda');
 const stubs = require('../../../../shared/test-utils/stubs');
 const testHelper = require('../../../../shared/test-utils/helpers');
@@ -39,10 +39,10 @@ describe('Import network', () => {
           .reply(200, stubs.users_200);
 
         admin = await testHelper.createUser({ password: 'pw' });
-        const { network: netw } = await testHelper.createNetworkWithIntegration({
-          userId: admin.id,
-          ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
-        });
+        const { network: netw } = await testHelper.createNetworkWithIntegration(R.merge(
+          { userId: admin.id },
+          R.pick(['externalId', 'name', 'integrationName'], pristineNetwork)
+          ));
         network = netw;
 
         sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve(fakeAdapter));
@@ -139,10 +139,10 @@ describe('Import network', () => {
       sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
 
       admin = await testHelper.createUser({ password: 'pw' });
-      const { network: netw } = await testHelper.createNetworkWithIntegration({
-        userId: admin.id,
-        ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
-      });
+      const { network: netw } = await testHelper.createNetworkWithIntegration(R.merge(
+        { userId: admin.id },
+        R.pick(['externalId', 'name', 'integrationName'], pristineNetwork)
+      ));
       network = netw;
     });
 

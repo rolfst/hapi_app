@@ -59,6 +59,7 @@ function createExchangeResponse(data) {
 // exports of functions
 module.exports = {
   createExchangeResponse,
+  findAcceptedExchangeResponsesForUser,
   findAllWhere,
   findResponseWhere,
   removeExchangeResponseForExchangeAndUser,

@@ -48,5 +48,5 @@ if (require.main === module) sendReminder();
 
 // exports of functions
 module.exports = {
-  sendReminder
+  sendReminder,
 };

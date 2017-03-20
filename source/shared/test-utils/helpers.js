@@ -181,7 +181,7 @@ async function createUser(userAttributes = {}) {
  * @return {external:Promise.<object>} {@link module:shared~User user},
  * {@link module:shared~Network network}
  */
-async function createUserForNewNetwork( userAttributes, { name = randomString() }) {
+async function createUserForNewNetwork(userAttributes, { name = randomString() }) {
   const user = await createUser(userAttributes);
   const network = await createNetwork({ userId: user.id, name });
   await addUserToNetwork({ networkId: network.id, userId: user.id, roleType: 'ADMIN' });

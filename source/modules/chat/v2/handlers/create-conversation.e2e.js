@@ -1,4 +1,5 @@
 const { assert } = require('chai');
+const R = require('ramda');
 const blueprints = require('../../../../shared/test-utils/blueprints');
 const testHelper = require('../../../../shared/test-utils/helpers');
 const { postRequest } = require('../../../../shared/test-utils/request');
@@ -15,12 +16,12 @@ describe('Handler: Create conversation (v2)', () => {
   describe('Good flow', () => {
     before(async () => {
       [creator, participant1, participant2] = await Promise.all([
-        testHelper.createUser({ ...blueprints.users.employee,
-          username: 'logged_user' }),
-        testHelper.createUser({ ...blueprints.users.employee,
-          username: 'conversation_participant1' }),
-        testHelper.createUser({ ...blueprints.users.employee,
-          username: 'conversation_participant2' }),
+        testHelper.createUser(R.merge(blueprints.users.employee,
+          { username: 'logged_user' })),
+        testHelper.createUser(R.merge(blueprints.users.employee,
+          { username: 'conversation_participant1' })),
+        testHelper.createUser(R.merge(blueprints.users.employee,
+          { username: 'conversation_participant2' })),
       ]);
 
       existingConversation = await conversationRepo.create({
@@ -61,7 +62,7 @@ describe('Handler: Create conversation (v2)', () => {
 
   describe('Bad flow', () => {
     before(async () => {
-      creator = await testHelper.createUser({ ...blueprints.users.employee });
+      creator = await testHelper.createUser(blueprints.users.employee);
     });
 
     it('should fail when passing logged user as a participant', async () => {

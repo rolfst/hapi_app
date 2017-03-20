@@ -1,5 +1,6 @@
 const _Mixpanel = require('mixpanel');
 const { assert } = require('chai');
+const R = require('ramda');
 const sinon = require('sinon');
 const Mixpanel = require('./mixpanel');
 
@@ -26,9 +27,9 @@ describe('Service: mixpanel', () => {
     methodSpy.restore();
 
     assert.isTrue(methodSpy.calledOnce);
-    assert.deepEqual(methodSpy.firstCall.args, [eventStub.name, {
-      ...eventStub.data, ...defaultMixpanelAttributes, distinct_id: 3,
-    }]);
+    assert.deepEqual(methodSpy.firstCall.args, [eventStub.name, R.mergeAll([
+      eventStub.data, defaultMixpanelAttributes, { distinct_id: 3 }]),
+    ]);
   });
 
   it('should fail when no distinctId is present', () => {

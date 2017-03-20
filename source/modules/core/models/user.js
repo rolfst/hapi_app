@@ -1,5 +1,4 @@
 const R = require('ramda');
-const { map, pick, toString } = require('lodash');
 const dateUtils = require('../../../shared/utils/date');
 
 const whitelistAttrs = [
@@ -14,7 +13,7 @@ if (process.env.API_ENV === 'acceptance') environment = 'acc';
 if (process.env.API_ENV === 'development') environment = 'staging';
 
 module.exports = (dao) => R.merge(
-  pick(dao, whitelistAttrs),
+  R.pick(whitelistAttrs, dao),
   {
     type: 'user',
     id: dao.id.toString(),

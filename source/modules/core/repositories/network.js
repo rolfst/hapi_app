@@ -262,7 +262,7 @@ module.exports = {
   createIntegrationNetwork,
   createNetwork,
   deleteById,
-  findAll, 
+  findAll,
   findAllUsersForNetwork,
   findIntegrationByName,
   findNetwork,

@@ -4,7 +4,8 @@ const createError = require('../utils/create-error');
 const tokenUtil = require('../utils/token');
 const loggerService = require('../services/logger');
 const userRepo = require('../../modules/core/repositories/user');
-const strategy, { authenticate } = require('./authenticator-strategy');
+const { strategy } = require('./authenticator-strategy');
+const authenticate = require('../utils/authenticate');
 
 describe('Middleware: AuthenticatorStrategy', () => {
   describe('Business logic', () => {

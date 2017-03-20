@@ -1,5 +1,5 @@
 const { assert } = require('chai');
-const { pick } = require('lodash');
+const R = require('ramda');
 const moment = require('moment');
 const nock = require('nock');
 const testHelper = require('../../../shared/test-utils/helpers');
@@ -27,12 +27,14 @@ describe('Handler: View shift', () => {
     admin = await testHelper.createUser();
     const flexappealNetwork = await testHelper.createNetwork({
       userId: admin.id, name: 'flexappeal' });
-    const { network } = await testHelper.createNetworkWithIntegration({
-      ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
-      userId: admin.id,
-      token: 'footoken',
-      userToken: 'foo',
-    });
+    const { network } = await testHelper.createNetworkWithIntegration(R.merge(
+      R.pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
+      {
+        userId: admin.id,
+        token: 'footoken',
+        userToken: 'foo',
+      }
+    ));
     integratedNetwork = network;
 
     createdExchange = await createExchange(admin.id, flexappealNetwork.id, {

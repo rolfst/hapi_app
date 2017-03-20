@@ -1,5 +1,6 @@
 const { assert } = require('chai');
 const sinon = require('sinon');
+const R = require('ramda');
 const Promise = require('bluebird');
 const stream = require('stream');
 const blueprints = require('../../../../shared/test-utils/blueprints');
@@ -19,12 +20,12 @@ describe('Handler: Get messages (v2)', () => {
     sandbox = sinon.sandbox.create();
     sandbox.stub(Storage, 'upload').returns(Promise.resolve('image.jpg'));
     const [admin, participant] = await Promise.all([
-      testHelper.createUser({
-        ...blueprints.users.admin,
-        username: 'conversation_creator' }),
-      testHelper.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_participant' }),
+      testHelper.createUser(R.merge(
+        blueprints.users.admin,
+        { username: 'conversation_creator' })),
+      testHelper.createUser(R.merge(
+        blueprints.users.employee,
+        { username: 'conversation_participant' })),
     ]);
     creator = admin;
 

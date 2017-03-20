@@ -1,4 +1,5 @@
 const { assert } = require('chai');
+const R = require('ramda');
 const blueprints = require('../../../../../shared/test-utils/blueprints');
 const userRepo = require('../../../../core/repositories/user');
 const objectService = require('../../../../core/services/object');
@@ -12,13 +13,13 @@ describe('Service: Conversation (v2)', () => {
     let createdConversation;
 
     before(async () => {
-      creator = await userRepo.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_creator' });
+      creator = await userRepo.createUser(R.merge(
+        blueprints.users.employee,
+        { username: 'conversation_creator' }));
 
-      participant = await userRepo.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_participant' });
+      participant = await userRepo.createUser(R.merge(
+        blueprints.users.employee,
+        { username: 'conversation_participant' }));
 
       createdConversation = await conversationService.create({
         type: 'PRIVATE',
@@ -58,13 +59,13 @@ describe('Service: Conversation (v2)', () => {
     let participant;
 
     before(async () => {
-      creator = await userRepo.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_creator' });
+      creator = await userRepo.createUser(R.merge(
+        blueprints.users.employee,
+        { username: 'conversation_creator' }));
 
-      participant = await userRepo.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_participant' });
+      participant = await userRepo.createUser(R.merge(
+        blueprints.users.employee,
+        { username: 'conversation_participant' }));
     });
 
     after(async () => {

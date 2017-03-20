@@ -1,5 +1,6 @@
 const { assert } = require('chai');
 const testHelper = require('../../../../shared/test-utils/helpers');
+const R = require('ramda');
 const Promise = require('bluebird');
 const blueprints = require('../../../../shared/test-utils/blueprints');
 const { getRequest } = require('../../../../shared/test-utils/request');
@@ -104,15 +105,15 @@ describe('Get conversations for logged user (v2)', () => {
     let createdConversation2;
 
     before(async () => {
-      creator = await testHelper.createUser({
-        ...blueprints.users.creator,
-        username: 'conversation_creator' });
-      participant1 = await testHelper.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_participant1' });
-      participant2 = await testHelper.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_participant2' });
+      creator = await testHelper.createUser(R.merge(
+        blueprints.users.creator,
+        { username: 'conversation_creator' }));
+      participant1 = await testHelper.createUser(R.merge(
+        blueprints.users.employee,
+        { username: 'conversation_participant1' }));
+      participant2 = await testHelper.createUser(R.merge(
+        blueprints.users.employee,
+        { username: 'conversation_participant2' }));
 
       const network = await testHelper.createNetwork({ userId: creator.id });
 
@@ -207,15 +208,15 @@ describe('Get conversations for logged user (v2)', () => {
 
   describe('Update flow', () => {
     before(async () => {
-      creator = await testHelper.createUser({
-        ...blueprints.users.creator,
-        username: 'conversation_creator' });
-      participant1 = await testHelper.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_participant1' });
-      participant2 = await testHelper.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_participant2' });
+      creator = await testHelper.createUser(R.merge(
+        blueprints.users.creator,
+        { username: 'conversation_creator' }));
+      participant1 = await testHelper.createUser(R.merge(
+        blueprints.users.employee,
+        { username: 'conversation_participant1' }));
+      participant2 = await testHelper.createUser(R.merge(
+        blueprints.users.employee,
+        { username: 'conversation_participant2' }));
 
       const network = await testHelper.createNetwork({ userId: creator.id });
 

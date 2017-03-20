@@ -10,4 +10,4 @@ module.exports = function (network, exchange) {
       'Created At': moment().toISOString(),
     },
   };
-}
+};

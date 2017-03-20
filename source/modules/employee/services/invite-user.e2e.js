@@ -1,4 +1,5 @@
 const { assert } = require('chai');
+const R = require('ramda');
 const { find, pick } = require('lodash');
 const sinon = require('sinon');
 const testHelper = require('../../../shared/test-utils/helpers');
@@ -148,7 +149,7 @@ describe('Service: Invite user', () => {
     });
 
     it('should add to the network as admin', async () => {
-      const actual = await service.inviteUser({ ...payload, roleType: 'admin' }, { network });
+      const actual = await service.inviteUser(R.merge(payload, { roleType: 'admin' }), { network });
 
       assert.equal(actual.roleType, 'ADMIN');
     });
@@ -160,9 +161,9 @@ describe('Service: Invite user', () => {
     });
 
     it('should add to the teams', async () => {
-      const serviceResult = await service.inviteUser({
-        ...payload,
-        teamIds: [team.id] },
+      const serviceResult = await service.inviteUser(R.merge(
+        payload,
+        { teamIds: [team.id] }),
         { network });
 
       const teamsLookup = await teamRepo.findTeamsForNetworkThatUserBelongsTo(
@@ -178,7 +179,7 @@ describe('Service: Invite user', () => {
       });
 
       const serviceResult = await service.inviteUser(
-        { ...payload, teamIds: [team.id, extraTeam.id] },
+        R.merge(payload, { teamIds: [team.id, extraTeam.id] }),
         { network });
 
       const teamsLookup = await teamRepo.findTeamsForNetworkThatUserBelongsTo(

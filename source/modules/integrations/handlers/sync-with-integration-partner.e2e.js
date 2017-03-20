@@ -1,5 +1,6 @@
 const { assert } = require('chai');
 const nock = require('nock');
+const R = require('ramda');
 const { map, differenceBy } = require('lodash');
 const Promise = require('bluebird');
 const testHelper = require('../../../shared/test-utils/helpers');
@@ -37,8 +38,8 @@ describe('Handle sync networks of linked to integration', () => {
     before(async () => {
       // add admin and user to database
       [alreadyImportedAdmin, alreadyImportedUser, globalAdmin] = await Promise.all([
-        testHelper.createUser({ ...initialAdmin, password: 'pw' }),
-        testHelper.createUser({ ...initialEmployee, password: 'pw' }),
+        testHelper.createUser(R.merge(initialAdmin, { password: 'pw' })),
+        testHelper.createUser(R.merge(initialEmployee, { password: 'pw' })),
         testHelper.createUser(adminCredentials),
       ]);
       alreadyImportedAdmin.externalId = '10032';

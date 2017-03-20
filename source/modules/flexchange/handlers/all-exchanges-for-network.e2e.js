@@ -1,7 +1,8 @@
 const { assert } = require('chai');
+const R = require('ramda');
 const qs = require('qs');
 const moment = require('moment');
-const { map, pick, find } = require('lodash');
+const { map, find } = require('lodash');
 const { getRequest } = require('../../../shared/test-utils/request');
 const testHelper = require('../../../shared/test-utils/helpers');
 const stubs = require('../../../shared/test-utils/stubs');
@@ -23,11 +24,12 @@ describe('Get exchanges for network', () => {
         testHelper.createUser(),
       ]);
 
-      const { network: netw } = await testHelper.createNetworkWithIntegration({
-        userId: admin.id,
-        token: 'footoken',
-        ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
-      });
+      const { network: netw } = await testHelper.createNetworkWithIntegration(R.merge(
+        {
+          userId: admin.id,
+          token: 'footoken',
+        },
+        R.pick(['externalId', 'name', 'integrationName'], pristineNetwork)));
       integratedNetwork = netw;
       const plainNetwork = await testHelper.createNetwork(
         { userId: admin.id, name: 'flexappeal' });
@@ -119,11 +121,12 @@ describe('Get exchanges for network', () => {
       employee = await testHelper.createUser({
         username: 'employee@flex-appeal.nl', password: 'baz' });
       network = await testHelper.createNetwork({ userId: admin.id, name: 'test' });
-      const { network: netw } = await testHelper.createNetworkWithIntegration({
-        userId: admin.id,
-        token: 'footoken',
-        ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
-      });
+      const { network: netw } = await testHelper.createNetworkWithIntegration(R.merge(
+        {
+          userId: admin.id,
+          token: 'footoken',
+        },
+        R.pick(['externalId', 'name', 'integrationName'], pristineNetwork)));
       const integrationNetwork = netw;
       testHelper.addUserToNetwork(
         { networkId: network.id, userId: employee.id, roleType: 'EMPLOYEE' });

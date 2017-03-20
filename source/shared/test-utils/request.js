@@ -9,7 +9,7 @@ function deleteRequest(url, token, server = global.server) {
   }, makeOptions(token)));
 }
 
-function postRequest( url, payload, token, server = global.server) {
+function postRequest(url, payload, token, server = global.server) {
   return server.inject(Object.assign({
     method: 'POST',
     url,
@@ -45,7 +45,7 @@ module.exports = {
   deleteRequest,
   getRequest,
   makeOptions,
-  patchRequest,  
+  patchRequest,
   postRequest,
   putRequest,
 };

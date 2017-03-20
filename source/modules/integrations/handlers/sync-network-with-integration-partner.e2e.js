@@ -37,8 +37,8 @@ describe('Handler: Handle single network sync', () => {
     before(async () => {
       // add admin and user to database
       [alreadyImportedAdmin, alreadyImportedUser, globalAdmin] = await Promise.all([
-        testHelper.createUser({ ...initialAdmin, password: 'foo' }),
-        testHelper.createUser({ ...initialEmployee, password: 'foo' }),
+        testHelper.createUser(R.merge(initialAdmin, { password: 'foo' })),
+        testHelper.createUser(R.merge(initialEmployee, { password: 'foo' })),
         testHelper.createUser(adminCredentials),
       ]);
       alreadyImportedAdmin.externalId = '10032';

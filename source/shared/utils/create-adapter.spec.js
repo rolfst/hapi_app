@@ -1,5 +1,6 @@
 const { assert } = require('chai');
 const sinon = require('sinon');
+const R = require('ramda');
 const userRepo = require('../../modules/core/repositories/user');
 const unit = require('./create-adapter');
 
@@ -64,14 +65,14 @@ describe('createAdapter', () => {
   });
 
   it('should fail when the network has no externalId value', () => {
-    const networkWithoutExternalId = { ...network, externalId: null };
+    const networkWithoutExternalId = R.merge(network, { externalId: null });
     const promise = unit.createAdapter(networkWithoutExternalId, userId, { integrations: {} });
 
     return assert.isRejected(promise, /Network has no externalId value./);
   });
 
   it('should fail when network has no integration', () => {
-    const networkWithoutIntegration = { ...network, hasIntegration: false };
+    const networkWithoutIntegration = R.merge(network, { hasIntegration: false });
     const promise = unit.createAdapter(networkWithoutIntegration, userId, {
       integrations: { fakeIntegrations } });
 

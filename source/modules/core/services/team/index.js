@@ -170,5 +170,5 @@ module.exports = {
   get,
   list,
   listMembersForTeams,
-  update
+  update,
 };

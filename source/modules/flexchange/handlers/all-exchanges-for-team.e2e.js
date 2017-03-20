@@ -1,4 +1,5 @@
 const { assert } = require('chai');
+const R = require('ramda');
 const qs = require('qs');
 const moment = require('moment');
 const { find } = require('lodash');
@@ -24,27 +25,31 @@ describe('Get exchanges for team', () => {
       values: [team.id],
     };
 
-    const exchange1 = createExchange(admin.id, network.id, {
-      ...defaultArgs,
-      title: 'Test shift 1 for team',
-    });
+    const exchange1 = createExchange(admin.id, network.id, R.merge(
+      defaultArgs,
+      { title: 'Test shift 1 for team' }
+    ));
 
-    const exchange2 = createExchange(admin.id, network.id, {
-      ...defaultArgs,
-      title: 'Test shift 2 for team',
-    });
+    const exchange2 = createExchange(admin.id, network.id, R.merge(
+      defaultArgs,
+      { title: 'Test shift 2 for team' }
+    ));
 
-    const exchange3 = createExchange(admin.id, network.id, {
-      ...defaultArgs,
-      date: moment().add(2, 'weeks').format('YYYY-MM-DD'),
-      title: 'Test shift 2',
-    });
+    const exchange3 = createExchange(admin.id, network.id, R.merge(
+      defaultArgs,
+      {
+        date: moment().add(2, 'weeks').format('YYYY-MM-DD'),
+        title: 'Test shift 2',
+      }
+    ));
 
-    const exchangeInPast = createExchange(admin.id, network.id, {
-      ...defaultArgs,
-      date: moment().subtract(2, 'weeks').format('YYYY-MM-DD'),
-      title: 'Test shift in past',
-    });
+    const exchangeInPast = createExchange(admin.id, network.id, R.merge(
+      defaultArgs,
+      {
+        date: moment().subtract(2, 'weeks').format('YYYY-MM-DD'),
+        title: 'Test shift in past',
+      }
+    ));
 
     return Promise.all([exchange1, exchange2, exchange3, exchangeInPast]);
   });

@@ -1,25 +1,10 @@
 const R = require('ramda');
-const { pick } = require('lodash');
-const tokenUtil = require('../utils/token');
 const serverUtil = require('../utils/server');
 const createError = require('../utils/create-error');
-const userRepo = require('../../modules/core/repositories/user');
 const Logger = require('../../shared/services/logger');
+const authenticate = require('../utils/authenticate');
 
 const logger = Logger.createLogger('SHARED/middleware/authenticatorStrategy');
-
-const authenticate = async (networkId, token = null) => {
-  if (!token) throw createError('401');
-
-  const { sub: userId, integrations } = tokenUtil.decode(token);
-  // TODO the user should be retrieved via the service
-  const user = await userRepo.findUserById(userId, null, false);
-
-  return {
-    credentials: pick(user, 'id', 'username', 'fullName', 'email', 'firstName', 'lastName'),
-    artifacts: { integrations },
-  };
-};
 
 module.exports = () => ({
   async authenticate(request, reply) {

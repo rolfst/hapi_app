@@ -1,4 +1,5 @@
 const { assert } = require('chai');
+const R = require('ramda');
 const testHelper = require('../../../../shared/test-utils/helpers');
 const pollService = require('./index');
 
@@ -55,7 +56,8 @@ describe('Service: Poll', () => {
 
   it('should be able to vote', async () => {
     const poll = await pollService.create(defaultPayload, message);
-    const payload = { ...defaultVotePayload, pollId: poll.id, optionIds: [poll.options[1].id] };
+    const payload = R.merge(defaultVotePayload,
+    { pollId: poll.id, optionIds: [poll.options[1].id] });
 
     const actual = await pollService.vote(payload, message);
 
@@ -67,7 +69,8 @@ describe('Service: Poll', () => {
 
   it('should be able to vote for multiple options', async () => {
     const { id: pollId, options } = await pollService.create(defaultPayload, message);
-    const payload = { ...defaultVotePayload, pollId, optionIds: [options[1].id, options[2].id] };
+    const payload = R.merge(defaultVotePayload,
+      { pollId, optionIds: [options[1].id, options[2].id] });
 
     const actual = await pollService.vote(payload, message);
 
@@ -80,10 +83,12 @@ describe('Service: Poll', () => {
   it('should be able to vote after already having voted', async () => {
     const { id: pollId, options } = await pollService.create(defaultPayload, message);
 
-    const payload = { ...defaultVotePayload, pollId, optionIds: [options[1].id, options[2].id] };
+    const payload = R.merge(defaultVotePayload,
+      { pollId, optionIds: [options[1].id, options[2].id] });
     await pollService.vote(payload, message);
 
-    const newVotePayload = { ...defaultVotePayload, pollId, optionIds: [options[0].id] };
+    const newVotePayload = R.merge(defaultVotePayload,
+        { pollId, optionIds: [options[0].id] });
     const actual = await pollService.vote(newVotePayload, message);
 
     assert.equal(actual.totalVoteCount, 1);
@@ -93,7 +98,8 @@ describe('Service: Poll', () => {
   });
 
   it('should fail when poll doesn\'t exist', async () => {
-    const payload = { ...defaultVotePayload, pollId: '123456789', optionIds: ['1'] };
+    const payload = R.merge(defaultVotePayload,
+      { pollId: '123456789', optionIds: ['1'] });
 
     return assert.isRejected(
       pollService.vote(payload, message),

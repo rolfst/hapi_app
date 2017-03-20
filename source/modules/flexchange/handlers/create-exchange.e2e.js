@@ -1,7 +1,6 @@
 const { assert } = require('chai');
 const sinon = require('sinon');
 const R = require('ramda');
-const { pick } = require('lodash');
 const moment = require('moment');
 const Promise = require('bluebird');
 const testHelper = require('../../../shared/test-utils/helpers');
@@ -32,11 +31,13 @@ describe('Create exchange', () => {
     employee = await testHelper.createUser();
     flexAppealNetwork = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
 
-    const networkWithIntegration = await testHelper.createNetworkWithIntegration({
-      userId: admin.id,
-      token: 'footoken',
-      ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
-    });
+    const networkWithIntegration = await testHelper.createNetworkWithIntegration(R.merge(
+      {
+        userId: admin.id,
+        token: 'footoken',
+      },
+      R.pick(['externalId', 'name', 'integrationName'], pristineNetwork)
+    ));
 
     await testHelper.addUserToNetwork({ networkId: flexAppealNetwork.id, userId: employee.id });
 

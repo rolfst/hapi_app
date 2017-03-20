@@ -1,5 +1,6 @@
 const { assert } = require('chai');
 const stream = require('stream');
+const R = require('ramda');
 const sinon = require('sinon');
 const { postRequest } = require('../../../../shared/test-utils/request');
 const Storage = require('../../../../shared/services/storage');
@@ -14,12 +15,12 @@ describe('Handler: Create message (v2)', () => {
 
   before(async () => {
     const [admin, participant] = await Promise.all([
-      testHelper.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_creator' }),
-      testHelper.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_participant' }),
+      testHelper.createUser(R.merge(
+        blueprints.users.employee,
+        { username: 'conversation_creator' })),
+      testHelper.createUser(R.merge(
+        blueprints.users.employee,
+        { username: 'conversation_participant' })),
     ]);
     creator = admin;
 

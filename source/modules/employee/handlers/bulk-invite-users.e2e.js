@@ -1,6 +1,7 @@
 const { assert } = require('chai');
 const Promise = require('bluebird');
 const sinon = require('sinon');
+const R = require('ramda');
 const { flatten, sortBy, partialRight, flow, map } = require('lodash');
 const { postRequest } = require('../../../shared/test-utils/request');
 const mailer = require('../../../shared/services/mailer');
@@ -18,7 +19,7 @@ describe('Handler: Bulk invite users', () => {
 
   // FIXME: Logic should be moved to service or repository
   const importUser = (networkId) => async (user) => {
-    const employee = await testHelpers.createUser({ ...user, password: 'fakepassword' });
+    const employee = await testHelpers.createUser(R.merge(user, { password: 'fakepassword' }));
 
     await testHelpers.addUserToNetwork({
       networkId,

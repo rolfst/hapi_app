@@ -4,7 +4,7 @@ const service = require('../flexchange');
 const commentRepo = require('../../repositories/comment');
 
 // TODO notification send needs to be activated
-const notification = require('../notifications/new-exchange-comment');
+// const notification = require('../../notifications/new-exchange-comment');
 
 describe('Create exchange comment', () => {
   let sandbox;

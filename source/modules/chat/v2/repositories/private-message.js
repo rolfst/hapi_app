@@ -26,5 +26,6 @@ module.exports = {
   create,
   findBy,
   findById,
+  findByIds,
   update,
 };

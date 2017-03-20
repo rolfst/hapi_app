@@ -1,6 +1,6 @@
 const moment = require('moment');
 const R = require('ramda');
-const { map, omit, merge } = require('lodash');
+const { map, merge } = require('lodash');
 const createError = require('../../../shared/utils/create-error');
 const { ActivityTypes } = require('../../core/repositories/dao/activity');
 const { createActivity } = require('../../core/repositories/activity');
