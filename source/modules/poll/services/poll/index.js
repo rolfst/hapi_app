@@ -46,7 +46,7 @@ export const get = async (payload, message) => {
     pollVoteRepository.findBy({ pollId: payload.pollId, userId: message.credentials.id }),
   ];
 
-  const [poll, votes] = Promise.all(promises);
+  const [poll, votes] = await Promise.all(promises);
   const result = votes.length ? R.pluck('optionId', votes) : null;
 
   return R.assoc('voteResults', result, poll);
