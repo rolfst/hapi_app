@@ -10,7 +10,7 @@ import * as impl from './implementation';
 
 const logger = Logger.getLogger('POLL/service/poll');
 
-const addResultToPoll = R.curry((results, poll) => {
+const addResultToPoll = R.curry((poll, results) => {
   const result = results[poll.id] ? R.pluck('optionId', results[poll.id]) : null;
 
   return R.assoc('voteResult', result, poll);
@@ -27,7 +27,7 @@ export const list = async (payload, message) => {
   const [polls, votes] = await Promise.all(promises);
   const resultsByPoll = R.groupBy(R.prop('pollId'), votes);
 
-  return R.map(addResultToPoll(resultsByPoll), polls);
+  return R.map(addResultToPoll(R.__, resultsByPoll), polls);
 };
 
 /**
