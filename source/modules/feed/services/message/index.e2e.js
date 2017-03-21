@@ -151,7 +151,8 @@ describe('Service: Message', () => {
         parentId: createdMessage.sourceId,
       });
 
-      const pollEntry = await pollService.get({ pollId: objects[0].sourceId });
+      const pollEntry = await pollService.get({
+        pollId: objects[0].sourceId }, { credentials: admin });
 
       assert.isDefined(pollEntry);
       assert.equal(pollEntry.networkId, network.id);

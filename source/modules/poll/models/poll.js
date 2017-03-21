@@ -22,5 +22,6 @@ export default (dao) => ({
   question: dao.question,
   options: dao.Options ? getOptions(dao.Options) : [],
   totalVoteCount: dao.Options ? getUniqueVoteUsers(dao.Options).length : 0,
+  voteResult: dao.voteResult || null,
   createdAt: dateUtils.toISOString(dao.created_at),
 });
