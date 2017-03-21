@@ -1,7 +1,7 @@
 import Parse from 'parse/node';
 import R from 'ramda';
 import * as Logger from './logger';
-import * as Analytics from './analytics';
+import * as Mixpanel from './mixpanel';
 
 const logger = Logger.createLogger('SHARED/services/notifier');
 
@@ -13,7 +13,7 @@ function createQuery(emails) {
 }
 
 export function trackPushNotification(notification, user) {
-  return Analytics.track({ name: 'Push Notification Sent', data: notification.data }, user.id);
+  return Mixpanel.track({ name: 'Push Notification Sent', data: notification.data }, user.id);
 }
 
 export function send(users, notification, networkId = null) {

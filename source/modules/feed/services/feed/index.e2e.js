@@ -15,6 +15,7 @@ describe('Service: Feed', () => {
     let sandbox;
     let team;
     let network;
+    let otherNetwork;
     let admin;
     let employee;
     let createdMessages;
@@ -29,9 +30,10 @@ describe('Service: Feed', () => {
       ]);
 
       network = await testHelpers.createNetwork({ userId: admin.id });
-      const otherNetwork = await testHelpers.createNetwork({ userId: admin.id });
+      otherNetwork = await testHelpers.createNetwork({ userId: admin.id });
       team = await testHelpers.addTeamToNetwork(network.id);
       await testHelpers.addUserToNetwork({ userId: employee.id, networkId: network.id });
+      await testHelpers.addUserToNetwork({ userId: employee.id, networkId: otherNetwork.id });
 
       const serviceMessage = { network, credentials: admin };
 
@@ -163,7 +165,7 @@ describe('Service: Feed', () => {
       await messageService.like({
         messageId: createdMessages[1].sourceId,
         userId: admin.id,
-      });
+      }, { credentials: admin });
 
       const actual = await feedService.makeForNetwork({
         networkId: network.id,
@@ -192,6 +194,27 @@ describe('Service: Feed', () => {
       assert.equal(commentedMessage.comments[0].text, 'Cool comment as sub-resource');
     });
 
+    it('should only include exchanges for user created for network', async () => {
+      await flexchangeService.createExchange({
+        date: moment().toISOString(),
+        startTime: moment().toISOString(),
+        endTime: moment().add(3, 'hours').toISOString(),
+        type: 'ALL',
+        values: [otherNetwork.id],
+      }, { network: otherNetwork, credentials: admin });
+
+      await Promise.delay(1000);
+
+      const actual = await feedService.makeForNetwork({
+        networkId: network.id,
+      }, { network, credentials: employee });
+
+      const exchangeObjects = R.filter(R.propEq('objectType', 'exchange'), actual);
+
+      assert.lengthOf(exchangeObjects, 1);
+      assert.equal(exchangeObjects[0].source.networkId, network.id);
+    });
+
     it('should return feed models from team', async () => {
       const actual = await feedService.makeForTeam({
         teamId: team.id,
@@ -205,7 +228,7 @@ describe('Service: Feed', () => {
     it('should have 5 messages in the database', async () => {
       const objects = await testHelpers.findAllObjects();
 
-      assert.equal(objects.length, 5);
+      assert.equal(objects.length, 6);
     });
   });
 });

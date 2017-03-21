@@ -5,7 +5,7 @@ const createSentryClient = require('../../shared/services/sentry').default;
 const syncService = require('../integrations/services/sync');
 
 const syncJob = new CronJob({
-  cronTime: '00 30 * * * * *', // Every 30 minutes
+  cronTime: '00 30 * * * *', // Every 30 minutes
   onTick() {
     const that = this;
 

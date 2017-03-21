@@ -147,7 +147,7 @@ describe('Service: Sync Implementation', () => {
         const internalUsers = [];
         const usersInSystem = [{
           id: '1',
-          externalId: '23',
+          externalId: null,
           email: 'added@baz.com',
           teamIds: [],
           deletedAt: null,
@@ -167,9 +167,9 @@ describe('Service: Sync Implementation', () => {
           id: '1',
           externalId: '23',
           email: 'added@baz.com',
-          teamIds: [],
           externalTeamIds: [],
           deletedAt: null,
+          teamIds: [],
         }]);
       });
 
@@ -247,6 +247,32 @@ describe('Service: Sync Implementation', () => {
     });
 
     describe('Action: create', () => {
+      it('should not create user when the email is changed', () => {
+        const internalUsers = [{
+          id: '1',
+          externalId: '235',
+          email: 'new@baz.com',
+          teamIds: [],
+          deletedAt: null,
+        }];
+
+        const usersInSystem = internalUsers;
+
+        const externalUsers = [{
+          externalId: '235',
+          email: 'newtypo@baz.com',
+          teamIds: [],
+          deletedAt: null,
+        }];
+
+        const userActions = impl.createUserActions(usersInSystem, [], internalUsers, externalUsers);
+
+        assert.deepEqual(userActions.remove, []);
+        assert.deepEqual(userActions.add, []);
+        assert.deepEqual(userActions.changedTeams, []);
+        assert.deepEqual(userActions.create, []);
+      });
+
       it('should create when external user is not present in our system', () => {
         const internalUsers = [];
         const usersInSystem = [];

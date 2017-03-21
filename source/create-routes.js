@@ -8,6 +8,7 @@ import flexchangeRoutes from './modules/flexchange/create-routes';
 import pollRoutes from './modules/poll/create-routes';
 import feedRoutes from './modules/feed/create-routes';
 import attachmentRoutes from './modules/attachment/create-routes';
+import statisticRoutes from './modules/statistics/create-routes';
 
 export default [
   ...coreRoutes,
@@ -20,4 +21,5 @@ export default [
   ...pollRoutes,
   ...feedRoutes,
   ...attachmentRoutes,
+  ...statisticRoutes,
 ];

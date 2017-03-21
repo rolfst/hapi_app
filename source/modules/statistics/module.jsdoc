@@ -1,0 +1,35 @@
+/**
+ * @module modules/statistics
+ * @description This Module contains the statistics domain of the Nodejs flex-appeal api
+ * It contains the functionality concering:
+ * <ul>
+ *   <li>{@link module:modules/statistics~Statistic Statistic}</li>
+ * </ul>
+ */
+
+/**
+ * @typedef {object} Statistic
+ * @property {object} createdMessages {@link
+ * module:modules/statistics~EventStatistic EventStatistic}
+ * @property {object} totalEmployees {@link
+ * module:modules/statistics~EmployeeStatistic EmployeeStatistic}
+ * @property {object} activeEmployees
+ * @property {object} createdExchanges {@link
+ * module:modules/statistics~EventStatistic EventStatistic}
+ * @property {object} approvedExchanges {@link
+ * module:modules/statistics~EventStatistic EventStatistic}
+ */
+
+/**
+ * @typedef {object} EventStatistic
+ * @property {object} data
+ * @property {array} data.payload - points of interest
+ */
+
+/**
+ * @typedef {object} EmployeeStatistic 
+ * @property {object} id
+ * @property {object} name
+ * @property {object} token - token to be used for authentication with the integration partner
+ */
+

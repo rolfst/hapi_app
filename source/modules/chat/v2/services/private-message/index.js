@@ -41,6 +41,7 @@ export async function create(payload, message) {
   if (!conversation) throw createError('404');
 
   const createObjectPayload = (createdMessage) => ({
+    networkId: null,
     userId: message.credentials.id,
     parentType: 'conversation',
     parentId: payload.conversationId,
@@ -56,6 +57,7 @@ export async function create(payload, message) {
 
     const filesArray = R.flatten([payload.files]);
     await Promise.map(filesArray, (attachmentId) => objectService.create({
+      networkId: null,
       userId: message.credentials.id,
       parentType: 'private_message',
       parentId: createdMessage.id,

@@ -1,9 +1,9 @@
-import Mixpanel from 'mixpanel';
+import _Mixpanel from 'mixpanel';
 import { assert } from 'chai';
 import sinon from 'sinon';
-import * as Analytics from './analytics';
+import * as Mixpanel from './mixpanel';
 
-describe('Service: Analytics', () => {
+describe('Service: mixpanel', () => {
   let sandbox;
 
   afterEach(() => sandbox.restore());
@@ -19,10 +19,10 @@ describe('Service: Analytics', () => {
   const defaultMixpanelAttributes = { mp_lib: 'node', token: 'foo_token' };
 
   it('should pass distinctId to mixpanel client', () => {
-    const mixpanelClient = Mixpanel.init('foo_token');
-    sandbox.stub(Mixpanel, 'init').returns(mixpanelClient);
+    const mixpanelClient = _Mixpanel.init('foo_token');
+    sandbox.stub(_Mixpanel, 'init').returns(mixpanelClient);
     const methodSpy = sinon.spy(mixpanelClient, 'track');
-    Analytics.track(eventStub, 3);
+    Mixpanel.track(eventStub, 3);
     methodSpy.restore();
 
     assert.isTrue(methodSpy.calledOnce);
@@ -32,8 +32,9 @@ describe('Service: Analytics', () => {
   });
 
   it('should fail when no distinctId is present', () => {
-    const mixpanelClient = Mixpanel.init('foo_token');
-    sandbox.stub(Mixpanel, 'init').returns(mixpanelClient);
-    assert.throws(() => Analytics.track(eventStub, null, mixpanelClient));
+    const mixpanelClient = _Mixpanel.init('foo_token');
+    sandbox.stub(_Mixpanel, 'init').returns(mixpanelClient);
+
+    assert.throws(() => Mixpanel.track(eventStub, null, mixpanelClient));
   });
 });
