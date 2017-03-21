@@ -20,7 +20,7 @@ export const findBy = async (whereConstraint) => Poll
  * @method findPollById
  * @return {external:Promise} - Find poll promise
  */
-export const findById = async (id, loggedUserId = null, includes = defaultIncludes) => {
+export const findById = async (id, includes = defaultIncludes) => {
   const poll = await Poll.findById(id, includes ? { include: includes } : {});
 
   if (!poll) return null;
