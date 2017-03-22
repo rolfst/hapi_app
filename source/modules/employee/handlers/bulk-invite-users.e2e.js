@@ -6,7 +6,7 @@ const { flatten, sortBy, partialRight, flow, map } = require('lodash');
 const { postRequest } = require('../../../shared/test-utils/request');
 const mailer = require('../../../shared/services/mailer');
 const stubs = require('../../../shared/test-utils/stubs');
-const { UserRoles } = require('../../../shared/services/permission');
+const UserRoles = require('../../../shared/services/permission');
 const userService = require('../../core/services/user');
 const testHelpers = require('../../../shared/test-utils/helpers');
 
