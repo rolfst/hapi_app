@@ -59,7 +59,7 @@ describe('Integration auth', () => {
     return testHelper.cleanAll();
   });
 
-  it('hook should be called with the credentials', async () => {
+  it.only('hook should be called with the credentials', async () => {
     const endpoint = `/v2/networks/${flexappealNetwork.id}/integration_auth`;
     const { statusCode } = await postRequest(endpoint, {
       username: employeeCredentials.username,
@@ -71,7 +71,7 @@ describe('Integration auth', () => {
       { username: employeeCredentials.username, password: employeeCredentials.password }));
   });
 
-  it.only('should return new access token', async () => {
+  it('should return new access token', async () => {
     const endpoint = `/v2/networks/${flexappealNetwork.id}/integration_auth`;
     const { result: { data } } = await postRequest(endpoint, {
       username: employeeCredentials.username,

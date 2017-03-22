@@ -27,14 +27,13 @@ describe('Handler: View shift', () => {
     admin = await testHelper.createUser();
     const flexappealNetwork = await testHelper.createNetwork({
       userId: admin.id, name: 'flexappeal' });
-    const { network } = await testHelper.createNetworkWithIntegration(R.merge(
-      R.pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
-      {
+    const { network } = await testHelper.createNetworkWithIntegration(
+      R.merge(R.pick(['externalId', 'name', 'integrationName'], pristineNetwork), {
         userId: admin.id,
         token: 'footoken',
         userToken: 'foo',
-      }
-    ));
+      }));
+
     integratedNetwork = network;
 
     createdExchange = await createExchange(admin.id, flexappealNetwork.id, {
