@@ -111,9 +111,7 @@ async function getCreatedShifts(payload, message) {
   return Mixpanel.executeQuery(jql, message);
 }
 
-module.exports = {
-  getApprovedShifts,
-  getCreatedMessages,
-  getCreatedShifts,
-};
+exports.getApprovedShifts = getApprovedShifts;
+exports.getCreatedMessages = getCreatedMessages;
+exports.getCreatedShifts = getCreatedShifts;
 

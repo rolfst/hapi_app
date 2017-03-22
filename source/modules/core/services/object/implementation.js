@@ -42,9 +42,7 @@ const findChildren = (objectsWithSource, object) =>
   R.filter(compareObject(R.__, object), objectsWithSource);
 
 // exports of functions
-module.exports = {
-  addSourceToObject,
-  findChildren,
-  findChildrenForType,
-  findSourcesForType,
-};
+exports.addSourceToObject = addSourceToObject;
+exports.findChildren = findChildren;
+exports.findChildrenForType = findChildrenForType;
+exports.findSourcesForType = findSourcesForType;

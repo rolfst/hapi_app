@@ -70,8 +70,6 @@ const assertThatUserBelongsToTheTeam = async (payload) => {
 };
 
 // exports of functions
-module.exports = {
-  assertRoleTypeForUser,
-  assertThatUserBelongsToTheNetwork,
-  assertThatUserBelongsToTheTeam,
-};
+exports.assertRoleTypeForUser = assertRoleTypeForUser;
+exports.assertThatUserBelongsToTheNetwork = assertThatUserBelongsToTheNetwork;
+exports.assertThatUserBelongsToTheTeam = assertThatUserBelongsToTheTeam;

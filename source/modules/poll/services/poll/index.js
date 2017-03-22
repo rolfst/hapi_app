@@ -82,9 +82,7 @@ const vote = async (payload, message) => {
 BindingTypeService.registerSource('poll', list);
 
 // exports of functions
-module.exports = {
-  create,
-  get,
-  list,
-  vote,
-};
+exports.create = create;
+exports.get = get;
+exports.list = list;
+exports.vote = vote;

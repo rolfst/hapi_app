@@ -76,7 +76,5 @@ const makeFeed = async (payload, options, message, extraWhereConstraint = {}) =>
 };
 
 // exports of functions
-module.exports = {
-  getIncludes,
-  makeFeed,
-};
+exports.getIncludes = getIncludes;
+exports.makeFeed = makeFeed;

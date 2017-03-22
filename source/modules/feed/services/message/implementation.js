@@ -86,9 +86,7 @@ const assertThatCurrentOwnerHasUpdateRights = async (objectId, message) => {
 };
 
 // exports of functions
-module.exports = {
-  assertThatCurrentOwnerHasUpdateRights,
-  assertThatUserBelongsToMessage,
-  createPollResource,
-  removeAttachedObjects,
-};
+exports.assertThatCurrentOwnerHasUpdateRights = assertThatCurrentOwnerHasUpdateRights;
+exports.assertThatUserBelongsToMessage = assertThatUserBelongsToMessage;
+exports.createPollResource = createPollResource;
+exports.removeAttachedObjects = removeAttachedObjects;

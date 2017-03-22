@@ -224,14 +224,12 @@ const get = async (payload, message) => {
 };
 
 // exports of functions
-module.exports = {
-  count,
-  create,
-  get,
-  getParent,
-  getWithSourceAndChildren,
-  list,
-  listWithSourceAndChildren,
-  remove,
-  usersForParent,
-};
+exports.count = count;
+exports.create = create;
+exports.get = get;
+exports.getParent = getParent;
+exports.getWithSourceAndChildren = getWithSourceAndChildren;
+exports.list = list;
+exports.listWithSourceAndChildren = listWithSourceAndChildren;
+exports.remove = remove;
+exports.usersForParent = usersForParent;
