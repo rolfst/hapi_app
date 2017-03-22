@@ -46,10 +46,8 @@ const getAuthenticationTokens = async (user, deviceName) => {
 };
 
 // exports of functions
-module.exports = {
-  authenticateUser,
-  checkPassword,
-  createAuthenticationTokens,
-  getAuthenticationTokens,
-  updateLastLogin,
-};
+exports.authenticateUser = authenticateUser;
+exports.checkPassword = checkPassword;
+exports.createAuthenticationTokens = createAuthenticationTokens;
+exports.getAuthenticationTokens = getAuthenticationTokens;
+exports.updateLastLogin = updateLastLogin;

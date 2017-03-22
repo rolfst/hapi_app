@@ -214,13 +214,11 @@ async function countMessages(payload, message) {
 }
 
 // exports of functions
-module.exports = {
-  countConversations,
-  countMessages,
-  create,
-  getConversation,
-  listConversations,
-  listConversationsForUser,
-  listMessages,
-  remove,
-};
+exports.countConversations = countConversations;
+exports.countMessages = countMessages;
+exports.create = create;
+exports.getConversation = getConversation;
+exports.listConversations = listConversations;
+exports.listConversationsForUser = listConversationsForUser;
+exports.listMessages = listMessages;
+exports.remove = remove;

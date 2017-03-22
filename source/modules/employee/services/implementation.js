@@ -21,6 +21,4 @@ const generatePasswordsForMembers = async (members) => {
 };
 
 // exports of functions
-module.exports = {
-  generatePasswordsForMembers,
-};
+exports.generatePasswordsForMembers = generatePasswordsForMembers;
