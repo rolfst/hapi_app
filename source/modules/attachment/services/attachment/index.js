@@ -1,4 +1,3 @@
-/* global BindingTypeService */
 const R = require('ramda');
 const Storage = require('../../../../shared/services/storage');
 const Logger = require('../../../../shared/services/logger');
@@ -100,8 +99,6 @@ const assertAttachmentsExist = async (payload, message) => {
     throw createError('403', 'Please provide valid attachment ids');
   }
 };
-
-BindingTypeService.registerSource('attachment', list);
 
 exports.assertAttachmentsExist = assertAttachmentsExist;
 exports.create = create;

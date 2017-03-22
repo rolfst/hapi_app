@@ -1,4 +1,3 @@
-/* global BindingTypeService */
 const R = require('ramda');
 const Promise = require('bluebird');
 const Logger = require('../../../../shared/services/logger');
@@ -278,8 +277,6 @@ const remove = async (payload, message) => {
 
   return true;
 };
-
-BindingTypeService.registerSource('feed_message', list);
 
 exports.create = create;
 exports.getAsObject = getAsObject;

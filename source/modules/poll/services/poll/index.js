@@ -1,4 +1,3 @@
-/* global BindingTypeService */
 const R = require('ramda');
 const Logger = require('../../../../shared/services/logger');
 const pollRepository = require('../../repositories/poll');
@@ -78,8 +77,6 @@ const vote = async (payload, message) => {
 
   return pollRepository.findById(payload.pollId);
 };
-
-BindingTypeService.registerSource('poll', list);
 
 exports.create = create;
 exports.get = get;
