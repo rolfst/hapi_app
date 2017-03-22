@@ -78,12 +78,10 @@ const deleteBy = (whereConstraint) =>
   Activity.destroy({ where: whereConstraint });
 
 // exports of functions
-module.exports = {
-  createActivity,
-  deleteBy,
-  deleteById,
-  findActivitiesForSource,
-  findAll,
-  findBy,
-  findForUser,
-};
+exports.createActivity = createActivity;
+exports.deleteBy = deleteBy;
+exports.deleteById = deleteById;
+exports.findActivitiesForSource = findActivitiesForSource;
+exports.findAll = findAll;
+exports.findBy = findBy;
+exports.findForUser = findForUser;

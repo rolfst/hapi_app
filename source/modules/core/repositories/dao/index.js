@@ -67,15 +67,13 @@ TeamModel.belongsToMany(UserModel, {
   timestamps: false,
 });
 
-module.exports = {
-  Activity: ActivityModel,
-  Network: NetworkModel,
-  User: UserModel,
-  Team: TeamModel,
-  Integration: IntegrationModel,
-  NetworkUser: NetworkUserModel,
-  TeamUser: TeamUserModel,
-  UserDevice: UserDeviceModel,
-  NetworkIntegration: NetworkIntegrationModel,
-  _Object: ObjectModel,
-};
+exports.Activity = ActivityModel;
+exports.Network = NetworkModel;
+exports.User = UserModel;
+exports.Team = TeamModel;
+exports.Integration = IntegrationModel;
+exports.NetworkUser = NetworkUserModel;
+exports.TeamUser = TeamUserModel;
+exports.UserDevice = UserDeviceModel;
+exports.NetworkIntegration = NetworkIntegrationModel;
+exports._Object = ObjectModel;

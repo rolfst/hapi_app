@@ -90,12 +90,10 @@ function findAll() {
 }
 
 // exports of functions
-module.exports = {
-  count,
-  create,
-  deleteBy,
-  deleteById,
-  findAll,
-  findBy,
-  update,
-};
+exports.count = count;
+exports.create = create;
+exports.deleteBy = deleteBy;
+exports.deleteById = deleteById;
+exports.findAll = findAll;
+exports.findBy = findBy;
+exports.update = update;
