@@ -240,6 +240,7 @@ async function createExchange(userId, networkId, attributes) {
   if (exchange.type === exchangeTypes.NETWORK) {
     exchangeValues = await createValuesForExchange(exchange.id, [networkId]);
   } else {
+    console.log('%%%%%%%%', exchangeTypes)
     exchangeValues = await createValuesForExchange(exchange.id, attributes.values);
   }
 

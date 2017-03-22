@@ -14,6 +14,7 @@ module.exports = async (req, reply) => {
 
     return reply({ data: responseUtil.serialize(result) });
   } catch (err) {
+    console.log(err)
     return reply(err);
   }
 };
