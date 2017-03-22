@@ -22,10 +22,8 @@ const update = (messageId, attributes) => PrivateMessage
   .update(attributes, { where: { id: messageId } });
 
 // exports of functions
-module.exports = {
-  create,
-  findBy,
-  findById,
-  findByIds,
-  update,
-};
+exports.create = create;
+exports.findBy = findBy;
+exports.findById = findById;
+exports.findByIds = findByIds;
+exports.update = update;

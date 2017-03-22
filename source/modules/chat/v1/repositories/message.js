@@ -92,11 +92,8 @@ const findMessagesForConversations = async (conversationIds) => {
   return R.flatten(result);
 };
 
-// exports of functions
-module.exports = {
-  createMessage,
-  findAllForConversation,
-  findMessageById,
-  findMessageByIds,
-  findMessagesForConversations,
-};
+exports.createMessage = createMessage;
+exports.findAllForConversation = findAllForConversation;
+exports.findMessageById = findMessageById;
+exports.findMessageByIds = findMessageByIds;
+exports.findMessagesForConversations = findMessagesForConversations;

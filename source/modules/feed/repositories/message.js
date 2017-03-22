@@ -63,11 +63,8 @@ const update = async (messageId, attributes) => {
 
 const destroy = (messageId) => FeedMessage.destroy({ where: { id: messageId } });
 
-// exports of functions
-module.exports = {
-  create,
-  destroy,
-  findById,
-  findByIds,
-  update,
-};
+exports.create = create;
+exports.destroy = destroy;
+exports.findById = findById;
+exports.findByIds = findByIds;
+exports.update = update;

@@ -2,8 +2,6 @@ const FeedMessageModel = require('./message');
 const LikeModel = require('./like');
 const CommentModel = require('./comment');
 
-module.exports = {
-  Comment: CommentModel,
-  FeedMessage: FeedMessageModel,
-  Like: LikeModel,
-};
+exports.Comment = CommentModel;
+exports.FeedMessage = FeedMessageModel;
+exports.Like = LikeModel;

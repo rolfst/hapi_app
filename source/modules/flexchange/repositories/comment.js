@@ -61,9 +61,6 @@ function findCommentsByExchange(exchange) {
   return exchange.getComments();
 }
 
-// exports of functions
-module.exports = {
-  createExchangeComment,
-  findCommentById,
-  findCommentsByExchange,
-};
+exports.createExchangeComment = createExchangeComment;
+exports.findCommentById = findCommentById;
+exports.findCommentsByExchange = findCommentsByExchange;

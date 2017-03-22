@@ -24,8 +24,6 @@ UserModel.belongsToMany(ConversationModel, {
 
 
 // exports of functions
-module.exports = {
-  Conversation: ConversationModel,
-  Message: MessageModel,
-  ConversationUser: ConversationUserModel,
-};
+exports.Conversation = ConversationModel;
+exports.Message = MessageModel;
+exports.ConversationUser = ConversationUserModel;

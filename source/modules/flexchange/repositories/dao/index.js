@@ -87,10 +87,7 @@ TeamModel.belongsToMany(ExchangeModel, {
   timestamps: false,
 });
 
-// exports of functions
-module.exports = {
-  Exchange: ExchangeModel,
-  ExchangeComment: ExchangeCommentModel,
-  ExchangeResponse: ExchangeResponseModel,
-  ExchangeValue: ExchangeValueModel,
-};
+exports.Exchange = ExchangeModel;
+exports.ExchangeComment = ExchangeCommentModel;
+exports.ExchangeResponse = ExchangeResponseModel;
+exports.ExchangeValue = ExchangeValueModel;

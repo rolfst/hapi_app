@@ -151,7 +151,5 @@ const Exchange = model.define('Exchange', {
   },
 });
 
-module.exports = {
-  Exchange,
-  exchangeTypes,
-};
+exports.Exchange = Exchange;
+exports.exchangeTypes = exchangeTypes;

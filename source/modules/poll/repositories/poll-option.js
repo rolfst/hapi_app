@@ -18,7 +18,4 @@ const create = async (attributes) => {
   return createPollOptionModel(pollOption);
 };
 
-// exports of functions
-module.exports = {
-  create,
-};
+exports.create = create;

@@ -17,8 +17,5 @@ const send = (message, usersToNotify) => {
   notifier.send(usersToNotify, notification);
 };
 
-// exports of functions
-module.exports = {
-  createNotification,
-  send,
-};
+exports.createNotification = createNotification;
+exports.send = send;

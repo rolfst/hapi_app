@@ -22,10 +22,6 @@ PrivateMessageModel.belongsTo(UserModel, {
   foreignKey: 'user_id',
 });
 
-
-// exports of functions
-module.exports = {
-  Conversation: ConversationModel,
-  ConversationUser: ConversationUserModel,
-  PrivateMessage: PrivateMessageModel,
-};
+exports.Conversation = ConversationModel;
+exports.ConversationUser = ConversationUserModel;
+exports.PrivateMessage = PrivateMessageModel;

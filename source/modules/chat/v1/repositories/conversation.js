@@ -149,13 +149,11 @@ async function update(conversationId, { updatedAt }) {
 }
 
 // exports of functions
-module.exports = {
-  createConversation,
-  deleteAllConversationsForUser,
-  deleteConversationById,
-  findConversationById,
-  findConversationsById,
-  findExistingConversation,
-  findIdsForUser,
-  update,
-};
+exports.createConversation = createConversation;
+exports.deleteAllConversationsForUser = deleteAllConversationsForUser;
+exports.deleteConversationById = deleteConversationById;
+exports.findConversationById = findConversationById;
+exports.findConversationsById = findConversationsById;
+exports.findExistingConversation = findExistingConversation;
+exports.findIdsForUser = findIdsForUser;
+exports.update = update;

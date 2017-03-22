@@ -457,30 +457,27 @@ async function rejectExchange(exchange, rejectingUser, userIdToReject) {
   return exchange.reload();
 }
 
-// exports of functions
-module.exports = {
-  acceptExchange,
-  approveExchange,
-  createExchange,
-  declineExchange,
-  decrementExchangeAcceptCount,
-  decrementExchangeDeclineCount,
-  deleteById,
-  findAllAcceptedExchanges,
-  findAllBy,
-  findByIds,
-  findExchangeById,
-  findExchangeByIds,
-  findExchangeIdsForValues,
-  findExchangesByNetwork,
-  findExchangesByShiftIds,
-  findExchangesByTeam,
-  findExchangesByUserAndNetwork,
-  findPlainExchangesById,
-  getRespondedToExchange,
-  incrementExchangeAcceptCount,
-  incrementExchangeDeclineCount,
-  rejectExchange,
-  respondToExchange,
-  updateExchangeById,
-};
+exports.acceptExchange = acceptExchange;
+exports.approveExchange = approveExchange;
+exports.createExchange = createExchange;
+exports.declineExchange = declineExchange;
+exports.decrementExchangeAcceptCount = decrementExchangeAcceptCount;
+exports.decrementExchangeDeclineCount = decrementExchangeDeclineCount;
+exports.deleteById = deleteById;
+exports.findAllAcceptedExchanges = findAllAcceptedExchanges;
+exports.findAllBy = findAllBy;
+exports.findByIds = findByIds;
+exports.findExchangeById = findExchangeById;
+exports.findExchangeByIds = findExchangeByIds;
+exports.findExchangeIdsForValues = findExchangeIdsForValues;
+exports.findExchangesByNetwork = findExchangesByNetwork;
+exports.findExchangesByShiftIds = findExchangesByShiftIds;
+exports.findExchangesByTeam = findExchangesByTeam;
+exports.findExchangesByUserAndNetwork = findExchangesByUserAndNetwork;
+exports.findPlainExchangesById = findPlainExchangesById;
+exports.getRespondedToExchange = getRespondedToExchange;
+exports.incrementExchangeAcceptCount = incrementExchangeAcceptCount;
+exports.incrementExchangeDeclineCount = incrementExchangeDeclineCount;
+exports.rejectExchange = rejectExchange;
+exports.respondToExchange = respondToExchange;
+exports.updateExchangeById = updateExchangeById;

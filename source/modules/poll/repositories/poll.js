@@ -78,13 +78,10 @@ const deleteById = async (pollId) => {
   return Poll.destroy({ where: { id: pollId } });
 };
 
-// exports of functions
-module.exports = {
-  clearVotes,
-  create,
-  deleteById,
-  findAll,
-  findBy,
-  findById,
-  vote,
-};
+exports.clearVotes = clearVotes;
+exports.create = create;
+exports.deleteById = deleteById;
+exports.findAll = findAll;
+exports.findBy = findBy;
+exports.findById = findById;
+exports.vote = vote;

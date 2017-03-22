@@ -22,8 +22,5 @@ const create = async (attributes) => Comment
   .create(attributes)
   .then(createCommentModel);
 
-// exports of functions
-module.exports = {
-  create,
-  findBy,
-};
+exports.create = create;
+exports.findBy = findBy;

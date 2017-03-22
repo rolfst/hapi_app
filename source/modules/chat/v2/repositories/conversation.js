@@ -117,14 +117,11 @@ const deleteById = (conversationId) => Conversation.destroy({
   where: { id: conversationId },
 });
 
-// exports of functions
-module.exports = {
-  countConversationsForUser,
-  create,
-  deleteById,
-  findById,
-  findByIds,
-  findExistingConversation,
-  findIdsForUser,
-  update,
-};
+exports.countConversationsForUser = countConversationsForUser;
+exports.create = create;
+exports.deleteById = deleteById;
+exports.findById = findById;
+exports.findByIds = findByIds;
+exports.findExistingConversation = findExistingConversation;
+exports.findIdsForUser = findIdsForUser;
+exports.update = update;

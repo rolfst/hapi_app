@@ -56,11 +56,8 @@ function createExchangeResponse(data) {
   return ExchangeResponse.create(data);
 }
 
-// exports of functions
-module.exports = {
-  createExchangeResponse,
-  findAcceptedExchangeResponsesForUser,
-  findAllWhere,
-  findResponseWhere,
-  removeExchangeResponseForExchangeAndUser,
-};
+exports.createExchangeResponse = createExchangeResponse;
+exports.findAcceptedExchangeResponsesForUser = findAcceptedExchangeResponsesForUser;
+exports.findAllWhere = findAllWhere;
+exports.findResponseWhere = findResponseWhere;
+exports.removeExchangeResponseForExchangeAndUser = removeExchangeResponseForExchangeAndUser;
