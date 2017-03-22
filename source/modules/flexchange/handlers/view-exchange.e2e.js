@@ -28,7 +28,6 @@ describe('View exchange', () => {
   it('should return correct attributes', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}`;
     const { result } = await getRequest(endpoint, admin.token);
-    console.log('%%%%%%%%%%%result', result);
 
     assert.equal(result.data.user.fullName, admin.full_name);
     assert.equal(result.data.title, 'Test shift to view');
