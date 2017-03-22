@@ -99,7 +99,6 @@ const makeConfig = () => {
   return options;
 };
 
-// exports of functions
 exports.makeConfig = makeConfig;
 exports.onPreResponse = onPreResponse;
 exports.onRequest = onRequest;

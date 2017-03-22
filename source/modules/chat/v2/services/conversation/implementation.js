@@ -13,6 +13,5 @@ const assertThatUserIsPartOfTheConversation = async (userId, conversationId) => 
   if (!result || !R.contains(userId, result.participantIds)) throw createError('404');
 };
 
-// exports of functions
 module.exports.assertThatUserIsPartOfTheConversation = assertThatUserIsPartOfTheConversation;
 module.exports.hasInclude = hasInclude;

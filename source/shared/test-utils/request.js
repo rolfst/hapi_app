@@ -40,7 +40,6 @@ function patchRequest(url, payload, token, server = global.server) {
   }, makeOptions(token)));
 }
 
-// exports of functions
 exports.deleteRequest = deleteRequest;
 exports.getRequest = getRequest;
 exports.makeOptions = makeOptions;

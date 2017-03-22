@@ -162,8 +162,6 @@ const deleteTeamsByIds = async (payload) => {
   return Promise.map(payload.teamIds, teamRepository.deleteById);
 };
 
-
-// exports of functions
 module.exports.create = create;
 module.exports.deleteTeamsByIds = deleteTeamsByIds;
 module.exports.get = get;

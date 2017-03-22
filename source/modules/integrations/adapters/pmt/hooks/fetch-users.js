@@ -26,6 +26,5 @@ async function getUsers(baseStoreUrl, teams) {
   });
 }
 
-// exports of functions
 exports.fetchUsers = fetchUsers;
 exports.getUsers = getUsers;

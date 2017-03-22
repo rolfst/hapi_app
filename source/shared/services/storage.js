@@ -67,7 +67,6 @@ function upload(file, prefix = null) {
     });
 }
 
-// exports of functions
 exports.getClient = getClient;
 exports.getEnvironmentLocation = getEnvironmentLocation;
 exports.upload = upload;

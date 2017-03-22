@@ -60,6 +60,5 @@ const authenticate = async (payload, message) => {
   return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, user };
 };
 
-// exports of functions
 module.exports.delegate = delegate;
 module.exports.authenticate = authenticate;

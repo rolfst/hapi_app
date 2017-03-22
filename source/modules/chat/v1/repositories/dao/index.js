@@ -22,8 +22,6 @@ UserModel.belongsToMany(ConversationModel, {
   timestamps: false,
 });
 
-
-// exports of functions
 exports.Conversation = ConversationModel;
 exports.Message = MessageModel;
 exports.ConversationUser = ConversationUserModel;

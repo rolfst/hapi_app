@@ -44,7 +44,6 @@ function findOrCreateUserDevice(userId, deviceName) {
   });
 }
 
-// exports of functions
 exports.createUserDevice = createUserDevice;
 exports.findOrCreateUserDevice = findOrCreateUserDevice;
 exports.findUserDevice = findUserDevice;

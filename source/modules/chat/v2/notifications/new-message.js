@@ -15,6 +15,5 @@ const send = (actor, object, usersToNotify) => {
   notifier.send(usersToNotify, notification);
 };
 
-// exports of functions
 exports.createNotification = createNotification;
 exports.send = send;

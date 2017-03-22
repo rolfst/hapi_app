@@ -281,7 +281,6 @@ const remove = async (payload, message) => {
 
 BindingTypeService.registerSource('feed_message', list);
 
-// exports of functions
 exports.create = create;
 exports.getAsObject = getAsObject;
 exports.like = like;

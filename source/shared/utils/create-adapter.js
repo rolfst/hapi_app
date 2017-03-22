@@ -44,5 +44,4 @@ const createAdapter = async (network, userId, options = {}) => {
   return integration.adapter(network, userToken);
 };
 
-// exports of functions
 exports.createAdapter = createAdapter;

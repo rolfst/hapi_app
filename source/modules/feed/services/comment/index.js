@@ -48,6 +48,5 @@ const create = async (payload, message) => {
   });
 };
 
-// exports of functions
 exports.create = create;
 exports.list = list;

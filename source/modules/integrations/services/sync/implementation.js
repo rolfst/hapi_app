@@ -308,7 +308,6 @@ const executeUserActions = (networkId, actions) => {
   return Promise.props(evolvedObj);
 };
 
-// exports of functions
 exports.createUserActions = createUserActions;
 exports.executeUserActions = executeUserActions;
 exports.createTeamActions = createTeamActions;

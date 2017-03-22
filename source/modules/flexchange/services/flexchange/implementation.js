@@ -133,7 +133,6 @@ const replaceUsersInResponses = (users, responses) => {
   }), responses);
 };
 
-// exports of functions
 exports.addValues = addValues;
 exports.createDateWhereConstraint = createDateWhereConstraint;
 exports.createResponseStatus = createResponseStatus;

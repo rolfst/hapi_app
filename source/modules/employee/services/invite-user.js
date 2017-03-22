@@ -158,7 +158,6 @@ const inviteUsers = async (payload, message) => {
   map(usersToSendMailto, (user) => mailer.send(signupMail(network, user, user.plainPassword)));
 };
 
-// exports of functions
 exports.inviteExistingUser = inviteExistingUser;
 exports.inviteNewUser = inviteNewUser;
 exports.inviteUser = inviteUser;

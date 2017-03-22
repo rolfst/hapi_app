@@ -175,7 +175,6 @@ const createMessage = async (payload, message) => {
   return refreshedMessage;
 };
 
-// exports of functions
 module.exports.create = create;
 module.exports.createMessage = createMessage;
 module.exports.getConversation = getConversation;

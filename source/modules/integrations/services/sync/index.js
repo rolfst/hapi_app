@@ -152,7 +152,6 @@ async function syncWithIntegrationPartner(payload, message) {
   }
 }
 
-// exports of functions
 exports.importNetwork = importNetwork;
 exports.syncNetwork = syncNetwork;
 exports.syncWithIntegrationPartner = syncWithIntegrationPartner;

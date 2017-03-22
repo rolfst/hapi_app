@@ -566,7 +566,6 @@ const listMyAcceptedExchanges = async (payload, message) => {
   return exchanges;
 };
 
-// exports of functions
 exports.acceptExchange = acceptExchange;
 exports.approveExchange = approveExchange;
 exports.createExchange = createExchange;

@@ -21,7 +21,6 @@ const create = ({ userId, objectId, text }) => PrivateMessage
 const update = (messageId, attributes) => PrivateMessage
   .update(attributes, { where: { id: messageId } });
 
-// exports of functions
 exports.create = create;
 exports.findBy = findBy;
 exports.findById = findById;

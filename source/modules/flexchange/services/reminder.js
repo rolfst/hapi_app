@@ -45,8 +45,6 @@ const sendReminder = async () => {
 
 if (require.main === module) sendReminder();
 
-
-// exports of functions
 module.exports = {
   sendReminder,
 };

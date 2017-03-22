@@ -34,6 +34,5 @@ function send(users, notification, networkId = null) {
     .catch(err => logger.error('Error sending push notification', { err }));
 }
 
-// exports of functions
 exports.send = send;
 exports.trackPushNotification = trackPushNotification;

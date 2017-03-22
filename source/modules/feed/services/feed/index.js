@@ -83,6 +83,5 @@ const makeForTeam = async (payload, message) => {
   return impl.makeFeed(feedPayload, feedOptions(payload), R.assoc('network', network, message));
 };
 
-// exports of functions
 exports.makeForNetwork = makeForNetwork;
 exports.makeForTeam = makeForTeam;

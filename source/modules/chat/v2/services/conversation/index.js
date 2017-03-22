@@ -213,7 +213,6 @@ async function countMessages(payload, message) {
   });
 }
 
-// exports of functions
 module.exports.countConversations = countConversations;
 module.exports.countMessages = countMessages;
 module.exports.create = create;

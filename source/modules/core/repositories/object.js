@@ -89,7 +89,6 @@ function findAll() {
   return _Object.findAll();
 }
 
-// exports of functions
 exports.count = count;
 exports.create = create;
 exports.deleteBy = deleteBy;

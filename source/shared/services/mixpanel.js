@@ -101,7 +101,6 @@ async function executeQuery(query, message) {
   return { payload: R.head(json), status };
 }
 
-// exports of functions
 exports.executeQuery = executeQuery;
 exports.getClient = getClient;
 exports.registerProfile = registerProfile;

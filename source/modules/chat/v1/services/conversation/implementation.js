@@ -33,7 +33,6 @@ const replaceConversationUserIdWithObject = (conversation, users) => {
   return R.merge(conversation, lastMessage);
 };
 
-// exports of functions
 exports.assertThatUserIsPartOfTheConversation = assertThatUserIsPartOfTheConversation;
 exports.createConversationWithParticipants = createConversationWithParticipants;
 exports.findExistingConversation = findExistingConversation;

@@ -20,5 +20,4 @@ const generatePasswordsForMembers = async (members) => {
   return Promise.map(members, await appendPasswordToUser);
 };
 
-// exports of functions
 exports.generatePasswordsForMembers = generatePasswordsForMembers;

@@ -22,7 +22,6 @@ const createEvent = (email, eventName, meta) => getClient().events.create({
   metadata: meta,
 });
 
-// exports of functions
 exports.createEvent = createEvent;
 exports.getClient = getClient;
 exports.incrementAttribute = incrementAttribute;

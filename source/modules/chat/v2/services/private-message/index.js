@@ -87,6 +87,5 @@ async function create(payload, message) {
 
 global.BindingTypeService.registerSource('private_message', list);
 
-// exports of functions
 module.exports.create = create;
 module.exports.list = list;

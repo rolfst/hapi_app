@@ -148,7 +148,6 @@ async function update(conversationId, { updatedAt }) {
     .then(toModel);
 }
 
-// exports of functions
 exports.createConversation = createConversation;
 exports.deleteAllConversationsForUser = deleteAllConversationsForUser;
 exports.deleteConversationById = deleteConversationById;

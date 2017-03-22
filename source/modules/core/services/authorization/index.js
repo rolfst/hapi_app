@@ -69,7 +69,6 @@ const assertThatUserBelongsToTheTeam = async (payload) => {
   if (!result) throw createError('10010');
 };
 
-// exports of functions
 module.exports.assertRoleTypeForUser = assertRoleTypeForUser;
 module.exports.assertThatUserBelongsToTheNetwork = assertThatUserBelongsToTheNetwork;
 module.exports.assertThatUserBelongsToTheTeam = assertThatUserBelongsToTheTeam;

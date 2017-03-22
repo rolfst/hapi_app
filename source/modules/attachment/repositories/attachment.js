@@ -51,7 +51,6 @@ const update = (attachment) => Attachment
   })
   .then(R.always(attachment));
 
-// exports of functions
 exports.create = create;
 exports.deleteById = deleteById;
 exports.findBy = findBy;

@@ -75,6 +75,5 @@ const makeFeed = async (payload, options, message, extraWhereConstraint = {}) =>
   return R.map(createObjectWithIncludes, objectsWithSources);
 };
 
-// exports of functions
 exports.getIncludes = getIncludes;
 exports.makeFeed = makeFeed;

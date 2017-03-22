@@ -34,7 +34,6 @@ const toSnakeCase = (response) => {
   return isArray(response) ? response.map(transformSnakeCase) : transformSnakeCase(response);
 };
 
-// exports of functions
 exports.error = error;
 exports.serialize = serialize;
 exports.toSnakeCase = toSnakeCase;

@@ -23,7 +23,6 @@ const send = async (exchange) => {
   return notifier.send([exchange.User], notification);
 };
 
-// exports of functions
 module.exports = {
   createNotification,
   send,

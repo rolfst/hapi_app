@@ -27,7 +27,6 @@ const send = async (comment) => {
   notifier.send(usersToNotify, notification);
 };
 
-// exports of functions
 module.exports = {
   createNotification,
   send,

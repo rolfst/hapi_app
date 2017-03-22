@@ -323,7 +323,6 @@ async function cleanAll() {
   await Promise.all(R.map(deletePoll, polls));
 }
 
-// exports of functions
 exports.DEFAULT_INTEGRATION = DEFAULT_INTEGRATION;
 exports.DEFAULT_NETWORK_EXTERNALID = DEFAULT_NETWORK_EXTERNALID;
 exports.addTeamToNetwork = addTeamToNetwork;

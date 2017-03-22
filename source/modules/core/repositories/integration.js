@@ -34,7 +34,6 @@ const findAll = async () => {
   return Integration.findAll();
 };
 
-// exports of functions
 exports.createIntegration = createIntegration;
 exports.deleteById = deleteById;
 exports.findAll = findAll;

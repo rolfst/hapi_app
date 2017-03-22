@@ -77,7 +77,6 @@ async function deleteById(activityId) {
 const deleteBy = (whereConstraint) =>
   Activity.destroy({ where: whereConstraint });
 
-// exports of functions
 exports.createActivity = createActivity;
 exports.deleteBy = deleteBy;
 exports.deleteById = deleteById;

@@ -214,7 +214,6 @@ const update = async (teamIdOrWhereConstraint, attributes) => {
   return Team.update(attributes, { where: whereConstraint });
 };
 
-// exports of functions
 exports.addUserToTeam = addUserToTeam;
 exports.addUserToTeams = addUserToTeams;
 exports.create = create;

@@ -46,6 +46,5 @@ const getEmployee = async (payload, message) => {
     id: message.credentials.id, networkId: message.network.id }, message);
 };
 
-// exports of functions
 exports.getEmployee = getEmployee;
 exports.updateEmployee = updateEmployee;

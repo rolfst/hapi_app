@@ -31,5 +31,4 @@ async function authenticate(payload, message) {
   return createAccessToken(message.credentials.id, device.device_id);
 }
 
-// exports of functions
 exports.authenticate = authenticate;
