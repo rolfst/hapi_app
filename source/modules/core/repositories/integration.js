@@ -35,8 +35,6 @@ const findAll = async () => {
 };
 
 // exports of functions
-module.exports = {
-  createIntegration,
-  deleteById,
-  findAll,
-};
+exports.createIntegration = createIntegration;
+exports.deleteById = deleteById;
+exports.findAll = findAll;

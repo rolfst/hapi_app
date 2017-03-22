@@ -215,21 +215,19 @@ const update = async (teamIdOrWhereConstraint, attributes) => {
 };
 
 // exports of functions
-module.exports = {
-  addUserToTeam,
-  addUserToTeams,
-  create,
-  createBulkTeams,
-  deleteById,
-  findBy,
-  findByIds,
-  findMembers,
-  findTeamsByExternalId,
-  findTeamById,
-  findTeamsForNetworkThatUserBelongsTo,
-  findUsersByTeamIds,
-  removeUserFromTeam,
-  setUsersForTeam,
-  update,
-  validateTeamIds,
-};
+exports.addUserToTeam = addUserToTeam;
+exports.addUserToTeams = addUserToTeams;
+exports.create = create;
+exports.createBulkTeams = createBulkTeams;
+exports.deleteById = deleteById;
+exports.findBy = findBy;
+exports.findByIds = findByIds;
+exports.findMembers = findMembers;
+exports.findTeamsByExternalId = findTeamsByExternalId;
+exports.findTeamById = findTeamById;
+exports.findTeamsForNetworkThatUserBelongsTo = findTeamsForNetworkThatUserBelongsTo;
+exports.findUsersByTeamIds = findUsersByTeamIds;
+exports.removeUserFromTeam = removeUserFromTeam;
+exports.setUsersForTeam = setUsersForTeam;
+exports.update = update;
+exports.validateTeamIds = validateTeamIds;

@@ -301,22 +301,20 @@ const userBelongsToNetwork = async (userId, networkId) => {
   return result !== null;
 };
 
-module.exports = {
-  createBulkUsers,
-  createUser,
-  deleteById,
-  findAllUsers,
-  findByIds,
-  findCredentialsForUser,
-  findExternalUsers,
-  findMultipleUserMetaDataForNetwork,
-  findNetworkLink,
-  findUserBy,
-  findUserById,
-  userBelongsToNetwork,
-  updateNetworkLink,
-  updateUser,
-  removeFromNetwork,
-  setNetworkLink,
-  validateUserIds,
-};
+exports.createBulkUsers = createBulkUsers;
+exports.createUser = createUser;
+exports.deleteById = deleteById;
+exports.findAllUsers = findAllUsers;
+exports.findByIds = findByIds;
+exports.findCredentialsForUser = findCredentialsForUser;
+exports.findExternalUsers = findExternalUsers;
+exports.findMultipleUserMetaDataForNetwork = findMultipleUserMetaDataForNetwork;
+exports.findNetworkLink = findNetworkLink;
+exports.findUserBy = findUserBy;
+exports.findUserById = findUserById;
+exports.userBelongsToNetwork = userBelongsToNetwork;
+exports.updateNetworkLink = updateNetworkLink;
+exports.updateUser = updateUser;
+exports.removeFromNetwork = removeFromNetwork;
+exports.setNetworkLink = setNetworkLink;
+exports.validateUserIds = validateUserIds;

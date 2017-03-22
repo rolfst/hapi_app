@@ -65,7 +65,5 @@ const Activity = model.define('Activity', {
   },
 });
 
-module.exports = {
-  Activity,
-  ActivityTypes,
-};
+exports.Activity = Activity;
+exports.ActivityTypes = ActivityTypes;

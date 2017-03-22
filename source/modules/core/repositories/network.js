@@ -256,22 +256,20 @@ const createIntegrationNetwork = async ({
   return findNetworkById(network.id);
 };
 
-module.exports = {
-  addUser,
-  addIntegrationToNetwork,
-  createIntegrationNetwork,
-  createNetwork,
-  deleteById,
-  findAll,
-  findAllUsersForNetwork,
-  findIntegrationByName,
-  findNetwork,
-  findNetworkByIds,
-  findNetworkById,
-  findNetworkIntegration,
-  findNetworksForUser,
-  findTeamsForNetwork,
-  findUsersForNetwork,
-  setImportDateOnNetworkIntegration,
-  updateNetwork,
-};
+exports.addUser = addUser;
+exports.addIntegrationToNetwork = addIntegrationToNetwork;
+exports.createIntegrationNetwork = createIntegrationNetwork;
+exports.createNetwork = createNetwork;
+exports.deleteById = deleteById;
+exports.findAll = findAll;
+exports.findAllUsersForNetwork = findAllUsersForNetwork;
+exports.findIntegrationByName = findIntegrationByName;
+exports.findNetwork = findNetwork;
+exports.findNetworkByIds = findNetworkByIds;
+exports.findNetworkById = findNetworkById;
+exports.findNetworkIntegration = findNetworkIntegration;
+exports.findNetworksForUser = findNetworksForUser;
+exports.findTeamsForNetwork = findTeamsForNetwork;
+exports.findUsersForNetwork = findUsersForNetwork;
+exports.setImportDateOnNetworkIntegration = setImportDateOnNetworkIntegration;
+exports.updateNetwork = updateNetwork;
