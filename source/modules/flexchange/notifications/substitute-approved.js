@@ -25,7 +25,5 @@ const send = async (exchange) => {
   return notifier.send([approvedUser], notification);
 };
 
-module.exports = {
-  createNotification,
-  send,
-};
+exports.createNotification = createNotification;
+exports.send = send;

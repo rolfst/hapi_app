@@ -60,5 +60,5 @@ const authenticate = async (payload, message) => {
   return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, user };
 };
 
-module.exports.delegate = delegate;
-module.exports.authenticate = authenticate;
+exports.delegate = delegate;
+exports.authenticate = authenticate;

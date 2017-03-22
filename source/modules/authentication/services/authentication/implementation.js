@@ -45,8 +45,8 @@ const getAuthenticationTokens = async (user, deviceName) => {
   return { accessToken, refreshToken };
 };
 
-module.exports.authenticateUser = authenticateUser;
-module.exports.checkPassword = checkPassword;
-module.exports.createAuthenticationTokens = createAuthenticationTokens;
-module.exports.getAuthenticationTokens = getAuthenticationTokens;
-module.exports.updateLastLogin = updateLastLogin;
+exports.authenticateUser = authenticateUser;
+exports.checkPassword = checkPassword;
+exports.createAuthenticationTokens = createAuthenticationTokens;
+exports.getAuthenticationTokens = getAuthenticationTokens;
+exports.updateLastLogin = updateLastLogin;

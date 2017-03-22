@@ -41,7 +41,7 @@ const addSourceToObject = R.curry((sources, object) =>
 const findChildren = (objectsWithSource, object) =>
   R.filter(compareObject(R.__, object), objectsWithSource);
 
-module.exports.addSourceToObject = addSourceToObject;
-module.exports.findChildren = findChildren;
-module.exports.findChildrenForType = findChildrenForType;
-module.exports.findSourcesForType = findSourcesForType;
+exports.addSourceToObject = addSourceToObject;
+exports.findChildren = findChildren;
+exports.findChildrenForType = findChildrenForType;
+exports.findSourcesForType = findSourcesForType;

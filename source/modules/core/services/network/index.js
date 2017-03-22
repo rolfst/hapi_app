@@ -150,10 +150,10 @@ const listTeamsForNetwork = async (payload, message) => {
   return teamService.list({ teamIds: R.pluck('id', result) }, message);
 };
 
-module.exports.listTeamsForNetwork = listTeamsForNetwork;
-module.exports.listNetworksForUser = listNetworksForUser;
-module.exports.listAllUsersForNetwork = listAllUsersForNetwork;
-module.exports.get = get;
-module.exports.create = create;
-module.exports.addUserToNetwork = addUserToNetwork;
-module.exports.listActiveUsersForNetwork = listActiveUsersForNetwork;
+exports.listTeamsForNetwork = listTeamsForNetwork;
+exports.listNetworksForUser = listNetworksForUser;
+exports.listAllUsersForNetwork = listAllUsersForNetwork;
+exports.get = get;
+exports.create = create;
+exports.addUserToNetwork = addUserToNetwork;
+exports.listActiveUsersForNetwork = listActiveUsersForNetwork;

@@ -88,6 +88,6 @@ async function getUserWithNetworkScope(payload, message) {
     });
 }
 
-module.exports.getUserWithNetworkScope = getUserWithNetworkScope;
-module.exports.listUsersWithNetworkScope = listUsersWithNetworkScope;
-module.exports.getUser = getUser;
+exports.getUserWithNetworkScope = getUserWithNetworkScope;
+exports.listUsersWithNetworkScope = listUsersWithNetworkScope;
+exports.getUser = getUser;

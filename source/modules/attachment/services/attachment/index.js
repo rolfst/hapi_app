@@ -103,8 +103,8 @@ const assertAttachmentsExist = async (payload, message) => {
 
 BindingTypeService.registerSource('attachment', list);
 
-module.exports.assertAttachmentsExist = assertAttachmentsExist;
-module.exports.create = create;
-module.exports.get = get;
-module.exports.list = list;
-module.exports.update = update;
+exports.assertAttachmentsExist = assertAttachmentsExist;
+exports.create = create;
+exports.get = get;
+exports.list = list;
+exports.update = update;

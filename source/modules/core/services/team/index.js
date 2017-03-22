@@ -162,9 +162,9 @@ const deleteTeamsByIds = async (payload) => {
   return Promise.map(payload.teamIds, teamRepository.deleteById);
 };
 
-module.exports.create = create;
-module.exports.deleteTeamsByIds = deleteTeamsByIds;
-module.exports.get = get;
-module.exports.list = list;
-module.exports.listMembersForTeams = listMembersForTeams;
-module.exports.update = update;
+exports.create = create;
+exports.deleteTeamsByIds = deleteTeamsByIds;
+exports.get = get;
+exports.list = list;
+exports.listMembersForTeams = listMembersForTeams;
+exports.update = update;

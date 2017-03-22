@@ -6,7 +6,5 @@ const createTimeText = (exchange) => (
   `${formatTime(exchange.startTime)} tot ${formatTime(exchange.endTime)}`
 );
 
-module.exports = {
-  createTimeText,
-  formatTime,
-};
+exports.createTimeText = createTimeText;
+exports.formatTime = formatTime;

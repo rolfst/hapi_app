@@ -213,11 +213,11 @@ async function countMessages(payload, message) {
   });
 }
 
-module.exports.countConversations = countConversations;
-module.exports.countMessages = countMessages;
-module.exports.create = create;
-module.exports.getConversation = getConversation;
-module.exports.listConversations = listConversations;
-module.exports.listConversationsForUser = listConversationsForUser;
-module.exports.listMessages = listMessages;
-module.exports.remove = remove;
+exports.countConversations = countConversations;
+exports.countMessages = countMessages;
+exports.create = create;
+exports.getConversation = getConversation;
+exports.listConversations = listConversations;
+exports.listConversationsForUser = listConversationsForUser;
+exports.listMessages = listMessages;
+exports.remove = remove;
