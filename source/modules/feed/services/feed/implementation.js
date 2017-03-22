@@ -40,13 +40,22 @@ const getIncludes = async (hasInclude, objects) => {
 };
 
 const makeFeed = async (payload, options, message, extraWhereConstraint = {}) => {
+  console.log('---------', extraWhereConstraint);
+
   const whereConstraint = {
-    $or: [...extraWhereConstraint, {
+    $or: [{
       parentType: payload.parentType,
       parentId: payload.parentId,
     }],
     $and: { networkId: payload.networkId },
   };
+
+  // Since extraWhereConstraint can either be an array or an object, the spread syntax does not work in all cases
+  if (Array.isArray(extraWhereConstraint)) {
+    whereConstraint.$or = [...extraWhereConstraint, ...whereConstraint.$or];
+  } else {
+    whereConstraint.$or = [extraWhereConstraint, ...whereConstraint.$or];
+  }
 
   const relatedObjects = await objectRepository.findBy(whereConstraint, {
     limit: options.limit,

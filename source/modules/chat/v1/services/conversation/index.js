@@ -15,13 +15,14 @@ const impl = require('./implementation');
  * Creates a new conversation
  * @param {object} payload - Object containing payload data
  * @param {ConversationType} payload.type {@link module:modules/chat~ConversationType}
+ * @param {string[]} payload.users - The id of the users that participate in the conversation
  * - The type of conversation
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method list
  * @return {external:Promise.<Integration[]>} {@link module:modules/core~Integration Integration} -
  */
 const create = async (payload, message) => {
-  const participants = uniq([...payload.participants, message.credentials.id]);
+  const participants = uniq([...payload.users, message.credentials.id]);
 
   if (participants.length < 2) {
     throw createError('403', 'A conversation must have 2 or more participants');
