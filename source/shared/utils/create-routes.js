@@ -32,5 +32,5 @@ const createRoute = ({
   return route;
 };
 
-exports.createRoutes: (routeObjects) => routeObjects.map(createRoute) = createRoutes;
+exports.createRoutes = (routeObjects) => routeObjects.map(createRoute);
 exports.createRoute = createRoute;
