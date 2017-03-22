@@ -1,4 +1,4 @@
-const { exchangeTypes } = require('../repositories/dao/exchange');
+const exchangeTypes = require('../repositories/dao/exchange');
 
 module.exports = (exchange) => {
   let exchangeValueOutput;
