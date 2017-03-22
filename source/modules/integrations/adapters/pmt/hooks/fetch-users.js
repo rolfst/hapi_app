@@ -27,7 +27,5 @@ async function getUsers(baseStoreUrl, teams) {
 }
 
 // exports of functions
-module.exports = {
-  fetchUsers,
-  getUsers,
-};
+exports.fetchUsers = fetchUsers;
+exports.getUsers = getUsers;

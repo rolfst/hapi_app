@@ -14,5 +14,5 @@ const assertThatUserIsPartOfTheConversation = async (userId, conversationId) => 
 };
 
 // exports of functions
-exports.assertThatUserIsPartOfTheConversation = assertThatUserIsPartOfTheConversation;
-exports.hasInclude = hasInclude;
+module.exports.assertThatUserIsPartOfTheConversation = assertThatUserIsPartOfTheConversation;
+module.exports.hasInclude = hasInclude;

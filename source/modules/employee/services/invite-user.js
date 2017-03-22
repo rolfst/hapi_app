@@ -159,7 +159,6 @@ const inviteUsers = async (payload, message) => {
 };
 
 // exports of functions
-module.exports = {
 exports.inviteExistingUser = inviteExistingUser;
 exports.inviteNewUser = inviteNewUser;
 exports.inviteUser = inviteUser;

@@ -61,5 +61,5 @@ const authenticate = async (payload, message) => {
 };
 
 // exports of functions
-exports.delegate = delegate;
-exports.authenticate = authenticate;
+module.exports.delegate = delegate;
+module.exports.authenticate = authenticate;

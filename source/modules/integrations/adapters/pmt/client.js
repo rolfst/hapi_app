@@ -64,10 +64,8 @@ async function makeRequest(endpoint, token = null, method = 'GET', data = {}, me
   return { payload: json, status };
 }
 
-module.exports = {
-  makeRequest,
-  post: (endpoint, token, data, message) => makeRequest(endpoint, token, 'POST', data, message),
-  get: (endpoint, token, message) => makeRequest(endpoint, token, 'GET', message),
-  put: (endpoint, token, data, message) => makeRequest(endpoint, token, 'PUT', data, message),
-  delete: (endpoint, token, message) => makeRequest(endpoint, token, 'DELETE', message),
-};
+exports.makeRequest = makeRequest;
+exports.post = (endpoint, token, data, message) => makeRequest(endpoint, token, 'POST', data, message);
+exports.get = (endpoint, token, message) => makeRequest(endpoint, token, 'GET', message);
+exports.put = (endpoint, token, data, message) => makeRequest(endpoint, token, 'PUT', data, message);
+exports.delete = (endpoint, token, message) => makeRequest(endpoint, token, 'DELETE', message);

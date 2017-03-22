@@ -16,4 +16,4 @@ const list = async () => {
   return integrationRepo.findAll();
 };
 
-exports.list = list;
+module.exports.list = list;
