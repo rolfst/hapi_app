@@ -49,7 +49,5 @@ const create = async (payload, message) => {
 };
 
 // exports of functions
-module.exports = {
-  create,
-  list,
-};
+exports.create = create;
+exports.list = list;

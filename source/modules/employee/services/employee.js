@@ -47,7 +47,5 @@ const getEmployee = async (payload, message) => {
 };
 
 // exports of functions
-module.exports = {
-  getEmployee,
-  updateEmployee,
-};
+exports.getEmployee = getEmployee;
+exports.updateEmployee = updateEmployee;

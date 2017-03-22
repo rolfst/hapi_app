@@ -164,11 +164,9 @@ const deleteTeamsByIds = async (payload) => {
 
 
 // exports of functions
-module.exports = {
-  create,
-  deleteTeamsByIds,
-  get,
-  list,
-  listMembersForTeams,
-  update,
-};
+module.exports.create = create;
+module.exports.deleteTeamsByIds = deleteTeamsByIds;
+module.exports.get = get;
+module.exports.list = list;
+module.exports.listMembersForTeams = listMembersForTeams;
+module.exports.update = update;

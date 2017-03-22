@@ -34,7 +34,5 @@ const send = async (eventName, users, payload, token) => {
 };
 
 // exports of functions
-module.exports = {
-  send,
-  WEBSOCKET_URL,
-};
+exports.send = send;
+exports.WEBSOCKET_URL = WEBSOCKET_URL;

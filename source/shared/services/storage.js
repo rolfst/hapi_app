@@ -68,8 +68,6 @@ function upload(file, prefix = null) {
 }
 
 // exports of functions
-module.exports = {
-  getClient,
-  getEnvironmentLocation,
-  upload,
-};
+exports.getClient = getClient;
+exports.getEnvironmentLocation = getEnvironmentLocation;
+exports.upload = upload;

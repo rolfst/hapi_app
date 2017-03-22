@@ -176,12 +176,10 @@ const createMessage = async (payload, message) => {
 };
 
 // exports of functions
-module.exports = {
-  create,
-  createMessage,
-  getConversation,
-  getMessage,
-  listConversationsForUser,
-  listConversations,
-  listMessages,
-};
+module.exports.create = create;
+module.exports.createMessage = createMessage;
+module.exports.getConversation = getConversation;
+module.exports.getMessage = getMessage;
+module.exports.listConversationsForUser = listConversationsForUser;
+module.exports.listConversations = listConversations;
+exports.listMessages = listMessages;

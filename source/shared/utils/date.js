@@ -6,7 +6,5 @@ const toISOString = dateString => moment(dateString).toISOString();
 
 const toDateFormat = dateString => moment(dateString).format(defaultDateFormat);
 
-module.exports = {
-  toISOString,
-  toDateFormat,
-};
+exports.toISOString = toISOString;
+exports.toDateFormat = toDateFormat;

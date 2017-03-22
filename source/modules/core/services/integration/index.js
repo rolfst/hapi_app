@@ -12,6 +12,8 @@ const integrationRepo = require('../../repositories/integration');
  * @return {external:Promise.<Integration[]>} {@link module:modules/core~Integration Integration} -
  * list of all integrations
  */
-export const list = async () => {
+const list = async () => {
   return integrationRepo.findAll();
 };
+
+module.exports.list = list;

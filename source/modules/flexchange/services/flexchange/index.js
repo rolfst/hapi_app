@@ -567,25 +567,23 @@ const listMyAcceptedExchanges = async (payload, message) => {
 };
 
 // exports of functions
-module.exports = {
-  acceptExchange,
-  approveExchange,
-  createExchange,
-  createExchangeComment,
-  declineExchange,
-  deleteExchange,
-  getExchange,
-  getShift,
-  list,
-  listActivities,
-  listAvailableUsersForShift,
-  listComments,
-  listExchangesForTeam,
-  listExchangesForUser,
-  listMyAcceptedExchanges,
-  listMyShifts,
-  listPersonalizedExchanges,
-  listReceivers,
-  listRespondedTo,
-  rejectExchange,
-};
+exports.acceptExchange = acceptExchange;
+exports.approveExchange = approveExchange;
+exports.createExchange = createExchange;
+exports.createExchangeComment = createExchangeComment;
+exports.declineExchange = declineExchange;
+exports.deleteExchange = deleteExchange;
+exports.getExchange = getExchange;
+exports.getShift = getShift;
+exports.list = list;
+exports.listActivities = listActivities;
+exports.listAvailableUsersForShift = listAvailableUsersForShift;
+exports.listComments = listComments;
+exports.listExchangesForTeam = listExchangesForTeam;
+exports.listExchangesForUser = listExchangesForUser;
+exports.listMyAcceptedExchanges = listMyAcceptedExchanges;
+exports.listMyShifts = listMyShifts;
+exports.listPersonalizedExchanges = listPersonalizedExchanges;
+exports.listReceivers = listReceivers;
+exports.listRespondedTo = listRespondedTo;
+exports.rejectExchange = rejectExchange;

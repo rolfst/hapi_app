@@ -282,13 +282,11 @@ const remove = async (payload, message) => {
 BindingTypeService.registerSource('feed_message', list);
 
 // exports of functions
-module.exports = {
-  create,
-  getAsObject,
-  like,
-  list,
-  listComments,
-  listLikes,
-  remove,
-  update,
-};
+exports.create = create;
+exports.getAsObject = getAsObject;
+exports.like = like;
+exports.list = list;
+exports.listComments = listComments;
+exports.listLikes = listLikes;
+exports.remove = remove;
+exports.update = update;

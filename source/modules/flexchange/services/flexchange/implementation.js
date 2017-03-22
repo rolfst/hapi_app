@@ -134,17 +134,15 @@ const replaceUsersInResponses = (users, responses) => {
 };
 
 // exports of functions
-module.exports = {
-  addValues,
-  createDateWhereConstraint,
-  createResponseStatus,
-  findUserById,
-  getExchangeIdsForEmployee,
-  getUserIdsInObjects,
-  groupValuesPerExchange,
-  makeCreatedInObject,
-  mapShiftsWithExchangeAndTeam,
-  mergeShiftWithExchangeAndTeam,
-  replaceUsersInResponses,
-  validateExchangeResponse,
-};
+exports.addValues = addValues;
+exports.createDateWhereConstraint = createDateWhereConstraint;
+exports.createResponseStatus = createResponseStatus;
+exports.findUserById = findUserById;
+exports.getExchangeIdsForEmployee = getExchangeIdsForEmployee;
+exports.getUserIdsInObjects = getUserIdsInObjects;
+exports.groupValuesPerExchange = groupValuesPerExchange;
+exports.makeCreatedInObject = makeCreatedInObject;
+exports.mapShiftsWithExchangeAndTeam = mapShiftsWithExchangeAndTeam;
+exports.mergeShiftWithExchangeAndTeam = mergeShiftWithExchangeAndTeam;
+exports.replaceUsersInResponses = replaceUsersInResponses;
+exports.validateExchangeResponse = validateExchangeResponse;
