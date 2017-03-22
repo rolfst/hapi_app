@@ -81,11 +81,9 @@ const send = (mail, message = null) => {
   });
 };
 
-module.exports = {
-  createMailOptions,
-  createSMTPHeader,
-  flattenBulkMails,
-  mapsToSubstitutes,
-  prepare,
-  send,
-};
+exports.createMailOptions = createMailOptions;
+exports.createSMTPHeader = createSMTPHeader;
+exports.flattenBulkMails = flattenBulkMails;
+exports.mapsToSubstitutes = mapsToSubstitutes;
+exports.prepare = prepare;
+exports.send = send;

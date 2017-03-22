@@ -104,7 +104,5 @@ const createLogger = (loggerOrName) => {
   };
 };
 
-module.exports = {
-  getLogger,
-  createLogger,
-};
+exports.getLogger = getLogger;
+exports.createLogger = createLogger;

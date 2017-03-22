@@ -102,9 +102,7 @@ async function executeQuery(query, message) {
 }
 
 // exports of functions
-module.exports = {
-  executeQuery,
-  getClient,
-  registerProfile,
-  track,
-};
+exports.executeQuery = executeQuery;
+exports.getClient = getClient;
+exports.registerProfile = registerProfile;
+exports.track = track;

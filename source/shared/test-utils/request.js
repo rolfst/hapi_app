@@ -41,11 +41,9 @@ function patchRequest(url, payload, token, server = global.server) {
 }
 
 // exports of functions
-module.exports = {
-  deleteRequest,
-  getRequest,
-  makeOptions,
-  patchRequest,
-  postRequest,
-  putRequest,
-};
+exports.deleteRequest = deleteRequest;
+exports.getRequest = getRequest;
+exports.makeOptions = makeOptions;
+exports.patchRequest = patchRequest;
+exports.postRequest = postRequest;
+exports.putRequest = putRequest;

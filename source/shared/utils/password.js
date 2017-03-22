@@ -22,7 +22,5 @@ const make = (passwordText) => {
   return hash.replace('$2a$', '$2y$');
 };
 
-module.exports = {
-  make,
-  plainRandom,
-};
+exports.make = make;
+exports.plainRandom = plainRandom;

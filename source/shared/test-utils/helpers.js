@@ -324,30 +324,28 @@ async function cleanAll() {
 }
 
 // exports of functions
-module.exports = {
-  DEFAULT_INTEGRATION,
-  DEFAULT_NETWORK_EXTERNALID,
-  addTeamToNetwork,
-  addUserToNetwork,
-  authenticateUser,
-  cleanAll,
-  createIntegration,
-  createNetwork,
-  createNetworkWithIntegration,
-  createUser,
-  createUserForNewNetwork,
-  deleteActivity,
-  deleteIntegration,
-  deleteObject,
-  deletePoll,
-  deleteUser,
-  findAllActivities,
-  findAllIntegrations,
-  findAllNetworks,
-  findAllObjects,
-  findAllPolls,
-  findAllUsers,
-  getLoginToken,
-  hapiFile,
-  randomString,
-};
+exports.DEFAULT_INTEGRATION = DEFAULT_INTEGRATION;
+exports.DEFAULT_NETWORK_EXTERNALID = DEFAULT_NETWORK_EXTERNALID;
+exports.addTeamToNetwork = addTeamToNetwork;
+exports.addUserToNetwork = addUserToNetwork;
+exports.authenticateUser = authenticateUser;
+exports.cleanAll = cleanAll;
+exports.createIntegration = createIntegration;
+exports.createNetwork = createNetwork;
+exports.createNetworkWithIntegration = createNetworkWithIntegration;
+exports.createUser = createUser;
+exports.createUserForNewNetwork = createUserForNewNetwork;
+exports.deleteActivity = deleteActivity;
+exports.deleteIntegration = deleteIntegration;
+exports.deleteObject = deleteObject;
+exports.deletePoll = deletePoll;
+exports.deleteUser = deleteUser;
+exports.findAllActivities = findAllActivities;
+exports.findAllIntegrations = findAllIntegrations;
+exports.findAllNetworks = findAllNetworks;
+exports.findAllObjects = findAllObjects;
+exports.findAllPolls = findAllPolls;
+exports.findAllUsers = findAllUsers;
+exports.getLoginToken = getLoginToken;
+exports.hapiFile = hapiFile;
+exports.randomString = randomString;
