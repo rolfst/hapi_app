@@ -2,6 +2,6 @@ import Joi from 'joi';
 
 export default {
   payload: Joi.object().keys({
-    option_ids: Joi.array().required(),
+    optionIds: Joi.array().min(1).required(),
   }).rename('option_ids', 'optionIds'),
 };
