@@ -59,7 +59,7 @@ describe('Integration auth', () => {
     return testHelper.cleanAll();
   });
 
-  it.only('hook should be called with the credentials', async () => {
+  it('hook should be called with the credentials', async () => {
     const endpoint = `/v2/networks/${flexappealNetwork.id}/integration_auth`;
     const { statusCode } = await postRequest(endpoint, {
       username: employeeCredentials.username,
