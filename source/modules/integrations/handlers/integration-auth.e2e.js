@@ -71,7 +71,7 @@ describe('Integration auth', () => {
       { username: employeeCredentials.username, password: employeeCredentials.password }));
   });
 
-  it('should return new access token', async () => {
+  it.only('should return new access token', async () => {
     const endpoint = `/v2/networks/${flexappealNetwork.id}/integration_auth`;
     const { result: { data } } = await postRequest(endpoint, {
       username: employeeCredentials.username,
