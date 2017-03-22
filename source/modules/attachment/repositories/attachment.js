@@ -52,10 +52,8 @@ const update = (attachment) => Attachment
   .then(R.always(attachment));
 
 // exports of functions
-module.exports = {
-  create,
-  deleteById,
-  findBy,
-  findById,
-  update,
-};
+exports.create = create;
+exports.deleteById = deleteById;
+exports.findBy = findBy;
+exports.findById = findById;
+exports.update = update;
