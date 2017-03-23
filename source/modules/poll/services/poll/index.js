@@ -1,6 +1,7 @@
 const R = require('ramda');
 const Logger = require('../../../../shared/services/logger');
 const pollRepository = require('../../repositories/poll');
+const pollVoteRepository = require('../../repositories/poll-vote');
 const impl = require('./implementation');
 
 /**
@@ -9,10 +10,24 @@ const impl = require('./implementation');
 
 const logger = Logger.getLogger('POLL/service/poll');
 
+const addResultToPoll = R.curry((poll, results) => {
+  const result = results[poll.id] ? R.pluck('optionId', results[poll.id]) : null;
+
+  return R.assoc('voteResult', result, poll);
+});
+
 const list = async (payload, message) => {
   logger.info('Finding multiple polls', { payload, message });
 
-  return pollRepository.findBy({ id: { $in: payload.pollIds } });
+  const promises = [
+    pollRepository.findBy({ id: { $in: payload.pollIds } }),
+    pollVoteRepository.findBy({ pollId: { $in: payload.pollIds }, userId: message.credentials.id }),
+  ];
+
+  const [polls, votes] = await Promise.all(promises);
+  const resultsByPoll = R.groupBy(R.prop('pollId'), votes);
+
+  return R.map(addResultToPoll(R.__, resultsByPoll), polls);
 };
 
 /**
@@ -25,9 +40,16 @@ const list = async (payload, message) => {
  */
 const get = async (payload, message) => {
   logger.info('Finding poll', { payload, message });
-  const poll = await pollRepository.findById(payload.pollId);
 
-  return poll;
+  const promises = [
+    pollRepository.findById(payload.pollId),
+    pollVoteRepository.findBy({ pollId: payload.pollId, userId: message.credentials.id }),
+  ];
+
+  const [poll, votes] = await Promise.all(promises);
+  const result = votes.length ? R.pluck('optionId', votes) : null;
+
+  return R.assoc('voteResults', result, poll);
 };
 
 /**
@@ -75,7 +97,10 @@ const vote = async (payload, message) => {
 
   await Promise.all(R.map(voteForOption, payload.optionIds));
 
-  return pollRepository.findById(payload.pollId);
+  const poll = await pollRepository.findById(payload.pollId);
+  poll.voteResult = payload.optionIds;
+
+  return poll;
 };
 
 exports.create = create;
