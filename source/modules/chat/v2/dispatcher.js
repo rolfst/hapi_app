@@ -1,10 +1,10 @@
-import R from 'ramda';
-import EventEmitter from '../../../shared/services/event-emitter';
-import * as socketService from '../../../shared/services/socket';
-import * as Logger from '../../../shared/services/logger';
-import * as responseUtils from '../../../shared/utils/response';
-import * as userRepository from '../../core/repositories/user';
-import * as newMessageNotification from './notifications/new-message';
+const R = require('ramda');
+const EventEmitter = require('../../../shared/services/event-emitter');
+const socketService = require('../../../shared/services/socket');
+const Logger = require('../../../shared/services/logger');
+const responseUtils = require('../../../shared/utils/response');
+const userRepository = require('../../core/repositories/user');
+const newMessageNotification = require('./notifications/new-message');
 
 const pubsub = EventEmitter.create();
 pubsub.setLogger(Logger.createLogger('CHAT/v1/dispatcher'));
@@ -20,4 +20,4 @@ pubsub.asyncOn('message.created', async (payload) => {
   newMessageNotification.send(actor, payload.object, usersToNotify);
 });
 
-export default pubsub;
+module.exports = pubsub;

@@ -1,16 +1,11 @@
-import * as PollService from '../services/poll';
-import * as responseUtil from '../../../shared/utils/response';
+const createServicePayload = require('../../../shared/utils/create-service-payload');
+const responseUtil = require('../../../shared/utils/response');
+const pollService = require('../services/poll');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const message = { ...req.pre, ...req.auth };
-    const payload = {
-      networkId: req.params.networkId,
-      pollId: req.params.pollId,
-      optionIds: req.payload.optionIds,
-    };
-
-    const poll = await PollService.vote(payload, message);
+    const { payload, message } = createServicePayload(req);
+    const poll = await pollService.vote(payload, message);
 
     return reply({ data: responseUtil.toSnakeCase(poll) });
   } catch (err) {

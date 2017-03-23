@@ -1,12 +1,12 @@
-import R from 'ramda';
-import Promise from 'bluebird';
-import * as Logger from '../../../../../shared/services/logger';
-import createError from '../../../../../shared/utils/create-error';
-import * as attachmentService from '../../../../attachment/services/attachment';
-import * as objectService from '../../../../core/services/object';
-import * as privateMessageRepository from '../../repositories/private-message';
-import * as conversationRepository from '../../repositories/conversation';
-import ChatDispatcher from '../../dispatcher';
+const R = require('ramda');
+const Promise = require('bluebird');
+const Logger = require('../../../../../shared/services/logger');
+const createError = require('../../../../../shared/utils/create-error');
+const attachmentService = require('../../../../attachment/services/attachment');
+const objectService = require('../../../../core/services/object');
+const privateMessageRepository = require('../../repositories/private-message');
+const conversationRepository = require('../../repositories/conversation');
+const ChatDispatcher = require('../../dispatcher');
 
 const logger = Logger.createLogger('CHAT/service/conversation');
 
@@ -18,7 +18,7 @@ const logger = Logger.createLogger('CHAT/service/conversation');
  * @method list
  * @return {external:Promise.<PrivateMessage[]>} {@link module:modules/chat~PrivateMessage}
  */
-export const list = async (payload, message) => {
+const list = async (payload, message) => {
   logger.info('Listing private messages', { payload, message });
 
   return privateMessageRepository.findByIds(payload.messageIds);
@@ -34,7 +34,7 @@ export const list = async (payload, message) => {
  * @method create
  * @return {external:Promise.<PrivateMessage>} {@link module:modules/chat~PrivateMessage}
  */
-export async function create(payload, message) {
+async function create(payload, message) {
   logger.info('Creating private message', { payload, message });
 
   const conversation = await conversationRepository.findById(payload.conversationId);
@@ -83,3 +83,6 @@ export async function create(payload, message) {
 
   return output;
 }
+
+exports.create = create;
+exports.list = list;

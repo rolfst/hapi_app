@@ -1,11 +1,11 @@
-import { assert } from 'chai';
-import { pick } from 'lodash';
-import sinon from 'sinon';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as Intercom from '../../../shared/services/intercom';
-import IntercomStub from '../../../shared/test-utils/stubs/intercom';
-import EmployeeDispatcher from '../dispatcher';
-import * as service from './employee';
+const { assert } = require('chai');
+const { pick } = require('lodash');
+const sinon = require('sinon');
+const testHelper = require('../../../shared/test-utils/helpers');
+const Intercom = require('../../../shared/services/intercom');
+const IntercomStub = require('../../../shared/test-utils/stubs/intercom');
+const EmployeeDispatcher = require('../dispatcher');
+const service = require('./employee');
 
 describe('Service: employee', () => {
   let credentials;

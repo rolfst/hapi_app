@@ -1,16 +1,10 @@
-import * as inviteUserService from '../services/invite-user';
-import * as responseUtil from '../../../shared/utils/response';
-import * as Logger from '../../../shared/services/logger';
+const createServicePayload = require('../../../shared/utils/create-service-payload');
+const responseUtil = require('../../../shared/utils/response');
+const inviteUserService = require('../services/invite-user');
 
-const logger = Logger.createLogger('EMPLOYEE/handler/bulkInviteUsers');
-
-
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const payload = { userIds: req.payload.user_ids };
-    const message = { ...req.pre, ...req.auth };
-
-    logger.info('Bulk-inviting users: ', { payload, message });
+    const { payload, message } = createServicePayload(req);
     const invitedUsers = await inviteUserService.inviteUsers(payload, message);
 
     return reply({ success: true, data: responseUtil.toSnakeCase(invitedUsers) });

@@ -1,9 +1,9 @@
-import { map } from 'lodash';
-import client from '../client';
-import teamSerializer from '../serializers/team';
+const R = require('ramda');
+const client = require('../client');
+const teamSerializer = require('../serializers/team');
 
-export default (baseStoreUrl) => async () => {
+module.exports = (baseStoreUrl) => async () => {
   const result = await client.get(`${baseStoreUrl}/departments`);
 
-  return map(result.payload.departments, teamSerializer);
+  return R.map(teamSerializer, result.payload.departments);
 };

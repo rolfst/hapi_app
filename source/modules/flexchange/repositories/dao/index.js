@@ -1,13 +1,12 @@
-import { ActivityTypes } from '../../../core/repositories/dao/activity';
-import UserModel from '../../../core/repositories/dao/user';
-import ActivityModel from '../../../core/repositories/dao/activity';
-import TeamModel from '../../../core/repositories/dao/team';
-import NetworkModel from '../../../core/repositories/dao/network';
-import { exchangeTypes } from './exchange';
-import ExchangeModel from './exchange';
-import ExchangeCommentModel from './exchange-comment';
-import ExchangeResponseModel from './exchange-response';
-import ExchangeValueModel from './exchange-value';
+const { ActivityTypes,
+  Activity: ActivityModel } = require('../../../core/repositories/dao/activity');
+const UserModel = require('../../../core/repositories/dao/user');
+const TeamModel = require('../../../core/repositories/dao/team');
+const NetworkModel = require('../../../core/repositories/dao/network');
+const { exchangeTypes, Exchange: ExchangeModel } = require('./exchange');
+const ExchangeCommentModel = require('./exchange-comment');
+const ExchangeResponseModel = require('./exchange-response');
+const ExchangeValueModel = require('./exchange-value');
 
 ExchangeResponseModel.belongsTo(UserModel, {
   foreignKey: 'user_id',
@@ -88,7 +87,7 @@ TeamModel.belongsToMany(ExchangeModel, {
   timestamps: false,
 });
 
-export const Exchange = ExchangeModel;
-export const ExchangeComment = ExchangeCommentModel;
-export const ExchangeResponse = ExchangeResponseModel;
-export const ExchangeValue = ExchangeValueModel;
+exports.Exchange = ExchangeModel;
+exports.ExchangeComment = ExchangeCommentModel;
+exports.ExchangeResponse = ExchangeResponseModel;
+exports.ExchangeValue = ExchangeValueModel;

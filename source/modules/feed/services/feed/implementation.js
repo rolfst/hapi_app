@@ -1,14 +1,14 @@
-import R from 'ramda';
-import Promise from 'bluebird';
-import * as objectRepository from '../../../core/repositories/object';
-import * as objectService from '../../../core/services/object';
-import * as messageService from '../message';
+const R = require('ramda');
+const Promise = require('bluebird');
+const objectRepository = require('../../../core/repositories/object');
+const objectService = require('../../../core/services/object');
+const messageService = require('../message');
 
 const typeEq = R.propEq('objectType');
 const pluckId = R.pluck('id');
 const messageIdEq = R.propEq('messageId');
-const findIncludes = (object, includes) => (typeEq('feed_message')) ?
-  R.defaultTo(null, R.filter(messageIdEq(object.sourceId), includes)) : null;
+const findIncludes = (object, includes) => (typeEq('feed_message') ?
+  R.defaultTo(null, R.filter(messageIdEq(object.sourceId), includes)) : null);
 const anyWithType = (type, objects) => R.any(typeEq(type), objects);
 const getSourceIdsForType = (type, objects) => R.pipe(
   R.filter(typeEq(type)), R.pluck('sourceId'))(objects);
@@ -20,7 +20,7 @@ const getSourceIdsForType = (type, objects) => R.pipe(
  * @method getIncludes
  * @return {external:Promise}
  */
-export const getIncludes = async (hasInclude, objects) => {
+const getIncludes = async (hasInclude, objects) => {
   const hasType = (type) => anyWithType(type, objects);
   const includes = { comments: [], likes: [] };
 
@@ -39,14 +39,22 @@ export const getIncludes = async (hasInclude, objects) => {
   return Promise.props(includes);
 };
 
-export const makeFeed = async (payload, options, message, extraWhereConstraint = {}) => {
+const makeFeed = async (payload, options, message, extraWhereConstraint = {}) => {
   const whereConstraint = {
-    $or: [...extraWhereConstraint, {
+    $or: [{
       parentType: payload.parentType,
       parentId: payload.parentId,
     }],
     $and: { networkId: payload.networkId },
   };
+
+  // Since extraWhereConstraint can either be an array or an object,
+  // the spread syntax does not work in all cases
+  if (Array.isArray(extraWhereConstraint)) {
+    whereConstraint.$or = [...extraWhereConstraint, ...whereConstraint.$or];
+  } else {
+    whereConstraint.$or = [extraWhereConstraint, ...whereConstraint.$or];
+  }
 
   const relatedObjects = await objectRepository.findBy(whereConstraint, {
     limit: options.limit,
@@ -74,3 +82,6 @@ export const makeFeed = async (payload, options, message, extraWhereConstraint =
 
   return R.map(createObjectWithIncludes, objectsWithSources);
 };
+
+exports.getIncludes = getIncludes;
+exports.makeFeed = makeFeed;

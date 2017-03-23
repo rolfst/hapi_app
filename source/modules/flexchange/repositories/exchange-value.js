@@ -1,6 +1,6 @@
-import R from 'ramda';
-import createExchangeValueModel from '../models/exchange-value';
-import ExchangeValue from './dao/exchange-value';
+const R = require('ramda');
+const createExchangeValueModel = require('../models/exchange-value');
+const ExchangeValue = require('./dao/exchange-value');
 
 /**
  * @module modules/flexchange/repositories/exchangeValue
@@ -13,9 +13,12 @@ import ExchangeValue from './dao/exchange-value';
  * @method createValuesForExchange
  * @return {external:Promise} Create exchange values promise
  */
-export const createValuesForExchange = (exchangeId, values) => ExchangeValue
-  .bulkCreate(R.map(value => ({ exchangeId, value }), values));
+const createValuesForExchange = (exchangeId, values) => ExchangeValue
+  .bulkCreate(R.map((value) => ({ exchangeId, value }), values));
 
-export const findAllWhere = (whereConstraint) => ExchangeValue
+const findAllWhere = (whereConstraint) => ExchangeValue
   .findAll({ where: whereConstraint })
   .then(R.map(createExchangeValueModel));
+
+exports.createValuesForExchange = createValuesForExchange;
+exports.findAllWhere = findAllWhere;

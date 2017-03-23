@@ -1,12 +1,13 @@
-import { assert } from 'chai';
-import { find, pick } from 'lodash';
-import sinon from 'sinon';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as networkRepo from '../../core/repositories/network';
-import * as userRepo from '../../core/repositories/user';
-import * as teamRepo from '../../core/repositories/team';
-import EmployeeDispatcher from '../dispatcher';
-import * as service from './invite-user';
+const { assert } = require('chai');
+const R = require('ramda');
+const { find, pick } = require('lodash');
+const sinon = require('sinon');
+const testHelper = require('../../../shared/test-utils/helpers');
+const networkRepo = require('../../core/repositories/network');
+const userRepo = require('../../core/repositories/user');
+const teamRepo = require('../../core/repositories/team');
+const EmployeeDispatcher = require('../dispatcher');
+const service = require('./invite-user');
 
 describe('Service: Invite user', () => {
   let employee;
@@ -148,7 +149,7 @@ describe('Service: Invite user', () => {
     });
 
     it('should add to the network as admin', async () => {
-      const actual = await service.inviteUser({ ...payload, roleType: 'admin' }, { network });
+      const actual = await service.inviteUser(R.merge(payload, { roleType: 'admin' }), { network });
 
       assert.equal(actual.roleType, 'ADMIN');
     });
@@ -160,9 +161,9 @@ describe('Service: Invite user', () => {
     });
 
     it('should add to the teams', async () => {
-      const serviceResult = await service.inviteUser({
-        ...payload,
-        teamIds: [team.id] },
+      const serviceResult = await service.inviteUser(R.merge(
+        payload,
+        { teamIds: [team.id] }),
         { network });
 
       const teamsLookup = await teamRepo.findTeamsForNetworkThatUserBelongsTo(
@@ -178,7 +179,7 @@ describe('Service: Invite user', () => {
       });
 
       const serviceResult = await service.inviteUser(
-        { ...payload, teamIds: [team.id, extraTeam.id] },
+        R.merge(payload, { teamIds: [team.id, extraTeam.id] }),
         { network });
 
       const teamsLookup = await teamRepo.findTeamsForNetworkThatUserBelongsTo(

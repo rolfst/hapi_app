@@ -1,15 +1,15 @@
-import { assert } from 'chai';
-import R from 'ramda';
-import Promise from 'bluebird';
-import sinon from 'sinon';
-import stream from 'stream';
-import * as testHelpers from '../../../../shared/test-utils/helpers';
-import * as Storage from '../../../../shared/services/storage';
-import * as attachmentService from '../../../attachment/services/attachment';
-import * as conversationService from '../../../chat/v2/services/conversation';
-import * as privateMessageService from '../../../chat/v2/services/private-message';
-import * as feedMessageService from '../../../feed/services/message';
-import * as objectService from './index';
+const { assert } = require('chai');
+const R = require('ramda');
+const Promise = require('bluebird');
+const sinon = require('sinon');
+const stream = require('stream');
+const testHelpers = require('../../../../shared/test-utils/helpers');
+const Storage = require('../../../../shared/services/storage');
+const attachmentService = require('../../../attachment/services/attachment');
+const conversationService = require('../../../chat/v2/services/conversation');
+const privateMessageService = require('../../../chat/v2/services/private-message');
+const feedMessageService = require('../../../feed/services/message');
+const objectService = require('./index');
 
 describe('Service: Object', () => {
   let admin;

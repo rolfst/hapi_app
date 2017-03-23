@@ -1,9 +1,10 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import Promise from 'bluebird';
-import * as password from '../../../../shared/utils/password';
-import * as userRepo from '../../../core/repositories/user';
-import * as unit from './implementation';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const R = require('ramda');
+const Promise = require('bluebird');
+const password = require('../../../../shared/utils/password');
+const userRepo = require('../../../core/repositories/user');
+const unit = require('./implementation');
 
 describe('Authentication service', () => {
   const credentials = {
@@ -30,8 +31,8 @@ describe('Authentication service', () => {
 
     it('should fail when credentials do not match', async () => {
       sinon.stub(unit, 'checkPassword').returns(false);
-      const authenticationPromise = unit.authenticateUser({
-        ...credentials, password: 'ihaznoswag' });
+      const authenticationPromise = unit.authenticateUser(R.merge(
+        credentials, { password: 'ihaznoswag' }));
       unit.checkPassword.restore();
 
       return assert.isRejected(authenticationPromise);

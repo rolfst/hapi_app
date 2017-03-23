@@ -1,14 +1,15 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import Promise from 'bluebird';
-import stream from 'stream';
-import blueprints from '../../../../shared/test-utils/blueprints';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import { getRequest } from '../../../../shared/test-utils/request';
-import * as Storage from '../../../../shared/services/storage';
-import * as attachmentService from '../../../attachment/services/attachment';
-import * as privateMessageService from '../services/private-message';
-import * as conversationService from '../services/conversation';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const R = require('ramda');
+const Promise = require('bluebird');
+const stream = require('stream');
+const blueprints = require('../../../../shared/test-utils/blueprints');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const { getRequest } = require('../../../../shared/test-utils/request');
+const Storage = require('../../../../shared/services/storage');
+const attachmentService = require('../../../attachment/services/attachment');
+const privateMessageService = require('../services/private-message');
+const conversationService = require('../services/conversation');
 
 describe('Handler: Get messages (v2)', () => {
   let sandbox;
@@ -19,12 +20,12 @@ describe('Handler: Get messages (v2)', () => {
     sandbox = sinon.sandbox.create();
     sandbox.stub(Storage, 'upload').returns(Promise.resolve('image.jpg'));
     const [admin, participant] = await Promise.all([
-      testHelper.createUser({
-        ...blueprints.users.admin,
-        username: 'conversation_creator' }),
-      testHelper.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_participant' }),
+      testHelper.createUser(R.merge(
+        blueprints.users.admin,
+        { username: 'conversation_creator' })),
+      testHelper.createUser(R.merge(
+        blueprints.users.employee,
+        { username: 'conversation_participant' })),
     ]);
     creator = admin;
 

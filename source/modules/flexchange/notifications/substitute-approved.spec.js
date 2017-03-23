@@ -1,6 +1,6 @@
-import { assert } from 'chai';
-import moment from 'moment-timezone';
-import { createNotification } from './substitute-approved';
+const { assert } = require('chai');
+const moment = require('moment-timezone');
+const { createNotification } = require('./substitute-approved');
 
 describe('Substitude flexchange notification', () => {
   const createExchange = (baseMoment) => ({

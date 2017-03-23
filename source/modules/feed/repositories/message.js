@@ -1,6 +1,6 @@
-import R from 'ramda';
-import { FeedMessage } from './dao';
-import createFeedMessageModel from '../models/message';
+const R = require('ramda');
+const { FeedMessage } = require('./dao');
+const createFeedMessageModel = require('../models/message');
 
 /**
  * Find a message by id
@@ -8,7 +8,7 @@ import createFeedMessageModel from '../models/message';
  * @method findById
  * @return {external:Promise.<FeedMessage>} {@link module:modules/feed~FeedMessage}
  */
-export const findById = (messageId) => {
+const findById = (messageId) => {
   return FeedMessage.findById(messageId)
     .then((message) => {
       if (!message) return null;
@@ -23,7 +23,7 @@ export const findById = (messageId) => {
  * @method findByIds
  * @return {external:Promise.<FeedMessage[]>} {@link module:modules/feed~FeedMessage}
  */
-export const findByIds = async (messageIds) => {
+const findByIds = async (messageIds) => {
   const results = await FeedMessage.findAll({
     where: { id: { in: messageIds } },
   });
@@ -39,7 +39,7 @@ export const findByIds = async (messageIds) => {
  * @method create
  * @return {external:Promise.<FeedMessage>} {@link module:modules/feed~FeedMessage}
  */
-export const create = async (attributes) => {
+const create = async (attributes) => {
   const attributesWhitelist = ['createdBy', 'text', 'parentType', 'parentId'];
   const result = await FeedMessage.create(R.pick(attributesWhitelist, attributes));
 
@@ -52,7 +52,7 @@ export const create = async (attributes) => {
  * @method update
  * @return {external:Promise.<FeedMessage>} {@link module:modules/feed~FeedMessage}
  */
-export const update = async (messageId, attributes) => {
+const update = async (messageId, attributes) => {
   const result = await FeedMessage.findOne({
     where: { id: messageId },
   });
@@ -61,4 +61,10 @@ export const update = async (messageId, attributes) => {
   return createFeedMessageModel(message);
 };
 
-export const destroy = (messageId) => FeedMessage.destroy({ where: { id: messageId } });
+const destroy = (messageId) => FeedMessage.destroy({ where: { id: messageId } });
+
+exports.create = create;
+exports.destroy = destroy;
+exports.findById = findById;
+exports.findByIds = findByIds;
+exports.update = update;

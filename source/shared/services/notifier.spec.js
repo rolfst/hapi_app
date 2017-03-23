@@ -1,8 +1,8 @@
-import _Mixpanel from 'mixpanel';
-import { assert } from 'chai';
-import sinon from 'sinon';
-import Parse from 'parse/node';
-import * as notifier from './notifier';
+const Mixpanel = require('mixpanel');
+const { assert } = require('chai');
+const sinon = require('sinon');
+const Parse = require('parse/node');
+const notifier = require('./notifier');
 
 describe('Notifier', () => {
   let sandbox;
@@ -12,8 +12,8 @@ describe('Notifier', () => {
 
   describe('send', () => {
     it.skip('should track push notifications', () => {
-      const mixpanelClient = _Mixpanel.init('foo_token');
-      sandbox.stub(_Mixpanel, 'init').returns(mixpanelClient);
+      const mixpanelClient = Mixpanel.init('foo_token');
+      sandbox.stub(Mixpanel, 'init').returns(mixpanelClient);
       const methodSpy = sandbox.stub(mixpanelClient, 'track');
       sandbox.stub(Parse.Push, 'send').returns(Promise.resolve(null));
 

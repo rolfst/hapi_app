@@ -1,12 +1,12 @@
-import * as Logger from '../../../../shared/services/logger';
-import { deleteConversationById } from '../repositories/conversation';
+const Logger = require('../../../../shared/services/logger');
+const createServicePayload = require('../../../../shared/utils/create-service-payload');
+const { deleteConversationById } = require('../repositories/conversation');
 
 const logger = Logger.createLogger('CHAT/handler/deleteCoversation');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const message = { ...req.pre, ...req.auth };
-    const payload = { ...req.params };
+    const { payload, message } = createServicePayload(req);
 
     // TODO move to service
     logger.info('Deleting conversation', { payload, message });

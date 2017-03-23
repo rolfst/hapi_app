@@ -1,14 +1,14 @@
-import { assert } from 'chai';
-import moment from 'moment';
-import sinon from 'sinon';
-import R from 'ramda';
-import Promise from 'bluebird';
-import * as testHelpers from '../../../../shared/test-utils/helpers';
-import * as notifier from '../../../../shared/services/notifier';
-import * as flexchangeService from '../../../flexchange/services/flexchange';
-import * as commentService from '../comment';
-import * as messageService from '../message';
-import * as feedService from './index';
+const { assert } = require('chai');
+const moment = require('moment');
+const sinon = require('sinon');
+const R = require('ramda');
+const Promise = require('bluebird');
+const testHelpers = require('../../../../shared/test-utils/helpers');
+const notifier = require('../../../../shared/services/notifier');
+const flexchangeService = require('../../../flexchange/services/flexchange');
+const commentService = require('../comment');
+const messageService = require('../message');
+const feedService = require('./index');
 
 describe('Service: Feed', () => {
   describe('make', () => {

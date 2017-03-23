@@ -1,7 +1,7 @@
-import * as notifier from '../../../shared/services/notifier';
-import * as networkRepo from '../../core/repositories/network';
+const notifier = require('../../../shared/services/notifier');
+const networkRepo = require('../../core/repositories/network');
 
-export const createNotification = (exchange, substituteUser) => {
+const createNotification = (exchange, substituteUser) => {
   const substitute = substituteUser.fullName;
   const creator = exchange.User.fullName;
 
@@ -12,10 +12,13 @@ export const createNotification = (exchange, substituteUser) => {
   };
 };
 
-export const send = async (network, exchange, userThatAccepts) => {
+const send = async (network, exchange, userThatAccepts) => {
   const admins = await networkRepo.findUsersForNetwork(network.id, { roleType: 'ADMIN' });
-  const usersToNotify = admins.filter(u => u.id !== userThatAccepts.id);
+  const usersToNotify = admins.filter((u) => u.id !== userThatAccepts.id);
   const notification = createNotification(exchange, userThatAccepts);
 
   return notifier.send(usersToNotify, notification);
 };
+
+exports.createNotification = createNotification;
+exports.send = send;

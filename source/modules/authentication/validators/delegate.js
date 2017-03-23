@@ -1,7 +1,7 @@
-import Joi from 'joi';
+const Joi = require('joi');
 
-export default {
-  query: {
-    refresh_token: Joi.string().required(),
-  },
+module.exports = {
+  query: Joi.object().keys({
+    refreshToken: Joi.string().required(),
+  }).rename('refresh_token', 'refreshToken'),
 };

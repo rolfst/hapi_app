@@ -1,6 +1,6 @@
-import Sequelize from 'sequelize';
-import model from '../../../../../shared/configs/sequelize';
-import * as dateUtils from '../../../../../shared/utils/date';
+const Sequelize = require('sequelize');
+const model = require('../../../../../shared/configs/sequelize');
+const dateUtils = require('../../../../../shared/utils/date');
 
 const Conversation = model.define('Conversation', {
   type: {
@@ -30,12 +30,12 @@ const Conversation = model.define('Conversation', {
       };
 
       if (this.Messages) {
-        const messages = this.Messages.map(message => message.toJSON());
+        const messages = this.Messages.map((message) => message.toJSON());
         output = Object.assign(output, { messages });
       }
 
       if (this.Users && this.Users.length > 0) {
-        const users = this.Users.map(user => user.toSimpleJSON());
+        const users = this.Users.map((user) => user.toSimpleJSON());
         output = Object.assign(output, { users });
       }
 
@@ -45,9 +45,9 @@ const Conversation = model.define('Conversation', {
   hooks: {
     afterDestroy: function (conversation) { // eslint-disable-line func-names, object-shorthand
       return conversation.getMessages()
-        .then(messages => messages.map(m => m.destroy()));
+        .then((messages) => messages.map((m) => m.destroy()));
     },
   },
 });
 
-export default Conversation;
+module.exports = Conversation;

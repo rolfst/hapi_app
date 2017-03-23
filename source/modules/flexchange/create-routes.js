@@ -1,4 +1,5 @@
-import createRoutes from '../../shared/utils/create-routes';
+/* eslint-disable global-require, import/no-dynamic-require */
+const { createRoutes } = require('../../shared/utils/create-routes');
 
 const basePath = './handlers';
 const baseUrl = '/v2/networks/{networkId}';
@@ -86,4 +87,4 @@ const routes = [{
   handler: require(`${basePath}/remove-exchange`),
 }];
 
-export default createRoutes(routes);
+module.exports = createRoutes(routes);

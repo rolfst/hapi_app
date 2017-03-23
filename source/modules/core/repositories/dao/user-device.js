@@ -1,5 +1,5 @@
-import Sequelize from 'sequelize';
-import model from '../../../../shared/configs/sequelize';
+const Sequelize = require('sequelize');
+const model = require('../../../../shared/configs/sequelize');
 
 const UserDevice = model.define('UserDevice', {
   userId: {
@@ -22,4 +22,4 @@ const UserDevice = model.define('UserDevice', {
   timestamps: false,
 });
 
-export default UserDevice;
+module.exports = UserDevice;

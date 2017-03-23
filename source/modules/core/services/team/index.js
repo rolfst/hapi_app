@@ -1,11 +1,11 @@
-import { map } from 'lodash';
-import Promise from 'bluebird';
-import R from 'ramda';
-import createError from '../../../../shared/utils/create-error';
-import * as Logger from '../../../../shared/services/logger';
-import * as authorizationService from '../../services/authorization';
-import * as teamRepository from '../../repositories/team';
-import * as userService from '../user';
+const { map } = require('lodash');
+const Promise = require('bluebird');
+const R = require('ramda');
+const createError = require('../../../../shared/utils/create-error');
+const Logger = require('../../../../shared/services/logger');
+const authorizationService = require('../../services/authorization');
+const teamRepository = require('../../repositories/team');
+const userService = require('../user');
 
 /**
  * @module modules/core/services/team
@@ -21,20 +21,20 @@ const logger = Logger.getLogger('CORE/service/team');
  * @method list
  * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team} -
  */
-export async function get(payload, message) {
+async function get(payload, message) {
   logger.info('Get team', { payload, message });
 
   const team = await teamRepository.findTeamById(payload.teamId);
   if (!team) throw createError('404', 'Team not found');
 
-  return {
-    ...R.omit(['createdAt'], team),
-    memberCount: team.memberIds.length,
-    isMember: message ? // FIXME: Temporarily because of sync script that has no message
-      R.contains(message.credentials.id.toString(), team.memberIds) : false,
-    isSynced: !!team.externalId,
-    createdAt: team.createdAt, // created_at should always be at the bottom of the response item
-  };
+  return R.merge(R.omit(['createdAt'], team),
+    {
+      memberCount: team.memberIds.length,
+      isMember: message ? // FIXME: Temporarily because of sync script that has no message
+        R.contains(message.credentials.id.toString(), team.memberIds) : false,
+      isSynced: !!team.externalId,
+      createdAt: team.createdAt, // created_at should always be at the bottom of the response item
+    });
 }
 
 /**
@@ -45,18 +45,18 @@ export async function get(payload, message) {
  * @method list
  * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team} -
  */
-export async function list(payload, message) {
+async function list(payload, message) {
   logger.info('Listing teams', { payload, message });
 
   const teams = await teamRepository.findByIds(payload.teamIds);
-  const transformTeam = (team) => ({
-    ...R.omit(['createdAt'], team),
-    memberCount: team.memberIds.length,
-    isMember: message ? // FIXME: Temporarily because of sync script that has no message
-      R.contains(message.credentials.id.toString(), team.memberIds) : false,
-    isSynced: !!team.externalId,
-    createdAt: team.createdAt, // created_at should always be at the bottom of the response item
-  });
+  const transformTeam = (team) => R.merge(R.omit(['createdAt'], team),
+    {
+      memberCount: team.memberIds.length,
+      isMember: message ? // FIXME: Temporarily because of sync script that has no message
+        R.contains(message.credentials.id.toString(), team.memberIds) : false,
+      isSynced: !!team.externalId,
+      createdAt: team.createdAt, // created_at should always be at the bottom of the response item
+    });
 
   return R.map(transformTeam, teams);
 }
@@ -73,7 +73,7 @@ export async function list(payload, message) {
  * @method create
  * @return {external:Promise.<Team>} {@link module:modules/core~Team Team}
  */
-export const create = async (payload, message) => {
+const create = async (payload, message) => {
   logger.info('Creating team', { payload, message });
 
   await authorizationService.assertRoleTypeForUser({
@@ -108,7 +108,7 @@ export const create = async (payload, message) => {
  * @method create
  * @return {external:Promise.<Team>} {@link module:modules/core~Team Team}
  */
-export const update = async (payload, message) => {
+const update = async (payload, message) => {
   logger.info('Updating team', { payload, message });
 
   await authorizationService.assertRoleTypeForUser({
@@ -140,7 +140,7 @@ export const update = async (payload, message) => {
  * @return {external:Promise.<User[]>} {@link module:modules/core~User User} - Promise
  * containing collection of users
  */
-export const listMembersForTeams = async (payload, message) => {
+const listMembersForTeams = async (payload, message) => {
   const users = await teamRepository.findUsersByTeamIds(payload.teamIds);
 
   return userService.listUsersWithNetworkScope({
@@ -158,6 +158,13 @@ export const listMembersForTeams = async (payload, message) => {
  * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team} -
  * Promise containing collection of deleted teams
  */
-export const deleteTeamsByIds = async (payload) => {
+const deleteTeamsByIds = async (payload) => {
   return Promise.map(payload.teamIds, teamRepository.deleteById);
 };
+
+exports.create = create;
+exports.deleteTeamsByIds = deleteTeamsByIds;
+exports.get = get;
+exports.list = list;
+exports.listMembersForTeams = listMembersForTeams;
+exports.update = update;

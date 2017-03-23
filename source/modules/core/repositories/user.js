@@ -1,11 +1,11 @@
-import { map, pick, sample } from 'lodash';
-import R from 'ramda';
-import Promise from 'bluebird';
-import createError from '../../../shared/utils/create-error';
-import createUserModel from '../models/user';
-import createNetworkLinkModel from '../models/network-link';
-import createCredentialsModel from '../models/credentials';
-import { User, Network, NetworkUser, Team } from './dao';
+const { map, sample } = require('lodash');
+const R = require('ramda');
+const Promise = require('bluebird');
+const createError = require('../../../shared/utils/create-error');
+const createUserModel = require('../models/user');
+const createNetworkLinkModel = require('../models/network-link');
+const createCredentialsModel = require('../models/credentials');
+const { User, Network, NetworkUser, Team } = require('./dao');
 
 /**
  * @module modules/core/repositories/user
@@ -26,7 +26,7 @@ const defaultIncludes = {
 const toModel = (dao) => createUserModel(dao);
 const toNetworkLinkModel = (dao) => createNetworkLinkModel(dao);
 
-export const findAllUsers = async () => {
+const findAllUsers = async () => {
   const result = await User.findAll();
 
   return map(result, toModel);
@@ -38,13 +38,10 @@ export const findAllUsers = async () => {
  * @method findExternalUsers
  * @return {external:Promise.<User[]>} {@link module:modules/core~User User}
  */
-export const findExternalUsers = async (externalIds) => {
+const findExternalUsers = async (externalIds) => {
   const pivotResult = await NetworkUser.findAll({ where: { externalId: { $in: externalIds } } });
-  const userIds = pivotResult.map(result => result.userId);
-  const result = await User.findAll({
-    ...defaultIncludes,
-    where: { id: { $in: userIds } },
-  });
+  const userIds = pivotResult.map((result) => result.userId);
+  const result = await User.findAll(R.merge(defaultIncludes, { where: { id: { $in: userIds } } }));
 
   return result;
 };
@@ -56,18 +53,18 @@ export const findExternalUsers = async (externalIds) => {
  * @method findByIds
  * @return {external:Promise.<User[]>} {@link module:modules/core~User User}
  */
-export const findByIds = async (userIds, networkId = null) => {
+const findByIds = async (userIds, networkId = null) => {
   let result;
 
   if (networkId) {
-    result = await User.findAll({ ...defaultIncludes, where: { id: { $in: userIds } } });
+    result = await User.findAll(R.merge(defaultIncludes, { where: { id: { $in: userIds } } }));
   } else {
     const includes = {
       include: [{ model: Team,
-      attributes: ['id'],
-      where: { networkId },
-      required: false }] };
-    result = await User.findAll({ ...includes, where: { id: { $in: userIds } } });
+        attributes: ['id'],
+        where: { networkId },
+        required: false }] };
+    result = await User.findAll(R.merge(includes, { where: { id: { $in: userIds } } }));
   }
 
   return map(result, toModel);
@@ -83,7 +80,7 @@ export const findByIds = async (userIds, networkId = null) => {
  * @method findByIds
  * @return {external:Promise.<User>} {@link module:modules/core~User User}
  */
-export const findUserById = async (userId, networkId, scoped = true) => {
+const findUserById = async (userId, networkId, scoped = true) => {
   if (scoped) {
     if (R.isNil(networkId)) throw createError('20001');
   }
@@ -93,10 +90,7 @@ export const findUserById = async (userId, networkId, scoped = true) => {
       where: { networkId },
       required: false }] }
     : {};
-  const user = await User.findOne({
-    ...includes,
-    where: { id: userId },
-  });
+  const user = await User.findOne(R.merge(includes, { where: { id: userId } }));
 
   if (!user) throw createError('403', `The user with id '${userId}' could not be found.`);
 
@@ -111,9 +105,9 @@ export const findUserById = async (userId, networkId, scoped = true) => {
  * @method findUserBy
  * @return {external:Promise.<User>} {@link module:modules/core~User User}
  */
-export const findUserBy = async (attributes) => {
+const findUserBy = async (attributes) => {
   const result = await User.findOne({
-    where: { ...pick(attributes, 'username', 'email') },
+    where: R.pick(['username', 'email'], attributes),
   });
   if (!result) return null;
 
@@ -129,9 +123,9 @@ export const findUserBy = async (attributes) => {
  * @method findNetworkLink
  * @return {external:Promise.<NetworkUser>} {@link module:modules/core~NetworkUser NetworkUser}
  */
-export const findNetworkLink = async (attributes) => {
+const findNetworkLink = async (attributes) => {
   const result = await NetworkUser.findOne({
-    where: { ...pick(attributes, 'externalId', 'userId', 'networkId') },
+    where: R.pick(['externalId', 'userId', 'networkId'], attributes),
   });
 
   if (!result) return null;
@@ -146,7 +140,7 @@ export const findNetworkLink = async (attributes) => {
  * @method findMultipleUserMetaDataForNetwork
  * @return {external:Promise.<NetworkUser[]>} {@link module:modules/core~NetworkUser NetworkUser}
  */
-export const findMultipleUserMetaDataForNetwork = async (userIds, networkId) => {
+const findMultipleUserMetaDataForNetwork = async (userIds, networkId) => {
   const result = await NetworkUser.findAll({
     where: { networkId, userId: { $in: userIds } },
   });
@@ -160,7 +154,7 @@ export const findMultipleUserMetaDataForNetwork = async (userIds, networkId) => 
  * @method findCredentialsForUser
  * @return {external:Promise.<Credentials>} {@link module:shared~Credentials Credentials}
  */
-export const findCredentialsForUser = async (username) => {
+const findCredentialsForUser = async (username) => {
   const result = await User.findOne({ where: { username } });
 
   if (!result) return null;
@@ -174,7 +168,7 @@ export const findCredentialsForUser = async (username) => {
  * @method updateUser
  * @return {external:Promise.<User>} {@link module:modules/core~User User}
  */
-export const updateUser = async (userId, attributes) => {
+const updateUser = async (userId, attributes) => {
   const user = await User.findById(userId);
   await user.update(attributes);
 
@@ -186,7 +180,7 @@ export const updateUser = async (userId, attributes) => {
  * @method createUser
  * @return {external:Promise.<User>} {@link module:modules/core~User User}
  */
-export const createUser = async (attributes) => {
+const createUser = async (attributes) => {
   const whitelistedAttributes = [
     'username',
     'email',
@@ -197,10 +191,9 @@ export const createUser = async (attributes) => {
     'password',
   ];
 
-  const user = await User.create({
-    ...pick(attributes, whitelistedAttributes),
-    profileImg: sample(dummyProfileImgPaths),
-  });
+  const user = await User.create(
+    R.merge(R.pick(whitelistedAttributes, attributes),
+    { profileImg: sample(dummyProfileImgPaths) }));
 
   return findUserById(user.id, null, false);
 };
@@ -211,7 +204,7 @@ export const createUser = async (attributes) => {
  * @method createBulkUsers
  * @return {external:Promise.<User>} {@link module:modules/core~User User}
  */
-export const createBulkUsers = async (users) => {
+const createBulkUsers = async (users) => {
   const result = await Promise.map(users, createUser);
 
   return map(result, toModel);
@@ -224,7 +217,7 @@ export const createBulkUsers = async (users) => {
  * @method validateUserIds
  * @return {external:Promise.<boolean>} - Promise with boolean if all ids are valid
  */
-export const validateUserIds = async (ids, networkId) => {
+const validateUserIds = async (ids, networkId) => {
   const usersCount = await User.count({
     where: {
       id: { $in: ids },
@@ -244,7 +237,7 @@ export const validateUserIds = async (ids, networkId) => {
  * @method removeFromNetwork
  * @return {external:Promise.<User>} {@link module:modules/core~User User}
  */
-export const removeFromNetwork = async (userId, networkId, forceDelete = false) => {
+const removeFromNetwork = async (userId, networkId, forceDelete = false) => {
   const result = await NetworkUser.findOne({
     where: { userId, networkId },
   });
@@ -268,20 +261,21 @@ export const removeFromNetwork = async (userId, networkId, forceDelete = false) 
  * @method setNetworkLink
  * @return {void}
  */
-export const setNetworkLink = async (whereConstraint, _attributes) => {
-  const attributes = pick(_attributes,
-    'userId', 'networkId', 'externalId', 'deletedAt', 'userToken', 'roleType', 'invitedAt');
+const setNetworkLink = async (whereConstraint, _attributes) => {
+  const attributes = R.pick([
+    'userId', 'networkId', 'externalId', 'deletedAt', 'userToken', 'roleType', 'invitedAt'],
+    _attributes);
 
   const result = await NetworkUser.findOne({
     where: whereConstraint,
   });
 
-  if (!result) return NetworkUser.create({ ...attributes, user_id: attributes.userId });
+  if (!result) return NetworkUser.create(R.merge(attributes, { user_id: attributes.userId }));
 
-  return result.update({ ...R.omit(['userId', 'networkId', 'externalId'], attributes) });
+  return result.update(R.omit(['userId', 'networkId', 'externalId'], attributes));
 };
 
-export const updateNetworkLink = (whereConstraint, attributes) =>
+const updateNetworkLink = (whereConstraint, attributes) =>
   NetworkUser.update(attributes, { where: whereConstraint });
 
 /**
@@ -289,7 +283,7 @@ export const updateNetworkLink = (whereConstraint, attributes) =>
  * @method deleteById
  * @return {external:Promise.<number>} Promise with amount of objects removed
  */
-export const deleteById = async (userId) => {
+const deleteById = async (userId) => {
   return User.destroy({ where: { id: userId } });
 };
 
@@ -299,10 +293,28 @@ export const deleteById = async (userId) => {
  * @method userBelongsToNetwork
  * @return {external:Promise.<boolean>} Promise whether the user belongs to a network
  */
-export const userBelongsToNetwork = async (userId, networkId) => {
+const userBelongsToNetwork = async (userId, networkId) => {
   const result = await NetworkUser.findOne({
     where: { networkId, userId, deletedAt: null },
   });
 
   return result !== null;
 };
+
+exports.createBulkUsers = createBulkUsers;
+exports.createUser = createUser;
+exports.deleteById = deleteById;
+exports.findAllUsers = findAllUsers;
+exports.findByIds = findByIds;
+exports.findCredentialsForUser = findCredentialsForUser;
+exports.findExternalUsers = findExternalUsers;
+exports.findMultipleUserMetaDataForNetwork = findMultipleUserMetaDataForNetwork;
+exports.findNetworkLink = findNetworkLink;
+exports.findUserBy = findUserBy;
+exports.findUserById = findUserById;
+exports.userBelongsToNetwork = userBelongsToNetwork;
+exports.updateNetworkLink = updateNetworkLink;
+exports.updateUser = updateUser;
+exports.removeFromNetwork = removeFromNetwork;
+exports.setNetworkLink = setNetworkLink;
+exports.validateUserIds = validateUserIds;

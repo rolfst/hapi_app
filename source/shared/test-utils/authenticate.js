@@ -1,6 +1,7 @@
-import tokenUtil from '../utils/token';
-import * as userRepo from '../../modules/core/repositories/user';
-import * as authenticationService from '../../modules/authentication/services/authentication';
+const R = require('ramda');
+const tokenUtil = require('../utils/token');
+const userRepo = require('../../modules/core/repositories/user');
+const authenticationService = require('../../modules/authentication/services/authentication');
 
 /**
  * @module shared/test-utils/authencticate
@@ -20,14 +21,14 @@ import * as authenticationService from '../../modules/authentication/services/au
  * @method default
  * @returns {@link module:shared/test-utils/authenticate.AuthorizedUser}
  */
-export default async (credentials, message) => {
+module.exports = async (credentials, message) => {
   const { accessToken } = await authenticationService.authenticate(credentials, message);
   const decodedToken = tokenUtil.decode(accessToken);
   const user = await userRepo.findUserById(decodedToken.sub, null, false);
 
-  return {
-    ...user,
-    token: accessToken,
-    integrations: decodedToken.integrations,
-  };
+  return R.merge(user,
+    {
+      token: accessToken,
+      integrations: decodedToken.integrations,
+    });
 };

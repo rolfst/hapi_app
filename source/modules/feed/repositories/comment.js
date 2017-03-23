@@ -1,6 +1,6 @@
-import R from 'ramda';
-import { Comment } from './dao';
-import createCommentModel from '../models/comment';
+const R = require('ramda');
+const { Comment } = require('./dao');
+const createCommentModel = require('../models/comment');
 
 /**
  * Find comments by where constraint
@@ -8,7 +8,7 @@ import createCommentModel from '../models/comment';
  * @method findBy
  * @return {external:Promise.<Comment[]>} {@link module:modules/feed~Comment}
  */
-export const findBy = async (whereConstraint) => Comment
+const findBy = async (whereConstraint) => Comment
   .findAll({ where: whereConstraint })
   .then(R.map(createCommentModel));
 
@@ -18,6 +18,9 @@ export const findBy = async (whereConstraint) => Comment
  * @method create
  * @return {external:Promise.<Comment>} {@link module:modules/feed~Comment}
  */
-export const create = async (attributes) => Comment
+const create = async (attributes) => Comment
   .create(attributes)
   .then(createCommentModel);
+
+exports.create = create;
+exports.findBy = findBy;

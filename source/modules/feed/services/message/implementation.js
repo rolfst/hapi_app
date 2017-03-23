@@ -1,10 +1,10 @@
-import R from 'ramda';
-import Promise from 'bluebird';
-import createError from '../../../../shared/utils/create-error';
-import * as pollService from '../../../poll/services/poll';
-import * as authorizationService from '../../../core/services/authorization';
-import * as userService from '../../../core/services/user';
-import * as objectService from '../../../core/services/object';
+const R = require('ramda');
+const Promise = require('bluebird');
+const createError = require('../../../../shared/utils/create-error');
+const pollService = require('../../../poll/services/poll');
+const authorizationService = require('../../../core/services/authorization');
+const userService = require('../../../core/services/user');
+const objectService = require('../../../core/services/object');
 
 /**
  * Creates a poll resource that consists of a poll object and a object object.
@@ -13,7 +13,7 @@ import * as objectService from '../../../core/services/object';
  * @method createPollResource
  * @return {external:Promise.<Object>}
  */
-export const createPollResource = (createdMessage, message) => R.pipeP(
+const createPollResource = (createdMessage, message) => R.pipeP(
   (payload) => pollService.create({
     networkId: message.network.id,
     options: payload.pollOptions,
@@ -35,7 +35,7 @@ export const createPollResource = (createdMessage, message) => R.pipeP(
  * @method removeAttachedObjects
  * @return {Promise}
  */
-export const removeAttachedObjects = (messageId) => Promise.all([
+const removeAttachedObjects = (messageId) => Promise.all([
   objectService.remove({ objectType: 'feed_message', sourceId: messageId }),
   objectService.remove({ parentType: 'feed_message', parentId: messageId }),
 ]);
@@ -47,7 +47,7 @@ export const removeAttachedObjects = (messageId) => Promise.all([
  * @method assertThatUserBelongsToMessage
  * @throws Error - 404
  */
-export const assertThatUserBelongsToMessage = async (messageId, message) => {
+const assertThatUserBelongsToMessage = async (messageId, message) => {
   const payload = { objectType: 'feed_message', sourceId: messageId };
 
   const { parentType, parentId } = await objectService.get(payload, message);
@@ -67,7 +67,7 @@ export const assertThatUserBelongsToMessage = async (messageId, message) => {
   }
 };
 
-export const assertThatCurrentOwnerHasUpdateRights = async (objectId, message) => {
+const assertThatCurrentOwnerHasUpdateRights = async (objectId, message) => {
   const object = await objectService.get({ id: objectId }, message);
   const objectParent = await objectService
     .getParent(R.pick(['parentType', 'parentId'], object));
@@ -84,3 +84,8 @@ export const assertThatCurrentOwnerHasUpdateRights = async (objectId, message) =
     throw createError('403');
   }
 };
+
+exports.assertThatCurrentOwnerHasUpdateRights = assertThatCurrentOwnerHasUpdateRights;
+exports.assertThatUserBelongsToMessage = assertThatUserBelongsToMessage;
+exports.createPollResource = createPollResource;
+exports.removeAttachedObjects = removeAttachedObjects;

@@ -1,6 +1,6 @@
-import Boom from 'boom';
-import { pick } from 'lodash';
-import errors from '../configs/errors.json';
+const Boom = require('boom');
+const { pick } = require('lodash');
+const errors = require('../configs/errors.json');
 
 const createError = (code, developerMessage) => {
   const FILTER_PROPERTIES = ['type', 'detail', 'code'];
@@ -14,4 +14,4 @@ const createError = (code, developerMessage) => {
   });
 };
 
-export default createError;
+module.exports = createError;

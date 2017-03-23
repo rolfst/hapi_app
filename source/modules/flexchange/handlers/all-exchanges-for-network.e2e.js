@@ -1,13 +1,14 @@
-import { assert } from 'chai';
-import qs from 'qs';
-import moment from 'moment';
-import { map, pick, find } from 'lodash';
-import { getRequest } from '../../../shared/test-utils/request';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as stubs from '../../../shared/test-utils/stubs';
-import * as teamRepo from '../../core/repositories/team';
-import { exchangeTypes } from '../repositories/dao/exchange';
-import * as exchangeRepo from '../repositories/exchange';
+const { assert } = require('chai');
+const R = require('ramda');
+const qs = require('qs');
+const moment = require('moment');
+const { map, find } = require('lodash');
+const { getRequest } = require('../../../shared/test-utils/request');
+const testHelper = require('../../../shared/test-utils/helpers');
+const stubs = require('../../../shared/test-utils/stubs');
+const teamRepo = require('../../core/repositories/team');
+const { exchangeTypes } = require('../repositories/dao/exchange');
+const exchangeRepo = require('../repositories/exchange');
 
 describe('Get exchanges for network', () => {
   const pristineNetwork = stubs.pristine_networks_admins[0];
@@ -23,11 +24,12 @@ describe('Get exchanges for network', () => {
         testHelper.createUser(),
       ]);
 
-      const { network: netw } = await testHelper.createNetworkWithIntegration({
-        userId: admin.id,
-        token: 'footoken',
-        ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
-      });
+      const { network: netw } = await testHelper.createNetworkWithIntegration(R.merge(
+        {
+          userId: admin.id,
+          token: 'footoken',
+        },
+        R.pick(['externalId', 'name', 'integrationName'], pristineNetwork)));
       integratedNetwork = netw;
       const plainNetwork = await testHelper.createNetwork(
         { userId: admin.id, name: 'flexappeal' });
@@ -119,11 +121,12 @@ describe('Get exchanges for network', () => {
       employee = await testHelper.createUser({
         username: 'employee@flex-appeal.nl', password: 'baz' });
       network = await testHelper.createNetwork({ userId: admin.id, name: 'test' });
-      const { network: netw } = await testHelper.createNetworkWithIntegration({
-        userId: admin.id,
-        token: 'footoken',
-        ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
-      });
+      const { network: netw } = await testHelper.createNetworkWithIntegration(R.merge(
+        {
+          userId: admin.id,
+          token: 'footoken',
+        },
+        R.pick(['externalId', 'name', 'integrationName'], pristineNetwork)));
       const integrationNetwork = netw;
       testHelper.addUserToNetwork(
         { networkId: network.id, userId: employee.id, roleType: 'EMPLOYEE' });
@@ -142,7 +145,7 @@ describe('Get exchanges for network', () => {
       ]);
 
       const exchanges = await exchangeRepo.findExchangesByNetwork(network.id);
-      await Promise.all(map(exchanges, e => exchangeRepo.deleteById(e.id)));
+      await Promise.all(map(exchanges, (e) => exchangeRepo.deleteById(e.id)));
 
       const exchangeForTeams = exchangeRepo.createExchange(admin.id, network.id, {
         date: moment().format('YYYY-MM-DD'),

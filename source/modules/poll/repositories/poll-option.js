@@ -1,6 +1,6 @@
-import R from 'ramda';
-import { PollOption } from './dao';
-import createPollOptionModel from '../models/poll-option';
+const R = require('ramda');
+const { PollOption } = require('./dao');
+const createPollOptionModel = require('../models/poll-option');
 
 /**
  * Create a new poll option
@@ -11,9 +11,11 @@ import createPollOptionModel from '../models/poll-option';
  * @method create
  * @return {external:Promise} - Create poll option promise
  */
-export const create = async (attributes) => {
+const create = async (attributes) => {
   const whitelist = ['pollId', 'text', 'order'];
   const pollOption = await PollOption.create(R.pick(whitelist, attributes));
 
   return createPollOptionModel(pollOption);
 };
+
+exports.create = create;

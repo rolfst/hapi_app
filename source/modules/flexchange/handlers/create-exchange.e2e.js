@@ -1,18 +1,17 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import R from 'ramda';
-import { pick } from 'lodash';
-import moment from 'moment';
-import Promise from 'bluebird';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as stubs from '../../../shared/test-utils/stubs';
-import * as notifier from '../../../shared/services/notifier';
-import { postRequest } from '../../../shared/test-utils/request';
-import * as teamRepo from '../../core/repositories/team';
-import * as objectService from '../../core/services/object';
-import { exchangeTypes } from '../repositories/dao/exchange';
-import * as exchangeRepo from '../repositories/exchange';
-import * as exchangeService from '../services/flexchange';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const R = require('ramda');
+const moment = require('moment');
+const Promise = require('bluebird');
+const testHelper = require('../../../shared/test-utils/helpers');
+const stubs = require('../../../shared/test-utils/stubs');
+const notifier = require('../../../shared/services/notifier');
+const { postRequest } = require('../../../shared/test-utils/request');
+const teamRepo = require('../../core/repositories/team');
+const objectService = require('../../core/services/object');
+const { exchangeTypes } = require('../repositories/dao/exchange');
+const exchangeRepo = require('../repositories/exchange');
+const exchangeService = require('../services/flexchange');
 
 describe('Create exchange', () => {
   let sandbox;
@@ -32,11 +31,13 @@ describe('Create exchange', () => {
     employee = await testHelper.createUser();
     flexAppealNetwork = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
 
-    const networkWithIntegration = await testHelper.createNetworkWithIntegration({
-      userId: admin.id,
-      token: 'footoken',
-      ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
-    });
+    const networkWithIntegration = await testHelper.createNetworkWithIntegration(R.merge(
+      {
+        userId: admin.id,
+        token: 'footoken',
+      },
+      R.pick(['externalId', 'name', 'integrationName'], pristineNetwork)
+    ));
 
     await testHelper.addUserToNetwork({ networkId: flexAppealNetwork.id, userId: employee.id });
 

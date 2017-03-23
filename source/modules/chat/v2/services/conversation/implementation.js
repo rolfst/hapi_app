@@ -1,14 +1,17 @@
-import R from 'ramda';
-import createError from '../../../../../shared/utils/create-error';
-import * as conversationRepo from '../../repositories/conversation';
+const R = require('ramda');
+const createError = require('../../../../../shared/utils/create-error');
+const conversationRepo = require('../../repositories/conversation');
 
 const parseIncludes = R.split(',');
 
-export const hasInclude = R.curry((includes, selector) =>
+const hasInclude = R.curry((includes, selector) =>
   R.contains(selector, parseIncludes(includes || '')));
 
-export const assertThatUserIsPartOfTheConversation = async (userId, conversationId) => {
+const assertThatUserIsPartOfTheConversation = async (userId, conversationId) => {
   const result = await R.pipeP(conversationRepo.findByIds, R.head)([conversationId]);
 
   if (!result || !R.contains(userId, result.participantIds)) throw createError('404');
 };
+
+exports.assertThatUserIsPartOfTheConversation = assertThatUserIsPartOfTheConversation;
+exports.hasInclude = hasInclude;

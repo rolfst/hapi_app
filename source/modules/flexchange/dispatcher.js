@@ -1,14 +1,14 @@
-import R from 'ramda';
-import * as Mixpanel from '../../shared/services/mixpanel';
-import EventEmitter from '../../shared/services/event-emitter';
-import * as Intercom from '../../shared/services/intercom';
-import * as objectService from '../core/services/object';
-import newExchangeEvent from './analytics/new-exchange-event';
-import approveExchangeEvent from './analytics/approve-exchange-event';
-import * as creatorNotifier from './notifications/creator-approved';
-import * as substituteNotifier from './notifications/substitute-approved';
-import * as createdNotifier from './notifications/exchange-created';
-import * as exchangeService from './services/flexchange';
+const R = require('ramda');
+const Mixpanel = require('../../shared/services/mixpanel');
+const EventEmitter = require('../../shared/services/event-emitter');
+const Intercom = require('../../shared/services/intercom');
+const objectService = require('../core/services/object');
+const newExchangeEvent = require('./analytics/new-exchange-event');
+const approveExchangeEvent = require('./analytics/approve-exchange-event');
+const creatorNotifier = require('./notifications/creator-approved');
+const substituteNotifier = require('./notifications/substitute-approved');
+const createdNotifier = require('./notifications/exchange-created');
+const exchangeService = require('./services/flexchange');
 
 const pubsub = EventEmitter.create();
 
@@ -47,4 +47,4 @@ pubsub.asyncOn('exchange.approved', (payload) => {
   Intercom.incrementAttribute(approvedUser.email, 'exchanged_shifts');
 });
 
-export default pubsub;
+module.exports = pubsub;

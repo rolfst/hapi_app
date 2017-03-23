@@ -1,15 +1,15 @@
-import sinon from 'sinon';
-import { assert } from 'chai';
-import R from 'ramda';
-import { find } from 'lodash';
-import Promise from 'bluebird';
-import * as testHelpers from '../../../../shared/test-utils/helpers';
-import * as adapterUtil from '../../../../shared/utils/create-adapter';
-import * as networkRepository from '../../../core/repositories/network';
-import * as teamRepository from '../../../core/repositories/team';
-import * as userRepository from '../../../core/repositories/user';
-import * as networkService from '../../../core/services/network';
-import * as service from './index';
+const sinon = require('sinon');
+const { assert } = require('chai');
+const R = require('ramda');
+const { find } = require('lodash');
+const Promise = require('bluebird');
+const testHelpers = require('../../../../shared/test-utils/helpers');
+const adapterUtil = require('../../../../shared/utils/create-adapter');
+const networkRepository = require('../../../core/repositories/network');
+const teamRepository = require('../../../core/repositories/team');
+const userRepository = require('../../../core/repositories/user');
+const networkService = require('../../../core/services/network');
+const service = require('./index');
 
 describe('Network synchronisation', () => {
   let network;
@@ -428,7 +428,7 @@ describe('Network synchronisation', () => {
       ]);
 
       const transferedUser = find(activeUsersInToTransferNetwork,
-        user => user.email === userToTransfer.email);
+        (user) => user.email === userToTransfer.email);
 
       assert.lengthOf(activeUsersInNetwork, 2);
       assert.lengthOf(activeUsersInNetworkAfterUpdate, 2);
@@ -451,7 +451,7 @@ describe('Network synchronisation', () => {
       const employeeIds = R.pluck('id', employeesOfNetwork(usersInNetwork));
 
       // We should delete the teams first to avoid a deadlock for at team_user pivot table
-      await Promise.map(teamsForNetwork, team => teamRepository.deleteById(team.id));
+      await Promise.map(teamsForNetwork, (team) => teamRepository.deleteById(team.id));
       await Promise.map(employeeIds, userRepository.deleteById);
     });
 
@@ -521,7 +521,7 @@ describe('Network synchronisation', () => {
       await service.syncNetwork({ networkId: network.id, internal: true });
 
       const membersOfCreatedTeams = await Promise.map(createdTeams,
-        team => teamRepository.findMembers(team.id));
+        (team) => teamRepository.findMembers(team.id));
 
       assert.lengthOf(membersOfCreatedTeams[0], 1);
       assert.lengthOf(membersOfCreatedTeams[1], 1);
@@ -594,7 +594,7 @@ describe('Network synchronisation', () => {
       await service.syncNetwork({ networkId: network.id, internal: true });
 
       const membersOfCreatedTeams = await Promise.map(createdTeams,
-        team => teamRepository.findMembers(team.id));
+        (team) => teamRepository.findMembers(team.id));
 
       assert.lengthOf(membersOfCreatedTeams[0], 0);
       assert.lengthOf(membersOfCreatedTeams[1], 1);

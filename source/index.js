@@ -1,8 +1,9 @@
-import 'babel-polyfill';
 require('dotenv').config();
-import 'newrelic';
-import Parse from 'parse/node';
-import * as Logger from './shared/services/logger';
+require('newrelic');
+require('./shared/services/BindingService');
+
+const Parse = require('parse/node');
+const Logger = require('./shared/services/logger');
 
 const logger = Logger.createLogger('SERVER');
 const createServer = require('./server').default;
@@ -13,7 +14,7 @@ if (process.env.API_ENV !== 'production') {
 
 const server = createServer();
 
-server.start(err => {
+server.start((err) => {
   if (err) throw err;
 
   const { PARSE_APP_ID, PARSE_CLIENT_KEY, PARSE_MASTER_KEY, PARSE_SERVER_URL } = process.env;

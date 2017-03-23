@@ -1,7 +1,8 @@
-import { assert } from 'chai';
-import { omit } from 'lodash';
-import preFetchNetwork from '../middlewares/prefetch-network';
-import * as systemUnderTest from './create-routes';
+const { assert } = require('chai');
+const { omit } = require('lodash');
+const R = require('ramda');
+const preFetchNetwork = require('../middlewares/prefetch-network');
+const systemUnderTest = require('./create-routes');
 
 describe('createRoutes', () => {
   describe('createRoute', () => {
@@ -80,7 +81,7 @@ describe('createRoutes', () => {
       };
 
       const actual = systemUnderTest.createRoute(fakeRoute);
-      const expected = { ...routeStub, config: omit(routeStub.config, 'auth', 'pre') };
+      const expected = R.mergeAll([routeStub, { config: omit(routeStub.config, 'auth', 'pre') }]);
 
       assert.deepEqual(actual, expected);
     });
@@ -95,10 +96,11 @@ describe('createRoutes', () => {
       };
 
       const actual = systemUnderTest.createRoute(fakeRoute);
-      const expected = { ...routeStub, config: {
-        auth: 'other_strategy',
-        validate: 'my_validator',
-      } };
+      const expected = R.merge(routeStub,
+        { config: {
+          auth: 'other_strategy',
+          validate: 'my_validator',
+        } });
 
       assert.deepEqual(actual, expected);
     });
@@ -113,10 +115,10 @@ describe('createRoutes', () => {
       };
 
       const actual = systemUnderTest.createRoute(fakeRoute);
-      const expected = { ...routeStub, config: {
+      const expected = R.merge(routeStub, { config: {
         auth: 'jwt',
         validate: 'my_validator',
-      } };
+      } });
 
       assert.deepEqual(actual, expected);
     });

@@ -1,7 +1,7 @@
-import Joi from 'joi';
+const Joi = require('joi');
 
-export default {
-  payload: {
-    external_email: Joi.string().required(),
-  },
+module.exports = {
+  payload: Joi.object().keys({
+    ownerEmail: Joi.string().required(),
+  }).rename('external_email', 'ownerEmail'),
 };

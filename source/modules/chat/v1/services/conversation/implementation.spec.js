@@ -1,8 +1,8 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import * as notifier from '../../../../../shared/services/notifier';
-import * as mailer from '../../../../../shared/services/mailer';
-import * as impl from './implementation';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const notifier = require('../../../../../shared/services/notifier');
+const mailer = require('../../../../../shared/services/mailer');
+const impl = require('./implementation');
 
 describe('Conversation Service implementation', () => {
   let sandbox;

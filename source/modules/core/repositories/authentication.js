@@ -1,5 +1,5 @@
-import uuid from 'uuid-v4';
-import { UserDevice } from './dao';
+const uuid = require('uuid-v4');
+const { UserDevice } = require('./dao');
 
 /**
  * @module modules/core/repositories/authentication
@@ -11,7 +11,7 @@ import { UserDevice } from './dao';
  * @method findUserDevice
  * @return {external:Promise.<UserDevice>} {@link module:shared~Activity Activity}
  */
-export function findUserDevice(userId, deviceName) {
+function findUserDevice(userId, deviceName) {
   return UserDevice.findOne({ where: { userId, deviceName } });
 }
 
@@ -22,7 +22,7 @@ export function findUserDevice(userId, deviceName) {
  * @method createUserDevice
  * @return {external:Promise.<Device>} {@link module:shared~Device Device}
  */
-export function createUserDevice(deviceId, deviceName, userId) {
+function createUserDevice(deviceId, deviceName, userId) {
   return UserDevice.create({ deviceId, deviceName, userId });
 }
 
@@ -32,14 +32,18 @@ export function createUserDevice(deviceId, deviceName, userId) {
  * @method findOrCreateUserDevice
  * @return {external:Promise.<Device>} {@link module:shared~Device Device}
  */
-export function findOrCreateUserDevice(userId, deviceName) {
-  return findUserDevice(userId, deviceName).then(device => {
+function findOrCreateUserDevice(userId, deviceName) {
+  return findUserDevice(userId, deviceName).then((device) => {
     if (!device) {
       const deviceId = uuid().toUpperCase().replace(/-/g, '');
-      return createUserDevice(deviceId, deviceName, userId)
-        .then(createdDevice => createdDevice);
+
+      return createUserDevice(deviceId, deviceName, userId);
     }
 
     return device;
   });
 }
+
+exports.createUserDevice = createUserDevice;
+exports.findOrCreateUserDevice = findOrCreateUserDevice;
+exports.findUserDevice = findUserDevice;

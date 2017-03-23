@@ -1,6 +1,6 @@
-import * as dateUtils from '../../../../shared/utils/date';
+const dateUtils = require('../../../../shared/utils/date');
 
-export default (dataModel) => ({
+module.exports = (dataModel) => ({
   type: 'private_message',
   id: dataModel.id.toString(),
   objectId: dataModel.objectId ? dataModel.objectId.toString() : null,

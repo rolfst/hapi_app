@@ -1,6 +1,6 @@
-import fetch from 'isomorphic-fetch';
-import createError from '../../../../shared/utils/create-error';
-import * as Logger from '../../../../shared/services/logger';
+const fetch = require('isomorphic-fetch');
+const createError = require('../../../../shared/utils/create-error');
+const Logger = require('../../../../shared/services/logger');
 
 const logger = Logger.createLogger('PMT/adapter/client');
 
@@ -36,7 +36,7 @@ const handleRequest = async (response, endpoint) => {
   return { status, json };
 };
 
-export async function makeRequest(endpoint, token = null, method = 'GET', data = {}, message) {
+async function makeRequest(endpoint, token = null, method = 'GET', data = {}, message) {
   const options = {
     method,
     headers: {
@@ -64,9 +64,10 @@ export async function makeRequest(endpoint, token = null, method = 'GET', data =
   return { payload: json, status };
 }
 
-export default {
-  post: (endpoint, token, data, message) => makeRequest(endpoint, token, 'POST', data, message),
-  get: (endpoint, token, message) => makeRequest(endpoint, token, 'GET', message),
-  put: (endpoint, token, data, message) => makeRequest(endpoint, token, 'PUT', data, message),
-  delete: (endpoint, token, message) => makeRequest(endpoint, token, 'DELETE', message),
-};
+exports.makeRequest = makeRequest;
+exports.post = (endpoint, token, data, message) => makeRequest(
+    endpoint, token, 'POST', data, message);
+exports.get = (endpoint, token, message) => makeRequest(endpoint, token, 'GET', message);
+exports.put = (endpoint, token, data, message) => makeRequest(
+    endpoint, token, 'PUT', data, message);
+exports.delete = (endpoint, token, message) => makeRequest(endpoint, token, 'DELETE', message);

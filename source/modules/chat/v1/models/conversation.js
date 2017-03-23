@@ -1,9 +1,9 @@
-import { map, last } from 'lodash';
-import * as dateUtils from '../../../../shared/utils/date';
-import createUserModel from '../../../core/models/user';
-import createMessageModel from './message';
+const { map, last } = require('lodash');
+const dateUtils = require('../../../../shared/utils/date');
+const createUserModel = require('../../../core/models/user');
+const createMessageModel = require('./message');
 
-export default (dao) => ({
+module.exports = (dao) => ({
   type: 'conversation',
   id: dao.id.toString(),
   createdAt: dateUtils.toISOString(dao.created_at),

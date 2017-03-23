@@ -1,3 +1,4 @@
+/* eslint-disable global-require, import/no-dynamic-require */
 const fs = require('fs');
 const path = require('path');
 
@@ -13,8 +14,5 @@ const path = require('path');
 fs.readdirSync(__dirname).forEach((filename) => {
   if (filename === 'index.js') { return; }
   const modelName = path.basename(filename, '.json');
-  function load() {
-    return require(`./${modelName}`);
-  }
-  exports.__defineGetter__(modelName.replace(/\-/g, '_'), load);
+  exports[modelName.replace(/-/g, '_')] = require(`./${modelName}`);
 });

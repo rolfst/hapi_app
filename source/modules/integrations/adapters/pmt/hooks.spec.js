@@ -1,11 +1,10 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import client from './client';
-import stubs from './test-utils/stubs';
-import blueprints from './test-utils/blueprints';
-import fetchTeams from './hooks/fetch-teams';
-import * as userConnector from './hooks/fetch-users';
-import teamSerializer from './serializers/team';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const client = require('./client');
+const blueprints = require('./test-utils/blueprints');
+const fetchTeams = require('./hooks/fetch-teams');
+const fetchUsers = require('./hooks/fetch-users');
+const teamSerializer = require('./serializers/team');
 
 describe('PMT Hooks', () => {
   const fakeBaseStoreUrl = 'http://mypmtstore.nl';
@@ -32,7 +31,7 @@ describe('PMT Hooks', () => {
     before(async () => {
       sinon.stub(client, 'get').returns(Promise.resolve({ payload: { data: blueprints.users } }));
 
-      hookResult = await userConnector.fetchUsers(fakeBaseStoreUrl)();
+      hookResult = await fetchUsers(fakeBaseStoreUrl)();
     });
 
     after(() => client.get.restore());
@@ -62,33 +61,6 @@ describe('PMT Hooks', () => {
       assert.property(hookResult[0], 'deletedAt');
       assert.property(hookResult[0], 'teamIds');
       assert.isArray(hookResult[0].teamIds);
-    });
-  });
-
-  describe('getUsers', () => {
-    before(async () => {
-      sinon.stub(client, 'get').returns(
-      Promise.resolve({ payload: { data: stubs.unlinkedUsers } }));
-    });
-
-    after(() => client.get.restore());
-    it('should confirm to Domain model', async () => {
-      const teams = [{
-        name: 'vleeswaren',
-        id: '1',
-        externalId: '14',
-        description: '',
-      }, {
-        name: 'algemeen',
-        id: '2',
-        externalId: '20',
-        description: '',
-      }];
-      const users = await userConnector.getUsers(fakeBaseStoreUrl, teams);
-
-      assert.equal(users.length, 2);
-      assert.property(users[0], 'teamIds');
-      assert.deepEqual(users[0].teamIds, ['1', '2']);
     });
   });
 });

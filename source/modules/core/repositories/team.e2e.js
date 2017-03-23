@@ -1,9 +1,9 @@
-import { assert } from 'chai';
-import Promise from 'bluebird';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as userRepo from './user';
-import * as networkRepo from './network';
-import * as teamRepo from './team';
+const { assert } = require('chai');
+const Promise = require('bluebird');
+const testHelper = require('../../../shared/test-utils/helpers');
+const userRepo = require('./user');
+const networkRepo = require('./network');
+const teamRepo = require('./team');
 
 describe('Team repository', () => {
   let network;

@@ -1,14 +1,7 @@
-import * as responseUtil from '../../../shared/utils/response';
-import * as Logger from '../../../shared/services/logger';
+const responseUtil = require('../../../shared/utils/response');
 
-const logger = Logger.createLogger('CORE/handler/viewNetwork');
-
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const message = { ...req.pre, ...req.auth };
-
-    logger.info('Retrieving network information', { message });
-
     return reply({ data: responseUtil.toSnakeCase(req.pre.network) });
   } catch (err) {
     return reply(err);

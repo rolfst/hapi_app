@@ -1,8 +1,9 @@
-import { assert } from 'chai';
-import moment from 'moment';
-import Joi from 'joi';
-import { omit } from 'lodash';
-import scheme from './create-exchange';
+const { assert } = require('chai');
+const moment = require('moment');
+const R = require('ramda');
+const Joi = require('joi');
+const { omit } = require('lodash');
+const scheme = require('./create-exchange');
 
 describe('Create exchange validator', () => {
   it('only accepts TEAM, ALL and USER values as type', () => {
@@ -62,7 +63,7 @@ describe('Create exchange validator', () => {
     });
 
     it('fails when type is not USER', () => {
-      const payload = { ...defaultPayload, type: 'ALL' };
+      const payload = R.merge(defaultPayload, { type: 'ALL' });
       const actual = Joi.validate({ payload }, scheme);
 
       assert.ifError(actual.error[0]);

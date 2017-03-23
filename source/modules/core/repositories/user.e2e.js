@@ -1,15 +1,15 @@
-import { assert } from 'chai';
-import R from 'ramda';
-import Promise from 'bluebird';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as repository from './user';
-import * as teamRepository from './team';
+const { assert } = require('chai');
+const R = require('ramda');
+const Promise = require('bluebird');
+const testHelper = require('../../../shared/test-utils/helpers');
+const repository = require('./user');
+const teamRepository = require('./team');
 
 describe('User Repository', () => {
   let createdUser;
   let network;
 
-  before(async() => {
+  before(async () => {
     createdUser = await repository.createUser({
       username: 'johndoe',
       email: 'johndoe@flex-appeal.nl',
@@ -65,8 +65,7 @@ describe('User Repository', () => {
     it('should fail when a scoped user is searched for without network id', async () => {
       const actual = repository.findUserById(createdUser.id);
 
-      return assert.isRejected(actual,
-          /Error: A bad number of arguments is provided for this method/);
+      return assert.isRejected(actual, 'A bad number of arguments is provided for this method');
     });
   });
 });

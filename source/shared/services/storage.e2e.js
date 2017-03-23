@@ -1,8 +1,8 @@
-import { assert } from 'chai';
-import stream from 'stream';
-import sinon from 'sinon';
-import AWS from 'aws-sdk';
-import * as Storage from './storage';
+const { assert } = require('chai');
+const stream = require('stream');
+const sinon = require('sinon');
+const AWS = require('aws-sdk');
+const Storage = require('./storage');
 
 describe('Service: Storage', () => {
   let sandbox;
@@ -50,6 +50,6 @@ describe('Service: Storage', () => {
 
     const result = Storage.upload(file);
 
-    return assert.isRejected(result, /Error: Error in S3/);
+    return assert.isRejected(result, 'Error in S3');
   });
 });

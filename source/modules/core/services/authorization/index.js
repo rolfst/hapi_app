@@ -1,9 +1,9 @@
-import * as Logger from '../../../../shared/services/logger';
-import createError from '../../../../shared/utils/create-error';
-import * as userRepo from '../../repositories/user';
-import * as networkRepo from '../../repositories/network';
-import { TeamUser } from '../../repositories/dao';
-import * as userService from '../user';
+const Logger = require('../../../../shared/services/logger');
+const createError = require('../../../../shared/utils/create-error');
+const userRepo = require('../../repositories/user');
+const networkRepo = require('../../repositories/network');
+const { TeamUser } = require('../../repositories/dao');
+const userService = require('../user');
 
 /**
  * @module modules/core/services/authorization
@@ -22,15 +22,13 @@ const logger = Logger.getLogger('CORE/service/authorization');
  * @throws Error - 403
  * @return {void}
  */
-export async function assertRoleTypeForUser(payload, message) {
+async function assertRoleTypeForUser(payload, message) {
   logger.info('Asserting role type for user', { payload, message });
 
   const scopedUser = await userService.getUserWithNetworkScope(
     { id: payload.userId, networkId: payload.networkId }, message);
 
   if (scopedUser.roleType !== payload.roleType) throw createError('403');
-
-  return;
 }
 
 /**
@@ -42,7 +40,7 @@ export async function assertRoleTypeForUser(payload, message) {
  * @throws Error - 10002
  * @return {void}
  */
-export async function assertThatUserBelongsToTheNetwork(payload) {
+async function assertThatUserBelongsToTheNetwork(payload) {
   const belongs = await userRepo.userBelongsToNetwork(payload.userId, payload.networkId);
   const network = await networkRepo.findNetwork({ userId: payload.userId, id: payload.networkId });
   const result = belongs || network;
@@ -61,10 +59,14 @@ export async function assertThatUserBelongsToTheNetwork(payload) {
  * @throws Error - 10010
  * @return {void}
  */
-export const assertThatUserBelongsToTheTeam = async (payload) => {
+const assertThatUserBelongsToTheTeam = async (payload) => {
   const result = await TeamUser.find({ where: {
     teamId: payload.teamId, userId: payload.userId,
   } });
 
   if (!result) throw createError('10010');
 };
+
+exports.assertRoleTypeForUser = assertRoleTypeForUser;
+exports.assertThatUserBelongsToTheNetwork = assertThatUserBelongsToTheNetwork;
+exports.assertThatUserBelongsToTheTeam = assertThatUserBelongsToTheTeam;

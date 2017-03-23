@@ -1,5 +1,5 @@
-import Sequelize from 'sequelize';
-import model from '../../../../shared/configs/sequelize';
+const Sequelize = require('sequelize');
+const model = require('../../../../shared/configs/sequelize');
 
 const FeedComment = model.define('FeedComment', {
   messageId: {
@@ -31,4 +31,4 @@ const FeedComment = model.define('FeedComment', {
   updatedAt: 'updated_at',
 });
 
-export default FeedComment;
+module.exports = FeedComment;

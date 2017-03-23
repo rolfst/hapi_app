@@ -1,9 +1,10 @@
-import { assert } from 'chai';
-import blueprints from '../../../../../shared/test-utils/blueprints';
-import * as userRepo from '../../../../core/repositories/user';
-import * as objectService from '../../../../core/services/object';
-import * as messageService from '../private-message';
-import * as conversationService from '../../services/conversation';
+const { assert } = require('chai');
+const R = require('ramda');
+const blueprints = require('../../../../../shared/test-utils/blueprints');
+const userRepo = require('../../../../core/repositories/user');
+const objectService = require('../../../../core/services/object');
+const messageService = require('../private-message');
+const conversationService = require('../../services/conversation');
 
 describe('Service: Conversation (v2)', () => {
   describe('remove', () => {
@@ -12,13 +13,13 @@ describe('Service: Conversation (v2)', () => {
     let createdConversation;
 
     before(async () => {
-      creator = await userRepo.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_creator' });
+      creator = await userRepo.createUser(R.merge(
+        blueprints.users.employee,
+        { username: 'conversation_creator' }));
 
-      participant = await userRepo.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_participant' });
+      participant = await userRepo.createUser(R.merge(
+        blueprints.users.employee,
+        { username: 'conversation_participant' }));
 
       createdConversation = await conversationService.create({
         type: 'PRIVATE',
@@ -28,21 +29,25 @@ describe('Service: Conversation (v2)', () => {
       await messageService.create({
         conversationId: createdConversation.id,
         text: 'First message',
-      }, { credentials: participant, artifacts: {
-        authenticationToken: 'foo_token' } });
+      }, {
+        credentials: participant,
+        artifacts: {
+          authenticationToken: 'foo_token' } });
 
       await messageService.create({
         conversationId: createdConversation.id,
         text: 'Last message',
-      }, { credentials: participant, artifacts: {
-        authenticationToken: 'foo_token' } });
+      }, {
+        credentials: participant,
+        artifacts: {
+          authenticationToken: 'foo_token' } });
 
       await conversationService.remove({ conversationId: createdConversation.id });
     });
 
     after(async () => {
       await conversationService.remove({ conversationId: createdConversation.id });
-      await [creator, participant].map(user => userRepo.deleteById(user.id));
+      await [creator, participant].map((user) => userRepo.deleteById(user.id));
     });
 
     it('should remove related objects', async () => {
@@ -58,17 +63,17 @@ describe('Service: Conversation (v2)', () => {
     let participant;
 
     before(async () => {
-      creator = await userRepo.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_creator' });
+      creator = await userRepo.createUser(R.merge(
+        blueprints.users.employee,
+        { username: 'conversation_creator' }));
 
-      participant = await userRepo.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_participant' });
+      participant = await userRepo.createUser(R.merge(
+        blueprints.users.employee,
+        { username: 'conversation_participant' }));
     });
 
     after(async () => {
-      await [creator, participant].map(user => userRepo.deleteById(user.id));
+      await [creator, participant].map((user) => userRepo.deleteById(user.id));
     });
 
     it('should create a conversation', async () => {

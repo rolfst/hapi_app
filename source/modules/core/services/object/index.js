@@ -1,12 +1,12 @@
-import R from 'ramda';
-import Promise from 'bluebird';
-import createError from '../../../../shared/utils/create-error';
-import * as Logger from '../../../../shared/services/logger';
-import * as networkRepository from '../../../core/repositories/network';
-import * as teamRepository from '../../../core/repositories/team';
-import * as userRepository from '../../../core/repositories/user';
-import * as objectRepository from '../../repositories/object';
-import * as impl from './implementation';
+const R = require('ramda');
+const Promise = require('bluebird');
+const createError = require('../../../../shared/utils/create-error');
+const Logger = require('../../../../shared/services/logger');
+const networkRepository = require('../../../core/repositories/network');
+const teamRepository = require('../../../core/repositories/team');
+const userRepository = require('../../../core/repositories/user');
+const objectRepository = require('../../repositories/object');
+const impl = require('./implementation');
 
 /**
  * @module modules/core/services/object
@@ -14,8 +14,9 @@ import * as impl from './implementation';
 
 const logger = Logger.getLogger('CORE/service/object');
 
-const objectsForTypeValuePair = (fn, pairs) => R.pipe(R.mapObjIndexed(fn), R.values)(pairs);
-const getSources = R.pipeP(Promise.all, R.flatten, R.reject(R.isNil));
+const objectsForTypeValuePair = (fn, pairs) => Object.keys(pairs)
+  .map((key) => fn(pairs[key], key));
+const getSources = R.pipeP(Promise.all, R.values, R.flatten, R.reject(R.isNil));
 const groupByObjectType = R.groupBy(R.prop('objectType'));
 const sourceIdsPerType = R.pipe(groupByObjectType, R.map(R.pluck('sourceId')));
 const createOptionsFromPayload = R.pipe(
@@ -33,7 +34,7 @@ const createOptionsFromPayload = R.pipe(
  * @method list
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
-export const list = async (payload, message) => {
+const list = async (payload, message) => {
   logger.info('Listing objects', { payload, message });
 
   const objects = await objectRepository.findBy({
@@ -52,7 +53,7 @@ export const list = async (payload, message) => {
  * @method listWithSourceAndChildren
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
-export const listWithSourceAndChildren = async (payload, message) => {
+const listWithSourceAndChildren = async (payload, message) => {
   logger.info('Listing objects with sources', { payload, message });
 
   const objects = await objectRepository.findBy({
@@ -63,8 +64,8 @@ export const listWithSourceAndChildren = async (payload, message) => {
     impl.findChildrenForType, sourceIdsPerType(objects));
   const children = await getSources(promisedChildren);
 
-  const promisedSources = objectsForTypeValuePair(impl.findSourcesForType(message),
-    R.merge(sourceIdsPerType(objects), sourceIdsPerType(children)));
+  const sourceIds = R.merge(sourceIdsPerType(objects), sourceIdsPerType(children));
+  const promisedSources = objectsForTypeValuePair(impl.findSourcesForType(message), sourceIds);
   const sources = await getSources(promisedSources);
 
   const objectsWithSource = R.map(impl.addSourceToObject(sources), R.concat(objects, children));
@@ -88,7 +89,7 @@ export const listWithSourceAndChildren = async (payload, message) => {
  * @method getWithSourceAndChildren
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
-export const getWithSourceAndChildren = async (payload, message) => {
+const getWithSourceAndChildren = async (payload, message) => {
   return R.head(await listWithSourceAndChildren({ objectIds: [payload.objectId] }, message));
 };
 
@@ -105,7 +106,7 @@ export const getWithSourceAndChildren = async (payload, message) => {
  * @method create
  * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
-export const create = async (payload, message) => {
+const create = async (payload, message) => {
   logger.info('Creating object', { payload, message });
 
   return objectRepository.create(payload);
@@ -122,7 +123,7 @@ export const create = async (payload, message) => {
  * @method count
  * @return {external:Promise.<number>}
  */
-export const count = async (payload, message) => {
+const count = async (payload, message) => {
   logger.info('Counting objects', { payload, message });
 
   const whitelistAttrs = ['userId', 'parentType', 'parentId', 'objectType'];
@@ -141,7 +142,7 @@ export const count = async (payload, message) => {
  * @method getParent
  * @return {external:Promise}
  */
-export const getParent = async (payload, message) => {
+const getParent = async (payload, message) => {
   logger.info('Retrieving parent for object', { payload, message });
 
   const result = await R.cond([
@@ -165,7 +166,7 @@ export const getParent = async (payload, message) => {
  * @method usersForParent
  * @return {external:Promise}
  */
-export const usersForParent = async (payload, message) => {
+const usersForParent = async (payload, message) => {
   logger.info('Retrieving users for parent of object', { payload, message });
 
   const result = await R.cond([
@@ -192,7 +193,7 @@ export const usersForParent = async (payload, message) => {
  * @method remove
  * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
-export const remove = async (payload, message) => {
+const remove = async (payload, message) => {
   logger.info('Deleting objects', { payload, message });
 
   await objectRepository.deleteBy(payload);
@@ -210,7 +211,7 @@ export const remove = async (payload, message) => {
  * @method get
  * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
-export const get = async (payload, message) => {
+const get = async (payload, message) => {
   logger.info('Retrieving object', { payload, message });
 
   const attributes = R.pick(['id', 'objectType', 'sourceId'], payload);
@@ -221,3 +222,13 @@ export const get = async (payload, message) => {
 
   return object;
 };
+
+exports.count = count;
+exports.create = create;
+exports.get = get;
+exports.getParent = getParent;
+exports.getWithSourceAndChildren = getWithSourceAndChildren;
+exports.list = list;
+exports.listWithSourceAndChildren = listWithSourceAndChildren;
+exports.remove = remove;
+exports.usersForParent = usersForParent;

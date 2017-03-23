@@ -1,7 +1,7 @@
-import nodemailer from 'nodemailer';
-import SendGridSMTP from 'smtpapi';
-import { mapValues } from 'lodash';
-import * as Logger from './logger';
+const nodemailer = require('nodemailer');
+const SendGridSMTP = require('smtpapi');
+const { mapValues } = require('lodash');
+const Logger = require('./logger');
 
 const logger = Logger.createLogger('SHARED/services/mailer');
 
@@ -17,7 +17,7 @@ const smtpConfig = {
 
 const transporter = nodemailer.createTransport(smtpConfig);
 
-export const flattenBulkMails = (mails) => {
+const flattenBulkMails = (mails) => {
   const output = mails.reduce((obj, curr) => {
     obj.email.push(curr.email);
     obj.data.push(curr.data);
@@ -29,7 +29,7 @@ export const flattenBulkMails = (mails) => {
   return output;
 };
 
-export const prepare = (mail) => {
+const prepare = (mail) => {
   if (Array.isArray(mail)) {
     return flattenBulkMails(mail);
   }
@@ -37,9 +37,9 @@ export const prepare = (mail) => {
   return mail;
 };
 
-export const mapsToSubstitutes = (subs) => mapValues(subs, o => [o]);
+const mapsToSubstitutes = (subs) => mapValues(subs, (o) => [o]);
 
-export const createSMTPHeader = (mail) => {
+const createSMTPHeader = (mail) => {
   const header = new SendGridSMTP();
 
   header.setSubstitutions(mapsToSubstitutes(mail.data));
@@ -55,7 +55,7 @@ export const createSMTPHeader = (mail) => {
   return header.jsonString();
 };
 
-export const createMailOptions = (mail) => {
+const createMailOptions = (mail) => {
   if (!mail.options.sender) throw new Error('No sender defined in mail object.');
   if (!mail.options.receiver) throw new Error('No receiver defined in mail object.');
 
@@ -72,7 +72,7 @@ export const createMailOptions = (mail) => {
   };
 };
 
-export const send = (mail, message = null) => {
+const send = (mail, message = null) => {
   const mailOptions = createMailOptions(mail);
   logger.info('Sending email to Sendgrid', { mailOptions, message });
 
@@ -80,3 +80,10 @@ export const send = (mail, message = null) => {
     if (err) logger.warn('Error when sending mail', { err, message, mail_options: mailOptions });
   });
 };
+
+exports.createMailOptions = createMailOptions;
+exports.createSMTPHeader = createSMTPHeader;
+exports.flattenBulkMails = flattenBulkMails;
+exports.mapsToSubstitutes = mapsToSubstitutes;
+exports.prepare = prepare;
+exports.send = send;

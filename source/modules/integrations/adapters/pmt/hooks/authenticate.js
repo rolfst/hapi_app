@@ -1,6 +1,6 @@
-import client from '../client';
+const client = require('../client');
 
-export default (baseStoreUrl) => async (credentials) => {
+module.exports = (baseStoreUrl) => async (credentials) => {
   const endpoint = `${baseStoreUrl}/login`;
 
   try {

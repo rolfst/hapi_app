@@ -1,5 +1,5 @@
-import Sequelize from 'sequelize';
-import model from '../../../../shared/configs/sequelize';
+const Sequelize = require('sequelize');
+const model = require('../../../../shared/configs/sequelize');
 
 const Poll = model.define('Poll', {
   userId: {
@@ -24,4 +24,4 @@ const Poll = model.define('Poll', {
   updatedAt: false,
 });
 
-export default Poll;
+module.exports = Poll;

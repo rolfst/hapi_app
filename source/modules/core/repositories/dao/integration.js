@@ -1,5 +1,5 @@
-import Sequelize from 'sequelize';
-import model from '../../../../shared/configs/sequelize';
+const Sequelize = require('sequelize');
+const model = require('../../../../shared/configs/sequelize');
 
 const Integration = model.define('Integration', {
   name: {
@@ -15,4 +15,4 @@ const Integration = model.define('Integration', {
   timestamps: false,
 });
 
-export default Integration;
+module.exports = Integration;

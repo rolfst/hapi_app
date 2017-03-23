@@ -1,11 +1,11 @@
-import { assert } from 'chai';
-import Promise from 'bluebird';
-import moment from 'moment';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import { deleteRequest } from '../../../shared/test-utils/request';
-import * as activityRepo from '../../core/repositories/activity';
-import { exchangeTypes } from '../repositories/dao/exchange';
-import * as exchangeService from '../services/flexchange';
+const { assert } = require('chai');
+const Promise = require('bluebird');
+const moment = require('moment');
+const testHelper = require('../../../shared/test-utils/helpers');
+const { deleteRequest } = require('../../../shared/test-utils/request');
+const activityRepo = require('../../core/repositories/activity');
+const { exchangeTypes } = require('../repositories/dao/exchange');
+const exchangeService = require('../services/flexchange');
 
 describe('Remove exchange', () => {
   let admin;

@@ -1,12 +1,12 @@
-import R from 'ramda';
-import Promise from 'bluebird';
-import AWS from 'aws-sdk';
-import createError from '../utils/create-error';
-import * as Logger from './logger';
+const R = require('ramda');
+const Promise = require('bluebird');
+const AWS = require('aws-sdk');
+const createError = require('../utils/create-error');
+const Logger = require('./logger');
 
 const logger = Logger.getLogger('SHARED/service/upload');
 
-export const getEnvironmentLocation = () => {
+const getEnvironmentLocation = () => {
   const mapping = {
     testing: 'development',
     development: 'development',
@@ -17,7 +17,7 @@ export const getEnvironmentLocation = () => {
   return mapping[process.env.API_ENV];
 };
 
-export const getClient = () => {
+const getClient = () => {
   AWS.config.setPromisesDependency(Promise);
 
   const options = {
@@ -38,7 +38,7 @@ export const getClient = () => {
  * @method upload
  * @return {external:Promise.<String>} Returning the filename
  */
-export function upload(file, prefix = null) {
+function upload(file, prefix = null) {
   const environment = getEnvironmentLocation();
   const fileExtension = R.last(file.hapi.filename.split('.'));
   const generatedFileName = Math.random().toString(20).substr(2, 15);
@@ -55,14 +55,18 @@ export function upload(file, prefix = null) {
   };
 
   return getClient().upload(params).promise()
-    .then(data => {
+    .then((data) => {
       logger.info('Amazon S3 response', { response: data });
 
       return newFilename;
     })
-    .catch(err => {
+    .catch((err) => {
       logger.error('Error while uploading to Amazon S3', { err });
 
       throw createError('30001', err);
     });
 }
+
+exports.getClient = getClient;
+exports.getEnvironmentLocation = getEnvironmentLocation;
+exports.upload = upload;

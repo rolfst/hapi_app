@@ -1,5 +1,5 @@
-import Sequelize from 'sequelize';
-import model from '../../../../../shared/configs/sequelize';
+const Sequelize = require('sequelize');
+const model = require('../../../../../shared/configs/sequelize');
 
 const ConversationUser = model.define('ConversationUser', {
   conversationId: {
@@ -15,4 +15,4 @@ const ConversationUser = model.define('ConversationUser', {
   timestamps: false,
 });
 
-export default ConversationUser;
+module.exports = ConversationUser;

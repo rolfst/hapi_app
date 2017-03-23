@@ -1,7 +1,7 @@
-import UserModel from '../../../../core/repositories/dao/user';
-import ConversationModel from './conversation';
-import ConversationUserModel from './conversation-user';
-import MessageModel from './message';
+const UserModel = require('../../../../core/repositories/dao/user');
+const ConversationModel = require('./conversation');
+const ConversationUserModel = require('./conversation-user');
+const MessageModel = require('./message');
 
 ConversationModel.belongsToMany(UserModel, {
   foreignKey: 'conversation_id',
@@ -22,6 +22,6 @@ UserModel.belongsToMany(ConversationModel, {
   timestamps: false,
 });
 
-export const Conversation = ConversationModel;
-export const Message = MessageModel;
-export const ConversationUser = ConversationUserModel;
+exports.Conversation = ConversationModel;
+exports.Message = MessageModel;
+exports.ConversationUser = ConversationUserModel;

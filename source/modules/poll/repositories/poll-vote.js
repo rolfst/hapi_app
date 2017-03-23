@@ -1,7 +1,7 @@
-import R from 'ramda';
-import { PollVote } from './dao';
-import createPollVoteModel from '../models/poll-vote';
+const R = require('ramda');
+const { PollVote } = require('./dao');
+const createPollVoteModel = require('../models/poll-vote');
 
-export const findBy = async (whereConstraint) => PollVote
+exports.findBy = async (whereConstraint) => PollVote
   .findAll({ where: whereConstraint })
   .then(R.map(createPollVoteModel));

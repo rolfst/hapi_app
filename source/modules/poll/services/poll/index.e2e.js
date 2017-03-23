@@ -1,6 +1,7 @@
-import { assert } from 'chai';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import * as pollService from './index';
+const { assert } = require('chai');
+const R = require('ramda');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const pollService = require('./index');
 
 describe('Service: Poll', () => {
   let employee;
@@ -29,7 +30,8 @@ describe('Service: Poll', () => {
 
     message = { credentials: { id: employee.id } };
     defaultPayload = {
-      networkId: flexAppeal.id, question: 'help in what way?',
+      networkId: flexAppeal.id,
+      question: 'help in what way?',
       options: ['Option A', 'Option B', 'Option C'],
     };
     defaultVotePayload = { networkId: flexAppeal.id };
@@ -55,7 +57,8 @@ describe('Service: Poll', () => {
 
   it('should be able to vote', async () => {
     const poll = await pollService.create(defaultPayload, message);
-    const payload = { ...defaultVotePayload, pollId: poll.id, optionIds: [poll.options[1].id] };
+    const payload = R.merge(defaultVotePayload,
+    { pollId: poll.id, optionIds: [poll.options[1].id] });
 
     const actual = await pollService.vote(payload, message);
 
@@ -68,7 +71,8 @@ describe('Service: Poll', () => {
 
   it('should be able to vote for multiple options', async () => {
     const { id: pollId, options } = await pollService.create(defaultPayload, message);
-    const payload = { ...defaultVotePayload, pollId, optionIds: [options[1].id, options[2].id] };
+    const payload = R.merge(defaultVotePayload,
+      { pollId, optionIds: [options[1].id, options[2].id] });
 
     const actual = await pollService.vote(payload, message);
 
@@ -82,10 +86,12 @@ describe('Service: Poll', () => {
   it('should be able to vote after already having voted', async () => {
     const { id: pollId, options } = await pollService.create(defaultPayload, message);
 
-    const payload = { ...defaultVotePayload, pollId, optionIds: [options[1].id, options[2].id] };
+    const payload = R.merge(defaultVotePayload,
+      { pollId, optionIds: [options[1].id, options[2].id] });
     await pollService.vote(payload, message);
 
-    const newVotePayload = { ...defaultVotePayload, pollId, optionIds: [options[0].id] };
+    const newVotePayload = R.merge(defaultVotePayload,
+        { pollId, optionIds: [options[0].id] });
     const actual = await pollService.vote(newVotePayload, message);
 
     assert.equal(actual.totalVoteCount, 1);
@@ -96,12 +102,11 @@ describe('Service: Poll', () => {
   });
 
   it('should fail when poll doesn\'t exist', async () => {
-    const payload = { ...defaultVotePayload, pollId: '123456789', optionIds: ['1'] };
+    const payload = R.merge(defaultVotePayload,
+      { pollId: '123456789', optionIds: ['1'] });
 
-    return assert.isRejected(
-      pollService.vote(payload, message),
-      'Error: User does not have enough privileges to access this resource.'
-    );
+    return assert.isRejected(pollService.vote(payload, message),
+      'User does not have enough privileges to access this resource.');
   });
 
   it('should fail when user doesn\'t belong to network', async () => {
@@ -109,9 +114,7 @@ describe('Service: Poll', () => {
 
     const payload = { networkId: pmt.id, pollId, optionIds: [options[1].id, options[2].id] };
 
-    return assert.isRejected(
-      pollService.vote(payload, message),
-      'Error: User does not have enough privileges to access this resource.'
-    );
+    return assert.isRejected(pollService.vote(payload, message),
+      'User does not have enough privileges to access this resource.');
   });
 });

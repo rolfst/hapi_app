@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   streams: [{
     level: 'debug',
     stream: process.stdout,

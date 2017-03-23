@@ -1,8 +1,8 @@
-import { assert } from 'chai';
-import R from 'ramda';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import * as messageService from '../message';
-import * as commentService from './index';
+const { assert } = require('chai');
+const R = require('ramda');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const messageService = require('../message');
+const commentService = require('./index');
 
 describe('Service: Comment (feed)', () => {
   describe('create', () => {

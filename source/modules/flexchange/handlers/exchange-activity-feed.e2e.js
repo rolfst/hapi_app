@@ -1,13 +1,14 @@
-import { assert } from 'chai';
-import Promise from 'bluebird';
-import moment from 'moment';
-import _ from 'lodash';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as Logger from '../../../shared/services/logger';
-import { getRequest } from '../../../shared/test-utils/request';
-import { ActivityTypes } from '../../core/repositories/dao/activity';
-import * as exchangeRepo from '../repositories/exchange';
-import * as commentRepo from '../repositories/comment';
+const { assert } = require('chai');
+const Promise = require('bluebird');
+const moment = require('moment');
+const R = require('ramda');
+const _ = require('lodash');
+const testHelper = require('../../../shared/test-utils/helpers');
+const Logger = require('../../../shared/services/logger');
+const { getRequest } = require('../../../shared/test-utils/request');
+const { ActivityTypes } = require('../../core/repositories/dao/activity');
+const exchangeRepo = require('../repositories/exchange');
+const commentRepo = require('../repositories/comment');
 
 const logger = Logger.createLogger('FLEXCHANGE/test/exchangeActivityFeed');
 
@@ -42,7 +43,7 @@ describe('Exchange activity feed', () => {
       () => exchangeRepo.approveExchange(exchange, admin, admin.id),
     ];
 
-    const values = await Promise.mapSeries(actions, async item => {
+    const values = await Promise.mapSeries(actions, async (item) => {
       await Promise.delay(1000);
       return item();
     });
@@ -54,10 +55,10 @@ describe('Exchange activity feed', () => {
 
     logger.debug('@@@@@@@ DEBUG for occasional failure @@@@@@@@', response.result);
 
-    result = response.result.data.map(item => ({
-      ...item,
-      data: _.omit(item.data, 'date'),
-    }));
+    result = response.result.data.map((item) => (R.merge(
+      item,
+      { data: _.omit(item.data, 'date') }
+    )));
   });
 
   after(() => testHelper.cleanAll());
@@ -69,7 +70,7 @@ describe('Exchange activity feed', () => {
   });
 
   it('should return correct activity order', () => {
-    const actual = result.map(item => item.data.activity_type);
+    const actual = result.map((item) => item.data.activity_type);
     const expected = [
       ActivityTypes.EXCHANGE_CREATED,
       ActivityTypes.EXCHANGE_ACCEPTED,

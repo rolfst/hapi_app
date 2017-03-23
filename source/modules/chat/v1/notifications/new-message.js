@@ -1,6 +1,6 @@
-import * as notifier from '../../../../shared/services/notifier';
+const notifier = require('../../../../shared/services/notifier');
 
-export const createNotification = (message) => {
+const createNotification = (message) => {
   return {
     text: `${message.createdBy.fullName}: ${message.text}`,
     data: {
@@ -11,8 +11,11 @@ export const createNotification = (message) => {
   };
 };
 
-export const send = (message, usersToNotify) => {
+const send = (message, usersToNotify) => {
   const notification = createNotification(message);
 
   notifier.send(usersToNotify, notification);
 };
+
+exports.createNotification = createNotification;
+exports.send = send;

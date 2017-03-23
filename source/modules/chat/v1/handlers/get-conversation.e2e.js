@@ -1,9 +1,9 @@
-import { assert } from 'chai';
-import { getRequest } from '../../../../shared/test-utils/request';
-import * as conversationRepo from '../repositories/conversation';
-import * as blueprints from '../../../../shared/test-utils/blueprints';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import * as messageRepo from '../repositories/message';
+const { assert } = require('chai');
+const { getRequest } = require('../../../../shared/test-utils/request');
+const conversationRepo = require('../repositories/conversation');
+const blueprints = require('../../../../shared/test-utils/blueprints');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const messageRepo = require('../repositories/message');
 
 describe('Get conversation', () => {
   let conversation;

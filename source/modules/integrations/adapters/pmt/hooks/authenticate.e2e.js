@@ -1,10 +1,10 @@
-import { assert } from 'chai';
-import nock from 'nock';
-import createError from '../../../../../shared/utils/create-error';
-import * as testHelpers from '../../../../../shared/test-utils/helpers';
-import * as stubs from '../test-utils/stubs';
-import * as blueprints from '../test-utils/blueprints';
-import hook from './authenticate';
+const { assert } = require('chai');
+const nock = require('nock');
+const createError = require('../../../../../shared/utils/create-error');
+const testHelpers = require('../../../../../shared/test-utils/helpers');
+const stubs = require('../test-utils/stubs');
+const blueprints = require('../test-utils/blueprints');
+const hook = require('./authenticate');
 
 describe('PMT Authenticate hook', () => {
   nock.disableNetConnect();

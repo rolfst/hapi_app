@@ -1,26 +1,12 @@
-import { pick } from 'lodash';
-import tokenUtil from '../utils/token';
-import * as serverUtil from '../utils/server';
-import createError from '../utils/create-error';
-import * as userRepo from '../../modules/core/repositories/user';
-import * as Logger from '../../shared/services/logger';
+const R = require('ramda');
+const serverUtil = require('../utils/server');
+const createError = require('../utils/create-error');
+const Logger = require('../../shared/services/logger');
+const authenticate = require('../utils/authenticate');
 
 const logger = Logger.createLogger('SHARED/middleware/authenticatorStrategy');
 
-export const authenticate = async (networkId, token = null) => {
-  if (!token) throw createError('401');
-
-  const { sub: userId, integrations } = tokenUtil.decode(token);
-  // TODO the user should be retrieved via the service
-  const user = await userRepo.findUserById(userId, null, false);
-
-  return {
-    credentials: pick(user, 'id', 'username', 'fullName', 'email', 'firstName', 'lastName'),
-    artifacts: { integrations },
-  };
-};
-
-export default () => ({
+module.exports = () => ({
   async authenticate(request, reply) {
     let artifacts = { requestId: request.id };
 
@@ -29,7 +15,7 @@ export default () => ({
       const token = request.raw.req.headers['x-api-token'];
       const authenticationResult = await authenticate(networkId, token);
 
-      artifacts = { ...artifacts, ...authenticationResult.artifacts };
+      artifacts = R.merge(artifacts, authenticationResult.artifacts);
       artifacts.authenticationToken = token;
 
       return reply.continue({ credentials: authenticationResult.credentials, artifacts });
@@ -50,3 +36,4 @@ export default () => ({
     }
   },
 });
+

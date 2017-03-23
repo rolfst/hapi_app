@@ -1,5 +1,5 @@
-import Sequelize from 'sequelize';
-import model from '../../../../shared/configs/sequelize';
+const Sequelize = require('sequelize');
+const model = require('../../../../shared/configs/sequelize');
 
 const Attachment = model.define('Attachment', {
   messageId: {
@@ -24,4 +24,4 @@ const Attachment = model.define('Attachment', {
   updatedAt: false,
 });
 
-export default Attachment;
+module.exports = Attachment;

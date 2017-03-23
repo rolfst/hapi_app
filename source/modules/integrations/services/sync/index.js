@@ -1,13 +1,13 @@
-import R from 'ramda';
-import Promise from 'bluebird';
-import * as passwordUtil from '../../../../shared/utils/password';
-import { createAdapter } from '../../../../shared/utils/create-adapter';
-import * as Logger from '../../../../shared/services/logger';
-import createError from '../../../../shared/utils/create-error';
-import * as userRepository from '../../../core/repositories/user';
-import * as networkRepository from '../../../core/repositories/network';
-import * as networkService from '../../../core/services/network';
-import * as impl from './implementation';
+const R = require('ramda');
+const Promise = require('bluebird');
+const passwordUtil = require('../../../../shared/utils/password');
+const adapterUtil = require('../../../../shared/utils/create-adapter');
+const Logger = require('../../../../shared/services/logger');
+const createError = require('../../../../shared/utils/create-error');
+const userRepository = require('../../../core/repositories/user');
+const networkRepository = require('../../../core/repositories/network');
+const networkService = require('../../../core/services/network');
+const impl = require('./implementation');
 
 const logger = Logger.createLogger('INTEGRATIONS/service/sync');
 
@@ -19,7 +19,7 @@ const logger = Logger.createLogger('INTEGRATIONS/service/sync');
  * @method syncWithIntegrationPartner
  * @return {external:Promise<Network[]>}
  */
-export const syncNetwork = async (payload, message) => {
+const syncNetwork = async (payload, message) => {
   try {
     logger.info('Started network synchronization', { payload, message });
 
@@ -29,7 +29,7 @@ export const syncNetwork = async (payload, message) => {
     if (!impl.isSyncable(network)) throw createError('10009');
     // TODO invite users based on importedAt value
 
-    const adapter = await createAdapter(network, 0, { proceedWithoutToken: true });
+    const adapter = await adapterUtil.createAdapter(network, 0, { proceedWithoutToken: true });
     const data = await Promise.all([
       adapter.fetchTeams(),
       adapter.fetchUsers(),
@@ -80,7 +80,7 @@ export const syncNetwork = async (payload, message) => {
  * @method importNetwork
  * @return {external:Promise<Network[]>}
  */
-export const importNetwork = async (payload, message) => {
+const importNetwork = async (payload, message) => {
   try {
     logger.info('Started network import', { payload, message });
 
@@ -89,7 +89,7 @@ export const importNetwork = async (payload, message) => {
     if (!!network.importedAt) throw createError('10007');
     if (!network.hasIntegration) throw createError('10001');
 
-    const adapter = await createAdapter(network, 0, { proceedWithoutToken: true });
+    const adapter = await adapterUtil.createAdapter(network, 0, { proceedWithoutToken: true });
     const externalUsers = await adapter.fetchUsers();
     const externalAdmin = R.find(R.propEq('email', payload.ownerEmail), externalUsers);
     if (!externalAdmin) throw createError('10006');
@@ -98,7 +98,7 @@ export const importNetwork = async (payload, message) => {
 
     if (!admin) {
       const password = passwordUtil.plainRandom();
-      admin = await userRepository.createUser({ ...externalAdmin, password });
+      admin = await userRepository.createUser(R.merge(externalAdmin, { password }));
     }
 
     await networkRepository.updateNetwork(network.id, { userId: admin.id });
@@ -131,7 +131,7 @@ export const importNetwork = async (payload, message) => {
  * @method syncWithIntegrationPartner
  * @return {external:Promise<Network[]>}
  */
-export async function syncWithIntegrationPartner(payload, message) {
+async function syncWithIntegrationPartner(payload, message) {
   const logError = (err) => logger.error('Error syncing integration partners', { err, message });
 
   try {
@@ -151,3 +151,7 @@ export async function syncWithIntegrationPartner(payload, message) {
     throw err;
   }
 }
+
+exports.importNetwork = importNetwork;
+exports.syncNetwork = syncNetwork;
+exports.syncWithIntegrationPartner = syncWithIntegrationPartner;

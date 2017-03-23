@@ -1,11 +1,11 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import Promise from 'bluebird';
-import * as Mixpanel from '../../shared/services/mixpanel';
-import * as notifier from '../../shared/services/notifier';
-import * as objectService from '../core/services/object';
-import * as networkService from '../core/services/network';
-import Dispatcher from './dispatcher';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const Promise = require('bluebird');
+const Mixpanel = require('../../shared/services/mixpanel');
+const notifier = require('../../shared/services/notifier');
+const objectService = require('../core/services/object');
+const networkService = require('../core/services/network');
+const Dispatcher = require('./dispatcher');
 
 describe('Feed: Dispatcher', () => {
   let sandbox;

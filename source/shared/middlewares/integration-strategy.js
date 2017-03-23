@@ -1,13 +1,13 @@
-import { pick } from 'lodash';
-import { Integration } from '../../modules/core/repositories/dao';
-import createError from '../utils/create-error';
-import * as Logger from '../services/logger';
+const { pick } = require('lodash');
+const { Integration } = require('../../modules/core/repositories/dao');
+const createError = require('../utils/create-error');
+const Logger = require('../services/logger');
 
 const logger = Logger.createLogger('SHARED/middleware/integrationStrategy');
 
-export default () => {
+module.exports = () => {
   return {
-    authenticate: async(request, reply) => {
+    authenticate: async (request, reply) => {
       try {
         const req = request.raw.req;
         const token = req.headers['x-api-token'];

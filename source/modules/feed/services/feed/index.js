@@ -1,10 +1,10 @@
-import R from 'ramda';
-import * as Logger from '../../../../shared/services/logger';
-import createError from '../../../../shared/utils/create-error';
-import * as networkService from '../../../core/services/network';
-import * as userService from '../../../core/services/user';
-import * as teamService from '../../../core/services/team';
-import * as impl from './implementation';
+const R = require('ramda');
+const Logger = require('../../../../shared/services/logger');
+const createError = require('../../../../shared/utils/create-error');
+const networkService = require('../../../core/services/network');
+const userService = require('../../../core/services/user');
+const teamService = require('../../../core/services/team');
+const impl = require('./implementation');
 
 /**
  * @module modules/feed/services/feed
@@ -25,7 +25,7 @@ const feedOptions = R.pick(['limit', 'offset', 'include']);
  * @method makeForNetwork
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
-export const makeForNetwork = async (payload, message) => {
+const makeForNetwork = async (payload, message) => {
   logger.info('Making feed for network', { payload, message });
 
   const [user, teams] = await Promise.all([
@@ -64,7 +64,7 @@ export const makeForNetwork = async (payload, message) => {
  * @method makeForTeam
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
-export const makeForTeam = async (payload, message) => {
+const makeForTeam = async (payload, message) => {
   logger.info('Making feed for team', { payload, message });
 
   const team = await teamService.get({ teamId: payload.teamId }, message);
@@ -82,3 +82,6 @@ export const makeForTeam = async (payload, message) => {
 
   return impl.makeFeed(feedPayload, feedOptions(payload), R.assoc('network', network, message));
 };
+
+exports.makeForNetwork = makeForNetwork;
+exports.makeForTeam = makeForTeam;

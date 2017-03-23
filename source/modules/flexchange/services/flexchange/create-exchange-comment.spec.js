@@ -1,10 +1,10 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import * as service from '../flexchange';
-import * as commentRepo from '../../repositories/comment';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const service = require('../flexchange');
+const commentRepo = require('../../repositories/comment');
 
 // TODO notification send needs to be activated
-// import * as notification from '../notifications/new-exchange-comment';
+// const notification = require('../../notifications/new-exchange-comment');
 
 describe('Create exchange comment', () => {
   let sandbox;

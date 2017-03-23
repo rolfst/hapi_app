@@ -1,12 +1,12 @@
-import R from 'ramda';
-import * as Logger from '../../../../../shared/services/logger';
-import createError from '../../../../../shared/utils/create-error';
-import * as userRepository from '../../../../core/repositories/user';
-import * as objectService from '../../../../core/services/object';
-import * as objectRepository from '../../../../core/repositories/object';
-import * as conversationRepoV1 from '../../../v1/repositories/conversation';
-import * as conversationRepo from '../../repositories/conversation';
-import * as impl from './implementation';
+const R = require('ramda');
+const Logger = require('../../../../../shared/services/logger');
+const createError = require('../../../../../shared/utils/create-error');
+const userRepository = require('../../../../core/repositories/user');
+const objectService = require('../../../../core/services/object');
+const objectRepository = require('../../../../core/repositories/object');
+const conversationRepoV1 = require('../../../v1/repositories/conversation');
+const conversationRepo = require('../../repositories/conversation');
+const impl = require('./implementation');
 
 const logger = Logger.createLogger('CHAT/service/conversation');
 const createOptions = R.pick(['limit', 'offset', 'order']);
@@ -28,7 +28,7 @@ const lastMessageObjectsByConversationId = R.pipe(
  * @method create
  * @return {external:Promise.<Conversation>} {@link module:modules/chat~Conversation} -
  */
-export const create = async (payload, message) => {
+const create = async (payload, message) => {
   logger.info('Creating conversation', { payload, message });
   const participantIds = R.pipe(R.append(message.credentials.id), R.uniq)(payload.participantIds);
 
@@ -60,13 +60,13 @@ export const create = async (payload, message) => {
  * @method listConversations
  * @return {external:Promise.<Conversation[]>} {@link module:modules/chat~Conversation} -
  */
-export const listConversations = async (payload, message) => {
+const listConversations = async (payload, message) => {
   logger.info('Listing conversations', { payload, message });
 
   const includes = impl.hasInclude(payload.include);
   const [conversations, objects] = await Promise.all([
     conversationRepo.findByIds(payload.conversationIds,
-      createOptions({ ...payload, order: [['updated_at', 'DESC']] })),
+      createOptions(R.merge(payload, { order: [['updated_at', 'DESC']] }))),
     objectRepository.findBy({
       parentType: 'conversation', parentId: { $in: payload.conversationIds } }),
   ]);
@@ -77,7 +77,7 @@ export const listConversations = async (payload, message) => {
   const objectIds = R.pipe(R.pluck('id'), R.values)(lastMessageObjects);
   const lastMessages = await objectService.listWithSourceAndChildren({ objectIds }, message);
 
-  const lastMessagesForConversation = R.map(object =>
+  const lastMessagesForConversation = R.map((object) =>
     R.find(R.propEq('sourceId', object.sourceId), lastMessages), lastMessageObjects);
 
   if (includes('participants')) {
@@ -85,13 +85,13 @@ export const listConversations = async (payload, message) => {
       pluckUniqueParticipantIds, userRepository.findByIds)(conversations);
     const findParticipant = (participantId) => findIdEq(participantId, participants);
 
-    return R.map(conversation => R.merge(conversation, {
+    return R.map((conversation) => R.merge(conversation, {
       lastMessage: lastMessagesForConversation[conversation.id],
       participants: R.map(findParticipant, conversation.participantIds),
     }), conversations);
   }
 
-  return R.map(conversation => R.merge(conversation, {
+  return R.map((conversation) => R.merge(conversation, {
     lastMessage: lastMessagesForConversation[conversation.id] }), conversations);
 };
 
@@ -102,10 +102,11 @@ export const listConversations = async (payload, message) => {
  * @method getConversation
  * @return {external:Promise.<Conversation>} {@link module:modules/chat~Conversation}
  */
-export const getConversation = async(conversationId, message) => {
-  logger.info('get conversation', { conversationId, message });
+const getConversation = async (payload, message) => {
+  logger.info('Get conversation', { payload, message });
 
-  const conversations = await listConversations({ conversationIds: [conversationId], limit: 1 });
+  const conversations = await listConversations({
+    conversationIds: [payload.conversationId], limit: 1 });
   const conversation = R.head(conversations);
 
   if (!conversation) throw createError('404');
@@ -125,12 +126,12 @@ export const getConversation = async(conversationId, message) => {
  * @method listConversationsForUser
  * @return {external:Promise.<Conversation[]>} {@link module:modules/chat~Conversation} -
  */
-export const listConversationsForUser = async (payload, message) => {
+const listConversationsForUser = async (payload, message) => {
   logger.info('Listing conversations for user', { payload, message });
 
   const conversationIds = await conversationRepo.findIdsForUser(payload.userId);
 
-  return listConversations({ conversationIds, ...payload }, message);
+  return listConversations(R.merge({ conversationIds }, payload), message);
 };
 
 /**
@@ -143,16 +144,17 @@ export const listConversationsForUser = async (payload, message) => {
  * @method listMessages
  * @return {external:Promise.<Message[]>} {@link module:modules/chat~Message} -
  */
-export const listMessages = async (payload, message) => {
+const listMessages = async (payload, message) => {
   logger.info('List messages for conversation', { payload, message });
 
   await impl.assertThatUserIsPartOfTheConversation(message.credentials.id, payload.conversationId);
 
-  const objects = await objectService.list({
-    ...createOptions(payload),
-    parentType: 'conversation',
-    parentId: payload.conversationId,
-  }, message);
+  const objects = await objectService.list(R.merge(
+    createOptions(payload),
+    {
+      parentType: 'conversation',
+      parentId: payload.conversationId,
+    }), message);
 
   return objectService.listWithSourceAndChildren({ objectIds: R.pluck('id', objects) }, message);
 };
@@ -165,7 +167,7 @@ export const listMessages = async (payload, message) => {
  * @method countConversations
  * @return {external:Promise<Number>}
  */
-export async function countConversations(payload, message) {
+async function countConversations(payload, message) {
   logger.info('Count conversation', { payload, message });
 
   return conversationRepo.countConversationsForUser(payload.userId);
@@ -179,7 +181,7 @@ export async function countConversations(payload, message) {
  * @method createMessage
  * @return {external:Promise<Message>} {@link module:chat~Message message}
  */
-export const remove = async (payload, message) => {
+const remove = async (payload, message) => {
   logger.info('Deleting conversation', { payload, message });
 
   return Promise.all([
@@ -199,7 +201,7 @@ export const remove = async (payload, message) => {
  * @method countMessages
  * @return {external:Promise<Number>}
  */
-export async function countMessages(payload, message) {
+async function countMessages(payload, message) {
   logger.info('Count messages for conversation', { payload, message });
 
   await impl.assertThatUserIsPartOfTheConversation(message.credentials.id, payload.conversationId);
@@ -210,3 +212,12 @@ export async function countMessages(payload, message) {
     objectType: 'private_message',
   });
 }
+
+exports.countConversations = countConversations;
+exports.countMessages = countMessages;
+exports.create = create;
+exports.getConversation = getConversation;
+exports.listConversations = listConversations;
+exports.listConversationsForUser = listConversationsForUser;
+exports.listMessages = listMessages;
+exports.remove = remove;

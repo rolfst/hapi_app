@@ -1,9 +1,9 @@
-import R from 'ramda';
-import createError from '../../../../shared/utils/create-error';
-import * as pollRepository from '../../repositories/poll';
-import * as pollOptionRepository from '../../repositories/poll-option';
+const R = require('ramda');
+const createError = require('../../../../shared/utils/create-error');
+const pollRepository = require('../../repositories/poll');
+const pollOptionRepository = require('../../repositories/poll-option');
 
-export const createOption = R.curry((pollId, text, order) => (
+const createOption = R.curry((pollId, text, order) => (
   pollOptionRepository.create({ pollId, text, order })
 ));
 
@@ -14,12 +14,15 @@ export const createOption = R.curry((pollId, text, order) => (
  * @method assertThatPollExists
  * @return {boolean|Error}
  */
-export const assertThatPollExistsAndUserHasPermission = async (networkId, pollId) => {
+const assertThatPollExistsAndUserHasPermission = async (networkId, pollId) => {
   const poll = await pollRepository.findById(pollId, null);
 
-  if (!networkId || networkId !== poll.networkId || !poll) {
+  if (!poll || !networkId || networkId !== poll.networkId) {
     throw createError('403');
   }
 
   return true;
 };
+
+exports.assertThatPollExistsAndUserHasPermission = assertThatPollExistsAndUserHasPermission;
+exports.createOption = createOption;

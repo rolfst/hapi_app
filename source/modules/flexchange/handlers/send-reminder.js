@@ -1,12 +1,13 @@
-import * as Logger from '../../../shared/services/logger';
-import * as reminderService from '../services/reminder';
+const createServicePayload = require('../../../shared/utils/create-service-payload');
+const Logger = require('../../../shared/services/logger');
+const reminderService = require('../services/reminder');
 
 const logger = Logger.createLogger('FLEXCHANGE/handler/sendReminder');
 
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const message = { ...req.pre, ...req.auth };
+    const { message } = createServicePayload(req);
 
     logger.info('Sending reminder', { message });
     await reminderService.sendReminder(null);

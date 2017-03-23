@@ -1,3 +1,3 @@
-import PrivateMessageV2DAO from '../../../v2/repositories/dao/private-message';
+const PrivateMessageV2DAO = require('../../../v2/repositories/dao/private-message');
 
-export default PrivateMessageV2DAO;
+module.exports = PrivateMessageV2DAO;

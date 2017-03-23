@@ -6,7 +6,7 @@ const trackNewExchange = (exchange) => { // eslint-disable-line no-unused-vars
   // TODO: Track new exchange in Mixpanel
 };
 
-export default (exchange) => {
+module.exports = (exchange) => {
   newExchangeNotification(exchange);
   trackNewExchange(exchange);
 };

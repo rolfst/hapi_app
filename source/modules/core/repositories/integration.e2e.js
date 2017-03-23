@@ -1,6 +1,6 @@
-import { assert } from 'chai';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as integrationRepo from './integration';
+const { assert } = require('chai');
+const testHelper = require('../../../shared/test-utils/helpers');
+const integrationRepo = require('./integration');
 
 describe('Integration repository', () => {
   after(() => testHelper.cleanAll());

@@ -1,7 +1,7 @@
-import { pick } from 'lodash';
-import * as Logger from '../../../shared/services/logger';
-import * as responseUtils from '../../../shared/utils/response';
-import * as flexchangeService from '../services/flexchange';
+const Logger = require('../../../shared/services/logger');
+const createServicePayload = require('../../../shared/utils/create-service-payload');
+const responseUtils = require('../../../shared/utils/response');
+const flexchangeService = require('../services/flexchange');
 
 const logger = Logger.createLogger('FLEXCHANGE/handler/modifyExchange');
 
@@ -12,17 +12,10 @@ const services = {
   reject: flexchangeService.rejectExchange,
 };
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const params = pick(req.params, ['exchangeId']);
-    const payload = {
-      ...params,
-      action: req.payload.action,
-      userId: req.payload.user_id,
-    };
-
+    const { payload, message } = createServicePayload(req);
     const actionHook = services[payload.action];
-    const message = { ...req.pre, ...req.auth };
 
     logger.info('Updating exchange', { message, payload });
     const result = await actionHook(payload, message);

@@ -1,9 +1,9 @@
-import { assert } from 'chai';
-import blueprints from '../../../shared/test-utils/blueprints';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import { putRequest } from '../../../shared/test-utils/request';
-import * as teamService from '../services/team';
-import * as teamRepository from '../repositories/team';
+const { assert } = require('chai');
+const blueprints = require('../../../shared/test-utils/blueprints');
+const testHelper = require('../../../shared/test-utils/helpers');
+const { putRequest } = require('../../../shared/test-utils/request');
+const teamService = require('../services/team');
+const teamRepository = require('../repositories/team');
 
 describe('Handler: update team', () => {
   let network;

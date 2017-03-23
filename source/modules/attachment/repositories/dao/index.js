@@ -1,3 +1,5 @@
-import AttachmentModel from './attachment';
+const AttachmentModel = require('./attachment');
 
-export const Attachment = AttachmentModel;
+const Attachment = AttachmentModel;
+
+exports.Attachment = Attachment;

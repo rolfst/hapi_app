@@ -4,16 +4,21 @@
       "mocha": true
   },
   "plugins": ["mocha"],
-  "parser": "babel-eslint",
   "rules": {
-      "arrow-body-style": ["off"],
-      "consistent-return": ["off"],
-      "no-console": 2,
-      "mocha/no-exclusive-tests": "error"
-  },
-  "parserOptions": {
-      "ecmaFeatures": {
-        "experimentalObjectRestSpread": true
-      }
+      "import/no-extraneous-dependencies": ["error", {"devDependencies": true, "optionalDependencies": false, "peerDependencies": false}],
+      "comma-dangle": ["error", {
+        "arrays": "only-multiline",
+        "objects": "only-multiline",
+        "imports": "never",
+        "exports": "never",
+        "functions": "never"
+      }],
+      "no-underscore-dangle": "off",
+      "arrow-body-style": "off",
+      "consistent-return": "off",
+      "arrow-parens": ["error", "always"],
+      "no-console": "error",
+      "mocha/no-exclusive-tests": "error",
+      "no-extra-boolean-cast": "off"
   }
 }

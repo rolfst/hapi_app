@@ -1,7 +1,7 @@
-import Joi from 'joi';
+const Joi = require('joi');
 
-export default {
-  payload: {
+module.exports = {
+  payload: Joi.object().keys({
     file: Joi.required(),
-  },
+  }).rename('file', 'fileStream'),
 };

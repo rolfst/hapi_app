@@ -1,6 +1,6 @@
-import Joi from 'joi';
+const Joi = require('joi');
 
-export default {
+module.exports = {
   query: Joi.object().keys({
     include: Joi.string().valid(['responses', 'comments']),
     start: Joi.date().format('YYYY-MM-DD'),

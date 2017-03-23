@@ -1,10 +1,10 @@
-import { assert } from 'chai';
-import { find } from 'lodash';
-import * as blueprints from '../../../../shared/test-utils/blueprints';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import { postRequest } from '../../../../shared/test-utils/request';
-import * as conversationRepo from '../repositories/conversation';
-import * as messageRepo from '../repositories/message';
+const { assert } = require('chai');
+const { find } = require('lodash');
+const blueprints = require('../../../../shared/test-utils/blueprints');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const { postRequest } = require('../../../../shared/test-utils/request');
+const conversationRepo = require('../repositories/conversation');
+const messageRepo = require('../repositories/message');
 
 let createdConversation;
 

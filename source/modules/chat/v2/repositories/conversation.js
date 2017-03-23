@@ -1,8 +1,8 @@
-import R from 'ramda';
-import Sequelize from '../../../../shared/configs/sequelize';
-import { User } from '../../../core/repositories/dao';
-import { Conversation, ConversationUser } from './dao';
-import createConversationModel from '../models/conversation';
+const R = require('ramda');
+const Sequelize = require('../../../../shared/configs/sequelize');
+const { User } = require('../../../core/repositories/dao');
+const { Conversation, ConversationUser } = require('./dao');
+const createConversationModel = require('../models/conversation');
 
 /**
  * Find multiple conversations
@@ -13,20 +13,20 @@ import createConversationModel from '../models/conversation';
  * @method findByIds
  * @return {external:Promise.<Conversation[]>} - Returns conversation models
  */
-export async function findByIds(conversationIds, options) {
-  const result = await Conversation.findAll({
-    ...options,
-    include: { attributes: ['id'], model: User },
-    where: { id: { $in: conversationIds } },
-  });
+async function findByIds(conversationIds, options) {
+  const result = await Conversation.findAll(R.merge(options,
+    {
+      include: { attributes: ['id'], model: User },
+      where: { id: { $in: conversationIds } },
+    }));
 
   return R.map(createConversationModel, result);
 }
 
-export const findById = (conversationId) => findByIds([conversationId])
+const findById = (conversationId) => findByIds([conversationId])
   .then(R.head);
 
-export async function countConversationsForUser(userId) {
+async function countConversationsForUser(userId) {
   return ConversationUser.count({ where: { userId } });
 }
 
@@ -36,7 +36,7 @@ export async function countConversationsForUser(userId) {
  * @method findIdsForUser
  * @return {external:Promise.<String[]>} - Returns conversation ids
  */
-export async function findIdsForUser(userId) {
+async function findIdsForUser(userId) {
   const pivotResult = await ConversationUser.findAll({
     attributes: ['conversation_id'],
     where: { userId },
@@ -55,7 +55,7 @@ export async function findIdsForUser(userId) {
  * @method create
  * @return {external:Promise.<Conversation>}
  */
-export const create = async (attributes) => {
+const create = async (attributes) => {
   const conversation = await Conversation.create({
     type: attributes.type,
     createdBy: attributes.userId,
@@ -76,7 +76,7 @@ export const create = async (attributes) => {
  * @method findExistingConversation
  * @return {Object.<Conversation>|null}
  */
-export const findExistingConversation = async (participantIds) => {
+const findExistingConversation = async (participantIds) => {
   const countUsersInConverrsation = Sequelize.fn('COUNT',
     Sequelize.fn('DISTINCT', Sequelize.col('`Users.ConversationUser`.`user_id`'))
   );
@@ -104,7 +104,7 @@ export const findExistingConversation = async (participantIds) => {
  * @param {date} attributes.updatedAt
  * @method update
  */
-export function update(conversationId, { updatedAt }) {
+function update(conversationId, { updatedAt }) {
   return Conversation.update({ updatedAt }, { where: { id: conversationId } });
 }
 
@@ -113,6 +113,15 @@ export function update(conversationId, { updatedAt }) {
  * @param {string} conversationId
  * @method deleteById
  */
-export const deleteById = (conversationId) => Conversation.destroy({
+const deleteById = (conversationId) => Conversation.destroy({
   where: { id: conversationId },
 });
+
+exports.countConversationsForUser = countConversationsForUser;
+exports.create = create;
+exports.deleteById = deleteById;
+exports.findById = findById;
+exports.findByIds = findByIds;
+exports.findExistingConversation = findExistingConversation;
+exports.findIdsForUser = findIdsForUser;
+exports.update = update;

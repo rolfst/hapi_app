@@ -1,7 +1,7 @@
-import R from 'ramda';
-import { Poll, PollOption, PollVote } from './dao';
-import createPollModel from '../models/poll';
-import createPollVoteModel from '../models/poll-vote';
+const R = require('ramda');
+const { Poll, PollOption, PollVote } = require('./dao');
+const createPollModel = require('../models/poll');
+const createPollVoteModel = require('../models/poll-vote');
 
 const defaultIncludes = [{
   model: PollOption,
@@ -10,7 +10,7 @@ const defaultIncludes = [{
   include: [{ model: PollVote, as: 'Votes' }],
 }];
 
-export const findBy = async (whereConstraint) => Poll
+const findBy = async (whereConstraint) => Poll
   .findAll({ include: defaultIncludes, where: whereConstraint })
   .then(R.map(createPollModel));
 
@@ -20,7 +20,7 @@ export const findBy = async (whereConstraint) => Poll
  * @method findPollById
  * @return {external:Promise} - Find poll promise
  */
-export const findById = async (id, includes = defaultIncludes) => {
+const findById = async (id, includes = defaultIncludes) => {
   const poll = await Poll.findById(id, includes ? { include: includes } : {});
 
   if (!poll) return null;
@@ -36,7 +36,7 @@ export const findById = async (id, includes = defaultIncludes) => {
  * @method create
  * @return {external:Promise} - Create poll promise
  */
-export const create = async (attributes) => {
+const create = async (attributes) => {
   const poll = await Poll.create(attributes);
 
   return createPollModel(poll);
@@ -51,7 +51,7 @@ export const create = async (attributes) => {
  * @method vote
  * @return {external:Promise} - Vote promise
  */
-export const vote = async (attributes) => {
+const vote = async (attributes) => {
   const whitelist = ['userId', 'pollId', 'optionId'];
 
   const pollVote = await PollVote.create(R.pick(whitelist, attributes));
@@ -66,14 +66,22 @@ export const vote = async (attributes) => {
  * @method clearVotes
  * @return {external:Promise} - Destroy promise
  */
-export const clearVotes = (pollId, userId) => (
+const clearVotes = (pollId, userId) => (
   PollVote.destroy({ where: { pollId, userId } })
 );
 
-export const findAll = async () => {
+const findAll = async () => {
   return Poll.findAll();
 };
 
-export const deleteById = async (pollId) => {
+const deleteById = async (pollId) => {
   return Poll.destroy({ where: { id: pollId } });
 };
+
+exports.clearVotes = clearVotes;
+exports.create = create;
+exports.deleteById = deleteById;
+exports.findAll = findAll;
+exports.findBy = findBy;
+exports.findById = findById;
+exports.vote = vote;

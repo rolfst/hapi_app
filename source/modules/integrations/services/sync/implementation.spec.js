@@ -1,9 +1,9 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import * as impl from './implementation';
-import * as teamRepository from '../../../core/repositories/team';
-import * as userRepository from '../../../core/repositories/user';
-import * as networkRepository from '../../../core/repositories/network';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const impl = require('./implementation');
+const teamRepository = require('../../../core/repositories/team');
+const userRepository = require('../../../core/repositories/user');
+const networkRepository = require('../../../core/repositories/network');
 
 describe('Service: Sync Implementation', () => {
   const internalTeams = [{

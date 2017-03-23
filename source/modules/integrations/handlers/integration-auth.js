@@ -1,15 +1,10 @@
-import { omit } from 'lodash';
-import * as integrationService from '../services/integration';
-import * as Logger from '../../../shared/services/logger';
+const createServicePayload = require('../../../shared/utils/create-service-payload');
+const integrationService = require('../services/integration');
 
-const logger = Logger.createLogger('INTEGRATIONS/handler/integrationAuth');
-
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const message = { ...req.pre, ...req.auth, deviceName: req.headers['user-agent'] };
-    const payload = { ...req.payload, ...req.params };
-
-    logger.info('Authenticating with integration', { payload: omit(payload, 'password'), message });
+    const { payload, message } = createServicePayload(req);
+    message.deviceName = req.headers['user-agent'];
     const accessToken = await integrationService.authenticate(payload, message);
 
     return reply({ data: { access_token: accessToken } });

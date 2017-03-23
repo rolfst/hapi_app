@@ -1,11 +1,11 @@
-import { map, find } from 'lodash';
-import R from 'ramda';
-import Promise from 'bluebird';
-import createError from '../../../../shared/utils/create-error';
-import * as Logger from '../../../../shared/services/logger';
-import * as userRepo from '../../repositories/user';
-import * as networkRepo from '../../repositories/network';
-import * as networkService from '../../services/network';
+const { map, find } = require('lodash');
+const R = require('ramda');
+const Promise = require('bluebird');
+const createError = require('../../../../shared/utils/create-error');
+const Logger = require('../../../../shared/services/logger');
+const userRepo = require('../../repositories/user');
+const networkRepo = require('../../repositories/network');
+const networkService = require('../../services/network');
 
 /**
  * @module modules/core/services/user
@@ -20,7 +20,7 @@ const logger = Logger.getLogger('CORE/service/user');
  * @method getUser
  * @return {external:Promise.<User>} {@link module:modules/core~User User} model
  */
-export const getUser = async (payload) => {
+const getUser = async (payload) => {
   return userRepo.findUserById(payload.userId, null, false);
 };
 
@@ -34,26 +34,26 @@ export const getUser = async (payload) => {
  * @return {external:Promise.<User[]>} {@link module:modules/core~User} Promise containing
  * collection of users
  */
-export async function listUsersWithNetworkScope(payload, message) {
+async function listUsersWithNetworkScope(payload, message) {
   logger.info('Listing users with network scope', { payload, message });
 
   const users = await userRepo.findByIds(payload.userIds, payload.networkId);
   const network = await networkService.get({ networkId: payload.networkId }, message);
   const metaDataList = await userRepo.findMultipleUserMetaDataForNetwork(
     map(users, 'id'), network.id);
-  const usersInNetwork = R.filter(user => R.find(R.propEq('userId', user.id), metaDataList), users);
+  const usersInNetwork = R.filter((user) => R.find(R.propEq('userId', user.id), metaDataList), users);
 
   return Promise.map(usersInNetwork, async (user) => {
     const metaData = find(metaDataList, { userId: user.id });
 
-    return {
-      ...user,
-      roleType: metaData.roleType,
-      externalId: metaData.externalId,
-      deletedAt: metaData.deletedAt,
-      invitedAt: metaData.invitedAt,
-      integrationAuth: !!metaData.userToken,
-    };
+    return R.merge(user,
+      {
+        roleType: metaData.roleType,
+        externalId: metaData.externalId,
+        deletedAt: metaData.deletedAt,
+        invitedAt: metaData.invitedAt,
+        integrationAuth: !!metaData.userToken,
+      });
   });
 }
 
@@ -67,7 +67,7 @@ export async function listUsersWithNetworkScope(payload, message) {
  * @return {external:Promise.<User[]>} {@link module:modules/core~User} Promise containing
  * collection of users
  */
-export async function getUserWithNetworkScope(payload, message) {
+async function getUserWithNetworkScope(payload, message) {
   logger.info('Get user with network scope', { payload, message });
   const [user, network] = await Promise.all([
     userRepo.findUserById(payload.id, payload.networkId),
@@ -78,12 +78,16 @@ export async function getUserWithNetworkScope(payload, message) {
 
   if (!networkLink) throw createError('10002');
 
-  return {
-    ...user,
-    roleType: networkLink.roleType,
-    externalId: networkLink.externalId,
-    deletedAt: networkLink.deletedAt,
-    invitedAt: networkLink.invitedAt,
-    integrationAuth: !!networkLink.userToken,
-  };
+  return R.merge(user,
+    {
+      roleType: networkLink.roleType,
+      externalId: networkLink.externalId,
+      deletedAt: networkLink.deletedAt,
+      invitedAt: networkLink.invitedAt,
+      integrationAuth: !!networkLink.userToken,
+    });
 }
+
+exports.getUserWithNetworkScope = getUserWithNetworkScope;
+exports.listUsersWithNetworkScope = listUsersWithNetworkScope;
+exports.getUser = getUser;

@@ -1,12 +1,13 @@
-import { assert } from 'chai';
-import qs from 'qs';
-import moment from 'moment';
-import { find } from 'lodash';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import { getRequest } from '../../../shared/test-utils/request';
-import { exchangeTypes } from '../repositories/dao/exchange';
-import { create } from '../../core/repositories/team';
-import { createExchange } from '../repositories/exchange';
+const { assert } = require('chai');
+const R = require('ramda');
+const qs = require('qs');
+const moment = require('moment');
+const { find } = require('lodash');
+const testHelper = require('../../../shared/test-utils/helpers');
+const { getRequest } = require('../../../shared/test-utils/request');
+const { exchangeTypes } = require('../repositories/dao/exchange');
+const { create } = require('../../core/repositories/team');
+const { createExchange } = require('../repositories/exchange');
 
 describe('Get exchanges for team', () => {
   let team;
@@ -24,27 +25,31 @@ describe('Get exchanges for team', () => {
       values: [team.id],
     };
 
-    const exchange1 = createExchange(admin.id, network.id, {
-      ...defaultArgs,
-      title: 'Test shift 1 for team',
-    });
+    const exchange1 = createExchange(admin.id, network.id, R.merge(
+      defaultArgs,
+      { title: 'Test shift 1 for team' }
+    ));
 
-    const exchange2 = createExchange(admin.id, network.id, {
-      ...defaultArgs,
-      title: 'Test shift 2 for team',
-    });
+    const exchange2 = createExchange(admin.id, network.id, R.merge(
+      defaultArgs,
+      { title: 'Test shift 2 for team' }
+    ));
 
-    const exchange3 = createExchange(admin.id, network.id, {
-      ...defaultArgs,
-      date: moment().add(2, 'weeks').format('YYYY-MM-DD'),
-      title: 'Test shift 2',
-    });
+    const exchange3 = createExchange(admin.id, network.id, R.merge(
+      defaultArgs,
+      {
+        date: moment().add(2, 'weeks').format('YYYY-MM-DD'),
+        title: 'Test shift 2',
+      }
+    ));
 
-    const exchangeInPast = createExchange(admin.id, network.id, {
-      ...defaultArgs,
-      date: moment().subtract(2, 'weeks').format('YYYY-MM-DD'),
-      title: 'Test shift in past',
-    });
+    const exchangeInPast = createExchange(admin.id, network.id, R.merge(
+      defaultArgs,
+      {
+        date: moment().subtract(2, 'weeks').format('YYYY-MM-DD'),
+        title: 'Test shift in past',
+      }
+    ));
 
     return Promise.all([exchange1, exchange2, exchange3, exchangeInPast]);
   });
@@ -53,7 +58,7 @@ describe('Get exchanges for team', () => {
 
   it('should return exchanges', () => {
     return getRequest(`/v2/networks/${network.id}/teams/${team.id}/exchanges`, admin.token)
-      .then(response => {
+      .then((response) => {
         const teamExchange = find(response.result.data, { title: 'Test shift 1 for team' });
 
         assert.equal(response.statusCode, 200);

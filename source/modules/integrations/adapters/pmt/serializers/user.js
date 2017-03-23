@@ -1,12 +1,12 @@
-import R from 'ramda';
-import moment from 'moment';
+const R = require('ramda');
+const moment = require('moment');
 
 function formatPhoneNumber(number) {
   if (!number) return null;
   return number.toString().replace(/\D/g, '');
 }
 
-export default (externalUser) => {
+module.exports = (externalUser) => {
   const defaultProps = {
     id: null,
     department: null,
@@ -22,7 +22,7 @@ export default (externalUser) => {
     home_phone_number: null,
   };
 
-  const properUser = { ...defaultProps, ...externalUser };
+  const properUser = R.merge(defaultProps, externalUser);
   let teamIds = [];
 
   if (properUser.scope && properUser.scope.length > 0) {

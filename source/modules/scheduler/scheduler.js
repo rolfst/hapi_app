@@ -1,5 +1,3 @@
-require('babel-register');
-require('babel-polyfill');
 const CronJob = require('cron').CronJob;
 const createSentryClient = require('../../shared/services/sentry').default;
 const syncService = require('../integrations/services/sync');

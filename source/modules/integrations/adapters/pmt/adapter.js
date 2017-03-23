@@ -1,18 +1,17 @@
-import authenticate from './hooks/authenticate';
-import fetchTeams from './hooks/fetch-teams';
-import * as userConnector from './hooks/fetch-users';
-import usersAvailableForShift from './hooks/users-available-for-shift';
-import myShifts from './hooks/my-shifts';
-import viewShift from './hooks/view-shift';
+const authenticate = require('./hooks/authenticate');
+const fetchTeams = require('./hooks/fetch-teams');
+const fetchUsers = require('./hooks/fetch-users');
+const usersAvailableForShift = require('./hooks/users-available-for-shift');
+const myShifts = require('./hooks/my-shifts');
+const viewShift = require('./hooks/view-shift');
 
 const pmtAdapter = ({ externalId }, token) => ({
   authenticate: authenticate(externalId),
   fetchTeams: fetchTeams(externalId),
-  fetchUsers: userConnector.fetchUsers(externalId),
-  getUsers: (teams) => userConnector.getUsers(externalId, teams),
+  fetchUsers: fetchUsers(externalId),
   usersAvailableForShift: usersAvailableForShift(externalId, token),
   myShifts: myShifts(externalId, token),
   viewShift: viewShift(externalId, token),
 });
 
-export default pmtAdapter;
+module.exports = pmtAdapter;

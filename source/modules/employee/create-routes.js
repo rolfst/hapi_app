@@ -1,4 +1,5 @@
-import createRoutes from '../../shared/utils/create-routes';
+/* eslint-disable global-require, import/no-dynamic-require */
+const { createRoutes } = require('../../shared/utils/create-routes');
 
 const baseImport = './handlers';
 const basePath = '/v2/networks/{networkId}';
@@ -24,4 +25,4 @@ const routes = [{
   validator: require('./validators/bulk-invite'),
 }];
 
-export default createRoutes(routes);
+module.exports = createRoutes(routes);

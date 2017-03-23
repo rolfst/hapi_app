@@ -1,6 +1,6 @@
-import * as notifier from '../../../../shared/services/notifier';
+const notifier = require('../../../../shared/services/notifier');
 
-export const createNotification = (actor, object) => ({
+const createNotification = (actor, object) => ({
   text: `${actor.fullName}: ${object.source.text}`,
   data: {
     id: object.parentId,
@@ -9,8 +9,11 @@ export const createNotification = (actor, object) => ({
   },
 });
 
-export const send = (actor, object, usersToNotify) => {
+const send = (actor, object, usersToNotify) => {
   const notification = createNotification(actor, object);
 
   notifier.send(usersToNotify, notification);
 };
+
+exports.createNotification = createNotification;
+exports.send = send;

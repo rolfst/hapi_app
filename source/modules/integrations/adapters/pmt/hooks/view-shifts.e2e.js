@@ -1,11 +1,11 @@
-import { assert } from 'chai';
-import nock from 'nock';
-import moment from 'moment';
-import createError from '../../../../../shared/utils/create-error';
-import * as testHelper from '../../../../../shared/test-utils/helpers';
-import * as stubs from '../test-utils/stubs';
-import * as blueprints from '../test-utils/blueprints';
-import hook from './view-shift';
+const { assert } = require('chai');
+const nock = require('nock');
+const moment = require('moment');
+const createError = require('../../../../../shared/utils/create-error');
+const testHelper = require('../../../../../shared/test-utils/helpers');
+const stubs = require('../test-utils/stubs');
+const blueprints = require('../test-utils/blueprints');
+const hook = require('./view-shift');
 
 describe('PMT view shifts hook', () => {
   nock.disableNetConnect();

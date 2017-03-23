@@ -1,6 +1,6 @@
-import NativeEventEmitter from 'events';
-import Promise from 'bluebird';
-import * as Logger from './logger';
+const NativeEventEmitter = require('events');
+const Promise = require('bluebird');
+const Logger = require('./logger');
 
 class EventEmitter extends NativeEventEmitter {
   constructor() {
@@ -16,12 +16,10 @@ class EventEmitter extends NativeEventEmitter {
   asyncOn(eventName, callback) {
     const that = this;
     return this.on(eventName, (...args) => {
-      return Promise.try(() => callback(...args)).catch(err =>
+      return Promise.try(() => callback(...args)).catch((err) =>
         that.logger.error('Error while emitting event', { eventName, err }));
     });
   }
 }
 
-export default {
-  create: () => new EventEmitter(),
-};
+exports.create = () => new EventEmitter();

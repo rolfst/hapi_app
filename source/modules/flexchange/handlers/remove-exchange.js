@@ -1,12 +1,12 @@
-import * as Logger from '../../../shared/services/logger';
-import * as flexchangeService from '../services/flexchange';
+const createServicePayload = require('../../../shared/utils/create-service-payload');
+const Logger = require('../../../shared/services/logger');
+const flexchangeService = require('../services/flexchange');
 
 const logger = Logger.createLogger('FLEXCHANGE/handler/removeExchanges');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const message = { ...req.pre, ...req.auth };
-    const payload = { exchangeId: req.params.exchangeId };
+    const { payload, message } = createServicePayload(req);
 
     logger.info('Deleting exchange', { payload, message });
     await flexchangeService.deleteExchange(payload);

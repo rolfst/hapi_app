@@ -1,8 +1,8 @@
-import { assert } from 'chai';
-import blueprints from '../../../shared/test-utils/blueprints';
-import stubs from '../../../shared/test-utils/stubs';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import { getRequest } from '../../../shared/test-utils/request';
+const { assert } = require('chai');
+const blueprints = require('../../../shared/test-utils/blueprints');
+const stubs = require('../../../shared/test-utils/stubs');
+const testHelper = require('../../../shared/test-utils/helpers');
+const { getRequest } = require('../../../shared/test-utils/request');
 
 describe('View network', async () => {
   let admin;

@@ -1,9 +1,9 @@
-import { assert } from 'chai';
-import stream from 'stream';
-import sinon from 'sinon';
-import bunyan from 'bunyan';
-import * as loggerService from './logger';
-import createError from '../utils/create-error';
+const { assert } = require('chai');
+const stream = require('stream');
+const sinon = require('sinon');
+const bunyan = require('bunyan');
+const loggerService = require('./logger');
+const createError = require('../utils/create-error');
 
 describe('Logger', () => {
   let loggerStub;

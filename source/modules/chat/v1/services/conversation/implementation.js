@@ -1,25 +1,26 @@
-import { find, pick } from 'lodash';
-import * as conversationRepo from '../../repositories/conversation';
+const R = require('ramda');
+const { find, pick } = require('lodash');
+const conversationRepo = require('../../repositories/conversation');
 
-export const findExistingConversation = async (participantIds) => {
+const findExistingConversation = async (participantIds) => {
   return conversationRepo.findExistingConversation(participantIds);
 };
 
-export const createConversationWithParticipants = async (type, creatorId, participants) => {
+const createConversationWithParticipants = async (type, creatorId, participants) => {
   return conversationRepo.createConversation(type, creatorId, participants);
 };
 
-export const assertThatUserIsPartOfTheConversation = (conversation, userId) => {
-  return conversation.users.some(user => user.id === userId);
+const assertThatUserIsPartOfTheConversation = (conversation, userId) => {
+  return conversation.users.some((user) => user.id === userId);
 };
 
-export const searchMessageCreatorIdForConversation = (conversation) => {
+const searchMessageCreatorIdForConversation = (conversation) => {
   if (!conversation.lastMessage) return null;
 
   return conversation.lastMessage.userId;
 };
 
-export const replaceConversationUserIdWithObject = (conversation, users) => {
+const replaceConversationUserIdWithObject = (conversation, users) => {
   const lastMessage = conversation.lastMessage;
 
   if (lastMessage) {
@@ -29,5 +30,11 @@ export const replaceConversationUserIdWithObject = (conversation, users) => {
     lastMessage.userId = pick(matchingUser, attrs);
   }
 
-  return { ...conversation, lastMessage };
+  return R.merge(conversation, lastMessage);
 };
+
+exports.assertThatUserIsPartOfTheConversation = assertThatUserIsPartOfTheConversation;
+exports.createConversationWithParticipants = createConversationWithParticipants;
+exports.findExistingConversation = findExistingConversation;
+exports.replaceConversationUserIdWithObject = replaceConversationUserIdWithObject;
+exports.searchMessageCreatorIdForConversation = searchMessageCreatorIdForConversation;

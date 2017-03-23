@@ -1,8 +1,8 @@
-import { assert } from 'chai';
-import { deleteRequest, getRequest } from '../../../../shared/test-utils/request';
-import * as blueprints from '../../../../shared/test-utils/blueprints';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import * as conversationRepo from '../repositories/conversation';
+const { assert } = require('chai');
+const { deleteRequest, getRequest } = require('../../../../shared/test-utils/request');
+const blueprints = require('../../../../shared/test-utils/blueprints');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const conversationRepo = require('../repositories/conversation');
 
 describe('Delete conversation', () => {
   let conversation;

@@ -1,6 +1,6 @@
-import R from 'ramda';
-import { _Object } from './dao';
-import createDomainObject from '../models/object';
+const R = require('ramda');
+const { _Object } = require('./dao');
+const createDomainObject = require('../models/object');
 
 /**
  * Creating an object
@@ -14,7 +14,7 @@ import createDomainObject from '../models/object';
  * @method create
  * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
-export const create = async (attributes) => {
+const create = async (attributes) => {
   const whitelist = ['userId', 'networkId', 'parentType', 'parentId', 'objectType', 'sourceId'];
   const result = await _Object.create(R.pick(whitelist, attributes));
 
@@ -31,11 +31,9 @@ export const create = async (attributes) => {
  * @method findBy
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
-export const findBy = async (whereConstraint, options) => {
-  const result = await _Object.findAll({
-    ...options,
-    where: whereConstraint,
-  });
+const findBy = async (whereConstraint, options) => {
+  const result = await _Object.findAll(R.merge(options,
+        { where: whereConstraint }));
 
   return R.map(createDomainObject, result);
 };
@@ -46,7 +44,7 @@ export const findBy = async (whereConstraint, options) => {
  * @method deleteBy
  * @return {boolean}
  */
-export const deleteBy = async (whereConstraint) => {
+const deleteBy = async (whereConstraint) => {
   await _Object.destroy({ where: whereConstraint });
 
   return true;
@@ -58,7 +56,7 @@ export const deleteBy = async (whereConstraint) => {
  * @method count
  * @return {boolean}
  */
-export const count = async (whereConstraint) => {
+const count = async (whereConstraint) => {
   return _Object.count({ where: whereConstraint });
 };
 
@@ -69,7 +67,7 @@ export const count = async (whereConstraint) => {
  * @method update
  * @return {boolean}
  */
-export const update = async (objectId, attributes) => _Object
+const update = async (objectId, attributes) => _Object
   .update(attributes, { where: { id: objectId } });
 
 /**
@@ -78,7 +76,7 @@ export const update = async (objectId, attributes) => _Object
  * @method deleteById
  * @return {boolean}
  */
-export function deleteById(id) {
+function deleteById(id) {
   return deleteBy({ id });
 }
 
@@ -87,6 +85,14 @@ export function deleteById(id) {
  * @method findAll
  * return {external:Promise.<Object[]>} {@link module:modules/feed~Object Object}
  */
-export function findAll() {
+function findAll() {
   return _Object.findAll();
 }
+
+exports.count = count;
+exports.create = create;
+exports.deleteBy = deleteBy;
+exports.deleteById = deleteById;
+exports.findAll = findAll;
+exports.findBy = findBy;
+exports.update = update;

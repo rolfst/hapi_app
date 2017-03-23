@@ -1,10 +1,10 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import * as blueprints from '../../../../shared/test-utils/blueprints';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import * as notifier from '../../../../shared/services/notifier';
-import { postRequest } from '../../../../shared/test-utils/request';
-import * as conversationRepo from '../repositories/conversation';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const blueprints = require('../../../../shared/test-utils/blueprints');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const notifier = require('../../../../shared/services/notifier');
+const { postRequest } = require('../../../../shared/test-utils/request');
+const conversationRepo = require('../repositories/conversation');
 
 describe('Post message', () => {
   let conversation;

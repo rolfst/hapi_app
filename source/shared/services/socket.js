@@ -1,13 +1,13 @@
-import fetch from 'isomorphic-fetch';
-import R from 'ramda';
-import * as Logger from './logger';
+const fetch = require('isomorphic-fetch');
+const R = require('ramda');
+const Logger = require('./logger');
 
 const logger = Logger.createLogger('SHARED/services/socket');
 
-export const WEBSOCKET_URL = process.env.API_ENV === 'production' ?
+const WEBSOCKET_URL = process.env.API_ENV === 'production' ?
   'https://realtime.flex-appeal.nl' : 'https://test.realtime.flex-appeal.nl';
 
-export const send = async (eventName, users, payload, token) => {
+const send = async (eventName, users, payload, token) => {
   const userIds = R.pluck('id', users);
 
   try {
@@ -32,3 +32,6 @@ export const send = async (eventName, users, payload, token) => {
     logger.error('Error sending socket event', { err });
   }
 };
+
+exports.send = send;
+exports.WEBSOCKET_URL = WEBSOCKET_URL;

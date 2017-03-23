@@ -1,7 +1,8 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import * as userRepo from '../../modules/core/repositories/user';
-import * as unit from './create-adapter';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const R = require('ramda');
+const userRepo = require('../../modules/core/repositories/user');
+const unit = require('./create-adapter');
 
 describe('createAdapter', () => {
   const integrationName = 'foo';
@@ -60,22 +61,22 @@ describe('createAdapter', () => {
   it('should fail when there is no adapter for integration for network', () => {
     const promise = unit.createAdapter(network, userId, { integrations: {} });
 
-    return assert.isRejected(promise, /Couldn\'t find integration with adapter./);
+    return assert.isRejected(promise, /Couldn't find integration with adapter./);
   });
 
   it('should fail when the network has no externalId value', () => {
-    const networkWithoutExternalId = { ...network, externalId: null };
+    const networkWithoutExternalId = R.merge(network, { externalId: null });
     const promise = unit.createAdapter(networkWithoutExternalId, userId, { integrations: {} });
 
     return assert.isRejected(promise, /Network has no externalId value./);
   });
 
   it('should fail when network has no integration', () => {
-    const networkWithoutIntegration = { ...network, hasIntegration: false };
+    const networkWithoutIntegration = R.merge(network, { hasIntegration: false });
     const promise = unit.createAdapter(networkWithoutIntegration, userId, {
       integrations: { fakeIntegrations } });
 
-    return assert.isRejected(promise, /The network doesn\'t have a linked integration./);
+    return assert.isRejected(promise, /The network doesn't have a linked integration./);
   });
 
   it('should fail when no token found', () => {

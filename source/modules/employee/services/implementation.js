@@ -1,6 +1,6 @@
-import Promise from 'bluebird';
-import * as passwordUtil from '../../../shared/utils/password';
-import * as userRepo from '../../core/repositories/user';
+const Promise = require('bluebird');
+const passwordUtil = require('../../../shared/utils/password');
+const userRepo = require('../../core/repositories/user');
 
 /**
  * @module modules/employee/services/employee/impl
@@ -16,6 +16,8 @@ const appendPasswordToUser = async (user) => {
   return employee;
 };
 
-export const generatePasswordsForMembers = async (members) => {
+const generatePasswordsForMembers = async (members) => {
   return Promise.map(members, await appendPasswordToUser);
 };
+
+exports.generatePasswordsForMembers = generatePasswordsForMembers;

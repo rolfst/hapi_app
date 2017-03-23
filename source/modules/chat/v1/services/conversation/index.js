@@ -1,11 +1,11 @@
-import { uniq, filter, map, omit } from 'lodash';
-import R from 'ramda';
-import createError from '../../../../../shared/utils/create-error';
-import * as objectService from '../../../../core/services/object';
-import * as conversationRepo from '../../repositories/conversation';
-import * as messageRepo from '../../repositories/message';
-import ChatDispatcher from '../../dispatcher';
-import * as impl from './implementation';
+const { uniq, filter, map, omit } = require('lodash');
+const R = require('ramda');
+const createError = require('../../../../../shared/utils/create-error');
+const objectService = require('../../../../core/services/object');
+const conversationRepo = require('../../repositories/conversation');
+const messageRepo = require('../../repositories/message');
+const ChatDispatcher = require('../../dispatcher');
+const impl = require('./implementation');
 
 /**
  * @module modules/chat/services/conversation
@@ -15,13 +15,14 @@ import * as impl from './implementation';
  * Creates a new conversation
  * @param {object} payload - Object containing payload data
  * @param {ConversationType} payload.type {@link module:modules/chat~ConversationType}
+ * @param {string[]} payload.users - The id of the users that participate in the conversation
  * - The type of conversation
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method list
  * @return {external:Promise.<Integration[]>} {@link module:modules/core~Integration Integration} -
  */
-export const create = async (payload, message) => {
-  const participants = uniq([...payload.participants, message.credentials.id]);
+const create = async (payload, message) => {
+  const participants = uniq([...payload.users, message.credentials.id]);
 
   if (participants.length < 2) {
     throw createError('403', 'A conversation must have 2 or more participants');
@@ -49,7 +50,7 @@ export const create = async (payload, message) => {
  * @return {external:Promise.<Conversation[]>} {@link module:modules/chat~Conversation Conversation}
  * - Promise containing a list of conversations§
  */
-export const listConversations = async (payload) => {
+const listConversations = async (payload) => {
   const conversations = await conversationRepo.findConversationsById(payload.ids);
   const messages = await messageRepo.findMessagesForConversations(map(conversations, 'id'));
 
@@ -59,11 +60,11 @@ export const listConversations = async (payload) => {
       (message) => omit(message, 'conversation', 'update_at')
     );
 
-    return {
-      ...conversation,
-      lastMessage: conversationMessages[conversationMessages.length - 1],
-      messages: conversationMessages,
-    };
+    return R.merge(conversation,
+      {
+        lastMessage: conversationMessages[conversationMessages.length - 1],
+        messages: conversationMessages,
+      });
   });
 };
 
@@ -76,7 +77,7 @@ export const listConversations = async (payload) => {
  * @return {external:Promise.<Conversation>} {@link module:modules/chat~Conversation} -
  * Promise containing a single conversation
  */
-export const getConversation = async (payload, message) => {
+const getConversation = async (payload, message) => {
   const conversation = await conversationRepo.findConversationById(payload.id);
   if (!conversation) throw createError('404');
 
@@ -89,7 +90,7 @@ export const getConversation = async (payload, message) => {
 
   const messages = await messageRepo.findMessageByIds(R.pluck('sourceId', messageObjects));
 
-  return { ...conversation, lastMessage: R.last(messages), messages };
+  return R.mergeAll([conversation, { lastMessage: R.last(messages) }, messages]);
 };
 
 /**
@@ -97,12 +98,11 @@ export const getConversation = async (payload, message) => {
  * @param {object} payload - Object containing payload data
  * @param {number} payload.id - The id of the user
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method getConversationsForUser
+ * @method listConversationsForUser
  * @return {external:Promise.<Conversation[]>} {@link module:modules/chat~Conversation} -
  * Promise containing a list of conversations
  */
-
-export const listConversationsForUser = async (payload, message) => {
+const listConversationsForUser = async (payload, message) => {
   const conversationIds = await conversationRepo.findIdsForUser(payload.id);
 
   return listConversations({ ids: conversationIds }, message);
@@ -117,7 +117,7 @@ export const listConversationsForUser = async (payload, message) => {
  * @return {external:Promise.<Message[]>} {@link module:modules/chat~Message} -
  * Promise containing a list of messages
  */
-export const listMessages = async (payload, message) => {
+const listMessages = async (payload, message) => {
   const conversation = await conversationRepo.findConversationById(payload.id);
   if (!conversation) throw createError('404');
 
@@ -135,7 +135,7 @@ export const listMessages = async (payload, message) => {
  * @return {external:Promise.<Message>} {@link module:modules/chat~Message} -
  * Promise containing a message
  */
-export const getMessage = async (payload) => {
+const getMessage = async (payload) => {
   const message = await messageRepo.findMessageById(payload.messageId);
   if (!message) throw createError('404');
 
@@ -152,7 +152,7 @@ export const getMessage = async (payload) => {
  * @return {external:Promise.<Message>} {@link module:modules/chat~Message} - Promise containing
  * the created message
  */
-export const createMessage = async (payload, message) => {
+const createMessage = async (payload, message) => {
   const { id, text } = payload;
   const { credentials } = message;
   const conversation = await getConversation({ id }, message);
@@ -175,3 +175,11 @@ export const createMessage = async (payload, message) => {
 
   return refreshedMessage;
 };
+
+exports.create = create;
+exports.createMessage = createMessage;
+exports.getConversation = getConversation;
+exports.getMessage = getMessage;
+exports.listConversationsForUser = listConversationsForUser;
+exports.listConversations = listConversations;
+exports.listMessages = listMessages;

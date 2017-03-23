@@ -1,11 +1,15 @@
-import Joi from 'joi';
+const Joi = require('joi');
 
-export default {
-  payload: {
-    first_name: Joi.string().required(),
-    last_name: Joi.string().required(),
+module.exports = {
+  payload: Joi.object().keys({
+    firstName: Joi.string().required(),
+    lastName: Joi.string().required(),
     email: Joi.string().email().required(),
-    role_type: Joi.valid('employee', 'admin'),
-    team_ids: Joi.array().allow(null),
-  },
+    roleType: Joi.valid('employee', 'admin'),
+    teamIds: Joi.array().allow(null),
+  })
+    .rename('first_name', 'firstName')
+    .rename('last_name', 'lastName')
+    .rename('role_type', 'roleType')
+    .rename('team_ids', 'teamIds'),
 };

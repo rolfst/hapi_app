@@ -1,8 +1,8 @@
-import moment from 'moment';
-import * as notifier from '../../../shared/services/notifier';
-import * as notificationUtils from '../utils/notification';
+const moment = require('moment');
+const notifier = require('../../../shared/services/notifier');
+const notificationUtils = require('../utils/notification');
 
-export const createNotification = (exchange) => {
+const createNotification = (exchange) => {
   const creator = exchange.User.fullName;
   const date = moment(exchange.date).calendar(null, {
     sameDay: '[vandaag]',
@@ -18,9 +18,12 @@ export const createNotification = (exchange) => {
   };
 };
 
-export const send = async (exchange) => {
+const send = async (exchange) => {
   const approvedUser = await exchange.getApprovedUser();
   const notification = createNotification(exchange);
 
   return notifier.send([approvedUser], notification);
 };
+
+exports.createNotification = createNotification;
+exports.send = send;

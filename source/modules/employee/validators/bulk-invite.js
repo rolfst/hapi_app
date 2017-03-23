@@ -1,7 +1,7 @@
-import Joi from 'joi';
+const Joi = require('joi');
 
-export default {
-  payload: {
-    user_ids: Joi.array().required(),
-  },
+module.exports = {
+  payload: Joi.object().keys({
+    userIds: Joi.array().required(),
+  }).rename('user_ids', 'userIds'),
 };

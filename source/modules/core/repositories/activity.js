@@ -1,4 +1,4 @@
-import { Activity, Team, Network, User } from './dao';
+const { Activity, Team, Network, User } = require('./dao');
 
 /**
  * @module modules/core/repositories/activity
@@ -13,7 +13,7 @@ const defaultIncludes = [{
   }],
 }];
 
-export const findBy = (whereConstraint) => Activity.findAll({
+const findBy = (whereConstraint) => Activity.findAll({
   where: whereConstraint,
 });
 
@@ -23,7 +23,7 @@ export const findBy = (whereConstraint) => Activity.findAll({
  * @method findForUser
  * @return {external:Promise.<Activity>} {@link module:shared~Activity Activity}
  */
-export function findForUser(userId) {
+function findForUser(userId) {
   return Activity.findAll({
     include: defaultIncludes,
     where: { sourceId: userId },
@@ -36,7 +36,7 @@ export function findForUser(userId) {
  * @method findActivitiesForSource
  * @return {external:Promise.<Activity[]>} {@link module:shared~Activity Activity}
  */
-export function findActivitiesForSource(sourceModel) {
+function findActivitiesForSource(sourceModel) {
   return sourceModel.getActivities({
     include: defaultIncludes,
   });
@@ -52,7 +52,7 @@ export function findActivitiesForSource(sourceModel) {
  * @method createActivity
  * @return {external:Promise.<Activity>} {@link module:shared~Activity Activity}
  */
-export function createActivity({ activityType, userId, sourceId, metaData }) {
+function createActivity({ activityType, userId, sourceId, metaData }) {
   return Activity.create({ activityType, userId, sourceId, metaData });
 }
 
@@ -61,7 +61,7 @@ export function createActivity({ activityType, userId, sourceId, metaData }) {
  * @method findAll
  * @return {external:Promise.<Activity[]>} {@link module:shared~Activity Activity}
  */
-export async function findAll() {
+async function findAll() {
   return Activity.findAll({ include: defaultIncludes });
 }
 
@@ -70,9 +70,17 @@ export async function findAll() {
  * @method deleteById
  * @return {external:Promise.<number>} - number of deleted activities
  */
-export async function deleteById(activityId) {
+async function deleteById(activityId) {
   return Activity.destroy({ where: { id: activityId } });
 }
 
-export const deleteBy = (whereConstraint) =>
+const deleteBy = (whereConstraint) =>
   Activity.destroy({ where: whereConstraint });
+
+exports.createActivity = createActivity;
+exports.deleteBy = deleteBy;
+exports.deleteById = deleteById;
+exports.findActivitiesForSource = findActivitiesForSource;
+exports.findAll = findAll;
+exports.findBy = findBy;
+exports.findForUser = findForUser;

@@ -1,8 +1,8 @@
-import moment from 'moment';
-import client from '../client';
-import shiftSerializer from '../serializers/shift';
+const moment = require('moment');
+const client = require('../client');
+const shiftSerializer = require('../serializers/shift');
 
-export default (baseStoreUrl, token) => async () => {
+module.exports = (baseStoreUrl, token) => async () => {
   const date = moment().format('DD-MM-YYYY');
   const endpoint = `${baseStoreUrl}/me/shifts/${date}`;
   const result = await client.get(endpoint, token);

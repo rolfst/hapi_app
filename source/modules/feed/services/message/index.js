@@ -1,14 +1,14 @@
-import R from 'ramda';
-import Promise from 'bluebird';
-import * as Logger from '../../../../shared/services/logger';
-import createError from '../../../../shared/utils/create-error';
-import * as attachmentService from '../../../attachment/services/attachment';
-import * as objectService from '../../../core/services/object';
-import FeedDispatcher from '../../dispatcher';
-import * as messageRepository from '../../repositories/message';
-import * as likeRepository from '../../repositories/like';
-import * as commentRepository from '../../repositories/comment';
-import * as impl from './implementation';
+const R = require('ramda');
+const Promise = require('bluebird');
+const Logger = require('../../../../shared/services/logger');
+const createError = require('../../../../shared/utils/create-error');
+const attachmentService = require('../../../attachment/services/attachment');
+const objectService = require('../../../core/services/object');
+const FeedDispatcher = require('../../dispatcher');
+const messageRepository = require('../../repositories/message');
+const likeRepository = require('../../repositories/like');
+const commentRepository = require('../../repositories/comment');
+const impl = require('./implementation');
 
 /**
  * @module modules/feed/services/message
@@ -29,7 +29,7 @@ const isAvailable = R.both(isDefined, isNotEmpty);
  * @method getComments
  * @return {external:Promise.<Comment[]>} {@link module:feed~Comment comment}
  */
-export const listComments = async (payload, message) => {
+const listComments = async (payload, message) => {
   logger.info('Get comments for message', { payload, message });
 
   let whereConstraint = {};
@@ -48,7 +48,7 @@ export const listComments = async (payload, message) => {
  * @method list
  * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
  */
-export const list = async (payload, message) => {
+const list = async (payload, message) => {
   logger.info('Listing multiple messages', { payload, message });
 
   const [messageResult, likeResult, commentResult] = await Promise.all([
@@ -66,12 +66,11 @@ export const list = async (payload, message) => {
     const likes = likesForMessage(feedMessage.id);
     const comments = commentsForMessage(feedMessage.id);
 
-    return {
-      ...feedMessage,
+    return R.merge(feedMessage, {
       hasLiked: R.pipe(R.pluck('userId'), R.contains(message.credentials.id))(likes),
       likesCount: likes.length,
       commentsCount: comments.length,
-    };
+    });
   }, messageResult);
 };
 
@@ -84,7 +83,7 @@ export const list = async (payload, message) => {
  * @method listLikes
  * @return {external:Promise.<Like[]>} {@link module:feed~Like like}
  */
-export const listLikes = async (payload, message) => {
+const listLikes = async (payload, message) => {
   logger.info('Listing likes for message', { payload, message });
 
   let whereConstraint = {};
@@ -104,7 +103,7 @@ export const listLikes = async (payload, message) => {
  * @method get
  * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
  */
-export const getAsObject = async (payload, message) => {
+const getAsObject = async (payload, message) => {
   logger.info('Finding message', { payload, message });
   const result = await messageRepository.findById(payload.messageId);
 
@@ -138,7 +137,7 @@ export const getAsObject = async (payload, message) => {
  * @method create
  * @return {external:Promise.<Message>} {@link module:feed~Message message}
  */
-export const create = async (payload, message) => {
+const create = async (payload, message) => {
   logger.info('Creating message', { payload, message });
 
   const checkPayload = R.compose(isAvailable, R.prop(R.__, payload));
@@ -226,7 +225,7 @@ export const create = async (payload, message) => {
  * @method update
  * @return {external:Promise.<Object>} {@link module:feed~Object object}
  */
-export const update = async (payload, message) => {
+const update = async (payload, message) => {
   logger.info('Updating message', { payload, message });
 
   const foundMessage = await messageRepository.findById(payload.messageId);
@@ -246,7 +245,7 @@ export const update = async (payload, message) => {
  * @method like
  * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
  */
-export const like = async (payload, message) => {
+const like = async (payload, message) => {
   logger.info('Liking message', { payload, message });
 
   const messageToLike = await getAsObject({ messageId: payload.messageId }, message);
@@ -255,7 +254,7 @@ export const like = async (payload, message) => {
   await likeRepository.create(payload.messageId, payload.userId);
 
   messageToLike.source.hasLiked = true;
-  messageToLike.source.likesCount++;
+  messageToLike.source.likesCount += 1;
 
   return messageToLike;
 };
@@ -268,7 +267,7 @@ export const like = async (payload, message) => {
  * @method remove
  * @return {external:Promise.<Boolean>}
  */
-export const remove = async (payload, message) => {
+const remove = async (payload, message) => {
   logger.info('Deleting message', { payload, message });
 
   // TODO ACL: Only an admin or the creator of the message can delete.
@@ -278,3 +277,12 @@ export const remove = async (payload, message) => {
 
   return true;
 };
+
+exports.create = create;
+exports.getAsObject = getAsObject;
+exports.like = like;
+exports.list = list;
+exports.listComments = listComments;
+exports.listLikes = listLikes;
+exports.remove = remove;
+exports.update = update;

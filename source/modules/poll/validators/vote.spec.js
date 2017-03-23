@@ -1,6 +1,6 @@
-import { assert } from 'chai';
-import Joi from 'joi';
-import scheme from './vote';
+const { assert } = require('chai');
+const Joi = require('joi');
+const scheme = require('./vote');
 
 describe('Validator: vote', () => {
   it('should succeed when receiving option_ids', () => {

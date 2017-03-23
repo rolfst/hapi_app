@@ -1,8 +1,9 @@
-import { assert } from 'chai';
-import blueprints from '../../../../shared/test-utils/blueprints';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import { postRequest } from '../../../../shared/test-utils/request';
-import * as conversationRepo from '../repositories/conversation';
+const { assert } = require('chai');
+const R = require('ramda');
+const blueprints = require('../../../../shared/test-utils/blueprints');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const { postRequest } = require('../../../../shared/test-utils/request');
+const conversationRepo = require('../repositories/conversation');
 
 describe('Handler: Create conversation (v2)', () => {
   let creator;
@@ -15,12 +16,12 @@ describe('Handler: Create conversation (v2)', () => {
   describe('Good flow', () => {
     before(async () => {
       [creator, participant1, participant2] = await Promise.all([
-        testHelper.createUser({ ...blueprints.users.employee,
-          username: 'logged_user' }),
-        testHelper.createUser({ ...blueprints.users.employee,
-          username: 'conversation_participant1' }),
-        testHelper.createUser({ ...blueprints.users.employee,
-          username: 'conversation_participant2' }),
+        testHelper.createUser(R.merge(blueprints.users.employee,
+          { username: 'logged_user' })),
+        testHelper.createUser(R.merge(blueprints.users.employee,
+          { username: 'conversation_participant1' })),
+        testHelper.createUser(R.merge(blueprints.users.employee,
+          { username: 'conversation_participant2' })),
       ]);
 
       existingConversation = await conversationRepo.create({
@@ -61,7 +62,7 @@ describe('Handler: Create conversation (v2)', () => {
 
   describe('Bad flow', () => {
     before(async () => {
-      creator = await testHelper.createUser({ ...blueprints.users.employee });
+      creator = await testHelper.createUser(blueprints.users.employee);
     });
 
     it('should fail when passing logged user as a participant', async () => {

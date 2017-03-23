@@ -1,6 +1,7 @@
-import { assert } from 'chai';
-import moment from 'moment';
-import userSerializer from './user';
+const { assert } = require('chai');
+const R = require('ramda');
+const moment = require('moment');
+const userSerializer = require('./user');
 
 describe('PMT: User Serializer', () => {
   const defaultExternalUser = {
@@ -47,77 +48,52 @@ describe('PMT: User Serializer', () => {
   });
 
   it('teamIds should fallback to department when scope is empty', () => {
-    const externalUser = {
-      ...defaultExternalUser,
-      scope: null,
-    };
+    const externalUser = R.merge(defaultExternalUser, { scope: null });
 
     const result = userSerializer(externalUser);
-    const expected = {
-      ...defaultInternalUser,
-      teamIds: ['14'],
-    };
+    const expected = R.merge(defaultInternalUser, { teamIds: ['14'] });
 
     assert.deepEqual(result, expected);
   });
 
   it('teamIds should be empty when department and scope are empty', () => {
-    const externalUser = {
-      ...defaultExternalUser,
-      department: null,
-      scope: null,
-    };
+    const externalUser = R.merge(
+      defaultExternalUser,
+      {
+        department: null,
+        scope: null,
+      }
+    );
 
     const result = userSerializer(externalUser);
-    const expected = {
-      ...defaultInternalUser,
-      teamIds: [],
-    };
+    const expected = R.merge(defaultInternalUser, { teamIds: [] });
 
     assert.deepEqual(result, expected);
   });
 
   it('username should fallback to email when empty', () => {
-    const externalUser = {
-      ...defaultExternalUser,
-      username: null,
-    };
+    const externalUser = R.merge(defaultExternalUser, { username: null });
 
     const result = userSerializer(externalUser);
-    const expected = {
-      ...defaultInternalUser,
-      username: defaultInternalUser.email,
-    };
+    const expected = R.merge(defaultInternalUser, { username: defaultInternalUser.email });
 
     assert.deepEqual(result, expected);
   });
 
   it('dateOfBirth should be set to null when date string is invalid', () => {
-    const externalUser = {
-      ...defaultExternalUser,
-      date_of_birth: '22-0321',
-    };
+    const externalUser = R.merge(defaultExternalUser, { date_of_birth: '22-0321' });
 
     const result = userSerializer(externalUser);
-    const expected = {
-      ...defaultInternalUser,
-      dateOfBirth: null,
-    };
+    const expected = R.merge(defaultInternalUser, { dateOfBirth: null });
 
     assert.deepEqual(result, expected);
   });
 
   it('dateOfBirth should be set to null when date string has wrong format', () => {
-    const externalUser = {
-      ...defaultExternalUser,
-      date_of_birth: '22-09-1995',
-    };
+    const externalUser = R.merge(defaultExternalUser, { date_of_birth: '22-09-1995' });
 
     const result = userSerializer(externalUser);
-    const expected = {
-      ...defaultInternalUser,
-      dateOfBirth: null,
-    };
+    const expected = R.merge(defaultInternalUser, { dateOfBirth: null });
 
     assert.deepEqual(result, expected);
   });

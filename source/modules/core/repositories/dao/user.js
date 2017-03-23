@@ -1,7 +1,7 @@
-import Sequelize from 'sequelize';
-import * as password from '../../../../shared/utils/password';
-import * as dateUtils from '../../../../shared/utils/date';
-import model from '../../../../shared/configs/sequelize';
+const Sequelize = require('sequelize');
+const password = require('../../../../shared/utils/password');
+const dateUtils = require('../../../../shared/utils/date');
+const model = require('../../../../shared/configs/sequelize');
 
 const User = model.define('User', {
   username: {
@@ -118,4 +118,4 @@ const User = model.define('User', {
   },
 });
 
-export default User;
+module.exports = User;

@@ -1,8 +1,8 @@
-import R from 'ramda';
-import Mixpanel from 'mixpanel';
-import EventEmitter from '../../shared/services/event-emitter';
-import * as Intercom from '../../shared/services/intercom';
-import * as networkService from '../core/services/network';
+const R = require('ramda');
+const Mixpanel = require('mixpanel');
+const EventEmitter = require('../../shared/services/event-emitter');
+const Intercom = require('../../shared/services/intercom');
+const networkService = require('../core/services/network');
 
 const pubsub = EventEmitter.create();
 
@@ -53,4 +53,4 @@ pubsub.asyncOn('user.deleted', (payload) => {
   });
 });
 
-export default pubsub;
+module.exports = pubsub;

@@ -1,10 +1,10 @@
-import * as responseUtil from '../../../shared/utils/response';
-import * as teamService from '../services/team';
+const responseUtil = require('../../../shared/utils/response');
+const createServicePayload = require('../../../shared/utils/create-service-payload');
+const teamService = require('../services/team');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const payload = { ...req.params, ...req.payload };
-    const message = { ...req.auth, ...req.pre };
+    const { payload, message } = createServicePayload(req);
     const data = await teamService.create(payload, message);
 
     return reply({ data: responseUtil.toSnakeCase(data) });

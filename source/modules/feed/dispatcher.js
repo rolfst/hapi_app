@@ -1,10 +1,10 @@
-import R from 'ramda';
-import EventEmitter from '../../shared/services/event-emitter';
-import * as Notifier from '../../shared/services/notifier';
-import * as Mixpanel from '../../shared/services/mixpanel';
-import * as objectService from '../core/services/object';
-import * as networkService from '../core/services/network';
-import createdMessageNotification from './notifications/message-created';
+const R = require('ramda');
+const EventEmitter = require('../../shared/services/event-emitter');
+const Notifier = require('../../shared/services/notifier');
+const Mixpanel = require('../../shared/services/mixpanel');
+const objectService = require('../core/services/object');
+const networkService = require('../core/services/network');
+const createdMessageNotification = require('./notifications/message-created');
 
 const pubsub = EventEmitter.create();
 
@@ -36,4 +36,4 @@ pubsub.asyncOn('message.created', async (payload) => {
   }, payload.credentials.id);
 });
 
-export default pubsub;
+module.exports = pubsub;

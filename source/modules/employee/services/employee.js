@@ -1,6 +1,7 @@
-import * as userRepo from '../../core/repositories/user';
-import * as userService from '../../core/services/user';
-import EmployeeDispatcher from '../dispatcher';
+const R = require('ramda');
+const userRepo = require('../../core/repositories/user');
+const userService = require('../../core/services/user');
+const EmployeeDispatcher = require('../dispatcher');
 
 /**
  * @module modules/employee/services/employee
@@ -10,16 +11,28 @@ import EmployeeDispatcher from '../dispatcher';
 /**
  * Update current user
  * @param {object} payload - Object containing payload data
- * @param {User} payload.attributes - The id for the user to find
+ * @param {User} payload.firstName - The firstName for the user to find
  * @param {number} payload.networkId - The id of network to apply scope
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method getUserWithNetworkScope
+ * @method updateEmployee
  * @return {external:Promise.<User[]>} {@link module:modules/core~User} Promise containing
  * collection of users
  */
-export const updateEmployee = async (payload, message) => {
+const updateEmployee = async (payload, message) => {
   // TODO move this functionality to the core module
-  await userRepo.updateUser(message.credentials.id, payload.attributes);
+  const whitelist = [
+    'firstName',
+    'lastName',
+    'email',
+    'password',
+    'address',
+    'zipCode',
+    'dateOfBirth',
+    'phoneNum',
+  ];
+
+  const attributes = R.pick(whitelist, payload);
+  await userRepo.updateUser(message.credentials.id, attributes);
 
   const updatedUser = await userService.getUserWithNetworkScope({
     id: message.credentials.id, networkId: message.network.id }, message);
@@ -41,7 +54,10 @@ export const updateEmployee = async (payload, message) => {
  * @return {external:Promise.<User>} {@link module:modules/core~User} Promise containing
  * collection of users
  */
-export const getEmployee = async (payload, message) => {
+const getEmployee = async (payload, message) => {
   return userService.getUserWithNetworkScope({
     id: message.credentials.id, networkId: message.network.id }, message);
 };
+
+exports.getEmployee = getEmployee;
+exports.updateEmployee = updateEmployee;

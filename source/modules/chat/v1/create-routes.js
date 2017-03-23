@@ -1,4 +1,6 @@
-import createRoutes from '../../../shared/utils/create-routes';
+/* eslint-disable global-require */
+const R = require('ramda');
+const { createRoutes } = require('../../../shared/utils/create-routes');
 
 const routes = [{
   method: 'GET',
@@ -30,6 +32,6 @@ const routes = [{
   handler: require('./handlers/delete-conversation'),
 }];
 
-const addPrefetchValue = (route) => ({ ...route, prefetch: false });
+const addPrefetchValue = (route) => R.merge(route, { prefetch: false });
 
-export default createRoutes(routes.map(addPrefetchValue));
+module.exports = createRoutes(routes.map(addPrefetchValue));

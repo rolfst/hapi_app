@@ -1,4 +1,5 @@
-import createRoutes from '../../shared/utils/create-routes';
+/* eslint-disable global-require */
+const { createRoutes } = require('../../shared/utils/create-routes');
 
 const routes = [{
   method: 'POST',
@@ -7,4 +8,4 @@ const routes = [{
   validator: require('./validators/vote'),
 }];
 
-export default createRoutes(routes);
+module.exports = createRoutes(routes);

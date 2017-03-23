@@ -1,21 +1,21 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import nock from 'nock';
-import Promise from 'bluebird';
-import { pick, find, map } from 'lodash';
-import R from 'ramda';
-import stubs from '../../../../shared/test-utils/stubs';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import * as adapterUtil from '../../../../shared/utils/create-adapter';
-import * as passwordUtil from '../../../../shared/utils/password';
-import configurationMailNewAdmin from '../../../../shared/mails/configuration-invite-newadmin';
-import * as mailer from '../../../../shared/services/mailer';
-import userSerializer from '../../../integrations/adapters/pmt/serializers/user';
-import * as networkRepo from '../../../core/repositories/network';
-import * as userService from '../../../core/services/user';
-import * as userRepo from '../../../core/repositories/user';
-import * as teamRepo from '../../../core/repositories/team';
-import * as syncService from './index';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const nock = require('nock');
+const Promise = require('bluebird');
+const { find, map } = require('lodash');
+const R = require('ramda');
+const stubs = require('../../../../shared/test-utils/stubs');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const adapterUtil = require('../../../../shared/utils/create-adapter');
+const passwordUtil = require('../../../../shared/utils/password');
+const configurationMailNewAdmin = require('../../../../shared/mails/configuration-invite-newadmin');
+const mailer = require('../../../../shared/services/mailer');
+const userSerializer = require('../../../integrations/adapters/pmt/serializers/user');
+const networkRepo = require('../../../core/repositories/network');
+const userService = require('../../../core/services/user');
+const userRepo = require('../../../core/repositories/user');
+const teamRepo = require('../../../core/repositories/team');
+const syncService = require('./index');
 
 describe('Import network', () => {
   let sandbox;
@@ -39,10 +39,10 @@ describe('Import network', () => {
           .reply(200, stubs.users_200);
 
         admin = await testHelper.createUser({ password: 'pw' });
-        const { network: netw } = await testHelper.createNetworkWithIntegration({
-          userId: admin.id,
-          ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
-        });
+        const { network: netw } = await testHelper.createNetworkWithIntegration(R.merge(
+          { userId: admin.id },
+          R.pick(['externalId', 'name', 'integrationName'], pristineNetwork)
+          ));
         network = netw;
 
         sandbox.stub(adapterUtil, 'createAdapter').returns(Promise.resolve(fakeAdapter));
@@ -139,10 +139,10 @@ describe('Import network', () => {
       sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
 
       admin = await testHelper.createUser({ password: 'pw' });
-      const { network: netw } = await testHelper.createNetworkWithIntegration({
-        userId: admin.id,
-        ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
-      });
+      const { network: netw } = await testHelper.createNetworkWithIntegration(R.merge(
+        { userId: admin.id },
+        R.pick(['externalId', 'name', 'integrationName'], pristineNetwork)
+      ));
       network = netw;
     });
 
@@ -158,7 +158,7 @@ describe('Import network', () => {
         networkId: 0,
       }, { credentials: admin });
 
-      await assert.isRejected(result, /Error: Network not found./);
+      await assert.isRejected(result, 'Network not found.');
     });
 
     it('should return 422 external user with email not found', async () => {
@@ -167,8 +167,7 @@ describe('Import network', () => {
         networkId: network.id,
       });
 
-      await assert.isRejected(result,
-        /Error: The user could no longer be found in external network./);
+      await assert.isRejected(result, 'The user could no longer be found in external network.');
     });
 
     it('should return 403 when network is already imported', async () => {
@@ -179,7 +178,7 @@ describe('Import network', () => {
         networkId: network.id,
       }, { credentials: admin });
 
-      await assert.isRejected(result, /Error: The network has already been imported./);
+      await assert.isRejected(result, 'The network has already been imported.');
     });
 
     it('should return 403 when no integration has been enabled for the network', async () => {
@@ -193,7 +192,7 @@ describe('Import network', () => {
 
       await networkRepo.deleteById(network.id);
 
-      await assert.isRejected(result, /Error: The network does not have an enabled integration/);
+      await assert.isRejected(result, 'The network does not have an enabled integration');
     });
   });
 });

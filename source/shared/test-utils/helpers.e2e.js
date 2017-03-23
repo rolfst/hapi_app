@@ -1,13 +1,13 @@
 /* global assert */
-import R from 'ramda';
-import { first } from 'lodash';
-import Promise from 'bluebird';
-import blueprints from './blueprints';
-import { UserRoles } from '../services/permission';
-import * as networkRepo from '../../modules/core/repositories/network';
-import * as integrationRepo from '../../modules/core/repositories/integration';
-import * as networkService from '../../modules/core/services/network';
-import * as testHelper from './helpers';
+const R = require('ramda');
+const { first } = require('lodash');
+const Promise = require('bluebird');
+const blueprints = require('./blueprints');
+const UserRoles = require('../services/permission');
+const networkRepo = require('../../modules/core/repositories/network');
+const integrationRepo = require('../../modules/core/repositories/integration');
+const networkService = require('../../modules/core/services/network');
+const testHelper = require('./helpers');
 
 describe('Test Helper', () => {
   describe('createUser', () => {

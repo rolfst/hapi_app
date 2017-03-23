@@ -1,10 +1,11 @@
-import Sequelize from 'sequelize';
-import moment from 'moment';
-import model from '../../../../shared/configs/sequelize';
-import * as dateUtils from '../../../../shared/utils/date';
-import makeCreatedInObject from '../../utils/created-in-text';
+const Sequelize = require('sequelize');
+const R = require('ramda');
+const moment = require('moment');
+const model = require('../../../../shared/configs/sequelize');
+const dateUtils = require('../../../../shared/utils/date');
+const makeCreatedInObject = require('../../utils/created-in-text');
 
-export const exchangeTypes = {
+const exchangeTypes = {
   NETWORK: 'ALL',
   TEAM: 'TEAM',
   USER: 'USER',
@@ -89,7 +90,7 @@ const Exchange = model.define('Exchange', {
   hooks: {
     afterDestroy: function (exchange) { // eslint-disable-line func-names, object-shorthand
       return exchange.getActivities()
-        .then(activities => activities.map(a => a.destroy()));
+        .then((activities) => activities.map((a) => a.destroy()));
     },
   },
   instanceMethods: {
@@ -123,26 +124,26 @@ const Exchange = model.define('Exchange', {
 
       if (this.ExchangeResponses) {
         output = Object.assign(output, {
-          responses: this.ExchangeResponses.map(res => res.toJSON()),
+          responses: this.ExchangeResponses.map((res) => res.toJSON()),
         });
       }
 
       if (this.Comments) {
         output = Object.assign(output, {
-          comments: this.Comments.map(res => res.toJSON()),
+          comments: this.Comments.map((res) => res.toJSON()),
         });
       }
 
       if (this.ResponseStatus) {
         if (this.ResponseStatus.approved !== null) {
-          output.response_status = !!this.ResponseStatus.approved ? 'APPROVED' : 'REJECTED';
+          output.response_status = !this.ResponseStatus.approved ? 'APPROVED' : 'REJECTED';
         } else {
           output.response_status = this.ResponseStatus.response ? 'ACCEPTED' : 'DECLINED';
         }
       }
 
       if (this.ExchangeValues) {
-        output = { ...output, created_in: makeCreatedInObject(this) };
+        output = R.merge(output, { created_in: makeCreatedInObject(this) });
       }
 
       return output;
@@ -150,4 +151,5 @@ const Exchange = model.define('Exchange', {
   },
 });
 
-export default Exchange;
+exports.Exchange = Exchange;
+exports.exchangeTypes = exchangeTypes;

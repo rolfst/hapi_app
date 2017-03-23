@@ -1,5 +1,5 @@
-import Sequelize from 'sequelize';
-import model from '../../../../shared/configs/sequelize';
+const Sequelize = require('sequelize');
+const model = require('../../../../shared/configs/sequelize');
 
 const Team = model.define('Team', {
   networkId: {
@@ -31,4 +31,4 @@ const Team = model.define('Team', {
   updatedAt: 'updated_at',
 });
 
-export default Team;
+module.exports = Team;

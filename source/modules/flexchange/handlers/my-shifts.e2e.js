@@ -1,14 +1,14 @@
-import { assert } from 'chai';
-import nock from 'nock';
-import moment from 'moment';
-import sinon from 'sinon';
-import { pick } from 'lodash';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as stubs from '../../../shared/test-utils/stubs';
-import * as teamRepo from '../../core/repositories/team';
-import { exchangeTypes } from '../repositories/dao/exchange';
-import { getRequest } from '../../../shared/test-utils/request';
-import { createExchange } from '..//repositories/exchange';
+const { assert } = require('chai');
+const nock = require('nock');
+const moment = require('moment');
+const sinon = require('sinon');
+const R = require('ramda');
+const testHelper = require('../../../shared/test-utils/helpers');
+const stubs = require('../../../shared/test-utils/stubs');
+const teamRepo = require('../../core/repositories/team');
+const { exchangeTypes } = require('../repositories/dao/exchange');
+const { getRequest } = require('../../../shared/test-utils/request');
+const { createExchange } = require('..//repositories/exchange');
 
 describe('My shifts', () => {
   const pristineNetwork = stubs.pristine_networks_admins[0];
@@ -20,12 +20,14 @@ describe('My shifts', () => {
     sandbox = sinon.sandbox.create();
 
     admin = await testHelper.createUser();
-    const { network } = await testHelper.createNetworkWithIntegration({
-      ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
-      userId: admin.id,
-      token: 'footoken',
-      userToken: 'foo',
-    });
+    const { network } = await testHelper.createNetworkWithIntegration(R.merge(
+      R.pick(['externalId', 'name', 'integrationName'], pristineNetwork),
+      {
+        userId: admin.id,
+        token: 'footoken',
+        userToken: 'foo',
+      }
+    ));
     integratedNetwork = network;
   });
 

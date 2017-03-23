@@ -1,18 +1,19 @@
-import R from 'ramda';
-import Mixpanel from 'mixpanel';
-import createError from '../utils/create-error';
-import * as Logger from './logger';
+const R = require('ramda');
+const fetch = require('isomorphic-fetch');
+const Mixpanel = require('mixpanel');
+const createError = require('../utils/create-error');
+const Logger = require('./logger');
 
 const logger = Logger.createLogger('SHARED/services/mixpanel');
 
 const API_KEY = process.env.MIXPANEL_TOKEN;
 const MP_API_JQL_URI = `https://${API_KEY}@mixpanel.com/api/2.0/jql/`;
 
-export function getClient() {
+function getClient() {
   return Mixpanel.init(API_KEY);
 }
 
-export function registerProfile(user) {
+function registerProfile(user) {
   if (!user.id) throw new Error('User need to have at least an identifier.');
 
   const payload = {
@@ -25,11 +26,11 @@ export function registerProfile(user) {
   getClient().people.set(user.id, payload);
 }
 
-export function track(event, distinctId = null) {
+function track(event, distinctId = null) {
   if (!distinctId) throw new Error('Missing distinctId parameter.');
   logger.info('Tracking event', { event, distinctId });
 
-  return getClient().track(event.name, { ...event.data, distinct_id: distinctId });
+  return getClient().track(event.name, R.merge(event.data, { distinct_id: distinctId }));
 }
 
 
@@ -75,7 +76,7 @@ async function handleRequest(response, endpoint) {
  * @return {external:Promise<EventStatistic>} {@link
  * module:source/modules/statisctis~EventStatistic EventStatistic}
  */
-export async function executeQuery(query, message) {
+async function executeQuery(query, message) {
   const options = {
     method: 'POST',
     headers: {
@@ -100,3 +101,8 @@ export async function executeQuery(query, message) {
 
   return { payload: R.head(json), status };
 }
+
+exports.executeQuery = executeQuery;
+exports.getClient = getClient;
+exports.registerProfile = registerProfile;
+exports.track = track;

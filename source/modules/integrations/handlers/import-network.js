@@ -1,13 +1,9 @@
-import * as syncService from '../services/sync';
+const createServicePayload = require('../../../shared/utils/create-service-payload');
+const syncService = require('../services/sync');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const message = { ...req.pre, ...req.auth };
-    const payload = {
-      networkId: req.params.networkId,
-      ownerEmail: req.payload.external_email,
-    };
-
+    const { payload, message } = createServicePayload(req);
     await syncService.importNetwork(payload, message);
 
     return reply().code(202);

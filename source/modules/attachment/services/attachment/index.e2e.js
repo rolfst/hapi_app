@@ -1,11 +1,11 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import stream from 'stream';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import * as Storage from '../../../../shared/services/storage';
-import * as messageService from '../../../feed/services/message';
-import * as attachmentService from './index';
-import AttachmentDAO from '../../repositories/dao/attachment';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const stream = require('stream');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const Storage = require('../../../../shared/services/storage');
+const messageService = require('../../../feed/services/message');
+const attachmentService = require('./index');
+const AttachmentDAO = require('../../repositories/dao/attachment');
 
 describe('Service: Attachment', () => {
   let admin;

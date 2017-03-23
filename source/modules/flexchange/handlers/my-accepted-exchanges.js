@@ -1,15 +1,13 @@
-import { pick } from 'lodash';
-import * as Logger from '../../../shared/services/logger';
-import * as responseUtil from '../../../shared/utils/response';
-import * as flexchangeService from '../services/flexchange';
+const Logger = require('../../../shared/services/logger');
+const createServicePayload = require('../../../shared/utils/create-service-payload');
+const responseUtil = require('../../../shared/utils/response');
+const flexchangeService = require('../services/flexchange');
 
 const logger = Logger.createLogger('FLEXCHANGE/handler/myAcceptedExchanges');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const message = { ...req.pre, ...req.auth };
-    const FILTER_PROPERTIES = ['start', 'end'];
-    const payload = { filter: pick(req.query, FILTER_PROPERTIES) };
+    const { payload, message } = createServicePayload(req);
 
     logger.info('Listing my accepted exchanges', { message, payload });
     const exchanges = await flexchangeService.listMyAcceptedExchanges(payload, message);

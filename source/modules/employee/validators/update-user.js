@@ -1,14 +1,19 @@
-import { string, date } from 'joi';
+const Joi = require('joi');
 
-export default {
-  payload: {
-    first_name: string(),
-    last_name: string(),
-    email: string().email(),
-    password: string(),
-    address: string(),
-    zip_code: string(),
-    date_of_birth: date().format('YYYY-MM-DD'),
-    phone_num: string(),
-  },
+module.exports = {
+  payload: Joi.object().keys({
+    firstName: Joi.string(),
+    lastName: Joi.string(),
+    email: Joi.string().email(),
+    password: Joi.string(),
+    address: Joi.string(),
+    zipCode: Joi.string(),
+    dateOfBirth: Joi.date().format('YYYY-MM-DD'),
+    phoneNum: Joi.string(),
+  })
+    .rename('first_name', 'firstName')
+    .rename('last_name', 'lastName')
+    .rename('zip_code', 'zipCode')
+    .rename('date_of_birth', 'dateOfBirth')
+    .rename('phone_num', 'phoneNum'),
 };

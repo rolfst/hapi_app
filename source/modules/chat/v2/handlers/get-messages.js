@@ -1,10 +1,10 @@
-import * as responseUtil from '../../../../shared/utils/response';
-import * as conversationService from '../services/conversation';
+const createServicePayload = require('../../../../shared/utils/create-service-payload');
+const responseUtil = require('../../../../shared/utils/response');
+const conversationService = require('../services/conversation');
 
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const payload = { ...req.params, ...req.query };
-    const message = { ...req.pre, ...req.auth };
+    const { payload, message } = createServicePayload(req);
     const [result, count] = await Promise.all([
       conversationService.listMessages(payload, message),
       conversationService.countMessages(payload, message),

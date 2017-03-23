@@ -1,16 +1,16 @@
-import coreRoutes from './modules/core/create-routes';
-import integrationsRoutes from './modules/integrations/create-routes';
-import authenticationRoutes from './modules/authentication/create-routes';
-import employeeRoutes from './modules/employee/create-routes';
-import chatRoutesV1 from './modules/chat/v1/create-routes';
-import chatRoutesV2 from './modules/chat/v2/create-routes';
-import flexchangeRoutes from './modules/flexchange/create-routes';
-import pollRoutes from './modules/poll/create-routes';
-import feedRoutes from './modules/feed/create-routes';
-import attachmentRoutes from './modules/attachment/create-routes';
-import statisticRoutes from './modules/statistics/create-routes';
+const coreRoutes = require('./modules/core/create-routes');
+const integrationsRoutes = require('./modules/integrations/create-routes');
+const authenticationRoutes = require('./modules/authentication/create-routes');
+const employeeRoutes = require('./modules/employee/create-routes');
+const chatRoutesV1 = require('./modules/chat/v1/create-routes');
+const chatRoutesV2 = require('./modules/chat/v2/create-routes');
+const flexchangeRoutes = require('./modules/flexchange/create-routes');
+const pollRoutes = require('./modules/poll/create-routes');
+const feedRoutes = require('./modules/feed/create-routes');
+const attachmentRoutes = require('./modules/attachment/create-routes');
+const statisticRoutes = require('./modules/statistics/create-routes');
 
-export default [
+module.exports = [
   ...coreRoutes,
   ...integrationsRoutes,
   ...authenticationRoutes,

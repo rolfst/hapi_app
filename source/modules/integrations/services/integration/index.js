@@ -1,13 +1,14 @@
-import { pick } from 'lodash';
-import { createAdapter } from '../../../../shared/utils/create-adapter';
-import * as userRepo from '../../../core/repositories/user';
-import * as authenticationRepo from '../../../core/repositories/authentication';
-import createAccessToken from '../../../authentication/utils/create-access-token';
-import * as impl from './implementation';
+const R = require('ramda');
+const AdapterUtil = require('../../../../shared/utils/create-adapter');
+const userRepo = require('../../../core/repositories/user');
+const authenticationRepo = require('../../../core/repositories/authentication');
+const createAccessToken = require('../../../authentication/utils/create-access-token');
+const impl = require('./implementation');
 
-export async function authenticate(payload, message) {
-  const credentials = pick(payload, 'username', 'password');
-  const adapter = await createAdapter(message.network, 0, { proceedWithoutToken: true });
+async function authenticate(payload, message) {
+  const credentials = R.pick(['username', 'password'], payload);
+  const adapter = await AdapterUtil.createAdapter(
+      message.network, 0, { proceedWithoutToken: true });
   const authResult = await adapter.authenticate(credentials);
 
   // Else we get different users that are connected with the
@@ -30,3 +31,5 @@ export async function authenticate(payload, message) {
 
   return createAccessToken(message.credentials.id, device.device_id);
 }
+
+exports.authenticate = authenticate;

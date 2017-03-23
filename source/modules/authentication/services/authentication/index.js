@@ -1,9 +1,9 @@
-import createError from '../../../../shared/utils/create-error';
-import tokenUtil from '../../../../shared/utils/token';
-import * as userRepo from '../../../core/repositories/user';
-import * as Mixpanel from '../../../../shared/services/mixpanel';
-import firstLoginEvent from '../../analytics/first-login-event';
-import * as impl from './implementation';
+const createError = require('../../../../shared/utils/create-error');
+const tokenUtil = require('../../../../shared/utils/token');
+const userRepo = require('../../../core/repositories/user');
+const Mixpanel = require('../../../../shared/services/mixpanel');
+const firstLoginEvent = require('../../analytics/first-login-event');
+const impl = require('./implementation');
 
 /**
  * @module modules/authentication/services/authentication
@@ -19,7 +19,7 @@ import * as impl from './implementation';
  * {@link module:/modules/authentication~AuthenticatedUser AuthenticatedUser}
  *
  */
-export const delegate = async (payload, message) => {
+const delegate = async (payload, message) => {
   let decodedToken;
 
   try {
@@ -48,7 +48,7 @@ export const delegate = async (payload, message) => {
  * @return {external:Promise.<AuthenticatedUser>}
  * {@link module:/modules/authentication~AuthenticatedUser AuthenticatedUser}
  */
-export const authenticate = async (payload, message) => {
+const authenticate = async (payload, message) => {
   const user = await impl.authenticateUser(payload);
   const tokens = await impl.getAuthenticationTokens(user, message.deviceName);
 
@@ -59,3 +59,6 @@ export const authenticate = async (payload, message) => {
 
   return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, user };
 };
+
+exports.delegate = delegate;
+exports.authenticate = authenticate;

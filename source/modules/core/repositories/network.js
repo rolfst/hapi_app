@@ -1,17 +1,17 @@
-import R from 'ramda';
-import moment from 'moment';
-import createError from '../../../shared/utils/create-error';
-import createNetworkModel from '../models/network';
-import createNetworkLinkModel from '../models/network-link';
-import createUserModel from '../models/user';
-import createTeamModel from '../models/team';
-import * as userRepo from './user';
-import { Network,
+const R = require('ramda');
+const moment = require('moment');
+const createError = require('../../../shared/utils/create-error');
+const createNetworkModel = require('../models/network');
+const createNetworkLinkModel = require('../models/network-link');
+const createUserModel = require('../models/user');
+const createTeamModel = require('../models/team');
+const userRepo = require('./user');
+const { Network,
   Team,
   User,
   NetworkUser,
   Integration,
-  NetworkIntegration } from './dao';
+  NetworkIntegration } = require('./dao');
 
 /**
  * @module modules/core/repositories/network
@@ -26,7 +26,7 @@ const defaultIncludes = [
  * @method findAll
  * @return {external:Promise.<Network[]>} {@link module:modules/core~Network Network}
  */
-export const findAll = async () => {
+const findAll = async () => {
   const networks = await Network.findAll({
     include: defaultIncludes,
   });
@@ -39,7 +39,7 @@ export const findAll = async () => {
  * @method findNetwork
  * @return {external:Promise.<Network>} {@link module:modules/core~Network Network}
  */
-export const findNetwork = async (data) => {
+const findNetwork = async (data) => {
   const result = await Network.findOne({
     where: data,
     include: defaultIncludes,
@@ -55,7 +55,7 @@ export const findNetwork = async (data) => {
  * @method findNetworkById
  * @return {external:Promise.<Network>} {@link module:modules/core~Network Network}
  */
-export const findNetworkById = async (id) => {
+const findNetworkById = async (id) => {
   const result = await Network.findById(id, {
     include: defaultIncludes,
   });
@@ -70,7 +70,7 @@ export const findNetworkById = async (id) => {
  * @method findNetworkByIds
  * @return {external:Promise.<Network[]>} {@link module:modules/core~Network Network}
  */
-export const findNetworkByIds = async (ids) => {
+const findNetworkByIds = async (ids) => {
   const result = await Network.findAll({
     where: { id: { $in: ids } },
     include: defaultIncludes,
@@ -79,7 +79,7 @@ export const findNetworkByIds = async (ids) => {
   return R.map(createNetworkModel, result);
 };
 
-export const updateNetwork = async (networkId, attributes) => {
+const updateNetwork = async (networkId, attributes) => {
   const result = await Network.findOne({
     where: { id: networkId },
   });
@@ -93,7 +93,7 @@ export const updateNetwork = async (networkId, attributes) => {
  * @return {external:Promise.<NetworkIntegration[]>}
  * {@link module:modules/core~NetworkIntegration NetworkIntegration}
  */
-export const findNetworkIntegration = async (networkId) => NetworkIntegration
+const findNetworkIntegration = async (networkId) => NetworkIntegration
   .findOne({ where: { networkId } });
 
 /**
@@ -102,7 +102,7 @@ export const findNetworkIntegration = async (networkId) => NetworkIntegration
  * @return {external:Promise.<NetworkIntegration>}
  * {@link module:modules/core~NetworkIntegration NetworkIntegration}
  */
-export const setImportDateOnNetworkIntegration = async (networkId) => {
+const setImportDateOnNetworkIntegration = async (networkId) => {
   const networkIntegration = await findNetworkIntegration(networkId);
   return networkIntegration.update({ importedAt: moment().toISOString() });
 };
@@ -112,7 +112,7 @@ export const setImportDateOnNetworkIntegration = async (networkId) => {
  * @method findNetworksForUser
  * @return {external:Promise.<Integration>} {@link module:modules/core~Integration Integration}
  */
-export const findNetworksForUser = async (userId) => {
+const findNetworksForUser = async (userId) => {
   const pivotResult = await NetworkUser.findAll({
     where: { userId, deletedAt: null },
   });
@@ -129,16 +129,16 @@ export const findNetworksForUser = async (userId) => {
  * @method addUser
  * @return {external:Promise.<NetworkUser>} {@link module:shared~NetworkUser NetworkUser}
  */
-export const addUser = async (attributes) => {
+const addUser = async (attributes) => {
   const pivotResult = await NetworkUser.findOne({
     where: { networkId: attributes.networkId, userId: attributes.userId },
   });
 
   if (pivotResult) {
-    return pivotResult.update({ ...attributes, deletedAt: attributes.deletedAt || null });
+    return pivotResult.update(R.merge(attributes, { deletedAt: attributes.deletedAt || null }));
   }
 
-  return NetworkUser.create({ ...attributes, user_id: attributes.userId });
+  return NetworkUser.create(R.merge(attributes, { user_id: attributes.userId }));
 };
 
 /**
@@ -150,7 +150,7 @@ export const addUser = async (attributes) => {
  * @method findUsersForNetwork
  * @return {external:Promise.<User[]>} {@link module:modules/core~User User}
  */
-export const findUsersForNetwork = async (networkId, attributes = {}) => {
+const findUsersForNetwork = async (networkId, attributes = {}) => {
   const whereConstraint = {
     networkId,
     deletedAt: attributes.deletedAt || null,
@@ -178,7 +178,7 @@ export const findUsersForNetwork = async (networkId, attributes = {}) => {
  * @method findAllUsersForNetwork
  * @return {external:Promise.<User[]>} {@link module:modules/core~User User}
  */
-export const findAllUsersForNetwork = async (networkId) =>
+const findAllUsersForNetwork = async (networkId) =>
   findUsersForNetwork(networkId, { deletedAt: { $or: { $ne: null, $eq: null } } });
 
 /**
@@ -186,7 +186,7 @@ export const findAllUsersForNetwork = async (networkId) =>
  * @method findTeamsForNetwork
  * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team}
  */
-export const findTeamsForNetwork = (networkId) => Team
+const findTeamsForNetwork = (networkId) => Team
   .findAll({ where: { networkId }, include: [{ attributes: ['id'], model: User }] })
   .then(R.map(createTeamModel));
 
@@ -196,7 +196,7 @@ export const findTeamsForNetwork = (networkId) => Team
  * @method addIntegrationToNetwork
  * @return {external:Promise.<Network>} {@link module:modules/core~Network Network}
  */
-export const addIntegrationToNetwork = async (networkId, integrationId) => {
+const addIntegrationToNetwork = async (networkId, integrationId) => {
   const network = await Network.findById(networkId);
 
   return network.addIntegration(integrationId);
@@ -209,7 +209,7 @@ export const addIntegrationToNetwork = async (networkId, integrationId) => {
  * @method createNetwork
  * @return {external:Promise.<Network[]>} {@link module:modules/core~Network Network}
  */
-export const createNetwork = async (userId, name = null, externalId = null) => {
+const createNetwork = async (userId, name = null, externalId = null) => {
   const enabledComponents = "['SOCIAL', 'SCHEDULE', 'CHAT', 'FLEXCHANGE']";
   const network = await Network.create({
     name, userId, enabledComponents, externalId,
@@ -222,7 +222,7 @@ export const createNetwork = async (userId, name = null, externalId = null) => {
  * @param {string} networkId - network id
  * @method deleteById
  */
-export const deleteById = (networkId) => {
+const deleteById = (networkId) => {
   return Network.destroy({ where: { id: networkId } });
 };
 
@@ -231,7 +231,7 @@ export const deleteById = (networkId) => {
  * @method findIntegrationByName
  * @return {external:Promise.<Integration>} {@link module:modules/core~Integration Integration}
  */
-export const findIntegrationByName = (name) => {
+const findIntegrationByName = (name) => {
   return Integration.findOne({ where: { name } });
 };
 
@@ -243,7 +243,7 @@ export const findIntegrationByName = (name) => {
  * @method createIntegrationNetwork
  * @return {external:Promise.<Network>} {@link module:modules/core~Network Network}
  */
-export const createIntegrationNetwork = async ({
+const createIntegrationNetwork = async ({
   userId, externalId, name, integrationName,
 }) => {
   const network = await createNetwork(userId, name, externalId);
@@ -255,3 +255,21 @@ export const createIntegrationNetwork = async ({
 
   return findNetworkById(network.id);
 };
+
+exports.addUser = addUser;
+exports.addIntegrationToNetwork = addIntegrationToNetwork;
+exports.createIntegrationNetwork = createIntegrationNetwork;
+exports.createNetwork = createNetwork;
+exports.deleteById = deleteById;
+exports.findAll = findAll;
+exports.findAllUsersForNetwork = findAllUsersForNetwork;
+exports.findIntegrationByName = findIntegrationByName;
+exports.findNetwork = findNetwork;
+exports.findNetworkByIds = findNetworkByIds;
+exports.findNetworkById = findNetworkById;
+exports.findNetworkIntegration = findNetworkIntegration;
+exports.findNetworksForUser = findNetworksForUser;
+exports.findTeamsForNetwork = findTeamsForNetwork;
+exports.findUsersForNetwork = findUsersForNetwork;
+exports.setImportDateOnNetworkIntegration = setImportDateOnNetworkIntegration;
+exports.updateNetwork = updateNetwork;

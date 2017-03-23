@@ -1,6 +1,6 @@
 machine:
   node:
-    version: v6.7.0
+    version: v7.7.3
   environment:
     API_ENV: testing
     TEST_DB_HOST: 127.0.0.1

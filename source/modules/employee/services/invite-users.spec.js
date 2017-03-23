@@ -1,18 +1,18 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import Promise from 'bluebird';
-import R from 'ramda';
-import mixpanel from 'mixpanel';
-import * as Intercom from '../../../shared/services/intercom';
-import * as passwordUtil from '../../../shared/utils/password';
-import * as notifier from '../../../shared/services/notifier';
-import * as mailer from '../../../shared/services/mailer';
-import signupMail from '../../../shared/mails/signup';
-import * as userRepo from '../../core/repositories/user';
-import * as userService from '../../core/services/user';
-import * as networkRepo from '../../core/repositories/network';
-import * as service from './invite-user';
-import * as impl from './implementation';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const Promise = require('bluebird');
+const R = require('ramda');
+const mixpanel = require('mixpanel');
+const Intercom = require('../../../shared/services/intercom');
+const passwordUtil = require('../../../shared/utils/password');
+const notifier = require('../../../shared/services/notifier');
+const mailer = require('../../../shared/services/mailer');
+const signupMail = require('../../../shared/mails/signup');
+const userRepo = require('../../core/repositories/user');
+const userService = require('../../core/services/user');
+const networkRepo = require('../../core/repositories/network');
+const service = require('./invite-user');
+const impl = require('./implementation');
 
 describe('Invite users', () => {
   let sandbox;
@@ -40,16 +40,18 @@ describe('Invite users', () => {
     roleType: 'ADMIN',
   };
   const allUsersFromIntegration = [aUser, invitedUser, adminUser];
-  const network = { id: '1',
-      superAdmin: { firstName: 'admin' },
-      integrations: ['PMT'],
-    };
+  const network = {
+    id: '1',
+    superAdmin: { firstName: 'admin' },
+    integrations: ['PMT'],
+  };
+
   const message = {
     credentials: { id: '3' },
     network,
   };
 
-  describe('invite users', () => {
+  describe('Invite multiple users', () => {
     before(() => (sandbox = sinon.sandbox.create()));
     after(() => sandbox.restore());
 
@@ -59,7 +61,7 @@ describe('Invite users', () => {
       sandbox.stub(userRepo, 'userBelongsToNetwork').returns(Promise.resolve(true));
       sandbox.stub(userService, 'getUserWithNetworkScope').returns(Promise.resolve(adminUser));
       sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
-      sandbox.stub(impl, 'generatePasswordsForMembers', users => {
+      sandbox.stub(impl, 'generatePasswordsForMembers', (users) => {
         return users;
       });
       sandbox.stub(userRepo, 'setNetworkLink').returns(Promise.resolve({
@@ -70,7 +72,7 @@ describe('Invite users', () => {
       const passwordMailConfig = signupMail(message.network, aUser);
       const noPasswordMailAdminConfig = signupMail(message.network, adminUser);
       const noPasswordMailConfig = signupMail(message.network, invitedUser);
-      const userIdsToNotify = R.map(allUsersFromIntegration, user => user.id);
+      const userIdsToNotify = R.map(allUsersFromIntegration, (user) => user.id);
 
       await service.inviteUsers({ userIds: userIdsToNotify, networkId: network.id }, message);
 
@@ -80,7 +82,7 @@ describe('Invite users', () => {
     });
   });
 
-  describe('invite user', () => {
+  describe('Invite single user', () => {
     let peopleMock;
 
     before(() => {

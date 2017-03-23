@@ -1,10 +1,10 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import moment from 'moment';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as notifier from '../../../shared/services/notifier';
-import * as exchangeRepo from '../repositories/exchange';
-import { getRequest } from '../../../shared/test-utils/request';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const moment = require('moment');
+const testHelper = require('../../../shared/test-utils/helpers');
+const notifier = require('../../../shared/services/notifier');
+const exchangeRepo = require('../repositories/exchange');
+const { getRequest } = require('../../../shared/test-utils/request');
 
 describe('Reminder', () => {
   let sandbox;

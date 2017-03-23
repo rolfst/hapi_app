@@ -1,10 +1,10 @@
-import { map, flatten } from 'lodash';
-import * as dateUtils from '../../../shared/utils/date';
-import createUserModel from './user';
+const { map, flatten } = require('lodash');
+const dateUtils = require('../../../shared/utils/date');
+const createUserModel = require('./user');
 
 const replaceChars = (string) => string.match(/([A-Z])\w+/g);
 
-export default (dao) => ({
+module.exports = (dao) => ({
   type: 'network',
   id: dao.id.toString(),
   externalId: dao.externalId ? dao.externalId.toString() : null,

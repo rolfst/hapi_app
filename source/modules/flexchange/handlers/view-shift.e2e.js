@@ -1,13 +1,13 @@
-import { assert } from 'chai';
-import { pick } from 'lodash';
-import moment from 'moment';
-import nock from 'nock';
-import * as testHelper from '../../../shared/test-utils/helpers';
-import * as sharedStubs from '../../../shared/test-utils/stubs';
-import { getRequest } from '../../../shared/test-utils/request';
-import * as stubs from '../../integrations/adapters/pmt/test-utils/stubs';
-import { exchangeTypes } from '../repositories/dao/exchange';
-import { createExchange } from '../repositories/exchange';
+const { assert } = require('chai');
+const R = require('ramda');
+const moment = require('moment');
+const nock = require('nock');
+const testHelper = require('../../../shared/test-utils/helpers');
+const sharedStubs = require('../../../shared/test-utils/stubs');
+const { getRequest } = require('../../../shared/test-utils/request');
+const stubs = require('../../integrations/adapters/pmt/test-utils/stubs');
+const { exchangeTypes } = require('../repositories/dao/exchange');
+const { createExchange } = require('../repositories/exchange');
 
 describe('Handler: View shift', () => {
   const pristineNetwork = sharedStubs.pristine_networks_admins[0];
@@ -27,12 +27,13 @@ describe('Handler: View shift', () => {
     admin = await testHelper.createUser();
     const flexappealNetwork = await testHelper.createNetwork({
       userId: admin.id, name: 'flexappeal' });
-    const { network } = await testHelper.createNetworkWithIntegration({
-      ...pick(pristineNetwork, 'externalId', 'name', 'integrationName'),
-      userId: admin.id,
-      token: 'footoken',
-      userToken: 'foo',
-    });
+    const { network } = await testHelper.createNetworkWithIntegration(
+      R.merge(R.pick(['externalId', 'name', 'integrationName'], pristineNetwork), {
+        userId: admin.id,
+        token: 'footoken',
+        userToken: 'foo',
+      }));
+
     integratedNetwork = network;
 
     createdExchange = await createExchange(admin.id, flexappealNetwork.id, {

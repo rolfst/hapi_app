@@ -1,14 +1,9 @@
-import * as syncService from '../services/sync';
-import * as Logger from '../../../shared/services/logger';
+const createServicePayload = require('../../../shared/utils/create-service-payload');
+const syncService = require('../services/sync');
 
-const logger = Logger.createLogger('INTEGRATIONS/handler/syncWithIntegrationPartner');
-
-export default async (req, reply) => {
+module.exports = async (req, reply) => {
   try {
-    const message = { ...req.pre, ...req.auth };
-    const payload = { ...req.payload, ...req.params };
-
-    logger.info('Syncing network', { payload, message });
+    const { payload, message } = createServicePayload(req);
     syncService.syncWithIntegrationPartner(payload, message);
 
     return reply().code(202);

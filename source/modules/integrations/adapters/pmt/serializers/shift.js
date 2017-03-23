@@ -1,9 +1,9 @@
-import moment from 'moment-timezone';
+const moment = require('moment-timezone');
 
 const createUTCDate = (time, dateFormat = 'DD-MM-YYYY HH:mm:ss') =>
   moment.tz(time, dateFormat, 'Europe/Amsterdam').tz('UTC');
 
-export default (externalShift) => ({
+module.exports = (externalShift) => ({
   id: externalShift.id,
   date: createUTCDate(externalShift.start_time).format('YYYY-MM-DD'),
   start_time: createUTCDate(externalShift.start_time).toISOString(),

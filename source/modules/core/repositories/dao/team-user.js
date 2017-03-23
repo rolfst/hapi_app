@@ -1,5 +1,5 @@
-import Sequelize from 'sequelize';
-import model from '../../../../shared/configs/sequelize';
+const Sequelize = require('sequelize');
+const model = require('../../../../shared/configs/sequelize');
 
 const TeamUser = model.define('TeamUser', {
   teamId: {
@@ -19,4 +19,4 @@ const TeamUser = model.define('TeamUser', {
   updatedAt: false,
 });
 
-export default TeamUser;
+module.exports = TeamUser;

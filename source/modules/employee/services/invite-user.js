@@ -1,17 +1,17 @@
-import { map, intersectionBy, reject } from 'lodash';
-import Promise from 'bluebird';
-import * as passwordUtil from '../../../shared/utils/password';
-import * as mailer from '../../../shared/services/mailer';
-import { UserRoles } from '../../../shared/services/permission';
-import createError from '../../../shared/utils/create-error';
-import signupMail from '../../../shared/mails/signup';
-import addedToNetworkMail from '../../../shared/mails/added-to-network';
-import * as userService from '../../core/services/user';
-import * as networkRepo from '../../core/repositories/network';
-import * as userRepo from '../../core/repositories/user';
-import * as teamRepo from '../../core/repositories/team';
-import EmployeeDispatcher from '../dispatcher';
-import * as impl from './implementation';
+const { map, intersectionBy, reject } = require('lodash');
+const Promise = require('bluebird');
+const passwordUtil = require('../../../shared/utils/password');
+const mailer = require('../../../shared/services/mailer');
+const UserRoles = require('../../../shared/services/permission');
+const createError = require('../../../shared/utils/create-error');
+const signupMail = require('../../../shared/mails/signup');
+const addedToNetworkMail = require('../../../shared/mails/added-to-network');
+const userService = require('../../core/services/user');
+const networkRepo = require('../../core/repositories/network');
+const userRepo = require('../../core/repositories/user');
+const teamRepo = require('../../core/repositories/team');
+const EmployeeDispatcher = require('../dispatcher');
+const impl = require('./implementation');
 
 /**
  * @module modules/employee/services/inviteUser
@@ -30,7 +30,7 @@ import * as impl from './implementation';
  * @return {external:Promise.<User>} {@link module:modules/core~User} Promise containing
  * the invited user
  */
-export const inviteNewUser = async (network, { firstName, lastName, email, roleType }) => {
+const inviteNewUser = async (network, { firstName, lastName, email, roleType }) => {
   const plainPassword = passwordUtil.plainRandom();
   const attributes = {
     firstName,
@@ -63,7 +63,7 @@ export const inviteNewUser = async (network, { firstName, lastName, email, roleT
  * @return {external:Promise.<User>} {@link module:modules/core~User} Promise containing
  * the invited user
  */
-export const inviteExistingUser = async (network, user, roleType) => {
+const inviteExistingUser = async (network, user, roleType) => {
   const userBelongsToNetwork = await userRepo.userBelongsToNetwork(user.id, network.id);
   const networkId = network.id;
   const userId = user.id;
@@ -98,7 +98,7 @@ export const inviteExistingUser = async (network, user, roleType) => {
  * @return {external:Promise.<User>} {@link module:modules/core~User} Promise containing the
  * invited user
  */
-export const inviteUser = async (payload, message) => {
+const inviteUser = async (payload, message) => {
   const { firstName, lastName, email, teamIds, roleType } = payload;
   const { network } = message;
 
@@ -134,7 +134,7 @@ export const inviteUser = async (payload, message) => {
  * @method inviteUsers
  * @return {void}
  */
-export const inviteUsers = async (payload, message) => {
+const inviteUsers = async (payload, message) => {
   const { network } = message;
   const identifiedUser = await userService.getUserWithNetworkScope({
     id: message.credentials.id, networkId: network.id }, message);
@@ -151,9 +151,14 @@ export const inviteUsers = async (payload, message) => {
   const toNotifyUsers = intersectionBy(preparedUsers, networkMembers, 'id');
   const usersToSendMailto = await impl.generatePasswordsForMembers(toNotifyUsers);
 
-  await Promise.map(usersToSendMailto, user =>
+  await Promise.map((usersToSendMailto), (user) =>
     userRepo.setNetworkLink({ userId: user.id, networkId: network.id }, {
       invitedAt: new Date(), userId: user.id, networkId: network.id }));
 
   map(usersToSendMailto, (user) => mailer.send(signupMail(network, user, user.plainPassword)));
 };
+
+exports.inviteExistingUser = inviteExistingUser;
+exports.inviteNewUser = inviteNewUser;
+exports.inviteUser = inviteUser;
+exports.inviteUsers = inviteUsers;

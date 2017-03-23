@@ -1,7 +1,7 @@
-import createError from '../../../shared/utils/create-error';
-import { ActivityTypes } from '../../core/repositories/dao/activity';
-import { createActivity } from '../../core/repositories/activity';
-import ExchangeComment from './dao/exchange-comment';
+const createError = require('../../../shared/utils/create-error');
+const { ActivityTypes } = require('../../core/repositories/dao/activity');
+const { createActivity } = require('../../core/repositories/activity');
+const ExchangeComment = require('./dao/exchange-comment');
 
 /**
  * @module modules/flexchange/repositories/comment
@@ -13,10 +13,10 @@ import ExchangeComment from './dao/exchange-comment';
  * @method findCommentById
  * @return {external:Promise} Find exchange comment promise
  */
-export function findCommentById(commentId) {
+function findCommentById(commentId) {
   return ExchangeComment
     .findById(commentId)
-    .then(comment => {
+    .then((comment) => {
       if (!comment) throw createError('404');
 
       return comment;
@@ -32,7 +32,7 @@ export function findCommentById(commentId) {
  * @method createExchangeComment
  * @return {external:Promise} - Create exchange comment promise
  */
-export async function createExchangeComment(exchangeId, { text, userId }) {
+async function createExchangeComment(exchangeId, { text, userId }) {
   const exchangeComment = await ExchangeComment.create({
     exchangeId,
     text,
@@ -57,6 +57,10 @@ export async function createExchangeComment(exchangeId, { text, userId }) {
  * @method findCommentsByExchange
  * @return {external:Promise} - Promise with list of all comments exchange comment promise
  */
-export function findCommentsByExchange(exchange) {
+function findCommentsByExchange(exchange) {
   return exchange.getComments();
 }
+
+exports.createExchangeComment = createExchangeComment;
+exports.findCommentById = findCommentById;
+exports.findCommentsByExchange = findCommentsByExchange;

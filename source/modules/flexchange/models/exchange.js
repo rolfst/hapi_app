@@ -1,6 +1,6 @@
-import * as dateUtils from '../../../shared/utils/date';
+const dateUtils = require('../../../shared/utils/date');
 
-export default (dao) => ({
+module.exports = (dao) => ({
   type: 'exchange',
   id: dao.id.toString(),
   networkId: dao.networkId.toString(),

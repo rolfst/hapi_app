@@ -1,16 +1,16 @@
-import { assert } from 'chai';
-import sinon from 'sinon';
-import R from 'ramda';
-import stream from 'stream';
-import Promise from 'bluebird';
-import * as testHelpers from '../../../../shared/test-utils/helpers';
-import * as Storage from '../../../../shared/services/storage';
-import * as pollService from '../../../poll/services/poll';
-import * as attachmentService from '../../../attachment/services/attachment';
-import * as objectService from '../../../core/services/object';
-import * as commentService from '../comment';
-import * as messageService from './index';
-import * as messageRepo from '../../repositories/message';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const R = require('ramda');
+const stream = require('stream');
+const Promise = require('bluebird');
+const testHelpers = require('../../../../shared/test-utils/helpers');
+const Storage = require('../../../../shared/services/storage');
+const pollService = require('../../../poll/services/poll');
+const attachmentService = require('../../../attachment/services/attachment');
+const objectService = require('../../../core/services/object');
+const commentService = require('../comment');
+const messageService = require('./index');
+const messageRepo = require('../../repositories/message');
 
 describe('Service: Message', () => {
   let admin;
@@ -352,8 +352,7 @@ describe('Service: Message', () => {
         text: 'My cool updated message',
       }, { credentials: { id: employee.id } });
 
-      return assert.isRejected(updatePromise,
-          /Error: User does not have enough privileges to access this resource./);
+      return assert.isRejected(updatePromise, 'User does not have enough privileges to access this resource.');
     });
   });
 });

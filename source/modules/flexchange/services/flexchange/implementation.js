@@ -1,9 +1,9 @@
-import { omit, find } from 'lodash';
-import R from 'ramda';
-import createError from '../../../../shared/utils/create-error';
-import * as exchangeRepo from '../../repositories/exchange';
+const { find } = require('lodash');
+const R = require('ramda');
+const createError = require('../../../../shared/utils/create-error');
+const exchangeRepo = require('../../repositories/exchange');
 
-export const validateExchangeResponse = (exchangeResponse) => {
+const validateExchangeResponse = (exchangeResponse) => {
   if (exchangeResponse.approved) {
     throw createError('403', 'The user is already approved for the exchange.');
   } else if (exchangeResponse.approved === 0) {
@@ -13,13 +13,14 @@ export const validateExchangeResponse = (exchangeResponse) => {
   }
 };
 
-export const mergeShiftWithExchangeAndTeam = (shift, exchange, team) => ({
-  ...omit(shift, 'team_id'),
-  exchangeId: exchange ? exchange.id : null,
-  teamId: team ? team.id : null,
-});
+const mergeShiftWithExchangeAndTeam = (shift, exchange, team) => R.merge(
+  R.omit(['team_id'], shift),
+  {
+    exchangeId: exchange ? exchange.id : null,
+    teamId: team ? team.id : null,
+  });
 
-export const getExchangeIdsForEmployee = async (network, user, queryFilter) => {
+const getExchangeIdsForEmployee = async (network, user, queryFilter) => {
   if (network.hasIntegration) {
     const exchangesForUser = await exchangeRepo.findExchangeIdsForValues(
       'USER', network.id, [user.id], user.id, queryFilter);
@@ -35,16 +36,16 @@ export const getExchangeIdsForEmployee = async (network, user, queryFilter) => {
   return exchangesInNetwork.concat(exchangesInTeams);
 };
 
-export const mapShiftsWithExchangeAndTeam = (shifts, exchanges, teams) => {
+const mapShiftsWithExchangeAndTeam = (shifts, exchanges, teams) => {
   const findExchange = (shiftId) => find(exchanges, { shiftId: parseInt(shiftId, 10) });
   const findTeam = (externalId) => find(teams, { externalId });
 
-  return shifts.map(shift => mergeShiftWithExchangeAndTeam(
+  return shifts.map((shift) => mergeShiftWithExchangeAndTeam(
     shift, findExchange(shift.id), findTeam(shift.team_id))
   );
 };
 
-export const groupValuesPerExchange = (exchangeValues) => {
+const groupValuesPerExchange = (exchangeValues) => {
   const groupByExchangeId = R.groupBy(R.prop('exchangeId'));
   const toPair = R.mapObjIndexed((value, key) => ({
     exchangeId: key,
@@ -54,7 +55,7 @@ export const groupValuesPerExchange = (exchangeValues) => {
   return R.pipe(groupByExchangeId, toPair, R.values)(exchangeValues);
 };
 
-export const createResponseStatus = (exchangeResponse) => {
+const createResponseStatus = (exchangeResponse) => {
   if (!exchangeResponse) return null;
 
   const accepted = R.propEq('response', true);
@@ -76,7 +77,7 @@ const networkType = (exchange) => ({ type: 'network', id: exchange.values[0] || 
 const teamType = (exchange) => ({ type: 'team', ids: exchange.values });
 const shiftType = (exchange) => ({ type: 'team', ids: exchange.teamId ? [exchange.teamId] : null });
 
-export const makeCreatedInObject = R.cond([
+const makeCreatedInObject = R.cond([
   [R.propEq('createdFor', 'ALL'), networkType],
   [R.propEq('createdFor', 'TEAM'), teamType],
   [R.and(
@@ -90,7 +91,7 @@ export const makeCreatedInObject = R.cond([
   [R.T, networkType],
 ]);
 
-export const createDateWhereConstraint = (start, end) => {
+const createDateWhereConstraint = (start, end) => {
   let dateFilter;
 
   if (start && end) {
@@ -102,20 +103,20 @@ export const createDateWhereConstraint = (start, end) => {
   return dateFilter ? { date: dateFilter } : {};
 };
 
-export const addValues = R.curry((valuesLookup, exchange) => {
+const addValues = R.curry((valuesLookup, exchange) => {
   const lookup = R.find(R.propEq('exchangeId', exchange.id), valuesLookup);
 
   return R.merge(exchange, { values: lookup ? lookup.values : [] });
 });
 
-export const getUserIdsInObjects = (selectedProperties) => R.pipe(
+const getUserIdsInObjects = (selectedProperties) => R.pipe(
   R.juxt(R.map(R.pluck, selectedProperties)),
   R.flatten,
   R.uniq,
   R.reject(R.isNil)
 );
 
-export const findUserById = R.curry((users, id) => {
+const findUserById = R.curry((users, id) => {
   const match = R.find(R.propEq('id', id), users);
 
   return R.ifElse(R.isNil,
@@ -124,10 +125,23 @@ export const findUserById = R.curry((users, id) => {
   )(match);
 });
 
-export const replaceUsersInResponses = (users, responses) => {
+const replaceUsersInResponses = (users, responses) => {
   const userById = findUserById(users);
 
-  return R.map(response => R.merge(response, {
+  return R.map((response) => R.merge(response, {
     user: userById(response.userId),
   }), responses);
 };
+
+exports.addValues = addValues;
+exports.createDateWhereConstraint = createDateWhereConstraint;
+exports.createResponseStatus = createResponseStatus;
+exports.findUserById = findUserById;
+exports.getExchangeIdsForEmployee = getExchangeIdsForEmployee;
+exports.getUserIdsInObjects = getUserIdsInObjects;
+exports.groupValuesPerExchange = groupValuesPerExchange;
+exports.makeCreatedInObject = makeCreatedInObject;
+exports.mapShiftsWithExchangeAndTeam = mapShiftsWithExchangeAndTeam;
+exports.mergeShiftWithExchangeAndTeam = mergeShiftWithExchangeAndTeam;
+exports.replaceUsersInResponses = replaceUsersInResponses;
+exports.validateExchangeResponse = validateExchangeResponse;

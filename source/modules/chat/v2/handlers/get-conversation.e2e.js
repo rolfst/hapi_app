@@ -1,8 +1,8 @@
-import { assert } from 'chai';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import Promise from 'bluebird';
-import { getRequest } from '../../../../shared/test-utils/request';
-import * as conversationService from '../services/conversation';
+const { assert } = require('chai');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const Promise = require('bluebird');
+const { getRequest } = require('../../../../shared/test-utils/request');
+const conversationService = require('../services/conversation');
 
 describe('Get conversation (v2)', () => {
   let creator;

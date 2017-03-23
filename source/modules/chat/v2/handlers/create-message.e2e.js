@@ -1,12 +1,13 @@
-import { assert } from 'chai';
-import stream from 'stream';
-import sinon from 'sinon';
-import { postRequest } from '../../../../shared/test-utils/request';
-import * as Storage from '../../../../shared/services/storage';
-import blueprints from '../../../../shared/test-utils/blueprints';
-import * as testHelper from '../../../../shared/test-utils/helpers';
-import * as attachmentService from '../../../attachment/services/attachment';
-import * as conversationService from '../services/conversation';
+const { assert } = require('chai');
+const stream = require('stream');
+const R = require('ramda');
+const sinon = require('sinon');
+const { postRequest } = require('../../../../shared/test-utils/request');
+const Storage = require('../../../../shared/services/storage');
+const blueprints = require('../../../../shared/test-utils/blueprints');
+const testHelper = require('../../../../shared/test-utils/helpers');
+const attachmentService = require('../../../attachment/services/attachment');
+const conversationService = require('../services/conversation');
 
 describe('Handler: Create message (v2)', () => {
   let createdConversation;
@@ -14,12 +15,12 @@ describe('Handler: Create message (v2)', () => {
 
   before(async () => {
     const [admin, participant] = await Promise.all([
-      testHelper.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_creator' }),
-      testHelper.createUser({
-        ...blueprints.users.employee,
-        username: 'conversation_participant' }),
+      testHelper.createUser(R.merge(
+        blueprints.users.employee,
+        { username: 'conversation_creator' })),
+      testHelper.createUser(R.merge(
+        blueprints.users.employee,
+        { username: 'conversation_participant' })),
     ]);
     creator = admin;
 

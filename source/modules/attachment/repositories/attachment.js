@@ -1,6 +1,6 @@
-import R from 'ramda';
-import { Attachment } from './dao';
-import createAttachmentModel from '../models/attachment';
+const R = require('ramda');
+const { Attachment } = require('./dao');
+const createAttachmentModel = require('../models/attachment');
 
 /**
  * @module modules/attachment/repositories/attachment
@@ -12,7 +12,7 @@ import createAttachmentModel from '../models/attachment';
  * @method findBy
  * @return {external:Promise.<Attachment[]>} {@link module:modules/attachment~Attachment}
  */
-export const findBy = (whereConstraint) => Attachment
+const findBy = (whereConstraint) => Attachment
   .findAll({ where: whereConstraint })
   .then(R.map(createAttachmentModel));
 
@@ -22,7 +22,7 @@ export const findBy = (whereConstraint) => Attachment
  * @method findById
  * @return {external:Promise.<Attachment>} - Find attachment promise
  */
-export const findById = (id) => Attachment
+const findById = (id) => Attachment
   .findById(id)
   .then(R.ifElse(R.isNil, R.always(null), createAttachmentModel));
 
@@ -32,11 +32,11 @@ export const findById = (id) => Attachment
  * @method create
  * @return {external:Promise.<Attachment>} - Create attachment promise
  */
-export const create = (path) => Attachment
+const create = (path) => Attachment
   .create({ path })
   .then(createAttachmentModel);
 
-export const deleteById = (attachmentId) => Attachment
+const deleteById = (attachmentId) => Attachment
   .destroy({ where: { id: attachmentId } });
 
 /**
@@ -45,8 +45,14 @@ export const deleteById = (attachmentId) => Attachment
  * @method update
  * @return {external:Promise.<Attachment>} - Create attachment promise
  */
-export const update = (attachment) => Attachment
+const update = (attachment) => Attachment
   .update(R.omit(['id'], attachment), {
     where: { id: attachment.id },
   })
   .then(R.always(attachment));
+
+exports.create = create;
+exports.deleteById = deleteById;
+exports.findBy = findBy;
+exports.findById = findById;
+exports.update = update;

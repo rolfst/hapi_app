@@ -1,4 +1,6 @@
-import preFetchNetwork from '../middlewares/prefetch-network';
+const R = require('ramda');
+
+const preFetchNetwork = require('../middlewares/prefetch-network');
 
 const createDefaultConfig = (stategy, prefetch) => {
   const config = { auth: stategy };
@@ -10,9 +12,9 @@ const createDefaultConfig = (stategy, prefetch) => {
   return config;
 };
 
-const getImport = (importFn) => importFn.default ? importFn.default : importFn;
+const getImport = (importFn) => (importFn.default ? importFn.default : importFn);
 
-export const createRoute = ({
+const createRoute = ({
   method, url, handler, validator, payload, auth = true, strategy = 'jwt', prefetch = true,
 }) => {
   const route = {
@@ -24,10 +26,11 @@ export const createRoute = ({
     },
   };
 
-  if (auth) route.config = { ...route.config, ...createDefaultConfig(strategy, prefetch) };
+  if (auth) route.config = R.merge(route.config, createDefaultConfig(strategy, prefetch));
   if (payload) route.config.payload = payload;
 
   return route;
 };
 
-export default (routeObjects) => routeObjects.map(createRoute);
+exports.createRoutes = (routeObjects) => routeObjects.map(createRoute);
+exports.createRoute = createRoute;

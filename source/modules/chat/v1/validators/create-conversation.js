@@ -1,6 +1,6 @@
-import Joi from 'joi';
+const Joi = require('joi');
 
-export default {
+module.exports = {
   payload: {
     type: Joi.string().valid('private', 'group').required(),
     users: Joi.array().required(),
