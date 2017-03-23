@@ -1,7 +1,6 @@
 const { assert } = require('chai');
 const sinon = require('sinon');
 const client = require('./client');
-const stubs = require('./test-utils/stubs');
 const blueprints = require('./test-utils/blueprints');
 const fetchTeams = require('./hooks/fetch-teams');
 const userConnector = require('./hooks/fetch-users');
@@ -30,6 +29,7 @@ describe('PMT Hooks', () => {
     let hookResult;
 
     before(async () => {
+
       sinon.stub(client, 'get').returns(Promise.resolve({ payload: { data: blueprints.users } }));
 
       hookResult = await userConnector.fetchUsers(fakeBaseStoreUrl)();
