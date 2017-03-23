@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-require('babel-register');
 require('dotenv').config();
 const createAccessToken = require('../source/modules/authentication/utils/create-access-token');
 const args = require('yargs').argv;

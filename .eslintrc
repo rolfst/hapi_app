@@ -4,16 +4,19 @@
       "mocha": true
   },
   "plugins": ["mocha"],
-  "parser": "babel-eslint",
   "rules": {
+      "import/no-extraneous-dependencies": ["error", {"devDependencies": true, "optionalDependencies": false, "peerDependencies": false}],
+      "comma-dangle": ["error", {
+        "arrays": "only-multiline",
+        "objects": "only-multiline",
+        "imports": "never",
+        "exports": "never",
+        "functions": "never"
+      }],
       "arrow-body-style": ["off"],
       "consistent-return": ["off"],
+      "arrow-parens": ["error", "always"],
       "no-console": 2,
       "mocha/no-exclusive-tests": "error"
-  },
-  "parserOptions": {
-      "ecmaFeatures": {
-        "experimentalObjectRestSpread": true
-      }
   }
 }

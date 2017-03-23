@@ -40,16 +40,18 @@ describe('Invite users', () => {
     roleType: 'ADMIN',
   };
   const allUsersFromIntegration = [aUser, invitedUser, adminUser];
-  const network = { id: '1',
-      superAdmin: { firstName: 'admin' },
-      integrations: ['PMT'],
-    };
+  const network = {
+    id: '1',
+    superAdmin: { firstName: 'admin' },
+    integrations: ['PMT'],
+  };
+
   const message = {
     credentials: { id: '3' },
     network,
   };
 
-  describe('invite users', () => {
+  describe('Invite multiple users', () => {
     before(() => (sandbox = sinon.sandbox.create()));
     after(() => sandbox.restore());
 
@@ -80,7 +82,7 @@ describe('Invite users', () => {
     });
   });
 
-  describe('invite user', () => {
+  describe('Invite single user', () => {
     let peopleMock;
 
     before(() => {

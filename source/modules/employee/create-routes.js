@@ -1,3 +1,4 @@
+/* eslint-disable global-require, import/no-dynamic-require */
 const { createRoutes } = require('../../shared/utils/create-routes');
 
 const baseImport = './handlers';

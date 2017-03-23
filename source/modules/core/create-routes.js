@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 const { createRoutes } = require('../../shared/utils/create-routes');
 
 const routes = [{
