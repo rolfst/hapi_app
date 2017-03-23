@@ -16,5 +16,5 @@ fs.readdirSync(__dirname).forEach((filename) => {
   const modelName = path.basename(filename, '.json') || path.basename(filename, '.js');
   const load = () => require(`./${modelName}`);
 
-  exports.__defineGetter__(modelName.replace(/\-/g, '_'), load);
+  exports.__defineGetter__(modelName.replace(/-/g, '_'), load);
 });

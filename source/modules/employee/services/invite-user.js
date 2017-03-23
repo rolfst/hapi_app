@@ -151,7 +151,7 @@ const inviteUsers = async (payload, message) => {
   const toNotifyUsers = intersectionBy(preparedUsers, networkMembers, 'id');
   const usersToSendMailto = await impl.generatePasswordsForMembers(toNotifyUsers);
 
-  await Promise.map((usersToSendMailto), user =>
+  await Promise.map((usersToSendMailto), (user) =>
     userRepo.setNetworkLink({ userId: user.id, networkId: network.id }, {
       invitedAt: new Date(), userId: user.id, networkId: network.id }));
 

@@ -13,7 +13,7 @@ const createServer = () => {
   server.connection(serverConfig);
 
   // Register plugins
-  server.register(require('hapi-async-handler'));
+  server.register(require('hapi-async-handler')); // eslint-disable-line global-require
 
   // Register schemes + strategies
   server.auth.scheme('jwt', jwtStrategy);
@@ -34,7 +34,7 @@ const createServer = () => {
   });
 
   // Register routes
-  routes.map(route => server.route(route));
+  routes.map((route) => server.route(route));
 
   return server;
 };
