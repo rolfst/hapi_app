@@ -10,7 +10,6 @@ machine:
 dependencies:
   pre:
     - npm set progress=false
-    - npm install bcrypt
 
 database:
   post:
