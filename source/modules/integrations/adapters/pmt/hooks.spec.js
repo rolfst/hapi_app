@@ -29,7 +29,6 @@ describe('PMT Hooks', () => {
     let hookResult;
 
     before(async () => {
-
       sinon.stub(client, 'get').returns(Promise.resolve({ payload: { data: blueprints.users } }));
 
       hookResult = await fetchUsers(fakeBaseStoreUrl)();

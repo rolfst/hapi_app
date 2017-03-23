@@ -48,7 +48,8 @@ const makeFeed = async (payload, options, message, extraWhereConstraint = {}) =>
     $and: { networkId: payload.networkId },
   };
 
-  // Since extraWhereConstraint can either be an array or an object, the spread syntax does not work in all cases
+  // Since extraWhereConstraint can either be an array or an object,
+  // the spread syntax does not work in all cases
   if (Array.isArray(extraWhereConstraint)) {
     whereConstraint.$or = [...extraWhereConstraint, ...whereConstraint.$or];
   } else {

@@ -65,7 +65,9 @@ async function makeRequest(endpoint, token = null, method = 'GET', data = {}, me
 }
 
 exports.makeRequest = makeRequest;
-exports.post = (endpoint, token, data, message) => makeRequest(endpoint, token, 'POST', data, message);
+exports.post = (endpoint, token, data, message) => makeRequest(
+    endpoint, token, 'POST', data, message);
 exports.get = (endpoint, token, message) => makeRequest(endpoint, token, 'GET', message);
-exports.put = (endpoint, token, data, message) => makeRequest(endpoint, token, 'PUT', data, message);
+exports.put = (endpoint, token, data, message) => makeRequest(
+    endpoint, token, 'PUT', data, message);
 exports.delete = (endpoint, token, message) => makeRequest(endpoint, token, 'DELETE', message);

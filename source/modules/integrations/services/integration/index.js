@@ -1,5 +1,5 @@
 const R = require('ramda');
-const { createAdapter } = require('../../../../shared/utils/create-adapter');
+const AdapterUtil = require('../../../../shared/utils/create-adapter');
 const userRepo = require('../../../core/repositories/user');
 const authenticationRepo = require('../../../core/repositories/authentication');
 const createAccessToken = require('../../../authentication/utils/create-access-token');
@@ -7,7 +7,8 @@ const impl = require('./implementation');
 
 async function authenticate(payload, message) {
   const credentials = R.pick(['username', 'password'], payload);
-  const adapter = await createAdapter(message.network, 0, { proceedWithoutToken: true });
+  const adapter = await AdapterUtil.createAdapter(
+      message.network, 0, { proceedWithoutToken: true });
   const authResult = await adapter.authenticate(credentials);
 
   // Else we get different users that are connected with the

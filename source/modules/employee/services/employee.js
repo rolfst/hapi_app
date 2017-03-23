@@ -20,8 +20,18 @@ const EmployeeDispatcher = require('../dispatcher');
  */
 const updateEmployee = async (payload, message) => {
   // TODO move this functionality to the core module
+  const whitelist = [
+    'firstName',
+    'lastName',
+    'email',
+    'password',
+    'address',
+    'zipCode',
+    'dateOfBirth',
+    'phoneNum',
+  ];
 
-  const attributes = R.pick(['firstName', 'lastName', 'email', 'password', 'address', 'zipCode', 'dateOfBirth', 'phoneNum'], payload);
+  const attributes = R.pick(whitelist, payload);
   await userRepo.updateUser(message.credentials.id, attributes);
 
   const updatedUser = await userService.getUserWithNetworkScope({
