@@ -9,4 +9,4 @@ function fetchUsers(baseStoreUrl) {
   };
 }
 
-exports.fetchUsers = fetchUsers;
+module.exports = fetchUsers;

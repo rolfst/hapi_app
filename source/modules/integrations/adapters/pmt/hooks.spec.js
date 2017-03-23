@@ -3,7 +3,7 @@ const sinon = require('sinon');
 const client = require('./client');
 const blueprints = require('./test-utils/blueprints');
 const fetchTeams = require('./hooks/fetch-teams');
-const userConnector = require('./hooks/fetch-users');
+const fetchUsers = require('./hooks/fetch-users');
 const teamSerializer = require('./serializers/team');
 
 describe('PMT Hooks', () => {
@@ -32,7 +32,7 @@ describe('PMT Hooks', () => {
 
       sinon.stub(client, 'get').returns(Promise.resolve({ payload: { data: blueprints.users } }));
 
-      hookResult = await userConnector.fetchUsers(fakeBaseStoreUrl)();
+      hookResult = await fetchUsers(fakeBaseStoreUrl)();
     });
 
     after(() => client.get.restore());
