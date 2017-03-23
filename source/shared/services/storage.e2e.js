@@ -50,6 +50,6 @@ describe('Service: Storage', () => {
 
     const result = Storage.upload(file);
 
-    return assert.isRejected(result, /Error: Error in S3/);
+    return assert.isRejected(result, 'Error in S3');
   });
 });

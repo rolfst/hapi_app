@@ -65,8 +65,7 @@ describe('User Repository', () => {
     it('should fail when a scoped user is searched for without network id', async () => {
       const actual = repository.findUserById(createdUser.id);
 
-      return assert.isRejected(actual,
-          /Error: A bad number of arguments is provided for this method/);
+      return assert.isRejected(actual, 'A bad number of arguments is provided for this method');
     });
   });
 });

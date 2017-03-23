@@ -352,8 +352,7 @@ describe('Service: Message', () => {
         text: 'My cool updated message',
       }, { credentials: { id: employee.id } });
 
-      return assert.isRejected(updatePromise,
-          /Error: User does not have enough privileges to access this resource./);
+      return assert.isRejected(updatePromise, 'User does not have enough privileges to access this resource.');
     });
   });
 });

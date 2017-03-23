@@ -105,10 +105,8 @@ describe('Service: Poll', () => {
     const payload = R.merge(defaultVotePayload,
       { pollId: '123456789', optionIds: ['1'] });
 
-    return assert.isRejected(
-      pollService.vote(payload, message),
-      'Error: User does not have enough privileges to access this resource.'
-    );
+    return assert.isRejected(pollService.vote(payload, message),
+      'User does not have enough privileges to access this resource.');
   });
 
   it('should fail when user doesn\'t belong to network', async () => {
@@ -116,9 +114,7 @@ describe('Service: Poll', () => {
 
     const payload = { networkId: pmt.id, pollId, optionIds: [options[1].id, options[2].id] };
 
-    return assert.isRejected(
-      pollService.vote(payload, message),
-      'Error: User does not have enough privileges to access this resource.'
-    );
+    return assert.isRejected(pollService.vote(payload, message),
+      'User does not have enough privileges to access this resource.');
   });
 });

@@ -158,7 +158,7 @@ describe('Import network', () => {
         networkId: 0,
       }, { credentials: admin });
 
-      await assert.isRejected(result, /Error: Network not found./);
+      await assert.isRejected(result, 'Network not found.');
     });
 
     it('should return 422 external user with email not found', async () => {
@@ -167,8 +167,7 @@ describe('Import network', () => {
         networkId: network.id,
       });
 
-      await assert.isRejected(result,
-        /Error: The user could no longer be found in external network./);
+      await assert.isRejected(result, 'The user could no longer be found in external network.');
     });
 
     it('should return 403 when network is already imported', async () => {
@@ -179,7 +178,7 @@ describe('Import network', () => {
         networkId: network.id,
       }, { credentials: admin });
 
-      await assert.isRejected(result, /Error: The network has already been imported./);
+      await assert.isRejected(result, 'The network has already been imported.');
     });
 
     it('should return 403 when no integration has been enabled for the network', async () => {
@@ -193,7 +192,7 @@ describe('Import network', () => {
 
       await networkRepo.deleteById(network.id);
 
-      await assert.isRejected(result, /Error: The network does not have an enabled integration/);
+      await assert.isRejected(result, 'The network does not have an enabled integration');
     });
   });
 });
