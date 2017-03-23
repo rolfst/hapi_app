@@ -16,7 +16,7 @@ const ExchangeComment = require('./dao/exchange-comment');
 function findCommentById(commentId) {
   return ExchangeComment
     .findById(commentId)
-    .then(comment => {
+    .then((comment) => {
       if (!comment) throw createError('404');
 
       return comment;

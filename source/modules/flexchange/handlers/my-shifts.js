@@ -5,7 +5,7 @@ const flexchangeService = require('../services/flexchange');
 
 const logger = Logger.createLogger('FLEXCHANGE/handler/myShifts');
 
-const transformItem = item => R.merge(
+const transformItem = (item) => R.merge(
   R.omit(['teamId', 'exchangeId'], item),
   {
     exchange_id: item.exchangeId ? item.exchangeId.toString() : null,

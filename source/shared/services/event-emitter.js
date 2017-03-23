@@ -16,7 +16,7 @@ class EventEmitter extends NativeEventEmitter {
   asyncOn(eventName, callback) {
     const that = this;
     return this.on(eventName, (...args) => {
-      return Promise.try(() => callback(...args)).catch(err =>
+      return Promise.try(() => callback(...args)).catch((err) =>
         that.logger.error('Error while emitting event', { eventName, err }));
     });
   }

@@ -24,10 +24,10 @@ const transformSnakeCase = (obj) => {
   return result;
 };
 
-const error = errorObject => ({ error: errorObject });
+const error = (errorObject) => ({ error: errorObject });
 
-const serialize = response => {
-  return (isArray(response)) ? response.map(item => item.toJSON()) : response.toJSON();
+const serialize = (response) => {
+  return (isArray(response)) ? response.map((item) => item.toJSON()) : response.toJSON();
 };
 
 const toSnakeCase = (response) => {

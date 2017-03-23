@@ -43,7 +43,7 @@ describe('Exchange activity feed', () => {
       () => exchangeRepo.approveExchange(exchange, admin, admin.id),
     ];
 
-    const values = await Promise.mapSeries(actions, async item => {
+    const values = await Promise.mapSeries(actions, async (item) => {
       await Promise.delay(1000);
       return item();
     });
@@ -55,7 +55,7 @@ describe('Exchange activity feed', () => {
 
     logger.debug('@@@@@@@ DEBUG for occasional failure @@@@@@@@', response.result);
 
-    result = response.result.data.map(item => (R.merge(
+    result = response.result.data.map((item) => (R.merge(
       item,
       { data: _.omit(item.data, 'date') }
     )));
@@ -70,7 +70,7 @@ describe('Exchange activity feed', () => {
   });
 
   it('should return correct activity order', () => {
-    const actual = result.map(item => item.data.activity_type);
+    const actual = result.map((item) => item.data.activity_type);
     const expected = [
       ActivityTypes.EXCHANGE_CREATED,
       ActivityTypes.EXCHANGE_ACCEPTED,

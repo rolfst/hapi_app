@@ -40,7 +40,7 @@ const mapShiftsWithExchangeAndTeam = (shifts, exchanges, teams) => {
   const findExchange = (shiftId) => find(exchanges, { shiftId: parseInt(shiftId, 10) });
   const findTeam = (externalId) => find(teams, { externalId });
 
-  return shifts.map(shift => mergeShiftWithExchangeAndTeam(
+  return shifts.map((shift) => mergeShiftWithExchangeAndTeam(
     shift, findExchange(shift.id), findTeam(shift.team_id))
   );
 };
@@ -128,7 +128,7 @@ const findUserById = R.curry((users, id) => {
 const replaceUsersInResponses = (users, responses) => {
   const userById = findUserById(users);
 
-  return R.map(response => R.merge(response, {
+  return R.map((response) => R.merge(response, {
     user: userById(response.userId),
   }), responses);
 };

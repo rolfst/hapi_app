@@ -61,7 +61,7 @@ describe('createAdapter', () => {
   it('should fail when there is no adapter for integration for network', () => {
     const promise = unit.createAdapter(network, userId, { integrations: {} });
 
-    return assert.isRejected(promise, /Couldn\'t find integration with adapter./);
+    return assert.isRejected(promise, /Couldn't find integration with adapter./);
   });
 
   it('should fail when the network has no externalId value', () => {
@@ -76,7 +76,7 @@ describe('createAdapter', () => {
     const promise = unit.createAdapter(networkWithoutIntegration, userId, {
       integrations: { fakeIntegrations } });
 
-    return assert.isRejected(promise, /The network doesn\'t have a linked integration./);
+    return assert.isRejected(promise, /The network doesn't have a linked integration./);
   });
 
   it('should fail when no token found', () => {

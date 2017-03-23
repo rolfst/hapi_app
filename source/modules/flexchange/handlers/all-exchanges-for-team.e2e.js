@@ -58,7 +58,7 @@ describe('Get exchanges for team', () => {
 
   it('should return exchanges', () => {
     return getRequest(`/v2/networks/${network.id}/teams/${team.id}/exchanges`, admin.token)
-      .then(response => {
+      .then((response) => {
         const teamExchange = find(response.result.data, { title: 'Test shift 1 for team' });
 
         assert.equal(response.statusCode, 200);

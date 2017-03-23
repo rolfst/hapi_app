@@ -12,7 +12,7 @@ const createDefaultConfig = (stategy, prefetch) => {
   return config;
 };
 
-const getImport = (importFn) => importFn.default ? importFn.default : importFn;
+const getImport = (importFn) => (importFn.default ? importFn.default : importFn);
 
 const createRoute = ({
   method, url, handler, validator, payload, auth = true, strategy = 'jwt', prefetch = true,

@@ -37,7 +37,7 @@ const prepare = (mail) => {
   return mail;
 };
 
-const mapsToSubstitutes = (subs) => mapValues(subs, o => [o]);
+const mapsToSubstitutes = (subs) => mapValues(subs, (o) => [o]);
 
 const createSMTPHeader = (mail) => {
   const header = new SendGridSMTP();
