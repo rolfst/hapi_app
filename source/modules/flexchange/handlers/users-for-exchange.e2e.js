@@ -74,7 +74,7 @@ describe('View users related to exchange', () => {
 
       assert.equal(statusCode, 200);
 
-      expectedProperties.forEach(property => assert.property(result.data[0], property));
+      expectedProperties.forEach((property) => assert.property(result.data[0], property));
 
       await exchangeRepo.deleteById(exchange.id);
     });

@@ -10,9 +10,12 @@ const incrementAttribute = (email, attributeName) => {
 
   if (!updatingUser) return;
 
-  return client.users.update({ email, custom_attributes: {
-    [attributeName]: updatingUser[attributeName] + 1,
-  } });
+  return client.users.update({
+    email,
+    custom_attributes: {
+      [attributeName]: updatingUser[attributeName] + 1,
+    },
+  });
 };
 
 const createEvent = (email, eventName, meta) => getClient().events.create({

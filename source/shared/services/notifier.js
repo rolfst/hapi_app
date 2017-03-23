@@ -30,8 +30,8 @@ function send(users, notification, networkId = null) {
   logger.info('Sending Push Notification', { data, emails });
 
   return Parse.Push.send({ where: createQuery(emails), data }, { useMasterKey: true })
-    .then(() => users.forEach(user => trackPushNotification(notification, user)))
-    .catch(err => logger.error('Error sending push notification', { err }));
+    .then(() => users.forEach((user) => trackPushNotification(notification, user)))
+    .catch((err) => logger.error('Error sending push notification', { err }));
 }
 
 exports.send = send;

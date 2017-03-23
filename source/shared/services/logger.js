@@ -9,7 +9,7 @@ const bunyan = require('bunyan');
 const environment = process.env.API_ENV;
 const defaultConfig = process.env.CI ?
    require('../configs/logs-ci') :
-   require(`../configs/logs-${environment}`);
+   require(`../configs/logs-${environment}`); // eslint-disable-line import/no-dynamic-require
 
 const makeMessage = R.pipe(
   R.pick(['credentials', 'artifacts', 'network']),

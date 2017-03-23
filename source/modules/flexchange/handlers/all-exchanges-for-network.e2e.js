@@ -145,7 +145,7 @@ describe('Get exchanges for network', () => {
       ]);
 
       const exchanges = await exchangeRepo.findExchangesByNetwork(network.id);
-      await Promise.all(map(exchanges, e => exchangeRepo.deleteById(e.id)));
+      await Promise.all(map(exchanges, (e) => exchangeRepo.deleteById(e.id)));
 
       const exchangeForTeams = exchangeRepo.createExchange(admin.id, network.id, {
         date: moment().format('YYYY-MM-DD'),
