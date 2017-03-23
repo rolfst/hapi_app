@@ -1,7 +1,7 @@
 const R = require('ramda');
 const Promise = require('bluebird');
 const passwordUtil = require('../../../../shared/utils/password');
-const { createAdapter } = require('../../../../shared/utils/create-adapter');
+const adapterUtil  = require('../../../../shared/utils/create-adapter');
 const Logger = require('../../../../shared/services/logger');
 const createError = require('../../../../shared/utils/create-error');
 const userRepository = require('../../../core/repositories/user');
@@ -29,7 +29,7 @@ const syncNetwork = async (payload, message) => {
     if (!impl.isSyncable(network)) throw createError('10009');
     // TODO invite users based on importedAt value
 
-    const adapter = await createAdapter(network, 0, { proceedWithoutToken: true });
+    const adapter = await adapterUtil.createAdapter(network, 0, { proceedWithoutToken: true });
     const data = await Promise.all([
       adapter.fetchTeams(),
       adapter.fetchUsers(),
@@ -89,7 +89,7 @@ const importNetwork = async (payload, message) => {
     if (!!network.importedAt) throw createError('10007');
     if (!network.hasIntegration) throw createError('10001');
 
-    const adapter = await createAdapter(network, 0, { proceedWithoutToken: true });
+    const adapter = await adapterUtil.createAdapter(network, 0, { proceedWithoutToken: true });
     const externalUsers = await adapter.fetchUsers();
     const externalAdmin = R.find(R.propEq('email', payload.ownerEmail), externalUsers);
     if (!externalAdmin) throw createError('10006');

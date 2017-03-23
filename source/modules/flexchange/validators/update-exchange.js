@@ -9,5 +9,5 @@ module.exports = {
   })
     .rename('start_time', 'startTime')
     .rename('end_time', 'endTime')
-    .and('startTime', 'endtime'),
+    .and('startTime', 'endTime'),
 };

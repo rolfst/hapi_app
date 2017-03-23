@@ -64,31 +64,4 @@ describe('PMT Hooks', () => {
       assert.isArray(hookResult[0].teamIds);
     });
   });
-
-  describe('getUsers', () => {
-    before(async () => {
-      sinon.stub(client, 'get').returns(
-      Promise.resolve({ payload: { data: stubs.unlinkedUsers } }));
-    });
-
-    after(() => client.get.restore());
-    it('should confirm to Domain model', async () => {
-      const teams = [{
-        name: 'vleeswaren',
-        id: '1',
-        externalId: '14',
-        description: '',
-      }, {
-        name: 'algemeen',
-        id: '2',
-        externalId: '20',
-        description: '',
-      }];
-      const users = await userConnector.getUsers(fakeBaseStoreUrl, teams);
-
-      assert.equal(users.length, 2);
-      assert.property(users[0], 'teamIds');
-      assert.deepEqual(users[0].teamIds, ['1', '2']);
-    });
-  });
 });
