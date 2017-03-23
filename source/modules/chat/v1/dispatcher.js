@@ -7,7 +7,7 @@ const pubsub = EventEmitter.create();
 
 pubsub.asyncOn('message.created', (payload) => {
   const usersToNotify = payload.conversation.users.filter(
-    user => user.id !== payload.message.createdBy.id);
+    (user) => user.id !== payload.message.createdBy.id);
   const socketPayload = { data: responseUtils.toSnakeCase(payload.message) };
 
   socketService.send('send-message', usersToNotify, socketPayload, payload.token);

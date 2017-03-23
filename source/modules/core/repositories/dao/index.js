@@ -76,4 +76,4 @@ exports.NetworkUser = NetworkUserModel;
 exports.TeamUser = TeamUserModel;
 exports.UserDevice = UserDeviceModel;
 exports.NetworkIntegration = NetworkIntegrationModel;
-exports._Object = ObjectModel;
+exports._Object = ObjectModel; // eslint-disable-line

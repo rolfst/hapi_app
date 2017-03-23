@@ -9,7 +9,7 @@ describe('User Repository', () => {
   let createdUser;
   let network;
 
-  before(async() => {
+  before(async () => {
     createdUser = await repository.createUser({
       username: 'johndoe',
       email: 'johndoe@flex-appeal.nl',

@@ -14,7 +14,7 @@ if (process.env.API_ENV !== 'production') {
 
 const server = createServer();
 
-server.start(err => {
+server.start((err) => {
   if (err) throw err;
 
   const { PARSE_APP_ID, PARSE_CLIENT_KEY, PARSE_MASTER_KEY, PARSE_SERVER_URL } = process.env;

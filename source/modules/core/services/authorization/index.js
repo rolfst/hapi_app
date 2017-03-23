@@ -29,8 +29,6 @@ async function assertRoleTypeForUser(payload, message) {
     { id: payload.userId, networkId: payload.networkId }, message);
 
   if (scopedUser.roleType !== payload.roleType) throw createError('403');
-
-  return;
 }
 
 /**

@@ -61,7 +61,7 @@ describe('Invite users', () => {
       sandbox.stub(userRepo, 'userBelongsToNetwork').returns(Promise.resolve(true));
       sandbox.stub(userService, 'getUserWithNetworkScope').returns(Promise.resolve(adminUser));
       sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
-      sandbox.stub(impl, 'generatePasswordsForMembers', users => {
+      sandbox.stub(impl, 'generatePasswordsForMembers', (users) => {
         return users;
       });
       sandbox.stub(userRepo, 'setNetworkLink').returns(Promise.resolve({
@@ -72,7 +72,7 @@ describe('Invite users', () => {
       const passwordMailConfig = signupMail(message.network, aUser);
       const noPasswordMailAdminConfig = signupMail(message.network, adminUser);
       const noPasswordMailConfig = signupMail(message.network, invitedUser);
-      const userIdsToNotify = R.map(allUsersFromIntegration, user => user.id);
+      const userIdsToNotify = R.map(allUsersFromIntegration, (user) => user.id);
 
       await service.inviteUsers({ userIds: userIdsToNotify, networkId: network.id }, message);
 
