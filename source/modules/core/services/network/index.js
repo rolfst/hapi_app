@@ -72,10 +72,10 @@ const addUserToNetwork = async (payload, message) => {
 
   const attrsWhitelist = ['userId', 'networkId', 'externalId', 'userToken'];
   const attributes = R.merge(
-    R.pick(attrsWhitelist, payload),
-    { roleType: payload.roleType || 'EMPLOYEE' },
-    { deletedAt: payload.active === false ? new Date() : null }
-  );
+    R.pick(attrsWhitelist, payload), {
+      roleType: payload.roleType || 'EMPLOYEE',
+      deletedAt: payload.active === false ? new Date() : null,
+    });
 
   return networkRepo.addUser(attributes);
 };

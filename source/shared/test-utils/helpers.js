@@ -73,8 +73,8 @@ function addUserToNetwork(networkUserAttributes) {
 async function createNetwork({
   userId, externalId, integrationName, name = randomString(), userExternalId, userToken }) {
   const networkAttributes = { userId, externalId, integrationName, name };
-
   const network = await networkService.create(networkAttributes);
+
   await addUserToNetwork({
     userId,
     userToken,
