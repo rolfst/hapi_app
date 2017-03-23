@@ -9,7 +9,6 @@ module.exports = async (req, reply) => {
 
     return reply({ success: true, data: responseUtil.toSnakeCase(invitedUser) });
   } catch (err) {
-    console.log(err)
     return reply(err);
   }
 };

@@ -9,7 +9,7 @@ const createError = require('../../../shared/utils/create-error');
 const tokenUtil = require('../../../shared/utils/token');
 const userRepo = require('../../core/repositories/user');
 
-describe('Integration auth', () => {
+describe.only('Integration auth', () => {
   let sandbox;
   let employee;
   let pmtNetwork;

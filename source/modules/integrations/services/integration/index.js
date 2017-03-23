@@ -6,7 +6,6 @@ const createAccessToken = require('../../../authentication/utils/create-access-t
 const impl = require('./implementation');
 
 async function authenticate(payload, message) {
-  console.log('%%%%%%%%%%%', createAdapter)
   const credentials = R.pick(['username', 'password'], payload);
   const adapter = await createAdapter(message.network, 0, { proceedWithoutToken: true });
   const authResult = await adapter.authenticate(credentials);

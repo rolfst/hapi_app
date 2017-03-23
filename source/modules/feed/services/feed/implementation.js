@@ -40,8 +40,6 @@ const getIncludes = async (hasInclude, objects) => {
 };
 
 const makeFeed = async (payload, options, message, extraWhereConstraint = {}) => {
-  console.log('---------', extraWhereConstraint);
-
   const whereConstraint = {
     $or: [{
       parentType: payload.parentType,
