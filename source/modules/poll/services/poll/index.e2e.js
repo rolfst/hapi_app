@@ -30,7 +30,8 @@ describe('Service: Poll', () => {
 
     message = { credentials: { id: employee.id } };
     defaultPayload = {
-      networkId: flexAppeal.id, question: 'help in what way?',
+      networkId: flexAppeal.id,
+      question: 'help in what way?',
       options: ['Option A', 'Option B', 'Option C'],
     };
     defaultVotePayload = { networkId: flexAppeal.id };

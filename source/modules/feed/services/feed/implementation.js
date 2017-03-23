@@ -7,8 +7,8 @@ const messageService = require('../message');
 const typeEq = R.propEq('objectType');
 const pluckId = R.pluck('id');
 const messageIdEq = R.propEq('messageId');
-const findIncludes = (object, includes) => (typeEq('feed_message')) ?
-  R.defaultTo(null, R.filter(messageIdEq(object.sourceId), includes)) : null;
+const findIncludes = (object, includes) => (typeEq('feed_message') ?
+  R.defaultTo(null, R.filter(messageIdEq(object.sourceId), includes)) : null);
 const anyWithType = (type, objects) => R.any(typeEq(type), objects);
 const getSourceIdsForType = (type, objects) => R.pipe(
   R.filter(typeEq(type)), R.pluck('sourceId'))(objects);

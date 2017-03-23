@@ -9,5 +9,6 @@ module.exports = {
   })
     .rename('poll_question', 'pollQuestion')
     .rename('poll_options', 'pollOptions')
-    .disallow([null, {}]).and('pollQuestion', 'pollOptions'),
+    .disallow([null, {}])
+    .and('pollQuestion', 'pollOptions'),
 };

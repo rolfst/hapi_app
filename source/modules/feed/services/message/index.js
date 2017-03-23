@@ -254,7 +254,7 @@ const like = async (payload, message) => {
   await likeRepository.create(payload.messageId, payload.userId);
 
   messageToLike.source.hasLiked = true;
-  messageToLike.source.likesCount++;
+  messageToLike.source.likesCount += 1;
 
   return messageToLike;
 };

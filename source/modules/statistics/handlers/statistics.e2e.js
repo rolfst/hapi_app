@@ -9,7 +9,7 @@ describe('Handler: Statistics', () => {
   let network;
   let admin;
 
-  before(async() => {
+  before(async () => {
     admin = await testHelper.createUser({ password: 'foo' });
     network = await testHelper.createNetwork({ userId: admin.id, name: 'flexAppeal' });
     sandbox = sinon.sandbox.create();
