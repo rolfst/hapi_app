@@ -22,5 +22,6 @@ module.exports = {
     .rename('end_time', 'endTime')
     .rename('shift_id', 'shiftId')
     .rename('team_id', 'teamId')
-    .and('startTime', 'endTime').and('shiftId', 'teamId'),
+    .and('startTime', 'endTime')
+    .and('shiftId', 'teamId'),
 };

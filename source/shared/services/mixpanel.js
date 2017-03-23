@@ -1,4 +1,5 @@
 const R = require('ramda');
+const fetch = require('isomorphic-fetch');
 const Mixpanel = require('mixpanel');
 const createError = require('../utils/create-error');
 const Logger = require('./logger');

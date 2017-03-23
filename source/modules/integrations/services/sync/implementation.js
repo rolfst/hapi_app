@@ -45,20 +45,20 @@ const getTeamsByExternalId = async (networkId, externalIds) => {
 };
 
 const replaceTeamIdsWithExternalId = (internalTeams) => (user) => {
-  const externalIds = R.map(id => {
+  const externalIds = R.map((id) => {
     const match = findById(internalTeams, id);
 
     return match ? match.externalId : null;
   }, R.defaultTo([], user.teamIds));
 
-  const replacedIds = R.pipe(rejectNil, R.sort((a, b) => a - b))(externalIds);
+  const replacedIds = R.pipe(rejectNil, R.sort(R.subtract))(externalIds);
 
   return R.assoc('teamIds', replacedIds, user);
 };
 
 const swapTeamIdsWithExternalTeamIds = (externalUser) => R.pipe(
-  obj => R.assoc('externalTeamIds', R.defaultTo([], obj.teamIds), obj),
-  R.over(R.lensProp('externalTeamIds'), R.sort((a, b) => a - b)),
+  (obj) => R.assoc('externalTeamIds', R.defaultTo([], obj.teamIds), obj),
+  R.over(R.lensProp('externalTeamIds'), R.sort(R.subtract)),
   R.dissoc('teamIds')
 )(externalUser);
 

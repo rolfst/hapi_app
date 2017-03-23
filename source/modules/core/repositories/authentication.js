@@ -33,11 +33,11 @@ function createUserDevice(deviceId, deviceName, userId) {
  * @return {external:Promise.<Device>} {@link module:shared~Device Device}
  */
 function findOrCreateUserDevice(userId, deviceName) {
-  return findUserDevice(userId, deviceName).then(device => {
+  return findUserDevice(userId, deviceName).then((device) => {
     if (!device) {
       const deviceId = uuid().toUpperCase().replace(/-/g, '');
-      return createUserDevice(deviceId, deviceName, userId)
-        .then(createdDevice => createdDevice);
+
+      return createUserDevice(deviceId, deviceName, userId);
     }
 
     return device;

@@ -23,7 +23,7 @@ describe('Mailer', () => {
   });
 
   it('should flatten when there is a bulk mail', () => {
-    const mails = users.map(u => mailFixture(u));
+    const mails = users.map((u) => mailFixture(u));
     const actual = mailer.prepare(mails);
     const expected = {
       email: ['johndoe@example.com', 'guido@example.com'],

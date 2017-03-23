@@ -7,7 +7,7 @@ const logger = Logger.createLogger('SHARED/middleware/integrationStrategy');
 
 module.exports = () => {
   return {
-    authenticate: async(request, reply) => {
+    authenticate: async (request, reply) => {
       try {
         const req = request.raw.req;
         const token = req.headers['x-api-token'];

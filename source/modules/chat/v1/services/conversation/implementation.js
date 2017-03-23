@@ -11,7 +11,7 @@ const createConversationWithParticipants = async (type, creatorId, participants)
 };
 
 const assertThatUserIsPartOfTheConversation = (conversation, userId) => {
-  return conversation.users.some(user => user.id === userId);
+  return conversation.users.some((user) => user.id === userId);
 };
 
 const searchMessageCreatorIdForConversation = (conversation) => {

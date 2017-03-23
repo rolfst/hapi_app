@@ -267,7 +267,7 @@ const getRespondedToExchange = async (userId, networkId) => {
     }],
   });
 
-  const exchangeIds = exchanges.map(e => e.id);
+  const exchangeIds = exchanges.map((e) => e.id);
 
   return findExchangeByIds(exchangeIds, userId);
 };
@@ -281,7 +281,7 @@ const getRespondedToExchange = async (userId, networkId) => {
  */
 function updateExchangeById(exchangeId, payload) {
   return Exchange.findById(exchangeId)
-    .then(exchange => exchange.update(payload));
+    .then((exchange) => exchange.update(payload));
 }
 
 /**

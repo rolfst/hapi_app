@@ -14,7 +14,7 @@ const createNotification = (exchange, substituteUser) => {
 
 const send = async (network, exchange, userThatAccepts) => {
   const admins = await networkRepo.findUsersForNetwork(network.id, { roleType: 'ADMIN' });
-  const usersToNotify = admins.filter(u => u.id !== userThatAccepts.id);
+  const usersToNotify = admins.filter((u) => u.id !== userThatAccepts.id);
   const notification = createNotification(exchange, userThatAccepts);
 
   return notifier.send(usersToNotify, notification);

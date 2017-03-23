@@ -428,7 +428,7 @@ describe('Network synchronisation', () => {
       ]);
 
       const transferedUser = find(activeUsersInToTransferNetwork,
-        user => user.email === userToTransfer.email);
+        (user) => user.email === userToTransfer.email);
 
       assert.lengthOf(activeUsersInNetwork, 2);
       assert.lengthOf(activeUsersInNetworkAfterUpdate, 2);
@@ -451,7 +451,7 @@ describe('Network synchronisation', () => {
       const employeeIds = R.pluck('id', employeesOfNetwork(usersInNetwork));
 
       // We should delete the teams first to avoid a deadlock for at team_user pivot table
-      await Promise.map(teamsForNetwork, team => teamRepository.deleteById(team.id));
+      await Promise.map(teamsForNetwork, (team) => teamRepository.deleteById(team.id));
       await Promise.map(employeeIds, userRepository.deleteById);
     });
 
@@ -521,7 +521,7 @@ describe('Network synchronisation', () => {
       await service.syncNetwork({ networkId: network.id, internal: true });
 
       const membersOfCreatedTeams = await Promise.map(createdTeams,
-        team => teamRepository.findMembers(team.id));
+        (team) => teamRepository.findMembers(team.id));
 
       assert.lengthOf(membersOfCreatedTeams[0], 1);
       assert.lengthOf(membersOfCreatedTeams[1], 1);
@@ -594,7 +594,7 @@ describe('Network synchronisation', () => {
       await service.syncNetwork({ networkId: network.id, internal: true });
 
       const membersOfCreatedTeams = await Promise.map(createdTeams,
-        team => teamRepository.findMembers(team.id));
+        (team) => teamRepository.findMembers(team.id));
 
       assert.lengthOf(membersOfCreatedTeams[0], 0);
       assert.lengthOf(membersOfCreatedTeams[1], 1);

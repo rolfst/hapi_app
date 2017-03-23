@@ -18,9 +18,9 @@ const send = async (comment) => {
 
   const comments = await findCommentsByExchange(exchange);
 
-  const users = comments.map(c => c.User).concat(exchange.User);
+  const users = comments.map((c) => c.User).concat(exchange.User);
   const uniqueUsers = _.uniqBy(users, 'id');
-  const usersToNotify = uniqueUsers.filter(u => u.id !== comment.User.id);
+  const usersToNotify = uniqueUsers.filter((u) => u.id !== comment.User.id);
 
   const notification = createNotification(exchange, comment);
 

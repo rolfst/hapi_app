@@ -29,21 +29,25 @@ describe('Service: Conversation (v2)', () => {
       await messageService.create({
         conversationId: createdConversation.id,
         text: 'First message',
-      }, { credentials: participant, artifacts: {
-        authenticationToken: 'foo_token' } });
+      }, {
+        credentials: participant,
+        artifacts: {
+          authenticationToken: 'foo_token' } });
 
       await messageService.create({
         conversationId: createdConversation.id,
         text: 'Last message',
-      }, { credentials: participant, artifacts: {
-        authenticationToken: 'foo_token' } });
+      }, {
+        credentials: participant,
+        artifacts: {
+          authenticationToken: 'foo_token' } });
 
       await conversationService.remove({ conversationId: createdConversation.id });
     });
 
     after(async () => {
       await conversationService.remove({ conversationId: createdConversation.id });
-      await [creator, participant].map(user => userRepo.deleteById(user.id));
+      await [creator, participant].map((user) => userRepo.deleteById(user.id));
     });
 
     it('should remove related objects', async () => {
@@ -69,7 +73,7 @@ describe('Service: Conversation (v2)', () => {
     });
 
     after(async () => {
-      await [creator, participant].map(user => userRepo.deleteById(user.id));
+      await [creator, participant].map((user) => userRepo.deleteById(user.id));
     });
 
     it('should create a conversation', async () => {

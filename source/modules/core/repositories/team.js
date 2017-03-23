@@ -49,7 +49,7 @@ async function setUsersForTeam(teamId, userIds) {
  * @return {external:Promise.<TeamUser[]>} {@link module:modules/core~TeamUser TeamUser}
  */
 function addUserToTeams(teamIds, userId) {
-  const values = teamIds.map(teamId => ({ teamId, userId }));
+  const values = teamIds.map((teamId) => ({ teamId, userId }));
 
   return TeamUser.bulkCreate(values);
 }

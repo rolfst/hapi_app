@@ -86,7 +86,7 @@ const importNetwork = async (payload, message) => {
 
     const network = await networkRepository.findNetworkById(payload.networkId);
     if (!network) throw createError('404', 'Network not found.');
-    if (!!network.importedAt) throw createError('10007');
+    if (!network.importedAt) throw createError('10007');
     if (!network.hasIntegration) throw createError('10001');
 
     const adapter = await adapterUtil.createAdapter(network, 0, { proceedWithoutToken: true });

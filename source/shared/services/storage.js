@@ -55,12 +55,12 @@ function upload(file, prefix = null) {
   };
 
   return getClient().upload(params).promise()
-    .then(data => {
+    .then((data) => {
       logger.info('Amazon S3 response', { response: data });
 
       return newFilename;
     })
-    .catch(err => {
+    .catch((err) => {
       logger.error('Error while uploading to Amazon S3', { err });
 
       throw createError('30001', err);

@@ -77,7 +77,7 @@ const listConversations = async (payload, message) => {
   const objectIds = R.pipe(R.pluck('id'), R.values)(lastMessageObjects);
   const lastMessages = await objectService.listWithSourceAndChildren({ objectIds }, message);
 
-  const lastMessagesForConversation = R.map(object =>
+  const lastMessagesForConversation = R.map((object) =>
     R.find(R.propEq('sourceId', object.sourceId), lastMessages), lastMessageObjects);
 
   if (includes('participants')) {
@@ -85,13 +85,13 @@ const listConversations = async (payload, message) => {
       pluckUniqueParticipantIds, userRepository.findByIds)(conversations);
     const findParticipant = (participantId) => findIdEq(participantId, participants);
 
-    return R.map(conversation => R.merge(conversation, {
+    return R.map((conversation) => R.merge(conversation, {
       lastMessage: lastMessagesForConversation[conversation.id],
       participants: R.map(findParticipant, conversation.participantIds),
     }), conversations);
   }
 
-  return R.map(conversation => R.merge(conversation, {
+  return R.map((conversation) => R.merge(conversation, {
     lastMessage: lastMessagesForConversation[conversation.id] }), conversations);
 };
 
@@ -102,7 +102,7 @@ const listConversations = async (payload, message) => {
  * @method getConversation
  * @return {external:Promise.<Conversation>} {@link module:modules/chat~Conversation}
  */
-const getConversation = async(payload, message) => {
+const getConversation = async (payload, message) => {
   logger.info('Get conversation', { payload, message });
 
   const conversations = await listConversations({

@@ -40,7 +40,7 @@ const findAllUsers = async () => {
  */
 const findExternalUsers = async (externalIds) => {
   const pivotResult = await NetworkUser.findAll({ where: { externalId: { $in: externalIds } } });
-  const userIds = pivotResult.map(result => result.userId);
+  const userIds = pivotResult.map((result) => result.userId);
   const result = await User.findAll(R.merge(defaultIncludes, { where: { id: { $in: userIds } } }));
 
   return result;
@@ -61,9 +61,9 @@ const findByIds = async (userIds, networkId = null) => {
   } else {
     const includes = {
       include: [{ model: Team,
-      attributes: ['id'],
-      where: { networkId },
-      required: false }] };
+        attributes: ['id'],
+        where: { networkId },
+        required: false }] };
     result = await User.findAll(R.merge(includes, { where: { id: { $in: userIds } } }));
   }
 

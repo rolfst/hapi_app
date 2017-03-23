@@ -41,7 +41,7 @@ async function listUsersWithNetworkScope(payload, message) {
   const network = await networkService.get({ networkId: payload.networkId }, message);
   const metaDataList = await userRepo.findMultipleUserMetaDataForNetwork(
     map(users, 'id'), network.id);
-  const usersInNetwork = R.filter(user => R.find(R.propEq('userId', user.id), metaDataList), users);
+  const usersInNetwork = R.filter((user) => R.find(R.propEq('userId', user.id), metaDataList), users);
 
   return Promise.map(usersInNetwork, async (user) => {
     const metaData = find(metaDataList, { userId: user.id });
