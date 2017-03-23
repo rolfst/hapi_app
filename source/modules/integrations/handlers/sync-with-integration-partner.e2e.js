@@ -96,7 +96,7 @@ describe('Handle sync networks of linked to integration', () => {
         .get('/users')
         .reply(200, stubs.users_200);
 
-      const endpoint = '/v2/integrations/sync';
+      const endpoint = '/v2/networks/sync';
       const { statusCode } = await getRequest(endpoint, 'footoken');
 
       assert.equal(statusCode, 202);
