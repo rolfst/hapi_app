@@ -2,7 +2,7 @@ const { assert } = require('chai');
 const createServer = require('./server');
 
 describe('server', () => {
-  it('should contain a start and stop a server', () => {
+  it('should contain a start and stop function', () => {
     const server = createServer();
 
     assert.property(server, 'start');
