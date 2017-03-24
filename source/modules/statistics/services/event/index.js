@@ -2,9 +2,8 @@ const R = require('ramda');
 const moment = require('moment');
 const Mixpanel = require('../../../../shared/services/mixpanel');
 const createError = require('../../../../shared/utils/create-error');
-const Logger = require('../../../../shared/services/logger');
 
-const logger = Logger.createLogger('STATISTICS/service/events');
+const logger = require('../../../../shared/services/logger')('STATISTICS/service/events');
 
 const defaultToMonth = R.defaultTo('month');
 

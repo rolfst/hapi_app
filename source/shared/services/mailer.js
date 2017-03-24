@@ -1,9 +1,8 @@
 const nodemailer = require('nodemailer');
 const SendGridSMTP = require('smtpapi');
 const { mapValues } = require('lodash');
-const Logger = require('./logger');
 
-const logger = Logger.createLogger('SHARED/services/mailer');
+const logger = require('./logger')('SHARED/services/mailer');
 
 const smtpConfig = {
   host: process.env.SMTP_HOST,

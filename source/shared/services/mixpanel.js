@@ -2,9 +2,8 @@ const R = require('ramda');
 const fetch = require('isomorphic-fetch');
 const Mixpanel = require('mixpanel');
 const createError = require('../utils/create-error');
-const Logger = require('./logger');
 
-const logger = Logger.createLogger('SHARED/services/mixpanel');
+const logger = require('./logger')('SHARED/services/mixpanel');
 
 const API_KEY = process.env.MIXPANEL_TOKEN;
 const MP_API_JQL_URI = `https://${API_KEY}@mixpanel.com/api/2.0/jql/`;

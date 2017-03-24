@@ -1,7 +1,6 @@
 const { sortBy, map, includes } = require('lodash');
 const R = require('ramda');
 const moment = require('moment');
-const Logger = require('../../../../shared/services/logger');
 const { createAdapter } = require('../../../../shared/utils/create-adapter');
 const createError = require('../../../../shared/utils/create-error');
 const teamRepo = require('../../../core/repositories/team');
@@ -23,7 +22,7 @@ const impl = require('./implementation');
 /**
  * @module modules/flexchange/services/flexchange
  */
-const logger = Logger.createLogger('FLEXCHANGE/service/exchange');
+const logger = require('../../../../shared/services/logger')('FLEXCHANGE/service/exchange');
 
 const FILTER_PROPERTIES = ['start', 'end'];
 

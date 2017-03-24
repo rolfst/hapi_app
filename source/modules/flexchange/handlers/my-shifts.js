@@ -1,9 +1,8 @@
 const R = require('ramda');
-const Logger = require('../../../shared/services/logger');
 const createServicePayload = require('../../../shared/utils/create-service-payload');
 const flexchangeService = require('../services/flexchange');
 
-const logger = Logger.createLogger('FLEXCHANGE/handler/myShifts');
+const logger = require('../../../shared/services/logger')('FLEXCHANGE/handler/myShifts');
 
 const transformItem = (item) => R.merge(
   R.omit(['teamId', 'exchangeId'], item),

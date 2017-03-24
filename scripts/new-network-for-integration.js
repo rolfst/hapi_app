@@ -2,10 +2,9 @@
 /* eslint-disable no-console */
 const userRepo = require('../source/modules/core/repositories/user');
 const networkRepo = require('../source/modules/core/repositories/network');
-const Logger = require('../source/shared/services/logger');
 const args = require('yargs').argv;
 
-const logger = Logger.createLogger('JOB/createNetworkForIntegration');
+const logger = require('../source/shared/services/logger')('JOB/createNetworkForIntegration');
 
 /*
  * This script can be used to create a new network that has an integration enabled.

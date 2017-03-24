@@ -1,5 +1,4 @@
 const R = require('ramda');
-const Logger = require('../../../../../shared/services/logger');
 const createError = require('../../../../../shared/utils/create-error');
 const userRepository = require('../../../../core/repositories/user');
 const objectService = require('../../../../core/services/object');
@@ -8,7 +7,8 @@ const conversationRepoV1 = require('../../../v1/repositories/conversation');
 const conversationRepo = require('../../repositories/conversation');
 const impl = require('./implementation');
 
-const logger = Logger.createLogger('CHAT/service/conversation');
+const logger = require('../../../../../shared/services/logger')('CHAT/service/conversation');
+
 const createOptions = R.pick(['limit', 'offset', 'order']);
 const pluckUniqueParticipantIds = R.pipe(R.pluck('participantIds'), R.flatten, R.uniq);
 const groupByParentId = R.groupBy(R.prop('parentId'));

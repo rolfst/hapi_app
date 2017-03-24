@@ -1,10 +1,9 @@
 const R = require('ramda');
 const serverUtil = require('../utils/server');
 const createError = require('../utils/create-error');
-const Logger = require('../../shared/services/logger');
 const authenticate = require('../utils/authenticate');
 
-const logger = Logger.createLogger('SHARED/middleware/authenticatorStrategy');
+const logger = require('../../shared/services/logger')('SHARED/middleware/authenticatorStrategy');
 
 module.exports = () => ({
   async authenticate(request, reply) {

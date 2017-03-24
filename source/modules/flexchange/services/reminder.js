@@ -5,9 +5,8 @@ const notifier = require('../../../shared/services/notifier');
 const networkRepo = require('../../core/repositories/network');
 const exchangeRepo = require('../repositories/exchange');
 const createReminderExchangeNotification = require('../notifications/accepted-exchange-reminder');
-const Logger = require('../../../shared/services/logger');
 
-const logger = Logger.createLogger('FLEXCHANGE/service/reminder');
+const logger = require('../../../shared/services/logger')('FLEXCHANGE/service/reminder');
 
 const createAdminInfo = (admins) => {
   return map(filter(admins, (u) => u),

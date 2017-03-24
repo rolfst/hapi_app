@@ -1,8 +1,7 @@
 const fetch = require('isomorphic-fetch');
 const createError = require('../../../../shared/utils/create-error');
-const Logger = require('../../../../shared/services/logger');
 
-const logger = Logger.createLogger('PMT/adapter/client');
+const logger = require('../../../../shared/services/logger')('PMT/adapter/client');
 
 const createFormEncodedString = (data) => {
   return Object.keys(data).map((key) => {

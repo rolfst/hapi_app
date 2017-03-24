@@ -1,9 +1,8 @@
 const Parse = require('parse/node');
 const R = require('ramda');
-const Logger = require('./logger');
 const Mixpanel = require('./mixpanel');
 
-const logger = Logger.createLogger('SHARED/services/notifier');
+const logger = require('./logger')('SHARED/services/notifier');
 
 function createQuery(emails) {
   const query = new Parse.Query(Parse.Installation);

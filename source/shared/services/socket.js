@@ -1,8 +1,7 @@
 const fetch = require('isomorphic-fetch');
 const R = require('ramda');
-const Logger = require('./logger');
 
-const logger = Logger.createLogger('SHARED/services/socket');
+const logger = require('./logger')('SHARED/services/socket');
 
 const WEBSOCKET_URL = process.env.API_ENV === 'production' ?
   'https://realtime.flex-appeal.nl' : 'https://test.realtime.flex-appeal.nl';

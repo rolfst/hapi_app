@@ -1,10 +1,9 @@
 const createServicePayload = require('../../../shared/utils/create-service-payload');
 const moment = require('moment');
 const createError = require('../../../shared/utils/create-error');
-const Logger = require('../../../shared/services/logger');
 const { updateExchangeById } = require('../repositories/exchange');
 
-const logger = Logger.createLogger('FLEXCHANGE/handler/updateExchange');
+const logger = require('../../../shared/services/logger')('FLEXCHANGE/handler/updateExchange');
 
 module.exports = async (req, reply) => {
   try {

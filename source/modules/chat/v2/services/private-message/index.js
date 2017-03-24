@@ -1,6 +1,5 @@
 const R = require('ramda');
 const Promise = require('bluebird');
-const Logger = require('../../../../../shared/services/logger');
 const createError = require('../../../../../shared/utils/create-error');
 const attachmentService = require('../../../../attachment/services/attachment');
 const objectService = require('../../../../core/services/object');
@@ -8,7 +7,7 @@ const privateMessageRepository = require('../../repositories/private-message');
 const conversationRepository = require('../../repositories/conversation');
 const ChatDispatcher = require('../../dispatcher');
 
-const logger = Logger.createLogger('CHAT/service/conversation');
+const logger = require('../../../../../shared/services/logger')('CHAT/service/conversation');
 
 /**
  * Listing private messages

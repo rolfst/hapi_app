@@ -1,9 +1,8 @@
 const { pick } = require('lodash');
 const { Integration } = require('../../modules/core/repositories/dao');
 const createError = require('../utils/create-error');
-const Logger = require('../services/logger');
 
-const logger = Logger.createLogger('SHARED/middleware/integrationStrategy');
+const logger = require('../services/logger')('SHARED/middleware/integrationStrategy');
 
 module.exports = () => {
   return {

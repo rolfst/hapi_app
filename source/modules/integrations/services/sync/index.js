@@ -2,14 +2,13 @@ const R = require('ramda');
 const Promise = require('bluebird');
 const passwordUtil = require('../../../../shared/utils/password');
 const adapterUtil = require('../../../../shared/utils/create-adapter');
-const Logger = require('../../../../shared/services/logger');
 const createError = require('../../../../shared/utils/create-error');
 const userRepository = require('../../../core/repositories/user');
 const networkRepository = require('../../../core/repositories/network');
 const networkService = require('../../../core/services/network');
 const impl = require('./implementation');
 
-const logger = Logger.createLogger('INTEGRATIONS/service/sync');
+const logger = require('../../../../shared/services/logger')('INTEGRATIONS/service/sync');
 
 /**
  * Synchronize a single network with his integration partner

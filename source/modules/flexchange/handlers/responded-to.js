@@ -1,9 +1,8 @@
 const responseUtil = require('../../../shared/utils/response');
 const createServicePayload = require('../../../shared/utils/create-service-payload');
-const Logger = require('../../../shared/services/logger');
 const flexchangeService = require('../services/flexchange');
 
-const logger = Logger.createLogger('FLEXCHANGE/handler/respondedTo');
+const logger = require('../../../shared/services/logger')('FLEXCHANGE/handler/respondedTo');
 
 module.exports = async (req, reply) => {
   try {

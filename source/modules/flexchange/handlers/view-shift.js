@@ -1,9 +1,8 @@
 const createServicePayload = require('../../../shared/utils/create-service-payload');
 const R = require('ramda');
-const Logger = require('../../../shared/services/logger');
 const flexchangeService = require('../services/flexchange');
 
-const logger = Logger.createLogger('FLEXCHANGE/handler/viewShift');
+const logger = require('../../../shared/services/logger')('FLEXCHANGE/handler/viewShift');
 
 module.exports = async (req, reply) => {
   try {

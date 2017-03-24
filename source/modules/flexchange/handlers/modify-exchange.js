@@ -1,9 +1,8 @@
-const Logger = require('../../../shared/services/logger');
 const createServicePayload = require('../../../shared/utils/create-service-payload');
 const responseUtils = require('../../../shared/utils/response');
 const flexchangeService = require('../services/flexchange');
 
-const logger = Logger.createLogger('FLEXCHANGE/handler/modifyExchange');
+const logger = require('../../../shared/services/logger')('FLEXCHANGE/handler/modifyExchange');
 
 const services = {
   accept: flexchangeService.acceptExchange,

@@ -3,9 +3,8 @@ require('newrelic');
 require('./shared/services/BindingService');
 
 const Parse = require('parse/node');
-const Logger = require('./shared/services/logger');
 
-const logger = Logger.createLogger('SERVER');
+const logger = require('./shared/services/logger')('SERVER');
 const createServer = require('./server').default;
 
 if (process.env.API_ENV !== 'production') {
