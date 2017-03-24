@@ -1,5 +1,4 @@
 const R = require('ramda');
-const Logger = require('../../../../shared/services/logger');
 const createError = require('../../../../shared/utils/create-error');
 const networkRepo = require('../../repositories/network');
 const userService = require('../user');
@@ -9,7 +8,7 @@ const teamService = require('../team');
  * @module modules/core/services/network
  */
 
-const logger = Logger.getLogger('CORE/service/network');
+const logger = require('../../../../shared/services/logger')('CORE/service/network');
 
 /**
  * Retrieve a single network;

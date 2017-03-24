@@ -1,4 +1,3 @@
-const Logger = require('../../../../shared/services/logger');
 const createError = require('../../../../shared/utils/create-error');
 const messageRepository = require('../../repositories/message');
 const commentRepository = require('../../repositories/comment');
@@ -7,7 +6,7 @@ const commentRepository = require('../../repositories/comment');
  * @module modules/feed/services/comment
  */
 
-const logger = Logger.getLogger('FEED/service/comment');
+const logger = require('../../../../shared/services/logger')('FEED/service/comment');
 
 /**
  * List comments

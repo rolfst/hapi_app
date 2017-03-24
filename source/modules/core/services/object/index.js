@@ -1,7 +1,6 @@
 const R = require('ramda');
 const Promise = require('bluebird');
 const createError = require('../../../../shared/utils/create-error');
-const Logger = require('../../../../shared/services/logger');
 const networkRepository = require('../../../core/repositories/network');
 const teamRepository = require('../../../core/repositories/team');
 const userRepository = require('../../../core/repositories/user');
@@ -12,7 +11,7 @@ const impl = require('./implementation');
  * @module modules/core/services/object
  */
 
-const logger = Logger.getLogger('CORE/service/object');
+const logger = require('../../../../shared/services/logger')('CORE/service/object');
 
 const objectsForTypeValuePair = (fn, pairs) => Object.keys(pairs)
   .map((key) => fn(pairs[key], key));

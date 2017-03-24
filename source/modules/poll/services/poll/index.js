@@ -1,5 +1,4 @@
 const R = require('ramda');
-const Logger = require('../../../../shared/services/logger');
 const pollRepository = require('../../repositories/poll');
 const pollVoteRepository = require('../../repositories/poll-vote');
 const impl = require('./implementation');
@@ -8,7 +7,7 @@ const impl = require('./implementation');
  * @module modules/POLL/services/poll
  */
 
-const logger = Logger.getLogger('POLL/service/poll');
+const logger = require('../../../../shared/services/logger')('POLL/service/poll');
 
 const addResultToPoll = R.curry((poll, results) => {
   const result = results[poll.id] ? R.pluck('optionId', results[poll.id]) : null;

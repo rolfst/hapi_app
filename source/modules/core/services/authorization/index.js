@@ -1,4 +1,3 @@
-const Logger = require('../../../../shared/services/logger');
 const createError = require('../../../../shared/utils/create-error');
 const userRepo = require('../../repositories/user');
 const networkRepo = require('../../repositories/network');
@@ -9,7 +8,7 @@ const userService = require('../user');
  * @module modules/core/services/authorization
  */
 
-const logger = Logger.getLogger('CORE/service/authorization');
+const logger = require('../../../../shared/services/logger')('CORE/service/authorization');
 
 /**
  * Assert role type for user

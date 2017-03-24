@@ -2,9 +2,8 @@ const R = require('ramda');
 const Promise = require('bluebird');
 const AWS = require('aws-sdk');
 const createError = require('../utils/create-error');
-const Logger = require('./logger');
 
-const logger = Logger.getLogger('SHARED/service/upload');
+const logger = require('./logger')('SHARED/service/upload');
 
 const getEnvironmentLocation = () => {
   const mapping = {

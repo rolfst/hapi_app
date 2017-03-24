@@ -1,5 +1,4 @@
 const R = require('ramda');
-const Logger = require('../../../../shared/services/logger');
 const createError = require('../../../../shared/utils/create-error');
 const networkService = require('../../../core/services/network');
 const userService = require('../../../core/services/user');
@@ -10,7 +9,8 @@ const impl = require('./implementation');
  * @module modules/feed/services/feed
  */
 
-const logger = Logger.getLogger('FEED/service/feed');
+const logger = require('../../../../shared/services/logger')('FEED/service/feed');
+
 const pluckId = R.pluck('id');
 const feedOptions = R.pick(['limit', 'offset', 'include']);
 

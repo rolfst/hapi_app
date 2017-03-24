@@ -1,6 +1,5 @@
 const R = require('ramda');
 const Storage = require('../../../../shared/services/storage');
-const Logger = require('../../../../shared/services/logger');
 const createError = require('../../../../shared/utils/create-error');
 const attachmentRepo = require('../../repositories/attachment');
 
@@ -8,7 +7,7 @@ const attachmentRepo = require('../../repositories/attachment');
  * @module modules/attachment/services/attachment
  */
 
-const logger = Logger.getLogger('attachment/service/attachment');
+const logger = require('../../../../shared/services/logger')('attachment/service/attachment');
 
 /**
  * Lists selected attachments

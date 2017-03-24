@@ -2,7 +2,6 @@ const { map, find } = require('lodash');
 const R = require('ramda');
 const Promise = require('bluebird');
 const createError = require('../../../../shared/utils/create-error');
-const Logger = require('../../../../shared/services/logger');
 const userRepo = require('../../repositories/user');
 const networkRepo = require('../../repositories/network');
 const networkService = require('../../services/network');
@@ -10,7 +9,7 @@ const networkService = require('../../services/network');
 /**
  * @module modules/core/services/user
  */
-const logger = Logger.getLogger('CORE/service/user');
+const logger = require('../../../../shared/services/logger')('CORE/service/user');
 
 /**
  * Retrieve user without network scope

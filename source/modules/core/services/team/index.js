@@ -2,7 +2,6 @@ const { map } = require('lodash');
 const Promise = require('bluebird');
 const R = require('ramda');
 const createError = require('../../../../shared/utils/create-error');
-const Logger = require('../../../../shared/services/logger');
 const authorizationService = require('../../services/authorization');
 const teamRepository = require('../../repositories/team');
 const userService = require('../user');
@@ -11,7 +10,7 @@ const userService = require('../user');
  * @module modules/core/services/team
  */
 
-const logger = Logger.getLogger('CORE/service/team');
+const logger = require('../../../../shared/services/logger')('CORE/service/team');
 
 /**
  * Get single team

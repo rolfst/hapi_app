@@ -1,6 +1,5 @@
 const R = require('ramda');
 const Promise = require('bluebird');
-const Logger = require('../../../../shared/services/logger');
 const createError = require('../../../../shared/utils/create-error');
 const attachmentService = require('../../../attachment/services/attachment');
 const objectService = require('../../../core/services/object');
@@ -14,7 +13,7 @@ const impl = require('./implementation');
  * @module modules/feed/services/message
  */
 
-const logger = Logger.getLogger('FEED/service/message');
+const logger = require('../../../../shared/services/logger')('FEED/service/message');
 
 const isDefined = R.complement(R.isNil);
 const isNotEmpty = R.complement(R.isEmpty);
