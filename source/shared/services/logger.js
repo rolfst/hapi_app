@@ -6,10 +6,56 @@ const bunyan = require('bunyan');
  * @module shared/services/logger
  */
 
-const environment = process.env.API_ENV;
-const defaultConfig = process.env.CI ?
-   require('../configs/logs-ci') :
-   require(`../configs/logs-${environment}`); // eslint-disable-line import/no-dynamic-require
+const LogLevel = {
+  NONE: null,
+  FATAL: 'fatal',
+  ERROR: 'error',
+  WARNING: 'warn',
+  INFO: 'info',
+  DEBUG: 'debug'
+};
+
+const ELogLevel = Object.keys(LogLevel);
+
+const logConfig = require('../configs/logger');
+
+const logEnvironment = (() => {
+  if (process.env.CI) {
+    return 'ci';
+  }
+
+  if (process.env.API_ENV in logConfig.defaultLogLevels) {
+    return process.env.API_ENV;
+  }
+
+  return logConfig.defaultEnvironment;
+})();
+
+// Loglevel at which we actually display errors (regardless of errorLogLevel)
+const currentLogLevel = ELogLevel.indexOf(
+  logEnvironment in logConfig.defaultLogLevels
+  ? logConfig.defaultLogLevels[logEnvironment]
+  : LogLevel.WARNING
+);
+
+// Minimum loglevel that is sent to stderr, the rest goes to stdout
+const errorLogLevel = ELogLevel.indexOf(LogLevel.WARNING);
+
+const bunyanConfig = {
+  streams: []
+};
+
+// Build bunyan config based on the current loglevel
+ELogLevel.forEach((logLevel, severity) => {
+  if (!LogLevel[logLevel] || currentLogLevel < severity) {
+    return;
+  }
+
+  bunyanConfig.streams.push({
+    level: logLevel,
+    stream: severity > errorLogLevel ? process.stdout : process.stderr
+  });
+});
 
 const makeMessage = R.pipe(
   R.pick(['credentials', 'artifacts', 'network']),
@@ -39,7 +85,7 @@ const buildLogContext = (args = {}) => {
   };
 };
 
-const getLogger = (name) => bunyan.createLogger(R.merge({ name }, defaultConfig));
+const getLogger = (name) => bunyan.createLogger(R.merge({ name }, bunyanConfig));
 
 /**
  * @param {string|Logger} loggerOrName
@@ -107,3 +153,5 @@ const createLogger = (loggerOrName) => {
 module.exports = createLogger;
 module.exports.createLogger = createLogger;
 module.exports.getLogger = getLogger;
+module.exports.LogLevel = LogLevel;
+module.exports.ELogLevel = ELogLevel;
