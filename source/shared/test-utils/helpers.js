@@ -310,6 +310,9 @@ async function cleanAll() {
   const users = await findAllUsers();
   await Promise.all(R.map(deleteUser, users));
 
+  const objects = await findAllObjects();
+  await Promise.all(R.map(deleteObject, objects));
+
   const activities = await findAllActivities();
   await Promise.all(R.map(deleteActivity, activities));
 
