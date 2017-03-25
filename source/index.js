@@ -1,6 +1,5 @@
 require('dotenv').config();
 require('newrelic');
-require('./shared/services/BindingService');
 
 const Parse = require('parse/node');
 const Logger = require('./shared/services/logger');
