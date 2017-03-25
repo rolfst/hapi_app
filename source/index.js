@@ -1,12 +1,11 @@
 require('dotenv').config();
 require('newrelic');
-require('./shared/services/BindingService');
 
 const Parse = require('parse/node');
 const Logger = require('./shared/services/logger');
 
 const logger = Logger.createLogger('SERVER');
-const createServer = require('./server').default;
+const createServer = require('./server');
 
 if (process.env.API_ENV !== 'production') {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
