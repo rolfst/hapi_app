@@ -88,7 +88,6 @@ async function executeQuery(query, message) {
   };
 
   logger.info('Fetching from mixpanel', { options, message });
-  console.log('#########', MP_API_JQL_URI);
   const response = await fetch(MP_API_JQL_URI, options);
   const { status, json } = await handleRequest(response, MP_API_JQL_URI);
 
