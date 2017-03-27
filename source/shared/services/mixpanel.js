@@ -7,7 +7,8 @@ const Logger = require('./logger');
 const logger = Logger.createLogger('SHARED/services/mixpanel');
 
 const API_KEY = process.env.MIXPANEL_TOKEN;
-const MP_API_JQL_URI = `https://${API_KEY}@mixpanel.com/api/2.0/jql/`;
+const API_SECRET = process.env.MIXPANEL_SECRET;
+const MP_API_JQL_URI = `https://${API_SECRET}@mixpanel.com/api/2.0/jql/`;
 
 function getClient() {
   return Mixpanel.init(API_KEY);
@@ -56,7 +57,7 @@ async function handleRequest(response, endpoint) {
   } else if (status === 404 && json.error === undefinedError) {
     throw createError('10008', json.error);
   } else if (status === 400 && json.error === 'Unable to authenticate request') {
-    throw createError('10004');
+    throw createError('40004');
   } else if (status === 400) {
     throw createError('422');
   }
@@ -87,6 +88,7 @@ async function executeQuery(query, message) {
   };
 
   logger.info('Fetching from mixpanel', { options, message });
+  console.log('#########', MP_API_JQL_URI);
   const response = await fetch(MP_API_JQL_URI, options);
   const { status, json } = await handleRequest(response, MP_API_JQL_URI);
 
