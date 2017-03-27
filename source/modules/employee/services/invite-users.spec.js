@@ -11,6 +11,7 @@ const signupMail = require('../../../shared/mails/signup');
 const userRepo = require('../../core/repositories/user');
 const userService = require('../../core/services/user');
 const networkRepo = require('../../core/repositories/network');
+const networkService = require('../../core/services/network');
 const service = require('./invite-user');
 const impl = require('./implementation');
 
@@ -95,6 +96,7 @@ describe('Invite users', () => {
       sandbox.stub(userRepo, 'findUserBy').returns(Promise.resolve(false));
       sandbox.stub(userRepo, 'createUser').returns(Promise.resolve(false));
       sandbox.stub(networkRepo, 'addUser').returns(Promise.resolve(false));
+      sandbox.stub(networkService, 'listNetworksForUser').returns(Promise.resolve(false));
       sandbox.stub(userService, 'getUserWithNetworkScope').returns(Promise.resolve(adminUser));
       sandbox.stub(passwordUtil, 'plainRandom').returns('testpassword');
     });
