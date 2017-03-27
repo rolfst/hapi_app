@@ -74,8 +74,8 @@ const update = async (payload, message) => {
 const create = async (payload, message) => {
   logger.info('Create attachment', { payload: R.omit(['fileStream'], payload), message });
 
-  if (typeof payload.fileStream.on !== 'function') {
-    throw createError('422', 'Please provide a file');
+  if (!payload.fileStream || typeof payload.fileStream.on !== 'function') {
+    throw createError('422', 'Please provide a file.');
   }
 
   const path = await Storage.upload(payload.fileStream, 'attachments');
