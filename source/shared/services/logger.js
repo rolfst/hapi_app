@@ -20,9 +20,7 @@ const ELogLevel = Object.keys(LogLevel);
 const logConfig = require('../configs/logger');
 
 const logEnvironment = (() => {
-  if (process.env.CI) {
-    return 'ci';
-  }
+  if (process.env.CI) return 'ci';
 
   if (process.env.API_ENV in logConfig.defaultLogLevels) {
     return process.env.API_ENV;
@@ -39,7 +37,7 @@ const currentLogLevel = ELogLevel.indexOf(
 );
 
 // Minimum loglevel that is sent to stderr, the rest goes to stdout
-const errorLogLevel = ELogLevel.indexOf(LogLevel.WARNING);
+const errorLogLevel = ELogLevel.indexOf(LogLevel[logConfig.errorLogLevel]);
 
 const bunyanConfig = {
   streams: []
@@ -151,7 +149,8 @@ const createLogger = (loggerOrName) => {
 };
 
 module.exports = createLogger;
-module.exports.createLogger = createLogger;
-module.exports.getLogger = getLogger;
 module.exports.LogLevel = LogLevel;
 module.exports.ELogLevel = ELogLevel;
+
+// Backwards compatibility - these should be removed sometime (still used in a test or 2)
+module.exports.createLogger = createLogger;
