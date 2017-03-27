@@ -1,6 +1,7 @@
 const R = require('ramda');
 const stream = require('stream');
 const bunyan = require('bunyan');
+const argv = require('yargs').argv;
 
 /**
  * @module shared/services/logger
@@ -30,11 +31,19 @@ const logEnvironment = (() => {
 })();
 
 // Loglevel at which we actually display errors (regardless of errorLogLevel)
-const currentLogLevel = ELogLevel.indexOf(
-  logEnvironment in logConfig.defaultLogLevels
-  ? logConfig.defaultLogLevels[logEnvironment]
-  : LogLevel.WARNING
-);
+const currentLogLevel = ELogLevel.indexOf((() => {
+  if (argv.verbose || argv.debug) {
+    return 'DEBUG';
+  }
+
+  if (argv.info) {
+    return 'INFO';
+  }
+
+  return (logEnvironment in logConfig.defaultLogLevels
+    ? logConfig.defaultLogLevels[logEnvironment]
+    : 'WARNING');
+})());
 
 // Minimum loglevel that is sent to stderr, the rest goes to stdout
 const errorLogLevel = ELogLevel.indexOf(LogLevel[logConfig.errorLogLevel]);
@@ -50,7 +59,7 @@ ELogLevel.forEach((logLevel, severity) => {
   }
 
   bunyanConfig.streams.push({
-    level: ELogLevel[logLevel],
+    level: LogLevel[logLevel],
     stream: severity > errorLogLevel ? process.stdout : process.stderr
   });
 });
