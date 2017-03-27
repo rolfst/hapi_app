@@ -73,7 +73,7 @@ const createMailOptions = (mail) => {
 
 const send = (mail, message = null) => {
   const mailOptions = createMailOptions(mail);
-  logger.info('Sending email to Sendgrid', { mailOptions, message });
+  logger.debug('Sending email to Sendgrid', { mailOptions, message });
 
   return transporter.sendMail(mailOptions, (err) => {
     if (err) logger.warn('Error when sending mail', { err, message, mail_options: mailOptions });

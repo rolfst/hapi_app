@@ -61,7 +61,7 @@ function createDateRange(unit, start, end) {
  * module:modules/statistics~EventStatistic EventStatistic}
  */
 async function getCreatedMessages(payload, message) {
-  logger.info('Retrieving Created Messages', { payload, message });
+  logger.debug('Retrieving Created Messages', { payload, message });
 
   const unit = defaultToMonth(payload.unit);
   const { startDate, endDate } = createDateRange(unit, payload.startDate, payload.endDate);
@@ -81,7 +81,7 @@ async function getCreatedMessages(payload, message) {
  * module:modules/statistics~EventStatistic EventStatistic}
  */
 async function getApprovedShifts(payload, message) {
-  logger.info('Retrieving Approved shifts', { payload, message });
+  logger.debug('Retrieving Approved shifts', { payload, message });
 
   const unit = defaultToMonth(payload.unit);
   const { startDate, endDate } = createDateRange(unit, payload.startDate, payload.endDate);
@@ -101,7 +101,7 @@ async function getApprovedShifts(payload, message) {
  * module:modules/statistics~EventStatistic EventStatistic}
  */
 async function getCreatedShifts(payload, message) {
-  logger.info('Retrieving Created shifts', { payload, message });
+  logger.debug('Retrieving Created shifts', { payload, message });
 
   const { startDate, endDate } = createDateRange('month', payload.startDate, payload.endDate);
   const jql = createEventQuery({

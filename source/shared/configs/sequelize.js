@@ -8,7 +8,7 @@ module.exports = (() => {
   const { host, database, username, password, dialect, port } = config[process.env.API_ENV];
 
   const logging = process.env.SQL_LOGGING === 'true' ?
-    (log) => logger.info(log) : false;
+    (log) => logger.debug(log) : false;
 
   const define = {
     charset: 'utf8mb4',

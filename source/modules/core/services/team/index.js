@@ -21,7 +21,7 @@ const logger = require('../../../../shared/services/logger')('CORE/service/team'
  * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team} -
  */
 async function get(payload, message) {
-  logger.info('Get team', { payload, message });
+  logger.debug('Get team', { payload, message });
 
   const team = await teamRepository.findTeamById(payload.teamId);
   if (!team) throw createError('404', 'Team not found');
@@ -45,7 +45,7 @@ async function get(payload, message) {
  * @return {external:Promise.<Team[]>} {@link module:modules/core~Team Team} -
  */
 async function list(payload, message) {
-  logger.info('Listing teams', { payload, message });
+  logger.debug('Listing teams', { payload, message });
 
   const teams = await teamRepository.findByIds(payload.teamIds);
   const transformTeam = (team) => R.merge(R.omit(['createdAt'], team),
@@ -73,7 +73,7 @@ async function list(payload, message) {
  * @return {external:Promise.<Team>} {@link module:modules/core~Team Team}
  */
 const create = async (payload, message) => {
-  logger.info('Creating team', { payload, message });
+  logger.debug('Creating team', { payload, message });
 
   await authorizationService.assertRoleTypeForUser({
     userId: message.credentials.id,
@@ -108,7 +108,7 @@ const create = async (payload, message) => {
  * @return {external:Promise.<Team>} {@link module:modules/core~Team Team}
  */
 const update = async (payload, message) => {
-  logger.info('Updating team', { payload, message });
+  logger.debug('Updating team', { payload, message });
 
   await authorizationService.assertRoleTypeForUser({
     userId: message.credentials.id,

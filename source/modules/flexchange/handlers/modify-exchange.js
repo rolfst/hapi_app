@@ -16,7 +16,7 @@ module.exports = async (req, reply) => {
     const { payload, message } = createServicePayload(req);
     const actionHook = services[payload.action];
 
-    logger.info('Updating exchange', { message, payload });
+    logger.debug('Updating exchange', { message, payload });
     const result = await actionHook(payload, message);
 
     return reply({ success: true, data: responseUtils.toSnakeCase(result) });

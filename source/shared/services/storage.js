@@ -55,7 +55,7 @@ function upload(file, prefix = null) {
 
   return getClient().upload(params).promise()
     .then((data) => {
-      logger.info('Amazon S3 response', { response: data });
+      logger.debug('Amazon S3 response', { response: data });
 
       return newFilename;
     })

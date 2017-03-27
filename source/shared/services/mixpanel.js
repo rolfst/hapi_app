@@ -27,7 +27,7 @@ function registerProfile(user) {
 
 function track(event, distinctId = null) {
   if (!distinctId) throw new Error('Missing distinctId parameter.');
-  logger.info('Tracking event', { event, distinctId });
+  logger.debug('Tracking event', { event, distinctId });
 
   return getClient().track(event.name, R.merge(event.data, { distinct_id: distinctId }));
 }
@@ -85,7 +85,7 @@ async function executeQuery(query, message) {
     body: createFormEncodedString({ script: query }),
   };
 
-  logger.info('Fetching from mixpanel', { options, message });
+  logger.debug('Fetching from mixpanel', { options, message });
   const response = await fetch(MP_API_JQL_URI, options);
   const { status, json } = await handleRequest(response, MP_API_JQL_URI);
 
@@ -94,8 +94,11 @@ async function executeQuery(query, message) {
       status, json, message });
   } else {
     const dataResponse = json[0] || {};
-    logger.info('Retrieved data from integration', {
-      status, itemCount: dataResponse.length, message });
+    logger.debug('Retrieved data from integration', {
+      status,
+      itemCount: dataResponse.length,
+      message
+    });
   }
 
   return { payload: R.head(json), status };

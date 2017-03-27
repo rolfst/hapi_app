@@ -22,7 +22,7 @@ const createNotificationData = async (exchange) => {
 };
 
 const sendReminder = async () => {
-  logger.info('Start send reminders for accepted exchanges');
+  logger.debug('Start send reminders for accepted exchanges');
 
   try {
     const twoDaysFromToday = moment().add(2, 'd');
@@ -36,7 +36,7 @@ const sendReminder = async () => {
       notifier.send(value.admins, notification, value.network.id);
     });
 
-    logger.info(`Finished sending ${exchanges.length} reminders`);
+    logger.debug(`Finished sending ${exchanges.length} reminders`);
   } catch (err) {
     logger.warn('Sending reminder went wrong', { err });
   }

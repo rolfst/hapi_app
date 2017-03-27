@@ -29,7 +29,7 @@ const isAvailable = R.both(isDefined, isNotEmpty);
  * @return {external:Promise.<Comment[]>} {@link module:feed~Comment comment}
  */
 const listComments = async (payload, message) => {
-  logger.info('Get comments for message', { payload, message });
+  logger.debug('Get comments for message', { payload, message });
 
   let whereConstraint = {};
 
@@ -48,7 +48,7 @@ const listComments = async (payload, message) => {
  * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
  */
 const list = async (payload, message) => {
-  logger.info('Listing multiple messages', { payload, message });
+  logger.debug('Listing multiple messages', { payload, message });
 
   const [messageResult, likeResult, commentResult] = await Promise.all([
     messageRepository.findByIds(payload.messageIds),
@@ -83,7 +83,7 @@ const list = async (payload, message) => {
  * @return {external:Promise.<Like[]>} {@link module:feed~Like like}
  */
 const listLikes = async (payload, message) => {
-  logger.info('Listing likes for message', { payload, message });
+  logger.debug('Listing likes for message', { payload, message });
 
   let whereConstraint = {};
 
@@ -103,7 +103,7 @@ const listLikes = async (payload, message) => {
  * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
  */
 const getAsObject = async (payload, message) => {
-  logger.info('Finding message', { payload, message });
+  logger.debug('Finding message', { payload, message });
   const result = await messageRepository.findById(payload.messageId);
 
   if (!result) throw createError('404');
@@ -137,7 +137,7 @@ const getAsObject = async (payload, message) => {
  * @return {external:Promise.<Message>} {@link module:feed~Message message}
  */
 const create = async (payload, message) => {
-  logger.info('Creating message', { payload, message });
+  logger.debug('Creating message', { payload, message });
 
   const checkPayload = R.compose(isAvailable, R.prop(R.__, payload));
   const parent = await objectService.getParent(R.pick(['parentType', 'parentId'], payload));
@@ -225,7 +225,7 @@ const create = async (payload, message) => {
  * @return {external:Promise.<Object>} {@link module:feed~Object object}
  */
 const update = async (payload, message) => {
-  logger.info('Updating message', { payload, message });
+  logger.debug('Updating message', { payload, message });
 
   const foundMessage = await messageRepository.findById(payload.messageId);
   if (!foundMessage) throw createError('404');
@@ -245,7 +245,7 @@ const update = async (payload, message) => {
  * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
  */
 const like = async (payload, message) => {
-  logger.info('Liking message', { payload, message });
+  logger.debug('Liking message', { payload, message });
 
   const messageToLike = await getAsObject({ messageId: payload.messageId }, message);
   if (!messageToLike) throw createError('404');
@@ -267,7 +267,7 @@ const like = async (payload, message) => {
  * @return {external:Promise.<Boolean>}
  */
 const remove = async (payload, message) => {
-  logger.info('Deleting message', { payload, message });
+  logger.debug('Deleting message', { payload, message });
 
   // TODO ACL: Only an admin or the creator of the message can delete.
 

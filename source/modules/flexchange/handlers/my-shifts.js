@@ -15,7 +15,7 @@ module.exports = async (req, reply) => {
   try {
     const { payload, message } = createServicePayload(req);
 
-    logger.info('Listing personal shifts', { payload, message });
+    logger.debug('Listing personal shifts', { payload, message });
     const items = await flexchangeService.listMyShifts(payload, message);
     const response = items.map(transformItem);
 

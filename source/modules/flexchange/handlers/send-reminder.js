@@ -8,7 +8,7 @@ module.exports = async (req, reply) => {
   try {
     const { message } = createServicePayload(req);
 
-    logger.info('Sending reminder', { message });
+    logger.debug('Sending reminder', { message });
     await reminderService.sendReminder(null);
 
     return reply({});

@@ -26,7 +26,7 @@ const feedOptions = R.pick(['limit', 'offset', 'include']);
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
 const makeForNetwork = async (payload, message) => {
-  logger.info('Making feed for network', { payload, message });
+  logger.debug('Making feed for network', { payload, message });
 
   const [user, teams] = await Promise.all([
     userService.getUserWithNetworkScope({
@@ -65,7 +65,7 @@ const makeForNetwork = async (payload, message) => {
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
 const makeForTeam = async (payload, message) => {
-  logger.info('Making feed for team', { payload, message });
+  logger.debug('Making feed for team', { payload, message });
 
   const team = await teamService.get({ teamId: payload.teamId }, message);
   const user = await userService.getUserWithNetworkScope({

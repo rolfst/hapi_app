@@ -22,7 +22,7 @@ const logger = require('../../../../shared/services/logger')('CORE/service/autho
  * @return {void}
  */
 async function assertRoleTypeForUser(payload, message) {
-  logger.info('Asserting role type for user', { payload, message });
+  logger.debug('Asserting role type for user', { payload, message });
 
   const scopedUser = await userService.getUserWithNetworkScope(
     { id: payload.userId, networkId: payload.networkId }, message);

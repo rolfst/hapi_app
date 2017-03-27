@@ -8,7 +8,7 @@ module.exports = async (req, reply) => {
   try {
     const { payload, message } = createServicePayload(req);
 
-    logger.info('Listing users for exchange', { payload, message });
+    logger.debug('Listing users for exchange', { payload, message });
     const result = await flexchangeService.listReceivers(payload, message);
 
     return reply({ data: responseUtil.toSnakeCase(result) });

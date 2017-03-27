@@ -19,7 +19,7 @@ module.exports = async (req, reply) => {
       throw createError('422', 'Attribute end_time should be after start_time');
     }
 
-    logger.info('Updating exchange', { payload, message });
+    logger.debug('Updating exchange', { payload, message });
     const exchange = await updateExchangeById(payload.exchangeId, data);
     const updatedExchange = await exchange.reload();
 

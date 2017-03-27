@@ -7,7 +7,7 @@ module.exports = async (req, reply) => {
   try {
     const { payload, message } = createServicePayload(req);
 
-    logger.info('Deleting exchange', { payload, message });
+    logger.debug('Deleting exchange', { payload, message });
     await flexchangeService.deleteExchange(payload);
 
     return reply({ success: true });

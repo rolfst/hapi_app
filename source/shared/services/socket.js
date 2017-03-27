@@ -21,8 +21,13 @@ const send = async (eventName, users, payload, token) => {
     const jsonResponse = await response.json();
 
     if (response.ok) {
-      logger.info('Successfully send socket event', {
-        userIds, eventName, payload, token, jsonResponse });
+      logger.debug('Successfully send socket event', {
+        userIds,
+        eventName,
+        payload,
+        token,
+        jsonResponse
+      });
     } else {
       logger.error('Error sending socket event', {
         userIds, eventName, payload, jsonResponse });

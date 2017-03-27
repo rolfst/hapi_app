@@ -8,7 +8,7 @@ module.exports = async (req, reply) => {
   try {
     const { payload, message } = createServicePayload(req);
 
-    logger.info('Creating exchange comment', { message, payload });
+    logger.debug('Creating exchange comment', { message, payload });
     const exchangeComment = await flexchangeService.createExchangeComment(payload, message);
 
     return reply({ success: true, data: responseUtil.serialize(exchangeComment) });

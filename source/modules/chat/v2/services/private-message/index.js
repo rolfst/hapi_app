@@ -18,7 +18,7 @@ const logger = require('../../../../../shared/services/logger')('CHAT/service/co
  * @return {external:Promise.<PrivateMessage[]>} {@link module:modules/chat~PrivateMessage}
  */
 const list = async (payload, message) => {
-  logger.info('Listing private messages', { payload, message });
+  logger.debug('Listing private messages', { payload, message });
 
   return privateMessageRepository.findByIds(payload.messageIds);
 };
@@ -34,7 +34,7 @@ const list = async (payload, message) => {
  * @return {external:Promise.<PrivateMessage>} {@link module:modules/chat~PrivateMessage}
  */
 async function create(payload, message) {
-  logger.info('Creating private message', { payload, message });
+  logger.debug('Creating private message', { payload, message });
 
   const conversation = await conversationRepository.findById(payload.conversationId);
   if (!conversation) throw createError('404');

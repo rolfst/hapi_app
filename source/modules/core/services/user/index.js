@@ -34,7 +34,7 @@ const getUser = async (payload) => {
  * collection of users
  */
 async function listUsersWithNetworkScope(payload, message) {
-  logger.info('Listing users with network scope', { payload, message });
+  logger.debug('Listing users with network scope', { payload, message });
 
   const users = await userRepo.findByIds(payload.userIds, payload.networkId);
   const network = await networkService.get({ networkId: payload.networkId }, message);
@@ -67,7 +67,7 @@ async function listUsersWithNetworkScope(payload, message) {
  * collection of users
  */
 async function getUserWithNetworkScope(payload, message) {
-  logger.info('Get user with network scope', { payload, message });
+  logger.debug('Get user with network scope', { payload, message });
   const [user, network] = await Promise.all([
     userRepo.findUserById(payload.id, payload.networkId),
     networkRepo.findNetworkById(payload.networkId),

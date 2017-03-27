@@ -8,7 +8,7 @@ module.exports = async (req, reply) => {
   try {
     const { payload, message } = createServicePayload(req);
 
-    logger.info('View shift', { payload, message });
+    logger.debug('View shift', { payload, message });
     const result = await flexchangeService.getShift(payload, message);
     const response = R.merge(R.omit(['teamId', 'exchangeId'], result),
       {

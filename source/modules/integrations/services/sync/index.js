@@ -20,7 +20,7 @@ const logger = require('../../../../shared/services/logger')('INTEGRATIONS/servi
  */
 const syncNetwork = async (payload, message) => {
   try {
-    logger.info('Started network synchronization', { payload, message });
+    logger.debug('Started network synchronization', { payload, message });
 
     const network = await networkRepository.findNetworkById(payload.networkId);
     if (!network) throw createError('404', 'Network not found.');
@@ -59,7 +59,7 @@ const syncNetwork = async (payload, message) => {
       )(userActions),
     };
 
-    logger.info('Successfully synced network', { payload, actions });
+    logger.debug('Successfully synced network', { payload, actions });
 
     return actions;
   } catch (err) {
@@ -81,7 +81,7 @@ const syncNetwork = async (payload, message) => {
  */
 const importNetwork = async (payload, message) => {
   try {
-    logger.info('Started network import', { payload, message });
+    logger.debug('Started network import', { payload, message });
 
     const network = await networkRepository.findNetworkById(payload.networkId);
     if (!network) throw createError('404', 'Network not found.');
@@ -115,7 +115,7 @@ const importNetwork = async (payload, message) => {
     await networkRepository.setImportDateOnNetworkIntegration(network.id);
     const syncResult = await syncNetwork({ networkId: network.id, internal: true }, message);
 
-    logger.info('Finished importing users for network', { syncResult });
+    logger.debug('Finished importing users for network', { syncResult });
   } catch (err) {
     logger.error('Failed importing network', { payload, message, err });
 

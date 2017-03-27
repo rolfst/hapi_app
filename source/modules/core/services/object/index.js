@@ -34,7 +34,7 @@ const createOptionsFromPayload = R.pipe(
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
 const list = async (payload, message) => {
-  logger.info('Listing objects', { payload, message });
+  logger.debug('Listing objects', { payload, message });
 
   const objects = await objectRepository.findBy({
     parentType: payload.parentType,
@@ -53,7 +53,7 @@ const list = async (payload, message) => {
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
 const listWithSourceAndChildren = async (payload, message) => {
-  logger.info('Listing objects with sources', { payload, message });
+  logger.debug('Listing objects with sources', { payload, message });
 
   const objects = await objectRepository.findBy({
     id: { $in: payload.objectIds } }, createOptionsFromPayload(payload)
@@ -106,7 +106,7 @@ const getWithSourceAndChildren = async (payload, message) => {
  * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
 const create = async (payload, message) => {
-  logger.info('Creating object', { payload, message });
+  logger.debug('Creating object', { payload, message });
 
   return objectRepository.create(payload);
 };
@@ -123,7 +123,7 @@ const create = async (payload, message) => {
  * @return {external:Promise.<number>}
  */
 const count = async (payload, message) => {
-  logger.info('Counting objects', { payload, message });
+  logger.debug('Counting objects', { payload, message });
 
   const whitelistAttrs = ['userId', 'parentType', 'parentId', 'objectType'];
   const attributes = R.flatten([R.pick(whitelistAttrs, payload)]);
@@ -142,7 +142,7 @@ const count = async (payload, message) => {
  * @return {external:Promise}
  */
 const getParent = async (payload, message) => {
-  logger.info('Retrieving parent for object', { payload, message });
+  logger.debug('Retrieving parent for object', { payload, message });
 
   const result = await R.cond([
     [R.equals('network'), () => networkRepository.findNetworkById(payload.parentId)],
@@ -166,7 +166,7 @@ const getParent = async (payload, message) => {
  * @return {external:Promise}
  */
 const usersForParent = async (payload, message) => {
-  logger.info('Retrieving users for parent of object', { payload, message });
+  logger.debug('Retrieving users for parent of object', { payload, message });
 
   const result = await R.cond([
     [R.equals('network'), () => networkRepository.findUsersForNetwork(payload.parentId)],
@@ -193,7 +193,7 @@ const usersForParent = async (payload, message) => {
  * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
 const remove = async (payload, message) => {
-  logger.info('Deleting objects', { payload, message });
+  logger.debug('Deleting objects', { payload, message });
 
   await objectRepository.deleteBy(payload);
 
@@ -211,7 +211,7 @@ const remove = async (payload, message) => {
  * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
 const get = async (payload, message) => {
-  logger.info('Retrieving object', { payload, message });
+  logger.debug('Retrieving object', { payload, message });
 
   const attributes = R.pick(['id', 'objectType', 'sourceId'], payload);
   const objects = await objectRepository.findBy(attributes);

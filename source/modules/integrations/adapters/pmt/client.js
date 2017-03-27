@@ -47,7 +47,7 @@ async function makeRequest(endpoint, token = null, method = 'GET', data = {}, me
   };
 
 
-  logger.info('Fetching from integration', { endpoint, options, message });
+  logger.debug('Fetching from integration', { endpoint, options, message });
   const response = await fetch(endpoint, options);
   const { status, json } = await handleRequest(response, endpoint);
 
@@ -56,7 +56,7 @@ async function makeRequest(endpoint, token = null, method = 'GET', data = {}, me
       status, json, message, endpoint });
   } else {
     const dataResponse = json[Object.keys(json)[0]] || [];
-    logger.info('Retrieved data from integration', {
+    logger.debug('Retrieved data from integration', {
       status, itemCount: dataResponse.length, message, endpoint });
   }
 

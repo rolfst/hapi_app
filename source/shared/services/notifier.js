@@ -26,7 +26,7 @@ function send(users, notification, networkId = null) {
 
   const emails = R.reject(R.isNil, R.pluck('email', users));
 
-  logger.info('Sending Push Notification', { data, emails });
+  logger.debug('Sending Push Notification', { data, emails });
 
   return Parse.Push.send({ where: createQuery(emails), data }, { useMasterKey: true })
     .then(() => users.forEach((user) => trackPushNotification(notification, user)))

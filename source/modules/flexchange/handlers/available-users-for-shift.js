@@ -8,7 +8,7 @@ module.exports = async (req, reply) => {
   try {
     const { payload, message } = createServicePayload(req);
 
-    logger.info('Lising all available users for shift', { message, payload });
+    logger.debug('Lising all available users for shift', { message, payload });
     const response = await flexchangeService.listAvailableUsersForShift(payload, message);
 
     return reply({ data: responseUtil.toSnakeCase(response) });

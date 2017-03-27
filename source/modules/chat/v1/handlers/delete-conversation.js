@@ -8,7 +8,7 @@ module.exports = async (req, reply) => {
     const { payload, message } = createServicePayload(req);
 
     // TODO move to service
-    logger.info('Deleting conversation', { payload, message });
+    logger.debug('Deleting conversation', { payload, message });
     await deleteConversationById(req.params.id);
 
     return reply({ success: true });

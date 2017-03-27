@@ -50,7 +50,7 @@ ELogLevel.forEach((logLevel, severity) => {
   }
 
   bunyanConfig.streams.push({
-    level: logLevel,
+    level: ELogLevel[logLevel],
     stream: severity > errorLogLevel ? process.stdout : process.stderr
   });
 });

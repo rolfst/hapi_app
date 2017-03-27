@@ -16,7 +16,7 @@ const addResultToPoll = R.curry((poll, results) => {
 });
 
 const list = async (payload, message) => {
-  logger.info('Finding multiple polls', { payload, message });
+  logger.debug('Finding multiple polls', { payload, message });
 
   const promises = [
     pollRepository.findBy({ id: { $in: payload.pollIds } }),
@@ -38,7 +38,7 @@ const list = async (payload, message) => {
  * @return {external:Promise.<Poll>}
  */
 const get = async (payload, message) => {
-  logger.info('Finding poll', { payload, message });
+  logger.debug('Finding poll', { payload, message });
 
   const promises = [
     pollRepository.findById(payload.pollId),
@@ -61,7 +61,7 @@ const get = async (payload, message) => {
  * @return {external:Promise.<Poll>}
  */
 const create = async (payload, message) => {
-  logger.info('Creating poll', { payload, message });
+  logger.debug('Creating poll', { payload, message });
 
   const poll = await pollRepository.create({
     networkId: payload.networkId,
@@ -86,7 +86,7 @@ const create = async (payload, message) => {
  * @return {external:Promise.<Poll>}
  */
 const vote = async (payload, message) => {
-  logger.info('Voting on poll', { payload, message });
+  logger.debug('Voting on poll', { payload, message });
 
   await impl.assertThatPollExistsAndUserHasPermission(payload.networkId, payload.pollId);
   await pollRepository.clearVotes(payload.pollId, message.credentials.id);

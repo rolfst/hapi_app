@@ -8,7 +8,7 @@ module.exports = async (req, reply) => {
   try {
     const { payload, message } = createServicePayload(req);
 
-    logger.info('Viewing exchange', { payload, message });
+    logger.debug('Viewing exchange', { payload, message });
     const result = await flexchangeService.getExchange(payload, message);
 
     return reply({ data: responseUtil.serialize(result) });
