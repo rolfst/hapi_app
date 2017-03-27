@@ -10,6 +10,7 @@ database*.json
 *.swo
 *.orig
 .tern-port
+.vagrant
 
 newrelic_agent.log
 /coverage
