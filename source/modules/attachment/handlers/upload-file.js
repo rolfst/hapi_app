@@ -9,6 +9,7 @@ module.exports = async (req, reply) => {
 
     return reply({ data: responseUtil.toSnakeCase(attachment) });
   } catch (err) {
+    console.log('##########33', err);
     return reply(err);
   }
 };
