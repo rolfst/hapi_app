@@ -32,10 +32,6 @@ const logEnvironment = (() => {
 
 // Loglevel at which we actually display errors (regardless of errorLogLevel)
 const currentLogLevel = ELogLevel.indexOf((() => {
-  if (process.env.LOGLEVEL && process.env.LOGLEVEL in LogLevel) {
-    return process.env.LOGLEVEL;
-  }
-
   // Commandline argument to suppress all warnings & errors
   if (argv.silent) {
     return 'NONE';
@@ -49,6 +45,10 @@ const currentLogLevel = ELogLevel.indexOf((() => {
   // Commandline argument to receive all log levels except debug
   if (argv.info) {
     return 'INFO';
+  }
+
+  if (process.env.LOGLEVEL && process.env.LOGLEVEL in LogLevel) {
+    return process.env.LOGLEVEL;
   }
 
   return (logEnvironment in logConfig.defaultLogLevels
