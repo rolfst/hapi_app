@@ -1,6 +1,7 @@
 const R = require('ramda');
 const stream = require('stream');
 const bunyan = require('bunyan');
+const safeCycles = bunyan.safeCycles;
 const argv = require('yargs').argv;
 
 /**
@@ -63,15 +64,35 @@ const bunyanConfig = {
   streams: []
 };
 
+// Dirty hack for bunyan so it doesn't upstream different error levels
+class BunyanStreamWrapper {
+  constructor (bunyanLevel, realStream) {
+    this.processLevel = bunyan.levelFromName[bunyanLevel];
+    this.stream = realStream;
+  }
+
+  write (rec) {
+    if (rec.level !== this.processLevel) {
+      return;
+    }
+
+    const str = JSON.stringify(rec, safeCycles());
+    this.stream.write(`${str}\n`);
+  };
+}
+
 // Build bunyan config based on the current loglevel
 ELogLevel.forEach((logLevel, severity) => {
   if (!LogLevel[logLevel] || currentLogLevel < severity) {
     return;
   }
 
+  const streamOutput = severity > errorLogLevel ? process.stdout : process.stderr;
+
   bunyanConfig.streams.push({
+    type: 'raw',
     level: LogLevel[logLevel],
-    stream: severity > errorLogLevel ? process.stdout : process.stderr
+    stream: new BunyanStreamWrapper(LogLevel[logLevel], streamOutput),
   });
 });
 
