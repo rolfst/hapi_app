@@ -2,6 +2,7 @@ const R = require('ramda');
 const stream = require('stream');
 const bunyan = require('bunyan');
 const argv = require('yargs').argv;
+const Raven = require('./sentry')();
 
 /**
  * @module shared/services/logger
@@ -16,7 +17,19 @@ const LogLevel = {
   DEBUG: 'debug'
 };
 
+// This object stores the actual enum
 const ELogLevel = Object.keys(LogLevel);
+
+// This object gives a quick binding from the log level to the severity (index in the enum)
+const LogLevelSeverities = (() => {
+  const severities = {};
+
+  ELogLevel.forEach((logLevel, index) => {
+    severities[logLevel] = index;
+  });
+
+  return severities;
+})();
 
 const logConfig = require('../configs/logger');
 
@@ -58,6 +71,9 @@ const currentLogLevel = ELogLevel.indexOf((() => {
 
 // Minimum loglevel that is sent to stderr, the rest goes to stdout
 const errorLogLevel = ELogLevel.indexOf(LogLevel[logConfig.errorLogLevel]);
+
+// Minimum loglevel that is exported to an external service like datadog or sentry (or both)
+const exportLogLevel = ELogLevel.indexOf(LogLevel[logConfig.errorLogLevel]);
 
 const bunyanConfig = {
   streams: []
@@ -105,6 +121,38 @@ const buildLogContext = (args = {}) => {
 
 const getLogger = (name) => bunyan.createLogger(R.merge({ name }, bunyanConfig));
 
+// This function will send the log to datadog and/or sentry if the severity is high enough
+//  - The flattenedData argument is to prevent flattening the same data twice
+const exportLog = async (severity, message, data, flattenedData = null) => {
+  // If we're not running in production, bail out since we don't want to pollute our data
+  if (process.env.API_ENV !== 'production') {
+    return;
+  }
+
+  // Lower severity actually means the error is more important
+  if (severity > exportLogLevel) {
+    return;
+  }
+
+  // Send entry to sentry
+  //  - Concerning log level, sentry uses the same naming convention we do but in lowercase
+  if (data instanceof Error) {
+    Raven.captureException(data, {
+      level: ELogLevel[severity].toLowerCase(),
+      extra: { message }
+    });
+  } else {
+    // Make sure we have flattened data
+    Raven.captureMessage(flattenedData || buildLogContext(data), {
+      level: ELogLevel[severity].toLowerCase(),
+      extra: { message }
+    });
+  }
+
+  // Send errors and stuff to sentry and datadog
+  return true;
+};
+
 /**
  * @param {string|Logger} loggerOrName
  * @method createLogger
@@ -123,7 +171,11 @@ const createLogger = (loggerOrName) => {
      * @method debug - logs at a debug level
      */
     debug(message, data) {
-      logger.debug(buildLogContext(data), message);
+      const flattenedData = buildLogContext(data);
+
+      logger.debug(flattenedData, message);
+
+      exportLog(LogLevelSeverities.DEBUG, message, data, flattenedData);
     },
     /**
      * @param {string} message - message
@@ -133,7 +185,11 @@ const createLogger = (loggerOrName) => {
      * @method info - logs at a info level
      */
     info(message, data) {
-      logger.info(buildLogContext(data), message);
+      const flattenedData = buildLogContext(data);
+
+      logger.info(flattenedData, message);
+
+      exportLog(LogLevelSeverities.INFO, message, data, flattenedData);
     },
     /**
      * @param {string} message - message
@@ -144,7 +200,11 @@ const createLogger = (loggerOrName) => {
      * @method warn - logs at a warning level
      */
     warn(message, data) {
-      logger.warn(buildLogContext(data), message);
+      const flattenedData = buildLogContext(data);
+
+      logger.warn(flattenedData, message);
+
+      exportLog(LogLevelSeverities.WARNING, message, data, flattenedData);
     },
     /**
      * @param {string} message - message
@@ -155,7 +215,11 @@ const createLogger = (loggerOrName) => {
      * @method error - logs at a error level
      */
     error(message, data) {
-      logger.error(buildLogContext(data), message);
+      const flattenedData = buildLogContext(data);
+
+      logger.error(flattenedData, message);
+
+      exportLog(LogLevelSeverities.ERROR, message, data, flattenedData);
     },
     /**
      * @param {string} message - message
@@ -164,6 +228,8 @@ const createLogger = (loggerOrName) => {
      */
     fatal(message, error) {
       logger.fatal(error, message);
+
+      exportLog(LogLevelSeverities.FATAL, message, error);
     },
   };
 };
