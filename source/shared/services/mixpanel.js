@@ -7,7 +7,8 @@ const Logger = require('./logger');
 const logger = Logger.createLogger('SHARED/services/mixpanel');
 
 const API_KEY = process.env.MIXPANEL_TOKEN;
-const MP_API_JQL_URI = `https://${API_KEY}@mixpanel.com/api/2.0/jql/`;
+const API_SECRET = process.env.MIXPANEL_SECRET;
+const MP_API_JQL_URI = `https://${API_SECRET}@mixpanel.com/api/2.0/jql/`;
 
 function getClient() {
   return Mixpanel.init(API_KEY);
