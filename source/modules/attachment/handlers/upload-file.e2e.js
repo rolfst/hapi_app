@@ -1,7 +1,6 @@
 const { assert } = require('chai');
 const FormData = require('form-data');
 const streamToPromise = require('stream-to-promise');
-const stream = require('stream');
 const sinon = require('sinon');
 const testHelper = require('../../../shared/test-utils/helpers');
 const attachmentService = require('../services/attachment/index');
@@ -22,7 +21,7 @@ describe('Service: Attachment', () => {
     });
   }
 
-  describe.only('create', () => {
+  describe('create', () => {
     before(async () => {
       sandbox = sinon.sandbox.create();
       sandbox.stub(attachmentService, 'create').returns(Promise.resolve({}));
@@ -41,10 +40,9 @@ describe('Service: Attachment', () => {
       const form = new FormData();
       form.append('file', Buffer('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64').toString());
       const promisiedStream = await streamToPromise(form);
-      const { statusCode, result } = await postRequest(
+      const { statusCode } = await postRequest(
         ENDPOINT_URL, promisiedStream, form.getHeaders(), admin.token);
 
-      console.log('$$$$$$$$', result);
       assert.equal(statusCode, 200);
     });
   });
