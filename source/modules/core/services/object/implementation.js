@@ -41,7 +41,49 @@ const addSourceToObject = R.curry((sources, object) =>
 const findChildren = (objectsWithSource, object) =>
   R.filter(compareObject(R.__, object), objectsWithSource);
 
+/**
+ * Add parent to object through lookup
+ * @param {object} parentLookups - Object containing lookup data
+ * @param {array} objects - All objects to find the parent of
+ * @method mergeObjectsWithParent
+ * @return {object[]}
+ * @example
+ * const lookups = {
+ *   teams: [{ id: '1', name: 'Foo' }],
+ *   networks: [{ id: '2'}]
+ * };
+ * const objects = [{ parentType: 'team', parentId: '1' }];
+ *
+ * mergeObjectsWithParent(lookups)(objects)
+ * // [{ parentType: 'team', parentId: '1', parent: { id: '1', name: 'Foo' } }]
+ */
+const mergeObjectsWithParent = (lookups) => {
+  const parentEq = R.propEq('parentType');
+  const addParent = R.cond([
+    [parentEq('team'), (object) => R.assoc('parent', lookups.teams[object.parentId], object)],
+    [parentEq('network'), R.assoc('parent', lookups.network)],
+    [R.T, R.identity],
+  ]);
+
+  return R.map(addParent);
+};
+
+/**
+ * Add user obect to objects provided
+ * @param {User[]} users - All users in network
+ * @param {Object[]} objects - All objects
+ * @method mergeObjectsWithUser
+ * @return {Object[]}
+ */
+const mergeObjectsWithUser = R.curry((users, objects) => R.map((object) => {
+  const byId = R.propEq('id', object.userId);
+
+  return R.merge(object, { user: R.find(byId, users) });
+})(objects));
+
 exports.addSourceToObject = addSourceToObject;
 exports.findChildren = findChildren;
 exports.findChildrenForType = findChildrenForType;
 exports.findSourcesForType = findSourcesForType;
+exports.mergeObjectsWithParent = mergeObjectsWithParent;
+exports.mergeObjectsWithUser = mergeObjectsWithUser;

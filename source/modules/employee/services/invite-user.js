@@ -71,7 +71,12 @@ const inviteExistingUser = async (network, user, roleType) => {
   if (userBelongsToNetwork) {
     throw createError('403', 'User with the same email already in this network.');
   } else {
-    await networkRepo.addUser({ userId, networkId, roleType });
+    await networkRepo.addUser({
+      userId,
+      networkId,
+      roleType,
+      invitedAt: new Date(),
+    });
   }
 
   await userRepo.setNetworkLink({

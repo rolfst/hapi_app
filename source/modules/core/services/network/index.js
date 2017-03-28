@@ -143,6 +143,7 @@ const listNetworksForUser = async (payload) => {
  */
 const listTeamsForNetwork = async (payload, message) => {
   const result = await networkRepo.findTeamsForNetwork(payload.networkId);
+
   logger.debug('List teams for network', {
     payload,
     teamCount: result.length,
