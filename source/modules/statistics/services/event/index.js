@@ -8,32 +8,53 @@ const logger = Logger.createLogger('STATISTICS/service/events');
 
 const defaultToMonth = R.defaultTo('month');
 
-function createEventQuery(payload) {
+/**
+ * Creates an EventQuery script for mixpanel
+ * @param  {object} payload - the container for the query properties
+ * @param  {string} payload.event - the metric that is queried
+ * @param  {string} payload.networkId - the network identifier to search within
+ * @param  {string} payload.idType - the field for which the metric is grouped by
+ * @param  {string} payload.type - the type for which the query is build .eg user, team
+ * @param {date} payload.startDate - begining of query
+ * @param {date} payload.endDate - end of query
+ * @return string - the query to be used
+ */
+function createEventQueryString(payload) {
   const startDate = payload.startDate.toISOString().substr(0, 10);
   const endDate = payload.endDate.toISOString().substr(0, 10);
 
   return `
     function main() {
-    const createdEventDate = (evt) => evt.properties['Created At'].toISOString().substr(0, 10);
+      const createdEventDate = (tuple) => tuple.event.properties['Created At'].toISOString().substr(0, 10);
 
-    return Events({
-      from_date: '${startDate}',
-      to_date:   '${endDate}',
-      event_selectors: [{ event: '${payload.event}' }]
-    })
-    .filter((evt) => (${payload.networkId} === evt.properties['Network Id']))
-    .groupBy(["properties.Network Id", createdEventDate], mixpanel.reducer.count())
-    .reduce((acc, items) => {
-      return items.reduce((acc, item) => {
-        const eventDate = item.key[1];
+      return join(
+        Events({
+          from_date: '${startDate}',
+          to_date:   '${endDate}',
+          event_selectors: [{
+            event: '${payload.event}',
+            selector: 'properties["Network Id"] == ${payload.networkId}' }]
+        }),
+        People(),
+        {type: 'left'}
+      )
+      .filter((tuple) => tuple.event.${payload.idType})
+      .groupBy(['${payload.idType}', createdEventDate], mixpanel.reducer.count())
+      .reduce((acc, items) => {
+        return items.reduce((acc, item) => {
+          const id = item.key[0];
+          const eventDate = item.key[1];
 
-        acc[eventDate] = item.value;
+          if (!acc[id]) acc[id] = { type: '${payload.type}', id, values: {} };
+          acc[id].values[eventDate] = item.value;
 
-        return acc;
-      }, {});
-    });
-  }
-  `;
+          return acc;
+        }, {});
+      })
+      .map((item) => {
+        return Object.keys(item).map((key) => item[key]);
+      })
+  } `;
 }
 
 /*
@@ -52,6 +73,27 @@ function createDateRange(unit, start, end) {
   return { startDate, endDate };
 }
 
+ /**
+ * @param  {string} eventName - the metric that is queried
+ * @param  {object} payload - the container for the query properties
+ * @param  {string} payload.networkId - the network identifier to search within
+ * @param  {string} payload.type - the type for which the query is build .eg user, team
+ * @param {date} payload.startDate - begining of query
+ * @param {date} payload.endDate - end of query
+ * @return {string} - jql query
+ */
+function createEventQuery(eventName, payload) {
+  const unit = defaultToMonth(payload.unit);
+  const { startDate, endDate } = createDateRange(unit, payload.startDate, payload.endDate);
+  const idTypes = {
+    user: 'distinct_id',
+    team: 'properties["Team Id"]',
+  };
+  const idType = idTypes[payload.type];
+
+  return createEventQueryString(R.merge({ event: eventName },
+    { networkId: payload.networkId, type: payload.type, idType, startDate, endDate }));
+}
 /*
  * @param {object} payload
  * @param {string} payload.networkId
@@ -64,10 +106,7 @@ function createDateRange(unit, start, end) {
 async function getCreatedMessages(payload, message) {
   logger.info('Retrieving Created Messages', { payload, message });
 
-  const unit = defaultToMonth(payload.unit);
-  const { startDate, endDate } = createDateRange(unit, payload.startDate, payload.endDate);
-  const jql = createEventQuery({
-    event: 'Created Message', networkId: payload.networkId, startDate, endDate });
+  const jql = createEventQuery('Created Message', payload);
 
   return Mixpanel.executeQuery(jql, message);
 }
@@ -84,10 +123,7 @@ async function getCreatedMessages(payload, message) {
 async function getApprovedShifts(payload, message) {
   logger.info('Retrieving Approved shifts', { payload, message });
 
-  const unit = defaultToMonth(payload.unit);
-  const { startDate, endDate } = createDateRange(unit, payload.startDate, payload.endDate);
-  const jql = createEventQuery({
-    event: 'Shift Takeover', networkId: payload.networkId, startDate, endDate });
+  const jql = createEventQuery('Shift Takeover', payload);
 
   return Mixpanel.executeQuery(jql, message);
 }
@@ -104,9 +140,7 @@ async function getApprovedShifts(payload, message) {
 async function getCreatedShifts(payload, message) {
   logger.info('Retrieving Created shifts', { payload, message });
 
-  const { startDate, endDate } = createDateRange('month', payload.startDate, payload.endDate);
-  const jql = createEventQuery({
-    event: 'Created Shift', networkId: payload.networkId, startDate, endDate });
+  const jql = createEventQuery('Created Shift', payload);
 
   return Mixpanel.executeQuery(jql, message);
 }
@@ -114,4 +148,3 @@ async function getCreatedShifts(payload, message) {
 exports.getApprovedShifts = getApprovedShifts;
 exports.getCreatedMessages = getCreatedMessages;
 exports.getCreatedShifts = getCreatedShifts;
-
