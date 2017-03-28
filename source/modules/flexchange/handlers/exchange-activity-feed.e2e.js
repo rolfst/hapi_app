@@ -4,13 +4,12 @@ const moment = require('moment');
 const R = require('ramda');
 const _ = require('lodash');
 const testHelper = require('../../../shared/test-utils/helpers');
-const Logger = require('../../../shared/services/logger');
 const { getRequest } = require('../../../shared/test-utils/request');
 const { ActivityTypes } = require('../../core/repositories/dao/activity');
 const exchangeRepo = require('../repositories/exchange');
 const commentRepo = require('../repositories/comment');
 
-const logger = Logger.createLogger('FLEXCHANGE/test/exchangeActivityFeed');
+const logger = require('../../../shared/services/logger')('FLEXCHANGE/test/exchangeActivityFeed');
 
 describe('Exchange activity feed', () => {
   let admin;

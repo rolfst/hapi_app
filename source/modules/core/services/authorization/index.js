@@ -1,4 +1,3 @@
-const Logger = require('../../../../shared/services/logger');
 const createError = require('../../../../shared/utils/create-error');
 const userRepo = require('../../repositories/user');
 const networkRepo = require('../../repositories/network');
@@ -9,7 +8,7 @@ const userService = require('../user');
  * @module modules/core/services/authorization
  */
 
-const logger = Logger.getLogger('CORE/service/authorization');
+const logger = require('../../../../shared/services/logger')('CORE/service/authorization');
 
 /**
  * Assert role type for user
@@ -23,7 +22,7 @@ const logger = Logger.getLogger('CORE/service/authorization');
  * @return {void}
  */
 async function assertRoleTypeForUser(payload, message) {
-  logger.info('Asserting role type for user', { payload, message });
+  logger.debug('Asserting role type for user', { payload, message });
 
   const scopedUser = await userService.getUserWithNetworkScope(
     { id: payload.userId, networkId: payload.networkId }, message);

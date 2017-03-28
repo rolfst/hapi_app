@@ -1,5 +1,4 @@
 const R = require('ramda');
-const Logger = require('../../../../shared/services/logger');
 const createError = require('../../../../shared/utils/create-error');
 const networkService = require('../../../core/services/network');
 const userService = require('../../../core/services/user');
@@ -10,7 +9,8 @@ const impl = require('./implementation');
  * @module modules/feed/services/feed
  */
 
-const logger = Logger.getLogger('FEED/service/feed');
+const logger = require('../../../../shared/services/logger')('FEED/service/feed');
+
 const pluckId = R.pluck('id');
 const feedOptions = R.pick(['limit', 'offset', 'include']);
 
@@ -26,7 +26,7 @@ const feedOptions = R.pick(['limit', 'offset', 'include']);
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
 const makeForNetwork = async (payload, message) => {
-  logger.info('Making feed for network', { payload, message });
+  logger.debug('Making feed for network', { payload, message });
 
   const [user, teams] = await Promise.all([
     userService.getUserWithNetworkScope({
@@ -65,7 +65,7 @@ const makeForNetwork = async (payload, message) => {
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
 const makeForTeam = async (payload, message) => {
-  logger.info('Making feed for team', { payload, message });
+  logger.debug('Making feed for team', { payload, message });
 
   const team = await teamService.get({ teamId: payload.teamId }, message);
   const user = await userService.getUserWithNetworkScope({

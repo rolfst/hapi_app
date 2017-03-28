@@ -2,9 +2,8 @@ const R = require('ramda');
 const moment = require('moment');
 const Mixpanel = require('../../../../shared/services/mixpanel');
 const createError = require('../../../../shared/utils/create-error');
-const Logger = require('../../../../shared/services/logger');
 
-const logger = Logger.createLogger('STATISTICS/service/events');
+const logger = require('../../../../shared/services/logger')('STATISTICS/service/events');
 
 const defaultToMonth = R.defaultTo('month');
 
@@ -62,7 +61,7 @@ function createDateRange(unit, start, end) {
  * module:modules/statistics~EventStatistic EventStatistic}
  */
 async function getCreatedMessages(payload, message) {
-  logger.info('Retrieving Created Messages', { payload, message });
+  logger.debug('Retrieving Created Messages', { payload, message });
 
   const unit = defaultToMonth(payload.unit);
   const { startDate, endDate } = createDateRange(unit, payload.startDate, payload.endDate);
@@ -82,7 +81,7 @@ async function getCreatedMessages(payload, message) {
  * module:modules/statistics~EventStatistic EventStatistic}
  */
 async function getApprovedShifts(payload, message) {
-  logger.info('Retrieving Approved shifts', { payload, message });
+  logger.debug('Retrieving Approved shifts', { payload, message });
 
   const unit = defaultToMonth(payload.unit);
   const { startDate, endDate } = createDateRange(unit, payload.startDate, payload.endDate);
@@ -102,7 +101,7 @@ async function getApprovedShifts(payload, message) {
  * module:modules/statistics~EventStatistic EventStatistic}
  */
 async function getCreatedShifts(payload, message) {
-  logger.info('Retrieving Created shifts', { payload, message });
+  logger.debug('Retrieving Created shifts', { payload, message });
 
   const { startDate, endDate } = createDateRange('month', payload.startDate, payload.endDate);
   const jql = createEventQuery({

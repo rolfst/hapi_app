@@ -2,9 +2,8 @@ const R = require('ramda');
 const Promise = require('bluebird');
 const AWS = require('aws-sdk');
 const createError = require('../utils/create-error');
-const Logger = require('./logger');
 
-const logger = Logger.getLogger('SHARED/service/upload');
+const logger = require('./logger')('SHARED/service/upload');
 
 const getEnvironmentLocation = () => {
   const mapping = {
@@ -56,7 +55,7 @@ function upload(file, prefix = null) {
 
   return getClient().upload(params).promise()
     .then((data) => {
-      logger.info('Amazon S3 response', { response: data });
+      logger.debug('Amazon S3 response', { response: data });
 
       return newFilename;
     })

@@ -1,6 +1,5 @@
 const R = require('ramda');
 const Promise = require('bluebird');
-const Logger = require('../../../../../shared/services/logger');
 const createError = require('../../../../../shared/utils/create-error');
 const attachmentService = require('../../../../attachment/services/attachment');
 const objectService = require('../../../../core/services/object');
@@ -8,7 +7,7 @@ const privateMessageRepository = require('../../repositories/private-message');
 const conversationRepository = require('../../repositories/conversation');
 const ChatDispatcher = require('../../dispatcher');
 
-const logger = Logger.createLogger('CHAT/service/conversation');
+const logger = require('../../../../../shared/services/logger')('CHAT/service/conversation');
 
 /**
  * Listing private messages
@@ -19,7 +18,7 @@ const logger = Logger.createLogger('CHAT/service/conversation');
  * @return {external:Promise.<PrivateMessage[]>} {@link module:modules/chat~PrivateMessage}
  */
 const list = async (payload, message) => {
-  logger.info('Listing private messages', { payload, message });
+  logger.debug('Listing private messages', { payload, message });
 
   return privateMessageRepository.findByIds(payload.messageIds);
 };
@@ -35,7 +34,7 @@ const list = async (payload, message) => {
  * @return {external:Promise.<PrivateMessage>} {@link module:modules/chat~PrivateMessage}
  */
 async function create(payload, message) {
-  logger.info('Creating private message', { payload, message });
+  logger.debug('Creating private message', { payload, message });
 
   const conversation = await conversationRepository.findById(payload.conversationId);
   if (!conversation) throw createError('404');

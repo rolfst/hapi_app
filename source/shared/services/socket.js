@@ -1,8 +1,7 @@
 const fetch = require('isomorphic-fetch');
 const R = require('ramda');
-const Logger = require('./logger');
 
-const logger = Logger.createLogger('SHARED/services/socket');
+const logger = require('./logger')('SHARED/services/socket');
 
 const WEBSOCKET_URL = process.env.API_ENV === 'production' ?
   'https://realtime.flex-appeal.nl' : 'https://test.realtime.flex-appeal.nl';
@@ -22,8 +21,13 @@ const send = async (eventName, users, payload, token) => {
     const jsonResponse = await response.json();
 
     if (response.ok) {
-      logger.info('Successfully send socket event', {
-        userIds, eventName, payload, token, jsonResponse });
+      logger.debug('Successfully send socket event', {
+        userIds,
+        eventName,
+        payload,
+        token,
+        jsonResponse
+      });
     } else {
       logger.error('Error sending socket event', {
         userIds, eventName, payload, jsonResponse });

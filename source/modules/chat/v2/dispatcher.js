@@ -7,7 +7,7 @@ const userRepository = require('../../core/repositories/user');
 const newMessageNotification = require('./notifications/new-message');
 
 const pubsub = EventEmitter.create();
-pubsub.setLogger(Logger.createLogger('CHAT/v1/dispatcher'));
+pubsub.setLogger(Logger('CHAT/v1/dispatcher'));
 
 pubsub.asyncOn('message.created', async (payload) => {
   const participants = await userRepository.findByIds(payload.conversation.participantIds);

@@ -1,15 +1,14 @@
 const createServicePayload = require('../../../shared/utils/create-service-payload');
 const responseUtil = require('../../../shared/utils/response');
-const Logger = require('../../../shared/services/logger');
 const flexchangeService = require('../services/flexchange');
 
-const logger = Logger.createLogger('FLEXCHANGE/handler/createExchangeComment');
+const logger = require('../../../shared/services/logger')('FLEXCHANGE/handler/createExchangeComment');
 
 module.exports = async (req, reply) => {
   try {
     const { payload, message } = createServicePayload(req);
 
-    logger.info('Creating exchange comment', { message, payload });
+    logger.debug('Creating exchange comment', { message, payload });
     const exchangeComment = await flexchangeService.createExchangeComment(payload, message);
 
     return reply({ success: true, data: responseUtil.serialize(exchangeComment) });

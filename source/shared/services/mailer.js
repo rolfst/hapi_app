@@ -1,9 +1,8 @@
 const nodemailer = require('nodemailer');
 const SendGridSMTP = require('smtpapi');
 const { mapValues } = require('lodash');
-const Logger = require('./logger');
 
-const logger = Logger.createLogger('SHARED/services/mailer');
+const logger = require('./logger')('SHARED/services/mailer');
 
 const smtpConfig = {
   host: process.env.SMTP_HOST,
@@ -74,7 +73,7 @@ const createMailOptions = (mail) => {
 
 const send = (mail, message = null) => {
   const mailOptions = createMailOptions(mail);
-  logger.info('Sending email to Sendgrid', { mailOptions, message });
+  logger.debug('Sending email to Sendgrid', { mailOptions, message });
 
   return transporter.sendMail(mailOptions, (err) => {
     if (err) logger.warn('Error when sending mail', { err, message, mail_options: mailOptions });

@@ -2,9 +2,8 @@ require('dotenv').config();
 require('newrelic');
 
 const Parse = require('parse/node');
-const Logger = require('./shared/services/logger');
 
-const logger = Logger.createLogger('SERVER');
+const logger = require('./shared/services/logger')('SERVER');
 const createServer = require('./server');
 
 if (process.env.API_ENV !== 'production') {
