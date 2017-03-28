@@ -39,9 +39,10 @@ describe('Service: Attachment', () => {
     it('should create a attachment', async () => {
       const ENDPOINT_URL = `/v2/networks/${network.id}/files`;
       const form = new FormData();
-      form.append('file', new stream.Readable('Foo'));
+      form.append('file', Buffer('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64').toString());
       const promisiedStream = await streamToPromise(form);
-      const { statusCode, result } = await postRequest(ENDPOINT_URL, promisiedStream, form.getHeaders(), admin.token);
+      const { statusCode, result } = await postRequest(
+        ENDPOINT_URL, promisiedStream, form.getHeaders(), admin.token);
 
       console.log('$$$$$$$$', result);
       assert.equal(statusCode, 200);
