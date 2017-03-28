@@ -2,6 +2,6 @@ const Joi = require('joi');
 
 module.exports = {
   payload: Joi.object().keys({
-    file: Joi.required(),
+    fileStream: Joi.any().label('file'),
   }).rename('file', 'fileStream'),
 };

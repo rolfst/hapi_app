@@ -4,6 +4,8 @@ const bunyan = require('bunyan');
 const argv = require('yargs').argv;
 const Raven = require('./sentry')();
 
+const safeCycles = bunyan.safeCycles;
+
 /**
  * @module shared/services/logger
  */
@@ -79,16 +81,44 @@ const bunyanConfig = {
   streams: []
 };
 
+// Dirty hack for bunyan so it doesn't upstream different error levels
+//  - The missing space between function name and first parenthese is thanks to the linter
+class BunyanStreamWrapper {
+  static createBunyanConfigEntry(bunyanLogLevel, realStream) {
+    return {
+      type: 'raw',
+      level: bunyanLogLevel,
+      stream: new BunyanStreamWrapper(bunyanLogLevel, realStream),
+    };
+  }
+
+  constructor(bunyanLogLevel, realStream) {
+    this.processLevel = bunyan.levelFromName[bunyanLogLevel];
+    this.stream = realStream;
+  }
+
+  write(rec) {
+    if (rec.level !== this.processLevel) {
+      return;
+    }
+
+    const str = JSON.stringify(rec, safeCycles());
+    this.stream.write(`${str}\n`);
+  }
+}
+
 // Build bunyan config based on the current loglevel
 ELogLevel.forEach((logLevel, severity) => {
   if (!LogLevel[logLevel] || currentLogLevel < severity) {
     return;
   }
 
-  bunyanConfig.streams.push({
-    level: LogLevel[logLevel],
-    stream: severity > errorLogLevel ? process.stdout : process.stderr
-  });
+  const streamOutput = severity > errorLogLevel ? process.stdout : process.stderr;
+
+  bunyanConfig.streams.push(BunyanStreamWrapper.createBunyanConfigEntry(
+    LogLevel[logLevel],
+    streamOutput
+  ));
 });
 
 const makeMessage = R.pipe(
