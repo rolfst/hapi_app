@@ -93,5 +93,10 @@
     "type": "error_in_upload",
     "detail": "Something went wrong while uploading your file",
     "code": 500
+  },
+  "40004": {
+    "type": "wrong_credentials_for_mixpanel",
+    "detail": "No user found for given username and password.",
+    "code": 403
   }
 }
