@@ -54,7 +54,7 @@ const findByIds = async (exchangeIds) => {
 /**
  * @param {object} [date=null] - moment, or parsable object
  * @method findAllAcceptedExchanges
- * @returns {Array<Exchange>} - Promise of list with Exchange objects
+ * @returns {Exchange[]} - Promise of list with Exchange objects
  */
 const findAllAcceptedExchanges = async (date = null) => {
   const query = {

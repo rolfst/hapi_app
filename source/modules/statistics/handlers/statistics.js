@@ -7,7 +7,7 @@ const eventService = require('../services/event');
 module.exports = async (req, reply) => {
   try {
     const { message, payload } = createServicePayload(req);
-    const viewEq = R.pathEq(['params', 'viewName']);
+    const viewEq = R.pathEq(['query', 'viewName']);
 
     const handler = R.cond([
       [viewEq('created_messages'), () => eventService.getCreatedMessages],

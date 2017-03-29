@@ -1,5 +1,4 @@
 const R = require('ramda');
-const Logger = require('../../../../shared/services/logger');
 const createError = require('../../../../shared/utils/create-error');
 const networkRepo = require('../../repositories/network');
 const userService = require('../user');
@@ -9,7 +8,7 @@ const teamService = require('../team');
  * @module modules/core/services/network
  */
 
-const logger = Logger.getLogger('CORE/service/network');
+const logger = require('../../../../shared/services/logger')('CORE/service/network');
 
 /**
  * Retrieve a single network;
@@ -21,7 +20,7 @@ const logger = Logger.getLogger('CORE/service/network');
  * Promise containing network
  */
 const get = async (payload, message) => {
-  logger.info('Retrieving single network', { payload, message });
+  logger.debug('Retrieving single network', { payload, message });
   const network = await networkRepo.findNetworkById(payload.networkId);
 
   if (!network) throw createError('404', 'Network not found');
@@ -42,7 +41,7 @@ const get = async (payload, message) => {
  * new network object
  */
 const create = async (payload, message) => {
-  logger.info('Creating network', { payload, message });
+  logger.debug('Creating network', { payload, message });
 
   const whitelistAttrs = R.pick(['userId', 'name', 'externalId', 'integrationName'], payload);
 
@@ -68,7 +67,7 @@ const create = async (payload, message) => {
  * Promise containing a User
  */
 const addUserToNetwork = async (payload, message) => {
-  logger.info('Adding user to network', { payload, message });
+  logger.debug('Adding user to network', { payload, message });
 
   const attrsWhitelist = ['userId', 'networkId', 'externalId', 'userToken'];
   const attributes = R.merge(
@@ -90,7 +89,7 @@ const addUserToNetwork = async (payload, message) => {
  * Promise containing collection of users
  */
 const listActiveUsersForNetwork = async (payload, message) => {
-  logger.info('Listing active users for network', { payload, message });
+  logger.debug('Listing active users for network', { payload, message });
 
   const network = await networkRepo.findNetworkById(payload.networkId);
   if (!network) throw createError('404', 'Network not found.');
@@ -108,7 +107,7 @@ const listActiveUsersForNetwork = async (payload, message) => {
  * Promise containing collection of users
  */
 const listAllUsersForNetwork = async (payload, message) => {
-  logger.info('List all users for network', { payload });
+  logger.debug('List all users for network', { payload });
 
   const network = await networkRepo.findNetworkById(payload.networkId);
   const usersFromNetwork = await networkRepo.findAllUsersForNetwork(network.id);
@@ -129,7 +128,7 @@ const listAllUsersForNetwork = async (payload, message) => {
  * Promise containing a collections networks
  */
 const listNetworksForUser = async (payload) => {
-  logger.info('List all networks for user', { payload });
+  logger.debug('List all networks for user', { payload });
 
   return networkRepo.findNetworksForUser(payload.id);
 };
@@ -144,8 +143,12 @@ const listNetworksForUser = async (payload) => {
  */
 const listTeamsForNetwork = async (payload, message) => {
   const result = await networkRepo.findTeamsForNetwork(payload.networkId);
-  logger.info('List teams for network', {
-    payload, teamCount: result.length, message: message || null });
+
+  logger.debug('List teams for network', {
+    payload,
+    teamCount: result.length,
+    message: message || null
+  });
 
   return teamService.list({ teamIds: R.pluck('id', result) }, message);
 };

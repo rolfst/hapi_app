@@ -2,9 +2,8 @@ const Url = require('url');
 const Qs = require('qs');
 const R = require('ramda');
 const createError = require('./create-error');
-const Logger = require('../services/logger');
 
-const logger = Logger.createLogger('NODE-API/server/response');
+const logger = require('../services/logger')('NODE-API/server/response');
 
 const onRequest = (ravenClient) => (req, reply) => {
   const uri = req.raw.req.url;

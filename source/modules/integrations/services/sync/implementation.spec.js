@@ -529,6 +529,7 @@ describe('Service: Sync Implementation', () => {
     });
 
     afterEach(() => sandbox.reset());
+    after(() => sandbox.restore());
 
     it('should execute correct function for add action', async () => {
       await impl.executeUserActions('1', {

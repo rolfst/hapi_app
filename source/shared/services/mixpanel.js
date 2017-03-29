@@ -2,12 +2,12 @@ const R = require('ramda');
 const fetch = require('isomorphic-fetch');
 const Mixpanel = require('mixpanel');
 const createError = require('../utils/create-error');
-const Logger = require('./logger');
 
-const logger = Logger.createLogger('SHARED/services/mixpanel');
+const logger = require('./logger')('SHARED/services/mixpanel');
 
 const API_KEY = process.env.MIXPANEL_TOKEN;
-const MP_API_JQL_URI = `https://${API_KEY}@mixpanel.com/api/2.0/jql/`;
+const API_SECRET = process.env.MIXPANEL_SECRET;
+const MP_API_JQL_URI = `https://${API_SECRET}@mixpanel.com/api/2.0/jql/`;
 
 function getClient() {
   return Mixpanel.init(API_KEY);
@@ -28,7 +28,7 @@ function registerProfile(user) {
 
 function track(event, distinctId = null) {
   if (!distinctId) throw new Error('Missing distinctId parameter.');
-  logger.info('Tracking event', { event, distinctId });
+  logger.debug('Tracking event', { event, distinctId });
 
   return getClient().track(event.name, R.merge(event.data, { distinct_id: distinctId }));
 }
@@ -56,7 +56,7 @@ async function handleRequest(response, endpoint) {
   } else if (status === 404 && json.error === undefinedError) {
     throw createError('10008', json.error);
   } else if (status === 400 && json.error === 'Unable to authenticate request') {
-    throw createError('10004');
+    throw createError('40004');
   } else if (status === 400) {
     throw createError('422');
   }
@@ -86,7 +86,7 @@ async function executeQuery(query, message) {
     body: createFormEncodedString({ script: query }),
   };
 
-  logger.info('Fetching from mixpanel', { options, message });
+  logger.debug('Fetching from mixpanel', { options, message });
   const response = await fetch(MP_API_JQL_URI, options);
   const { status, json } = await handleRequest(response, MP_API_JQL_URI);
 
@@ -95,8 +95,11 @@ async function executeQuery(query, message) {
       status, json, message });
   } else {
     const dataResponse = json[0] || {};
-    logger.info('Retrieved data from integration', {
-      status, itemCount: dataResponse.length, message });
+    logger.debug('Retrieved data from integration', {
+      status,
+      itemCount: dataResponse.length,
+      message
+    });
   }
 
   return { payload: R.head(json), status };

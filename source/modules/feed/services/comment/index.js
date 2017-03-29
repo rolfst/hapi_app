@@ -1,4 +1,3 @@
-const Logger = require('../../../../shared/services/logger');
 const createError = require('../../../../shared/utils/create-error');
 const messageRepository = require('../../repositories/message');
 const commentRepository = require('../../repositories/comment');
@@ -7,7 +6,7 @@ const commentRepository = require('../../repositories/comment');
  * @module modules/feed/services/comment
  */
 
-const logger = Logger.getLogger('FEED/service/comment');
+const logger = require('../../../../shared/services/logger')('FEED/service/comment');
 
 /**
  * List comments
@@ -18,7 +17,7 @@ const logger = Logger.getLogger('FEED/service/comment');
  * @return {external:Promise.<Comment[]>} {@link module:modules/feed~Comment}
  */
 const list = async (payload, message) => {
-  logger.info('List comments', { payload, message });
+  logger.debug('List comments', { payload, message });
 
   return commentRepository.findBy({
     id: { $in: payload.commentIds },
@@ -36,7 +35,7 @@ const list = async (payload, message) => {
  * @return {external:Promise.<Comment>} {@link module:modules/feed~Comment}
  */
 const create = async (payload, message) => {
-  logger.info('Creating comment for feed message', { payload, message });
+  logger.debug('Creating comment for feed message', { payload, message });
 
   const messageToComment = await messageRepository.findById(payload.messageId);
   if (!messageToComment) throw createError('404', 'Message not found.');

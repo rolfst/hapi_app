@@ -1,6 +1,5 @@
 const R = require('ramda');
 const Storage = require('../../../../shared/services/storage');
-const Logger = require('../../../../shared/services/logger');
 const createError = require('../../../../shared/utils/create-error');
 const attachmentRepo = require('../../repositories/attachment');
 
@@ -8,7 +7,7 @@ const attachmentRepo = require('../../repositories/attachment');
  * @module modules/attachment/services/attachment
  */
 
-const logger = Logger.getLogger('attachment/service/attachment');
+const logger = require('../../../../shared/services/logger')('attachment/service/attachment');
 
 /**
  * Lists selected attachments
@@ -20,7 +19,7 @@ const logger = Logger.getLogger('attachment/service/attachment');
  * module:modules/attachment~Attachment Attachment}
  */
 const list = async (payload, message) => {
-  logger.info('Finding multiple attachments', { payload, message });
+  logger.debug('Finding multiple attachments', { payload, message });
 
   return attachmentRepo.findBy({ id: { $in: payload.attachmentIds } });
 };
@@ -34,7 +33,7 @@ const list = async (payload, message) => {
  * @return {external:Promise.<attachment>} {@link module:modules/attachment~Attachment Attachment}
  */
 const get = async (payload, message) => {
-  logger.info('Finding attachment', { payload, message });
+  logger.debug('Finding attachment', { payload, message });
   const attachment = R.head(await attachmentRepo.findBy(payload.whereConstraint));
 
   if (!attachment) throw createError('404');
@@ -52,7 +51,7 @@ const get = async (payload, message) => {
  * @return {external:Promise.<attachment>} {@link module:modules/attachment~Attachment Attachment}
  */
 const update = async (payload, message) => {
-  logger.info('Updating attachment', { payload, message });
+  logger.debug('Updating attachment', { payload, message });
   const attachment = await get({ whereConstraint: payload.whereConstraint });
 
   return attachmentRepo.update(R.merge({ id: attachment.id }, payload.attributes));
@@ -72,7 +71,7 @@ const update = async (payload, message) => {
  * @return {external:Promise.<Attachment>} {@link module:modules/attachment~Attachment Attachment}
  */
 const create = async (payload, message) => {
-  logger.info('Create attachment', { payload: R.omit(['fileStream'], payload), message });
+  logger.debug('Create attachment', { payload: R.omit(['fileStream'], payload), message });
 
   if (!payload.fileStream || typeof payload.fileStream.on !== 'function') {
     throw createError('422', 'Please provide a file.');

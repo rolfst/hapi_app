@@ -1,9 +1,8 @@
 const Parse = require('parse/node');
 const R = require('ramda');
-const Logger = require('./logger');
 const Mixpanel = require('./mixpanel');
 
-const logger = Logger.createLogger('SHARED/services/notifier');
+const logger = require('./logger')('SHARED/services/notifier');
 
 function createQuery(emails) {
   const query = new Parse.Query(Parse.Installation);
@@ -27,7 +26,7 @@ function send(users, notification, networkId = null) {
 
   const emails = R.reject(R.isNil, R.pluck('email', users));
 
-  logger.info('Sending Push Notification', { data, emails });
+  logger.debug('Sending Push Notification', { data, emails });
 
   return Parse.Push.send({ where: createQuery(emails), data }, { useMasterKey: true })
     .then(() => users.forEach((user) => trackPushNotification(notification, user)))

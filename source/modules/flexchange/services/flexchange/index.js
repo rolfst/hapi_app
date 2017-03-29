@@ -1,7 +1,6 @@
 const { sortBy, map, includes } = require('lodash');
 const R = require('ramda');
 const moment = require('moment');
-const Logger = require('../../../../shared/services/logger');
 const { createAdapter } = require('../../../../shared/utils/create-adapter');
 const createError = require('../../../../shared/utils/create-error');
 const teamRepo = require('../../../core/repositories/team');
@@ -23,7 +22,7 @@ const impl = require('./implementation');
 /**
  * @module modules/flexchange/services/flexchange
  */
-const logger = Logger.createLogger('FLEXCHANGE/service/exchange');
+const logger = require('../../../../shared/services/logger')('FLEXCHANGE/service/exchange');
 
 const FILTER_PROPERTIES = ['start', 'end'];
 
@@ -38,7 +37,7 @@ const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
  * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange}
  */
 const list = async (payload, message) => {
-  logger.info('Listing exchanges', { payload, message });
+  logger.debug('Listing exchanges', { payload, message });
 
   const [exchanges, responsesForExchanges, valuesForExchanges] = await Promise.all([
     exchangeRepo.findByIds(payload.exchangeIds),
@@ -85,7 +84,7 @@ const list = async (payload, message) => {
  * Promise with list of receivers for this exchange
  */
 const listReceivers = async (payload, message) => {
-  logger.info('Listing receivers for exchange', { payload, message });
+  logger.debug('Listing receivers for exchange', { payload, message });
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, message.credentials.id);
   const valueIds = R.pluck('value', exchange.ExchangeValues);
   let receivers;
@@ -114,7 +113,7 @@ const listReceivers = async (payload, message) => {
  * Promise with the accepted exchange
  */
 const acceptExchange = async (payload, message) => {
-  logger.info('Accepting exchange', { payload, message });
+  logger.debug('Accepting exchange', { payload, message });
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, message.credentials.id);
 
   if (isExpired(exchange.date)) throw createError('403', 'The exchange is expired.');
@@ -155,7 +154,7 @@ const acceptExchange = async (payload, message) => {
  * Promise with the accepted exchange
  */
 const approveExchange = async (payload, message) => {
-  logger.info('Approving exchange', { payload, message });
+  logger.debug('Approving exchange', { payload, message });
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, message.credentials.id);
 
   const constraint = { exchangeId: payload.exchangeId, userId: payload.userId };
@@ -209,7 +208,7 @@ const listRespondedTo = async (payload, message) => {
  * Promise with the declined exchange
  */
 const declineExchange = async (payload, message) => {
-  logger.info('Declining exchange', { payload, message });
+  logger.debug('Declining exchange', { payload, message });
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, message.credentials.id);
   const { ResponseStatus } = exchange;
   const approved = ResponseStatus ? ResponseStatus.approved : null;
@@ -239,7 +238,7 @@ const declineExchange = async (payload, message) => {
  * Promise with list of shifts
  */
 const listMyShifts = async (payload, message) => {
-  logger.info('Listing my shifts', { payload, message });
+  logger.debug('Listing my shifts', { payload, message });
   const { network } = message;
 
   if (!network.hasIntegration) throw createError('10001');
@@ -256,7 +255,7 @@ const listMyShifts = async (payload, message) => {
 };
 
 const deleteExchange = async (payload, message) => {
-  logger.info('Deleting exchange', { payload, message });
+  logger.debug('Deleting exchange', { payload, message });
 
   return Promise.all([
     objectService.remove({ objectType: 'exchange', sourceId: payload.exchangeId }),
@@ -282,7 +281,7 @@ const deleteExchange = async (payload, message) => {
  * Promise with the rejected exchange
  */
 const rejectExchange = async (payload, message) => {
-  logger.info('Rejecting exchange', { payload, message });
+  logger.debug('Rejecting exchange', { payload, message });
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId,
     message.credentials.id);
   const constraint = { exchangeId: exchange.id, userId: payload.userId };
@@ -325,7 +324,7 @@ const getExchange = async (payload, message) => {
  * Promise with a list of comments for an exchange
  */
 const listComments = async (payload, message) => {
-  logger.info('Listing comments for exchange', { payload, message });
+  logger.debug('Listing comments for exchange', { payload, message });
   const userId = message.credentials.id;
   const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, userId);
 
@@ -367,7 +366,7 @@ const getShift = async (payload, message) => {
  * Promise with a list of Users
  */
 const listAvailableUsersForShift = async (payload, message) => {
-  logger.info('Listing available users for shift', { payload, message });
+  logger.debug('Listing available users for shift', { payload, message });
   if (!message.network.hasIntegration) throw createError('10001');
 
   const adapter = await createAdapter(message.network, message.credentials.id);
@@ -429,7 +428,7 @@ const listPersonalizedExchanges = async (payload, message) => {
  * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange} -
  */
 const listExchangesForUser = async (payload, message) => {
-  logger.info('Listing all exchanges for user', { payload, message });
+  logger.debug('Listing all exchanges for user', { payload, message });
 
   const filter = R.pick(FILTER_PROPERTIES, payload);
   const user = await userService.getUserWithNetworkScope({
@@ -477,7 +476,7 @@ const createValidator = (exchangeType) => {
  * Promise with the newly created Exchange
  */
 const createExchange = async (payload, message) => {
-  logger.info('Creating an exchange', { payload, message });
+  logger.debug('Creating an exchange', { payload, message });
 
   if (payload.startTime && payload.endTime && moment(payload.endTime).isBefore(payload.startTime)) {
     throw createError('422', 'Attribute end_time should be after start_time');

@@ -1,5 +1,4 @@
 const R = require('ramda');
-const Logger = require('../../../../../shared/services/logger');
 const createError = require('../../../../../shared/utils/create-error');
 const userRepository = require('../../../../core/repositories/user');
 const objectService = require('../../../../core/services/object');
@@ -8,7 +7,8 @@ const conversationRepoV1 = require('../../../v1/repositories/conversation');
 const conversationRepo = require('../../repositories/conversation');
 const impl = require('./implementation');
 
-const logger = Logger.createLogger('CHAT/service/conversation');
+const logger = require('../../../../../shared/services/logger')('CHAT/service/conversation');
+
 const createOptions = R.pick(['limit', 'offset', 'order']);
 const pluckUniqueParticipantIds = R.pipe(R.pluck('participantIds'), R.flatten, R.uniq);
 const groupByParentId = R.groupBy(R.prop('parentId'));
@@ -29,7 +29,7 @@ const lastMessageObjectsByConversationId = R.pipe(
  * @return {external:Promise.<Conversation>} {@link module:modules/chat~Conversation} -
  */
 const create = async (payload, message) => {
-  logger.info('Creating conversation', { payload, message });
+  logger.debug('Creating conversation', { payload, message });
   const participantIds = R.pipe(R.append(message.credentials.id), R.uniq)(payload.participantIds);
 
   const users = await userRepository.findByIds(participantIds);
@@ -61,7 +61,7 @@ const create = async (payload, message) => {
  * @return {external:Promise.<Conversation[]>} {@link module:modules/chat~Conversation} -
  */
 const listConversations = async (payload, message) => {
-  logger.info('Listing conversations', { payload, message });
+  logger.debug('Listing conversations', { payload, message });
 
   const includes = impl.hasInclude(payload.include);
   const [conversations, objects] = await Promise.all([
@@ -103,7 +103,7 @@ const listConversations = async (payload, message) => {
  * @return {external:Promise.<Conversation>} {@link module:modules/chat~Conversation}
  */
 const getConversation = async (payload, message) => {
-  logger.info('Get conversation', { payload, message });
+  logger.debug('Get conversation', { payload, message });
 
   const conversations = await listConversations({
     conversationIds: [payload.conversationId], limit: 1 });
@@ -127,7 +127,7 @@ const getConversation = async (payload, message) => {
  * @return {external:Promise.<Conversation[]>} {@link module:modules/chat~Conversation} -
  */
 const listConversationsForUser = async (payload, message) => {
-  logger.info('Listing conversations for user', { payload, message });
+  logger.debug('Listing conversations for user', { payload, message });
 
   const conversationIds = await conversationRepo.findIdsForUser(payload.userId);
 
@@ -145,7 +145,7 @@ const listConversationsForUser = async (payload, message) => {
  * @return {external:Promise.<Message[]>} {@link module:modules/chat~Message} -
  */
 const listMessages = async (payload, message) => {
-  logger.info('List messages for conversation', { payload, message });
+  logger.debug('List messages for conversation', { payload, message });
 
   await impl.assertThatUserIsPartOfTheConversation(message.credentials.id, payload.conversationId);
 
@@ -168,7 +168,7 @@ const listMessages = async (payload, message) => {
  * @return {external:Promise<Number>}
  */
 async function countConversations(payload, message) {
-  logger.info('Count conversation', { payload, message });
+  logger.debug('Count conversation', { payload, message });
 
   return conversationRepo.countConversationsForUser(payload.userId);
 }
@@ -182,7 +182,7 @@ async function countConversations(payload, message) {
  * @return {external:Promise<Message>} {@link module:chat~Message message}
  */
 const remove = async (payload, message) => {
-  logger.info('Deleting conversation', { payload, message });
+  logger.debug('Deleting conversation', { payload, message });
 
   return Promise.all([
     conversationRepoV1.deleteConversationById(payload.conversationId),
@@ -202,7 +202,7 @@ const remove = async (payload, message) => {
  * @return {external:Promise<Number>}
  */
 async function countMessages(payload, message) {
-  logger.info('Count messages for conversation', { payload, message });
+  logger.debug('Count messages for conversation', { payload, message });
 
   await impl.assertThatUserIsPartOfTheConversation(message.credentials.id, payload.conversationId);
 

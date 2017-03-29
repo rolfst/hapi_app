@@ -1,6 +1,9 @@
 const CronJob = require('cron').CronJob;
+const R = require('ramda');
 const createSentryClient = require('../../shared/services/sentry').default;
+const networkRepo = require('../core/repositories/network');
 const syncService = require('../integrations/services/sync');
+const weeklyUpdate = require('./weekly-update');
 
 const syncJob = new CronJob({
   cronTime: '00 30 * * * *', // Every 30 minutes
@@ -24,7 +27,8 @@ const syncJob = new CronJob({
 const weeklyUpdateJob = new CronJob({
   cronTime: '00 13 * * 05', // Every friday at 13:00
   onTick() {
-    // TODO
+    networkRepo.findAll()
+      .then(R.pipe(R.pluck('id'), R.map(weeklyUpdate.send)));
   },
   timeZone: 'Europe/Amsterdam',
 });

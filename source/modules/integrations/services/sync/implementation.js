@@ -1,12 +1,11 @@
 const R = require('ramda');
 const Promise = require('bluebird');
-const Logger = require('../../../../shared/services/logger');
 const passwordUtil = require('../../../../shared/utils/password');
 const teamRepository = require('../../../core/repositories/team');
 const userRepository = require('../../../core/repositories/user');
 const networkRepository = require('../../../core/repositories/network');
 
-const logger = Logger.createLogger('INTEGRATIONS/service/sync');
+const logger = require('../../../../shared/services/logger')('INTEGRATIONS/service/sync');
 
 const isSyncable = R.and(R.prop('hasIntegration'), R.prop('importedAt'));
 

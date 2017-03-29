@@ -49,7 +49,7 @@ const findMessageById = async (id) => {
 
 /**
  * Find messages by id
- * @param {array<string>} messageIds - Ids of the messages being looked for
+ * @param {string[]} messageIds - Ids of the messages being looked for
  * @method findMessageByIds
  * @return {external:Promise} - Find message promise
  */

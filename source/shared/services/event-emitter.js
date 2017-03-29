@@ -6,7 +6,7 @@ class EventEmitter extends NativeEventEmitter {
   constructor() {
     super();
 
-    this.logger = Logger.createLogger('SHARED/eventEmitter');
+    this.logger = Logger('SHARED/eventEmitter');
   }
 
   setLogger(logger) {
