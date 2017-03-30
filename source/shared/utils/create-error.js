@@ -1,8 +1,27 @@
 const Boom = require('boom');
+const R = require('ramda');
 const { pick } = require('lodash');
 const errors = require('../configs/errors.json');
 
 const ownStackEntryRegex = /^\s*at createError.*$/;
+const matchesRegex = (stackEntry) => ownStackEntryRegex.test(stackEntry);
+const stripCreateErrorFromStacktrace = (error) => {
+  const newError = error;
+  const newStack = error.stack.split('\n');
+
+  // Now find the first 'at createError' line, remove it then fall out
+  for (let stackIdx = 0, stackLen = newStack.length; stackIdx < stackLen; stackIdx += 1) {
+    if (matchesRegex(newStack[stackIdx])) {
+      newStack.splice(stackIdx, 1);
+      break;
+    }
+  }
+
+  // Put it back like nothing happened
+  newError.stack = newStack.join('\n');
+
+  return newError;
+};
 
 const createError = (code, developerMessage) => {
   const FILTER_PROPERTIES = ['type', 'detail', 'code'];
@@ -16,20 +35,7 @@ const createError = (code, developerMessage) => {
   });
 
   // We modify the stacktrace so our entry point isn't createError()
-  const fullStack = boomError.stack.split('\n');
-
-  // Now find the first 'at createError' line, remove it then fall out
-  for (let stackIdx = 0, stackLen = fullStack.length; stackIdx < stackLen; stackIdx += 1) {
-    if (ownStackEntryRegex.test(fullStack[stackIdx])) {
-      fullStack.splice(stackIdx, 1);
-      break;
-    }
-  }
-
-  // Put it back like nothing happened
-  boomError.stack = fullStack.join('\n');
-
-  return boomError;
+  return stripCreateErrorFromStacktrace(boomError);
 };
 
 module.exports = createError;
