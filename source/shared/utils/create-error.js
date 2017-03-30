@@ -1,5 +1,4 @@
 const Boom = require('boom');
-const R = require('ramda');
 const { pick } = require('lodash');
 const errors = require('../configs/errors.json');
 
