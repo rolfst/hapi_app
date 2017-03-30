@@ -5,24 +5,11 @@ const createError = require('./create-error');
 
 const logger = require('../services/logger')('NODE-API/server/response');
 
-const onRequest = (ravenClient) => (req, reply) => {
+const onRequest = () => (req, reply) => {
   const uri = req.raw.req.url;
   const parsed = Url.parse(decodeURIComponent(uri), false);
   parsed.query = Qs.parse(parsed.query);
   req.setUrl(parsed);
-
-  const requestContext = {
-    id: req.id,
-    payload: R.omit('password', req.payload),
-    user_agent: req.headers['user-agent'],
-    method: req.method,
-    url: req.path,
-    headers: req.headers,
-  };
-
-  if (ravenClient && typeof ravenClient.setExtraContext === 'function') {
-    ravenClient.setExtraContext({ request: requestContext });
-  }
 
   process.env.BASE_URL = `${req.connection.info.protocol}://${req.info.host}`;
 
@@ -36,10 +23,6 @@ const transformBoomToErrorResponse = (boom) => ({
   status_code: boom.output.payload.statusCode,
 });
 
-const trackSentryError = (client, payload, error) => {
-  if (client && typeof client.captureException === 'function') client.captureException(error);
-};
-
 const logApplicationError = (message, payload, error) => {
   logger.error('Error from application', {
     message,
@@ -48,15 +31,7 @@ const logApplicationError = (message, payload, error) => {
   });
 };
 
-const logError = (ravenClient, message, payload, error) => {
-  logApplicationError(message, payload, error);
-
-  if (process.env.API_ENV === 'production') {
-    trackSentryError(ravenClient, payload, error);
-  }
-};
-
-const onPreResponse = (ravenClient) => (req, reply) => {
+const onPreResponse = () => (req, reply) => {
   const message = R.merge(req.auth, req.credentials);
   const errorPayload = R.merge(R.pick(['info', 'headers', 'payload', 'params', 'query'], req),
     {
@@ -75,7 +50,7 @@ const onPreResponse = (ravenClient) => (req, reply) => {
     }
 
     if (req.response.output.statusCode !== 404) {
-      logError(ravenClient, message, errorPayload, req.response);
+      logApplicationError(message, errorPayload, req.response);
     }
 
     const errorResponse = transformBoomToErrorResponse(error);
@@ -84,7 +59,7 @@ const onPreResponse = (ravenClient) => (req, reply) => {
   }
 
   if (req.response instanceof Error) {
-    logError(ravenClient, message, errorPayload, req.response);
+    logApplicationError(message, errorPayload, req.response);
 
     return reply(transformBoomToErrorResponse(createError('500'))).code('500');
   }
