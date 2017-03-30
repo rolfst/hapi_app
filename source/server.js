@@ -22,7 +22,7 @@ const createServer = () => {
         dogReporter: [{
           module: 'good-datadog',
           args: [{
-            debug: process.env.LOGLEVEL.toLowerCase() === 'debug',
+            debug: process.env.LOGLEVEL === 'DEBUG',
             host: process.env.API_ENV === 'development' ? 'test.api.flex-appeal.nl' : 'localhost',
             globalTags: [`env:${process.env.API_ENV}`],
           }],
