@@ -52,10 +52,10 @@ describe('Mailer', () => {
       baz: 'swag',
     };
 
-    const actual = mailer.mapsToSubstitutes(fakeSubs);
+    const actual = mailer.mapsToSubstitutes(fakeSubs, 2);
     const expected = {
-      foo: ['test'],
-      baz: ['swag'],
+      foo: ['test', 'test'],
+      baz: ['swag', 'swag'],
     };
 
     assert.deepEqual(actual, expected);

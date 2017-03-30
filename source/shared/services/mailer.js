@@ -1,3 +1,4 @@
+const R = require('ramda');
 const nodemailer = require('nodemailer');
 const SendGridSMTP = require('smtpapi');
 const { mapValues } = require('lodash');
@@ -36,12 +37,13 @@ const prepare = (mail) => {
   return mail;
 };
 
-const mapsToSubstitutes = (subs) => mapValues(subs, (o) => [o]);
+const mapsToSubstitutes = (subs, length) =>
+  mapValues(subs, (o) => R.map(R.always(o), R.range(0, length)));
 
 const createSMTPHeader = (mail) => {
   const header = new SendGridSMTP();
 
-  header.setSubstitutions(mapsToSubstitutes(mail.data));
+  header.setSubstitutions(mapsToSubstitutes(mail.data, R.length(mail.options.receiver)));
   header.setFilters({
     templates: {
       settings: {
@@ -61,7 +63,8 @@ const createMailOptions = (mail) => {
   return {
     subject: mail.options.subject,
     from: `"${mail.options.sender.name}" <${mail.options.sender.email}>`,
-    to: mail.options.receiver.email,
+    to: Array.isArray(mail.options.receiver) ?
+      R.pluck('email', mail.options.receiver) : mail.options.receiver.email,
     replyTo: 'help@flex-appeal.nl',
     html: '<br>',
     headers: {
@@ -71,13 +74,11 @@ const createMailOptions = (mail) => {
   };
 };
 
-const send = (mail, message = null) => {
-  const mailOptions = createMailOptions(mail);
-  logger.debug('Sending email to Sendgrid', { mailOptions, message });
+const send = (payload, message = null) => {
+  const mail = createMailOptions(payload);
+  logger.debug('Sending email to Sendgrid', { mail: R.omit(['headers'], mail), message });
 
-  return transporter.sendMail(mailOptions, (err) => {
-    if (err) logger.warn('Error when sending mail', { err, message, mail_options: mailOptions });
-  });
+  return transporter.sendMail(mail);
 };
 
 exports.createMailOptions = createMailOptions;

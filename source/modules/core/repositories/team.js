@@ -150,7 +150,7 @@ async function create(attributes) {
 
 /**
  * Creates multiple teams at once
- * @param {Array<Team>} teams - The teams to create
+ * @param {Team[]} teams - The teams to create
  * @method createBulkTeams
  * @return {external:Promise.<Team>} {@link module:modules/core~Team Team}
  */

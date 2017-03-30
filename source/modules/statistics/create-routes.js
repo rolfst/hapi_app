@@ -3,7 +3,7 @@ const { createRoutes } = require('../../shared/utils/create-routes');
 
 const routes = [{
   method: 'GET',
-  url: '/v2/networks/{networkId}/statistics/{viewName}',
+  url: '/v2/networks/{networkId}/statistics',
   handler: require('./handlers/statistics'),
   validator: require('./validators/statistics'),
 }];

@@ -11,6 +11,22 @@ const createServer = () => {
 
   // Register plugins
   server.register(require('hapi-async-handler')); // eslint-disable-line global-require
+  server.register({
+    register: require('good'), // eslint-disable-line global-require
+    options: {
+      ops: false,
+      reporters: {
+        dogReporter: [{
+          module: 'good-datadog',
+          args: [{
+            debug: process.env.LOGLEVEL === 'DEBUG',
+            host: process.env.API_ENV === 'development' ? 'test.api.flex-appeal.nl' : 'localhost',
+            globalTags: [`env:${process.env.API_ENV}`],
+          }],
+        }],
+      },
+    },
+  });
 
   // Register schemes + strategies
   server.auth.scheme('jwt', jwtStrategy);

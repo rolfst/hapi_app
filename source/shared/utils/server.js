@@ -7,7 +7,7 @@ const logger = require('../services/logger')('NODE-API/server/response');
 
 const onRequest = () => (req, reply) => {
   const uri = req.raw.req.url;
-  const parsed = Url.parse(uri, false);
+  const parsed = Url.parse(decodeURIComponent(uri), false);
   parsed.query = Qs.parse(parsed.query);
   req.setUrl(parsed);
 
