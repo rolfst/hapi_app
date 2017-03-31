@@ -7,7 +7,7 @@ const routes = [{
   handler: require('./handlers/upload-file'),
   validator: require('./validators/upload-file'),
   payload: {
-    maxBytes: 4000000,
+    maxBytes: 8000000,
     output: 'stream',
     parse: true,
   },
