@@ -25,7 +25,7 @@ const syncJob = new CronJob({
 });
 
 const weeklyUpdateJob = new CronJob({
-  cronTime: '00 13 * * 05', // Every friday at 13:00
+  cronTime: '00 13 * * 0', // Every sunday at 13:00
   onTick() {
     networkRepo.findAll()
       .then(R.pipe(R.pluck('id'), R.map(weeklyUpdate.send)));
