@@ -5,7 +5,7 @@ const testHelper = require('../../../shared/test-utils/helpers');
 const repository = require('./user');
 const teamRepository = require('./team');
 
-describe.only('User Repository', () => {
+describe('User Repository', () => {
   let createdUser;
   let network;
   let anotherNetwork;
