@@ -8,6 +8,7 @@ const teamRepository = require('./team');
 describe('User Repository', () => {
   let createdUser;
   let network;
+  let anotherNetwork;
 
   before(async () => {
     createdUser = await repository.createUser({
@@ -19,6 +20,7 @@ describe('User Repository', () => {
     });
     const admin = await testHelper.createUser({ password: 'pw' });
     network = await testHelper.createNetwork({ userId: admin.id });
+    anotherNetwork = await testHelper.createNetwork({ userId: admin.id });
   });
 
   after(() => testHelper.cleanAll());
@@ -48,6 +50,7 @@ describe('User Repository', () => {
     it('domain object should have the correct teamIds property', async () => {
       const createdTeams = await Promise.all([
         teamRepository.create({ networkId: network.id, name: 'Team #1' }),
+        teamRepository.create({ networkId: anotherNetwork.id, name: 'Team in other network' }),
         teamRepository.create({ networkId: network.id, name: 'Team #2' }),
       ]);
 
@@ -58,8 +61,44 @@ describe('User Repository', () => {
 
       assert.property(actual, 'teamIds');
       assert.isArray(actual.teamIds);
+      assert.lengthOf(actual.teamIds, 2);
       assert.include(actual.teamIds, createdTeams[0].id);
-      assert.include(actual.teamIds, createdTeams[1].id);
+      assert.include(actual.teamIds, createdTeams[2].id);
+    });
+
+    it('should have the correct teamIds when using network scope', async () => {
+      const createdTeams = await Promise.all([
+        teamRepository.create({ networkId: network.id, name: 'Team #1' }),
+        teamRepository.create({ networkId: anotherNetwork.id, name: 'Team in other network' }),
+        teamRepository.create({ networkId: network.id, name: 'Team #2' }),
+      ]);
+
+      await teamRepository.addUserToTeams(R.pluck('id', createdTeams), createdUser.id);
+      const actual = await repository.findByIds([createdUser.id], network.id);
+
+      await Promise.map(createdTeams, (team) => teamRepository.deleteById(team.id));
+
+      assert.lengthOf(actual[0].teamIds, 2);
+      assert.include(actual[0].teamIds, createdTeams[0].id);
+      assert.include(actual[0].teamIds, createdTeams[2].id);
+    });
+
+    it('should have the correct teamIds when not using network scope', async () => {
+      const createdTeams = await Promise.all([
+        teamRepository.create({ networkId: network.id, name: 'Team #1' }),
+        teamRepository.create({ networkId: anotherNetwork.id, name: 'Team in other network' }),
+        teamRepository.create({ networkId: network.id, name: 'Team #2' }),
+      ]);
+
+      await teamRepository.addUserToTeams(R.pluck('id', createdTeams), createdUser.id);
+      const actual = await repository.findByIds([createdUser.id]);
+
+      await Promise.map(createdTeams, (team) => teamRepository.deleteById(team.id));
+
+      assert.lengthOf(actual[0].teamIds, 3);
+      assert.include(actual[0].teamIds, createdTeams[0].id);
+      assert.include(actual[0].teamIds, createdTeams[1].id);
+      assert.include(actual[0].teamIds, createdTeams[2].id);
     });
 
     it('should fail when a scoped user is searched for without network id', async () => {

@@ -17,11 +17,11 @@ const dummyProfileImgPaths = [
   'default/default-3.png',
 ];
 
-const defaultIncludes = {
-  include: [{
-    model: Team,
-  }],
-};
+const defaultIncludes = [{
+  model: Team,
+  attributes: ['id'],
+  required: false,
+}];
 
 const toModel = (dao) => createUserModel(dao);
 const toNetworkLinkModel = (dao) => createNetworkLinkModel(dao);
@@ -41,7 +41,9 @@ const findAllUsers = async () => {
 const findExternalUsers = async (externalIds) => {
   const pivotResult = await NetworkUser.findAll({ where: { externalId: { $in: externalIds } } });
   const userIds = pivotResult.map((result) => result.userId);
-  const result = await User.findAll(R.merge(defaultIncludes, { where: { id: { $in: userIds } } }));
+  const result = await User.findAll(R.merge(
+    { include: defaultIncludes }, { where: { id: { $in: userIds } } }
+  ));
 
   return result;
 };
@@ -54,18 +56,14 @@ const findExternalUsers = async (externalIds) => {
  * @return {external:Promise.<User[]>} {@link module:modules/core~User User}
  */
 const findByIds = async (userIds, networkId = null) => {
-  let result;
+  let includes = defaultIncludes;
 
   if (networkId) {
-    result = await User.findAll(R.merge(defaultIncludes, { where: { id: { $in: userIds } } }));
-  } else {
-    const includes = {
-      include: [{ model: Team,
-        attributes: ['id'],
-        where: { networkId },
-        required: false }] };
-    result = await User.findAll(R.merge(includes, { where: { id: { $in: userIds } } }));
+    includes = R.map(R.merge(R.__, { where: { networkId } }), includes);
   }
+
+  const options = R.merge({ include: includes }, { where: { id: { $in: userIds } } });
+  const result = await User.findAll(options);
 
   return map(result, toModel);
 };
