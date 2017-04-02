@@ -47,7 +47,7 @@ describe('User Repository', () => {
       assert.equal(actual.lastLogin, null);
     });
 
-    it('domain object should have the correct teamIds propertye', async () => {
+    it('domain object should have the correct teamIds property', async () => {
       const createdTeams = await Promise.all([
         teamRepository.create({ networkId: network.id, name: 'Team #1' }),
         teamRepository.create({ networkId: anotherNetwork.id, name: 'Team in other network' }),
