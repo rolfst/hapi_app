@@ -5,8 +5,6 @@ const R = require('ramda');
 const sinon = require('sinon');
 const MixpanelService = require('./mixpanel');
 
-const API_SECRET = process.env.MIXPANEL_SECRET;
-
 describe('Service: mixpanel', () => {
   let sandbox;
 
