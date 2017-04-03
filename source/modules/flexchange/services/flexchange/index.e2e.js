@@ -7,7 +7,7 @@ const exchangeRepository = require('../../repositories/exchange');
 const exchangeService = require('./index');
 
 describe('Service: Flexchange', () => {
-  describe.only('list', () => {
+  describe('list', () => {
     let sandbox;
     let admin;
     let network;
