@@ -38,12 +38,12 @@ pubsub.asyncOn('exchange.created', async (payload) => {
 });
 
 pubsub.asyncOn('exchange.approved', (payload) => {
-  const { exchange, network, credentials, approvedUser } = payload;
+  const { exchange, network, approvedUser } = payload;
 
   objectService.remove({ objectType: 'exchange', sourceId: exchange.id });
   creatorNotifier.send(exchange);
   substituteNotifier.send(exchange);
-  Mixpanel.track(approveExchangeEvent(network, payload.exchange), credentials.id);
+  Mixpanel.track(approveExchangeEvent(network, payload.exchange), approvedUser.id);
   Intercom.incrementAttribute(approvedUser.email, 'exchanged_shifts');
 });
 
