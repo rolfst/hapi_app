@@ -174,18 +174,18 @@ const exportLog = async (severity, message, data, flattenedData = null) => {
 */
     // Send entry to sentry
     //  - Concerning log level, sentry uses the same naming convention we do but in lowercase
-    if (data instanceof Error) {
-      Raven.captureException(data, {
-        level: ELogLevel[severity].toLowerCase(),
-        extra: { message }
-      });
-    } else {
-      // Make sure we have flattened data
-      Raven.captureMessage(flattenedData || buildLogContext(data), {
-        level: ELogLevel[severity].toLowerCase(),
-        extra: { message }
-      });
-    }
+  if (data instanceof Error) {
+    Raven.captureException(data, {
+      level: ELogLevel[severity].toLowerCase(),
+      extra: { message }
+    });
+  } else {
+    // Make sure we have flattened data
+    Raven.captureMessage(flattenedData || buildLogContext(data), {
+      level: ELogLevel[severity].toLowerCase(),
+      extra: { message }
+    });
+  }
 //  });
 
   // Send errors and stuff to sentry and datadog

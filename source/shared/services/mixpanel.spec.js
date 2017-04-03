@@ -6,7 +6,6 @@ const sinon = require('sinon');
 const MixpanelService = require('./mixpanel');
 
 const API_SECRET = process.env.MIXPANEL_SECRET;
-const MP_API_JQL_URI = `https://${API_SECRET}@mixpanel.com`;
 
 describe('Service: mixpanel', () => {
   let sandbox;
