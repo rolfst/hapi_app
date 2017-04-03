@@ -244,8 +244,8 @@ async function createExchange(userId, networkId, attributes) {
 
   return findExchangeById(exchange.id);
 }
-
-const getRespondedToExchange = async (userId, networkId) => {
+// TODO Does not provide all properties that are supposed to be in an exchange
+const findRespondedExchangesForUser = async (userId, networkId) => {
   const exchanges = await Exchange.findAll({
     attributes: ['id'],
     where: { networkId },
@@ -462,7 +462,7 @@ exports.findExchangesByNetwork = findExchangesByNetwork;
 exports.findExchangesByShiftIds = findExchangesByShiftIds;
 exports.findExchangesByTeam = findExchangesByTeam;
 exports.findExchangesByUserAndNetwork = findExchangesByUserAndNetwork;
-exports.getRespondedToExchange = getRespondedToExchange;
+exports.findRespondedExchangesForUser = findRespondedExchangesForUser;
 exports.incrementExchangeAcceptCount = incrementExchangeAcceptCount;
 exports.incrementExchangeDeclineCount = incrementExchangeDeclineCount;
 exports.rejectExchange = rejectExchange;
