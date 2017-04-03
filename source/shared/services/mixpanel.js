@@ -90,11 +90,14 @@ async function executeQuery(query, message) {
   const response = await fetch(MP_API_JQL_URI, options);
   const { status, json } = await handleRequest(response, MP_API_JQL_URI);
 
+  let dataResponse = [];
   if (status !== 200) {
     logger.error('Error occured when fetching data from Mixpanel', {
       status, json, message });
   } else {
-    const dataResponse = json[0] || {};
+    // Mxpanel return double array as result and the element in that array is also an array
+    dataResponse = Array.isArray(json) && (Array.isArray(R.head(json))) ? R.head(json) : [];
+
     logger.debug('Retrieved data from integration', {
       status,
       itemCount: dataResponse.length,
@@ -102,10 +105,11 @@ async function executeQuery(query, message) {
     });
   }
 
-  return { payload: R.head(json), status };
+  return { payload: dataResponse, status };
 }
 
 exports.executeQuery = executeQuery;
 exports.getClient = getClient;
 exports.registerProfile = registerProfile;
 exports.track = track;
+exports.handleRequest = handleRequest;
