@@ -21,7 +21,7 @@ function createEventQueryString(payload) {
         Events({
           from_date: '${startDate}',
           to_date:   '${endDate}',
-          event_selectors: [{ event: 'Approved Shift', selector: 'properties["Network Id"] == "${payload.networkId}"' }]
+          event_selectors: [{ event: 'Shift Takeover', selector: 'properties["Network Id"] == "${payload.networkId}"' }]
         }),
         People(),
         {type: 'left'}

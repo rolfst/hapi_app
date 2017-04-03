@@ -32,7 +32,7 @@ pubsub.asyncOn('exchange.created', async (payload) => {
   Promise.all(createObjectsForReceivers);
 
   createdNotifier.send(exchangeReceivers, payload.exchange);
-  Mixpanel.track(newExchangeEvent(network.id, exchange), credentials.id);
+  Mixpanel.track(newExchangeEvent(network, exchange), credentials.id);
   Intercom.createEvent(credentials.username, 'exchange.create', intercomEventPayload);
   Intercom.incrementAttribute(credentials.username, 'created_shifts');
 });
