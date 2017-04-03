@@ -1,7 +1,6 @@
 const R = require('ramda');
 const createServicePayload = require('../../../shared/utils/create-service-payload');
 const createError = require('../../../shared/utils/create-error');
-const responseUtil = require('../../../shared/utils/response');
 const eventService = require('../services/event');
 
 module.exports = async (req, reply) => {
@@ -20,7 +19,7 @@ module.exports = async (req, reply) => {
 
     const stats = await handler(payload, message);
 
-    return reply({ data: responseUtil.toSnakeCase(stats.payload) });
+    return reply({ data: stats.payload });
   } catch (err) {
     return reply(err);
   }

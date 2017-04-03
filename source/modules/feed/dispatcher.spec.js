@@ -87,7 +87,7 @@ describe('Feed: Dispatcher', () => {
       sandbox.stub(notifier, 'send');
       sandbox.stub(objectService, 'usersForParent').returns(Promise.resolve(usersForParent));
       sandbox.stub(networkService, 'get').returns(Promise.resolve({
-        networkId: '123', name: 'testNetwork' }));
+        id: '123', name: 'testNetwork' }));
       sandbox.stub(Mixpanel, 'track').returns(Promise.resolve(true));
 
       Dispatcher.emit('message.created', {
@@ -99,11 +99,13 @@ describe('Feed: Dispatcher', () => {
       });
 
       await Promise.delay(1000);
-
-      assert.deepEqual(Mixpanel.track.firstCall.args, [
-        { name: 'Created Message',
-          data: { 'Network Id': '123', 'Network Name': 'testNetwork', 'Placed In': 'Team' },
-        }, '111']);
+      const actual = Mixpanel.track.firstCall.args[0];
+      assert.equal(actual.name, 'Created Message');
+      assert.equal(actual.data['Network Id'], '123');
+      assert.equal(actual.data['Network Name'], 'testNetwork');
+      assert.equal(actual.data['Placed In'], 'Team');
+      assert.equal(actual.data['Team Id'], '12');
+      assert.isDefined(actual.data['Created At']);
     });
 
     it('notification text without "in:" when parent name is not present', async () => {

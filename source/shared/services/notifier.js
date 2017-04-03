@@ -15,7 +15,7 @@ function trackPushNotification(notification, user) {
   return Mixpanel.track({ name: 'Push Notification Sent', data: notification.data }, user.id);
 }
 
-function send(users, notification, networkId = null) {
+async function send(users, notification, networkId = null) {
   const data = R.merge(notification.data,
     {
       alert: notification.text,
