@@ -96,20 +96,8 @@ async function findExchangeById(exchangeId, userId) {
     .findById(exchangeId, { include: [...defaultIncludes, ...extraIncludes] });
 
   if (!exchange) throw createError('404');
-
   return exchange;
 }
-
-// FIXME: Should be replaced when flexchange will be used with
-// models instead of DAO's containing so many includes
-const findPlainExchangesById = async (exchangeIds) => {
-  const result = await Exchange.findAll({
-    where: { id: { $in: exchangeIds } },
-    include: [{ attributes: ['value'], model: ExchangeValue }],
-  });
-
-  return R.map(createExchangeModel, result);
-};
 
 /**
  * Find a specific exchange by ids
@@ -474,7 +462,6 @@ exports.findExchangesByNetwork = findExchangesByNetwork;
 exports.findExchangesByShiftIds = findExchangesByShiftIds;
 exports.findExchangesByTeam = findExchangesByTeam;
 exports.findExchangesByUserAndNetwork = findExchangesByUserAndNetwork;
-exports.findPlainExchangesById = findPlainExchangesById;
 exports.getRespondedToExchange = getRespondedToExchange;
 exports.incrementExchangeAcceptCount = incrementExchangeAcceptCount;
 exports.incrementExchangeDeclineCount = incrementExchangeDeclineCount;

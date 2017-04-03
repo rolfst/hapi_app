@@ -7,7 +7,7 @@ const exchangeRepository = require('../../repositories/exchange');
 const exchangeService = require('./index');
 
 describe('Service: Flexchange', () => {
-  describe('list', () => {
+  describe.only('list', () => {
     let sandbox;
     let admin;
     let network;
@@ -78,6 +78,12 @@ describe('Service: Flexchange', () => {
       assert.strictEqual(actual[0].approvedUser, null);
       assert.deepEqual(actual[0].responses, []);
       assert.equal(actual[1].title, 'Test shift');
+      assert.equal(actual[0].networkId, expectedCreatedIn.id);
+      assert.property(actual[0], 'teamId');
+      assert.property(actual[0], 'shiftId');
+      assert.property(actual[0], 'createdFor');
+      assert.equal(actual[0].approvedById, null);
+      assert.equal(actual[0].approvedUserId, null);
     });
 
     describe('Response statusses', () => {
