@@ -62,6 +62,7 @@ const list = async (payload, message) => {
 
   const findUserById = impl.findUserById(occuringUsers);
 
+  // TODO this result doesn't show comments
   return R.map((exchange) => R.merge(exchange, {
     createdIn: impl.makeCreatedInObject(
       impl.addValues(valuesForExchanges, exchange)),
@@ -195,7 +196,7 @@ const approveExchange = async (payload, message) => {
 const listRespondedTo = async (payload, message) => {
   const { network, credentials } = message;
 
-  return exchangeRepo.getRespondedToExchange(credentials.id, network.id);
+  return exchangeRepo.findRespondedExchangesForUser(credentials.id, network.id);
 };
 
 /**
@@ -310,7 +311,7 @@ const rejectExchange = async (payload, message) => {
  */
 const getExchange = async (payload, message) => {
   const { credentials } = message;
-
+  // TODO this result shows comments
   return exchangeRepo.findExchangeById(payload.exchangeId, credentials.id);
 };
 
