@@ -95,7 +95,8 @@ async function executeQuery(query, message) {
     logger.error('Error occured when fetching data from Mixpanel', {
       status, json, message });
   } else {
-    dataResponse = Array.isArray(json) ? R.head(json) : [];
+    // Mxpanel return double array as result and the element in that array is also an array
+    dataResponse = Array.isArray(json) && (Array.isArray(R.head(json))) ? R.head(json) : [];
 
     logger.debug('Retrieved data from integration', {
       status,
@@ -111,3 +112,4 @@ exports.executeQuery = executeQuery;
 exports.getClient = getClient;
 exports.registerProfile = registerProfile;
 exports.track = track;
+exports.handleRequest = handleRequest;
