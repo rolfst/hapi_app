@@ -155,7 +155,7 @@ const getLogger = (name) => bunyan.createLogger(R.merge({ name }, bunyanConfig))
 //  - The flattenedData argument is to prevent flattening the same data twice
 const exportLog = async (severity, message, data, flattenedData = null) => {
   // If we're not running in production, bail out since we don't want to pollute our data
-  if (process.env.API_ENV !== 'production') {
+  if (process.env.API_ENV !== 'production' && !process.env.FORCE_SENTRY_LOG) {
     return;
   }
 
@@ -164,20 +164,29 @@ const exportLog = async (severity, message, data, flattenedData = null) => {
     return;
   }
 
-  // Send entry to sentry
-  //  - Concerning log level, sentry uses the same naming convention we do but in lowercase
-  if (data instanceof Error) {
-    Raven.captureException(data, {
-      level: ELogLevel[severity].toLowerCase(),
-      extra: { message }
-    });
-  } else {
-    // Make sure we have flattened data
-    Raven.captureMessage(flattenedData || buildLogContext(data), {
-      level: ELogLevel[severity].toLowerCase(),
-      extra: { message }
-    });
-  }
+/*  Raven.context(() => {
+    // Should we add user context?
+    if (data.user) {
+      Raven.setContext({
+        user: data.user
+      });
+    }
+*/
+    // Send entry to sentry
+    //  - Concerning log level, sentry uses the same naming convention we do but in lowercase
+    if (data instanceof Error) {
+      Raven.captureException(data, {
+        level: ELogLevel[severity].toLowerCase(),
+        extra: { message }
+      });
+    } else {
+      // Make sure we have flattened data
+      Raven.captureMessage(flattenedData || buildLogContext(data), {
+        level: ELogLevel[severity].toLowerCase(),
+        extra: { message }
+      });
+    }
+//  });
 
   // Send errors and stuff to sentry and datadog
   return true;
