@@ -3,6 +3,7 @@ const Promise = require('bluebird');
 const authenticate = require('./authenticate');
 const blueprints = require('./blueprints');
 const networkService = require('../../modules/core/services/network');
+const exchangeRepo = require('../../modules/flexchange/repositories/exchange');
 const integrationRepo = require('../../modules/core/repositories/integration');
 const userRepo = require('../../modules/core/repositories/user');
 const networkRepo = require('../../modules/core/repositories/network');
@@ -259,6 +260,24 @@ function findAllActivities() {
 function deleteActivity(activity) {
   return activityRepo.deleteById(activity.id);
 }
+/**
+ * Finds all Exchanges 
+ * @method findAllExchanges
+ * @returns {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange}
+ */
+function findAllExchanges() {
+  return exchangeRepo.findAllBy();
+}
+
+/**
+ * Deletes exchanges from database
+ * @param {Exchange} exchange 
+ * @method deleteExchange
+ * @returns {external:Promise.<number[]>} number of deleted exchanges
+ */
+function deleteExchange(exchange) {
+  return exchangeRepo.deleteById(exchange.id);
+}
 
 /**
  * Deletes objects from database
@@ -335,6 +354,7 @@ exports.createNetworkWithIntegration = createNetworkWithIntegration;
 exports.createUser = createUser;
 exports.createUserForNewNetwork = createUserForNewNetwork;
 exports.deleteActivity = deleteActivity;
+exports.deleteExchange = deleteExchange;
 exports.deleteIntegration = deleteIntegration;
 exports.deleteObject = deleteObject;
 exports.deletePoll = deletePoll;
@@ -345,6 +365,7 @@ exports.findAllNetworks = findAllNetworks;
 exports.findAllObjects = findAllObjects;
 exports.findAllPolls = findAllPolls;
 exports.findAllUsers = findAllUsers;
+exports.findAllExchanges = findAllExchanges;
 exports.getLoginToken = getLoginToken;
 exports.hapiFile = hapiFile;
 exports.randomString = randomString;
