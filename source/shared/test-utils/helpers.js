@@ -261,7 +261,7 @@ function deleteActivity(activity) {
   return activityRepo.deleteById(activity.id);
 }
 /**
- * Finds all Exchanges 
+ * Finds all Exchanges
  * @method findAllExchanges
  * @returns {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange}
  */
@@ -271,7 +271,7 @@ function findAllExchanges() {
 
 /**
  * Deletes exchanges from database
- * @param {Exchange} exchange 
+ * @param {Exchange} exchange
  * @method deleteExchange
  * @returns {external:Promise.<number[]>} number of deleted exchanges
  */
