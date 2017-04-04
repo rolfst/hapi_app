@@ -8,7 +8,6 @@ module.exports = (dao) => ({
   teamId: dao.teamId ? dao.teamId.toString() : null,
   shiftId: dao.shiftId ? dao.shiftId.toString() : null,
   createdFor: dao.type || null,
-  responseStatus: null, // Will be set by business logic
   date: dateUtils.toISOString(dao.date),
   startTime: dao.startTime ? dateUtils.toISOString(dao.startTime) : null,
   endTime: dao.endTime ? dateUtils.toISOString(dao.endTime) : null,
@@ -20,4 +19,10 @@ module.exports = (dao) => ({
   approvedById: dao.approvedBy ? dao.approvedBy.toString() : null,
   approvedUserId: dao.approvedUserId ? dao.approvedUserId.toString() : null,
   createdAt: dateUtils.toISOString(dao.created_at),
+  responseStatus: null, // Will be set by business logic
+  createdIn: null, // Will be set by business logic
+  user: null, // Will be set by business logic
+  approvedUser: null, // Will be set by business logic
+  responses: null, // Will be set by business logic
+  Comments: null, // Will be set by business logic
 });
