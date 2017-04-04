@@ -7,7 +7,7 @@ const dispatcher = require('../../dispatcher');
 const exchangeService = require('./index');
 
 describe('Service: Flexchange', () => {
-  describe.only('from create to approveExchange', () => {
+  describe('from create to approveExchange', () => {
     let sandbox;
     let admin;
     let creator;
@@ -82,8 +82,123 @@ describe('Service: Flexchange', () => {
       assert.property(createdExchange1, 'shiftId');
       // assert.property(createdExchange1, 'createdFor');
       assert.equal(createdExchange1.approvedById, null);
-      assert.equal(createdExchange1.approvedUserId, null);
       assert.property(createdExchange1, 'Comments');
+    });
+
+    it('should accept a shift', async () => {
+      createdExchange1 = await exchangeService.createExchange({
+        date: moment().toISOString(),
+        startTime: moment().toISOString(),
+        endTime: moment().add(2, 'hours').toISOString(),
+        title: 'Test shift',
+        type: 'ALL',
+        values: [network.id],
+      }, {
+        network: { id: network.id },
+        credentials: { id: creator.id },
+      });
+
+      const expectedCreatedIn = network.id.toString();
+      const accepted = await exchangeService.acceptExchange(
+        { exchangeId: createdExchange1.id },
+        {
+          credentials: { id: acceptor.id },
+          network: { id: network.id },
+        }
+      );
+
+      const actual = await exchangeService.getExchange(
+        { exchangeId: createdExchange1.id }, { credentials: { id: admin.id } });
+
+      // assert.equal(createdExchange1.type, 'exchange');
+      assert.equal(actual.id, accepted.id);
+      // assert.strictEqual(actual.id, actual.id.toString());
+      assert.property(actual, 'date');
+      assert.property(actual, 'startTime');
+      assert.property(actual, 'endTime');
+      assert.equal(actual.description, null);
+      assert.strictEqual(actual.acceptCount, 1);
+      assert.strictEqual(actual.declineCount, 0);
+      // assert.strictEqual(actual.userId, creator.id);
+      assert.equal(actual.responseStatus, null);
+      assert.strictEqual(actual.isApproved, actual.isApproved);
+      // assert.strictEqual(actual.isApproved, false);
+      assert.strictEqual(actual.createdIn, actual.createdIn);
+      // assert.deepEqual(actual.createdIn, expectedCreatedIn);
+      // assert.strictEqual(actual.user.id, admin.id);
+      assert.strictEqual(actual.approvedUserId, null);
+      // assert.strictEqual(actual.approvedUser, null);
+      // assert.deepEqual(actual.responses, []);
+      assert.equal(actual.title, 'Test shift');
+      assert.equal(actual.networkId, expectedCreatedIn);
+      assert.property(actual, 'teamId');
+      assert.property(actual, 'shiftId');
+      // assert.property(actual, 'createdFor');
+      assert.equal(actual.approvedById, null);
+      assert.property(actual, 'Comments');
+    });
+
+    it('should approve a shift takeover', async () => {
+      createdExchange1 = await exchangeService.createExchange({
+        date: moment().toISOString(),
+        startTime: moment().toISOString(),
+        endTime: moment().add(2, 'hours').toISOString(),
+        title: 'Test shift',
+        type: 'ALL',
+        values: [network.id],
+      }, {
+        network: { id: network.id },
+        credentials: { id: creator.id },
+      });
+
+      const expectedCreatedIn = network.id.toString();
+      await exchangeService.acceptExchange(
+        { exchangeId: createdExchange1.id },
+        {
+          credentials: { id: acceptor.id },
+          network: { id: network.id },
+        }
+      );
+      const approved = await exchangeService.approveExchange(
+        {
+          exchangeId: createdExchange1.id,
+          userId: acceptor.id,
+        },
+        {
+          credentials: { id: admin.id },
+          network: { id: network.id },
+        }
+      );
+
+      const actual = await exchangeService.getExchange(
+        { exchangeId: createdExchange1.id }, { credentials: { id: admin.id } });
+
+      // assert.equal(createdExchange1.type, 'exchange');
+      assert.equal(actual.id, approved.id);
+      // assert.strictEqual(actual.id, actual.id.toString());
+      assert.property(actual, 'date');
+      assert.property(actual, 'startTime');
+      assert.property(actual, 'endTime');
+      assert.equal(actual.description, null);
+      assert.strictEqual(actual.acceptCount, 1);
+      assert.strictEqual(actual.declineCount, 0);
+      // assert.strictEqual(actual.userId, creator.id);
+      assert.equal(actual.responseStatus, null);
+      assert.strictEqual(actual.isApproved, actual.isApproved);
+      // assert.strictEqual(actual.isApproved, true);
+      assert.strictEqual(actual.createdIn, actual.createdIn);
+      // assert.deepEqual(actual.createdIn, expectedCreatedIn);
+      // assert.strictEqual(actual.user.id, admin.id);
+      assert.equal(actual.approvedUserId, acceptor.id);
+      // assert.strictEqual(actual.approvedUser, null);
+      // assert.deepEqual(actual.responses, []);
+      assert.equal(actual.title, 'Test shift');
+      assert.equal(actual.networkId, expectedCreatedIn);
+      assert.property(actual, 'teamId');
+      assert.property(actual, 'shiftId');
+      // assert.property(actual, 'createdFor');
+      // assert.equal(actual.approvedById, admin.id);
+      assert.property(actual, 'Comments');
     });
   });
 });
