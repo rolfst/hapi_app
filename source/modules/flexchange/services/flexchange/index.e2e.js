@@ -31,7 +31,10 @@ describe('Service: Flexchange', () => {
       ]);
     });
 
-    after(() => testHelper.cleanAll());
+    after(() => {
+      sandbox.restore();
+      return testHelper.cleanAll();
+    });
 
     afterEach(async () => {
       const exchanges = await testHelper.findAllExchanges();
