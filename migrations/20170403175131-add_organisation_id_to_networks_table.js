@@ -1,0 +1,25 @@
+'use strict';
+
+module.exports = {
+  up: function (queryInterface, Sequelize) {
+    return queryInterface.addColumn('networks', 'organisation_id', {
+      type: Sequelize.INTEGER.UNSIGNED,
+      allowNull: true,
+      references: {
+        model: 'organisations',
+        key: 'id',
+      },
+      onDelete: 'set null',
+    });
+  },
+
+  down: function (queryInterface, Sequelize) {
+    /*
+      Add reverting commands here.
+      Return a promise to correctly handle asynchronicity.
+
+      Example:
+      return queryInterface.dropTable('users');
+    */
+  }
+};
