@@ -1,6 +1,9 @@
 const R = require('ramda');
 const { _Object } = require('./dao');
 const createDomainObject = require('../models/object');
+//const sequelizeInstance = require('../../../shared/configs/sequelize');
+const sequelize = require('sequelize');
+const { ObjectSeen } = require('./dao');
 
 /**
  * Creating an object
@@ -32,8 +35,105 @@ const create = async (attributes) => {
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
 const findBy = async (whereConstraint, options) => {
-  const result = await _Object.findAll(R.merge(options,
-        { where: whereConstraint }));
+  const result = await _Object.findAll({
+    attributes: ['*', sequelize.fn('COUNT', 'object_seen.*')],
+    include: {
+      model: ObjectSeen,
+    },
+    where: whereConstraint,
+  }, {
+    logging: console.log,
+  });
+
+//  const result = await _Object.findAll(R.merge(options,
+//        { where: whereConstraint }));
+
+  return R.map(createDomainObject, result);
+};
+
+const findByIncludeSeen = async (networkId, filters = [], offset = 0, rowCount = 20) => {
+
+  // TODO - We need a nice query store which could even optimize raw queries
+
+  /*  This query finds objects and joins them with the object_seen table
+   *
+   *  filters are magically created from the sequelize $or array
+   *
+   *  Params for this query:
+   *    - :networkId
+   *    - :offset
+   *    - :rowCount
+   */
+
+  const params = {
+    networkId,
+    offset,
+    rowCount
+  };
+
+  let processedFilters = '1=1';
+
+  if (filters.length) {
+    let extraParamCount = 0;
+    let filtersDone = [];
+
+    filters.forEach((filter) => {
+      let currentFilter = [];
+
+      for (var prop in filter) {
+        const columnName = _Object.attributes[prop].field ? _Object.attributes[prop].field : prop;
+
+        if (filter[prop].$in) {
+          if (filter[prop].$in.length) {
+            const inValues = filter[prop].$in.map(sequelizeInstance.escape).join(', ');
+            currentFilter.push(`o.${columnName} IN (${inValues})`);
+          } else {
+            currentFilter.push('1=0');
+          }
+        } else {
+          extraParamCount += 1;
+
+          const extraParamName = `extra${extraParamCount}`;
+
+          params[extraParamName] = filter[prop];
+          currentFilter.push(`o.${columnName} = :${extraParamName}`);
+        }
+      }
+
+      currentFilter = currentFilter.join(' AND ');
+
+      filtersDone.push(`(${currentFilter})`);
+    });
+
+    filtersDone = filtersDone.join(' OR ');
+
+    processedFilters = `(${filtersDone})`;
+  }
+
+  const objectQueryWithSeenCount = `SELECT
+  o.id id,
+  o.user_id userId,
+  o.object_type objectType,
+  o.source_id sourceId,
+  o.parent_type parentType,
+  o.parent_id parentId,
+  o.created_at createdAt,
+  o.updated_at updatedAt,
+  o.network_id networkId,
+  COUNT(os.id) seenCount
+  FROM objects o LEFT JOIN object_seen os ON (o.id = os.object_id)
+WHERE network_id = :networkId AND ${processedFilters}
+GROUP BY o.id
+ORDER BY created_at DESC
+LIMIT :offset, :rowCount;`;
+
+  const result = await sequelizeInstance.query(
+    objectQueryWithSeenCount,
+    {
+      hasJoin: true,
+      model: _Object,
+      replacements: params
+    });
 
   return R.map(createDomainObject, result);
 };
@@ -95,4 +195,5 @@ exports.deleteBy = deleteBy;
 exports.deleteById = deleteById;
 exports.findAll = findAll;
 exports.findBy = findBy;
+exports.findByIncludeSeen = findByIncludeSeen;
 exports.update = update;

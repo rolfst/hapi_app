@@ -9,6 +9,7 @@ const NetworkIntegrationModel = require('./network-service');
 const TeamUserModel = require('./team-user');
 const UserDeviceModel = require('./user-device');
 const ObjectModel = require('./object');
+const ObjectSeenModel = require('./objectseen');
 
 ActivityModel.belongsTo(UserModel, {
   foreignKey: 'user_id',
@@ -67,6 +68,16 @@ TeamModel.belongsToMany(UserModel, {
   timestamps: false,
 });
 
+ObjectSeenModel.belongsToMany(ObjectModel, {
+  foreignKey: 'object_id',
+  timestamps: false,
+});
+
+ObjectSeenModel.belongsToMany(UserModel, {
+  foreignKey: 'user_id',
+  timestamps: false,
+});
+
 exports.Activity = ActivityModel;
 exports.Network = NetworkModel;
 exports.User = UserModel;
@@ -77,3 +88,4 @@ exports.TeamUser = TeamUserModel;
 exports.UserDevice = UserDeviceModel;
 exports.NetworkIntegration = NetworkIntegrationModel;
 exports._Object = ObjectModel; // eslint-disable-line
+exports.ObjectSeen = ObjectSeenModel;

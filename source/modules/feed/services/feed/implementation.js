@@ -62,6 +62,14 @@ const makeFeed = async (payload, options, message, extraWhereConstraint = {}) =>
     order: [['created_at', 'DESC']],
   });
 
+/*  const relatedObjects = await objectRepository.findByIncludeSeen(
+    payload.networkId,
+    whereConstraint.$or,
+    options.offset,
+    options.limit
+  );
+*/
+
   const hasInclude = R.contains(R.__, options.include || []);
   const [includes, objectsWithSources] = await Promise.all([
     getIncludes(hasInclude, relatedObjects),

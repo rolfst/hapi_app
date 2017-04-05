@@ -84,7 +84,7 @@ describe('Service: Feed', () => {
       return testHelpers.cleanAll();
     });
 
-    it('should only include team messages where user is member of', async () => {
+    it.only('should only include team messages where user is member of', async () => {
       const actual = await feedService.makeForNetwork({
         networkId: network.id,
       }, { network, credentials: employee });
