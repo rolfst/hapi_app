@@ -33,7 +33,7 @@ module.exports = {
       },
       function_id: {
         type: Sequelize.INTEGER.UNSIGNED,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'organisation_functions',
           key: 'id',
