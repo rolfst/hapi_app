@@ -70,11 +70,15 @@ TeamModel.belongsToMany(UserModel, {
 
 ObjectSeenModel.belongsToMany(ObjectModel, {
   foreignKey: 'object_id',
+  otherKey: 'user_id',
+  through: ObjectSeenModel,
   timestamps: false,
 });
 
 ObjectSeenModel.belongsToMany(UserModel, {
   foreignKey: 'user_id',
+  otherKey: 'object_id',
+  through: ObjectSeenModel,
   timestamps: false,
 });
 

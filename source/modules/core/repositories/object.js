@@ -35,18 +35,18 @@ const create = async (attributes) => {
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
 const findBy = async (whereConstraint, options) => {
-  const result = await _Object.findAll({
-    attributes: ['*', sequelize.fn('COUNT', 'object_seen.*')],
-    include: {
-      model: ObjectSeen,
-    },
-    where: whereConstraint,
-  }, {
-    logging: console.log,
-  });
+  // const result = await _Object.findAll({
+  //   attributes: ['*', sequelize.fn('COUNT', 'object_seen.*')],
+  //   include: {
+  //     model: ObjectSeen,
+  //   },
+  //   where: whereConstraint,
+  // }, {
+  //   logging: console.log,
+  // });
 
-//  const result = await _Object.findAll(R.merge(options,
-//        { where: whereConstraint }));
+ const result = await _Object.findAll(R.merge(options,
+       { where: whereConstraint }));
 
   return R.map(createDomainObject, result);
 };
