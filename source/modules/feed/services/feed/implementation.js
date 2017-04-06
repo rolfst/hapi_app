@@ -1,6 +1,7 @@
 const R = require('ramda');
 const Promise = require('bluebird');
 const objectRepository = require('../../../core/repositories/object');
+const objectSeenRepository = require('../../../core/repositories/objectseen');
 const objectService = require('../../../core/services/object');
 const messageService = require('../message');
 
@@ -62,24 +63,24 @@ const makeFeed = async (payload, options, message, extraWhereConstraint = {}) =>
     order: [['created_at', 'DESC']],
   });
 
-/*  const relatedObjects = await objectRepository.findByIncludeSeen(
-    payload.networkId,
-    whereConstraint.$or,
-    options.offset,
-    options.limit
-  );
-*/
+  const objectIds = pluckId(relatedObjects);
+
+  const seenCounts = await objectSeenRepository.findSeenCountsForObjects(objectIds);
 
   const hasInclude = R.contains(R.__, options.include || []);
   const [includes, objectsWithSources] = await Promise.all([
     getIncludes(hasInclude, relatedObjects),
-    objectService.listWithSourceAndChildren({ objectIds: pluckId(relatedObjects) }, message),
+    objectService.listWithSourceAndChildren({ objectIds: objectIds }, message),
   ]);
+
+  const findSeenCount = (object) => R.propOr(0, 'seenCount', R.find(R.propEq('objectId', object.id), seenCounts));
 
   const addComments = (object) =>
     R.assoc('comments', findIncludes(object, includes.comments), object);
   const addLikes = (object) =>
     R.assoc('likes', findIncludes(object, includes.likes), object);
+  const addSeenCount = (object) =>
+    R.assoc('seenCount', findSeenCount(object), object);
 
   const createObjectWithIncludes = R.cond([
     [() => R.and(hasInclude('comments'), hasInclude('likes')), R.pipe(addComments, addLikes)],
@@ -88,7 +89,9 @@ const makeFeed = async (payload, options, message, extraWhereConstraint = {}) =>
     [R.T, R.identity],
   ]);
 
-  return R.map(createObjectWithIncludes, objectsWithSources);
+  const createObjectWithIncludesAndSeenCount = R.pipe(createObjectWithIncludes, addSeenCount);
+
+  return R.map(createObjectWithIncludesAndSeenCount, objectsWithSources);
 };
 
 exports.getIncludes = getIncludes;

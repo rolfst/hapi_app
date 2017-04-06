@@ -10,6 +10,8 @@ const commentService = require('../comment');
 const messageService = require('../message');
 const feedService = require('./index');
 
+const objectSeenRepo = require('../../../core/repositories/objectseen');
+
 describe('Service: Feed', () => {
   describe('make', () => {
     let sandbox;
@@ -84,7 +86,7 @@ describe('Service: Feed', () => {
       return testHelpers.cleanAll();
     });
 
-    it.only('should only include team messages where user is member of', async () => {
+    it('should only include team messages where user is member of', async () => {
       const actual = await feedService.makeForNetwork({
         networkId: network.id,
       }, { network, credentials: employee });
@@ -229,6 +231,28 @@ describe('Service: Feed', () => {
       const objects = await testHelpers.findAllObjects();
 
       assert.equal(objects.length, 6);
+    });
+
+    it.only('should include seen counts for top level objects', async () => {
+      // add seen for one entry
+      await objectSeenRepo.create({
+        userId: employee.id,
+        objectId: createdMessages[0].id
+      });
+
+      const actual = await feedService.makeForNetwork({
+        networkId: network.id,
+        include: ['comments'],
+      }, { network, credentials: admin });
+
+      const seenMessage = R.find(R.propEq('id', createdMessages[0].id), actual);
+      const unseenMessage = R.find(R.propEq('id', createdMessages[1].id), actual);
+
+      assert.property(seenMessage, 'seenCount', 'seen message has seenCount property');
+      assert.property(unseenMessage, 'seenCount', 'unseen message has seenCount property');
+
+      assert.equal(seenMessage.seenCount, 1, 'seen message is seen 1 time');
+      assert.equal(unseenMessage.seenCount, 0, 'unseen message is seen 0 times');
     });
   });
 });

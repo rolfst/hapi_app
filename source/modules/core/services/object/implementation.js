@@ -5,6 +5,7 @@ const attachmentService = require('../../../attachment/services/attachment');
 const privateMessageService = require('../../../chat/v2/services/private-message');
 const feedMessageService = require('../../../feed/services/message');
 const objectRepository = require('../../repositories/object');
+const objectSeenRepository = require('../../repositories/objectseen');
 
 const whereTypeAndId = (type, id) => R.both(R.propEq('type', type), R.propEq('id', id));
 const findSource = (type, id, sources) => R.find(whereTypeAndId(type, id), sources) || null;

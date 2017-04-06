@@ -11,19 +11,19 @@ module.exports = {
         },
         object_id: {
           type: Sequelize.INTEGER.UNSIGNED,
-          allowNull: false,
+          allowNull: false/*,
           references: {
             model: 'objects',
             key: 'id'
-          }
+          }*/
         },
         user_id: {
           type: Sequelize.INTEGER.UNSIGNED,
-          allowNull: false,
+          allowNull: false/*,
           references: {
             model: 'users',
             key: 'id'
-          }
+          }*/
         },
         created_at: {
           type: Sequelize.DATE,

@@ -68,18 +68,6 @@ TeamModel.belongsToMany(UserModel, {
   timestamps: false,
 });
 
-ObjectSeenModel.belongsToMany(ObjectModel, {
-  foreignKey: 'object_id',
-  through: 'objectseen',
-  timestamps: false,
-});
-
-ObjectSeenModel.belongsToMany(UserModel, {
-  foreignKey: 'user_id',
-  through: 'objectseen',
-  timestamps: false,
-});
-
 exports.Activity = ActivityModel;
 exports.Network = NetworkModel;
 exports.User = UserModel;

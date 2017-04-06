@@ -1,7 +1,7 @@
 const R = require('ramda');
 const Sequelize = require('sequelize');
 const { ObjectSeen } = require('./dao');
-const createDomainObject = require('../models/object');
+const createDomainObject = require('../models/objectseen');
 
 /**
  * Creating an object
@@ -47,7 +47,7 @@ const findSeenCountsForObjects = (messageIds) => {
   }, {
     attributes: [
       'objectId',
-      [Sequelize.fn('count', Sequelize.col('id')), 'seenCount']],
+      [Sequelize.fn('COUNT', Sequelize.col('object_id')), 'seenCount']],
     group: ['objectId']
   });
 };
