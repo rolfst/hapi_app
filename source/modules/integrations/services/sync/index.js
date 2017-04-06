@@ -20,7 +20,7 @@ const logger = require('../../../../shared/services/logger')('INTEGRATIONS/servi
  */
 const syncNetwork = async (payload, message) => {
   try {
-    logger.debug('Started network synchronization', { payload, message });
+    logger.info('Started network synchronization', { payload, message });
 
     const network = await networkRepository.findNetworkById(payload.networkId);
     if (!network) throw createError('404', 'Network not found.');
@@ -59,7 +59,7 @@ const syncNetwork = async (payload, message) => {
       )(userActions),
     };
 
-    logger.debug('Successfully synced network', { payload, actions });
+    logger.info('Successfully synced network', { payload, actions });
 
     return actions;
   } catch (err) {

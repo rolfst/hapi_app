@@ -1,6 +1,6 @@
 const CronJob = require('cron').CronJob;
 const R = require('ramda');
-const createSentryClient = require('../../shared/services/sentry').default;
+const createSentryClient = require('../../shared/services/sentry');
 const networkRepo = require('../core/repositories/network');
 const syncService = require('../integrations/services/sync');
 const weeklyUpdate = require('./weekly-update');
