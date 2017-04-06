@@ -2,6 +2,7 @@ const createError = require('../../../shared/utils/create-error');
 const { ActivityTypes } = require('../../core/repositories/dao/activity');
 const { createActivity } = require('../../core/repositories/activity');
 const ExchangeComment = require('./dao/exchange-comment');
+const createExchangeCommentModel = require('../models/exchange-comment');
 
 /**
  * @module modules/flexchange/repositories/comment
@@ -19,7 +20,7 @@ function findCommentById(commentId) {
     .then((comment) => {
       if (!comment) throw createError('404');
 
-      return comment;
+      return createExchangeCommentModel(comment);
     });
 }
 
@@ -61,6 +62,11 @@ function findCommentsByExchange(exchange) {
   return exchange.getComments();
 }
 
+function findBy(attributes) {
+  return ExchangeComment.findAll({ where: attributes });
+}
+
 exports.createExchangeComment = createExchangeComment;
 exports.findCommentById = findCommentById;
 exports.findCommentsByExchange = findCommentsByExchange;
+exports.findBy = findBy;
