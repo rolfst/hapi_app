@@ -61,6 +61,11 @@ const list = async (payload, message) => {
     R.find(R.propEq('userId', userId), responsesForExchange(exchangeId));
 
   const findUserById = impl.findUserById(occuringUsers);
+  const occuringExchangeIds = R.pluck('id', exchanges);
+  const comments = R.pipeP(
+    (exchangeIds) => commentRepo.findBy({ exchangeId: { $in: exchangeIds } }),
+    R.groupBy('exchangeId')
+  )(occuringExchangeIds);
 
   // TODO this result doesn't show comments
   return R.map((exchange) => R.merge(exchange, {
@@ -72,6 +77,7 @@ const list = async (payload, message) => {
       responseForUser(message.credentials.id, exchange.id)),
     responses: impl.replaceUsersInResponses(
       occuringUsers, responsesForExchange(exchange.id)),
+    Comments: R.defaultTo([], comments[exchange.id]),
   }), exchanges);
 };
 
@@ -182,7 +188,7 @@ const approveExchange = async (payload, message) => {
 
   const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
 
-  return exchanges[0];
+  return R.head(exchanges);
 };
 
 /**

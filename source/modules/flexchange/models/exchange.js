@@ -24,5 +24,5 @@ module.exports = (dao) => ({
   user: null, // Will be set by business logic
   approvedUser: null, // Will be set by business logic
   responses: null, // Will be set by business logic
-  Comments: null, // Will be set by business logic
+  Comments: [], // Will be set by business logic
 });

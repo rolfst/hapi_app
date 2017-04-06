@@ -6,7 +6,7 @@ const testHelper = require('../../../../shared/test-utils/helpers');
 const dispatcher = require('../../dispatcher');
 const exchangeService = require('./index');
 
-describe.only('Service: Flexchange', () => {
+describe('Service: Flexchange', () => {
   let sandbox;
   let admin;
   let creator;
@@ -17,7 +17,7 @@ describe.only('Service: Flexchange', () => {
     sandbox = sinon.sandbox.create();
   });
 
-  describe.only('from create to approveExchange', () => {
+  describe('from create to approveExchange', () => {
     let createdExchange1;
 
     before(async () => {
@@ -45,7 +45,7 @@ describe.only('Service: Flexchange', () => {
       return Promise.all(R.map(testHelper.deleteExchange, exchanges));
     });
 
-    it.only('should create a shift', async () => {
+    it('should create a shift', async () => {
       createdExchange1 = await exchangeService.createExchange({
         date: moment().toISOString(),
         startTime: moment().toISOString(),
@@ -94,6 +94,7 @@ describe.only('Service: Flexchange', () => {
       assert.property(createdExchange1, 'createdFor');
       assert.equal(createdExchange1.approvedById, null);
       assert.property(createdExchange1, 'Comments');
+      assert.lengthOf(createdExchange1.Comments, 0);
     });
 
     it('should accept a shift', async () => {
@@ -109,7 +110,11 @@ describe.only('Service: Flexchange', () => {
         credentials: { id: creator.id },
       });
 
-      const expectedCreatedIn = network.id.toString();
+
+      const expectedCreatedIn = {
+        type: 'network',
+        id: network.id.toString(),
+      };
       const accepted = await exchangeService.acceptExchange(
         { exchangeId: createdExchange1.id },
         {
@@ -118,9 +123,14 @@ describe.only('Service: Flexchange', () => {
         }
       );
 
-      const actual = await exchangeService.getExchange(        { exchangeId: createdExchange1.id }, { credentials: { id: admin.id } });
+      const actual = await exchangeService.getExchange(
+        { exchangeId: createdExchange1.id },
+        {
+          credentials: { id: admin.id },
+          network: { id: network.id },
+        });
 
-       assert.equal(createdExchange1.type, 'exchange');
+      assert.equal(createdExchange1.type, 'exchange');
       assert.equal(actual.id, accepted.id);
       assert.strictEqual(actual.id, actual.id.toString());
       assert.property(actual, 'date');
@@ -135,17 +145,19 @@ describe.only('Service: Flexchange', () => {
       assert.strictEqual(actual.isApproved, false);
       assert.strictEqual(actual.createdIn, actual.createdIn);
       assert.deepEqual(actual.createdIn, expectedCreatedIn);
-      assert.strictEqual(actual.user.id, admin.id);
+      assert.strictEqual(actual.user.id, creator.id);
       assert.strictEqual(actual.approvedUserId, null);
       assert.strictEqual(actual.approvedUser, null);
-      assert.deepEqual(actual.responses, []);
+      assert.lengthOf(actual.responses, 1);
       assert.equal(actual.title, 'Test shift');
-      assert.equal(actual.networkId, expectedCreatedIn);
+      assert.deepEqual(actual.createdIn, expectedCreatedIn);
       assert.property(actual, 'teamId');
       assert.property(actual, 'shiftId');
       assert.property(actual, 'createdFor');
       assert.equal(actual.approvedById, null);
       assert.property(actual, 'Comments');
+      assert.lengthOf(createdExchange1.Comments, 0);
+      assert.lengthOf(actual.Comments, 0);
     });
 
     it('should decline a shift', async () => {
@@ -161,7 +173,10 @@ describe.only('Service: Flexchange', () => {
         credentials: { id: creator.id },
       });
 
-      const expectedCreatedIn = network.id.toString();
+      const expectedCreatedIn = {
+        type: 'network',
+        id: network.id.toString(),
+      };
       const accepted = await exchangeService.declineExchange(
         { exchangeId: createdExchange1.id },
         {
@@ -171,7 +186,12 @@ describe.only('Service: Flexchange', () => {
       );
 
       const actual = await exchangeService.getExchange(
-        { exchangeId: createdExchange1.id }, { credentials: { id: admin.id } });
+        { exchangeId: createdExchange1.id },
+        {
+          credentials: { id: admin.id },
+          network: { id: network.id },
+        }
+      );
 
       assert.equal(createdExchange1.type, 'exchange');
       assert.equal(actual.id, accepted.id);
@@ -188,12 +208,12 @@ describe.only('Service: Flexchange', () => {
       assert.strictEqual(actual.isApproved, false);
       assert.strictEqual(actual.createdIn, actual.createdIn);
       assert.deepEqual(actual.createdIn, expectedCreatedIn);
-      assert.strictEqual(actual.user.id, admin.id);
+      assert.strictEqual(actual.user.id, creator.id);
       assert.strictEqual(actual.approvedUserId, null);
       assert.strictEqual(actual.approvedUser, null);
-      assert.deepEqual(actual.responses, []);
+      assert.lengthOf(actual.responses, 1);
       assert.equal(actual.title, 'Test shift');
-      assert.equal(actual.networkId, expectedCreatedIn);
+      assert.equal(actual.networkId, expectedCreatedIn.id);
       assert.property(actual, 'teamId');
       assert.property(actual, 'shiftId');
       assert.property(actual, 'createdFor');
@@ -214,7 +234,10 @@ describe.only('Service: Flexchange', () => {
         credentials: { id: creator.id },
       });
 
-      const expectedCreatedIn = network.id.toString();
+      const expectedCreatedIn = {
+        type: 'network',
+        id: network.id.toString(),
+      };
       await exchangeService.acceptExchange(
         { exchangeId: createdExchange1.id },
         {
@@ -234,8 +257,12 @@ describe.only('Service: Flexchange', () => {
       );
 
       const actual = await exchangeService.getExchange(
-        { exchangeId: createdExchange1.id }, { credentials: { id: admin.id } });
-
+        { exchangeId: createdExchange1.id },
+        {
+          credentials: { id: admin.id },
+          network: { id: network.id },
+        }
+      );
       assert.equal(createdExchange1.type, 'exchange');
       assert.equal(actual.id, approved.id);
       assert.strictEqual(actual.id, actual.id.toString());
@@ -251,19 +278,19 @@ describe.only('Service: Flexchange', () => {
       assert.strictEqual(actual.isApproved, true);
       assert.strictEqual(actual.createdIn, actual.createdIn);
       assert.deepEqual(actual.createdIn, expectedCreatedIn);
-      assert.strictEqual(actual.user.id, admin.id);
+      assert.strictEqual(actual.user.id, creator.id);
       assert.equal(actual.approvedUserId, acceptor.id);
-      assert.strictEqual(actual.approvedUser, null);
-      assert.deepEqual(actual.responses, []);
+      assert.strictEqual(actual.approvedUser.id, actual.approvedUserId);
+      assert.lengthOf(actual.responses, 1);
       assert.equal(actual.title, 'Test shift');
-      assert.equal(actual.networkId, expectedCreatedIn);
+      assert.equal(actual.networkId, expectedCreatedIn.id);
       assert.property(actual, 'teamId');
       assert.property(actual, 'shiftId');
       assert.property(actual, 'createdFor');
       assert.equal(actual.approvedById, admin.id);
       assert.property(actual, 'Comments');
     });
-  
+
     it('should reject a shift takeover', async () => {
       createdExchange1 = await exchangeService.createExchange({
         date: moment().toISOString(),
@@ -277,7 +304,6 @@ describe.only('Service: Flexchange', () => {
         credentials: { id: creator.id },
       });
 
-      const expectedCreatedIn = network.id.toString();
       await exchangeService.acceptExchange(
         { exchangeId: createdExchange1.id },
         {
@@ -296,8 +322,17 @@ describe.only('Service: Flexchange', () => {
         }
       );
 
+      const expectedCreatedIn = {
+        type: 'network',
+        id: network.id.toString(),
+      };
       const actual = await exchangeService.getExchange(
-        { exchangeId: createdExchange1.id }, { credentials: { id: admin.id } });
+        { exchangeId: createdExchange1.id },
+        {
+          credentials: { id: admin.id },
+          network: { id: network.id },
+        }
+      );
 
       assert.equal(createdExchange1.type, 'exchange');
       assert.equal(actual.id, approved.id);
@@ -314,17 +349,19 @@ describe.only('Service: Flexchange', () => {
       assert.strictEqual(actual.isApproved, false);
       assert.strictEqual(actual.createdIn, actual.createdIn);
       assert.deepEqual(actual.createdIn, expectedCreatedIn);
-      assert.strictEqual(actual.user.id, admin.id);
+      assert.strictEqual(actual.user.id, creator.id);
       assert.equal(actual.approvedUserId, null);
       assert.strictEqual(actual.approvedUser, null);
-      assert.deepEqual(actual.responses, []);
+      assert.lengthOf(actual.responses, 1);
       assert.equal(actual.title, 'Test shift');
-      assert.equal(actual.networkId, expectedCreatedIn);
+      assert.deepEqual(actual.createdIn, expectedCreatedIn);
       assert.property(actual, 'teamId');
       assert.property(actual, 'shiftId');
       assert.property(actual, 'createdFor');
-      assert.equal(actual.approvedById, admin.id);
+      assert.equal(actual.approvedById, null);
       assert.property(actual, 'Comments');
+      assert.lengthOf(createdExchange1.Comments, 0);
+      assert.lengthOf(actual.Comments, 0);
     });
   });
 
@@ -356,7 +393,7 @@ describe.only('Service: Flexchange', () => {
       return Promise.all(R.map(testHelper.deleteExchange, exchanges));
     });
 
-    it('should populate the comments', async () => {
+    it.only('should populate the comments', async () => {
       createdExchange1 = await exchangeService.createExchange({
         date: moment().toISOString(),
         startTime: moment().toISOString(),
@@ -369,7 +406,10 @@ describe.only('Service: Flexchange', () => {
         credentials: { id: creator.id },
       });
 
-      const expectedCreatedIn = network.id.toString();
+      const expectedCreatedIn = {
+        type: 'network',
+        id: network.id.toString(),
+      };
       const commented = await exchangeService.createExchangeComment(
         { exchangeId: createdExchange1.id,
           text: 'voor een extra doe ik het'
@@ -381,8 +421,12 @@ describe.only('Service: Flexchange', () => {
       );
 
       const actual = await exchangeService.getExchange(
-        { exchangeId: createdExchange1.id }, { credentials: { id: admin.id } });
-
+        { exchangeId: createdExchange1.id },
+        {
+          credentials: { id: acceptor.id },
+          network: { id: network.id },
+        }
+      );
       assert.equal(createdExchange1.type, 'exchange');
       assert.strictEqual(actual.id, actual.id.toString());
       assert.property(actual, 'date');
@@ -397,7 +441,7 @@ describe.only('Service: Flexchange', () => {
       assert.strictEqual(actual.isApproved, false);
       assert.strictEqual(actual.createdIn, commented.createdIn);
       assert.deepEqual(actual.createdIn, expectedCreatedIn);
-      assert.strictEqual(actual.user.id, admin.id);
+      assert.strictEqual(actual.user.id, creator.id);
       assert.strictEqual(actual.approvedUserId, null);
       assert.strictEqual(actual.approvedUser, null);
       assert.deepEqual(actual.responses, []);
@@ -483,7 +527,7 @@ describe.only('Service: Flexchange', () => {
       assert.strictEqual(actual[0].isApproved, false);
       assert.strictEqual(actual[0].createdIn, actual[0].createdIn);
       assert.deepEqual(actual[0].createdIn, expectedCreatedIn);
-      assert.strictEqual(actual[0].user.id, admin.id);
+      assert.strictEqual(actual[0].user.id, creator.id);
       assert.strictEqual(actual[0].approvedUserId, null);
       assert.strictEqual(actual[0].approvedUser, null);
       assert.deepEqual(actual[0].responses, []);
@@ -535,7 +579,7 @@ describe.only('Service: Flexchange', () => {
       assert.strictEqual(actual[0].isApproved, false);
       assert.strictEqual(actual[0].createdIn, actual[0].createdIn);
       assert.deepEqual(actual[0].createdIn, expectedCreatedIn);
-      assert.strictEqual(actual[0].user.id, admin.id);
+      assert.strictEqual(actual[0].user.id, creator.id);
       assert.strictEqual(actual[0].approvedUserId, null);
       assert.strictEqual(actual[0].approvedUser, null);
       assert.deepEqual(actual[0].responses, []);
@@ -587,7 +631,7 @@ describe.only('Service: Flexchange', () => {
       assert.strictEqual(actual[0].isApproved, false);
       assert.strictEqual(actual[0].createdIn, actual[0].createdIn);
       assert.deepEqual(actual[0].createdIn, expectedCreatedIn);
-      assert.strictEqual(actual[0].user.id, admin.id);
+      assert.strictEqual(actual[0].user.id, creator.id);
       assert.strictEqual(actual[0].approvedUserId, null);
       assert.strictEqual(actual[0].approvedUser, null);
       assert.deepEqual(actual[0].responses, []);
@@ -658,29 +702,29 @@ describe.only('Service: Flexchange', () => {
         }
       );
 
-      // assert.equal(createdExchange1.type, 'exchange');
-      // assert.strictEqual(actual.id, createdExchange1.id.toString());
+      assert.equal(createdExchange1.type, 'exchange');
+      assert.strictEqual(actual.id, createdExchange1.id.toString());
       assert.property(actual[0], 'date');
       assert.property(actual[0], 'startTime');
       assert.property(actual[0], 'endTime');
       assert.equal(actual[0].description, null);
       assert.strictEqual(actual[0].acceptCount, 0);
       assert.strictEqual(actual[0].declineCount, 0);
-      // assert.strictEqual(actual[0].userId, creator.id);
+      assert.strictEqual(actual[0].userId, creator.id);
       assert.equal(actual[0].responseStatus, null);
       assert.strictEqual(actual[0].isApproved, actual.isApproved);
-      // assert.strictEqual(actual[0].isApproved, false);
+      assert.strictEqual(actual[0].isApproved, false);
       assert.strictEqual(actual[0].createdIn, actual.createdIn);
-      // assert.deepEqual(actual[0].createdIn, expectedCreatedIn);
-      // assert.strictEqual(actual[0].user.id, admin.id);
+      assert.deepEqual(actual[0].createdIn, expectedCreatedIn);
+      assert.strictEqual(actual[0].user.id, creator.id);
       assert.strictEqual(actual[0].approvedUserId, null);
-      // assert.strictEqual(actual[0].approvedUser, null);
-      // assert.deepEqual(actual[0].responses, []);
+      assert.strictEqual(actual[0].approvedUser, null);
+      assert.deepEqual(actual[0].responses, []);
       assert.equal(actual[0].title, 'Test shift');
       assert.equal(actual[0].networkId, expectedCreatedIn.id);
       assert.property(actual[0], 'teamId');
       assert.property(actual[0], 'shiftId');
-      // assert.property(actual[0], 'createdFor');
+      assert.property(actual[0], 'createdFor');
       assert.equal(actual[0].approvedById, null);
       assert.property(actual[0], 'Comments');
     });
