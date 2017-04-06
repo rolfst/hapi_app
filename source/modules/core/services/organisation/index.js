@@ -15,7 +15,7 @@ const logger = require('../../../../shared/services/logger')('CORE/service/objec
  * @param {string} payload.brandIcon
  * @param {Message} message {@link module:shared~Message message}
  * @method create
- * @return {external:Promise<Organisation>} {@link module:core~Organisation}
+ * @return {external:Promise.<Organisation>} {@link module:modules/core~Organisation}
  */
 const create = (payload, message) => {
   logger.debug('Creating organisation', { payload, message });
@@ -29,7 +29,7 @@ const create = (payload, message) => {
  * @param {string} payload.organisationId
  * @param {Message} message {@link module:shared~Message message}
  * @method listNetworks
- * @return {external:Promise<Network[]>} {@link module:core~Network}
+ * @return {external:Promise.<Network[]>} {@link module:modules/core~Network}
  */
 const listNetworks = async (payload, message) => {
   logger.debug('List all network for organisation', { payload, message });
@@ -53,7 +53,7 @@ const listNetworks = async (payload, message) => {
  * @param {UserRoles} payload.roleType
  * @param {Message} message {@link module:shared~Message message}
  * @method addUser
- * @return {external:Promise<boolean>}
+ * @return {external:Promise.<boolean>}
  */
 const addUser = async (payload, message) => {
   logger.debug('Adding user to organisation', { payload, message });
