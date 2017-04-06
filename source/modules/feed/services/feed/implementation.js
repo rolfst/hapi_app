@@ -70,7 +70,7 @@ const makeFeed = async (payload, options, message, extraWhereConstraint = {}) =>
   const hasInclude = R.contains(R.__, options.include || []);
   const [includes, objectsWithSources] = await Promise.all([
     getIncludes(hasInclude, relatedObjects),
-    objectService.listWithSourceAndChildren({ objectIds: objectIds }, message),
+    objectService.listWithSourceAndChildren({ objectIds }, message),
   ]);
 
   const findSeenCount = (object) => R.propOr(0, 'seenCount', R.find(R.propEq('objectId', object.id), seenCounts));

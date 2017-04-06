@@ -6,7 +6,7 @@ module.exports = (dataModel) => {
     return {
       objectId: dataModel.objectId.toString(),
       seenCount: dataModel.dataValues.seenCount || 0
-    }
+    };
   }
 
   return {

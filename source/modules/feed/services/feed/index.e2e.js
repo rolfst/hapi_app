@@ -233,7 +233,7 @@ describe('Service: Feed', () => {
       assert.equal(objects.length, 6);
     });
 
-    it.only('should include seen counts for top level objects', async () => {
+    it('should include seen counts for top level objects', async () => {
       // add seen for one entry
       await objectSeenRepo.create({
         userId: employee.id,
