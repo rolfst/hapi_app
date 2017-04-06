@@ -1,3 +1,4 @@
+const R = require('ramda');
 const createError = require('../../../shared/utils/create-error');
 const { ActivityTypes } = require('../../core/repositories/dao/activity');
 const { createActivity } = require('../../core/repositories/activity');
@@ -63,7 +64,8 @@ function findCommentsByExchange(exchange) {
 }
 
 function findBy(attributes) {
-  return ExchangeComment.findAll({ where: attributes });
+  return ExchangeComment.findAll({ where: attributes })
+    .then((comments) => R.map(createExchangeCommentModel, comments));
 }
 
 exports.createExchangeComment = createExchangeComment;

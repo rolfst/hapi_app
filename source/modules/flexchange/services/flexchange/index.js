@@ -62,9 +62,9 @@ const list = async (payload, message) => {
 
   const findUserById = impl.findUserById(occuringUsers);
   const occuringExchangeIds = R.pluck('id', exchanges);
-  const comments = R.pipeP(
+  const comments = await R.pipeP(
     (exchangeIds) => commentRepo.findBy({ exchangeId: { $in: exchangeIds } }),
-    R.groupBy('exchangeId')
+    R.groupBy((comment) => comment.exchangeId)
   )(occuringExchangeIds);
 
   // TODO this result doesn't show comments
