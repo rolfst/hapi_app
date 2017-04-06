@@ -3,6 +3,7 @@ const dateUtils = require('../../../shared/utils/date');
 const createUserModel = require('./user');
 
 const replaceChars = (string) => string.match(/([A-Z])\w+/g);
+const adminProperties = ['id', 'fullName', 'email', 'function', 'profileImg'];
 
 module.exports = (dao) => ({
   type: 'network',
@@ -12,7 +13,7 @@ module.exports = (dao) => ({
   importedAt: dao.Integrations[0] ? dao.Integrations[0].NetworkIntegration.importedAt : null,
   hasIntegration: dao.Integrations.length > 0,
   integrations: R.pluck('name', dao.Integrations),
-  superAdmin: dao.SuperAdmin ? R.pick(['id', 'fullName', 'email', 'function', 'profileImg'], createUserModel(dao.SuperAdmin)) : null,
+  superAdmin: dao.SuperAdmin ? R.pick(adminProperties, createUserModel(dao.SuperAdmin)) : null,
   enabledComponents: R.pipe(R.split(','), R.map(replaceChars), R.flatten)(dao.enabledComponents),
   welcomeMailTemplate: dao.welcomeMailTemplate || null,
   createdAt: dateUtils.toISOString(dao.created_at),
