@@ -310,9 +310,10 @@ const rejectExchange = async (payload, message) => {
  * Promise with an Exchange
  */
 const getExchange = async (payload, message) => {
-  const { credentials } = message;
   // TODO this result shows comments
-  return exchangeRepo.findExchangeById(payload.exchangeId, credentials.id);
+  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+
+  return R.head(exchanges);
 };
 
 /**
@@ -505,7 +506,9 @@ const createExchange = async (payload, message) => {
     });
   }
 
-  return exchangeRepo.findExchangeById(createdExchange.id);
+  const exchanges = await list({ exchangeIds: [createdExchange.id] }, message);
+
+  return R.head(exchanges);
 };
 
 /**
