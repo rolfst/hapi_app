@@ -405,11 +405,6 @@ describe('Service: Flexchange', () => {
         network: { id: network.id },
         credentials: { id: creator.id },
       });
-
-      const expectedCreatedIn = {
-        type: 'network',
-        id: network.id.toString(),
-      };
       const commented = await exchangeService.createExchangeComment(
         { exchangeId: createdExchange1.id,
           text: 'voor een extra doe ik het'
@@ -420,6 +415,10 @@ describe('Service: Flexchange', () => {
         }
       );
 
+      const expectedCreatedIn = {
+        type: 'network',
+        id: network.id.toString(),
+      };
       const actual = await exchangeService.getExchange(
         { exchangeId: createdExchange1.id },
         {
@@ -437,16 +436,14 @@ describe('Service: Flexchange', () => {
       assert.strictEqual(actual.declineCount, 0);
       assert.strictEqual(actual.userId, creator.id);
       assert.equal(actual.responseStatus, null);
-      assert.strictEqual(actual.isApproved, commented.isApproved);
       assert.strictEqual(actual.isApproved, false);
-      assert.strictEqual(actual.createdIn, commented.createdIn);
       assert.deepEqual(actual.createdIn, expectedCreatedIn);
       assert.strictEqual(actual.user.id, creator.id);
       assert.strictEqual(actual.approvedUserId, null);
       assert.strictEqual(actual.approvedUser, null);
       assert.deepEqual(actual.responses, []);
       assert.equal(actual.title, 'Test shift');
-      assert.equal(actual.networkId, expectedCreatedIn);
+      assert.deepEqual(actual.createdIn, expectedCreatedIn);
       assert.property(actual, 'teamId');
       assert.property(actual, 'shiftId');
       assert.property(actual, 'createdFor');
