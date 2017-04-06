@@ -9,9 +9,17 @@ const NetworkIntegrationModel = require('./network-service');
 const TeamUserModel = require('./team-user');
 const UserDeviceModel = require('./user-device');
 const ObjectModel = require('./object');
+const OrganisationModel = require('./organisation');
+const OrganisationUserModel = require('./organisation-user');
 
 ActivityModel.belongsTo(UserModel, {
   foreignKey: 'user_id',
+});
+
+OrganisationModel.belongsToMany(UserModel, {
+  foreignKey: 'organisation_id',
+  otherKey: 'user_id',
+  through: OrganisationUserModel,
 });
 
 NetworkModel.belongsTo(UserModel, {
@@ -77,3 +85,5 @@ exports.TeamUser = TeamUserModel;
 exports.UserDevice = UserDeviceModel;
 exports.NetworkIntegration = NetworkIntegrationModel;
 exports._Object = ObjectModel; // eslint-disable-line
+exports.Organisation = OrganisationModel;
+exports.OrganisationUser = OrganisationUserModel;
