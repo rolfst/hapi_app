@@ -129,6 +129,17 @@ function addTeamToNetwork(networkId, name = randomString(), description = null) 
 }
 
 /**
+ * Adds a User to a team
+ * @param {string} teamId
+ * @param {string} userId
+ * @method addUserToTeam
+ * @return {external:Promise.<TeamUser>} {@link module:modules/core~TeamUser TeamUser}
+ */
+function addUserToTeam(teamId, userId) {
+  return teamRepo.addUserToTeam(teamId, userId);
+}
+
+/**
  * @param {object} credentials
  * @param {string} creadentials.username
  * @param {string} creadentials.password
@@ -346,6 +357,7 @@ exports.DEFAULT_INTEGRATION = DEFAULT_INTEGRATION;
 exports.DEFAULT_NETWORK_EXTERNALID = DEFAULT_NETWORK_EXTERNALID;
 exports.addTeamToNetwork = addTeamToNetwork;
 exports.addUserToNetwork = addUserToNetwork;
+exports.addUserToTeam = addUserToTeam;
 exports.authenticateUser = authenticateUser;
 exports.cleanAll = cleanAll;
 exports.createIntegration = createIntegration;
