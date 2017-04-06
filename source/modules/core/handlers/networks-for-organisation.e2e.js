@@ -8,9 +8,11 @@ describe('Handler: Networks for organisation', () => {
   let otherUser;
 
   before(async () => {
-    organisation = await testHelpers.createOrganisation();
-    admin = await testHelpers.createUser();
-    otherUser = await testHelpers.createUser();
+    [organisation, admin, otherUser] = await Promise.all([
+      testHelpers.createOrganisation(),
+      testHelpers.createUser(),
+      testHelpers.createUser(),
+    ]);
 
     await testHelpers.addUserToOrganisation(admin.id, organisation.id, 'ADMIN');
 
