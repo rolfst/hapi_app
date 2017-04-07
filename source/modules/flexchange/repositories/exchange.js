@@ -189,22 +189,6 @@ const findExchangesByNetwork = async (networkId, options = {}) => {
 };
 
 /**
- * Find exchanges by team
- * @param {Team} team - Team we want the exchanges from
- * @method findExchangesByTeam
- * @return {Promise} Get exchanges promise
- */
-const findExchangesByTeam = async (teamId, userId, filter = {}) => {
-  const teamDAO = await Team.findById(teamId);
-  const exchanges = await teamDAO.getExchanges();
-
-  const dateFilter = createDateFilter(filter.start, filter.end);
-  const constraint = dateFilter ? { where: { date: dateFilter } } : {};
-
-  return findExchangeByIds(map(exchanges, 'id'), userId, constraint);
-};
-
-/**
  * Delete a specific exchange by id
  * @param {number} exchangeId - Id of exchange to be deleted
  * @method deleteById
@@ -462,7 +446,6 @@ exports.findExchangeByIds = findExchangeByIds;
 exports.findExchangeIdsForValues = findExchangeIdsForValues;
 exports.findExchangesByNetwork = findExchangesByNetwork;
 exports.findExchangesByShiftIds = findExchangesByShiftIds;
-exports.findExchangesByTeam = findExchangesByTeam;
 exports.findExchangesByUserAndNetwork = findExchangesByUserAndNetwork;
 exports.findRespondedExchangesForUser = findRespondedExchangesForUser;
 exports.incrementExchangeAcceptCount = incrementExchangeAcceptCount;

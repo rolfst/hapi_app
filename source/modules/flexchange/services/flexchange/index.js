@@ -171,7 +171,7 @@ const acceptExchange = async (payload, message) => {
 
   const exchanges = await listConstrainted({ exchangeIds: [payload.exchangeId] }, message);
 
-  return exchanges[0];
+  return R.head(exchanges);
 };
 
 /**
@@ -412,26 +412,6 @@ const listAvailableUsersForShift = async (payload, message) => {
 };
 
 /**
- * Lists exchanges for a team.
- * @param {object} payload - Object containing payload data
- * @param {string} payload.teamId - The id of the shift to fetch
- * @param {string} payload.start - start of the offset
- * @param {string} payload.end - end of the offset
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method listExchangesForTeam
- * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange} -
- * Promise with a list of Exchanges for team
- */
-const listExchangesForTeam = async (payload, message) => {
-  const filter = R.pick(FILTER_PROPERTIES, payload);
-  const team = await teamRepo.findTeamById(payload.teamId);
-  const exchanges = await exchangeRepo.findExchangesByTeam(
-    team.id, message.credentials.id, filter);
-
-  return exchanges;
-};
-
-/**
  * Lists exchanges for a user.
  * @param {object} payload - Object containing payload data
  * @param {string} payload.userId - The id of the shift to fetch
@@ -612,7 +592,6 @@ exports.list = list;
 exports.listActivities = listActivities;
 exports.listAvailableUsersForShift = listAvailableUsersForShift;
 exports.listComments = listComments;
-exports.listExchangesForTeam = listExchangesForTeam;
 exports.listExchangesForUser = listExchangesForUser;
 exports.listMyAcceptedExchanges = listMyAcceptedExchanges;
 exports.listMyShifts = listMyShifts;
