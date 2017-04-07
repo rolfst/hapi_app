@@ -17,6 +17,11 @@ const routes = [{
   prefetch: false,
 }, {
   method: 'GET',
+  url: '/v2/users/me/organisations',
+  handler: require('./handlers/organisations-for-user'),
+  prefetch: false,
+}, {
+  method: 'GET',
   url: '/v2/networks/{networkId}/teams',
   handler: require('./handlers/teams-for-network'),
 }, {
