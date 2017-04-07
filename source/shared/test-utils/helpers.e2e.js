@@ -87,7 +87,7 @@ describe('Test Helper', () => {
         }),
       ]);
 
-      const networks = await testHelper.findAllNetworks();
+      const networks = await networkRepo.findAll();
 
       assert.equal(networks.length, 2);
     });
@@ -213,7 +213,7 @@ describe('Test Helper', () => {
       });
 
       await testHelper.cleanAll();
-      const networks = await testHelper.findAllNetworks();
+      const networks = await networkRepo.findAll();
       const users = await testHelper.findAllUsers();
       const integrations = await testHelper.findAllIntegrations();
 
