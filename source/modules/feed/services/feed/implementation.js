@@ -62,12 +62,10 @@ const makeFeed = async (payload, options, message, extraWhereConstraint = {}) =>
     order: [['created_at', 'DESC']],
   });
 
-  const objectIds = pluckId(relatedObjects);
-
   const hasInclude = R.contains(R.__, options.include || []);
   const [includes, objectsWithSources] = await Promise.all([
     getIncludes(hasInclude, relatedObjects),
-    objectService.listWithSourceAndChildren({ objectIds }, message),
+    objectService.listWithSourceAndChildren({ objectIds: pluckId(relatedObjects) }, message),
   ]);
 
   const addComments = (object) =>
