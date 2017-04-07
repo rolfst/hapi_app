@@ -1,3 +1,4 @@
+const R = require('ramda');
 const { Integration } = require('./dao');
 
 /**
@@ -34,6 +35,12 @@ const findAll = async () => {
   return Integration.findAll();
 };
 
+const deleteAll = () => Integration.findAll()
+  .then((integrations) => Integration.destroy({
+    where: { id: { $in: R.pluck('id', integrations) } },
+  }));
+
 exports.createIntegration = createIntegration;
 exports.deleteById = deleteById;
 exports.findAll = findAll;
+exports.deleteAll = deleteAll;

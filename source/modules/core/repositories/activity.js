@@ -1,3 +1,4 @@
+const R = require('ramda');
 const { Activity, Team, Network, User } = require('./dao');
 
 /**
@@ -77,6 +78,11 @@ async function deleteById(activityId) {
 const deleteBy = (whereConstraint) =>
   Activity.destroy({ where: whereConstraint });
 
+const deleteAll = () => Activity.findAll()
+  .then((activities) => Activity.destroy({
+    where: { id: { $in: R.pluck('id', activities) } },
+  }));
+
 exports.createActivity = createActivity;
 exports.deleteBy = deleteBy;
 exports.deleteById = deleteById;
@@ -84,3 +90,4 @@ exports.findActivitiesForSource = findActivitiesForSource;
 exports.findAll = findAll;
 exports.findBy = findBy;
 exports.findForUser = findForUser;
+exports.deleteAll = deleteAll;
