@@ -26,7 +26,7 @@ const defaultIncludes = [
     { model: ExchangeValue },
 ];
 
-// FIXME: Will be removed soon
+// FIXME: Will be removed soon because duplicate code in implementation
 const createDateFilter = (start, end) => {
   let dateFilter;
 
@@ -44,8 +44,8 @@ const findAllBy = (whereConstraint) => Exchange
   .findAll({ where: whereConstraint })
   .then(R.map(createExchangeModel));
 
-const findByIds = async (exchangeIds) => {
-  const result = await Exchange.findAll({ where: { id: { $in: exchangeIds } } });
+const findByIds = async (exchangeIds, filter) => {
+  const result = await Exchange.findAll(R.merge({ where: { id: { $in: exchangeIds } } }, filter));
 
   return R.map(createExchangeModel, result);
 };
@@ -137,19 +137,25 @@ async function findExchangesByShiftIds(shiftIds) {
 /**
  * Find exchanges by user
  * @param {number} userId - Id of the user we want the exchanges from
+ * @param {string} networkId - id of the network the exchanges are searched for
+ * @param {object} [filter] - filter object to limit the results
+ * @param {date} filter.start
+ * @param {date} filter.end
  * @method findExchangesByUserAndNetwork
- * @return {Promise} Get exchanges promise
+ * @return {external:Promise.<Exchange>} Get exchanges promise
  */
 const findExchangesByUserAndNetwork = async (userId, networkId, filter = {}) => {
-  const exchanges = await Exchange.findAll({
-    attributes: ['id'],
-    where: { userId, networkId },
-  });
-
   const dateFilter = createDateFilter(filter.start, filter.end);
   const constraint = dateFilter ? { where: { date: dateFilter } } : {};
+  const exchanges = await Exchange.findAll(
+    R.merge({
+      attributes: ['id'],
+      where: { userId, networkId }
+    },
+    constraint)
+  );
 
-  return findExchangeByIds(map(exchanges, 'id'), userId, constraint);
+  return R.pluck('id', exchanges);
 };
 
 async function findExchangeIdsForValues(type, networkId, values, userId, filter = {}) {

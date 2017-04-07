@@ -28,26 +28,8 @@ const FILTER_PROPERTIES = ['start', 'end'];
 
 const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
 
-/**
- * Lists exchanges for network by id
- * @param {object} payload - Object containing payload data
- * @param {string[]} payload.exchangeIds - The id of the exchanges to list
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method list
- * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange}
- */
-const list = async (payload, message) => {
-  logger.debug('Listing exchanges', { payload, message });
-
-  const [exchanges, responsesForExchanges, valuesForExchanges] = await Promise.all([
-    exchangeRepo.findByIds(payload.exchangeIds),
-    exchangeResponseRepo.findAllWhere({
-      exchangeId: { $in: payload.exchangeIds } }),
-    exchangeValueRepo.findAllWhere({
-      exchangeId: { $in: payload.exchangeIds },
-    }).then(impl.groupValuesPerExchange),
-  ]);
-
+const populateConstraintedExchanges = async (
+  exchanges, responsesForExchanges, valuesForExchanges, message) => {
   const occuringUsers = await R.pipe(
     impl.getUserIdsInObjects(['approvedUser', 'approvedBy', 'userId']),
     (userIds) => userService.listUsersWithNetworkScope({
@@ -67,7 +49,6 @@ const list = async (payload, message) => {
     R.groupBy((comment) => comment.exchangeId)
   )(occuringExchangeIds);
 
-  // TODO this result doesn't show comments
   return R.map((exchange) => R.merge(exchange, {
     createdIn: impl.makeCreatedInObject(
       impl.addValues(valuesForExchanges, exchange)),
@@ -80,6 +61,49 @@ const list = async (payload, message) => {
     Comments: R.defaultTo([], comments[exchange.id]),
   }), exchanges);
 };
+
+/**
+ * Lists exchanges for network by id
+ * @param {object} payload - Object containing payload data
+ * @param {string[]} payload.exchangeIds - The id of the exchanges to list
+ * @param {string} [payload.start] - date when to start searching
+ * @param {string} [payload.end] - date when to end searching
+ * @param {number} [payload.limit] - max amount to retrieve
+ * @param {number} [payload.offset] - where to start fetching results in the found exchanges
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method list
+ * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange}
+ */
+async function list(payload, message) {
+  logger.debug('Listing exchanges', { payload, message });
+
+  return listBasic(payload, message);
+}
+async function listBasic(payload, message) {
+  const filter = R.pick(['start', 'end', 'limit', 'offset'], payload);
+  const exchangesAndAttributes = await Promise.all([
+    exchangeRepo.findByIds(payload.exchangeIds, null, filter),
+    exchangeResponseRepo.findAllWhere({
+      exchangeId: { $in: payload.exchangeIds } }),
+    exchangeValueRepo.findAllWhere({
+      exchangeId: { $in: payload.exchangeIds },
+    }).then(impl.groupValuesPerExchange),
+  ]);
+
+  return populateConstraintedExchanges(...exchangesAndAttributes, message);
+}
+async function listConstrainted(payload, message) {
+  const exchangesAndAttributes = await Promise.all([
+    exchangeRepo.findByIds(payload.exchangeIds),
+    exchangeResponseRepo.findAllWhere({
+      exchangeId: { $in: payload.exchangeIds } }),
+    exchangeValueRepo.findAllWhere({
+      exchangeId: { $in: payload.exchangeIds },
+    }).then(impl.groupValuesPerExchange),
+  ]);
+
+  return populateConstraintedExchanges(...exchangesAndAttributes, message);
+}
 
 /**
  * Lists the possible receivers for an exchange
@@ -145,7 +169,7 @@ const acceptExchange = async (payload, message) => {
     sourceId: payload.exchangeId,
   });
 
-  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+  const exchanges = await listConstrainted({ exchangeIds: [payload.exchangeId] }, message);
 
   return exchanges[0];
 };
@@ -186,7 +210,7 @@ const approveExchange = async (payload, message) => {
     });
   }
 
-  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+  const exchanges = await listConstrainted({ exchangeIds: [payload.exchangeId] }, message);
 
   return R.head(exchanges);
 };
@@ -230,7 +254,7 @@ const declineExchange = async (payload, message) => {
     sourceId: payload.exchangeId,
   });
 
-  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+  const exchanges = await listConstrainted({ exchangeIds: [payload.exchangeId] }, message);
 
   return exchanges[0];
 };
@@ -301,7 +325,7 @@ const rejectExchange = async (payload, message) => {
   await rejectedExchange.reload();
   // TODO: Fire ExchangeWasRejected event
 
-  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+  const exchanges = await listConstrainted({ exchangeIds: [payload.exchangeId] }, message);
 
   return exchanges[0];
 };
@@ -317,7 +341,7 @@ const rejectExchange = async (payload, message) => {
  */
 const getExchange = async (payload, message) => {
   // TODO this result shows comments
-  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+  const exchanges = await listConstrainted({ exchangeIds: [payload.exchangeId] }, message);
 
   return R.head(exchanges);
 };
@@ -421,8 +445,10 @@ const listExchangesForTeam = async (payload, message) => {
 const listPersonalizedExchanges = async (payload, message) => {
   const filter = R.pick(FILTER_PROPERTIES, payload);
 
-  return exchangeRepo.findExchangesByUserAndNetwork(
+  const exchangeIds = await exchangeRepo.findExchangesByUserAndNetwork(
     message.credentials.id, message.network.id, filter);
+
+  return listConstrainted({ exchangeIds }, message);
 };
 
 /**
@@ -456,7 +482,7 @@ const listExchangesForUser = async (payload, message) => {
     userId: user.id, networkId: message.network.id,
   }, impl.createDateWhereConstraint(filter.start, filter.end)));
 
-  return list({
+  return listConstrainted({
     exchangeIds: R.concat(exchangeIds, R.pluck('id', createdExchangesByUser)) },
     message);
 };
@@ -512,7 +538,7 @@ const createExchange = async (payload, message) => {
     });
   }
 
-  const exchanges = await list({ exchangeIds: [createdExchange.id] }, message);
+  const exchanges = await listConstrainted({ exchangeIds: [createdExchange.id] }, message);
 
   return R.head(exchanges);
 };
@@ -571,7 +597,7 @@ const listMyAcceptedExchanges = async (payload, message) => {
     message.credentials.id);
   const exchangeIds = R.pluck('exchangeId', responses);
 
-  return list({ exchangeIds }, message);
+  return listConstrainted({ exchangeIds }, message);
 };
 
 exports.acceptExchange = acceptExchange;

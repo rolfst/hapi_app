@@ -482,7 +482,7 @@ describe('Service: Flexchange', () => {
       return Promise.all(R.map(testHelper.deleteExchange, exchanges));
     });
 
-    it.only('should return a list of my accepted exchanges', async () => {
+    it('should return a list of my accepted exchanges', async () => {
       createdExchange1 = await exchangeService.createExchange({
         date: moment().toISOString(),
         startTime: moment().toISOString(),
@@ -620,7 +620,7 @@ describe('Service: Flexchange', () => {
       );
 
       assert.equal(createdExchange1.type, 'exchange');
-      assert.strictEqual(actual.id, createdExchange1.id.toString());
+      assert.strictEqual(actual[0].id, createdExchange1.id.toString());
       assert.property(actual[0], 'date');
       assert.property(actual[0], 'startTime');
       assert.property(actual[0], 'endTime');
