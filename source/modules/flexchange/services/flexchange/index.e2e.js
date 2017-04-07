@@ -393,7 +393,7 @@ describe('Service: Flexchange', () => {
       return Promise.all(R.map(testHelper.deleteExchange, exchanges));
     });
 
-    it.only('should populate the comments', async () => {
+    it('should populate the comments', async () => {
       createdExchange1 = await exchangeService.createExchange({
         date: moment().toISOString(),
         startTime: moment().toISOString(),
@@ -482,7 +482,7 @@ describe('Service: Flexchange', () => {
       return Promise.all(R.map(testHelper.deleteExchange, exchanges));
     });
 
-    it('should return a list of my accepted exchanges', async () => {
+    it.only('should return a list of my accepted exchanges', async () => {
       createdExchange1 = await exchangeService.createExchange({
         date: moment().toISOString(),
         startTime: moment().toISOString(),
@@ -508,10 +508,15 @@ describe('Service: Flexchange', () => {
         id: network.id.toString(),
       };
       const actual = await exchangeService.listMyAcceptedExchanges(
-        { exchangeId: createdExchange1.id }, { credentials: { id: acceptor.id } });
+        { exchangeId: createdExchange1.id },
+        {
+          credentials: { id: acceptor.id },
+          network: { id: network.id },
+        }
+      );
 
       assert.equal(createdExchange1.type, 'exchange');
-      assert.strictEqual(actual.id, createdExchange1.id.toString());
+      assert.strictEqual(actual[0].id, createdExchange1.id);
       assert.property(actual[0], 'date');
       assert.property(actual[0], 'startTime');
       assert.property(actual[0], 'endTime');
@@ -519,7 +524,7 @@ describe('Service: Flexchange', () => {
       assert.strictEqual(actual[0].acceptCount, 1);
       assert.strictEqual(actual[0].declineCount, 0);
       assert.strictEqual(actual[0].userId, creator.id);
-      assert.equal(actual[0].responseStatus, null);
+      assert.equal(actual[0].responseStatus, 'ACCEPTED');
       assert.strictEqual(actual[0].isApproved, actual[0].isApproved);
       assert.strictEqual(actual[0].isApproved, false);
       assert.strictEqual(actual[0].createdIn, actual[0].createdIn);
@@ -527,7 +532,7 @@ describe('Service: Flexchange', () => {
       assert.strictEqual(actual[0].user.id, creator.id);
       assert.strictEqual(actual[0].approvedUserId, null);
       assert.strictEqual(actual[0].approvedUser, null);
-      assert.deepEqual(actual[0].responses, []);
+      assert.lengthOf(actual[0].responses, 1);
       assert.equal(actual[0].title, 'Test shift');
       assert.equal(actual[0].networkId, expectedCreatedIn.id);
       assert.property(actual[0], 'teamId');

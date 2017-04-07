@@ -569,10 +569,9 @@ const createExchangeComment = async (payload, message) => {
 const listMyAcceptedExchanges = async (payload, message) => {
   const responses = await exchangeResponseRepo.findAcceptedExchangeResponsesForUser(
     message.credentials.id);
-  const exchanges = await exchangeRepo.findExchangeByIds(
-    map(responses, 'exchangeId'), message.credentials.id);
+  const exchangeIds = R.pluck('exchangeId', responses);
 
-  return exchanges;
+  return list({ exchangeIds }, message);
 };
 
 exports.acceptExchange = acceptExchange;
