@@ -19,6 +19,7 @@ const routes = [{
   method: 'GET',
   url: '/v2/users/me/organisations',
   handler: require('./handlers/organisations-for-user'),
+  validator: require('./validators/organisations-for-user'),
   prefetch: false,
 }, {
   method: 'GET',

@@ -3,7 +3,7 @@ const testHelpers = require('../../../shared/test-utils/helpers');
 const organisationService = require('../services/organisation');
 const { getRequest } = require('../../../shared/test-utils/request');
 
-describe.only('Handler: Organisations for user', () => {
+describe('Handler: Organisations for user', () => {
   let organisationA;
   let organisationB;
   let user;
@@ -45,5 +45,12 @@ describe.only('Handler: Organisations for user', () => {
 
     assert.lengthOf(result.data, 2);
     assert.lengthOf(result.data.find((o) => o.id === organisationA.id).networks, 2);
+  });
+
+  it('should fail when specifying invalid include value', async () => {
+    const endpoint = '/v2/users/me/organisations?include=invalid';
+    const { statusCode } = await getRequest(endpoint, user.token);
+
+    assert.equal(statusCode, 422);
   });
 });
