@@ -41,9 +41,9 @@ const findBy = async (whereConstraint, options) => {
  * @method findSeenCountsForObjects
  * @return {external:Promise.<Object[]>} {@link TODO - add definition}
  */
-const findSeenCountsForObjects = (messageIds) => {
+const findSeenCountsForObjects = (objectIds) => {
   return findBy({
-    objectId: { $in: messageIds }
+    objectId: { $in: objectIds }
   }, {
     attributes: [
       'objectId',
@@ -52,6 +52,14 @@ const findSeenCountsForObjects = (messageIds) => {
   });
 };
 
+const findObjectsSeenByUser = (objectIds, userId) => {
+  return findBy({
+    objectId: { $in: objectIds },
+    userId
+  });
+};
+
 exports.create = create;
 exports.findBy = findBy;
+exports.findObjectsSeenByUser = findObjectsSeenByUser;
 exports.findSeenCountsForObjects = findSeenCountsForObjects;

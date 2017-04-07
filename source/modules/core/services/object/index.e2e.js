@@ -205,4 +205,75 @@ describe('Service: Object', () => {
       assert.equal(object.source.text, 'Test message for network');
     });
   });
+
+  describe('mark as read', () => {
+    let createdMessages;
+
+    before(async () => {
+      admin = await testHelpers.createUser({ password: 'foo' });
+      network = await testHelpers.createNetwork({ userId: admin.id });
+
+      createdMessages = await Promise.all([
+        objectService.create({
+          networkId: network.id,
+          userId: admin.id,
+          parentType: 'network',
+          parentId: network.id,
+          objectType: 'poll',
+          sourceId: '1931',
+        }),
+        objectService.create({
+          networkId: network.id,
+          userId: admin.id,
+          parentType: 'network',
+          parentId: network.id,
+          objectType: 'feed_message',
+          sourceId: '1932',
+        })
+      ]);
+    });
+
+    after(() => testHelpers.cleanAll());
+
+    it('should have a seenCount and should be 0', async () => {
+      const actual = await objectService.list({
+        parentType: 'network',
+        parentId: network.id,
+      }, { credentials: admin });
+
+      const seenObjects = R.find(R.complement(R.propEq('seenCount', 0)), actual);
+
+      assert.property(actual[0], 'seenCount', 'message 1 has seenCount property');
+      assert.property(actual[1], 'seenCount', 'message 2 has seenCount property');
+
+      assert.isUndefined(seenObjects, 'both messages should not have been seen');
+    });
+
+    it('one message should be read', async () => {
+      // mark one message as read
+      await objectService.markAsRead({
+        objectId: createdMessages[0].id
+      }, { credentials: admin });
+
+      const actual = await objectService.list({
+        parentType: 'network',
+        parentId: network.id,
+      }, { credentials: admin });
+
+      const seenMessage = R.find(R.propEq('id', createdMessages[0].id), actual);
+      const unseenMessage = R.find(R.propEq('id', createdMessages[1].id), actual);
+
+      assert.property(seenMessage, 'seen', 'seen message has seen property');
+      assert.property(unseenMessage, 'seen', 'unseen message has seen property');
+
+      assert.property(seenMessage, 'seenCount', 'seen message has seenCount property');
+      assert.property(unseenMessage, 'seenCount', 'unseen message has seenCount property');
+
+      assert.equal(seenMessage.seen, true, 'seen message has been seen by the current user');
+      assert.equal(unseenMessage.seen, false, 'unseen message has not been seen by the current user');
+
+      assert.equal(seenMessage.seenCount, 1, 'seen message is seen 1 time');
+      assert.equal(unseenMessage.seenCount, 0, 'unseen message is seen 0 times');
+    });
+  });
 });

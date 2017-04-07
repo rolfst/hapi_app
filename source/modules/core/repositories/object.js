@@ -3,6 +3,8 @@ const { _Object } = require('./dao');
 const createDomainObject = require('../models/object');
 const objectSeenRepository = require('./objectseen');
 
+const isObject = R.is(Object);
+
 /**
  * Creating an object
  * @param {object} attributes - Object containing the attributes
@@ -32,18 +34,26 @@ const create = async (attributes) => {
  * @method findBy
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
-const findBy = async (whereConstraint, options) => {
+const findBy = async (whereConstraint, options, userId = null) => {
   const result = await _Object.findAll(R.merge(options,
         { where: whereConstraint }));
 
-  const seenCounts = await objectSeenRepository.findSeenCountsForObjects(R.pluck('id', result));
+  const objectIds = R.pluck('id', result);
+
+  const seenCounts = await objectSeenRepository.findSeenCountsForObjects(objectIds);
+  const seenByUser =
+    userId ? await objectSeenRepository.findObjectsSeenByUser(objectIds, userId) : null;
 
   const findSeenCount = (object) =>
     R.propOr(0, 'seenCount', R.find(R.propEq('objectId', object.id), seenCounts));
   const addSeenCount = (object) =>
     R.assoc('seenCount', findSeenCount(object), object);
+  const objectIsSeen = (object) =>
+    (seenByUser ? isObject(R.find(R.propEq('objectId', object.id), seenByUser)) : false);
+  const addSeenByCurrentUser = (object) =>
+    R.assoc('seen', objectIsSeen(object), object);
 
-  return R.map(R.pipe(createDomainObject, addSeenCount), result);
+  return R.map(R.pipe(createDomainObject, addSeenCount, addSeenByCurrentUser), result);
 };
 
 /**
