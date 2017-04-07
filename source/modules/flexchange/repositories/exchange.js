@@ -148,11 +148,7 @@ const findExchangesByUserAndNetwork = async (userId, networkId, filter = {}) => 
   const dateFilter = createDateFilter(filter.start, filter.end);
   const constraint = dateFilter ? { where: { date: dateFilter } } : {};
   const exchanges = await Exchange.findAll(
-    R.merge({
-      attributes: ['id'],
-      where: { userId, networkId }
-    },
-    constraint)
+    R.merge({ attributes: ['id'], where: { userId, networkId } }, constraint)
   );
 
   return R.pluck('id', exchanges);
