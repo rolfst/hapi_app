@@ -1,6 +1,7 @@
 const R = require('ramda');
 const { _Object } = require('./dao');
 const createDomainObject = require('../models/object');
+const objectSeenRepository = require('./objectseen');
 
 /**
  * Creating an object
@@ -35,7 +36,14 @@ const findBy = async (whereConstraint, options) => {
   const result = await _Object.findAll(R.merge(options,
         { where: whereConstraint }));
 
-  return R.map(createDomainObject, result);
+  const seenCounts = await objectSeenRepository.findSeenCountsForObjects(R.pluck('id', result));
+
+  const findSeenCount = (object) =>
+    R.propOr(0, 'seenCount', R.find(R.propEq('objectId', object.id), seenCounts));
+  const addSeenCount = (object) =>
+    R.assoc('seenCount', findSeenCount(object), object);
+
+  return R.map(R.pipe(createDomainObject, addSeenCount), result);
 };
 
 /**
