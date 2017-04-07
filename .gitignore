@@ -2,6 +2,7 @@
 /.idea
 /build
 .DS_Store
+.vscode/
 /npm-debug.log*
 database*.json
 .eslintcache

@@ -10,6 +10,15 @@
  * </ul>
  */
 
+/**
+* @typedef {object} Organisation
+* @property {string} type - 'organisation'
+* @property {string} id
+* @property {string} name
+* @property {string} brandIcon
+* @property {string} createdAt
+* @property {string} updatedAt
+*/
 
 /**
  * @typedef {object} Network
@@ -20,7 +29,7 @@
  * @property {boolean} hasIntegrations
  * @property {User} superAdmin {@link module:modules/core~User User}
  * @property {string[]} enabledComponents - Products that are enabled
- * @property {string} createdAt - user token
+ * @property {string} createdAt
  */
 
 /**

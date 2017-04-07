@@ -34,6 +34,10 @@ const findAll = async () => {
   return R.map(createNetworkModel, networks);
 };
 
+const findWhere = async (whereConstraint) => Network
+  .findAll({ include: defaultIncludes, where: whereConstraint })
+  .then(R.map(createNetworkModel));
+
 /**
  * @param {Network} data  - partial Network object as search criteria
  * @method findNetwork
@@ -209,10 +213,10 @@ const addIntegrationToNetwork = async (networkId, integrationId) => {
  * @method createNetwork
  * @return {external:Promise.<Network[]>} {@link module:modules/core~Network Network}
  */
-const createNetwork = async (userId, name = null, externalId = null) => {
+const createNetwork = async (userId, name = null, externalId = null, organisationId = null) => {
   const enabledComponents = "['SOCIAL', 'SCHEDULE', 'CHAT', 'FLEXCHANGE']";
   const network = await Network.create({
-    name, userId, enabledComponents, externalId,
+    name, userId, enabledComponents, externalId, organisationId,
   });
 
   return findNetworkById(network.id);
@@ -237,16 +241,17 @@ const findIntegrationByName = (name) => {
 
 /**
  * @param {string} userId - owner of the network
+ * @param {string} name - name for the network
  * @param {string} externalId - identifier as known in the integration partner
- * @param {string} [name] - name for the network
  * @param {string} integrationName - name of the integration
+ * @param {string} [organisationId] - id of the organisation the network belongs to
  * @method createIntegrationNetwork
  * @return {external:Promise.<Network>} {@link module:modules/core~Network Network}
  */
 const createIntegrationNetwork = async ({
-  userId, externalId, name, integrationName,
+  userId, externalId, name, integrationName, organisationId,
 }) => {
-  const network = await createNetwork(userId, name, externalId);
+  const network = await createNetwork(userId, name, externalId, organisationId);
   const integration = await findIntegrationByName(integrationName);
 
   if (!integration) throw createError('10001', `Integration ${integrationName} not found.`);
@@ -261,6 +266,7 @@ exports.addIntegrationToNetwork = addIntegrationToNetwork;
 exports.createIntegrationNetwork = createIntegrationNetwork;
 exports.createNetwork = createNetwork;
 exports.deleteById = deleteById;
+exports.findWhere = findWhere;
 exports.findAll = findAll;
 exports.findAllUsersForNetwork = findAllUsersForNetwork;
 exports.findIntegrationByName = findIntegrationByName;

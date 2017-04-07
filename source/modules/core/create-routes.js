@@ -3,6 +3,11 @@ const { createRoutes } = require('../../shared/utils/create-routes');
 
 const routes = [{
   method: 'GET',
+  url: '/v2/organisations/{organisationId}/networks',
+  handler: require('./handlers/networks-for-organisation'),
+  prefetch: false,
+}, {
+  method: 'GET',
   url: '/v2/networks/{networkId}',
   handler: require('./handlers/view-network'),
 }, {
