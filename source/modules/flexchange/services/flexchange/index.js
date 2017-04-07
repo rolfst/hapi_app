@@ -74,11 +74,6 @@ const populateConstraintedExchanges = async (
  * @method list
  * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange}
  */
-async function list(payload, message) {
-  logger.debug('Listing exchanges', { payload, message });
-
-  return listBasic(payload, message);
-}
 async function listBasic(payload, message) {
   const filter = R.pick(['start', 'end', 'limit', 'offset'], payload);
   const exchangesAndAttributes = await Promise.all([
@@ -91,6 +86,11 @@ async function listBasic(payload, message) {
   ]);
 
   return populateConstraintedExchanges(...exchangesAndAttributes, message);
+}
+async function list(payload, message) {
+  logger.debug('Listing exchanges', { payload, message });
+
+  return listBasic(payload, message);
 }
 async function listConstrainted(payload, message) {
   const exchangesAndAttributes = await Promise.all([
