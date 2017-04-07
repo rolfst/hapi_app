@@ -1,10 +1,10 @@
 const moment = require('moment');
 const R = require('ramda');
-const { map, merge } = require('lodash');
+const { merge } = require('lodash');
 const createError = require('../../../shared/utils/create-error');
 const { ActivityTypes } = require('../../core/repositories/dao/activity');
 const { createActivity } = require('../../core/repositories/activity');
-const { User, Team } = require('../../core/repositories/dao');
+const { User } = require('../../core/repositories/dao');
 const makeCreatedInObject = require('../utils/created-in-text');
 const createExchangeModel = require('../models/exchange');
 const { exchangeTypes } = require('./dao/exchange');
