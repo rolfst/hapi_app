@@ -12,7 +12,7 @@ module.exports = async (req, reply) => {
     return reply({ data: responseUtil.toSnakeCase(data) });
   } catch (err) {
     if (err instanceof Sequelize.UniqueConstraintError) {
-      return reply(createError(50001, 'Tried to see an object more than once'));
+      return reply(createError(50001, 'You cannot read the same object twice ;).'));
     }
 
     return reply(err);
