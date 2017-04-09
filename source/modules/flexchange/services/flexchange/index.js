@@ -49,6 +49,7 @@ const populateConstraintedExchanges = async (
     R.groupBy((comment) => comment.exchangeId)
   )(occuringExchangeIds);
 
+  // TODO this result doesn't show comments
   return R.map((exchange) => R.merge(exchange, {
     createdIn: impl.makeCreatedInObject(
       impl.addValues(valuesForExchanges, exchange)),

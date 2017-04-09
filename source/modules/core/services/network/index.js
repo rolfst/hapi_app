@@ -28,13 +28,24 @@ const get = async (payload, message) => {
   return network;
 };
 
+const list = async (payload, message) => {
+  logger.debug('Listing networks', { payload, message });
+
+  const whereConstraint = {};
+  if (payload.networkIds) whereConstraint.id = { $in: payload.networkIds };
+  if (payload.organisationId) whereConstraint.organisationId = payload.organisationId;
+
+  return networkRepo.findWhere(whereConstraint);
+};
+
 /**
  * Create a new network.
  * @param {object} payload - Object containing payload data
  * @param {string} payload.userId - The id of the owner of the network
  * @param {string} payload.name - The name of the network
- * @param {string} payload.externalId - The external id of the network
- * @param {string} payload.integrationName - The integration that the network should have
+ * @param {string} [payload.externalId] - The external id of the network
+ * @param {string} [payload.integrationName] - The integration that the network should have
+ * @param {string} [payload.organisationId] - The id of the rganisation the network belongs to
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method create
  * @return {external:Promise.<Network>} {@link module:modules/core~Network Network} -
@@ -43,13 +54,13 @@ const get = async (payload, message) => {
 const create = async (payload, message) => {
   logger.debug('Creating network', { payload, message });
 
-  const whitelistAttrs = R.pick(['userId', 'name', 'externalId', 'integrationName'], payload);
+  const whitelistAttrs = R.pick(['organisationId', 'userId', 'name', 'externalId', 'integrationName'], payload);
 
   if (payload.integrationName) {
     return networkRepo.createIntegrationNetwork(whitelistAttrs);
   }
 
-  return networkRepo.createNetwork(payload.userId, payload.name);
+  return networkRepo.createNetwork(payload.userId, payload.name, null, payload.organisationId);
 };
 
 /**
@@ -157,6 +168,7 @@ exports.listTeamsForNetwork = listTeamsForNetwork;
 exports.listNetworksForUser = listNetworksForUser;
 exports.listAllUsersForNetwork = listAllUsersForNetwork;
 exports.get = get;
+exports.list = list;
 exports.create = create;
 exports.addUserToNetwork = addUserToNetwork;
 exports.listActiveUsersForNetwork = listActiveUsersForNetwork;

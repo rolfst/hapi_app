@@ -2,6 +2,8 @@ const R = require('ramda');
 const Promise = require('bluebird');
 const authenticate = require('./authenticate');
 const blueprints = require('./blueprints');
+const organisationService = require('../../modules/core/services/organisation');
+const organisationRepository = require('../../modules/core/repositories/organisation');
 const networkService = require('../../modules/core/services/network');
 const exchangeRepo = require('../../modules/flexchange/repositories/exchange');
 const integrationRepo = require('../../modules/core/repositories/integration');
@@ -59,6 +61,14 @@ function addUserToNetwork(networkUserAttributes) {
   return networkService.addUserToNetwork(networkUserAttributes);
 }
 
+function addUserToOrganisation(userId, organisationId, roleType = 'EMPLOYEE') {
+  return organisationRepository.addUser(userId, organisationId, roleType);
+}
+
+function createOrganisation(name = randomString()) {
+  return organisationService.create({ name });
+}
+
 /**
  * Creates a network based on the attributes
  * @param {Object} networkAttributes
@@ -72,8 +82,15 @@ function addUserToNetwork(networkUserAttributes) {
  * @return {external:Promise<Network>} {@link module:modules/core~Network Network} - created network
  */
 async function createNetwork({
-  userId, externalId, integrationName, name = randomString(), userExternalId, userToken }) {
-  const networkAttributes = { userId, externalId, integrationName, name };
+  name = randomString(),
+  userId,
+  organisationId,
+  externalId,
+  integrationName,
+  userExternalId,
+  userToken,
+}) {
+  const networkAttributes = { organisationId, userId, externalId, integrationName, name };
   const network = await networkService.create(networkAttributes);
 
   await addUserToNetwork({
@@ -358,8 +375,10 @@ exports.DEFAULT_NETWORK_EXTERNALID = DEFAULT_NETWORK_EXTERNALID;
 exports.addTeamToNetwork = addTeamToNetwork;
 exports.addUserToNetwork = addUserToNetwork;
 exports.addUserToTeam = addUserToTeam;
+exports.addUserToOrganisation = addUserToOrganisation;
 exports.authenticateUser = authenticateUser;
 exports.cleanAll = cleanAll;
+exports.createOrganisation = createOrganisation;
 exports.createIntegration = createIntegration;
 exports.createNetwork = createNetwork;
 exports.createNetworkWithIntegration = createNetworkWithIntegration;
