@@ -568,7 +568,7 @@ describe('Service: Flexchange', () => {
       );
 
       assert.equal(createdExchange1.type, 'exchange');
-      assert.strictEqual(actual.id, createdExchange1.id.toString());
+      assert.strictEqual(actual[0].id, createdExchange1.id.toString());
       assert.property(actual[0], 'date');
       assert.property(actual[0], 'startTime');
       assert.property(actual[0], 'endTime');

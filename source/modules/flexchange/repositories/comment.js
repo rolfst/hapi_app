@@ -60,7 +60,8 @@ async function createExchangeComment(exchangeId, { text, userId }) {
  * @return {external:Promise} - Promise with list of all comments exchange comment promise
  */
 function findCommentsByExchange(exchange) {
-  return exchange.getComments();
+  return ExchangeComment.findAll({ where: { exchangeId: exchange.id } });
+  // return exchange.getComments();
 }
 
 function findBy(attributes) {

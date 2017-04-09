@@ -11,7 +11,7 @@ module.exports = async (req, reply) => {
     logger.debug('Listing my exchanges', { payload, message });
     const result = await flexchangeService.listPersonalizedExchanges(payload, message);
 
-    return reply({ data: responseUtil.serialize(result) });
+    return reply({ data: responseUtil.toSnakeCase(result) });
   } catch (err) {
     return reply(err);
   }

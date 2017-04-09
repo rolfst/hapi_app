@@ -56,9 +56,9 @@ const populateConstraintedExchanges = async (
     approvedUser: findUserById(exchange.approvedUserId),
     responseStatus: impl.createResponseStatus(
       responseForUser(message.credentials.id, exchange.id)),
-    responses: impl.replaceUsersInResponses(
+    responses: impl.replaceUsersIn(
       occuringUsers, responsesForExchange(exchange.id)),
-    Comments: R.defaultTo([], comments[exchange.id]),
+    Comments: impl.replaceUsersIn(occuringUsers, R.defaultTo([], comments[exchange.id])),
   }), exchanges);
 };
 
@@ -320,12 +320,11 @@ const rejectExchange = async (payload, message) => {
 
   impl.validateExchangeResponse(exchangeResponse);
 
-  const rejectedExchange = await exchangeRepo.rejectExchange(
+  const rejectedExchangeId = await exchangeRepo.rejectExchange(
     exchange, message.credentials, payload.userId);
-  await rejectedExchange.reload();
   // TODO: Fire ExchangeWasRejected event
 
-  const exchanges = await listConstrainted({ exchangeIds: [payload.exchangeId] }, message);
+  const exchanges = await listConstrainted({ exchangeIds: [rejectedExchangeId] }, message);
 
   return exchanges[0];
 };
@@ -343,7 +342,9 @@ const getExchange = async (payload, message) => {
   // TODO this result shows comments
   const exchanges = await listConstrainted({ exchangeIds: [payload.exchangeId] }, message);
 
-  return R.head(exchanges);
+  const result = R.head(exchanges);
+  if (!result) { throw createError('404'); }
+  return result;
 };
 
 /**
@@ -358,9 +359,10 @@ const getExchange = async (payload, message) => {
 const listComments = async (payload, message) => {
   logger.debug('Listing comments for exchange', { payload, message });
   const userId = message.credentials.id;
-  const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, userId);
-
-  return commentRepo.findCommentsByExchange(exchange);
+  const exchanges = await exchangeRepo.findAllBy({ id: payload.exchangeId, userId });
+  const user = await userService.getUser({ userId }, message);
+  const exchangeComments = await commentRepo.findBy({ exchangeId: exchanges[0].id });
+  return impl.replaceUsersIn([user], exchangeComments);
 };
 
 /**
@@ -554,12 +556,15 @@ const createExchangeComment = async (payload, message) => {
   const data = { text: payload.text, userId: message.credentials.id };
   const createdExchangeComment = await commentRepo.createExchangeComment(payload.exchangeId, data);
 
+  const user = await userService.getUser({ userId: message.credentials.id }, message);
+
   const exchangeComment = await commentRepo.findCommentById(createdExchangeComment.id);
+  const populatedComment = impl.mergeWithUsers([user], exchangeComment);
 
   // TODO activate notifications
   // commentNotifier.send(exchangeComment);
 
-  return exchangeComment;
+  return populatedComment;
 };
 
 /**
@@ -573,9 +578,8 @@ const createExchangeComment = async (payload, message) => {
  * Promise with a list of Exchanges for a user
  */
 const listMyAcceptedExchanges = async (payload, message) => {
-  const responses = await exchangeResponseRepo.findAcceptedExchangeResponsesForUser(
-    message.credentials.id);
-  const exchangeIds = R.pluck('exchangeId', responses);
+  const exchangeIds = await exchangeResponseRepo.findAllExchangeIdsBy(
+    { userId: message.credentials.id, response: 1 });
 
   return listConstrainted({ exchangeIds }, message);
 };

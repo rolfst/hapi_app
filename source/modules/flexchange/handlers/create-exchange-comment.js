@@ -11,7 +11,7 @@ module.exports = async (req, reply) => {
     logger.debug('Creating exchange comment', { message, payload });
     const exchangeComment = await flexchangeService.createExchangeComment(payload, message);
 
-    return reply({ success: true, data: responseUtil.serialize(exchangeComment) });
+    return reply({ success: true, data: responseUtil.toSnakeCase(exchangeComment) });
   } catch (err) {
     return reply(err);
   }
