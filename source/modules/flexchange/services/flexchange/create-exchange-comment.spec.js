@@ -1,5 +1,6 @@
 const { assert } = require('chai');
 const sinon = require('sinon');
+const userService = require('../../../core/services/user');
 const service = require('../flexchange');
 const commentRepo = require('../../repositories/comment');
 
@@ -15,6 +16,7 @@ describe('Create exchange comment', () => {
   it('should send a notification to the whole network', async () => {
     sandbox.stub(commentRepo, 'createExchangeComment').returns({});
     sandbox.stub(commentRepo, 'findCommentById').returns({ toJSON: () => '' });
+    sandbox.stub(userService, 'getUser').returns(Promise.resolve({}))
 
     const messageFixture = { credentials: {}, network: {} };
     const payload = {
