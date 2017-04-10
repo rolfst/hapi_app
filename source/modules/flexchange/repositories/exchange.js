@@ -349,7 +349,7 @@ async function respondToExchange(exchangeId, userId, response) {
  * @param {number} exchangeId - Exchange to add the response to
  * @param {number} userId - User accepting the exchange
  * @method acceptExchange
- * @return {Promise} Add exchange response promise
+ * @return {Promise.<string>} id of the response
  */
 async function acceptExchange(exchangeId, userId) {
   const id = await respondToExchange(exchangeId, userId, 1);
@@ -382,9 +382,15 @@ async function declineExchange(exchangeId, userId) {
   return exchange;
 }
 
+/**
+ * Updates an exchange
+ * @param {object} constraint - fields used to match the correct exchange to be updated
+ * @param {object} data - the data that needs to be updated
+ */
 function update(constraint, data) {
   Exchange.update(data, constraint);
 }
+
 /**
  * Approve an exchange
  * @param {Exchange} exchange - Exchange to approve
