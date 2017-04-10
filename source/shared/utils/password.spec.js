@@ -1,6 +1,6 @@
 const { assert } = require('chai');
 const sinon = require('sinon');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const password = require('./password');
 
 describe('password', () => {
