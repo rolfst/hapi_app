@@ -25,6 +25,15 @@ const create = (payload, message) => {
   return organisationRepository.create({ name: payload.name });
 };
 
+/**
+ * Attach network to organisation
+ * @param {object} payload
+ * @param {string} payload.networkId
+ * @param {string} payload.organisationId
+ * @param {Message} message {@link module:shared~Message message}
+ * @method create
+ * @return {external:Promise}
+ */
 const attachNetwork = (payload, message) => {
   logger.debug('Attaching network to organisation', { payload, message });
 
@@ -57,7 +66,7 @@ const listNetworks = async (payload, message) => {
 /**
  * Listing organisations for a user
  * @param {object} payload
- * @param {string} payload.id - The id of the user to list organisations for
+ * @param {string} payload.userId - The id of the user to list organisations for
  * @param {array} payload.include - The includes on the organisation resource
  * @param {Message} message {@link module:shared~Message message}
  * @method listForUser
@@ -66,7 +75,7 @@ const listNetworks = async (payload, message) => {
 const listForUser = async (payload, message) => {
   logger.debug('List all organisations for user', { payload, message });
 
-  let organisations = await organisationRepository.findForUser(payload.id);
+  let organisations = await organisationRepository.findForUser(payload.userId);
 
   if (R.contains('networks', payload.include)) {
     organisations = await Promise.map(organisations, async (organisation) => {
