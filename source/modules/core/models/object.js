@@ -9,5 +9,5 @@ module.exports = (dataModel) => ({
   parentId: dataModel.parentId.toString(),
   createdAt: dateUtils.toISOString(dataModel.created_at),
   seen: false, // Filled in object repo
-  seenCount: null // Filled in object repo
+  seenCount: null, // Filled in object repo
 });

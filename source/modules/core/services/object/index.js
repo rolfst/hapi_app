@@ -239,7 +239,7 @@ const markAsRead = async (payload, message) => {
 
   return objectSeenRepository.create({
     objectId: payload.objectId,
-    userId: message.credentials.id
+    userId: message.credentials.id,
   });
 };
 

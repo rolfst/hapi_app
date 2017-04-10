@@ -1,7 +1,7 @@
 const R = require('ramda');
 const Sequelize = require('sequelize');
 const { ObjectSeen } = require('./dao');
-const createDomainObject = require('../models/objectseen');
+const createDomainObject = require('../models/object-seen');
 
 /**
  * Creating an object
@@ -43,19 +43,19 @@ const findBy = async (whereConstraint, options) => {
  */
 const findSeenCountsForObjects = (objectIds) => {
   return findBy({
-    objectId: { $in: objectIds }
+    objectId: { $in: objectIds },
   }, {
     attributes: [
       'objectId',
       [Sequelize.fn('COUNT', Sequelize.col('object_id')), 'seenCount']],
-    group: ['objectId']
+    group: ['objectId'],
   });
 };
 
 const findObjectsSeenByUser = (objectIds, userId) => {
   return findBy({
     objectId: { $in: objectIds },
-    userId
+    userId,
   });
 };
 
