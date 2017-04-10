@@ -65,6 +65,8 @@ const populateConstraintedExchanges = async (
 
 /**
  * Lists exchanges for network by id
+ * This method still allows to filter on start end limit and offset but does not take in account
+ * the current user
  * @param {object} payload - Object containing payload data
  * @param {string[]} payload.exchangeIds - The id of the exchanges to list
  * @param {string} [payload.start] - date when to start searching
@@ -93,6 +95,14 @@ async function list(payload, message) {
 
   return listBasic(payload, message);
 }
+/**
+ * Lists exchanges for network by id
+ * This method does not take filters into account
+ * @param {object} payload - Object containing payload data
+ * @param {string[]} payload.exchangeIds - The id of the exchanges to list
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange}
+ */
 async function listConstrainted(payload, message) {
   const exchangesAndAttributes = await Promise.all([
     exchangeRepo.findByIds(payload.exchangeIds),
