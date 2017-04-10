@@ -1,7 +1,7 @@
 const R = require('ramda');
 const { _Object } = require('./dao');
 const createDomainObject = require('../models/object');
-const objectSeenRepository = require('./objectseen');
+const objectSeenRepository = require('./object-seen');
 
 const isObject = R.is(Object);
 
@@ -40,9 +40,12 @@ const findBy = async (whereConstraint, options, userId = null) => {
 
   const objectIds = R.pluck('id', result);
 
-  const seenCounts = await objectSeenRepository.findSeenCountsForObjects(objectIds);
-  const seenByUser =
-    userId ? await objectSeenRepository.findObjectsSeenByUser(objectIds, userId) : null;
+  const seenCountsP = objectSeenRepository.findSeenCountsForObjects(objectIds);
+  const seenByUserP = userId
+    ? objectSeenRepository.findObjectsSeenByUser(objectIds, userId)
+    : Promise.resolve(null);
+
+  const [seenCounts, seenByUser] = await Promise.all([seenCountsP, seenByUserP]);
 
   const findSeenCount = (object) =>
     R.propOr(0, 'seenCount', R.find(R.propEq('objectId', object.id), seenCounts));

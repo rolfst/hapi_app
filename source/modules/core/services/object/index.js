@@ -5,7 +5,7 @@ const networkRepository = require('../../../core/repositories/network');
 const teamRepository = require('../../../core/repositories/team');
 const userRepository = require('../../../core/repositories/user');
 const objectRepository = require('../../repositories/object');
-const objectSeenRepository = require('../../repositories/objectseen');
+const objectSeenRepository = require('../../repositories/object-seen');
 const impl = require('./implementation');
 
 /**
