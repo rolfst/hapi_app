@@ -110,6 +110,11 @@ function findAll() {
   return _Object.findAll();
 }
 
+const deleteAll = () => _Object.findAll()
+  .then((objects) => _Object.destroy({
+    where: { id: { $in: R.pluck('id', objects) } },
+  }));
+
 exports.count = count;
 exports.create = create;
 exports.deleteBy = deleteBy;
@@ -117,3 +122,4 @@ exports.deleteById = deleteById;
 exports.findAll = findAll;
 exports.findBy = findBy;
 exports.update = update;
+exports.deleteAll = deleteAll;

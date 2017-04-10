@@ -26,7 +26,7 @@ const send = async (eventName, users, payload, token) => {
         eventName,
         payload,
         token,
-        jsonResponse
+        jsonResponse,
       });
     } else {
       logger.error('Error sending socket event', {
