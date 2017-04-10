@@ -235,7 +235,7 @@ describe('Service: Feed', () => {
     it('should include seen property and counts for top level objects', async () => {
       // Mark the first message as read
       await objectService.markAsRead({
-        objectId: createdMessages[0].id
+        objectId: createdMessages[0].id,
       }, { credentials: admin });
 
       const actual = await feedService.makeForNetwork({

@@ -9,7 +9,7 @@ const NetworkIntegrationModel = require('./network-service');
 const TeamUserModel = require('./team-user');
 const UserDeviceModel = require('./user-device');
 const ObjectModel = require('./object');
-const ObjectSeenModel = require('./objectseen');
+const ObjectSeenModel = require('./object-seen');
 const OrganisationModel = require('./organisation');
 const OrganisationUserModel = require('./organisation-user');
 

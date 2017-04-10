@@ -40,7 +40,7 @@ const routes = [{
   url: '/v2/objects/{objectId}/read',
   handler: require('./handlers/read-object'),
   validator: require('./validators/read-object'),
-  prefetch: false
+  prefetch: false,
 }];
 
 module.exports = createRoutes(routes);
