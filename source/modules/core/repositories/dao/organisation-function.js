@@ -5,12 +5,12 @@ const OrganisationFunction = model.define('OrganisationFunction', {
   organisationId: {
     type: Sequelize.INTEGER,
     field: 'organisation_id',
-    allowNull: false
+    allowNull: false,
   },
   name: {
     type: Sequelize.STRING,
-    field: 'name'
-  }
+    field: 'name',
+  },
 }, {
   tableName: 'organisation_function',
   createdAt: 'created_at',

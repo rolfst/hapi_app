@@ -2,6 +2,6 @@ const Joi = require('joi');
 
 module.exports = {
   params: {
-    organisationId: Joi.number().required()
-  }
+    organisationId: Joi.number().required(),
+  },
 };

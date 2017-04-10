@@ -72,7 +72,7 @@ function createOrganisation(name = randomString()) {
  * Creates a function in an origanisation
  * @param {number} organisationId
  * @param {string} name
- * @returns {external:Promise<Organisation>} {@link module:modules/core~Organisation OrganisationFunction} - created network
+ * @returns {external:Promise<Organisation>} - created network
  */
 const createOrganisationFunction = (organisationId, name = randomString()) => {
   return organisationRepository.addFunction(organisationId, name);

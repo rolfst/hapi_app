@@ -5,22 +5,22 @@ const ObjectSeen = model.define('ObjectSeen', {
   objectId: {
     type: Sequelize.INTEGER,
     field: 'object_id',
-    allowNull: false
+    allowNull: false,
   },
   userId: {
     type: Sequelize.INTEGER,
     field: 'user_id',
-    allowNull: false
+    allowNull: false,
   },
   createdAt: {
     type: Sequelize.DATE,
-    field: 'created_at'
-  }
+    field: 'created_at',
+  },
 }, {
   tableName: 'object_seen',
   timestamps: true,
   createdAt: 'created_at',
-  updatedAt: false
+  updatedAt: false,
 });
 
 module.exports = ObjectSeen;

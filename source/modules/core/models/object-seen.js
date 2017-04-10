@@ -5,7 +5,7 @@ module.exports = (dataModel) => {
   if (!dataModel.id) {
     return {
       objectId: dataModel.objectId.toString(),
-      seenCount: dataModel.dataValues.seenCount || 0
+      seenCount: dataModel.dataValues.seenCount || 0,
     };
   }
 
@@ -13,6 +13,6 @@ module.exports = (dataModel) => {
     id: dataModel.id.toString(),
     userId: dataModel.userId.toString(),
     objectId: dataModel.objectId.toString(),
-    createdAt: dateUtils.toISOString(dataModel.created_at)
+    createdAt: dateUtils.toISOString(dataModel.created_at),
   };
 };
