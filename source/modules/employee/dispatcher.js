@@ -13,7 +13,7 @@ function getClient() {
 async function registerProfile(user) {
   if (!user.id) throw new Error('User need to have at least an identifier.');
 
-  const networks = await networkService.listNetworksForUser(user.id);
+  const networks = await networkService.listNetworksForUser({ id: user.id });
 
   const payload = {
     $first_name: user.firstName,
