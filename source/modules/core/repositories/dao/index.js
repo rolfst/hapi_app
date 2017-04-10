@@ -12,6 +12,7 @@ const ObjectModel = require('./object');
 const ObjectSeenModel = require('./objectseen');
 const OrganisationModel = require('./organisation');
 const OrganisationUserModel = require('./organisation-user');
+const OrganisationFunctionModel = require('./organisation-function');
 
 ActivityModel.belongsTo(UserModel, {
   foreignKey: 'user_id',
@@ -89,3 +90,4 @@ exports._Object = ObjectModel; // eslint-disable-line
 exports.ObjectSeen = ObjectSeenModel;
 exports.Organisation = OrganisationModel;
 exports.OrganisationUser = OrganisationUserModel;
+exports.OrganisationFunction = OrganisationFunctionModel;

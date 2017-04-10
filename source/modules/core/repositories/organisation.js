@@ -1,7 +1,8 @@
 const R = require('ramda');
-const { Organisation, OrganisationUser, OrganisationNetwork } = require('./dao');
+const { Organisation, OrganisationUser, OrganisationNetwork, OrganisationFunction } = require('./dao');
 const createModel = require('../models/organisation');
 const createPivotModel = require('../models/organisation-user');
+const createFunctionsModel = require('../models/organisation-function');
 
 const create = (attributes) => Organisation
   .create(attributes)
@@ -44,9 +45,10 @@ const hasUser = async (userId, organisationId) => {
 };
 
 const addUser = async (userId, organisationId, roleType = 'EMPLOYEE', functionId = null) => {
-  return OrganisationUser.create({
-    userId, organisationId, organisation_id: organisationId, roleType, functionId,
-  });
+  return OrganisationUser
+    .create({
+      userId, organisationId, organisation_id: organisationId, roleType, functionId,
+    });
 };
 
 const attachNetwork = async (networkId, organisationId) => OrganisationNetwork
@@ -57,6 +59,33 @@ const deleteAll = () => Organisation.findAll()
     where: { id: { $in: R.pluck('id', organisations) } },
   }));
 
+const addFunction = (organisationId, name) => OrganisationFunction
+  .create({ organisationId, name })
+  .then(createFunctionsModel);
+
+const updateFunction = (organisationFunctionIdOrWhereConstraint, name) => {
+  const whereConstraint = typeof organisationFunctionIdOrWhereConstraint === 'object'
+    ? organisationFunctionIdOrWhereConstraint
+    : { id: organisationFunctionIdOrWhereConstraint };
+
+  return OrganisationFunction
+    .update({ name }, whereConstraint);
+};
+
+const removeFunction = (organisationFunctionIdOrWhereConstraint) => {
+  const whereConstraint = typeof organisationFunctionIdOrWhereConstraint === 'object'
+    ? organisationFunctionIdOrWhereConstraint
+    : { id: organisationFunctionIdOrWhereConstraint };
+
+  return OrganisationFunction
+    .destroy(whereConstraint);
+};
+
+const findFunctionsInOrganisation = (organisationId) =>
+  OrganisationFunction
+    .findBy({ organisationId })
+    .then(createFunctionsModel);
+
 exports.create = create;
 exports.findById = findById;
 exports.findForUser = findForUser;
@@ -65,3 +94,7 @@ exports.hasUser = hasUser;
 exports.addUser = addUser;
 exports.attachNetwork = attachNetwork;
 exports.deleteAll = deleteAll;
+exports.addFunction = addFunction;
+exports.updateFunction = updateFunction;
+exports.removeFunction = removeFunction;
+exports.findFunctionsInOrganisation = findFunctionsInOrganisation;

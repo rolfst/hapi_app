@@ -41,6 +41,11 @@ const routes = [{
   handler: require('./handlers/read-object'),
   validator: require('./validators/read-object'),
   prefetch: false
+}, {
+  method: 'GET',
+  url: '/v2/organisations/{organisationId}/functions',
+  handler: require('./handlers/functions-in-organisation'),
+  validator: require('./validators/functions-in-organisation')
 }];
 
 module.exports = createRoutes(routes);

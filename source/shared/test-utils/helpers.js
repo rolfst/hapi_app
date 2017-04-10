@@ -69,6 +69,16 @@ function createOrganisation(name = randomString()) {
 }
 
 /**
+ * Creates a function in an origanisation
+ * @param {number} organisationId
+ * @param {string} name
+ * @returns {external:Promise<Organisation>} {@link module:modules/core~Organisation OrganisationFunction} - created network
+ */
+const createOrganisationFunction = (organisationId, name = randomString()) => {
+  return organisationRepository.addFunction(organisationId, name);
+};
+
+/**
  * Creates a network based on the attributes
  * @param {Object} networkAttributes
  * @param {string} networkAttributes.userId
@@ -304,6 +314,7 @@ exports.addUserToOrganisation = addUserToOrganisation;
 exports.authenticateUser = authenticateUser;
 exports.cleanAll = cleanAll;
 exports.createOrganisation = createOrganisation;
+exports.createOrganisationFunction = createOrganisationFunction;
 exports.createIntegration = createIntegration;
 exports.createNetwork = createNetwork;
 exports.createNetworkWithIntegration = createNetworkWithIntegration;
