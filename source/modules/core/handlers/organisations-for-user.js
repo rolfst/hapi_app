@@ -6,7 +6,7 @@ module.exports = async (req, reply) => {
   try {
     const { message } = createServicePayload(req);
     const payload = {
-      id: req.auth.credentials.id,
+      userId: req.auth.credentials.id,
       include: req.query.include ? req.query.include.split(',') : [],
     };
     const data = await organisationService.listForUser(payload, message);
