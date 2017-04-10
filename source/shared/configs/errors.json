@@ -98,5 +98,10 @@
     "type": "wrong_credentials_for_mixpanel",
     "detail": "No user found for given username and password.",
     "code": 403
+  },
+  "50001": {
+    "type": "already_seen_object",
+    "detail": "You already marked this object as seen.",
+    "code": 403
   }
 }

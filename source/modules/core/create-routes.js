@@ -29,6 +29,12 @@ const routes = [{
   url: '/v2/networks/{networkId}/teams/{teamId}',
   handler: require('./handlers/update-team'),
   validator: require('./validators/update-team'),
+}, {
+  method: 'POST',
+  url: '/v2/objects/{objectId}/read',
+  handler: require('./handlers/read-object'),
+  validator: require('./validators/read-object'),
+  prefetch: false
 }];
 
 module.exports = createRoutes(routes);
