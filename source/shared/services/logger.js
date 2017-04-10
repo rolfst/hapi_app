@@ -16,7 +16,7 @@ const LogLevel = {
   ERROR: 'error',
   WARNING: 'warn',
   INFO: 'info',
-  DEBUG: 'debug'
+  DEBUG: 'debug',
 };
 
 // This object stores the actual enum
@@ -78,7 +78,7 @@ const errorLogLevel = ELogLevel.indexOf(LogLevel[logConfig.errorLogLevel]);
 const exportLogLevel = ELogLevel.indexOf(LogLevel[logConfig.errorLogLevel]);
 
 const bunyanConfig = {
-  streams: []
+  streams: [],
 };
 
 // Dirty hack for bunyan so it doesn't upstream different error levels
@@ -177,13 +177,13 @@ const exportLog = async (severity, message, data, flattenedData = null) => {
   if (data instanceof Error) {
     Raven.captureException(data, {
       level: ELogLevel[severity].toLowerCase(),
-      extra: { message }
+      extra: { message },
     });
   } else {
     // Make sure we have flattened data
     Raven.captureMessage(flattenedData || buildLogContext(data), {
       level: ELogLevel[severity].toLowerCase(),
-      extra: { message }
+      extra: { message },
     });
   }
 //  });

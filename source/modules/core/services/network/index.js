@@ -159,7 +159,7 @@ const listTeamsForNetwork = async (payload, message) => {
   logger.debug('List teams for network', {
     payload,
     teamCount: result.length,
-    message: message || null
+    message: message || null,
   });
 
   return teamService.list({ teamIds: R.pluck('id', result) }, message);
