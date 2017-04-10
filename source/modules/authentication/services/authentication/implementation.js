@@ -1,5 +1,5 @@
 const moment = require('moment');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const createError = require('../../../../shared/utils/create-error');
 const authenticationRepo = require('../../../core/repositories/authentication');
 const userRepo = require('../../../core/repositories/user');
