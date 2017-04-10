@@ -12,7 +12,7 @@ const OrganisationFunction = model.define('OrganisationFunction', {
     field: 'name',
   },
 }, {
-  tableName: 'organisation_function',
+  tableName: 'organisation_functions',
   createdAt: 'created_at',
   updatedAt: false,
 });

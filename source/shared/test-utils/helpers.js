@@ -295,6 +295,7 @@ async function deletePoll(poll) {
 async function cleanAll() {
   await organisationRepository.deleteAll();
 
+
   const networks = await networkRepo.findAll();
   const admins = R.map((network) => network.superAdmin, networks);
   await Promise.all(R.map(deleteUser, admins));

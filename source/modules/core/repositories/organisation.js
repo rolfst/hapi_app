@@ -54,10 +54,18 @@ const addUser = async (userId, organisationId, roleType = 'EMPLOYEE', functionId
 const attachNetwork = async (networkId, organisationId) => OrganisationNetwork
   .create({ networkId, organisationId });
 
-const deleteAll = () => Organisation.findAll()
-  .then((organisations) => Organisation.destroy({
-    where: { id: { $in: R.pluck('id', organisations) } },
-  }));
+const deleteAll = () => {
+  return Promise.all([
+    Organisation.findAll()
+      .then((organisations) => Organisation.destroy({
+        where: { id: { $in: R.pluck('id', organisations) } },
+      })),
+    OrganisationFunction.findAll()
+      .then((organisationFunctions) => OrganisationFunction.destroy({
+        where: { id: { $in: R.pluck('id', organisationFunctions) } },
+      })),
+  ]);
+};
 
 const addFunction = (organisationId, name) => OrganisationFunction
   .create({ organisationId, name })
@@ -83,8 +91,8 @@ const removeFunction = (organisationFunctionIdOrWhereConstraint) => {
 
 const findFunctionsInOrganisation = (organisationId) =>
   OrganisationFunction
-    .findBy({ organisationId })
-    .then(createFunctionsModel);
+    .findAll({ organisationId })
+    .then(R.map(createFunctionsModel));
 
 exports.create = create;
 exports.findById = findById;
