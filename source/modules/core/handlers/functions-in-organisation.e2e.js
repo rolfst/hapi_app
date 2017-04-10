@@ -2,7 +2,7 @@ const { assert } = require('chai');
 const testHelpers = require('../../../shared/test-utils/helpers');
 const { getRequest } = require('../../../shared/test-utils/request');
 
-describe.only('Handler: Functions in organisation', () => {
+describe('Handler: Functions in organisation', () => {
   let organisation;
   let admin;
   let otherUser;
@@ -16,7 +16,7 @@ describe.only('Handler: Functions in organisation', () => {
 
     await Promise.all([
       testHelpers.addUserToOrganisation(admin.id, organisation.id, 'ADMIN'),
-      testHelpers.createNetwork({ userId: admin.id, organisationId: organisation.id, }),
+      testHelpers.createNetwork({ userId: admin.id, organisationId: organisation.id }),
       testHelpers.createOrganisationFunction(organisation.id, 'really important function'),
       testHelpers.createOrganisationFunction(organisation.id, 'coffee machine'),
     ]);
