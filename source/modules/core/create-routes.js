@@ -47,6 +47,24 @@ const routes = [{
   handler: require('./handlers/functions-in-organisation'),
   validator: require('./validators/functions-in-organisation'),
   prefetch: false,
+}, {
+  method: 'POST',
+  url: '/v2/organisations/{organisationId}/functions',
+  handler: require('./handlers/create-function-in-organisation'),
+  validator: require('./validators/create-function-in-organisation'),
+  prefetch: false,
+}, {
+  method: 'PUT',
+  url: '/v2/organisations/{organisationId}/functions/{organisationFunctionId}',
+  handler: require('./handlers/update-function-in-organisation'),
+  validator: require('./validators/update-function-in-organisation'),
+  prefetch: false,
+}, {
+  method: 'DELETE',
+  url: '/v2/organisations/{organisationId}/functions/{organisationFunctionId}',
+  handler: require('./handlers/remove-function-in-organisation'),
+  validator: require('./validators/remove-function-in-organisation'),
+  prefetch: false,
 }];
 
 module.exports = createRoutes(routes);

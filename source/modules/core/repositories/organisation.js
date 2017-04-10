@@ -77,7 +77,7 @@ const updateFunction = (organisationFunctionIdOrWhereConstraint, name) => {
     : { id: organisationFunctionIdOrWhereConstraint };
 
   return OrganisationFunction
-    .update({ name }, whereConstraint);
+    .update({ name }, { where: whereConstraint });
 };
 
 const removeFunction = (organisationFunctionIdOrWhereConstraint) => {
@@ -86,13 +86,22 @@ const removeFunction = (organisationFunctionIdOrWhereConstraint) => {
     : { id: organisationFunctionIdOrWhereConstraint };
 
   return OrganisationFunction
-    .destroy(whereConstraint);
+    .destroy({ where: whereConstraint });
 };
 
 const findFunctionsInOrganisation = (organisationId) =>
   OrganisationFunction
-    .findAll({ organisationId })
+    .findAll({ where: { organisationId } })
     .then(R.map(createFunctionsModel));
+
+const findFunction = (organisationFunctionIdOrWhereConstraint) => {
+  const whereConstraint = typeof organisationFunctionIdOrWhereConstraint === 'object'
+    ? organisationFunctionIdOrWhereConstraint
+    : { id: organisationFunctionIdOrWhereConstraint };
+
+  return OrganisationFunction
+    .findOne({ where: whereConstraint });
+};
 
 exports.create = create;
 exports.findById = findById;
@@ -106,3 +115,4 @@ exports.addFunction = addFunction;
 exports.updateFunction = updateFunction;
 exports.removeFunction = removeFunction;
 exports.findFunctionsInOrganisation = findFunctionsInOrganisation;
+exports.findFunction = findFunction;
