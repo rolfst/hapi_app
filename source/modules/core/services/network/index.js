@@ -143,6 +143,7 @@ const listNetworksForUser = async (payload) => {
 
   return networkRepo.findNetworksForUser(payload.id);
 };
+
 /**
  * Retrieve teams that belong to the network.
  * @param {object} payload - Object containing payload data
@@ -158,10 +159,28 @@ const listTeamsForNetwork = async (payload, message) => {
   logger.debug('List teams for network', {
     payload,
     teamCount: result.length,
-    message: message || null
+    message: message || null,
   });
 
   return teamService.list({ teamIds: R.pluck('id', result) }, message);
+};
+
+/**
+ * Update a network
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.networkId - The id of the network
+ * @param {string} payload.organisationId
+ * @param {string} payload.name
+ * @param {string} payload.externalId
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method update
+ * @return {external:Promise.<Network>} {@link module:modules/core~Network Network}
+ */
+const update = async (payload, message) => {
+  logger.debug('Updating network', { payload, message });
+
+  const UPDATE_PROPERTIES = ['organisationId', 'name', 'externalId'];
+  return networkRepo.updateNetwork(payload.networkId, R.pick(UPDATE_PROPERTIES, payload));
 };
 
 exports.listTeamsForNetwork = listTeamsForNetwork;
@@ -172,3 +191,4 @@ exports.list = list;
 exports.create = create;
 exports.addUserToNetwork = addUserToNetwork;
 exports.listActiveUsersForNetwork = listActiveUsersForNetwork;
+exports.update = update;

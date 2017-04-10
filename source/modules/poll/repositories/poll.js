@@ -78,6 +78,11 @@ const deleteById = async (pollId) => {
   return Poll.destroy({ where: { id: pollId } });
 };
 
+const deleteAll = () => Poll.findAll()
+  .then((polls) => Poll.destroy({
+    where: { id: { $in: R.pluck('id', polls) } },
+  }));
+
 exports.clearVotes = clearVotes;
 exports.create = create;
 exports.deleteById = deleteById;
@@ -85,3 +90,4 @@ exports.findAll = findAll;
 exports.findBy = findBy;
 exports.findById = findById;
 exports.vote = vote;
+exports.deleteAll = deleteAll;

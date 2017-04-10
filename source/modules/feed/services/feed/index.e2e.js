@@ -9,6 +9,7 @@ const flexchangeService = require('../../../flexchange/services/flexchange');
 const commentService = require('../comment');
 const messageService = require('../message');
 const feedService = require('./index');
+const objectService = require('../../../core/services/object');
 
 describe('Service: Feed', () => {
   describe('make', () => {
@@ -229,6 +230,33 @@ describe('Service: Feed', () => {
       const objects = await testHelpers.findAllObjects();
 
       assert.equal(objects.length, 6);
+    });
+
+    it('should include seen property and counts for top level objects', async () => {
+      // Mark the first message as read
+      await objectService.markAsRead({
+        objectId: createdMessages[0].id,
+      }, { credentials: admin });
+
+      const actual = await feedService.makeForNetwork({
+        networkId: network.id,
+        include: ['comments'],
+      }, { network, credentials: admin });
+
+      const seenMessage = R.find(R.propEq('id', createdMessages[0].id), actual);
+      const unseenMessage = R.find(R.propEq('id', createdMessages[1].id), actual);
+
+      assert.property(seenMessage, 'seen', 'seen message has seen property');
+      assert.property(unseenMessage, 'seen', 'unseen message has seen property');
+
+      assert.property(seenMessage, 'seenCount', 'seen message has seenCount property');
+      assert.property(unseenMessage, 'seenCount', 'unseen message has seenCount property');
+
+      assert.equal(seenMessage.seen, true, 'seen message has been seen by the current user');
+      assert.equal(unseenMessage.seen, false, 'unseen message has not been seen by the current user');
+
+      assert.equal(seenMessage.seenCount, 1, 'seen message is seen 1 time');
+      assert.equal(unseenMessage.seenCount, 0, 'unseen message is seen 0 times');
     });
   });
 });

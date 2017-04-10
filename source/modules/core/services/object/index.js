@@ -5,6 +5,7 @@ const networkRepository = require('../../../core/repositories/network');
 const teamRepository = require('../../../core/repositories/team');
 const userRepository = require('../../../core/repositories/user');
 const objectRepository = require('../../repositories/object');
+const objectSeenRepository = require('../../repositories/object-seen');
 const impl = require('./implementation');
 
 /**
@@ -39,7 +40,7 @@ const list = async (payload, message) => {
   const objects = await objectRepository.findBy({
     parentType: payload.parentType,
     parentId: payload.parentId,
-  }, createOptionsFromPayload(payload));
+  }, createOptionsFromPayload(payload), message && message.credentials && message.credentials.id);
 
   return objects;
 };
@@ -52,11 +53,13 @@ const list = async (payload, message) => {
  * @method listWithSourceAndChildren
  * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
  */
-const listWithSourceAndChildren = async (payload, message) => {
+const listWithSourceAndChildren = async (payload, message, userId = null) => {
   logger.debug('Listing objects with sources', { payload, message });
 
-  const objects = await objectRepository.findBy({
-    id: { $in: payload.objectIds } }, createOptionsFromPayload(payload)
+  const objects = await objectRepository.findBy(
+    { id: { $in: payload.objectIds } },
+    createOptionsFromPayload(payload),
+    userId
     );
 
   const promisedChildren = objectsForTypeValuePair(
@@ -222,6 +225,24 @@ const get = async (payload, message) => {
   return object;
 };
 
+
+/**
+ * Create object
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.objectId - The id that instantiated the object
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method create
+ * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
+ */
+const markAsRead = async (payload, message) => {
+  logger.debug('Marking object as read', { payload, message });
+
+  return objectSeenRepository.create({
+    objectId: payload.objectId,
+    userId: message.credentials.id,
+  });
+};
+
 exports.count = count;
 exports.create = create;
 exports.get = get;
@@ -229,5 +250,6 @@ exports.getParent = getParent;
 exports.getWithSourceAndChildren = getWithSourceAndChildren;
 exports.list = list;
 exports.listWithSourceAndChildren = listWithSourceAndChildren;
+exports.markAsRead = markAsRead;
 exports.remove = remove;
 exports.usersForParent = usersForParent;

@@ -132,15 +132,6 @@ async function createNetworkWithIntegration({
   return { integration, network };
 }
 
-/**
- * Finds all networks in the database
- * @method findAllNetworks
- * @return {external:Promise<Network[]>} {@link module:modules/core~Network Network}
- */
-function findAllNetworks() {
-  return networkRepo.findAll();
-}
-
 function addTeamToNetwork(networkId, name = randomString(), description = null) {
   return teamRepo.create({ networkId, name, description });
 }
@@ -271,15 +262,6 @@ function findAllIntegrations() {
 }
 
 /**
- * Finds all Activites in the database
- * @method findAllActivities
- * @return {external:Promise.<Activity[]} {@link module:shared~Activity Activity}
- */
-function findAllActivities() {
-  return activityRepo.findAll();
-}
-
-/**
  * Deletes activities from database
  * @param {Activity} activity
  * @method deleteActivity
@@ -308,31 +290,12 @@ function deleteExchange(exchange) {
 }
 
 /**
- * Deletes objects from database
- * @param {Object} object
- * @method deleteObject
- * @return {external:Promise.<number[]>} number of deleted objects
- */
-function deleteObject(object) {
-  return objectRepo.deleteById(object.id);
-}
-
-/**
  * Finds all Objects in the database
  * @method findAllObjects
  * @return {external:Promise.<Object[]} {@link module:shared~Object Object}
  */
 async function findAllObjects() {
   return objectRepo.findAll();
-}
-
-/**
- * Finds all Polls in the database
- * @method findAllPolls
- * @return {external:Promise.<Poll[]} {@link module:modules/poll~Poll Poll}
- */
-async function findAllPolls() {
-  return pollRepo.findAll();
 }
 
 /**
@@ -350,24 +313,17 @@ async function deletePoll(poll) {
  * @method cleanAll
  */
 async function cleanAll() {
-  const networks = await findAllNetworks();
+  await organisationRepository.deleteAll();
+
+  const networks = await networkRepo.findAll();
   const admins = R.map((network) => network.superAdmin, networks);
   await Promise.all(R.map(deleteUser, admins));
 
-  const users = await findAllUsers();
-  await Promise.all(R.map(deleteUser, users));
-
-  const objects = await findAllObjects();
-  await Promise.all(R.map(deleteObject, objects));
-
-  const activities = await findAllActivities();
-  await Promise.all(R.map(deleteActivity, activities));
-
-  const integrations = await findAllIntegrations();
-  await Promise.all(R.map(deleteIntegration, integrations));
-
-  const polls = findAllPolls();
-  await Promise.all(R.map(deletePoll, polls));
+  await userRepo.deleteAll();
+  await objectRepo.deleteAll();
+  await activityRepo.deleteAll();
+  await integrationRepo.deleteAll();
+  await pollRepo.deleteAll();
 }
 
 exports.DEFAULT_INTEGRATION = DEFAULT_INTEGRATION;
@@ -387,14 +343,10 @@ exports.createUserForNewNetwork = createUserForNewNetwork;
 exports.deleteActivity = deleteActivity;
 exports.deleteExchange = deleteExchange;
 exports.deleteIntegration = deleteIntegration;
-exports.deleteObject = deleteObject;
 exports.deletePoll = deletePoll;
 exports.deleteUser = deleteUser;
-exports.findAllActivities = findAllActivities;
 exports.findAllIntegrations = findAllIntegrations;
-exports.findAllNetworks = findAllNetworks;
 exports.findAllObjects = findAllObjects;
-exports.findAllPolls = findAllPolls;
 exports.findAllUsers = findAllUsers;
 exports.findAllExchanges = findAllExchanges;
 exports.getLoginToken = getLoginToken;

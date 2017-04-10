@@ -1,4 +1,5 @@
-const { Organisation, OrganisationUser } = require('./dao');
+const R = require('ramda');
+const { Organisation, OrganisationUser, OrganisationNetwork } = require('./dao');
 const createModel = require('../models/organisation');
 const createPivotModel = require('../models/organisation-user');
 
@@ -13,6 +14,18 @@ const findById = (organisationId) => Organisation
 
     return createModel(result);
   });
+
+const findForUser = async (userId) => {
+  const pivotResult = await OrganisationUser.findAll({
+    where: { userId },
+  });
+
+  const organisationResult = await Organisation.findAll({
+    where: { id: { $in: R.pluck('organisationId', pivotResult) } },
+  });
+
+  return R.map(createModel, organisationResult);
+};
 
 const getPivot = async (userId, organisationId) => {
   const result = await OrganisationUser.findOne({
@@ -36,8 +49,19 @@ const addUser = async (userId, organisationId, roleType = 'EMPLOYEE', functionId
   });
 };
 
+const attachNetwork = async (networkId, organisationId) => OrganisationNetwork
+  .create({ networkId, organisationId });
+
+const deleteAll = () => Organisation.findAll()
+  .then((organisations) => Organisation.destroy({
+    where: { id: { $in: R.pluck('id', organisations) } },
+  }));
+
 exports.create = create;
 exports.findById = findById;
+exports.findForUser = findForUser;
 exports.getPivot = getPivot;
 exports.hasUser = hasUser;
 exports.addUser = addUser;
+exports.attachNetwork = attachNetwork;
+exports.deleteAll = deleteAll;
