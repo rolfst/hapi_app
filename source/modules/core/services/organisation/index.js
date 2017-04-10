@@ -1,3 +1,5 @@
+const R = require('ramda');
+const Promise = require('bluebird');
 const createError = require('../../../../shared/utils/create-error');
 const organisationRepository = require('../../repositories/organisation');
 const networkService = require('../network');
@@ -24,6 +26,24 @@ const create = (payload, message) => {
 };
 
 /**
+ * Attach network to organisation
+ * @param {object} payload
+ * @param {string} payload.networkId
+ * @param {string} payload.organisationId
+ * @param {Message} message {@link module:shared~Message message}
+ * @method create
+ * @return {external:Promise}
+ */
+const attachNetwork = (payload, message) => {
+  logger.debug('Attaching network to organisation', { payload, message });
+
+  return networkService.update({
+    networkId: payload.networkId,
+    organisationId: payload.organisationId,
+  }, message);
+};
+
+/**
  * Listing networks that belong to the organisation
  * @param {object} payload
  * @param {string} payload.organisationId
@@ -40,9 +60,33 @@ const listNetworks = async (payload, message) => {
     throw createError('403');
   }
 
-  const networks = await networkService.list({ organisationId: organisation.id });
+  return networkService.list({ organisationId: organisation.id });
+};
 
-  return networks;
+/**
+ * Listing organisations for a user
+ * @param {object} payload
+ * @param {string} payload.userId - The id of the user to list organisations for
+ * @param {array} payload.include - The includes on the organisation resource
+ * @param {Message} message {@link module:shared~Message message}
+ * @method listForUser
+ * @return {external:Promise.<Organisation[]>} {@link module:modules/core~Organisation}
+ */
+const listForUser = async (payload, message) => {
+  logger.debug('List all organisations for user', { payload, message });
+
+  let organisations = await organisationRepository.findForUser(payload.userId);
+
+  if (R.contains('networks', payload.include)) {
+    organisations = await Promise.map(organisations, async (organisation) => {
+      const networksForOrganisation = await listNetworks({
+        organisationId: organisation.id }, message);
+
+      return R.merge(organisation, { networks: networksForOrganisation });
+    });
+  }
+
+  return organisations;
 };
 
 /**
@@ -68,5 +112,7 @@ const addUser = async (payload, message) => {
 };
 
 exports.create = create;
+exports.attachNetwork = attachNetwork;
 exports.listNetworks = listNetworks;
+exports.listForUser = listForUser;
 exports.addUser = addUser;

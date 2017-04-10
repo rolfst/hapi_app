@@ -17,6 +17,12 @@ const routes = [{
   prefetch: false,
 }, {
   method: 'GET',
+  url: '/v2/users/me/organisations',
+  handler: require('./handlers/organisations-for-user'),
+  validator: require('./validators/organisations-for-user'),
+  prefetch: false,
+}, {
+  method: 'GET',
   url: '/v2/networks/{networkId}/teams',
   handler: require('./handlers/teams-for-network'),
 }, {
@@ -29,6 +35,12 @@ const routes = [{
   url: '/v2/networks/{networkId}/teams/{teamId}',
   handler: require('./handlers/update-team'),
   validator: require('./validators/update-team'),
+}, {
+  method: 'POST',
+  url: '/v2/objects/{objectId}/read',
+  handler: require('./handlers/read-object'),
+  validator: require('./validators/read-object'),
+  prefetch: false
 }];
 
 module.exports = createRoutes(routes);

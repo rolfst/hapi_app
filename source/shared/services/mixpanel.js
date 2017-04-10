@@ -101,7 +101,7 @@ async function executeQuery(query, message) {
     logger.debug('Retrieved data from integration', {
       status,
       itemCount: dataResponse.length,
-      message
+      message,
     });
   }
 
