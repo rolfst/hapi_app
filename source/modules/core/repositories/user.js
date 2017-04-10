@@ -278,15 +278,6 @@ const updateNetworkLink = (whereConstraint, attributes) =>
 
 /**
  * @param {string} userId - identifier for user to delete
- * @method deleteById
- * @return {external:Promise.<number>} Promise with amount of objects removed
- */
-const deleteById = async (userId) => {
-  return User.destroy({ where: { id: userId } });
-};
-
-/**
- * @param {string} userId - identifier for user to delete
  * @param {string} networkId - network to find the user in
  * @method userBelongsToNetwork
  * @return {external:Promise.<boolean>} Promise whether the user belongs to a network
@@ -298,6 +289,20 @@ const userBelongsToNetwork = async (userId, networkId) => {
 
   return result !== null;
 };
+
+/**
+ * @param {string} userId - identifier for user to delete
+ * @method deleteById
+ * @return {external:Promise.<number>} Promise with amount of objects removed
+ */
+const deleteById = async (userId) => {
+  return User.destroy({ where: { id: userId } });
+};
+
+const deleteAll = () => User.findAll()
+  .then((users) => User.destroy({
+    where: { id: { $in: R.pluck('id', users) } },
+  }));
 
 exports.createBulkUsers = createBulkUsers;
 exports.createUser = createUser;
@@ -316,3 +321,4 @@ exports.updateUser = updateUser;
 exports.removeFromNetwork = removeFromNetwork;
 exports.setNetworkLink = setNetworkLink;
 exports.validateUserIds = validateUserIds;
+exports.deleteAll = deleteAll;

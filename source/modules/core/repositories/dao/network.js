@@ -14,6 +14,11 @@ const Network = model.define('Network', {
     field: 'user_id',
     allowNull: false,
   },
+  organisationId: {
+    type: Sequelize.INTEGER,
+    field: 'organisation_id',
+    allowNull: true,
+  },
   name: {
     type: Sequelize.STRING,
     allowNull: false,

@@ -12,5 +12,5 @@ exports.defaultLogLevels = {
   ci: null,
   development: 'DEBUG',
   production: 'WARNING',
-  testing: 'WARNING'
+  testing: 'WARNING',
 };

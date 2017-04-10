@@ -2,6 +2,8 @@ const R = require('ramda');
 const Promise = require('bluebird');
 const authenticate = require('./authenticate');
 const blueprints = require('./blueprints');
+const organisationService = require('../../modules/core/services/organisation');
+const organisationRepository = require('../../modules/core/repositories/organisation');
 const networkService = require('../../modules/core/services/network');
 const integrationRepo = require('../../modules/core/repositories/integration');
 const userRepo = require('../../modules/core/repositories/user');
@@ -58,6 +60,14 @@ function addUserToNetwork(networkUserAttributes) {
   return networkService.addUserToNetwork(networkUserAttributes);
 }
 
+function addUserToOrganisation(userId, organisationId, roleType = 'EMPLOYEE') {
+  return organisationRepository.addUser(userId, organisationId, roleType);
+}
+
+function createOrganisation(name = randomString()) {
+  return organisationService.create({ name });
+}
+
 /**
  * Creates a network based on the attributes
  * @param {Object} networkAttributes
@@ -71,8 +81,15 @@ function addUserToNetwork(networkUserAttributes) {
  * @return {external:Promise<Network>} {@link module:modules/core~Network Network} - created network
  */
 async function createNetwork({
-  userId, externalId, integrationName, name = randomString(), userExternalId, userToken }) {
-  const networkAttributes = { userId, externalId, integrationName, name };
+  name = randomString(),
+  userId,
+  organisationId,
+  externalId,
+  integrationName,
+  userExternalId,
+  userToken,
+}) {
+  const networkAttributes = { organisationId, userId, externalId, integrationName, name };
   const network = await networkService.create(networkAttributes);
 
   await addUserToNetwork({
@@ -112,15 +129,6 @@ async function createNetworkWithIntegration({
       { userId, externalId, name, integrationName, userToken, userExternalId });
 
   return { integration, network };
-}
-
-/**
- * Finds all networks in the database
- * @method findAllNetworks
- * @return {external:Promise<Network[]>} {@link module:modules/core~Network Network}
- */
-function findAllNetworks() {
-  return networkRepo.findAll();
 }
 
 function addTeamToNetwork(networkId, name = randomString(), description = null) {
@@ -242,15 +250,6 @@ function findAllIntegrations() {
 }
 
 /**
- * Finds all Activites in the database
- * @method findAllActivities
- * @return {external:Promise.<Activity[]} {@link module:shared~Activity Activity}
- */
-function findAllActivities() {
-  return activityRepo.findAll();
-}
-
-/**
  * Deletes activities from database
  * @param {Activity} activity
  * @method deleteActivity
@@ -261,31 +260,12 @@ function deleteActivity(activity) {
 }
 
 /**
- * Deletes objects from database
- * @param {Object} object
- * @method deleteObject
- * @return {external:Promise.<number[]>} number of deleted objects
- */
-function deleteObject(object) {
-  return objectRepo.deleteById(object.id);
-}
-
-/**
  * Finds all Objects in the database
  * @method findAllObjects
  * @return {external:Promise.<Object[]} {@link module:shared~Object Object}
  */
 async function findAllObjects() {
   return objectRepo.findAll();
-}
-
-/**
- * Finds all Polls in the database
- * @method findAllPolls
- * @return {external:Promise.<Poll[]} {@link module:modules/poll~Poll Poll}
- */
-async function findAllPolls() {
-  return pollRepo.findAll();
 }
 
 /**
@@ -303,32 +283,27 @@ async function deletePoll(poll) {
  * @method cleanAll
  */
 async function cleanAll() {
-  const networks = await findAllNetworks();
+  await organisationRepository.deleteAll();
+
+  const networks = await networkRepo.findAll();
   const admins = R.map((network) => network.superAdmin, networks);
   await Promise.all(R.map(deleteUser, admins));
 
-  const users = await findAllUsers();
-  await Promise.all(R.map(deleteUser, users));
-
-  const objects = await findAllObjects();
-  await Promise.all(R.map(deleteObject, objects));
-
-  const activities = await findAllActivities();
-  await Promise.all(R.map(deleteActivity, activities));
-
-  const integrations = await findAllIntegrations();
-  await Promise.all(R.map(deleteIntegration, integrations));
-
-  const polls = findAllPolls();
-  await Promise.all(R.map(deletePoll, polls));
+  await userRepo.deleteAll();
+  await objectRepo.deleteAll();
+  await activityRepo.deleteAll();
+  await integrationRepo.deleteAll();
+  await pollRepo.deleteAll();
 }
 
 exports.DEFAULT_INTEGRATION = DEFAULT_INTEGRATION;
 exports.DEFAULT_NETWORK_EXTERNALID = DEFAULT_NETWORK_EXTERNALID;
 exports.addTeamToNetwork = addTeamToNetwork;
 exports.addUserToNetwork = addUserToNetwork;
+exports.addUserToOrganisation = addUserToOrganisation;
 exports.authenticateUser = authenticateUser;
 exports.cleanAll = cleanAll;
+exports.createOrganisation = createOrganisation;
 exports.createIntegration = createIntegration;
 exports.createNetwork = createNetwork;
 exports.createNetworkWithIntegration = createNetworkWithIntegration;
@@ -336,14 +311,10 @@ exports.createUser = createUser;
 exports.createUserForNewNetwork = createUserForNewNetwork;
 exports.deleteActivity = deleteActivity;
 exports.deleteIntegration = deleteIntegration;
-exports.deleteObject = deleteObject;
 exports.deletePoll = deletePoll;
 exports.deleteUser = deleteUser;
-exports.findAllActivities = findAllActivities;
 exports.findAllIntegrations = findAllIntegrations;
-exports.findAllNetworks = findAllNetworks;
 exports.findAllObjects = findAllObjects;
-exports.findAllPolls = findAllPolls;
 exports.findAllUsers = findAllUsers;
 exports.getLoginToken = getLoginToken;
 exports.hapiFile = hapiFile;
