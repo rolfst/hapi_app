@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 const model = require('../../../../shared/configs/sequelize');
 
-const OrganisationFunction = model.define('OrganisationUser', {
+const OrganisationFunction = model.define('OrganisationFunction', {
   organisationId: {
     type: Sequelize.INTEGER,
     field: 'organisation_id',

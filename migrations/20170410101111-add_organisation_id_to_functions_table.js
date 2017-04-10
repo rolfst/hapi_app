@@ -2,8 +2,9 @@
 
 module.exports = {
   up: function (queryInterface, Sequelize) {
-    return queryInterface.addColumn('organization_functions', 'organization_id', {
-      after: 'id',
+    // Note: This field was supposed to go after `id`, but sequelize puts the AFTER
+    //         expression before the REFERENCES expression which mysql does not like
+    return queryInterface.addColumn('organisation_functions', 'organisation_id', {
       type: Sequelize.INTEGER.UNSIGNED,
       allowNull: true,
       references: {
@@ -15,6 +16,6 @@ module.exports = {
   },
 
   down: function (queryInterface, Sequelize) {
-    return queryInterface.removeColumn('organization_functions', 'organization_id');
+    return queryInterface.removeColumn('organisation_functions', 'organisation_id');
   }
 };
