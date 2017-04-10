@@ -407,7 +407,7 @@ describe('Service: Flexchange', () => {
       });
       const commented = await exchangeService.createExchangeComment(
         { exchangeId: createdExchange1.id,
-          text: 'voor een extra doe ik het'
+          text: 'voor een extra doe ik het',
         },
         {
           credentials: { id: acceptor.id },
