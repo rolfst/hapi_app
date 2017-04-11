@@ -47,7 +47,11 @@ const hasUser = async (userId, organisationId) => {
 const addUser = async (userId, organisationId, roleType = 'EMPLOYEE', functionId = null) => {
   return OrganisationUser
     .create({
-      userId, organisationId, organisation_id: organisationId, roleType, functionId,
+      userId,
+      organisationId,
+      organisation_id: organisationId,
+      roleType,
+      functionId,
     });
 };
 
@@ -94,13 +98,42 @@ const findFunctionsInOrganisation = (organisationId) =>
     .findAll({ where: { organisationId } })
     .then(R.map(createFunctionsModel));
 
-const findFunction = (functionIdOrWhereConstraint) => {
+const findFunction = async (functionIdOrWhereConstraint) => {
   const whereConstraint = typeof functionIdOrWhereConstraint === 'object'
     ? functionIdOrWhereConstraint
     : { id: functionIdOrWhereConstraint };
 
-  return OrganisationFunction
+  const organisationFunction = await OrganisationFunction
     .findOne({ where: whereConstraint });
+
+  return organisationFunction
+    ? createFunctionsModel(organisationFunction)
+    : null;
+};
+
+const findFunctionsForUsers = async (userId) => {
+  const organisationUsers = R.map(
+    createPivotModel,
+    await OrganisationUser.findAll({ where: { userId } })
+  );
+
+  const functionIds = R.filter(R.complement(R.isNil()), R.map(R.prop('functionId'), organisationUsers));
+
+  const organisationFunctions = await OrganisationFunction
+    .findAll({ where: { id: { $in: functionIds } } })
+    .then(R.map(createFunctionsModel));
+
+  const findFunctionForOrganisationUser = (organisationUser) =>
+    R.find(R.propEq('id', organisationUser.functionId), organisationFunctions);
+
+  return R.map(
+    (organisationUser) =>
+      R.assoc('function', findFunctionForOrganisationUser(organisationUser), organisationUser),
+    organisationUsers);
+};
+
+const findFunctionForUser = (userId) => {
+  return R.head(findFunctionsForUsers(userId));
 };
 
 exports.create = create;
@@ -116,3 +149,5 @@ exports.updateFunction = updateFunction;
 exports.removeFunction = removeFunction;
 exports.findFunctionsInOrganisation = findFunctionsInOrganisation;
 exports.findFunction = findFunction;
+exports.findFunctionsForUsers = findFunctionsForUsers;
+exports.findFunctionForUser = findFunctionForUser;
