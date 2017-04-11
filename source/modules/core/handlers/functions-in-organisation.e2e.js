@@ -6,6 +6,7 @@ describe('Handler: Functions in organisation', () => {
   let organisation;
   let admin;
   let otherUser;
+  let createdFunction1;
 
   before(async () => {
     [organisation, admin, otherUser] = await Promise.all([
@@ -14,7 +15,7 @@ describe('Handler: Functions in organisation', () => {
       testHelpers.createUser(),
     ]);
 
-    await Promise.all([
+    [,, createdFunction1] = await Promise.all([
       testHelpers.addUserToOrganisation(admin.id, organisation.id, 'ADMIN'),
       testHelpers.createNetwork({ userId: admin.id, organisationId: organisation.id }),
       testHelpers.createOrganisationFunction(organisation.id, 'really important function'),
@@ -29,6 +30,9 @@ describe('Handler: Functions in organisation', () => {
     const { result } = await getRequest(endpoint, admin.token);
 
     assert.lengthOf(result.data, 2);
+    assert.equal(result.data[0].id, createdFunction1.id, 'Id is the correct');
+    assert.equal(result.data[0].name, createdFunction1.name, 'Name is correct');
+    assert.equal(result.data[0].created_at, createdFunction1.createdAt, 'createdAt is the same');
   });
 
   it('should fail when user doesnt belong to the organisation', async () => {

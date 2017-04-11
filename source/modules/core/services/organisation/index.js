@@ -134,7 +134,7 @@ const updateFunction = async (payload, message) => {
     await organisationRepository.getPivot(message.credentials.id, payload.organisationId);
   if (!userMeta || userMeta.roleType !== 'ADMIN') throw createError('403');
 
-  return organisationRepository.updateFunction(payload.organisationFunctionId, payload.name);
+  return organisationRepository.updateFunction(payload.functionId, payload.name);
 };
 
 const deleteFunction = async (payload, message) => {
@@ -147,7 +147,7 @@ const deleteFunction = async (payload, message) => {
     await organisationRepository.getPivot(message.credentials.id, payload.organisationId);
   if (!userMeta || userMeta.roleType !== 'ADMIN') throw createError('403');
 
-  return organisationRepository.removeFunction(payload.organisationFunctionId);
+  return organisationRepository.removeFunction(payload.functionId);
 };
 
 const listFunctions = async (payload, message) => {

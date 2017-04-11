@@ -7,12 +7,14 @@ describe('Handler: Update functions in organisation', () => {
   let organisation;
   let admin;
   let otherUser;
+  let organisationUser;
   let existingFunction;
   const newFunctionName = 'new function';
 
   before(async () => {
-    [organisation, admin, otherUser] = await Promise.all([
+    [organisation, admin, organisationUser, otherUser] = await Promise.all([
       testHelpers.createOrganisation(),
+      testHelpers.createUser(),
       testHelpers.createUser(),
       testHelpers.createUser(),
     ]);
@@ -20,6 +22,7 @@ describe('Handler: Update functions in organisation', () => {
     [existingFunction] = await Promise.all([
       testHelpers.createOrganisationFunction(organisation.id, 'old function'),
       testHelpers.addUserToOrganisation(admin.id, organisation.id, 'ADMIN'),
+      testHelpers.addUserToOrganisation(organisationUser.id, organisation.id),
       testHelpers.createNetwork({ userId: admin.id, organisationId: organisation.id }),
     ]);
   });
@@ -40,6 +43,13 @@ describe('Handler: Update functions in organisation', () => {
   });
 
   it('should fail when user isn\'t an admin in the organisation', async () => {
+    const endpoint = `/v2/organisations/${organisation.id}/functions/${existingFunction.id}`;
+    const { statusCode } = await putRequest(endpoint, { name: 'shouldn\'t be updated' }, organisationUser.token);
+
+    assert.equal(statusCode, 403);
+  });
+
+  it('should fail when user isn\'t in the organisation', async () => {
     const endpoint = `/v2/organisations/${organisation.id}/functions/${existingFunction.id}`;
     const { statusCode } = await putRequest(endpoint, { name: 'shouldn\'t be updated' }, otherUser.token);
 

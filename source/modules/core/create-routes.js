@@ -55,13 +55,13 @@ const routes = [{
   prefetch: false,
 }, {
   method: 'PUT',
-  url: '/v2/organisations/{organisationId}/functions/{organisationFunctionId}',
+  url: '/v2/organisations/{organisationId}/functions/{functionId}',
   handler: require('./handlers/update-function-in-organisation'),
   validator: require('./validators/update-function-in-organisation'),
   prefetch: false,
 }, {
   method: 'DELETE',
-  url: '/v2/organisations/{organisationId}/functions/{organisationFunctionId}',
+  url: '/v2/organisations/{organisationId}/functions/{functionId}',
   handler: require('./handlers/remove-function-in-organisation'),
   validator: require('./validators/remove-function-in-organisation'),
   prefetch: false,

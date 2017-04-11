@@ -71,19 +71,19 @@ const addFunction = (organisationId, name) => OrganisationFunction
   .create({ organisationId, name })
   .then(createFunctionsModel);
 
-const updateFunction = (organisationFunctionIdOrWhereConstraint, name) => {
-  const whereConstraint = typeof organisationFunctionIdOrWhereConstraint === 'object'
-    ? organisationFunctionIdOrWhereConstraint
-    : { id: organisationFunctionIdOrWhereConstraint };
+const updateFunction = (functionIdOrWhereConstraint, name) => {
+  const whereConstraint = typeof functionIdOrWhereConstraint === 'object'
+    ? functionIdOrWhereConstraint
+    : { id: functionIdOrWhereConstraint };
 
   return OrganisationFunction
     .update({ name }, { where: whereConstraint });
 };
 
-const removeFunction = (organisationFunctionIdOrWhereConstraint) => {
-  const whereConstraint = typeof organisationFunctionIdOrWhereConstraint === 'object'
-    ? organisationFunctionIdOrWhereConstraint
-    : { id: organisationFunctionIdOrWhereConstraint };
+const removeFunction = (functionIdOrWhereConstraint) => {
+  const whereConstraint = typeof functionIdOrWhereConstraint === 'object'
+    ? functionIdOrWhereConstraint
+    : { id: functionIdOrWhereConstraint };
 
   return OrganisationFunction
     .destroy({ where: whereConstraint });
@@ -94,10 +94,10 @@ const findFunctionsInOrganisation = (organisationId) =>
     .findAll({ where: { organisationId } })
     .then(R.map(createFunctionsModel));
 
-const findFunction = (organisationFunctionIdOrWhereConstraint) => {
-  const whereConstraint = typeof organisationFunctionIdOrWhereConstraint === 'object'
-    ? organisationFunctionIdOrWhereConstraint
-    : { id: organisationFunctionIdOrWhereConstraint };
+const findFunction = (functionIdOrWhereConstraint) => {
+  const whereConstraint = typeof functionIdOrWhereConstraint === 'object'
+    ? functionIdOrWhereConstraint
+    : { id: functionIdOrWhereConstraint };
 
   return OrganisationFunction
     .findOne({ where: whereConstraint });

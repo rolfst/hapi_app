@@ -11,7 +11,7 @@ module.exports = {
         model: 'organisations',
         key: 'id'
       },
-      onDelete: 'set null'
+      onDelete: 'casecade'
     });
   },
 

@@ -4,5 +4,5 @@ module.exports = (dataModel) => ({
   id: dataModel.id,
   organisationId: dataModel.organisationId,
   name: dataModel.name,
-  createdAt: dateUtils.toISOString(dataModel.updated_at),
+  createdAt: dateUtils ? dateUtils.toISOString(dataModel.created_at) : null,
 });
