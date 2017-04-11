@@ -309,14 +309,14 @@ function decrementExchangeDeclineCount(exchange, amount = 1) {
 }
 
 
-async function incrementCounter(counterValue, exchange) {
-  if (counterValue === 0) await incrementExchangeDeclineCount(exchange);
-  else if (counterValue === 1) await incrementExchangeAcceptCount(exchange);
+async function incrementResponseCount(responseCount, exchange) {
+  if (responseCount === 0) await incrementExchangeDeclineCount(exchange);
+  else if (responseCount === 1) await incrementExchangeAcceptCount(exchange);
 }
 
-async function decrementCounter(counterValue, exchange) {
-  if (counterValue === 0) await decrementExchangeDeclineCount(exchange);
-  else if (counterValue === 1) await decrementExchangeAcceptCount(exchange);
+async function decrementResponseCount(responseCount, exchange) {
+  if (responseCount === 0) await decrementExchangeDeclineCount(exchange);
+  else if (responseCount === 1) await decrementExchangeAcceptCount(exchange);
 }
 /**
  * Add a response to an exchange
@@ -330,14 +330,14 @@ async function respondToExchange(exchangeId, userId, response) {
   const data = { userId, exchangeId, response };
   const exchange = await findExchangeById(exchangeId, userId);
 
-  incrementCounter(data.response, exchange);
+  incrementResponseCount(data.response, exchange);
 
   const constraint = { exchangeId: exchange.id, userId };
   const exchangeResponse = await exchangeResponseRepo.findResponseWhere(constraint);
 
   if (exchangeResponse) {
     await exchangeResponse.destroy();
-    decrementCounter(exchangeResponse.response, exchange);
+    decrementResponseCount(exchangeResponse.response, exchange);
   }
   await exchangeResponseRepo.createExchangeResponse(data);
 
