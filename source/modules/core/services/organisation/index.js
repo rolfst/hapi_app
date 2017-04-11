@@ -111,8 +111,64 @@ const addUser = async (payload, message) => {
   return organisationRepository.addUser(payload.userId, payload.organisationId, payload.roleType);
 };
 
+const addFunction = async (payload, message) => {
+  logger.debug('Adding function to organisation', { payload, message });
+
+  const organisation = await organisationRepository.findById(payload.organisationId);
+  if (!organisation) throw createError('404', 'Organisation not found.');
+
+  const userMeta =
+    await organisationRepository.getPivot(message.credentials.id, payload.organisationId);
+  if (!userMeta || userMeta.roleType !== 'ADMIN') throw createError('403');
+
+  return organisationRepository.addFunction(payload.organisationId, payload.name);
+};
+
+const updateFunction = async (payload, message) => {
+  logger.debug('Updating function in organisation', { payload, message });
+
+  const organisation = await organisationRepository.findById(payload.organisationId);
+  if (!organisation) throw createError('404', 'Organisation not found.');
+
+  const userMeta =
+    await organisationRepository.getPivot(message.credentials.id, payload.organisationId);
+  if (!userMeta || userMeta.roleType !== 'ADMIN') throw createError('403');
+
+  return organisationRepository.updateFunction(payload.functionId, payload.name);
+};
+
+const deleteFunction = async (payload, message) => {
+  logger.debug('Removing function in organisation', { payload, message });
+
+  const organisation = await organisationRepository.findById(payload.organisationId);
+  if (!organisation) throw createError('404', 'Organisation not found.');
+
+  const userMeta =
+    await organisationRepository.getPivot(message.credentials.id, payload.organisationId);
+  if (!userMeta || userMeta.roleType !== 'ADMIN') throw createError('403');
+
+  return organisationRepository.removeFunction(payload.functionId);
+};
+
+const listFunctions = async (payload, message) => {
+  logger.debug('List all functions for organisation', { payload, message });
+
+  const organisation = await organisationRepository.findById(payload.organisationId);
+  if (!organisation) throw createError('404', 'Organisation not found.');
+
+  if (!await organisationRepository.hasUser(message.credentials.id, organisation.id)) {
+    throw createError('403');
+  }
+
+  return organisationRepository.findFunctionsInOrganisation(organisation.id);
+};
+
 exports.create = create;
 exports.attachNetwork = attachNetwork;
 exports.listNetworks = listNetworks;
 exports.listForUser = listForUser;
 exports.addUser = addUser;
+exports.addFunction = addFunction;
+exports.updateFunction = updateFunction;
+exports.deleteFunction = deleteFunction;
+exports.listFunctions = listFunctions;
