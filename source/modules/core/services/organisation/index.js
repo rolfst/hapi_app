@@ -92,8 +92,8 @@ const listForUser = async (payload, message) => {
 /**
  * Adding an user to organisation
  * @param {object} payload
- * @param {string} payload.organisationId
- * @param {string} payload.userId
+ * @param {string} payload.organisationId - The id of the organisation
+ * @param {string} payload.userId - The id of the user to add
  * @param {UserRoles} payload.roleType
  * @param {Message} message {@link module:shared~Message message}
  * @method addUser
@@ -111,6 +111,14 @@ const addUser = async (payload, message) => {
   return organisationRepository.addUser(payload.userId, payload.organisationId, payload.roleType);
 };
 
+/**
+ * Add a function in an organisation
+ * @param {object} payload
+ * @param {number} payload.organisationId - The id of the orgonisation
+ * @param {string} payload.name - The name of the function to add
+ * @param {Message} message {@link module:shared~Message message}
+ * @return {external:Promise.<OrganisationFunction>}
+ */
 const addFunction = async (payload, message) => {
   logger.debug('Adding function to organisation', { payload, message });
 
@@ -124,6 +132,14 @@ const addFunction = async (payload, message) => {
   return organisationRepository.addFunction(payload.organisationId, payload.name);
 };
 
+/**
+ * Update a function in an organisation
+ * @param {object} payload
+ * @param {number} payload.organisationId - The id of the orgonisation
+ * @param {string} payload.name - The name of the function to add
+ * @param {Message} message {@link module:shared~Message message}
+ * @return {external:Promise.<OrganisationFunction>}
+ */
 const updateFunction = async (payload, message) => {
   logger.debug('Updating function in organisation', { payload, message });
 
@@ -137,6 +153,14 @@ const updateFunction = async (payload, message) => {
   return organisationRepository.updateFunction(payload.functionId, payload.name);
 };
 
+/**
+ * delete a function from an organisation
+ * @param {object} payload
+ * @param {number} payload.organisationId - The id of the orgonisation
+ * @param {string} payload.functionId - The id of the function to delete
+ * @param {Message} message {@link module:shared~Message message}
+ * @return {external:Promise.<OrganisationFunction>}
+ */
 const deleteFunction = async (payload, message) => {
   logger.debug('Removing function in organisation', { payload, message });
 
@@ -150,6 +174,13 @@ const deleteFunction = async (payload, message) => {
   return organisationRepository.removeFunction(payload.functionId);
 };
 
+/**
+ * list functions in an organisation
+ * @param {object} payload
+ * @param {number} payload.organisationId - The id of the orgonisation
+ * @param {Message} message {@link module:shared~Message message}
+ * @return {external:Promise.<OrganisationFunction>}
+ */
 const listFunctions = async (payload, message) => {
   logger.debug('List all functions for organisation', { payload, message });
 
