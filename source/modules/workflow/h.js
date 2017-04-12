@@ -1,8 +1,8 @@
-const ETriggerTypes = {
+exports.ETriggerTypes = {
   DATETIME: 'datetime',
 };
 
-const EConditionOperators = {
+exports.EConditionOperators = {
   EQUAL: '==',
   GREATER_THAN: '>',
   LESS_THAN: '<',
@@ -11,10 +11,6 @@ const EConditionOperators = {
   NOT: '!=',
 };
 
-const EActionTypes = {
+exports.EActionTypes = {
   MESSAGE: 'message',
 };
-
-exports.ETriggerTypes = ETriggerTypes;
-exports.EConditionOperators = EConditionOperators;
-exports.EActionTypes = EActionTypes;
