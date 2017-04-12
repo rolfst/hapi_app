@@ -6,35 +6,25 @@ const Condition2Model = require('../models/condition');
 const Action2Model = require('../models/action');
 const ActionDone2Model = require('../models/actiondone');
 
-const findAll = (workflowIdsOrWhereConstraints) => {
-  const whereConstraints =
-    typeof workflowIdsOrWhereConstraints === 'object'
-    && !Array.isArray(workflowIdsOrWhereConstraints)
-      ? workflowIdsOrWhereConstraints
-      : { id: workflowIdsOrWhereConstraints };
+const buildWhereConstraint = (idOrWhereConstraint) =>
+  typeof idOrWhereConstraint === 'object'
+  && !Array.isArray(idOrWhereConstraint)
+    ? idOrWhereConstraint
+    : { id: idOrWhereConstraint };
 
+const findAll = (workflowIdsOrWhereConstraints) => {
   return WorkFlow
-    .findAll({ where: whereConstraints })
+    .findAll({ where: buildWhereConstraint(workflowIdsOrWhereConstraints) })
     .then(R.map(WorkFlow2Model));
 };
 
 const findOne = (workflowIdOrWhereConstraints) => {
-  const whereConstraints = typeof workflowIdOrWhereConstraints === 'object'
-    ? workflowIdOrWhereConstraints
-    : { id: [workflowIdOrWhereConstraints] };
-
-  return R.head(findAll(whereConstraints));
+  return R.head(findAll(buildWhereConstraint(workflowIdOrWhereConstraints)));
 };
 
 const findAllWithData = async (workflowIdsOrWhereConstraints) => {
-  const whereConstraints =
-    typeof workflowIdsOrWhereConstraints === 'object'
-    && !Array.isArray(workflowIdsOrWhereConstraints)
-      ? workflowIdsOrWhereConstraints
-      : { id: workflowIdsOrWhereConstraints };
-
   const workFlows = await WorkFlow
-    .findAll({ where: whereConstraints })
+    .findAll({ where: buildWhereConstraint(workflowIdsOrWhereConstraints) })
     .then(R.map(WorkFlow2Model));
 
   const dataFindOptions = { where: { workflowId: R.pluck('id', workFlows) } };
@@ -49,24 +39,19 @@ const findAllWithData = async (workflowIdsOrWhereConstraints) => {
   const findConditions = (workflowId) => R.filter(R.propEq('workflowId', workflowId), conditions);
   const findActions = (workflowId) => R.filter(R.propEq('workflowId', workflowId), actions);
 
-  const addData = (workflow) =>
-    R.pipe(
-      R.assoc('triggers', findTriggers(workflow.id)),
-      R.assoc('conditions', findConditions(workflow.id)),
-      R.assoc('actions', findActions(workflow.id)),
-    );
+  const addData = (workflow) => R.merge(workflow, {
+    triggers: findTriggers(workflow.id),
+    conditions: findConditions(workflow.id),
+    actions: findActions(workflow.id),
+  });
 
   return R.map(addData, workFlows);
 };
 
 const findOneWithData = (workflowIdOrWhereConstraints) => {
-  const whereConstraints =
-    typeof workflowIdOrWhereConstraints === 'object'
-      ? workflowIdOrWhereConstraints
-      : { id: [workflowIdOrWhereConstraints] };
-
-  return R.head(findAllWithData(whereConstraints));
+  return R.head(findAllWithData(buildWhereConstraint(workflowIdOrWhereConstraints)));
 };
+
 exports.findAll = findAll;
 exports.findOne = findOne;
 exports.findAllWithData = findAllWithData;
