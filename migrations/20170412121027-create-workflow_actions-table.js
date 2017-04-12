@@ -21,6 +21,7 @@ module.exports = {
           onDelete: 'cascade'
         },
         type: Sequelize.ENUM.apply(null, Object.values(EActionTypes)),
+        meta: Sequelize.TEXT,
         created_at: {
           type: Sequelize.DATE,
           defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),

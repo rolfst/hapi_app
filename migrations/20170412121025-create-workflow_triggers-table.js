@@ -24,8 +24,7 @@ module.exports = {
           type: Sequelize.ENUM.apply(null, Object.values(ETriggerTypes)),
           allowNull: false
         },
-        value: Sequelize.STRING, // This value is actually meta info about the trigger, but this field is indexed
-        meta: Sequelize.TEXT,
+        value: Sequelize.STRING,
         created_at: {
           type: Sequelize.DATE,
           defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
