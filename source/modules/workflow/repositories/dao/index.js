@@ -26,7 +26,7 @@ ActionDone.belongsTo(WorkFlow, {
   foreignKey: 'workflow_id',
 });
 
-ActionDone.belongsTo(WorkFlow, {
+ActionDone.belongsTo(User, {
   foreignKey: 'user_id',
 });
 
