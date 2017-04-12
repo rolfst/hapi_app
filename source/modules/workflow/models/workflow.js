@@ -5,6 +5,13 @@ module.exports = (dataModel) => ({
   organisationId: dataModel.organisationId,
   name: dataModel.name,
   meta: dataModel.meta ? JSON.parse(dataModel.meta) : null,
-  createdAt: dateUtils ? dateUtils.toISOString(dataModel.created_at) : null,
-  updatedAt: dateUtils ? dateUtils.toISOString(dataModel.updated_at) : null,
+  startDate: dataModel.start_date ? dateUtils.toISOString(dataModel.start_date) : null,
+  expirationDate: dataModel.expiration_date
+    ? dateUtils.toISOString(dataModel.expiration_date)
+    : null,
+  createdAt: dataModel.created_at ? dateUtils.toISOString(dataModel.created_at) : null,
+  updatedAt: dataModel.updated_at ? dateUtils.toISOString(dataModel.updated_at) : null,
+  triggers: null, // Set in service
+  conditions: null, // Set in service
+  actions: null, // Set in service
 });

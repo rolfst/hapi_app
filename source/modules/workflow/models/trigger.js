@@ -5,6 +5,6 @@ module.exports = (dataModel) => ({
   workflowId: dataModel.workflowId,
   type: dataModel.type,
   value: dataModel.value,
-  createdAt: dateUtils ? dateUtils.toISOString(dataModel.created_at) : null,
-  updatedAt: dateUtils ? dateUtils.toISOString(dataModel.updated_at) : null,
+  createdAt: dataModel.created_at ? dateUtils.toISOString(dataModel.created_at) : null,
+  updatedAt: dataModel.updated_at ? dateUtils.toISOString(dataModel.updated_at) : null,
 });
