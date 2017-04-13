@@ -3,7 +3,7 @@ const testHelpers = require('../../../shared/test-utils/helpers');
 const { putRequest } = require('../../../shared/test-utils/request');
 const OrganisationRepo = require('../repositories/organisation');
 
-describe.only('Handler: Update function for user', () => {
+describe('Handler: Update function for user', () => {
   let organisation;
   let admin;
   let otherUser;
@@ -11,7 +11,6 @@ describe.only('Handler: Update function for user', () => {
   let existingFunction;
   let otherFunction;
   let network;
-  const newFunctionName = 'new function';
 
   before(async () => {
     [organisation, admin, organisationUser, otherUser] = await Promise.all([
@@ -28,7 +27,7 @@ describe.only('Handler: Update function for user', () => {
       testHelpers.addUserToOrganisation(admin.id, organisation.id, 'ADMIN'),
       testHelpers.addUserToOrganisation(organisationUser.id, organisation.id),
     ]);
-    await testHelpers.addUserToNetwork({ networkId: network.id, userId: organisationUser.id }),
+    await testHelpers.addUserToNetwork({ networkId: network.id, userId: organisationUser.id });
     await Promise.all([
       OrganisationRepo.updateUser(organisationUser.id, organisation.id,
         { functionId: existingFunction.id }),
@@ -63,10 +62,10 @@ describe.only('Handler: Update function for user', () => {
       }, organisationUser.token);
 
     assert.equal(statusCode, 403);
-    assert.equal(result.error_code, '10020')
+    assert.equal(result.error_code, '10020');
   });
 
-  it.only('should fail when user isn\'t in the organisation', async () => {
+  it('should fail when user isn\'t in the organisation', async () => {
     const endpoint = `/v2/networks/${network.id}/users/${otherUser.id}`;
     const { statusCode, result } = await putRequest(endpoint,
       {
@@ -75,6 +74,6 @@ describe.only('Handler: Update function for user', () => {
       }, admin.token);
 
     assert.equal(statusCode, 403);
-    assert.equal(result.error_code, '403')
+    assert.equal(result.error_code, '403');
   });
 });

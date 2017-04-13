@@ -136,18 +136,24 @@ const findFunctionForUser = (userId) => {
   return R.head(findFunctionsForUsers(userId));
 };
 
-exports.create = create;
-exports.findById = findById;
-exports.findForUser = findForUser;
-exports.getPivot = getPivot;
-exports.hasUser = hasUser;
+async function updateUser(userId, organisationId, attributes) {
+  return OrganisationUser.update(attributes, { where: { organisationId, userId } })
+    .then(createPivotModel);
+}
+
+exports.addFunction = addFunction;
 exports.addUser = addUser;
 exports.attachNetwork = attachNetwork;
+exports.create = create;
 exports.deleteAll = deleteAll;
-exports.addFunction = addFunction;
-exports.updateFunction = updateFunction;
-exports.removeFunction = removeFunction;
-exports.findFunctionsInOrganisation = findFunctionsInOrganisation;
+exports.findById = findById;
+exports.findForUser = findForUser;
 exports.findFunction = findFunction;
-exports.findFunctionsForUsers = findFunctionsForUsers;
 exports.findFunctionForUser = findFunctionForUser;
+exports.findFunctionsForUsers = findFunctionsForUsers;
+exports.findFunctionsInOrganisation = findFunctionsInOrganisation;
+exports.getPivot = getPivot;
+exports.hasUser = hasUser;
+exports.removeFunction = removeFunction;
+exports.updateFunction = updateFunction;
+exports.updateUser = updateUser;

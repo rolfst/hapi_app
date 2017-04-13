@@ -1,8 +1,8 @@
 const R = require('ramda');
 const Promise = require('bluebird');
-const createError = require('../../../../shared/utils/create-error');
 const organisationRepository = require('../../repositories/organisation');
 const networkService = require('../network');
+const impl = require('./implementation');
 
 /**
  * @module modules/core/services/organisation
@@ -54,13 +54,10 @@ const attachNetwork = (payload, message) => {
 const listNetworks = async (payload, message) => {
   logger.debug('List all network for organisation', { payload, message });
 
-  const organisation = await organisationRepository.findById(payload.organisationId);
-  if (!organisation) throw createError('404', 'Organisation not found.');
-  if (!await organisationRepository.hasUser(message.credentials.id, organisation.id)) {
-    throw createError('403');
-  }
+  await impl.assertThatOrganisationExists(payload.organisationId);
+  await impl.assertThatUserIsMemberOfOrganisation(message.credentials.id, payload.organisationId);
 
-  return networkService.list({ organisationId: organisation.id });
+  return networkService.list({ organisationId: payload.organisationId });
 };
 
 /**
@@ -102,11 +99,8 @@ const listForUser = async (payload, message) => {
 const addUser = async (payload, message) => {
   logger.debug('Adding user to organisation', { payload, message });
 
-  const organisation = await organisationRepository.findById(payload.organisationId);
-  if (!organisation) throw createError('404', 'Organisation not found.');
-
-  const userMeta = await organisationRepository.getPivot(payload.userId, payload.organisationId);
-  if (!userMeta || userMeta.roleType !== 'ADMIN') throw createError('403');
+  await impl.assertThatOrganisationExists(payload.organisationId);
+  await impl.assertThatUserIsAdminInOrganisation(payload.userId, payload.organisationId);
 
   return organisationRepository.addUser(payload.userId, payload.organisationId, payload.roleType);
 };
@@ -122,12 +116,8 @@ const addUser = async (payload, message) => {
 const addFunction = async (payload, message) => {
   logger.debug('Adding function to organisation', { payload, message });
 
-  const organisation = await organisationRepository.findById(payload.organisationId);
-  if (!organisation) throw createError('404', 'Organisation not found.');
-
-  const userMeta =
-    await organisationRepository.getPivot(message.credentials.id, payload.organisationId);
-  if (!userMeta || userMeta.roleType !== 'ADMIN') throw createError('403');
+  await impl.assertThatOrganisationExists(payload.organisationId);
+  await impl.assertThatUserIsAdminInOrganisation(message.credentials.id, payload.organisationId);
 
   return organisationRepository.addFunction(payload.organisationId, payload.name);
 };
@@ -143,12 +133,8 @@ const addFunction = async (payload, message) => {
 const updateFunction = async (payload, message) => {
   logger.debug('Updating function in organisation', { payload, message });
 
-  const organisation = await organisationRepository.findById(payload.organisationId);
-  if (!organisation) throw createError('404', 'Organisation not found.');
-
-  const userMeta =
-    await organisationRepository.getPivot(message.credentials.id, payload.organisationId);
-  if (!userMeta || userMeta.roleType !== 'ADMIN') throw createError('403');
+  await impl.assertThatOrganisationExists(payload.organisationId);
+  await impl.assertThatUserIsAdminInOrganisation(message.credentials.id, payload.organisationId);
 
   return organisationRepository.updateFunction(payload.functionId, payload.name);
 };
@@ -164,12 +150,8 @@ const updateFunction = async (payload, message) => {
 const deleteFunction = async (payload, message) => {
   logger.debug('Removing function in organisation', { payload, message });
 
-  const organisation = await organisationRepository.findById(payload.organisationId);
-  if (!organisation) throw createError('404', 'Organisation not found.');
-
-  const userMeta =
-    await organisationRepository.getPivot(message.credentials.id, payload.organisationId);
-  if (!userMeta || userMeta.roleType !== 'ADMIN') throw createError('403');
+  await impl.assertThatOrganisationExists(payload.organisationId);
+  await impl.assertThatUserIsAdminInOrganisation(message.credentials.id, payload.organisationId);
 
   return organisationRepository.removeFunction(payload.functionId);
 };
@@ -177,29 +159,46 @@ const deleteFunction = async (payload, message) => {
 /**
  * list functions in an organisation
  * @param {object} payload
- * @param {number} payload.organisationId - The id of the orgonisation
+ * @param {number} payload.organisationId - The id of the organisation
  * @param {Message} message {@link module:shared~Message message}
  * @return {external:Promise.<OrganisationFunction>}
  */
 const listFunctions = async (payload, message) => {
   logger.debug('List all functions for organisation', { payload, message });
 
-  const organisation = await organisationRepository.findById(payload.organisationId);
-  if (!organisation) throw createError('404', 'Organisation not found.');
+  await impl.assertThatOrganisationExists(payload.organisationId);
+  await impl.assertThatUserIsMemberOfOrganisation(message.credentials.id, payload.organisationId);
 
-  if (!await organisationRepository.hasUser(message.credentials.id, organisation.id)) {
-    throw createError('403');
-  }
-
-  return organisationRepository.findFunctionsInOrganisation(organisation.id);
+  return organisationRepository.findFunctionsInOrganisation(payload.organisationId);
 };
 
-exports.create = create;
-exports.attachNetwork = attachNetwork;
-exports.listNetworks = listNetworks;
-exports.listForUser = listForUser;
-exports.addUser = addUser;
+/**
+ * Updates a user with organisational data.
+ * @param {object} payload
+ * @param {number} payload.userId - The id of the orgonisation
+ * @param {number} payload.organisationId - The id of the organisation
+ * @param {number} payload.functionId - The id of the function to be assigned to the user.
+ * @param {Message} message {@link module:shared~Message message}
+ */
+async function updateUser(payload, message) {
+  logger.debug('Updates a function for a user in an organisation', { payload, message });
+
+  await impl.assertThatUserIsMemberOfOrganisation(payload.userId, payload.organisationId);
+  await impl.assertThatUserIsAdminInOrganisation(message.credentials.id, payload.organisationId);
+
+  const organisationUser = await organisationRepository.updateUser(
+    payload.userId, payload.organisationId, { functionId: payload.functionId });
+
+  return organisationUser;
+}
+
 exports.addFunction = addFunction;
-exports.updateFunction = updateFunction;
+exports.addUser = addUser;
+exports.attachNetwork = attachNetwork;
+exports.create = create;
 exports.deleteFunction = deleteFunction;
+exports.listForUser = listForUser;
 exports.listFunctions = listFunctions;
+exports.listNetworks = listNetworks;
+exports.updateFunction = updateFunction;
+exports.updateUser = updateUser;
