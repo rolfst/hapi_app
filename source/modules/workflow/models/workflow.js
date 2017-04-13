@@ -2,7 +2,7 @@ const dateUtils = require('../../../shared/utils/date');
 
 module.exports = (dataModel) => ({
   id: dataModel.id,
-  organisationId: dataModel.organisationId,
+  organisationId: parseInt(dataModel.organisationId, 10), // Somehow the dao gives a string
   name: dataModel.name,
   meta: dataModel.meta ? JSON.parse(dataModel.meta) : null,
   startDate: dataModel.start_date ? dateUtils.toISOString(dataModel.start_date) : null,

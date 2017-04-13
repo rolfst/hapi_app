@@ -4,6 +4,7 @@ const authenticate = require('./authenticate');
 const blueprints = require('./blueprints');
 const organisationService = require('../../modules/core/services/organisation');
 const organisationRepository = require('../../modules/core/repositories/organisation');
+const workflowRepository = require('../../modules/workflow/repositories/workflow');
 const networkService = require('../../modules/core/services/network');
 const integrationRepo = require('../../modules/core/repositories/integration');
 const userRepo = require('../../modules/core/repositories/user');
@@ -293,18 +294,22 @@ async function deletePoll(poll) {
  * @method cleanAll
  */
 async function cleanAll() {
-  await organisationRepository.deleteAll();
-
+  await Promise.all([
+    organisationRepository.deleteAll(),
+    workflowRepository.deleteAll(),
+  ]);
 
   const networks = await networkRepo.findAll();
   const admins = R.map((network) => network.superAdmin, networks);
   await Promise.all(R.map(deleteUser, admins));
 
-  await userRepo.deleteAll();
-  await objectRepo.deleteAll();
-  await activityRepo.deleteAll();
-  await integrationRepo.deleteAll();
-  await pollRepo.deleteAll();
+  await Promise.all([
+    userRepo.deleteAll(),
+    objectRepo.deleteAll(),
+    activityRepo.deleteAll(),
+    integrationRepo.deleteAll(),
+    pollRepo.deleteAll(),
+  ]);
 }
 
 exports.DEFAULT_INTEGRATION = DEFAULT_INTEGRATION;
