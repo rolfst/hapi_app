@@ -1,20 +1,20 @@
 const R = require('ramda');
-const { WorkFlow, Trigger, Condition, Action, ActionDone } = require('./dao');
+const { WorkFlow, Trigger, Condition, Action/* , ActionDone */ } = require('./dao');
 const createWorkFlowModel = require('../models/workflow');
 const createTriggerModel = require('../models/trigger');
 const createConditionModel = require('../models/condition');
 const createActionModel = require('../models/action');
-//const createActionDoneModel = require('../models/actiondone');
-//const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../h');
+// const createActionDoneModel = require('../models/actiondone');
+const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../h');
 const dateUtils = require('../../../shared/utils/date');
 
-const buildWhereConstraint = (idOrWhereConstraint) =>
+const buildWhereConstraint = (idOrWhereConstraint) => (
   typeof idOrWhereConstraint === 'object'
   && !Array.isArray(idOrWhereConstraint)
     ? idOrWhereConstraint
     : {
       id: idOrWhereConstraint instanceof Array ? { $in: idOrWhereConstraint } : idOrWhereConstraint,
-    };
+    });
 
 const buildQueryOptions = (where) => ({ where });
 
@@ -24,10 +24,18 @@ const filterByWorkflowId = (id, collection) => R.filter(R.propEq('workflowId', i
 const pluckIds = R.pluck('id');
 
 const create = (attributes) => {
-  const whitelist = ['organisationId', 'name', 'startDate', 'expirationDate'];
+  const whitelist = ['organisationId', 'name', 'meta', 'startDate', 'expirationDate'];
 
   return WorkFlow
     .create(R.pick(whitelist, attributes))
+    .then(createWorkFlowModel);
+};
+
+const update = (id, attributes) => {
+  const whitelist = ['organisationId', 'name', 'meta', 'startDate', 'expirationDate'];
+
+  return WorkFlow
+    .update(R.pick(whitelist, attributes), { where: { id } })
     .then(createWorkFlowModel);
 };
 
@@ -141,7 +149,13 @@ const deleteAll = () => {
   ]);
 };
 
+// Carry along enums for easy access later
+exports.ETriggerTypes = ETriggerTypes;
+exports.EConditionOperators = EConditionOperators;
+exports.EActionTypes = EActionTypes;
+
 exports.create = create;
+exports.update = update;
 exports.createTrigger = createTrigger;
 exports.createCondition = createCondition;
 exports.createAction = createAction;

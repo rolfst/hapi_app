@@ -3,6 +3,7 @@ const Promise = require('bluebird');
 const createError = require('../../../../shared/utils/create-error');
 const organisationRepository = require('../../repositories/organisation');
 const networkService = require('../network');
+const { ERoleTypes } = require('./h');
 
 /**
  * @module modules/core/services/organisation
@@ -163,6 +164,19 @@ const listFunctions = async (payload, message) => {
   return organisationRepository.findFunctionsInOrganisation(organisation.id);
 };
 
+const userHasRoleInOrganisation = async (requestedRole, organisationId, userId) => {
+  logger.debug('Checking user role in organisation', { requestedRole, organisationId, userId });
+
+  const organisation = await organisationRepository.findById(organisationId);
+  if (!organisation) throw createError('404', 'Organisation not found.');
+
+  const userMeta = await organisationRepository.getPivot(userId, organisationId);
+  if (!userMeta) throw createError('403');
+
+  return userMeta.roleType === requestedRole;
+};
+
+exports.ERoleTypes = ERoleTypes;
 exports.create = create;
 exports.attachNetwork = attachNetwork;
 exports.listNetworks = listNetworks;
@@ -172,3 +186,4 @@ exports.addFunction = addFunction;
 exports.updateFunction = updateFunction;
 exports.deleteFunction = deleteFunction;
 exports.listFunctions = listFunctions;
+exports.userHasRoleInOrganisation = userHasRoleInOrganisation;

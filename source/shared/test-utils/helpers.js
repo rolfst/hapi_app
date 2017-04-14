@@ -290,26 +290,82 @@ async function deletePoll(poll) {
 }
 
 /**
+ * Creates a complete workflow object with some dummy triggers, conditions and actions
+ * @param {number} organisationId
+ * @param {string} Optional: name
+ * @method createCompleteWorkFlow
+ * @return {external:Array<WorkFlow, Triggers, Conditions, Action>}
+ */
+async function createCompleteWorkFlow(organisationId, name = randomString()) {
+  const createdWorkFlow = await workflowRepository
+    .create({ organisationId, name });
+
+  const [createdTriggers, createdConditions, createdActions] = await Promise.all([
+    Promise.all([
+      workflowRepository.createTrigger({
+        workflowId: createdWorkFlow.id,
+        type: workflowRepository.ETriggerTypes.DATETIME,
+        value: '2017-01-01',
+      }),
+    ]),
+    Promise.all([
+      workflowRepository.createCondition({
+        workflowId: createdWorkFlow.id,
+        field: 'user.age',
+        operator: workflowRepository.EConditionOperators.GREATER_THAN_OR_EQUAL,
+        value: '25',
+      }),
+      workflowRepository.createCondition({
+        workflowId: createdWorkFlow.id,
+        field: 'user.gender',
+        operator: workflowRepository.EConditionOperators.EQUAL,
+        value: 'm',
+      }),
+    ]),
+    Promise.all([
+      workflowRepository.createAction({
+        workflowId: createdWorkFlow.id,
+        type: workflowRepository.EActionTypes.MESSAGE,
+        meta: {
+          senderId: 1,
+          content: 'Too old for stocking',
+        },
+      }),
+    ]),
+  ]);
+
+  return [createdWorkFlow, createdTriggers, createdConditions, createdActions];
+}
+
+/**
+ * Creates a workflow object
+ * @param {number} organisationId
+ * @param {string} Optional: name
+ * @method createWorkFlow
+ * @return {external:Array<WorkFlow, Triggers, Conditions, Action>}
+ */
+async function createWorkFlow(organisationId, name = randomString()) {
+  return workflowRepository
+    .create({ organisationId, name });
+}
+
+/**
  * Deletes all data in the database
  * @method cleanAll
  */
 async function cleanAll() {
-  await Promise.all([
-    organisationRepository.deleteAll(),
-    workflowRepository.deleteAll(),
-  ]);
+  await organisationRepository.deleteAll();
+  await workflowRepository.deleteAll();
 
   const networks = await networkRepo.findAll();
   const admins = R.map((network) => network.superAdmin, networks);
   await Promise.all(R.map(deleteUser, admins));
 
-  await Promise.all([
-    userRepo.deleteAll(),
-    objectRepo.deleteAll(),
-    activityRepo.deleteAll(),
-    integrationRepo.deleteAll(),
-    pollRepo.deleteAll(),
-  ]);
+  await userRepo.deleteAll();
+  await objectRepo.deleteAll();
+  await activityRepo.deleteAll();
+  await integrationRepo.deleteAll();
+  await pollRepo.deleteAll();
 }
 
 exports.DEFAULT_INTEGRATION = DEFAULT_INTEGRATION;
@@ -336,3 +392,5 @@ exports.findAllUsers = findAllUsers;
 exports.getLoginToken = getLoginToken;
 exports.hapiFile = hapiFile;
 exports.randomString = randomString;
+exports.createCompleteWorkFlow = createCompleteWorkFlow;
+exports.createWorkFlow = createWorkFlow;

@@ -9,6 +9,7 @@ const pollRoutes = require('./modules/poll/create-routes');
 const feedRoutes = require('./modules/feed/create-routes');
 const attachmentRoutes = require('./modules/attachment/create-routes');
 const statisticRoutes = require('./modules/statistics/create-routes');
+const workflowRoutes = require('./modules/workflow/create-routes');
 
 module.exports = [
   ...coreRoutes,
@@ -22,4 +23,5 @@ module.exports = [
   ...feedRoutes,
   ...attachmentRoutes,
   ...statisticRoutes,
+  ...workflowRoutes,
 ];

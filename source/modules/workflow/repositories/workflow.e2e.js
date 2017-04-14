@@ -4,7 +4,7 @@ const testHelper = require('../../../shared/test-utils/helpers');
 const workFlowRepo = require('./workflow');
 const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../h');
 
-describe.only('Workflow repository', () => {
+describe('Workflow repository', () => {
   let admin;
   let employee;
   let organisation;
@@ -26,7 +26,10 @@ describe.only('Workflow repository', () => {
 
   it('should contain all necessary properties when fetching', async () => {
     // First create a complete workflow
-    const createdWorkFlow = await workFlowRepo.create({ organisationId: organisation.id,name: 'test workflow' });
+    const createdWorkFlow = await workFlowRepo.create({
+      organisationId: organisation.id,
+      name: 'test workflow',
+    });
     const [createdTriggers, createdConditions, createdActions] = await Promise.all([
       Promise.all([
         workFlowRepo.createTrigger({
