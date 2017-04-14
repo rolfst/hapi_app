@@ -60,10 +60,22 @@ function addUserToNetwork(networkUserAttributes) {
   return networkService.addUserToNetwork(networkUserAttributes);
 }
 
-function addUserToOrganisation(userId, organisationId, roleType = 'EMPLOYEE') {
-  return organisationRepository.addUser(userId, organisationId, roleType);
+/**
+ * @param userId - The id of the user to add
+ * @param organisationId - The id of the organisation
+ * @param roleType - ADMIN or EMPLOYEE for security
+ * @param functionId - Organisational function of the user
+ * @returns {Promise.<OrganisationUser>}
+ */
+function addUserToOrganisation(userId, organisationId, roleType = 'EMPLOYEE', functionId = null) {
+  return organisationRepository.addUser(userId, organisationId, roleType, functionId);
 }
 
+/**
+ * Create an organisation
+ * @param {string} name - The name of the origanisation
+ * @returns {*|external:Promise.<Organisation>}
+ */
 function createOrganisation(name = randomString()) {
   return organisationService.create({ name });
 }

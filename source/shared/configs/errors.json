@@ -84,6 +84,11 @@
     "detail": "The user does not belong to the team.",
     "code": 403
   },
+  "10020": {
+    "type": "no_admin_in_organisation",
+    "detail": "The user is not an admin in the organisation.",
+    "code": 403
+  },
   "20001": {
     "type": "bad_number_of_arguments",
     "detail": "A bad number of arguments is provided for this method",

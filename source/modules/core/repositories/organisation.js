@@ -47,7 +47,11 @@ const hasUser = async (userId, organisationId) => {
 const addUser = async (userId, organisationId, roleType = 'EMPLOYEE', functionId = null) => {
   return OrganisationUser
     .create({
-      userId, organisationId, organisation_id: organisationId, roleType, functionId,
+      userId,
+      organisationId,
+      organisation_id: organisationId,
+      roleType,
+      functionId,
     });
 };
 
@@ -94,25 +98,62 @@ const findFunctionsInOrganisation = (organisationId) =>
     .findAll({ where: { organisationId } })
     .then(R.map(createFunctionsModel));
 
-const findFunction = (functionIdOrWhereConstraint) => {
+const findFunction = async (functionIdOrWhereConstraint) => {
   const whereConstraint = typeof functionIdOrWhereConstraint === 'object'
     ? functionIdOrWhereConstraint
     : { id: functionIdOrWhereConstraint };
 
-  return OrganisationFunction
+  const organisationFunction = await OrganisationFunction
     .findOne({ where: whereConstraint });
+
+  return organisationFunction
+    ? createFunctionsModel(organisationFunction)
+    : null;
 };
 
-exports.create = create;
-exports.findById = findById;
-exports.findForUser = findForUser;
-exports.getPivot = getPivot;
-exports.hasUser = hasUser;
+const findFunctionsForUsers = async (userId) => {
+  const organisationUsers = R.map(
+    createPivotModel,
+    await OrganisationUser.findAll({ where: { userId } })
+  );
+
+  const functionIds = R.filter(R.complement(R.isNil()), R.map(R.prop('functionId'), organisationUsers));
+
+  const organisationFunctions = await OrganisationFunction
+    .findAll({ where: { id: { $in: functionIds } } })
+    .then(R.map(createFunctionsModel));
+
+  const findFunctionForOrganisationUser = (organisationUser) =>
+    R.find(R.propEq('id', organisationUser.functionId), organisationFunctions);
+
+  return R.map(
+    (organisationUser) =>
+      R.assoc('function', findFunctionForOrganisationUser(organisationUser), organisationUser),
+    organisationUsers);
+};
+
+const findFunctionForUser = (userId) => {
+  return R.head(findFunctionsForUsers(userId));
+};
+
+async function updateUser(userId, organisationId, attributes) {
+  return OrganisationUser.update(attributes, { where: { organisationId, userId } })
+    .then(createPivotModel);
+}
+
+exports.addFunction = addFunction;
 exports.addUser = addUser;
 exports.attachNetwork = attachNetwork;
+exports.create = create;
 exports.deleteAll = deleteAll;
-exports.addFunction = addFunction;
-exports.updateFunction = updateFunction;
-exports.removeFunction = removeFunction;
-exports.findFunctionsInOrganisation = findFunctionsInOrganisation;
+exports.findById = findById;
+exports.findForUser = findForUser;
 exports.findFunction = findFunction;
+exports.findFunctionForUser = findFunctionForUser;
+exports.findFunctionsForUsers = findFunctionsForUsers;
+exports.findFunctionsInOrganisation = findFunctionsInOrganisation;
+exports.getPivot = getPivot;
+exports.hasUser = hasUser;
+exports.removeFunction = removeFunction;
+exports.updateFunction = updateFunction;
+exports.updateUser = updateUser;
