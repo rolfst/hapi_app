@@ -90,7 +90,7 @@ describe('Service: Object', () => {
       assert.isUndefined(seenObjects, 'both messages should not have been seen');
     });
 
-    it.only('one message should be read', async () => {
+    it('one message should be read', async () => {
       // mark one message as read
       await objectService.markAsRead({
         ids: [createdMessages[0].id],
