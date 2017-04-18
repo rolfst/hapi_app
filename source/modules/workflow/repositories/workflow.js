@@ -24,7 +24,7 @@ const filterByWorkflowId = (id, collection) => R.filter(R.propEq('workflowId', i
 const pluckIds = R.pluck('id');
 
 const create = (attributes) => {
-  const whitelist = ['organisationId', 'name', 'meta', 'startDate', 'expirationDate'];
+  const whitelist = ['organisationId', 'name', 'meta', 'startDate', 'expirationDate', 'lastCheck'];
 
   return WorkFlow
     .create(R.pick(whitelist, attributes))
@@ -32,7 +32,7 @@ const create = (attributes) => {
 };
 
 const update = (id, attributes) => {
-  const whitelist = ['organisationId', 'name', 'meta', 'startDate', 'expirationDate'];
+  const whitelist = ['organisationId', 'name', 'meta', 'startDate', 'expirationDate', 'lastCheck'];
 
   return WorkFlow
     .update(R.pick(whitelist, attributes), { where: { id } })

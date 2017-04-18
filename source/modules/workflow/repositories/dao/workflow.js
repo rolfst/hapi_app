@@ -20,6 +20,10 @@ const WorkFlow = model.define('WorkFlow', {
     type: Sequelize.DATE,
     field: 'expiration_date',
   },
+  lastCheck: {
+    type: Sequelize.DATE,
+    field: 'last_check',
+  },
 }, {
   tableName: 'workflows',
   createdAt: 'created_at',

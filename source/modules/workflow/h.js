@@ -1,4 +1,5 @@
 exports.ETriggerTypes = {
+  DIRECT: 'direct',
   DATETIME: 'datetime',
 };
 
