@@ -108,7 +108,7 @@ const destroyTrigger = (id) =>
 const findOneTrigger = (triggerIdOrWhereConstraints) => {
   return Trigger
     .findOne({ where: buildWhereConstraint(triggerIdOrWhereConstraints) })
-    .then(createTrigger);
+    .then(createTriggerModel);
 };
 
 const createCondition = (attributes) => {
@@ -139,7 +139,7 @@ const destroyCondition = (id) =>
 const findOneCondition = (conditionIdOrWhereConstraints) => {
   return Condition
     .findOne({ where: buildWhereConstraint(conditionIdOrWhereConstraints) })
-    .then(createCondition);
+    .then(createConditionModel);
 };
 
 const createAction = (attributes) => {
@@ -170,7 +170,7 @@ const destroyAction = (id) =>
 const findOneAction = (actionIdOrWhereConstraints) => {
   return Action
     .findOne({ where: buildWhereConstraint(actionIdOrWhereConstraints) })
-    .then(createAction);
+    .then(createActionModel);
 };
 
 const deleteAll = () => {

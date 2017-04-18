@@ -3,8 +3,8 @@ const { ETriggerTypes } = require('../h');
 
 module.exports = {
   payload: Joi.object().keys({
-    type: Joi.string().required(),
-    value: Joi.string().required().valid.apply(null, Object.values(ETriggerTypes)),
+    type: Joi.string().required().valid(Object.values(ETriggerTypes)),
+    value: Joi.string().required(),
   }),
   params: Joi.object().keys({
     organisationId: Joi.number().required(),

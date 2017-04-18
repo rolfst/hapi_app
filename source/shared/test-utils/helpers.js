@@ -350,6 +350,46 @@ async function createWorkFlow(organisationId, name = randomString()) {
 }
 
 /**
+ * Creates a workflow trigger
+ * @param {number} workflowId
+ * @param {string} Optional: type (ETriggerTypes)
+ * @param {date|string} Optional: value
+ * @method createTrigger
+ * @return {external:Array<WorkFlow, Triggers, Conditions, Action>}
+ */
+async function createTrigger(workflowId, type = workflowRepository.ETriggerTypes.DATETIME, value = randomString()) {
+  return workflowRepository
+    .createTrigger({ workflowId, type, value });
+}
+
+/**
+ * Creates a workflow condition
+ * @param {number} workflowId
+ * @param {string} Optional: field
+ * @param {string} Optional: operator (EConditionOperators)
+ * @param {string} Optional: value
+ * @method createCondition
+ * @return {external:Array<WorkFlow, Triggers, Conditions, Action>}
+ */
+async function createCondition(workflowId, field = randomString(), operator = workflowRepository.EConditionOperators.EQUAL, value = randomString()) {
+  return workflowRepository
+    .createCondition({ workflowId, field, operator, value });
+}
+
+/**
+ * Creates a workflow action
+ * @param {number} workflowId
+ * @param {string} Optional: type (EActionTypes)
+ * @param {object|string} Optional: meta
+ * @method createAction
+ * @return {external:Array<WorkFlow, Triggers, Conditions, Action>}
+ */
+async function createAction(workflowId, type = workflowRepository.EActionTypes.MESSAGE, meta = {}) {
+  return workflowRepository
+    .createAction({ workflowId, type, meta });
+}
+
+/**
  * Deletes all data in the database
  * @method cleanAll
  */
@@ -394,3 +434,6 @@ exports.hapiFile = hapiFile;
 exports.randomString = randomString;
 exports.createCompleteWorkFlow = createCompleteWorkFlow;
 exports.createWorkFlow = createWorkFlow;
+exports.createTrigger = createTrigger;
+exports.createCondition = createCondition;
+exports.createAction = createAction;

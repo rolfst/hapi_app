@@ -9,6 +9,7 @@ exports.EConditionOperators = {
   GREATER_THAN_OR_EQUAL: '>=',
   LESS_THAN_OR_EQUAL: '<=',
   NOT: '!=',
+  CONTAINS: 'in',
 };
 
 exports.EActionTypes = {
