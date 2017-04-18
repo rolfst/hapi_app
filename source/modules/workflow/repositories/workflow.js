@@ -39,50 +39,8 @@ const update = (id, attributes) => {
     .then(createWorkFlowModel);
 };
 
-const destroy = (id) => WorkFlow
-  .destroy({ where: { id } });
-
-const createTrigger = (attributes) => {
-  const whitelist = ['workflowId', 'type', 'value'];
-
-  const pickedAttributes = R.pick(whitelist, attributes);
-
-  if (pickedAttributes.value instanceof Date) {
-    pickedAttributes.value = dateUtils.toISOString(pickedAttributes.value);
-  }
-
-  return Trigger
-    .create(pickedAttributes)
-    .then(createTriggerModel);
-};
-
-const createCondition = (attributes) => {
-  const whitelist = ['workflowId', 'field', 'operator', 'value'];
-
-  const pickedAttributes = R.pick(whitelist, attributes);
-
-  if (pickedAttributes.value instanceof Date) {
-    pickedAttributes.value = dateUtils.toISOString(pickedAttributes.value);
-  }
-
-  return Condition
-    .create(pickedAttributes)
-    .then(createConditionModel);
-};
-
-const createAction = (attributes) => {
-  const whitelist = ['workflowId', 'type', 'meta'];
-
-  const pickedAttributes = R.pick(whitelist, attributes);
-
-  if (typeof pickedAttributes.meta === 'object') {
-    pickedAttributes.meta = JSON.stringify(pickedAttributes.meta);
-  }
-
-  return Action
-    .create(pickedAttributes)
-    .then(createActionModel);
-};
+const destroy = (id) =>
+  WorkFlow.destroy({ where: { id } });
 
 const findAll = (workflowIdsOrWhereConstraints) => {
   return WorkFlow
@@ -120,6 +78,99 @@ const findAllWithData = async (workflowIdsOrWhereConstraints) => {
 const findOneWithData = (workflowIdOrWhereConstraints) => {
   return findAllWithData(buildWhereConstraint(workflowIdOrWhereConstraints))
     .then(R.head);
+};
+
+const createTrigger = (attributes) => {
+  const whitelist = ['workflowId', 'type', 'value'];
+
+  const pickedAttributes = R.pick(whitelist, attributes);
+
+  if (pickedAttributes.value instanceof Date) {
+    pickedAttributes.value = dateUtils.toISOString(pickedAttributes.value);
+  }
+
+  return Trigger
+    .create(pickedAttributes)
+    .then(createTriggerModel);
+};
+
+const updateTrigger = (id, attributes) => {
+  const whitelist = ['workflowId', 'type', 'value'];
+
+  return Trigger
+    .update(R.pick(whitelist, attributes), { where: { id } })
+    .then(createTriggerModel);
+};
+
+const destroyTrigger = (id) =>
+  Trigger.destroy({ where: { id } });
+
+const findOneTrigger = (triggerIdOrWhereConstraints) => {
+  return Trigger
+    .findOne({ where: buildWhereConstraint(triggerIdOrWhereConstraints) })
+    .then(createTrigger);
+};
+
+const createCondition = (attributes) => {
+  const whitelist = ['workflowId', 'field', 'operator', 'value'];
+
+  const pickedAttributes = R.pick(whitelist, attributes);
+
+  if (pickedAttributes.value instanceof Date) {
+    pickedAttributes.value = dateUtils.toISOString(pickedAttributes.value);
+  }
+
+  return Condition
+    .create(pickedAttributes)
+    .then(createConditionModel);
+};
+
+const updateCondition = (id, attributes) => {
+  const whitelist = ['workflowId', 'field', 'operator', 'value'];
+
+  return Condition
+    .update(R.pick(whitelist, attributes), { where: { id } })
+    .then(createConditionModel);
+};
+
+const destroyCondition = (id) =>
+  Condition.destroy({ where: { id } });
+
+const findOneCondition = (conditionIdOrWhereConstraints) => {
+  return Condition
+    .findOne({ where: buildWhereConstraint(conditionIdOrWhereConstraints) })
+    .then(createCondition);
+};
+
+const createAction = (attributes) => {
+  const whitelist = ['workflowId', 'type', 'meta'];
+
+  const pickedAttributes = R.pick(whitelist, attributes);
+
+  if (typeof pickedAttributes.meta === 'object') {
+    pickedAttributes.meta = JSON.stringify(pickedAttributes.meta);
+  }
+
+  return Action
+    .create(pickedAttributes)
+    .then(createActionModel);
+};
+
+const updateAction = (id, attributes) => {
+  const whitelist = ['workflowId', 'type', 'meta'];
+
+  return Action
+    .update(R.pick(whitelist, attributes), { where: { id } })
+    .then(createActionModel);
+};
+
+const destroyAction = (id) =>
+  Action.destroy({ where: { id } });
+
+const findOneAction = (actionIdOrWhereConstraints) => {
+  return Action
+    .findOne({ where: buildWhereConstraint(actionIdOrWhereConstraints) })
+    .then(createAction);
 };
 
 const deleteAll = () => {
@@ -160,11 +211,22 @@ exports.EActionTypes = EActionTypes;
 exports.create = create;
 exports.update = update;
 exports.destroy = destroy;
-exports.createTrigger = createTrigger;
-exports.createCondition = createCondition;
-exports.createAction = createAction;
 exports.findAll = findAll;
 exports.findOne = findOne;
 exports.findAllWithData = findAllWithData;
 exports.findOneWithData = findOneWithData;
+exports.createTrigger = createTrigger;
+exports.updateTrigger = updateTrigger;
+exports.destroyTrigger = destroyTrigger;
+exports.findOneTrigger = findOneTrigger;
+exports.createCondition = createCondition;
+exports.createCondition = createCondition;
+exports.updateCondition = updateCondition;
+exports.destroyCondition = destroyCondition;
+exports.findOneCondition = findOneCondition;
+exports.createAction = createAction;
+exports.createAction = createAction;
+exports.updateAction = updateAction;
+exports.destroyAction = destroyAction;
+exports.findOneAction = findOneAction;
 exports.deleteAll = deleteAll;
