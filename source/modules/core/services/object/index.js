@@ -237,13 +237,15 @@ const markAsRead = async (payload, message) => {
   logger.debug('Marking object(s) as read', { payload, message });
 
   const createdRecords = await Promise.all(R.map((id) => {
-    return objectSeenRepository.create({
-      objectId: id,
-      userId: message.credentials.id,
-    })
+    return objectSeenRepository
+      .create({
+        objectId: id,
+        userId: message.credentials.id,
+      })
+      .catch(() => {}); // We swallow errors since we only return seen object ids anyway
   }, payload.ids));
 
-  return R.map(R.prop('id'), createdRecords);
+  return R.filter(R.identity(), R.map(R.prop('objectId'), createdRecords));
 };
 
 exports.count = count;
