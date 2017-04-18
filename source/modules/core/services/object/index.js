@@ -225,22 +225,25 @@ const get = async (payload, message) => {
   return object;
 };
 
-
 /**
- * Create object
+ * Mark object seen
  * @param {object} payload - Object containing payload data
- * @param {string} payload.objectId - The id that instantiated the object
+ * @param {string} payload.ids - An array of objects to mark as read
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method create
- * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
+ * @method markAsRead
+ * @return {external:Promise.<Array<Object ids>>}
  */
 const markAsRead = async (payload, message) => {
-  logger.debug('Marking object as read', { payload, message });
+  logger.debug('Marking object(s) as read', { payload, message });
 
-  return objectSeenRepository.create({
-    objectId: payload.objectId,
-    userId: message.credentials.id,
-  });
+  const createdRecords = await Promise.all(R.map((id) => {
+    return objectSeenRepository.create({
+      objectId: id,
+      userId: message.credentials.id,
+    })
+  }, payload.ids));
+
+  return R.map(R.prop('id'), createdRecords);
 };
 
 exports.count = count;

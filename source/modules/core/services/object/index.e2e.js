@@ -90,10 +90,10 @@ describe('Service: Object', () => {
       assert.isUndefined(seenObjects, 'both messages should not have been seen');
     });
 
-    it('one message should be read', async () => {
+    it.only('one message should be read', async () => {
       // mark one message as read
       await objectService.markAsRead({
-        objectId: createdMessages[0].id,
+        ids: [createdMessages[0].id],
       }, { credentials: admin });
 
       const actual = await objectService.list({
