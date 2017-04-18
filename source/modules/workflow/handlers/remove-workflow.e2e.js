@@ -1,13 +1,9 @@
 const { assert } = require('chai');
 const testHelper = require('../../../shared/test-utils/helpers');
-const { putRequest } = require('../../../shared/test-utils/request');
+const { deleteRequest } = require('../../../shared/test-utils/request');
 const workflowRepo = require('../repositories/workflow');
 
-describe('Workflow handler: update workflow', () => {
-  const workflowFixture = {
-    name: 'test workflow update',
-  };
-
+describe.only('Workflow handler: remove workflow', () => {
   let admin;
   let employee;
   let otherUser;
@@ -34,10 +30,9 @@ describe('Workflow handler: update workflow', () => {
 
   after(() => testHelper.cleanAll());
 
-  it('should update a workflow for an admin', async () => {
-    const { statusCode, result } = await putRequest(
+  it('should remove a workflow for an admin', async () => {
+    const { statusCode, result } = await deleteRequest(
       `/v2/organisations/${organisation.id}/workflows/${createdWorkFlow.id}`,
-      workflowFixture,
       admin.token
     );
 
@@ -46,13 +41,12 @@ describe('Workflow handler: update workflow', () => {
     // Now fetch it again and check the result
     const updatedWorkFlow = await workflowRepo.findOne(createdWorkFlow.id);
 
-    assert.equal(updatedWorkFlow.name, workflowFixture.name);
+    assert.isUndefined(updatedWorkFlow);
   });
 
   it('should fail for an employee', async () => {
-    const { statusCode } = await putRequest(
+    const { statusCode } = await deleteRequest(
       `/v2/organisations/${organisation.id}/workflows/${createdWorkFlow.id}`,
-      workflowFixture,
       employee.token
     );
 
@@ -60,9 +54,8 @@ describe('Workflow handler: update workflow', () => {
   });
 
   it('should fail for user not in organisation', async () => {
-    const { statusCode } = await putRequest(
+    const { statusCode } = await deleteRequest(
       `/v2/organisations/${organisation.id}/workflows/${createdWorkFlow.id}`,
-      workflowFixture,
       otherUser.token
     );
 

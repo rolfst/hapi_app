@@ -11,6 +11,6 @@ module.exports = {
     .rename('expiration_date', 'expirationDate'),
   params: Joi.object().keys({
     organisationId: Joi.number().required(),
-    workflowId: Joi.number().required()
+    workflowId: Joi.number().required(),
   }),
 };

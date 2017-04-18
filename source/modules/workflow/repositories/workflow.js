@@ -39,6 +39,9 @@ const update = (id, attributes) => {
     .then(createWorkFlowModel);
 };
 
+const destroy = (id) => WorkFlow
+  .destroy({ where: { id } });
+
 const createTrigger = (attributes) => {
   const whitelist = ['workflowId', 'type', 'value'];
 
@@ -156,6 +159,7 @@ exports.EActionTypes = EActionTypes;
 
 exports.create = create;
 exports.update = update;
+exports.destroy = destroy;
 exports.createTrigger = createTrigger;
 exports.createCondition = createCondition;
 exports.createAction = createAction;

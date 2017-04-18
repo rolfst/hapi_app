@@ -50,6 +50,20 @@ const update = async (payload, message) => {
 };
 
 /**
+ * Remove workflow
+ * @param {object} payload - Object containing workflow data
+ * @param {number} payload.workflowId - The id of the workflow
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method remove
+ * @return {external:Promise.<Object>} {@link module:modules/workflow~Object}
+ */
+const remove = async (payload, message) => {
+  logger.debug('Remove workflow', { payload, message });
+
+  return workFlowRepo.destroy(payload.workflowId);
+};
+
+/**
  * Fetch workflow complete with all subdata
  * @param {object} payload - Object containing workflow data
  * @param {number} payload.workflowId - The id of the workflow
@@ -84,5 +98,6 @@ exports.EActionTypes = workFlowRepo.EActionTypes;
 
 exports.create = create;
 exports.update = update;
+exports.remove = remove;
 exports.fetchOne = fetchOne;
 exports.fetchAll = fetchAll;
