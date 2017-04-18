@@ -4,6 +4,7 @@ const organisationRepository = require('../../repositories/organisation');
 const networkService = require('../network');
 const { ERoleTypes } = require('./h');
 const impl = require('./implementation');
+const createError = require('../../../../shared/utils/create-error');
 
 /**
  * @module modules/core/services/organisation
@@ -173,6 +174,13 @@ const listFunctions = async (payload, message) => {
   return organisationRepository.findFunctionsInOrganisation(payload.organisationId);
 };
 
+/**
+ * Verifies if a user has a specific role in an organisation
+ * @param requestedRole - The role to check for
+ * @param organisationId - The id of the organisation
+ * @param userId - The id of the user
+ * @returns {external:Promise.<Boolean>}
+ */
 const userHasRoleInOrganisation = async (requestedRole, organisationId, userId) => {
   logger.debug('Checking user role in organisation', { requestedRole, organisationId, userId });
 
