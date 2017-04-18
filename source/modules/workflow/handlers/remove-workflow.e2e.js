@@ -101,7 +101,7 @@ describe('Workflow handler: remove trigger', () => {
   after(() => testHelper.cleanAll());
 
   it('should remove a workflow for an admin', async () => {
-    const { statusCode, result } = await deleteRequest(
+    const { statusCode } = await deleteRequest(
       removeUrl,
       admin.token
     );
@@ -167,7 +167,7 @@ describe('Workflow handler: remove condition', () => {
   after(() => testHelper.cleanAll());
 
   it('should remove a workflow for an admin', async () => {
-    const { statusCode, result } = await deleteRequest(
+    const { statusCode } = await deleteRequest(
       removeUrl,
       admin.token
     );
@@ -233,7 +233,7 @@ describe('Workflow handler: remove action', () => {
   after(() => testHelper.cleanAll());
 
   it('should remove a workflow for an admin', async () => {
-    const { statusCode, result } = await deleteRequest(
+    const { statusCode } = await deleteRequest(
       removeUrl,
       admin.token
     );

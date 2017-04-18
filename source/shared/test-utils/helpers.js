@@ -357,7 +357,11 @@ async function createWorkFlow(organisationId, name = randomString()) {
  * @method createTrigger
  * @return {external:Array<WorkFlow, Triggers, Conditions, Action>}
  */
-async function createTrigger(workflowId, type = workflowRepository.ETriggerTypes.DATETIME, value = randomString()) {
+async function createTrigger(
+  workflowId,
+  type = workflowRepository.ETriggerTypes.DATETIME,
+  value = randomString()
+) {
   return workflowRepository
     .createTrigger({ workflowId, type, value });
 }
@@ -371,7 +375,12 @@ async function createTrigger(workflowId, type = workflowRepository.ETriggerTypes
  * @method createCondition
  * @return {external:Array<WorkFlow, Triggers, Conditions, Action>}
  */
-async function createCondition(workflowId, field = randomString(), operator = workflowRepository.EConditionOperators.EQUAL, value = randomString()) {
+async function createCondition(
+  workflowId,
+  field = randomString(),
+  operator = workflowRepository.EConditionOperators.EQUAL,
+  value = randomString()
+) {
   return workflowRepository
     .createCondition({ workflowId, field, operator, value });
 }

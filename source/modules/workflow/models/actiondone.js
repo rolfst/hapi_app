@@ -9,5 +9,5 @@ module.exports = (dataModel) => {
     userId: dataModel.userId,
     createdAt: dataModel.created_at ? dateUtils.toISOString(dataModel.created_at) : null,
     updatedAt: dataModel.updated_at ? dateUtils.toISOString(dataModel.updated_at) : null,
-  }
+  };
 };

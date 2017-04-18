@@ -97,12 +97,14 @@ const createTrigger = (attributes) => {
 const updateTrigger = (id, attributes) => {
   const whitelist = ['workflowId', 'type', 'value'];
 
+  const pickedAttributes = R.pick(whitelist, attributes);
+
   if (pickedAttributes.value instanceof Date) {
     pickedAttributes.value = dateUtils.toISOString(pickedAttributes.value);
   }
 
   return Trigger
-    .update(R.pick(whitelist, attributes), { where: { id } })
+    .update(pickedAttributes, { where: { id } })
     .then(createTriggerModel);
 };
 
@@ -132,12 +134,14 @@ const createCondition = (attributes) => {
 const updateCondition = (id, attributes) => {
   const whitelist = ['workflowId', 'field', 'operator', 'value'];
 
+  const pickedAttributes = R.pick(whitelist, attributes);
+
   if (pickedAttributes.value instanceof Date) {
     pickedAttributes.value = dateUtils.toISOString(pickedAttributes.value);
   }
 
   return Condition
-    .update(R.pick(whitelist, attributes), { where: { id } })
+    .update(pickedAttributes, { where: { id } })
     .then(createConditionModel);
 };
 

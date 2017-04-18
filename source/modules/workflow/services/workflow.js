@@ -41,7 +41,7 @@ const update = async (payload, message) => {
     throw new Error('Workflow not found!');
   }
 
-  if (currentWorkflow.organisationId != payload.organisationId) {
+  if (currentWorkflow.organisationId !== payload.organisationId) {
     throw new Error('Workflow belongs to a different organisation!');
   }
 
@@ -66,7 +66,7 @@ const remove = async (payload, message) => {
     throw new Error('Workflow not found!');
   }
 
-  if (currentWorkflow.organisationId != payload.organisationId) {
+  if (currentWorkflow.organisationId !== payload.organisationId) {
     throw new Error('Workflow belongs to a different organisation!');
   }
 
@@ -120,7 +120,7 @@ const createTrigger = async (payload, message) => {
     throw new Error('Workflow not found!');
   }
 
-  if (currentWorkflow.organisationId != payload.organisationId) {
+  if (currentWorkflow.organisationId !== payload.organisationId) {
     throw new Error('Workflow belongs to a different organisation!');
   }
 
@@ -152,7 +152,7 @@ const updateTrigger = async (payload, message) => {
     throw new Error('Workflow not found!');
   }
 
-  if (currentWorkflow.organisationId != payload.organisationId) {
+  if (currentWorkflow.organisationId !== payload.organisationId) {
     throw new Error('Workflow belongs to a different organisation!');
   }
 
@@ -182,7 +182,7 @@ const removeTrigger = async (payload, message) => {
     throw new Error('Workflow not found!');
   }
 
-  if (currentWorkflow.organisationId != payload.organisationId) {
+  if (currentWorkflow.organisationId !== payload.organisationId) {
     throw new Error('Workflow belongs to a different organisation!');
   }
 
@@ -209,7 +209,7 @@ const createCondition = async (payload, message) => {
     throw new Error('Workflow not found!');
   }
 
-  if (currentWorkflow.organisationId != payload.organisationId) {
+  if (currentWorkflow.organisationId !== payload.organisationId) {
     throw new Error('Workflow belongs to a different organisation!');
   }
 
@@ -241,7 +241,7 @@ const updateCondition = async (payload, message) => {
     throw new Error('Workflow not found!');
   }
 
-  if (currentWorkflow.organisationId != payload.organisationId) {
+  if (currentWorkflow.organisationId !== payload.organisationId) {
     throw new Error('Workflow belongs to a different organisation!');
   }
 
@@ -271,7 +271,7 @@ const removeCondition = async (payload, message) => {
     throw new Error('Workflow not found!');
   }
 
-  if (currentWorkflow.organisationId != payload.organisationId) {
+  if (currentWorkflow.organisationId !== payload.organisationId) {
     throw new Error('Workflow belongs to a different organisation!');
   }
 
@@ -297,7 +297,7 @@ const createAction = async (payload, message) => {
     throw new Error('Workflow not found!');
   }
 
-  if (currentWorkflow.organisationId != payload.organisationId) {
+  if (currentWorkflow.organisationId !== payload.organisationId) {
     throw new Error('Workflow belongs to a different organisation!');
   }
 
@@ -329,7 +329,7 @@ const updateAction = async (payload, message) => {
     throw new Error('Workflow not found!');
   }
 
-  if (currentWorkflow.organisationId != payload.organisationId) {
+  if (currentWorkflow.organisationId !== payload.organisationId) {
     throw new Error('Workflow belongs to a different organisation!');
   }
 
@@ -359,7 +359,7 @@ const removeAction = async (payload, message) => {
     throw new Error('Workflow not found!');
   }
 
-  if (currentWorkflow.organisationId != payload.organisationId) {
+  if (currentWorkflow.organisationId !== payload.organisationId) {
     throw new Error('Workflow belongs to a different organisation!');
   }
 
