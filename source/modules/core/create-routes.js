@@ -36,6 +36,11 @@ const routes = [{
   handler: require('./handlers/update-team'),
   validator: require('./validators/update-team'),
 }, {
+  method: 'PUT',
+  url: '/v2/networks/{networkId}/users/{userId}',
+  handler: require('./handlers/update-user-in-organisation'),
+  validator: require('./validators/update-user-in-organisation'),
+}, {
   method: 'POST',
   url: '/v2/objects/{objectId}/read',
   handler: require('./handlers/read-object'),
