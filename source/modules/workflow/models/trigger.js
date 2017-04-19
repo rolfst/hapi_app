@@ -1,7 +1,7 @@
 const dateUtils = require('../../../shared/utils/date');
 
 module.exports = (dataModel) => {
-  if (!dataModel) return undefined;
+  if (!dataModel) return null;
 
   return {
     id: dataModel.id,

@@ -45,7 +45,7 @@ describe('Workflow handler: remove workflow', () => {
     // Now fetch it again and check the result
     const updatedWorkFlow = await workflowRepo.findOne(createdWorkFlow.id);
 
-    assert.isUndefined(updatedWorkFlow);
+    assert.isNull(updatedWorkFlow);
   });
 
   it('should fail for an employee', async () => {
@@ -111,7 +111,7 @@ describe('Workflow handler: remove trigger', () => {
     // Now fetch it again and check the result
     const updatedTrigger = await workflowRepo.findOneTrigger(createdTrigger.id);
 
-    assert.isUndefined(updatedTrigger);
+    assert.isNull(updatedTrigger);
   });
 
   it('should fail for an employee', async () => {
@@ -177,7 +177,7 @@ describe('Workflow handler: remove condition', () => {
     // Now fetch it again and check the result
     const updatedCondition = await workflowRepo.findOneCondition(createdCondition.id);
 
-    assert.isUndefined(updatedCondition);
+    assert.isNull(updatedCondition);
   });
 
   it('should fail for an employee', async () => {
@@ -243,7 +243,7 @@ describe('Workflow handler: remove action', () => {
     // Now fetch it again and check the result
     const updatedAction = await workflowRepo.findOneAction(createdAction.id);
 
-    assert.isUndefined(updatedAction);
+    assert.isNull(updatedAction);
   });
 
   it('should fail for an employee', async () => {
