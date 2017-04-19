@@ -78,7 +78,8 @@ describe('Feed: Dispatcher', () => {
 
       assert.deepEqual(notifier.send.firstCall.args, [
         [{ id: '2', email: 'baz@example.com' }], {
-          text: 'John Doe in Foo team: Jessica cannot work today.',
+          headings: 'John Doe in Foo team',
+          text: 'Jessica cannot work today.',
           data: { id: '435', type: 'message', track_name: 'message_created' },
         }, '123']);
     });
@@ -126,7 +127,8 @@ describe('Feed: Dispatcher', () => {
 
       assert.deepEqual(notifier.send.firstCall.args, [
         [{ id: '2', email: 'baz@example.com' }], {
-          text: 'John Doe: Jessica cannot work today.',
+          headings: 'John Doe',
+          text: 'Jessica cannot work today.',
           data: { id: '435', type: 'message', track_name: 'message_created' },
         }, '123']);
     });
