@@ -1,6 +1,17 @@
 const workFlowRepo = require('../repositories/workflow');
+const createError = require('../../../shared/utils/create-error');
 
 const logger = require('../../../shared/services/logger')('workflow/service');
+
+const assertWorkflowBelongsToOrganisation = (workflow, organisationId) => {
+  if (!workflow) {
+    throw createError('404');
+  }
+
+  if (workflow.organisationId !== organisationId) {
+    throw createError('403');
+  }
+};
 
 /**
  * Create workflow
@@ -35,13 +46,7 @@ const update = async (payload, message) => {
 
   const currentWorkflow = await workFlowRepo.findOne(payload.workflowId);
 
-  if (!currentWorkflow) {
-    throw new Error('Workflow not found!');
-  }
-
-  if (currentWorkflow.organisationId !== payload.organisationId) {
-    throw new Error('Workflow belongs to a different organisation!');
-  }
+  assertWorkflowBelongsToOrganisation(currentWorkflow, payload.organisationId);
 
   return workFlowRepo
     .update(payload.workflowId, payload);
@@ -60,13 +65,7 @@ const remove = async (payload, message) => {
 
   const currentWorkflow = await workFlowRepo.findOne(payload.workflowId);
 
-  if (!currentWorkflow) {
-    throw new Error('Workflow not found!');
-  }
-
-  if (currentWorkflow.organisationId !== payload.organisationId) {
-    throw new Error('Workflow belongs to a different organisation!');
-  }
+  assertWorkflowBelongsToOrganisation(currentWorkflow, payload.organisationId);
 
   return workFlowRepo.destroy(payload.workflowId);
 };
@@ -114,13 +113,7 @@ const createTrigger = async (payload, message) => {
 
   const currentWorkflow = await workFlowRepo.findOne(payload.workflowId);
 
-  if (!currentWorkflow) {
-    throw new Error('Workflow not found!');
-  }
-
-  if (currentWorkflow.organisationId !== payload.organisationId) {
-    throw new Error('Workflow belongs to a different organisation!');
-  }
+  assertWorkflowBelongsToOrganisation(currentWorkflow, payload.organisationId);
 
   return workFlowRepo.createTrigger(payload);
 };
@@ -146,13 +139,7 @@ const updateTrigger = async (payload, message) => {
 
   const currentWorkflow = await workFlowRepo.findOne(currentTrigger.workflowId);
 
-  if (!currentWorkflow) {
-    throw new Error('Workflow not found!');
-  }
-
-  if (currentWorkflow.organisationId !== payload.organisationId) {
-    throw new Error('Workflow belongs to a different organisation!');
-  }
+  assertWorkflowBelongsToOrganisation(currentWorkflow, payload.organisationId);
 
   return workFlowRepo.updateTrigger(payload.triggerId, payload);
 };
@@ -176,13 +163,7 @@ const removeTrigger = async (payload, message) => {
 
   const currentWorkflow = await workFlowRepo.findOne(currentTrigger.workflowId);
 
-  if (!currentWorkflow) {
-    throw new Error('Workflow not found!');
-  }
-
-  if (currentWorkflow.organisationId !== payload.organisationId) {
-    throw new Error('Workflow belongs to a different organisation!');
-  }
+  assertWorkflowBelongsToOrganisation(currentWorkflow, payload.organisationId);
 
   return workFlowRepo.destroyTrigger(payload.triggerId);
 };
@@ -203,13 +184,7 @@ const createCondition = async (payload, message) => {
 
   const currentWorkflow = await workFlowRepo.findOne(payload.workflowId);
 
-  if (!currentWorkflow) {
-    throw new Error('Workflow not found!');
-  }
-
-  if (currentWorkflow.organisationId !== payload.organisationId) {
-    throw new Error('Workflow belongs to a different organisation!');
-  }
+  assertWorkflowBelongsToOrganisation(currentWorkflow, payload.organisationId);
 
   return workFlowRepo.createCondition(payload);
 };
@@ -235,13 +210,7 @@ const updateCondition = async (payload, message) => {
 
   const currentWorkflow = await workFlowRepo.findOne(currentCondition.workflowId);
 
-  if (!currentWorkflow) {
-    throw new Error('Workflow not found!');
-  }
-
-  if (currentWorkflow.organisationId !== payload.organisationId) {
-    throw new Error('Workflow belongs to a different organisation!');
-  }
+  assertWorkflowBelongsToOrganisation(currentWorkflow, payload.organisationId);
 
   return workFlowRepo.updateCondition(payload.conditionId, payload);
 };
@@ -265,13 +234,7 @@ const removeCondition = async (payload, message) => {
 
   const currentWorkflow = await workFlowRepo.findOne(currentCondition.workflowId);
 
-  if (!currentWorkflow) {
-    throw new Error('Workflow not found!');
-  }
-
-  if (currentWorkflow.organisationId !== payload.organisationId) {
-    throw new Error('Workflow belongs to a different organisation!');
-  }
+  assertWorkflowBelongsToOrganisation(currentWorkflow, payload.organisationId);
 
   return workFlowRepo.destroyCondition(payload.conditionId);
 };
@@ -291,13 +254,7 @@ const createAction = async (payload, message) => {
 
   const currentWorkflow = await workFlowRepo.findOne(payload.workflowId);
 
-  if (!currentWorkflow) {
-    throw new Error('Workflow not found!');
-  }
-
-  if (currentWorkflow.organisationId !== payload.organisationId) {
-    throw new Error('Workflow belongs to a different organisation!');
-  }
+  assertWorkflowBelongsToOrganisation(currentWorkflow, payload.organisationId);
 
   return workFlowRepo.createAction(payload);
 };
@@ -323,13 +280,7 @@ const updateAction = async (payload, message) => {
 
   const currentWorkflow = await workFlowRepo.findOne(currentAction.workflowId);
 
-  if (!currentWorkflow) {
-    throw new Error('Workflow not found!');
-  }
-
-  if (currentWorkflow.organisationId !== payload.organisationId) {
-    throw new Error('Workflow belongs to a different organisation!');
-  }
+  assertWorkflowBelongsToOrganisation(currentWorkflow, payload.organisationId);
 
   return workFlowRepo.updateAction(payload.actionId, payload);
 };
@@ -353,13 +304,7 @@ const removeAction = async (payload, message) => {
 
   const currentWorkflow = await workFlowRepo.findOne(currentAction.workflowId);
 
-  if (!currentWorkflow) {
-    throw new Error('Workflow not found!');
-  }
-
-  if (currentWorkflow.organisationId !== payload.organisationId) {
-    throw new Error('Workflow belongs to a different organisation!');
-  }
+  assertWorkflowBelongsToOrganisation(currentWorkflow, payload.organisationId);
 
   return workFlowRepo.destroyAction(payload.actionId);
 };
