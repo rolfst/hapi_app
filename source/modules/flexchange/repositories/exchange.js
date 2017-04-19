@@ -1,23 +1,25 @@
 const moment = require('moment');
 const R = require('ramda');
-const { map, merge } = require('lodash');
+const { merge } = require('lodash');
 const createError = require('../../../shared/utils/create-error');
 const { ActivityTypes } = require('../../core/repositories/dao/activity');
 const { createActivity } = require('../../core/repositories/activity');
-const { User, Team } = require('../../core/repositories/dao');
+const { User } = require('../../core/repositories/dao');
 const makeCreatedInObject = require('../utils/created-in-text');
 const createExchangeModel = require('../models/exchange');
 const { exchangeTypes } = require('./dao/exchange');
 const {
   Exchange, ExchangeResponse, ExchangeComment, ExchangeValue,
 } = require('./dao');
-const { createExchangeResponse } = require('./exchange-response');
-const { createValuesForExchange } = require('./exchange-value');
+const exchangeValuesRepo = require('./exchange-value');
 const exchangeResponseRepo = require('./exchange-response');
 
 /**
  * @module modules/flexchange/repositories/exchange
  */
+
+const whereLens = R.lensProp('where');
+const whereMerge = R.over(whereLens);
 
 const defaultIncludes = [
     { model: User },
@@ -26,7 +28,7 @@ const defaultIncludes = [
     { model: ExchangeValue },
 ];
 
-// FIXME: Will be removed soon
+// FIXME: Will be removed soon because duplicate code in implementation
 const createDateFilter = (start, end) => {
   let dateFilter;
 
@@ -44,8 +46,8 @@ const findAllBy = (whereConstraint) => Exchange
   .findAll({ where: whereConstraint })
   .then(R.map(createExchangeModel));
 
-const findByIds = async (exchangeIds) => {
-  const result = await Exchange.findAll({ where: { id: { $in: exchangeIds } } });
+const findByIds = async (exchangeIds, filter) => {
+  const result = await Exchange.findAll(R.merge({ where: { id: { $in: exchangeIds } } }, filter));
 
   return R.map(createExchangeModel, result);
 };
@@ -137,19 +139,24 @@ async function findExchangesByShiftIds(shiftIds) {
 /**
  * Find exchanges by user
  * @param {number} userId - Id of the user we want the exchanges from
+ * @param {string} networkId - id of the network the exchanges are searched for
+ * @param {object} [filter] - filter object to limit the results
+ * @param {date} filter.start
+ * @param {date} filter.end
  * @method findExchangesByUserAndNetwork
- * @return {Promise} Get exchanges promise
+ * @return {external:Promise.<Exchange>} Get exchanges promise
  */
 const findExchangesByUserAndNetwork = async (userId, networkId, filter = {}) => {
-  const exchanges = await Exchange.findAll({
-    attributes: ['id'],
-    where: { userId, networkId },
-  });
-
   const dateFilter = createDateFilter(filter.start, filter.end);
-  const constraint = dateFilter ? { where: { date: dateFilter } } : {};
+  const constraint = dateFilter ? { date: dateFilter } : {};
+  const options = { attributes: ['id'],
+    where: { userId, networkId } };
+  const mergeWithConstrainst = R.merge(constraint);
+  const exchanges = await Exchange.findAll(
+    whereMerge(mergeWithConstrainst, options)
+  );
 
-  return findExchangeByIds(map(exchanges, 'id'), userId, constraint);
+  return R.pluck('id', exchanges);
 };
 
 async function findExchangeIdsForValues(type, networkId, values, userId, filter = {}) {
@@ -187,22 +194,6 @@ const findExchangesByNetwork = async (networkId, options = {}) => {
 };
 
 /**
- * Find exchanges by team
- * @param {Team} team - Team we want the exchanges from
- * @method findExchangesByTeam
- * @return {Promise} Get exchanges promise
- */
-const findExchangesByTeam = async (teamId, userId, filter = {}) => {
-  const teamDAO = await Team.findById(teamId);
-  const exchanges = await teamDAO.getExchanges();
-
-  const dateFilter = createDateFilter(filter.start, filter.end);
-  const constraint = dateFilter ? { where: { date: dateFilter } } : {};
-
-  return findExchangeByIds(map(exchanges, 'id'), userId, constraint);
-};
-
-/**
  * Delete a specific exchange by id
  * @param {number} exchangeId - Id of exchange to be deleted
  * @method deleteById
@@ -226,9 +217,10 @@ async function createExchange(userId, networkId, attributes) {
   let exchangeValues;
 
   if (exchange.type === exchangeTypes.NETWORK) {
-    exchangeValues = await createValuesForExchange(exchange.id, [networkId]);
+    exchangeValues = await exchangeValuesRepo.createValuesForExchange(exchange.id, [networkId]);
   } else {
-    exchangeValues = await createValuesForExchange(exchange.id, attributes.values);
+    exchangeValues = await exchangeValuesRepo.createValuesForExchange(
+      exchange.id, attributes.values);
   }
 
   exchange.ExchangeValues = exchangeValues;
@@ -316,36 +308,40 @@ function decrementExchangeDeclineCount(exchange, amount = 1) {
   return exchange.decrement({ declineCount: amount });
 }
 
+
+async function incrementResponseCount(responseCount, exchange) {
+  if (responseCount === 0) await incrementExchangeDeclineCount(exchange);
+  else if (responseCount === 1) await incrementExchangeAcceptCount(exchange);
+}
+
+async function decrementResponseCount(responseCount, exchange) {
+  if (responseCount === 0) await decrementExchangeDeclineCount(exchange);
+  else if (responseCount === 1) await decrementExchangeAcceptCount(exchange);
+}
 /**
  * Add a response to an exchange
  * @param {number} exchangeId - Exchange to add the response to
  * @param {number} userId - User declining the exchange
  * @param {number} response - Value of response
  * @method respondToExchange
- * @return {Promise} Respond to exchange promise
+ * @return {Promise.<string>} Id of the exchange
  */
 async function respondToExchange(exchangeId, userId, response) {
   const data = { userId, exchangeId, response };
   const exchange = await findExchangeById(exchangeId, userId);
 
-  if (data.response === 0) await incrementExchangeDeclineCount(exchange);
-  else if (data.response === 1) await incrementExchangeAcceptCount(exchange);
+  incrementResponseCount(data.response, exchange);
 
   const constraint = { exchangeId: exchange.id, userId };
   const exchangeResponse = await exchangeResponseRepo.findResponseWhere(constraint);
 
   if (exchangeResponse) {
     await exchangeResponse.destroy();
-
-    if (exchangeResponse.response === 0) await decrementExchangeDeclineCount(exchange);
-    else if (exchangeResponse.response === 1) await decrementExchangeAcceptCount(exchange);
-
-    await createExchangeResponse(data);
-  } else {
-    await createExchangeResponse(data);
+    decrementResponseCount(exchangeResponse.response, exchange);
   }
+  await exchangeResponseRepo.createExchangeResponse(data);
 
-  return exchange.reload();
+  return exchange.id;
 }
 
 /**
@@ -353,10 +349,10 @@ async function respondToExchange(exchangeId, userId, response) {
  * @param {number} exchangeId - Exchange to add the response to
  * @param {number} userId - User accepting the exchange
  * @method acceptExchange
- * @return {Promise} Add exchange response promise
+ * @return {Promise.<string>} id of the response
  */
 async function acceptExchange(exchangeId, userId) {
-  const exchange = await respondToExchange(exchangeId, userId, 1);
+  const id = await respondToExchange(exchangeId, userId, 1);
 
   createActivity({
     activityType: ActivityTypes.EXCHANGE_ACCEPTED,
@@ -364,7 +360,7 @@ async function acceptExchange(exchangeId, userId) {
     sourceId: exchangeId,
   });
 
-  return exchange;
+  return id;
 }
 
 /**
@@ -387,6 +383,15 @@ async function declineExchange(exchangeId, userId) {
 }
 
 /**
+ * Updates an exchange
+ * @param {object} constraint - fields used to match the correct exchange to be updated
+ * @param {object} data - the data that needs to be updated
+ */
+function update(constraint, data) {
+  Exchange.update(data, constraint);
+}
+
+/**
  * Approve an exchange
  * @param {Exchange} exchange - Exchange to approve
  * @param {User} approvingUser - User that approves the exchange
@@ -395,14 +400,12 @@ async function declineExchange(exchangeId, userId) {
  * @return {Promise} Promise containing the updated exchange
  */
 async function approveExchange(exchange, approvingUser, userIdToApprove) {
-  const constraint = { exchangeId: exchange.id, userId: userIdToApprove };
-  const exchangeResponse = await exchangeResponseRepo.findResponseWhere(constraint);
-
-  if (!exchangeResponse) throw createError('403', 'Cannot approve the exchange for this user.');
+  const constraint = { where: { exchangeId: exchange.id, userId: userIdToApprove } };
 
   await Promise.all([
-    exchangeResponse.update({ approved: 1 }),
-    exchange.update({ approved_by: approvingUser.id, approved_user: userIdToApprove }),
+    exchangeResponseRepo.update(constraint, { approved: 1 }),
+    update({ where: { id: exchange.id } },
+      { approved_by: approvingUser.id, approved_user: userIdToApprove }),
   ]);
 
   createActivity({
@@ -414,7 +417,7 @@ async function approveExchange(exchange, approvingUser, userIdToApprove) {
     },
   });
 
-  return exchange.reload();
+  return exchange.id;
 }
 
 /**
@@ -427,11 +430,7 @@ async function approveExchange(exchange, approvingUser, userIdToApprove) {
  */
 async function rejectExchange(exchange, rejectingUser, userIdToReject) {
   const constraint = { exchangeId: exchange.id, userId: userIdToReject };
-  const exchangeResponse = await exchangeResponseRepo.findResponseWhere(constraint);
-
-  if (!exchangeResponse) throw createError('403', 'Cannot reject the exchange for this user.');
-
-  await exchangeResponse.update({ approved: 0 });
+  await exchangeResponseRepo.update({ where: constraint }, { approved: 0 });
 
   createActivity({
     activityType: ActivityTypes.EXCHANGE_REJECTED,
@@ -442,7 +441,7 @@ async function rejectExchange(exchange, rejectingUser, userIdToReject) {
     },
   });
 
-  return exchange.reload();
+  return exchange.id;
 }
 
 exports.acceptExchange = acceptExchange;
@@ -460,7 +459,6 @@ exports.findExchangeByIds = findExchangeByIds;
 exports.findExchangeIdsForValues = findExchangeIdsForValues;
 exports.findExchangesByNetwork = findExchangesByNetwork;
 exports.findExchangesByShiftIds = findExchangesByShiftIds;
-exports.findExchangesByTeam = findExchangesByTeam;
 exports.findExchangesByUserAndNetwork = findExchangesByUserAndNetwork;
 exports.findRespondedExchangesForUser = findRespondedExchangesForUser;
 exports.incrementExchangeAcceptCount = incrementExchangeAcceptCount;

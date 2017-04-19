@@ -21,6 +21,11 @@ const findAllWhere = (whereConstraint) => ExchangeResponse
   .findAll({ where: whereConstraint })
   .then(R.map(createExchangeResponseModel));
 
+const findAllExchangeIdsBy = (whereConstraint) => ExchangeResponse
+  .unscoped()
+  .findAll({ where: whereConstraint })
+  .then(R.pluck(['exchangeId']));
+
 /**
  * Find an accepted exchange response for a user
  * @param {string} userId - user to find the response for
@@ -56,8 +61,14 @@ function createExchangeResponse(data) {
   return ExchangeResponse.create(data);
 }
 
+async function update(constraint, data) {
+  return ExchangeResponse.update(data, constraint);
+}
+
 exports.createExchangeResponse = createExchangeResponse;
 exports.findAcceptedExchangeResponsesForUser = findAcceptedExchangeResponsesForUser;
+exports.findAllExchangeIdsBy = findAllExchangeIdsBy;
 exports.findAllWhere = findAllWhere;
 exports.findResponseWhere = findResponseWhere;
 exports.removeExchangeResponseForExchangeAndUser = removeExchangeResponseForExchangeAndUser;
+exports.update = update;

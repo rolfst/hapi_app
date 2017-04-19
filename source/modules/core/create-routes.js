@@ -36,10 +36,39 @@ const routes = [{
   handler: require('./handlers/update-team'),
   validator: require('./validators/update-team'),
 }, {
+  method: 'PUT',
+  url: '/v2/networks/{networkId}/users/{userId}',
+  handler: require('./handlers/update-user-in-organisation'),
+  validator: require('./validators/update-user-in-organisation'),
+}, {
   method: 'POST',
   url: '/v2/objects/{objectId}/read',
   handler: require('./handlers/read-object'),
   validator: require('./validators/read-object'),
+  prefetch: false,
+}, {
+  method: 'GET',
+  url: '/v2/organisations/{organisationId}/functions',
+  handler: require('./handlers/functions-in-organisation'),
+  validator: require('./validators/functions-in-organisation'),
+  prefetch: false,
+}, {
+  method: 'POST',
+  url: '/v2/organisations/{organisationId}/functions',
+  handler: require('./handlers/create-function-in-organisation'),
+  validator: require('./validators/create-function-in-organisation'),
+  prefetch: false,
+}, {
+  method: 'PUT',
+  url: '/v2/organisations/{organisationId}/functions/{functionId}',
+  handler: require('./handlers/update-function-in-organisation'),
+  validator: require('./validators/update-function-in-organisation'),
+  prefetch: false,
+}, {
+  method: 'DELETE',
+  url: '/v2/organisations/{organisationId}/functions/{functionId}',
+  handler: require('./handlers/remove-function-in-organisation'),
+  validator: require('./validators/remove-function-in-organisation'),
   prefetch: false,
 }];
 

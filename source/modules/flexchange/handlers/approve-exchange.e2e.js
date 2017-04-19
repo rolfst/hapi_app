@@ -1,12 +1,16 @@
 const { assert } = require('chai');
 const moment = require('moment');
+const sinon = require('sinon');
 const testHelper = require('../../../shared/test-utils/helpers');
+const flexchangeDispatcher = require('../dispatcher');
+const acceptanceNotifier = require('../notifications/accepted-exchange');
 const { patchRequest } = require('../../../shared/test-utils/request');
 const objectRepository = require('../../core/repositories/object');
 const { exchangeTypes } = require('../repositories/dao/exchange');
 const exchangeService = require('../services/flexchange');
 
 describe('Approve exchange', () => {
+  let sandbox;
   let admin;
   let employee;
   let network;
@@ -14,6 +18,10 @@ describe('Approve exchange', () => {
   let rejectedExchange;
 
   before(async () => {
+    sandbox = sinon.sandbox.create();
+    sandbox.stub(flexchangeDispatcher, 'emit');
+    sandbox.stub(acceptanceNotifier, 'send').returns(Promise.resolve(true));
+
     [admin, employee] = await Promise.all([
       testHelper.createUser({ username: 'admin@flex-appeal.nl', password: 'foo' }),
       testHelper.createUser({ username: 'employee@flex-appeal.nl', password: 'baz' }),
@@ -54,7 +62,10 @@ describe('Approve exchange', () => {
     }, { network, credentials: admin }));
   });
 
-  after(() => testHelper.cleanAll());
+  after(() => {
+    sandbox.restore();
+    return testHelper.cleanAll();
+  });
 
   it('should return correct data', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${acceptedExchange.id}`;
