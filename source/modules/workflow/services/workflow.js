@@ -1,5 +1,3 @@
-// const R = require('ramda');
-// const Promise = require('bluebird');
 const workFlowRepo = require('../repositories/workflow');
 
 const logger = require('../../../shared/services/logger')('workflow/service');

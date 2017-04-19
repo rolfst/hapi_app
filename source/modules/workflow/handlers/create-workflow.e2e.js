@@ -81,7 +81,7 @@ describe('Workflow handler: create workflow', () => {
 describe('Workflow handler: create trigger', async () => {
   const triggerFixture = {
     type: ETriggerTypes.DATETIME,
-    value: '2018-01-01',
+    value: '2018-01-01 13:00:00',
   };
 
   let admin;

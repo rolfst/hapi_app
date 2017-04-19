@@ -16,12 +16,12 @@ const buildWhereConstraint = (idOrWhereConstraint) => (
       id: idOrWhereConstraint instanceof Array ? { $in: idOrWhereConstraint } : idOrWhereConstraint,
     });
 
-const buildQueryOptions = (where) => ({ where });
-
-const completeQueryOptionsPipe = R.pipe(buildWhereConstraint, buildQueryOptions);
+const completeQueryOptionsPipe = R.pipe(buildWhereConstraint, R.objOf('where'));
 
 const filterByWorkflowId = (id, collection) => R.filter(R.propEq('workflowId', id), collection);
 const pluckIds = R.pluck('id');
+
+const headOrNull = (arr) => R.defaultTo(null, R.head(arr));
 
 const create = (attributes) => {
   const whitelist = ['organisationId', 'name', 'meta', 'startDate', 'expirationDate', 'lastCheck'];
@@ -50,7 +50,7 @@ const findAll = (workflowIdsOrWhereConstraints) => {
 
 const findOne = (workflowIdOrWhereConstraints) => {
   return findAll(buildWhereConstraint(workflowIdOrWhereConstraints))
-    .then(R.head);
+    .then(headOrNull);
 };
 
 const findAllWithData = async (workflowIdsOrWhereConstraints) => {
@@ -77,7 +77,7 @@ const findAllWithData = async (workflowIdsOrWhereConstraints) => {
 
 const findOneWithData = (workflowIdOrWhereConstraints) => {
   return findAllWithData(buildWhereConstraint(workflowIdOrWhereConstraints))
-    .then(R.head);
+    .then(headOrNull);
 };
 
 const createTrigger = (attributes) => {
