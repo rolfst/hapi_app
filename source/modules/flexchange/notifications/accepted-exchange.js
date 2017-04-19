@@ -17,7 +17,7 @@ const send = async (network, exchange, userThatAccepts) => {
   const usersToNotify = admins.filter((u) => u.id !== userThatAccepts.id);
   const notification = createNotification(exchange, userThatAccepts);
 
-  return notifier.send(usersToNotify, notification);
+  notifier.send(usersToNotify, notification);
 };
 
 exports.createNotification = createNotification;

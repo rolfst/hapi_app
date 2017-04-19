@@ -105,7 +105,7 @@ describe('Flexchange service', () => {
         response: true,
       }];
 
-      const actual = impl.replaceUsersInResponses(users, responses);
+      const actual = impl.replaceUsersIn(users, responses);
       const expected = [{
         id: '232',
         userId: '1',

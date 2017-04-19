@@ -5,6 +5,7 @@ const blueprints = require('./blueprints');
 const organisationService = require('../../modules/core/services/organisation');
 const organisationRepository = require('../../modules/core/repositories/organisation');
 const networkService = require('../../modules/core/services/network');
+const exchangeRepo = require('../../modules/flexchange/repositories/exchange');
 const integrationRepo = require('../../modules/core/repositories/integration');
 const userRepo = require('../../modules/core/repositories/user');
 const networkRepo = require('../../modules/core/repositories/network');
@@ -158,6 +159,17 @@ function addTeamToNetwork(networkId, name = randomString(), description = null) 
 }
 
 /**
+ * Adds a User to a team
+ * @param {string} teamId
+ * @param {string} userId
+ * @method addUserToTeam
+ * @return {external:Promise.<TeamUser>} {@link module:modules/core~TeamUser TeamUser}
+ */
+function addUserToTeam(teamId, userId) {
+  return teamRepo.addUserToTeam(teamId, userId);
+}
+
+/**
  * @param {object} credentials
  * @param {string} creadentials.username
  * @param {string} creadentials.password
@@ -280,6 +292,24 @@ function findAllIntegrations() {
 function deleteActivity(activity) {
   return activityRepo.deleteById(activity.id);
 }
+/**
+ * Finds all Exchanges
+ * @method findAllExchanges
+ * @returns {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange}
+ */
+function findAllExchanges() {
+  return exchangeRepo.findAllBy();
+}
+
+/**
+ * Deletes exchanges from database
+ * @param {Exchange} exchange
+ * @method deleteExchange
+ * @returns {external:Promise.<number[]>} number of deleted exchanges
+ */
+function deleteExchange(exchange) {
+  return exchangeRepo.deleteById(exchange.id);
+}
 
 /**
  * Finds all Objects in the database
@@ -323,6 +353,7 @@ exports.DEFAULT_INTEGRATION = DEFAULT_INTEGRATION;
 exports.DEFAULT_NETWORK_EXTERNALID = DEFAULT_NETWORK_EXTERNALID;
 exports.addTeamToNetwork = addTeamToNetwork;
 exports.addUserToNetwork = addUserToNetwork;
+exports.addUserToTeam = addUserToTeam;
 exports.addUserToOrganisation = addUserToOrganisation;
 exports.authenticateUser = authenticateUser;
 exports.cleanAll = cleanAll;
@@ -334,12 +365,14 @@ exports.createNetworkWithIntegration = createNetworkWithIntegration;
 exports.createUser = createUser;
 exports.createUserForNewNetwork = createUserForNewNetwork;
 exports.deleteActivity = deleteActivity;
+exports.deleteExchange = deleteExchange;
 exports.deleteIntegration = deleteIntegration;
 exports.deletePoll = deletePoll;
 exports.deleteUser = deleteUser;
 exports.findAllIntegrations = findAllIntegrations;
 exports.findAllObjects = findAllObjects;
 exports.findAllUsers = findAllUsers;
+exports.findAllExchanges = findAllExchanges;
 exports.getLoginToken = getLoginToken;
 exports.hapiFile = hapiFile;
 exports.randomString = randomString;
