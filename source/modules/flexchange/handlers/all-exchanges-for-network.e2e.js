@@ -13,7 +13,7 @@ const exchangeRepo = require('../repositories/exchange');
 describe('Get exchanges for network', () => {
   const pristineNetwork = stubs.pristine_networks_admins[0];
 
-  describe.only('Integrated network', () => {
+  describe('Integrated network', () => {
     let integratedNetwork;
     let admin;
     let employee;
