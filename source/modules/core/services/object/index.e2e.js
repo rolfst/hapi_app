@@ -93,7 +93,7 @@ describe('Service: Object', () => {
     it('one message should be read', async () => {
       // mark one message as read
 
-      await objectService.markAsRead({
+      await objectService.markAsSeen({
         ids: [createdMessages[0].id],
       }, { credentials: admin });
 

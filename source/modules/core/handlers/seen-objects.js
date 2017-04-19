@@ -7,7 +7,7 @@ const createError = require('../../../shared/utils/create-error');
 module.exports = async (req, reply) => {
   try {
     const { payload, message } = createServicePayload(req);
-    const data = await objectService.markAsRead(payload, message);
+    const data = await objectService.markAsSeen(payload, message);
 
     return reply({ data: responseUtil.toSnakeCase(data) });
   } catch (err) {

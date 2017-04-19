@@ -230,10 +230,10 @@ const get = async (payload, message) => {
  * @param {object} payload - Object containing payload data
  * @param {string} payload.ids - An array of objects to mark as read
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method markAsRead
+ * @method markAsSeen
  * @return {external:Promise.<Array<Object ids>>}
  */
-const markAsRead = async (payload, message) => {
+const markAsSeen = async (payload, message) => {
   logger.debug('Marking object(s) as read', { payload, message });
 
   const createdRecords = await Promise.all(R.map((id) => {
@@ -245,7 +245,7 @@ const markAsRead = async (payload, message) => {
       .catch(() => {}); // We swallow errors since we only return seen object ids anyway
   }, payload.ids));
 
-  return R.filter(R.identity(), R.map(R.prop('objectId'), createdRecords));
+  return R.filter(R.identity(), R.pluck('objectId'), createdRecords);
 };
 
 exports.count = count;
@@ -255,6 +255,6 @@ exports.getParent = getParent;
 exports.getWithSourceAndChildren = getWithSourceAndChildren;
 exports.list = list;
 exports.listWithSourceAndChildren = listWithSourceAndChildren;
-exports.markAsRead = markAsRead;
+exports.markAsSeen = markAsSeen;
 exports.remove = remove;
 exports.usersForParent = usersForParent;
