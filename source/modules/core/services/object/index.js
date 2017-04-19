@@ -245,7 +245,7 @@ const markAsSeen = async (payload, message) => {
       .catch(() => {}); // We swallow errors since we only return seen object ids anyway
   }, payload.ids));
 
-  return R.filter(R.identity(), R.pluck('objectId'), createdRecords);
+  return R.filter(R.identity(), R.pluck('objectId', createdRecords));
 };
 
 exports.count = count;
