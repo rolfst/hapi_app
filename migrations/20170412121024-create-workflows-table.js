@@ -40,16 +40,16 @@ module.exports = {
         }
       })
       .then(() => {
-        return queryInterface
-          .addIndex('workflows', ['organisation_id']);
-      })
-      .then(() => {
-        return queryInterface
-          .addIndex('workflows', ['start_date']);
-      })
-      .then(() => {
-        return queryInterface
-          .addIndex('workflows', ['expiration_date']);
+        return Promise.all([
+          queryInterface
+            .addIndex('workflows', ['organisation_id']),
+          queryInterface
+            .addIndex('workflows', ['start_date']),
+          queryInterface
+            .addIndex('workflows', ['expiration_date']),
+          queryInterface
+            .addIndex('workflows', ['last_check'])
+        ]);
       });
   },
 
