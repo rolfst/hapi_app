@@ -236,14 +236,14 @@ const get = async (payload, message) => {
 const markAsSeen = async (payload, message) => {
   logger.debug('Marking object(s) as read', { payload, message });
 
-  const createdRecords = await Promise.all(R.map((id) => {
+  const createdRecords = await Promise.map(payload.ids, (id) => {
     return objectSeenRepository
       .create({
         objectId: id,
         userId: message.credentials.id,
       })
       .catch(() => {}); // We swallow errors since we only return seen object ids anyway
-  }, payload.ids));
+  });
 
   return R.filter(R.identity(), R.pluck('objectId', createdRecords));
 };
