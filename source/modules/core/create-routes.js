@@ -42,9 +42,9 @@ const routes = [{
   validator: require('./validators/update-user-in-organisation'),
 }, {
   method: 'POST',
-  url: '/v2/objects/{objectId}/read',
-  handler: require('./handlers/read-object'),
-  validator: require('./validators/read-object'),
+  url: '/v2/seen_objects',
+  handler: require('./handlers/seen-objects'),
+  validator: require('./validators/seen-objects'),
   prefetch: false,
 }, {
   method: 'GET',
