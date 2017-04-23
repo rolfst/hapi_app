@@ -107,6 +107,13 @@ async function getUserWithNetworkScope(payload, message) {
     });
 }
 
+const listUsers = async (payload, message) => {
+  logger.debug('Listing all users', { payload, message });
+  return userRepo.findByIds(payload.userIds);
+};
+
 exports.getUserWithNetworkScope = getUserWithNetworkScope;
 exports.listUsersWithNetworkScope = listUsersWithNetworkScope;
 exports.getUser = getUser;
+exports.list = listUsers;
+

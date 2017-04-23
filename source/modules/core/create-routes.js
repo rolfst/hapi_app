@@ -48,6 +48,12 @@ const routes = [{
   prefetch: false,
 }, {
   method: 'GET',
+  url: '/v2/organisations/{organisationId}/users',
+  handler: require('./handlers/users-in-organisation'),
+  validator: require('./validators/users-in-organisation'),
+  prefetch: false,
+}, {
+  method: 'GET',
   url: '/v2/organisations/{organisationId}/functions',
   handler: require('./handlers/functions-in-organisation'),
   validator: require('./validators/functions-in-organisation'),

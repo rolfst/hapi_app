@@ -1,7 +1,9 @@
 const R = require('ramda');
 const Promise = require('bluebird');
+const createError = require('../../../../shared/utils/create-error');
 const organisationRepository = require('../../repositories/organisation');
 const networkService = require('../network');
+const userService = require('../user');
 const impl = require('./implementation');
 
 /**
@@ -9,6 +11,9 @@ const impl = require('./implementation');
  */
 
 const logger = require('../../../../shared/services/logger')('CORE/service/object');
+
+const OPTIONS_WHITELIST = ['offset', 'limit'];
+const createOptionsFromPayload = R.pick(OPTIONS_WHITELIST);
 
 /**
  * Creates an organisation
@@ -172,6 +177,21 @@ const listFunctions = async (payload, message) => {
   return organisationRepository.findFunctionsInOrganisation(payload.organisationId);
 };
 
+async function listUsers(payload, message) {
+  logger.debug('List all users for organisation', { payload, message });
+
+  await impl.assertThatUserIsAdminInOrganisation(message.credentials.id, payload.organisationId);
+
+  const organisation = await organisationRepository.findById(payload.organisationId);
+  if (!organisation) throw createError('404', 'Organisation not found.');
+
+  const options = createOptionsFromPayload(payload);
+  const users = await organisationRepository.findUsers(R.omit(OPTIONS_WHITELIST, payload), { attributes: ['userId'] }, options);
+  const userIds = R.map((user) => user.userId, users);
+
+  return userService.list({ userIds });
+}
+
 /**
  * Updates a user with organisational data.
  * @param {object} payload
@@ -200,5 +220,6 @@ exports.deleteFunction = deleteFunction;
 exports.listForUser = listForUser;
 exports.listFunctions = listFunctions;
 exports.listNetworks = listNetworks;
+exports.listUsers = listUsers;
 exports.updateFunction = updateFunction;
 exports.updateUser = updateUser;
