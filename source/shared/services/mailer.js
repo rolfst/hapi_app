@@ -43,7 +43,8 @@ const mapsToSubstitutes = (subs, length) =>
 const createSMTPHeader = (mail) => {
   const header = new SendGridSMTP();
 
-  header.setSubstitutions(mapsToSubstitutes(mail.data, R.length(mail.options.receiver)));
+  const subLength = Array.isArray(mail.options.receiver) ? R.length(mail.options.receiver) : 1;
+  header.setSubstitutions(mapsToSubstitutes(mail.data, subLength));
   header.setFilters({
     templates: {
       settings: {
