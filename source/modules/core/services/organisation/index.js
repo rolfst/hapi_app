@@ -318,11 +318,28 @@ async function getOrganisation(payload, message) {
   return organisationRepository.findById(payload.organisationId);
 }
 
+/**
+ * Count objects
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.organisationId - The id that instantiated the object
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method countUsers
+ * @return {external:Promise.<number>}
+ */
+const countUsers = async (payload, message) => {
+  logger.debug('Counting objects', { payload, message });
+
+  const whereConstraint = { organisationId: payload.organisationId };
+
+  return organisationRepository.countUsers(whereConstraint);
+};
+
 exports.addFunction = addFunction;
 exports.addUser = addUser;
 exports.getUser = getUser;
 exports.assertUserIsAdminInOrganisation = assertUserIsAdminInOrganisation;
 exports.attachNetwork = attachNetwork;
+exports.countUsers = countUsers;
 exports.create = create;
 exports.deleteFunction = deleteFunction;
 exports.getOrganisation = getOrganisation;

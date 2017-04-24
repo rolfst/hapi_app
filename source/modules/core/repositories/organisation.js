@@ -183,9 +183,14 @@ async function updateUser(userId, organisationId, attributes) {
     .then(createPivotModel);
 }
 
+async function countUsers(whereConstraint) {
+  return OrganisationUser.count({ where: whereConstraint });
+}
+
 exports.addFunction = addFunction;
 exports.addUser = addUser;
 exports.attachNetwork = attachNetwork;
+exports.countUsers = countUsers;
 exports.create = create;
 exports.deleteAll = deleteAll;
 exports.findById = findById;

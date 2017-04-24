@@ -46,6 +46,15 @@ describe('Handler: Users in organisation', () => {
     assert.lengthOf(result.data, 3);
   });
 
+  it('should return a users count for organisation the meta', async () => {
+    const endpoint = `/v2/organisations/${organisationA.id}/users`;
+    const { result: { meta } } = await getRequest(endpoint, users[0].token);
+
+    assert.equal(meta.pagination.total_count, 3);
+    assert.equal(meta.pagination.offset, 0);
+    assert.equal(meta.pagination.limit, 20);
+  });
+
   it('should return a limited set of users for organisation', async () => {
     const endpoint = `/v2/organisations/${organisationA.id}/users?limit=1`;
     const { statusCode, result } = await getRequest(endpoint, users[0].token);
