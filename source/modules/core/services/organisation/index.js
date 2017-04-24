@@ -2,9 +2,11 @@ const R = require('ramda');
 const Promise = require('bluebird');
 const createError = require('../../../../shared/utils/create-error');
 const organisationRepository = require('../../repositories/organisation');
+const userRepository = require('../../repositories/user');
 const networkService = require('../network');
 const userService = require('../user');
 const impl = require('./implementation');
+const { ERoleTypes } = require('../../declarations');
 
 /**
  * @module modules/core/services/organisation
@@ -193,6 +195,69 @@ async function listUsers(payload, message) {
 }
 
 /**
+ * Verifies if a user has a specific role in an organisation
+ * @param requestedRole - The role to check for
+ * @param organisationId - The id of the organisation
+ * @param userId - The id of the user
+ * @method userHasRoleInOrganisation
+ * @returns {external:Promise.<Boolean>}
+ */
+const userHasRoleInOrganisation = async (requestedRole, organisationId, userId) => {
+  logger.debug('Checking user role in organisation', { requestedRole, organisationId, userId });
+
+  const organisation = await organisationRepository.findById(organisationId);
+  if (!organisation) throw createError('404', 'Organisation not found.');
+
+  const userMeta = await organisationRepository.getPivot(userId, organisationId);
+  if (!userMeta) throw createError('403');
+
+  return userMeta.roleType === requestedRole;
+};
+
+/**
+ * Verifies if a user is an admin in a specific organisation
+ * @param organisationId - The id of the organisation
+ * @param userId - The id of the user
+ * @method assertUserIsAdminInOrganisation
+ * @returns {external:Promise.<Boolean>}
+ */
+const assertUserIsAdminInOrganisation = async (organisationId, userId) => {
+  if (!await userHasRoleInOrganisation(ERoleTypes.ADMIN, organisationId, userId)) {
+    throw createError('10020');
+  }
+};
+
+/**
+ * Fetches a user with organisational data.
+ * @param {object} payload
+ * @param {number} payload.userId - The id of the orgonisation
+ * @param {number} payload.organisationId - The id of the organisation
+ * @param {Message} message {@link module:shared~Message message}
+ * @method getUser
+ * @returns {external:Promise.<Boolean>}
+ */
+async function getUser(payload, message) {
+  logger.debug('fetches a user in an organisation', { payload, message });
+
+  // TODO - when the callee is the owner of the user record, it should also be allowed
+  await assertUserIsAdminInOrganisation(payload.organisationId, message.credentials.id);
+
+  const [user, organisationUser] = await Promise.all([
+    userRepository.findUser(payload.userId),
+    organisationRepository.getPivot(payload.userId, payload.organisationId),
+  ]);
+
+  return R.merge(user, {
+    roleType: organisationUser.roleType,
+    functionId: organisationUser.functionId,
+    externalId: organisationUser.externalId,
+    invitedAt: organisationUser.invitedAt,
+    deletedAt: organisationUser.deletedAt,
+    updatedAt: organisationUser.updatedAt,
+  });
+}
+
+/**
  * Updates a user with organisational data.
  * @param {object} payload
  * @param {number} payload.userId - The id of the orgonisation
@@ -203,23 +268,68 @@ async function listUsers(payload, message) {
 async function updateUser(payload, message) {
   logger.debug('Updates a function for a user in an organisation', { payload, message });
 
-  await impl.assertThatUserIsMemberOfOrganisation(payload.userId, payload.organisationId);
-  await impl.assertThatUserIsAdminInOrganisation(message.credentials.id, payload.organisationId);
+  await assertUserIsAdminInOrganisation(payload.organisationId, message.credentials.id);
 
-  const organisationUser = await organisationRepository.updateUser(
-    payload.userId, payload.organisationId, { functionId: payload.functionId });
+  const userWhiteList = [
+    'firstName',
+    'lastName',
+    'email',
+    'password',
+    'dateOfBirth',
+    'phoneNum',
+  ];
 
-  return organisationUser;
+  const organisationUserWhiteList = [
+    'functionId',
+    'roleType',
+  ];
+
+  const userFields = R.pick(userWhiteList, payload);
+  const organisationUserFields = R.pick(organisationUserWhiteList, payload);
+
+  const updateUserRecord = () => {
+    if (R.isEmpty(userFields)) return Promise.resolve();
+
+    return userRepository.updateUser(payload.userId, userFields);
+  };
+
+  const updateOrganisationUserRecord = () => {
+    if (R.isEmpty(organisationUserFields)) return Promise.resolve();
+
+    return organisationRepository
+      .updateUser(
+        payload.userId,
+        payload.organisationId,
+        organisationUserFields
+      );
+  };
+
+  await updateUserRecord().then(updateOrganisationUserRecord);
+
+  return getUser(payload, message);
+}
+
+async function getOrganisation(payload, message) {
+  logger.debug('Shows an organisation.', { payload, message });
+
+  await impl.assertThatOrganisationExists(payload.organisationId);
+  await impl.assertThatUserIsMemberOfOrganisation(message.credentials.id, payload.organisationId);
+
+  return organisationRepository.findById(payload.organisationId);
 }
 
 exports.addFunction = addFunction;
 exports.addUser = addUser;
+exports.getUser = getUser;
+exports.assertUserIsAdminInOrganisation = assertUserIsAdminInOrganisation;
 exports.attachNetwork = attachNetwork;
 exports.create = create;
 exports.deleteFunction = deleteFunction;
+exports.getOrganisation = getOrganisation;
 exports.listForUser = listForUser;
 exports.listFunctions = listFunctions;
 exports.listNetworks = listNetworks;
 exports.listUsers = listUsers;
 exports.updateFunction = updateFunction;
 exports.updateUser = updateUser;
+exports.userHasRoleInOrganisation = userHasRoleInOrganisation;

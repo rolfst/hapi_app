@@ -9,6 +9,11 @@ const routes = [{
   url: `${basePath}/users/me`,
   handler: require(`${baseImport}/view-my-profile`),
 }, {
+  method: 'GET',
+  url: '/users/me',
+  handler: require(`${baseImport}/view-my-scoped-profile`),
+  prefetch: false,
+}, {
   method: 'PUT',
   url: `${basePath}/users/me`,
   handler: require(`${baseImport}/update-my-profile`),

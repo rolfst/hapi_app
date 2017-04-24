@@ -1,6 +1,7 @@
 const { assert } = require('chai');
 const testHelpers = require('../../../shared/test-utils/helpers');
 const { getRequest } = require('../../../shared/test-utils/request');
+const organisationRepo = require('../repositories/organisation');
 
 describe('Handler: Networks for organisation', () => {
   let organisation;
@@ -14,9 +15,9 @@ describe('Handler: Networks for organisation', () => {
       testHelpers.createUser(),
     ]);
 
-    await testHelpers.addUserToOrganisation(admin.id, organisation.id, 'ADMIN');
 
     return Promise.all([
+      organisationRepo.addUser(admin.id, organisation.id, 'ADMIN'),
       testHelpers.createNetwork({
         userId: admin.id,
         organisationId: organisation.id,

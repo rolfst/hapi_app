@@ -2,6 +2,7 @@ const R = require('ramda');
 const moment = require('moment');
 const createError = require('../../../shared/utils/create-error');
 const createNetworkModel = require('../models/network');
+const createScopedInfoModel = require('../models/network-scope');
 const createNetworkLinkModel = require('../models/network-link');
 const createUserModel = require('../models/user');
 const createTeamModel = require('../models/team');
@@ -116,14 +117,28 @@ const setImportDateOnNetworkIntegration = async (networkId) => {
  * @method findNetworksForUser
  * @return {external:Promise.<Integration>} {@link module:modules/core~Integration Integration}
  */
-const findNetworksForUser = async (userId) => {
+const findNetworksForUser = async (userId, includePivot = false) => {
   const pivotResult = await NetworkUser.findAll({
     where: { userId, deletedAt: null },
-  });
+  })
+  .then(R.map(createNetworkLinkModel));
 
-  const networkIds = R.pipe(R.pluck('networkId'), R.uniq)(pivotResult);
+  if (!includePivot) {
+    const networkIds = R.pipe(R.pluck('networkId'), R.uniq)(pivotResult);
+    return findNetworkByIds(networkIds);
+  }
 
-  return findNetworkByIds(networkIds);
+  const networkResult = await Network
+    .findAll({
+      where: { id: { $in: R.pluck('networkId', pivotResult) } },
+    })
+    .then(R.map(createScopedInfoModel));
+  const findNetworkPivot = (networkId) => R.find(R.propEq('id', networkId), networkResult);
+
+  return R.map((networkUser) => R.merge(
+    networkUser,
+    R.pick(['name', 'id'], findNetworkPivot(networkUser.networkId.toString()))
+  ), pivotResult);
 };
 
 /**

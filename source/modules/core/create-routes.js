@@ -36,11 +36,6 @@ const routes = [{
   handler: require('./handlers/update-team'),
   validator: require('./validators/update-team'),
 }, {
-  method: 'PUT',
-  url: '/v2/networks/{networkId}/users/{userId}',
-  handler: require('./handlers/update-user-in-organisation'),
-  validator: require('./validators/update-user-in-organisation'),
-}, {
   method: 'POST',
   url: '/v2/seen_objects',
   handler: require('./handlers/seen-objects'),
@@ -48,9 +43,26 @@ const routes = [{
   prefetch: false,
 }, {
   method: 'GET',
+  url: '/v2/organisations/{organisationId}/users/{userId}',
+  handler: require('./handlers/view-user-in-organisation'),
+  validator: require('./validators/view-user-in-organisation'),
+  prefetch: false,
+}, {
+  method: 'PUT',
+  url: '/v2/organisations/{organisationId}/users/{userId}',
+  handler: require('./handlers/update-user-in-organisation'),
+  validator: require('./validators/update-user-in-organisation'),
+  prefetch: false,
+}, {
+  method: 'GET',
   url: '/v2/organisations/{organisationId}/users',
   handler: require('./handlers/users-in-organisation'),
   validator: require('./validators/users-in-organisation'),
+  prefetch: false,
+}, {
+  method: 'GET',
+  url: '/v2/organisations/{organisationId}',
+  handler: require('./handlers/view-organisation'),
   prefetch: false,
 }, {
   method: 'GET',
