@@ -137,7 +137,7 @@ const findNetworksForUser = async (userId, includePivot = false) => {
 
   return R.map((networkUser) => R.merge(
     networkUser,
-    R.pick(['name', 'id'], findNetworkPivot(networkUser.networkId.toString()))
+    R.pick(['name', 'id', 'organisationId'], findNetworkPivot(networkUser.networkId.toString()))
   ), pivotResult);
 };
 

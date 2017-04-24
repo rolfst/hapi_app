@@ -67,6 +67,7 @@ describe('Handler: View my scoped profile', () => {
     assert.isDefined(aNetwork);
     assert.property(aNetwork, 'id');
     assert.property(aNetwork, 'name');
+    assert.property(aNetwork, 'organisation_id');
     assert.property(aNetwork, 'role_type');
     assert.property(aNetwork, 'invited_at');
     assert.property(aNetwork, 'deleted_at');
