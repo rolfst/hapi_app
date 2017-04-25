@@ -59,5 +59,10 @@ const getEmployee = async (payload, message) => {
     id: message.credentials.id, networkId: message.network.id }, message);
 };
 
+async function getOwn(payload, message) {
+  return userService.getScoped({ id: message.credentials.id }, message);
+}
+
 exports.getEmployee = getEmployee;
+exports.getOwn = getOwn;
 exports.updateEmployee = updateEmployee;

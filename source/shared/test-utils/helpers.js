@@ -6,12 +6,14 @@ const organisationService = require('../../modules/core/services/organisation');
 const organisationRepository = require('../../modules/core/repositories/organisation');
 const workflowRepository = require('../../modules/workflow/repositories/workflow');
 const networkService = require('../../modules/core/services/network');
+const exchangeRepo = require('../../modules/flexchange/repositories/exchange');
 const integrationRepo = require('../../modules/core/repositories/integration');
 const userRepo = require('../../modules/core/repositories/user');
 const networkRepo = require('../../modules/core/repositories/network');
 const teamRepo = require('../../modules/core/repositories/team');
 const activityRepo = require('../../modules/core/repositories/activity');
 const objectRepo = require('../../modules/core/repositories/object');
+const objectSeenRepo = require('../../modules/core/repositories/object-seen');
 const pollRepo = require('../../modules/poll/repositories/poll');
 const { postRequest } = require('./request');
 
@@ -62,23 +64,24 @@ function addUserToNetwork(networkUserAttributes) {
 }
 
 /**
- * @param userId - The id of the user to add
- * @param organisationId - The id of the organisation
- * @param roleType - ADMIN or EMPLOYEE for security
- * @param functionId - Organisational function of the user
- * @returns {Promise.<OrganisationUser>}
- */
-function addUserToOrganisation(userId, organisationId, roleType = 'EMPLOYEE', functionId = null) {
-  return organisationRepository.addUser(userId, organisationId, roleType, functionId);
-}
-
-/**
  * Create an organisation
  * @param {string} name - The name of the origanisation
  * @returns {*|external:Promise.<Organisation>}
  */
 function createOrganisation(name = randomString()) {
   return organisationService.create({ name });
+}
+
+/**
+ * @param userId - The id of the user to add
+ * @param organisationId - The id of the organisation
+ * @param roleType - ADMIN or EMPLOYEE for security
+ * @param functionId - Organisational function of the user
+ * @method addUserToOrganisation
+ * @returns {Promise.<OrganisationUser>}
+ */
+function addUserToOrganisation(userId, organisationId, roleType = 'EMPLOYEE', functionId = null) {
+  return organisationRepository.addUser(userId, organisationId, roleType, functionId);
 }
 
 /**
@@ -154,8 +157,19 @@ async function createNetworkWithIntegration({
   return { integration, network };
 }
 
-function addTeamToNetwork(networkId, name = randomString(), description = null) {
+function createTeamInNetwork(networkId, name = randomString(), description = null) {
   return teamRepo.create({ networkId, name, description });
+}
+
+/**
+ * Adds a User to a team
+ * @param {string} teamId
+ * @param {string} userId
+ * @method addUserToTeam
+ * @return {external:Promise.<TeamUser>} {@link module:modules/core~TeamUser TeamUser}
+ */
+function addUserToTeam(teamId, userId) {
+  return teamRepo.addUserToTeam(teamId, userId);
 }
 
 /**
@@ -280,6 +294,24 @@ function findAllIntegrations() {
  */
 function deleteActivity(activity) {
   return activityRepo.deleteById(activity.id);
+}
+/**
+ * Finds all Exchanges
+ * @method findAllExchanges
+ * @returns {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange}
+ */
+function findAllExchanges() {
+  return exchangeRepo.findAllBy();
+}
+
+/**
+ * Deletes exchanges from database
+ * @param {Exchange} exchange
+ * @method deleteExchange
+ * @returns {external:Promise.<number[]>} number of deleted exchanges
+ */
+function deleteExchange(exchange) {
+  return exchangeRepo.deleteById(exchange.id);
 }
 
 /**
@@ -424,6 +456,7 @@ async function cleanAll() {
 
   await userRepo.deleteAll();
   await objectRepo.deleteAll();
+  await objectSeenRepo.deleteAll();
   await activityRepo.deleteAll();
   await integrationRepo.deleteAll();
   await pollRepo.deleteAll();
@@ -431,9 +464,10 @@ async function cleanAll() {
 
 exports.DEFAULT_INTEGRATION = DEFAULT_INTEGRATION;
 exports.DEFAULT_NETWORK_EXTERNALID = DEFAULT_NETWORK_EXTERNALID;
-exports.addTeamToNetwork = addTeamToNetwork;
+exports.createTeamInNetwork = createTeamInNetwork;
 exports.addUserToNetwork = addUserToNetwork;
 exports.addUserToOrganisation = addUserToOrganisation;
+exports.addUserToTeam = addUserToTeam;
 exports.authenticateUser = authenticateUser;
 exports.cleanAll = cleanAll;
 exports.createOrganisation = createOrganisation;
@@ -444,12 +478,14 @@ exports.createNetworkWithIntegration = createNetworkWithIntegration;
 exports.createUser = createUser;
 exports.createUserForNewNetwork = createUserForNewNetwork;
 exports.deleteActivity = deleteActivity;
+exports.deleteExchange = deleteExchange;
 exports.deleteIntegration = deleteIntegration;
 exports.deletePoll = deletePoll;
 exports.deleteUser = deleteUser;
 exports.findAllIntegrations = findAllIntegrations;
 exports.findAllObjects = findAllObjects;
 exports.findAllUsers = findAllUsers;
+exports.findAllExchanges = findAllExchanges;
 exports.getLoginToken = getLoginToken;
 exports.hapiFile = hapiFile;
 exports.randomString = randomString;

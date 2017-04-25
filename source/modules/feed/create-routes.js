@@ -53,4 +53,18 @@ const routes = [{
   prefetch: false,
 }];
 
-module.exports = createRoutes(routes);
+const organisationMessageRoutes = [{
+  method: 'GET',
+  url: '/v2/organisations/{organisationId}/messages',
+  handler: require('./handlers/get-organisation-messages'),
+  validator: require('./validators/get-organisation-messages'),
+  prefetch: false,
+}, {
+  method: 'POST',
+  url: '/v2/organisations/{organisationId}/messages',
+  handler: require('./handlers/create-organisation-message'),
+  validator: require('./validators/create-organisation-message'),
+  prefetch: false,
+}];
+
+module.exports = createRoutes([...routes, ...organisationMessageRoutes]);

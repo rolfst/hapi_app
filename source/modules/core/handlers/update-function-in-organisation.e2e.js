@@ -1,7 +1,7 @@
 const { assert } = require('chai');
 const testHelpers = require('../../../shared/test-utils/helpers');
 const { putRequest } = require('../../../shared/test-utils/request');
-const OrganisationRepo = require('../repositories/organisation');
+const organisationRepo = require('../repositories/organisation');
 
 describe('Handler: Update functions in organisation', () => {
   let organisation;
@@ -21,8 +21,8 @@ describe('Handler: Update functions in organisation', () => {
 
     [existingFunction] = await Promise.all([
       testHelpers.createOrganisationFunction(organisation.id, 'old function'),
-      testHelpers.addUserToOrganisation(admin.id, organisation.id, 'ADMIN'),
-      testHelpers.addUserToOrganisation(organisationUser.id, organisation.id),
+      organisationRepo.addUser(admin.id, organisation.id, 'ADMIN'),
+      organisationRepo.addUser(organisationUser.id, organisation.id, 'EMPLOYEE'),
       testHelpers.createNetwork({ userId: admin.id, organisationId: organisation.id }),
     ]);
   });
@@ -37,7 +37,7 @@ describe('Handler: Update functions in organisation', () => {
 
     assert.equal(statusCode, 200, 'Request is successful');
 
-    const verifyFunction = await OrganisationRepo.findFunction(existingFunction.id);
+    const verifyFunction = await organisationRepo.findFunction(existingFunction.id);
 
     assert.equal(verifyFunction.name, newFunctionName, 'Function name is updated');
   });

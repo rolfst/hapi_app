@@ -1,0 +1,81 @@
+const { assert } = require('chai');
+const testHelpers = require('../../../shared/test-utils/helpers');
+const organisationService = require('../services/organisation');
+const organisationRepo = require('../repositories/organisation');
+const { getRequest } = require('../../../shared/test-utils/request');
+
+describe('Handler: Users in organisation', () => {
+  let organisationA;
+  let organisationB;
+  let users;
+
+  before(async () => {
+    [organisationA, organisationB, ...users] = await Promise.all([
+      testHelpers.createOrganisation(),
+      testHelpers.createOrganisation(),
+      testHelpers.createUser(),
+      testHelpers.createUser(),
+      testHelpers.createUser(),
+      testHelpers.createUser(),
+    ]);
+
+    const [networkA, networkB] = await Promise.all([
+      testHelpers.createNetwork({ userId: users[0].id }),
+      testHelpers.createNetwork({ userId: users[1].id }),
+    ]);
+
+    await Promise.all([
+      organisationService.attachNetwork({
+        networkId: networkA.id, organisationId: organisationA.id }),
+      organisationService.attachNetwork({
+        networkId: networkB.id, organisationId: organisationA.id }),
+      organisationRepo.addUser(users[0].id, organisationA.id, 'ADMIN'),
+      organisationRepo.addUser(users[2].id, organisationA.id, 'ADMIN'),
+      organisationRepo.addUser(users[3].id, organisationA.id, 'ADMIN'),
+      organisationRepo.addUser(users[1].id, organisationB.id, 'ADMIN'),
+    ]);
+  });
+
+  after(() => testHelpers.cleanAll());
+
+  it('should return users for organisation', async () => {
+    const endpoint = `/v2/organisations/${organisationA.id}/users`;
+    const { statusCode, result } = await getRequest(endpoint, users[0].token);
+
+    assert.equal(statusCode, 200);
+    assert.lengthOf(result.data, 3);
+  });
+
+  it('should return a users count for organisation the meta', async () => {
+    const endpoint = `/v2/organisations/${organisationA.id}/users`;
+    const { result: { meta } } = await getRequest(endpoint, users[0].token);
+
+    assert.equal(meta.pagination.total_count, 3);
+    assert.equal(meta.pagination.offset, 0);
+    assert.equal(meta.pagination.limit, 20);
+  });
+
+  it('should return a limited set of users for organisation', async () => {
+    const endpoint = `/v2/organisations/${organisationA.id}/users?limit=1`;
+    const { statusCode, result } = await getRequest(endpoint, users[0].token);
+
+    assert.equal(statusCode, 200);
+    assert.lengthOf(result.data, 1);
+  });
+
+  it('should return users for different organinsation', async () => {
+    const endpoint = `/v2/organisations/${organisationB.id}/users`;
+    const { statusCode, result } = await getRequest(endpoint, users[1].token);
+
+    assert.equal(statusCode, 200);
+    assert.lengthOf(result.data, 1);
+  });
+
+  it('should not return any users for different organisation', async () => {
+    const endpoint = `/v2/organisations/${organisationB.id}/users`;
+    const { statusCode, result } = await getRequest(endpoint, users[0].token);
+
+    assert.equal(statusCode, 403);
+    assert.equal(result.error_code, '403');
+  });
+});

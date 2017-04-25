@@ -74,6 +74,38 @@ const list = async (payload, message) => {
 };
 
 /**
+ * Listing messages
+ * @param {object} payload - Object containing payload data
+ * @param {string[]} payload.organisationId - The id of the organisation to get messages for
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method listByOrganisation
+ * @return {external:Promise.<Message[]>} {@link module:feed~Message message}
+ */
+const listByOrganisation = async (payload, message) => {
+  logger.debug('Listing organisation messages', { payload, message });
+
+  const objectIds = await messageRepository
+    .findByOrganisation(payload.organisationId)
+    .then(R.pluck('objectId'));
+
+  return objectService.listWithSourceAndChildren({ objectIds }, message);
+};
+
+/**
+ * Count objects for an organisation
+ * @param {object} payload - Object containing payload data
+ * @param {string[]} payload.organisationId - The id of the organisation to count messages for
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method countByOrganisation
+ * @return {external:Promise.<number>}
+ */
+const countByOrganisation = async (payload, message) => {
+  logger.debug('Counting objects by organisation', { payload, message });
+
+  return messageRepository.countByOrganisation(payload.organisationId);
+};
+
+/**
  * List likes for message or multiple messages
  * @param {object} payload - Object containing payload data
  * @param {string} payload.messageId - The id of the message to retrieve
@@ -141,19 +173,26 @@ const create = async (payload, message) => {
 
   const checkPayload = R.compose(isAvailable, R.prop(R.__, payload));
   const parent = await objectService.getParent(R.pick(['parentType', 'parentId'], payload));
-  const networkId = R.ifElse(
-    R.propEq('type', 'team'),
-    R.prop('networkId'),
-    R.prop('id'))(parent);
+
+  const networkId = await R.cond([
+    [R.propEq('type', 'organisation'), R.always(null)],
+    [R.propEq('type', 'team'), R.prop('networkId')],
+    [R.T, R.prop('id')],
+  ])(parent);
+
+  const organisationId =
+    R.ifElse(R.propEq('parentType', 'organisation'), R.prop('parentId'), R.always(null))(payload);
 
   const parentEntity = `${payload.parentType.slice(0, 1)
       .toUpperCase()}${payload.parentType.slice(1)}`;
+
   const createdMessage = await messageRepository.create({
     parentType: `FlexAppeal\\Entities\\${parentEntity}`, // Backwards compatibility for PHP API
     parentId: payload.parentId,
     objectId: null,
     text: payload.text,
     createdBy: message.credentials.id,
+    messageType: payload.messageType || 'default_message',
   });
 
   const createdObject = await objectService.create({
@@ -202,6 +241,7 @@ const create = async (payload, message) => {
 
   FeedDispatcher.emit('message.created', {
     parent,
+    organisationId,
     networkId,
     actor: message.credentials,
     object: objectWithSourceAndChildren,
@@ -277,10 +317,12 @@ const remove = async (payload, message) => {
   return true;
 };
 
+exports.countByOrganisation = countByOrganisation;
 exports.create = create;
 exports.getAsObject = getAsObject;
 exports.like = like;
 exports.list = list;
+exports.listByOrganisation = listByOrganisation;
 exports.listComments = listComments;
 exports.listLikes = listLikes;
 exports.remove = remove;

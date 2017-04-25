@@ -32,7 +32,7 @@ describe('Service: Feed', () => {
 
       network = await testHelpers.createNetwork({ userId: admin.id });
       otherNetwork = await testHelpers.createNetwork({ userId: admin.id });
-      team = await testHelpers.addTeamToNetwork(network.id);
+      team = await testHelpers.createTeamInNetwork(network.id);
       await testHelpers.addUserToNetwork({ userId: employee.id, networkId: network.id });
       await testHelpers.addUserToNetwork({ userId: employee.id, networkId: otherNetwork.id });
 
@@ -234,8 +234,8 @@ describe('Service: Feed', () => {
 
     it('should include seen property and counts for top level objects', async () => {
       // Mark the first message as read
-      await objectService.markAsRead({
-        objectId: createdMessages[0].id,
+      await objectService.markAsSeen({
+        ids: [createdMessages[0].id],
       }, { credentials: admin });
 
       const actual = await feedService.makeForNetwork({

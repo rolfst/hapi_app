@@ -36,11 +36,6 @@ const routes = [{
   validator: require('./validators/get-exchange'),
 }, {
   method: 'GET',
-  url: `${baseUrl}/teams/{teamId}/exchanges`,
-  handler: require(`${basePath}/all-exchanges-for-team`),
-  validator: require('./validators/get-exchange'),
-}, {
-  method: 'GET',
   url: `${baseUrl}/exchanges/{exchangeId}`,
   handler: require(`${basePath}/view-exchange`),
   validator: require('./validators/get-exchange'),

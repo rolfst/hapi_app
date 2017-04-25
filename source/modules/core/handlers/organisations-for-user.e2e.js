@@ -2,6 +2,7 @@ const { assert } = require('chai');
 const testHelpers = require('../../../shared/test-utils/helpers');
 const organisationService = require('../services/organisation');
 const { getRequest } = require('../../../shared/test-utils/request');
+const organisationRepo = require('../repositories/organisation');
 
 describe('Handler: Organisations for user', () => {
   let organisationA;
@@ -25,8 +26,8 @@ describe('Handler: Organisations for user', () => {
         networkId: networkA.id, organisationId: organisationA.id }),
       organisationService.attachNetwork({
         networkId: networkB.id, organisationId: organisationA.id }),
-      testHelpers.addUserToOrganisation(user.id, organisationA.id, 'ADMIN'),
-      testHelpers.addUserToOrganisation(user.id, organisationB.id, 'EMPLOYEE'),
+      organisationRepo.addUser(user.id, organisationA.id, 'ADMIN'),
+      organisationRepo.addUser(user.id, organisationB.id, 'ADMIN'),
     ]);
   });
 

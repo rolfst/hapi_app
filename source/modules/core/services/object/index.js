@@ -4,6 +4,7 @@ const createError = require('../../../../shared/utils/create-error');
 const networkRepository = require('../../../core/repositories/network');
 const teamRepository = require('../../../core/repositories/team');
 const userRepository = require('../../../core/repositories/user');
+const organisationRepository = require('../../../core/repositories/organisation');
 const objectRepository = require('../../repositories/object');
 const objectSeenRepository = require('../../repositories/object-seen');
 const impl = require('./implementation');
@@ -151,6 +152,7 @@ const getParent = async (payload, message) => {
     [R.equals('network'), () => networkRepository.findNetworkById(payload.parentId)],
     [R.equals('team'), () => teamRepository.findTeamById(payload.parentId)],
     [R.equals('user'), () => userRepository.findUserById(payload.parentId, null, false)],
+    [R.equals('organisation'), () => organisationRepository.findById(payload.parentId)],
     [R.T, R.F],
   ])(payload.parentType);
 
@@ -225,22 +227,27 @@ const get = async (payload, message) => {
   return object;
 };
 
-
 /**
- * Create object
+ * Mark object seen
  * @param {object} payload - Object containing payload data
- * @param {string} payload.objectId - The id that instantiated the object
+ * @param {string} payload.ids - An array of objects to mark as read
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method create
- * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
+ * @method markAsSeen
+ * @return {external:Promise.<Array<Object ids>>}
  */
-const markAsRead = async (payload, message) => {
-  logger.debug('Marking object as read', { payload, message });
+const markAsSeen = async (payload, message) => {
+  logger.debug('Marking object(s) as read', { payload, message });
 
-  return objectSeenRepository.create({
-    objectId: payload.objectId,
-    userId: message.credentials.id,
+  const createdRecords = await Promise.map(payload.ids, (id) => {
+    return objectSeenRepository
+      .create({
+        objectId: id,
+        userId: message.credentials.id,
+      })
+      .catch(() => {}); // We swallow errors since we only return seen object ids anyway
   });
+
+  return R.filter(R.identity(), R.pluck('objectId', createdRecords));
 };
 
 exports.count = count;
@@ -250,6 +257,6 @@ exports.getParent = getParent;
 exports.getWithSourceAndChildren = getWithSourceAndChildren;
 exports.list = list;
 exports.listWithSourceAndChildren = listWithSourceAndChildren;
-exports.markAsRead = markAsRead;
+exports.markAsSeen = markAsSeen;
 exports.remove = remove;
 exports.usersForParent = usersForParent;

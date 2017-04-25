@@ -22,6 +22,21 @@ const OrganisationUser = model.define('OrganisationUser', {
     field: 'role_type',
     defaultValue: 'EMPLOYEE',
   },
+  invitedAt: {
+    type: Sequelize.DATE,
+    field: 'invited_at',
+    allowNull: true,
+  },
+  deletedAt: {
+    type: Sequelize.DATE,
+    field: 'deleted_at',
+    allowNull: true,
+  },
+  externalId: {
+    type: Sequelize.STRING,
+    field: 'external_id',
+    allowNull: true,
+  },
 }, {
   tableName: 'organisation_user',
   createdAt: 'created_at',

@@ -26,7 +26,7 @@ describe('Service: Message', () => {
         testHelpers.createUser({ password: 'foo' }),
       ]);
       network = await testHelpers.createNetwork({ userId: admin.id });
-      const team = await testHelpers.addTeamToNetwork(network.id);
+      const team = await testHelpers.createTeamInNetwork(network.id);
 
       createdMessages = await Promise.all([
         messageService.create({
@@ -287,7 +287,7 @@ describe('Service: Message', () => {
       ]);
       const teamMember = await testHelpers.createUser({ password: 'foo' });
       network = await testHelpers.createNetwork({ userId: admin.id });
-      const team = await testHelpers.addTeamToNetwork(network.id);
+      const team = await testHelpers.createTeamInNetwork(network.id);
 
       await testHelpers.addUserToNetwork({ networkId: network.id, userId: employee.id });
       await testHelpers.addUserToNetwork({ networkId: network.id, userId: teamMember.id });

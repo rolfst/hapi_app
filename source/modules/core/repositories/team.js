@@ -12,6 +12,17 @@ const { Team, User, TeamUser } = require('./dao');
 
 /**
  * @param {string} id - team id
+ * @method findById
+ * @return {external:Promise.<Team>} {@link module:modules/core~Team Team}
+ */
+async function findById(id) {
+  return Team
+    .findOne({ where: { id } })
+    .then(createTeamModel);
+}
+
+/**
+ * @param {string} id - team id
  * @method findTeamById
  * @return {external:Promise.<Team>} {@link module:modules/core~Team Team}
  */
@@ -220,6 +231,7 @@ exports.create = create;
 exports.createBulkTeams = createBulkTeams;
 exports.deleteById = deleteById;
 exports.findBy = findBy;
+exports.findById = findById;
 exports.findByIds = findByIds;
 exports.findMembers = findMembers;
 exports.findTeamsByExternalId = findTeamsByExternalId;

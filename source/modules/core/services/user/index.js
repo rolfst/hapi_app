@@ -107,6 +107,25 @@ async function getUserWithNetworkScope(payload, message) {
     });
 }
 
-exports.getUserWithNetworkScope = getUserWithNetworkScope;
-exports.listUsersWithNetworkScope = listUsersWithNetworkScope;
+async function getScoped(payload, message) {
+  logger.debug('Fetching user information with scopes', { payload, message });
+
+  const [user, organisations, networks] = await Promise.all([
+    userRepo.findUnscopedById(payload.id),
+    organisationRepo.findForUser(payload.id, true),
+    networkRepo.findNetworksForUser(payload.id, true),
+  ]);
+
+  return R.merge(user, { scopes: { organisations, networks } });
+}
+
+const listUsers = async (payload, message) => {
+  logger.debug('Listing all users', { payload, message });
+  return userRepo.findByIds(payload.userIds);
+};
+
+exports.getScoped = getScoped;
 exports.getUser = getUser;
+exports.getUserWithNetworkScope = getUserWithNetworkScope;
+exports.list = listUsers;
+exports.listUsersWithNetworkScope = listUsersWithNetworkScope;

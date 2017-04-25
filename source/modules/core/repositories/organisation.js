@@ -4,9 +4,19 @@ const createModel = require('../models/organisation');
 const createPivotModel = require('../models/organisation-user');
 const createFunctionsModel = require('../models/organisation-function');
 
-const create = (attributes) => Organisation
-  .create(attributes)
-  .then(createModel);
+const create = (attributes) => {
+  const whitelist = ['name', 'brandIcon', 'externalConfig'];
+
+  const pickedAttributes = R.pick(whitelist, attributes);
+
+  if (typeof pickedAttributes.externalConfig === 'object') {
+    pickedAttributes.externalConfig = JSON.stringify(pickedAttributes.externalConfig);
+  }
+
+  return Organisation
+    .create(pickedAttributes)
+    .then(createModel);
+};
 
 const findById = (organisationId) => Organisation
   .findById(organisationId)
@@ -16,16 +26,28 @@ const findById = (organisationId) => Organisation
     return createModel(result);
   });
 
-const findForUser = async (userId) => {
-  const pivotResult = await OrganisationUser.findAll({
-    where: { userId },
-  });
+const findForUser = async (userId, includePivot = false) => {
+  const pivotResult = await OrganisationUser
+  .findAll({ where: { userId } })
+  .then(R.map(createPivotModel));
 
-  const organisationResult = await Organisation.findAll({
-    where: { id: { $in: R.pluck('organisationId', pivotResult) } },
-  });
+  const organisationResult = await Organisation
+    .findAll({
+      where: { id: { $in: R.pluck('organisationId', pivotResult) } },
+    })
+    .then(R.map(createModel));
 
-  return R.map(createModel, organisationResult);
+  if (!includePivot) return organisationResult;
+
+  const findOrganisationPivot = (organisationId) => R.find(R.propEq('id', organisationId), organisationResult);
+  return R.map((organisationUser) => {
+    return R.merge(organisationUser,
+      R.pick(
+        ['name', 'id'],
+        findOrganisationPivot(organisationUser.organisationId.toString())
+      )
+    );
+  }, pivotResult);
 };
 
 const getPivot = async (userId, organisationId) => {
@@ -111,6 +133,22 @@ const findFunction = async (functionIdOrWhereConstraint) => {
     : null;
 };
 
+/**
+ * find All users by constraint
+ * @param {object} constraint
+ * @param {object} [attributes=object]
+ * @param {object} attributes.attributes
+ * @param {object} [options] - options to limit the query
+ * @param {number} options.limit - options to limit the result
+ * @param {number} options.offset - options to start the result cursor
+ * @return {external:Promise.<user[]>}
+ */
+const findUsers = async (constraint, attributes = {}, options = null) => {
+  const query = R.merge(options, { where: constraint }, attributes);
+
+  return OrganisationUser.findAll(query);
+};
+
 const findFunctionsForUsers = async (userId) => {
   const organisationUsers = R.map(
     createPivotModel,
@@ -137,13 +175,22 @@ const findFunctionForUser = (userId) => {
 };
 
 async function updateUser(userId, organisationId, attributes) {
-  return OrganisationUser.update(attributes, { where: { organisationId, userId } })
+  const whitelist = ['functionId', 'roleType', 'invitedAt', 'deletedAt'];
+
+  return OrganisationUser
+    .update(R.pick(whitelist, attributes), { where: { organisationId, userId } })
+    .then(() => OrganisationUser.findOne({ where: { organisationId, userId } }))
     .then(createPivotModel);
+}
+
+async function countUsers(whereConstraint) {
+  return OrganisationUser.count({ where: whereConstraint });
 }
 
 exports.addFunction = addFunction;
 exports.addUser = addUser;
 exports.attachNetwork = attachNetwork;
+exports.countUsers = countUsers;
 exports.create = create;
 exports.deleteAll = deleteAll;
 exports.findById = findById;
@@ -152,6 +199,7 @@ exports.findFunction = findFunction;
 exports.findFunctionForUser = findFunctionForUser;
 exports.findFunctionsForUsers = findFunctionsForUsers;
 exports.findFunctionsInOrganisation = findFunctionsInOrganisation;
+exports.findUsers = findUsers;
 exports.getPivot = getPivot;
 exports.hasUser = hasUser;
 exports.removeFunction = removeFunction;

@@ -10,6 +10,10 @@ const Organisation = model.define('Organisation', {
     type: Sequelize.STRING,
     field: 'brand_icon',
   },
+  externalConfig: {
+    type: Sequelize.TEXT,
+    field: 'external_config',
+  },
 }, {
   tableName: 'organisations',
   createdAt: 'created_at',

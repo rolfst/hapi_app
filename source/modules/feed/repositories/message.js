@@ -1,6 +1,7 @@
 const R = require('ramda');
 const { FeedMessage } = require('./dao');
 const createFeedMessageModel = require('../models/message');
+const { EMessageTypes, DEFAULT_MESSAGE_LIMIT } = require('../definitions');
 
 /**
  * Find a message by id
@@ -40,7 +41,7 @@ const findByIds = async (messageIds) => {
  * @return {external:Promise.<FeedMessage>} {@link module:modules/feed~FeedMessage}
  */
 const create = async (attributes) => {
-  const attributesWhitelist = ['createdBy', 'text', 'parentType', 'parentId'];
+  const attributesWhitelist = ['createdBy', 'text', 'parentType', 'parentId', 'messageType'];
   const result = await FeedMessage.create(R.pick(attributesWhitelist, attributes));
 
   return createFeedMessageModel(result);
@@ -61,10 +62,34 @@ const update = async (messageId, attributes) => {
   return createFeedMessageModel(message);
 };
 
+
+const findByOrganisation = async (organisationId, limit = DEFAULT_MESSAGE_LIMIT, offset = 0) =>
+  FeedMessage
+    .findAll({
+      where: {
+        messageType: EMessageTypes.ORGANISATION,
+        parentId: organisationId,
+      },
+      offset,
+      limit,
+    })
+    .then(R.map(createFeedMessageModel));
+
+const countByOrganisation = (organisationId) =>
+  FeedMessage
+    .count({
+      where: {
+        messageType: EMessageTypes.ORGANISATION,
+        parentId: organisationId,
+      },
+    });
+
 const destroy = (messageId) => FeedMessage.destroy({ where: { id: messageId } });
 
+exports.countByOrganisation = countByOrganisation;
 exports.create = create;
 exports.destroy = destroy;
 exports.findById = findById;
 exports.findByIds = findByIds;
+exports.findByOrganisation = findByOrganisation;
 exports.update = update;

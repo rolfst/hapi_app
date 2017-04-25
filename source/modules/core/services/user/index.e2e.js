@@ -3,6 +3,7 @@ const R = require('ramda');
 const testHelpers = require('../../../../shared/test-utils/helpers');
 const teamRepository = require('../../repositories/team');
 const userService = require('./index');
+const organisationRepo = require('../../repositories/organisation');
 
 describe('Service: User', () => {
   describe('listUsersWithNetworkScope', () => {
@@ -27,19 +28,14 @@ describe('Service: User', () => {
       ]);
 
       createdTeams = await Promise.all([
-        testHelpers.addTeamToNetwork(network.id),
-        testHelpers.addTeamToNetwork(network.id),
+        testHelpers.createTeamInNetwork(network.id),
+        testHelpers.createTeamInNetwork(network.id),
       ]);
 
       await Promise.all([
         teamRepository.addUserToTeam(createdTeams[0].id, employee.id),
         testHelpers.addUserToNetwork({ networkId: network.id, userId: employee.id }),
-        testHelpers.addUserToOrganisation(
-          employee.id,
-          organisation.id,
-          undefined,
-          createdFunction.id
-        ),
+        organisationRepo.addUser(employee.id, organisation.id, undefined, createdFunction.id),
       ]);
 
       serviceResult = await userService.listUsersWithNetworkScope({
