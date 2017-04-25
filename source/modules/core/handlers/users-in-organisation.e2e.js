@@ -71,11 +71,11 @@ describe('Handler: Users in organisation', () => {
     assert.lengthOf(result.data, 1);
   });
 
-  it('should not return any users for different organinsation', async () => {
+  it('should not return any users for different organisation', async () => {
     const endpoint = `/v2/organisations/${organisationB.id}/users`;
     const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
     assert.equal(statusCode, 403);
-    assert.equal(result.error_code, 10020);
+    assert.equal(result.error_code, '403');
   });
 });

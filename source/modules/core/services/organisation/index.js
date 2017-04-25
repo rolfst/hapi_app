@@ -18,6 +18,39 @@ const OPTIONS_WHITELIST = ['offset', 'limit'];
 const createOptionsFromPayload = R.pick(OPTIONS_WHITELIST);
 
 /**
+ * Verifies if a user has a specific role in an organisation
+ * @param requestedRole - The role to check for
+ * @param organisationId - The id of the organisation
+ * @param userId - The id of the user
+ * @method userHasRoleInOrganisation
+ * @returns {external:Promise.<Boolean>}
+ */
+const userHasRoleInOrganisation = async (requestedRole, organisationId, userId) => {
+  logger.debug('Checking user role in organisation', { requestedRole, organisationId, userId });
+
+  const organisation = await organisationRepository.findById(organisationId);
+  if (!organisation) throw createError('404', 'Organisation not found.');
+
+  const userMeta = await organisationRepository.getPivot(userId, organisationId);
+  if (!userMeta) throw createError('403');
+
+  return userMeta.roleType === requestedRole;
+};
+
+/**
+ * Verifies if a user is an admin in a specific organisation
+ * @param organisationId - The id of the organisation
+ * @param userId - The id of the user
+ * @method assertUserIsAdminInOrganisation
+ * @returns {external:Promise.<Boolean>}
+ */
+const assertUserIsAdminInOrganisation = async (organisationId, userId) => {
+  if (!await userHasRoleInOrganisation(ERoleTypes.ADMIN, organisationId, userId)) {
+    throw createError('10020');
+  }
+};
+
+/**
  * Creates an organisation
  * @param {object} payload
  * @param {string} payload.name
@@ -182,50 +215,24 @@ const listFunctions = async (payload, message) => {
 async function listUsers(payload, message) {
   logger.debug('List all users for organisation', { payload, message });
 
-  await impl.assertThatUserIsAdminInOrganisation(message.credentials.id, payload.organisationId);
-
-  const organisation = await organisationRepository.findById(payload.organisationId);
-  if (!organisation) throw createError('404', 'Organisation not found.');
+  await assertUserIsAdminInOrganisation(payload.organisationId, message.credentials.id);
 
   const options = createOptionsFromPayload(payload);
-  const users = await organisationRepository.findUsers(R.omit(OPTIONS_WHITELIST, payload), { attributes: ['userId'] }, options);
-  const userIds = R.map((user) => user.userId, users);
+  const organisationUsers = await organisationRepository.findUsers(
+    R.omit(OPTIONS_WHITELIST, payload), null, options);
+  const userIds = R.map((user) => user.userId, organisationUsers);
+  const users = await userService.list({ userIds });
+  const findOrganisationUser = (organisationUserId) => R.find(R.propEq('id', organisationUserId), users);
 
-  return userService.list({ userIds });
+  return R.map((organisationUser) => {
+    return R.merge(findOrganisationUser(organisationUser.userId.toString()),
+      R.pick(
+        ['externalId', 'roleType', 'invitedAt', 'createdAt', 'deletedAt'],
+        organisationUser
+      )
+    );
+  }, organisationUsers);
 }
-
-/**
- * Verifies if a user has a specific role in an organisation
- * @param requestedRole - The role to check for
- * @param organisationId - The id of the organisation
- * @param userId - The id of the user
- * @method userHasRoleInOrganisation
- * @returns {external:Promise.<Boolean>}
- */
-const userHasRoleInOrganisation = async (requestedRole, organisationId, userId) => {
-  logger.debug('Checking user role in organisation', { requestedRole, organisationId, userId });
-
-  const organisation = await organisationRepository.findById(organisationId);
-  if (!organisation) throw createError('404', 'Organisation not found.');
-
-  const userMeta = await organisationRepository.getPivot(userId, organisationId);
-  if (!userMeta) throw createError('403');
-
-  return userMeta.roleType === requestedRole;
-};
-
-/**
- * Verifies if a user is an admin in a specific organisation
- * @param organisationId - The id of the organisation
- * @param userId - The id of the user
- * @method assertUserIsAdminInOrganisation
- * @returns {external:Promise.<Boolean>}
- */
-const assertUserIsAdminInOrganisation = async (organisationId, userId) => {
-  if (!await userHasRoleInOrganisation(ERoleTypes.ADMIN, organisationId, userId)) {
-    throw createError('10020');
-  }
-};
 
 /**
  * Fetches a user with organisational data.
