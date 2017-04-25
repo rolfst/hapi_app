@@ -155,7 +155,7 @@ async function createNetworkWithIntegration({
   return { integration, network };
 }
 
-function addTeamToNetwork(networkId, name = randomString(), description = null) {
+function createTeamInNetwork(networkId, name = randomString(), description = null) {
   return teamRepo.create({ networkId, name, description });
 }
 
@@ -351,7 +351,7 @@ async function cleanAll() {
 
 exports.DEFAULT_INTEGRATION = DEFAULT_INTEGRATION;
 exports.DEFAULT_NETWORK_EXTERNALID = DEFAULT_NETWORK_EXTERNALID;
-exports.addTeamToNetwork = addTeamToNetwork;
+exports.createTeamInNetwork = createTeamInNetwork;
 exports.addUserToNetwork = addUserToNetwork;
 exports.addUserToOrganisation = addUserToOrganisation;
 exports.addUserToTeam = addUserToTeam;

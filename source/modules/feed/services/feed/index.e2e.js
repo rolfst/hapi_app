@@ -32,7 +32,7 @@ describe('Service: Feed', () => {
 
       network = await testHelpers.createNetwork({ userId: admin.id });
       otherNetwork = await testHelpers.createNetwork({ userId: admin.id });
-      team = await testHelpers.addTeamToNetwork(network.id);
+      team = await testHelpers.createTeamInNetwork(network.id);
       await testHelpers.addUserToNetwork({ userId: employee.id, networkId: network.id });
       await testHelpers.addUserToNetwork({ userId: employee.id, networkId: otherNetwork.id });
 

@@ -28,8 +28,8 @@ describe('Service: User', () => {
       ]);
 
       createdTeams = await Promise.all([
-        testHelpers.addTeamToNetwork(network.id),
-        testHelpers.addTeamToNetwork(network.id),
+        testHelpers.createTeamInNetwork(network.id),
+        testHelpers.createTeamInNetwork(network.id),
       ]);
 
       await Promise.all([
