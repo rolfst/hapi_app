@@ -22,12 +22,15 @@ async function send(users, notification, networkId = null) {
     ios_badgeType: 'Increase',
     ios_badgeCount: 1,
     data: R.merge(notification.data, { network_id: networkId }),
-    filters: R.map((email) => (({
-      field: 'email',
-      value: email,
-    }, {
+    filters: R.intersperse({
       operator: 'OR',
-    })), emails),
+    }, R.map(
+      (email) => ({
+        field: 'email',
+        value: email,
+      }),
+      emails)
+    ),
   };
 
   logger.debug('Sending Push Notification', { data, emails });
