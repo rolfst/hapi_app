@@ -282,6 +282,8 @@ async function updateUser(payload, message) {
   const organisationUserWhiteList = [
     'functionId',
     'roleType',
+    'invitedAt',
+    'deletedAt',
   ];
 
   const userFields = R.pick(userWhiteList, payload);

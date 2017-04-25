@@ -175,7 +175,7 @@ const findFunctionForUser = (userId) => {
 };
 
 async function updateUser(userId, organisationId, attributes) {
-  const whitelist = ['functionId', 'roleType'];
+  const whitelist = ['functionId', 'roleType', 'invitedAt', 'deletedAt'];
 
   return OrganisationUser
     .update(R.pick(whitelist, attributes), { where: { organisationId, userId } })

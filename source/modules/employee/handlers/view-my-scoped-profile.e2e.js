@@ -1,5 +1,7 @@
 const { assert } = require('chai');
+const moment = require('moment');
 const R = require('ramda');
+const dateUtils = require('../../../shared/utils/date');
 const testHelpers = require('../../../shared/test-utils/helpers');
 const { getRequest } = require('../../../shared/test-utils/request');
 const organisationRepo = require('../../core/repositories/organisation');
@@ -11,6 +13,7 @@ describe('Handler: View my scoped profile', () => {
   let organisationB;
   let network;
   let networkWithIntegration;
+  let currentDate;
 
   before(async () => {
     [organisationA, organisationB, admin, employee] = await Promise.all([
@@ -29,12 +32,19 @@ describe('Handler: View my scoped profile', () => {
     await Promise.all([
       organisationRepo.addUser(admin.id, organisationA.id, 'ADMIN'),
       organisationRepo.addUser(admin.id, organisationB.id),
+      organisationRepo.addUser(employee.id, organisationA.id),
       testHelpers.addUserToNetwork({
         userId: employee.id, networkId: network.id, roleType: 'EMPLOYEE' }),
       testHelpers.addUserToNetwork({
         userId: employee.id, networkId: networkWithIntegration.network.id, roleType: 'EMPLOYEE' }),
       testHelpers.addUserToNetwork({
         userId: admin.id, networkId: network.id, roleType: 'ADMIN' }),
+    ]);
+
+    currentDate = moment().millisecond(0).toDate();
+    await Promise.all([
+      organisationRepo.updateUser(admin.id, organisationA.id, { invitedAt: currentDate }),
+      organisationRepo.updateUser(employee.id, organisationA.id, { invitedAt: currentDate }),
     ]);
   });
 
@@ -61,6 +71,7 @@ describe('Handler: View my scoped profile', () => {
     assert.property(organisation, 'name');
     assert.property(organisation, 'role_type');
     assert.property(organisation, 'invited_at');
+    assert.equal(organisation.invited_at, dateUtils.toISOString(currentDate));
     assert.property(organisation, 'deleted_at');
     assert.isArray(data.scopes.networks);
     const aNetwork = R.head(data.scopes.networks);
