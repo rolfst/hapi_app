@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const model = require('../../../../shared/configs/sequelize');
+const { EMessageTypes } = require('../../definitions');
 
 const Message = model.define('FeedMessage', {
   parentId: {
@@ -15,7 +16,7 @@ const Message = model.define('FeedMessage', {
   messageType: {
     type: Sequelize.STRING,
     field: 'message_type',
-    defaultValue: 'default_message',
+    defaultValue: EMessageTypes.DEFAULT,
   },
   objectId: {
     type: Sequelize.INTEGER,

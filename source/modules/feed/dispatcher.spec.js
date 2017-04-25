@@ -81,7 +81,7 @@ describe('Feed: Dispatcher', () => {
           headings: 'John Doe in Foo team',
           text: 'Jessica cannot work today.',
           data: { id: '435', type: 'message', track_name: 'message_created' },
-        }, '123']);
+        }, '123', undefined]);
     });
 
     it('should send statistic', async () => {
@@ -130,7 +130,7 @@ describe('Feed: Dispatcher', () => {
           headings: 'John Doe',
           text: 'Jessica cannot work today.',
           data: { id: '435', type: 'message', track_name: 'message_created' },
-        }, '123']);
+        }, '123', undefined]);
     });
   });
 });

@@ -12,6 +12,7 @@ const networkRepo = require('../../modules/core/repositories/network');
 const teamRepo = require('../../modules/core/repositories/team');
 const activityRepo = require('../../modules/core/repositories/activity');
 const objectRepo = require('../../modules/core/repositories/object');
+const objectSeenRepo = require('../../modules/core/repositories/object-seen');
 const pollRepo = require('../../modules/poll/repositories/poll');
 const { postRequest } = require('./request');
 
@@ -344,6 +345,7 @@ async function cleanAll() {
 
   await userRepo.deleteAll();
   await objectRepo.deleteAll();
+  await objectSeenRepo.deleteAll();
   await activityRepo.deleteAll();
   await integrationRepo.deleteAll();
   await pollRepo.deleteAll();

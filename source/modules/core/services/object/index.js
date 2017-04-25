@@ -4,6 +4,7 @@ const createError = require('../../../../shared/utils/create-error');
 const networkRepository = require('../../../core/repositories/network');
 const teamRepository = require('../../../core/repositories/team');
 const userRepository = require('../../../core/repositories/user');
+const organisationRepository = require('../../../core/repositories/organisation');
 const objectRepository = require('../../repositories/object');
 const objectSeenRepository = require('../../repositories/object-seen');
 const impl = require('./implementation');
@@ -151,6 +152,7 @@ const getParent = async (payload, message) => {
     [R.equals('network'), () => networkRepository.findNetworkById(payload.parentId)],
     [R.equals('team'), () => teamRepository.findTeamById(payload.parentId)],
     [R.equals('user'), () => userRepository.findUserById(payload.parentId, null, false)],
+    [R.equals('organisation'), () => organisationRepository.findById(payload.parentId)],
     [R.T, R.F],
   ])(payload.parentType);
 

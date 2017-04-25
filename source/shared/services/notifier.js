@@ -8,7 +8,7 @@ function trackPushNotification(notification, user) {
   return Mixpanel.track({ name: 'Push Notification Sent', data: notification.data }, user.id);
 }
 
-async function send(users, notification, networkId = null) {
+async function send(users, notification, networkId = null, organisationId = null) {
   const emails = R.reject(R.isNil, R.pluck('email', users));
   const data = {
     app_id: process.env.ONESIGNAL_APP_ID,
@@ -21,7 +21,10 @@ async function send(users, notification, networkId = null) {
     android_group: 'flex_appeal_message',
     ios_badgeType: 'Increase',
     ios_badgeCount: 1,
-    data: R.merge(notification.data, { network_id: networkId }),
+    data: R.merge(notification.data, {
+      organisation_id: organisationId,
+      network_id: networkId,
+    }),
     filters: R.intersperse({
       operator: 'OR',
     }, R.map(

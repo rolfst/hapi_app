@@ -6,7 +6,7 @@ const userRepository = require('../../repositories/user');
 const networkService = require('../network');
 const userService = require('../user');
 const impl = require('./implementation');
-const { ERoleTypes } = require('../../declarations');
+const { ERoleTypes } = require('../../definitions');
 
 /**
  * @module modules/core/services/organisation
@@ -33,6 +33,8 @@ const userHasRoleInOrganisation = async (requestedRole, organisationId, userId) 
 
   const userMeta = await organisationRepository.getPivot(userId, organisationId);
   if (!userMeta) throw createError('403');
+
+  if (requestedRole === ERoleTypes.ANY) return true;
 
   return userMeta.roleType === requestedRole;
 };
