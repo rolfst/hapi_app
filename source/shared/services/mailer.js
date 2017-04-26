@@ -64,7 +64,7 @@ const createMailOptions = (mail) => {
   return {
     subject: mail.options.subject,
     from: `"${mail.options.sender.name}" <${mail.options.sender.email}>`,
-    to: Array.isArray(mail.options.receiver) ?
+    bcc: Array.isArray(mail.options.receiver) ?
       R.pluck('email', mail.options.receiver) : mail.options.receiver.email,
     replyTo: 'help@flex-appeal.nl',
     html: '<br>',
