@@ -30,16 +30,44 @@ const send = async (networkId) => {
 
   const dateRange = [moment().subtract(1, 'weeks'), moment()];
   const [users, teams] = await Promise.all([
-    networkRepo.findUsersForNetwork(networkId)
+    networkRepo
+      .findUsersForNetwork(networkId)
       .then(R.pluck('id'))
-      .then((userIds) => userService.listUsersWithNetworkScope({ userIds, networkId: network.id })),
-    networkRepo.findTeamsForNetwork(networkId),
+      .then((userIds) => userService.listUsersWithNetworkScope({ userIds, networkId: network.id }))
+      .catch((err) => {
+        logger.error('findUsersForNetwork & listUsersWithNetworkScope error', err);
+
+        return [];
+      }),
+    networkRepo
+      .findTeamsForNetwork(networkId)
+      .catch((err) => {
+        logger.error('findTeamsForNetwork error', err);
+
+        return [];
+      }),
   ]);
+
+  if (!users || !users.length || !teams || !teams.length) {
+    // Don't throw exception because the scheduler will fail
+    return;
+  }
 
   const parentLookups = { teams: impl.keyedObject(R.prop('id'), teams), network };
 
-  const messages = await impl.findMessagesForNetwork(networkId, dateRange)
-    .then(impl.prepareMessages(users, parentLookups));
+  const messages = await impl
+    .findMessagesForNetwork(networkId, dateRange)
+    .then(impl.prepareMessages(users, parentLookups))
+    .catch((err) => {
+      logger.error('findMessagesForNetwork error', err);
+      // Don't rethrow so other mails will still go out
+      return [];
+    });
+
+  if (!messages || !messages.length) {
+    // Don't throw exception because the scheduler will fail
+    return;
+  }
 
   const addTopMessagesToBundle = (bundle) =>
     R.assoc('messages', impl.getTopMessagesForBundle(bundle, messages), bundle);
@@ -51,11 +79,17 @@ const send = async (networkId) => {
   )(users);
 
   const createMail = (bundle) => weeklyUpdateMail(bundle, network, newColleagues, dateRange);
-  return Promise.all(R.pipe(
-    R.filter(impl.isValidBundle(R.__, newColleagues)),
-    R.map(R.pipe(createMail)),
-    R.map(mailer.send)
-  )(bundles));
+
+  return Promise
+    .all(R.pipe(
+      R.filter(impl.isValidBundle(R.__, newColleagues)),
+      R.map(R.pipe(createMail)),
+      R.map(mailer.send)
+    )(bundles))
+    .catch((err) => {
+      logger.error('sendMail error', err);
+      // Don't rethrow so other mails will still go out
+    });
 };
 
 exports.send = send;
