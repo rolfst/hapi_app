@@ -3,6 +3,7 @@ const Promise = require('bluebird');
 const createError = require('../../../../shared/utils/create-error');
 const organisationRepository = require('../../repositories/organisation');
 const userRepository = require('../../repositories/user');
+const networkRepository = require('../../repositories/network');
 const networkService = require('../network');
 const userService = require('../user');
 const impl = require('./implementation');
@@ -222,7 +223,7 @@ async function listUsers(payload, message) {
   const options = createOptionsFromPayload(payload);
   const organisationUsers = await organisationRepository.findUsers(
     R.omit(OPTIONS_WHITELIST, payload), null, options);
-  const userIds = R.map((user) => user.userId, organisationUsers);
+  const userIds = R.pick('userId', organisationUsers);
   const users = await userService.list({ userIds });
   const findOrganisationUser = (organisationUserId) => R.find(R.propEq('id', organisationUserId), users);
 
@@ -251,12 +252,14 @@ async function getUser(payload, message) {
   // TODO - when the callee is the owner of the user record, it should also be allowed
   await assertUserIsAdminInOrganisation(payload.organisationId, message.credentials.id);
 
-  const [user, organisationUser] = await Promise.all([
+  const [user, organisationUser, networks] = await Promise.all([
     userRepository.findUser(payload.userId),
     organisationRepository.getPivot(payload.userId, payload.organisationId),
+    networkRepository.findNetworksForUser(payload.userId),
   ]);
 
   return R.merge(user, {
+    networkIds: R.pluck('id', networks),
     roleType: organisationUser.roleType,
     functionId: organisationUser.functionId,
     externalId: organisationUser.externalId,
