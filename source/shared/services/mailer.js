@@ -61,11 +61,9 @@ const createMailOptions = (mail) => {
   if (!mail.options.sender) throw new Error('No sender defined in mail object.');
   if (!mail.options.receiver) throw new Error('No receiver defined in mail object.');
 
-  return {
+  const mailOptions = {
     subject: mail.options.subject,
     from: `"${mail.options.sender.name}" <${mail.options.sender.email}>`,
-    bcc: Array.isArray(mail.options.receiver) ?
-      R.pluck('email', mail.options.receiver) : mail.options.receiver.email,
     replyTo: 'help@flex-appeal.nl',
     html: '<br>',
     headers: {
@@ -73,6 +71,20 @@ const createMailOptions = (mail) => {
       'X-SMTPAPI': createSMTPHeader(mail),
     },
   };
+
+  if (mail.options.receiver) {
+    mailOptions.to = Array.isArray(mail.options.receiver)
+      ? R.pluck('email', mail.options.receiver)
+      : mail.options.receiver.email;
+  }
+
+  if (mail.options.blindReceiver) {
+    mailOptions.bcc = Array.isArray(mail.options.blindReceiver)
+      ? R.pluck('email', mail.options.blindReceiver)
+      : mail.options.blindReceiver.email;
+  }
+
+  return mailOptions;
 };
 
 const send = (payload, message = null) => {
