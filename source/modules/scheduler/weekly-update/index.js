@@ -73,11 +73,6 @@ const send = async (networkId) => {
       return [];
     });
 
-  if (!messages || !messages.length) {
-    // Don't throw exception because the scheduler will fail
-    return;
-  }
-
   const addTopMessagesToBundle = (bundle) =>
     R.assoc('messages', impl.getTopMessagesForBundle(bundle, messages), bundle);
   const bundles = R.pipe(impl.createBundles, R.map(addTopMessagesToBundle))(users);
