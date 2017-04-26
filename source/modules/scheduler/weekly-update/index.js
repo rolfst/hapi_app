@@ -24,6 +24,15 @@ const logger = Logger.createLogger('SCRIPT/weeklyUpdate');
 const send = async (networkId) => {
   logger.info('Sending weekly update', { networkId });
 
+  const logError = (message, err) => {
+    // Tack on some contextual info
+    const myError = err;
+
+    myError.context = { networkId };
+
+    logger.error(myError);
+  };
+
   const network = await networkRepo.findNetworkById(networkId);
 
   if (!network) throw createError('404');
@@ -35,14 +44,14 @@ const send = async (networkId) => {
       .then(R.pluck('id'))
       .then((userIds) => userService.listUsersWithNetworkScope({ userIds, networkId: network.id }))
       .catch((err) => {
-        logger.error('findUsersForNetwork & listUsersWithNetworkScope error', err);
+        logError('findUsersForNetwork & listUsersWithNetworkScope error', err);
 
         return [];
       }),
     networkRepo
       .findTeamsForNetwork(networkId)
       .catch((err) => {
-        logger.error('findTeamsForNetwork error', err);
+        logError('findTeamsForNetwork error', err);
 
         return [];
       }),
@@ -59,7 +68,7 @@ const send = async (networkId) => {
     .findMessagesForNetwork(networkId, dateRange)
     .then(impl.prepareMessages(users, parentLookups))
     .catch((err) => {
-      logger.error('findMessagesForNetwork error', err);
+      logError('findMessagesForNetwork error', err);
       // Don't rethrow so other mails will still go out
       return [];
     });
@@ -87,7 +96,7 @@ const send = async (networkId) => {
       R.map(mailer.send)
     )(bundles))
     .catch((err) => {
-      logger.error('sendMail error', err);
+      logError('sendMail error', err);
       // Don't rethrow so other mails will still go out
     });
 };
