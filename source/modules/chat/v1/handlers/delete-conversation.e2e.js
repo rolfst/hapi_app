@@ -24,7 +24,7 @@ describe('Delete conversation', () => {
   it('should return correct values', async () => {
     const endpoint = `/v1/chats/conversations/${conversation.id}`;
 
-    await deleteRequest(endpoint, admin.token);
+    await deleteRequest(endpoint, null, admin.token);
     const { statusCode } = await getRequest(endpoint, admin.token);
 
     assert.equal(statusCode, 404);

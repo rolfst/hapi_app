@@ -44,6 +44,27 @@ describe('Handler: Users in organisation', () => {
 
     assert.equal(statusCode, 200);
     assert.lengthOf(result.data, 3);
+
+    const actual = result.data[0];
+    assert.property(actual, 'id');
+
+    assert.property(actual, 'first_name');
+    assert.property(actual, 'last_name');
+    assert.property(actual, 'full_name');
+    assert.property(actual, 'phone_num');
+    assert.property(actual, 'type');
+    assert.property(actual, 'id');
+    assert.property(actual, 'username');
+    assert.property(actual, 'email');
+    assert.property(actual, 'external_id');
+    assert.property(actual, 'integration_auth');
+    assert.property(actual, 'role_type');
+    assert.property(actual, 'profile_img');
+    assert.property(actual, 'date_of_birth');
+    assert.property(actual, 'created_at');
+    assert.property(actual, 'last_login');
+    assert.property(actual, 'invited_at');
+    assert.property(actual, 'deleted_at');
   });
 
   it('should return a users count for organisation the meta', async () => {

@@ -223,9 +223,10 @@ async function listUsers(payload, message) {
   const options = createOptionsFromPayload(payload);
   const organisationUsers = await organisationRepository.findUsers(
     R.omit(OPTIONS_WHITELIST, payload), null, options);
-  const userIds = R.pick('userId', organisationUsers);
-  const users = await userService.list({ userIds });
-  const findOrganisationUser = (organisationUserId) => R.find(R.propEq('id', organisationUserId), users);
+  const userIds = R.map((user) => user.userId, organisationUsers);
+  const users = await userService.list({ userIds }, message);
+  const findOrganisationUser = (organisationUserId) => R.omit(['function', 'teamIds'],
+    R.find(R.propEq('id', organisationUserId), users));
 
   return R.map((organisationUser) => {
     return R.merge(findOrganisationUser(organisationUser.userId.toString()),
@@ -258,7 +259,7 @@ async function getUser(payload, message) {
     networkRepository.findNetworksForUser(payload.userId),
   ]);
 
-  return R.merge(user, {
+  return R.merge(R.omit(['teamIds'], user), {
     networkIds: R.pluck('id', networks),
     roleType: organisationUser.roleType,
     functionId: organisationUser.functionId,
@@ -348,8 +349,85 @@ const countUsers = async (payload, message) => {
   return organisationRepository.countUsers(whereConstraint);
 };
 
+const assertNetworksAreInOrganisation = async (organisationId, networkIds) => {
+  const organisationNetworks =
+    await networkService.fetchOrganisationNetworks(organisationId, networkIds);
+
+  if (organisationNetworks.length !== networkIds.length) {
+    throw createError('403');
+  }
+};
+
+/**
+ * Add user to networks
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.organisationId - The id of the organisation
+ * @param {string} payload.userId - The id of the user
+ * @param {string} payload.networks - An array of {networkId, roleType}
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method addUserToNetworks
+ */
+const addUserToNetworks = async (payload, message) => {
+  logger.debug('Add user to networks', { payload, message });
+
+  await assertNetworksAreInOrganisation(payload.organisationId, R.pluck('networkId', payload.networks));
+
+  await Promise.map(payload.networks, (singleNetwork) => networkService.addUserToNetwork({
+    networkId: singleNetwork.networkId,
+    userId: payload.userId,
+    roleType: singleNetwork.roleType || ERoleTypes.EMPLOYEE,
+  }));
+};
+
+/**
+ * Update user in networks
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.organisationId - The id of the organisation
+ * @param {string} payload.userId - The id of the user
+ * @param {string} payload.networks - An array of {networkId, roleType}
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method updateUserInNetworks
+ */
+const updateUserInNetworks = async (payload, message) => {
+  logger.debug('Update user in networks', { payload, message });
+
+  await assertNetworksAreInOrganisation(payload.organisationId, R.pluck('networkId', payload.networks));
+
+  await Promise.map(
+    payload.networks,
+    (singleNetwork) =>
+      networkService.updateUser(singleNetwork.networkId, payload.userId, {
+        roleType: singleNetwork.roleType || ERoleTypes.EMPLOYEE,
+      })
+  );
+};
+
+/**
+ * Remove user from networks
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.organisationId - The id of the organisation
+ * @param {string} payload.userId - The id of the user
+ * @param {string} payload.networks - An array of networkIds
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method removeUserFromNetworks
+ */
+const removeUserFromNetworks = async (payload, message) => {
+  logger.debug('Remove users from networks', { payload, message });
+
+  await assertNetworksAreInOrganisation(payload.organisationId, payload.networks);
+
+  await Promise.map(
+    payload.networks,
+    (networkId) => networkService.removeUser(networkId, payload.userId)
+  );
+};
+
+exports.ERoleTypes = ERoleTypes;
+
+exports.assertNetworksAreInOrganisation = assertNetworksAreInOrganisation;
 exports.addFunction = addFunction;
 exports.addUser = addUser;
+exports.addUserToNetworks = addUserToNetworks;
 exports.getUser = getUser;
 exports.assertUserIsAdminInOrganisation = assertUserIsAdminInOrganisation;
 exports.attachNetwork = attachNetwork;
@@ -361,6 +439,8 @@ exports.listForUser = listForUser;
 exports.listFunctions = listFunctions;
 exports.listNetworks = listNetworks;
 exports.listUsers = listUsers;
+exports.removeUserFromNetworks = removeUserFromNetworks;
 exports.updateFunction = updateFunction;
 exports.updateUser = updateUser;
+exports.updateUserInNetworks = updateUserInNetworks;
 exports.userHasRoleInOrganisation = userHasRoleInOrganisation;
