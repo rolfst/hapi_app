@@ -29,7 +29,11 @@ describe('Feed: Dispatcher', () => {
         actor: { fullName: 'John Doe' },
         networkId: '123',
         parent: { type: 'team', id: '12', name: 'Foo team' },
-        object: { id: '35234', source: { id: '435', text: 'Jessica cannot work today.' } },
+        object: {
+          id: '35234',
+          source: { id: '435', text: 'Jessica cannot work today.' },
+          children: [],
+        },
         credentials: { id: '111' },
       });
 
@@ -51,7 +55,11 @@ describe('Feed: Dispatcher', () => {
         actor: { fullName: 'John Doe' },
         networkId: '123',
         parent: { type: 'nonexistingtype', id: '12', name: 'Foo team' },
-        object: { id: '35234', source: { id: '435', text: 'Jessica cannot work today.' } },
+        object: {
+          id: '35234',
+          source: { id: '435', text: 'Jessica cannot work today.' },
+          children: [],
+        },
         credentials: { id: '111' },
       });
 
@@ -70,7 +78,11 @@ describe('Feed: Dispatcher', () => {
         actor: { id: '1', fullName: 'John Doe' },
         networkId: '123',
         parent: { type: 'team', id: '12', name: 'Foo team' },
-        object: { id: '35234', source: { id: '435', text: 'Jessica cannot work today.' } },
+        object: {
+          id: '35234',
+          source: { id: '435', text: 'Jessica cannot work today.' },
+          children: [],
+        },
         credentials: { id: '111' },
       });
 
@@ -78,7 +90,8 @@ describe('Feed: Dispatcher', () => {
 
       assert.deepEqual(notifier.send.firstCall.args, [
         [{ id: '2', email: 'baz@example.com' }], {
-          text: 'John Doe in Foo team: Jessica cannot work today.',
+          headings: 'John Doe @ Foo team',
+          text: 'Jessica cannot work today.',
           data: { id: '435', type: 'message', track_name: 'message_created' },
         }, '123']);
     });
@@ -118,7 +131,11 @@ describe('Feed: Dispatcher', () => {
         actor: { id: '1', fullName: 'John Doe' },
         networkId: '123',
         parent: { type: 'team', id: '12' },
-        object: { id: '35234', source: { id: '435', text: 'Jessica cannot work today.' } },
+        object: {
+          id: '35234',
+          source: { id: '435', text: 'Jessica cannot work today.' },
+          children: [],
+        },
         credentials: { id: '111' },
       });
 
@@ -126,7 +143,8 @@ describe('Feed: Dispatcher', () => {
 
       assert.deepEqual(notifier.send.firstCall.args, [
         [{ id: '2', email: 'baz@example.com' }], {
-          text: 'John Doe: Jessica cannot work today.',
+          headings: 'John Doe',
+          text: 'Jessica cannot work today.',
           data: { id: '435', type: 'message', track_name: 'message_created' },
         }, '123']);
     });

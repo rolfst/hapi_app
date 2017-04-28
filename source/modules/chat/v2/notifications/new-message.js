@@ -1,7 +1,8 @@
 const notifier = require('../../../../shared/services/notifier');
 
 const createNotification = (actor, object) => ({
-  text: `${actor.fullName}: ${object.source.text}`,
+  headings: actor.fullName,
+  text: object.source.text,
   data: {
     id: object.parentId,
     type: 'conversation',

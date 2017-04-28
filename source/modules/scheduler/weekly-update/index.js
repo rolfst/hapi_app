@@ -1,6 +1,7 @@
 const R = require('ramda');
 const moment = require('moment');
 require('moment/locale/nl');
+require('moment-timezone').locale('nl');
 const Promise = require('bluebird');
 const createError = require('../../../shared/utils/create-error');
 const mailer = require('../../../shared/services/mailer');
