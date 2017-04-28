@@ -223,9 +223,10 @@ async function listUsers(payload, message) {
   const options = createOptionsFromPayload(payload);
   const organisationUsers = await organisationRepository.findUsers(
     R.omit(OPTIONS_WHITELIST, payload), null, options);
-  const userIds = R.pick('userId', organisationUsers);
-  const users = await userService.list({ userIds });
-  const findOrganisationUser = (organisationUserId) => R.find(R.propEq('id', organisationUserId), users);
+  const userIds = R.map((user) => user.userId, organisationUsers);
+  const users = await userService.list({ userIds }, message);
+  const findOrganisationUser = (organisationUserId) => R.omit(['function', 'teamIds'],
+    R.find(R.propEq('id', organisationUserId), users));
 
   return R.map((organisationUser) => {
     return R.merge(findOrganisationUser(organisationUser.userId.toString()),
@@ -258,7 +259,7 @@ async function getUser(payload, message) {
     networkRepository.findNetworksForUser(payload.userId),
   ]);
 
-  return R.merge(user, {
+  return R.merge(R.omit(['teamIds'], user), {
     networkIds: R.pluck('id', networks),
     roleType: organisationUser.roleType,
     functionId: organisationUser.functionId,

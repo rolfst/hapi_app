@@ -66,7 +66,6 @@ describe('Handler: View user in organisation', () => {
     assert.isArray(data.network_ids);
     assert.property(data, 'function');
     assert.property(data, 'role_type');
-    assert.property(data, 'team_ids');
     assert.property(data, 'profile_img');
     assert.property(data, 'date_of_birth');
     assert.property(data, 'created_at');
