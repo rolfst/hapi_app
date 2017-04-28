@@ -57,7 +57,7 @@ const send = async (networkId) => {
       }),
   ]);
 
-  if (!users || !users.length || !teams || !teams.length) {
+  if (!users || !users.length || !teams) {
     // Don't throw exception because the scheduler will fail
     return;
   }
