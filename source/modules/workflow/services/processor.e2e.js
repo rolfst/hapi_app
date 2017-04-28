@@ -29,7 +29,7 @@ describe.only('Workflow processor', async () => {
   it('should generate a query', async () => {
     const query = workflowProcessor.buildQuery(organisation.id, workflow.conditions);
 
-    assert.isString(query);
+    assert.notEmpty(query);
   });
 });
 
