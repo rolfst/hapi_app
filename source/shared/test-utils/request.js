@@ -2,10 +2,11 @@ const makeOptions = (token) => {
   return { headers: { 'X-API-Token': token } };
 };
 
-function deleteRequest(url, token, server = global.server) {
+function deleteRequest(url, payload, token, server = global.server) {
   return server.inject(Object.assign({
     method: 'DELETE',
     url,
+    payload,
   }, makeOptions(token)));
 }
 
