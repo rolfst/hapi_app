@@ -14,7 +14,7 @@ module.exports = (dao) => ({
   hasIntegration: dao.Integrations.length > 0,
   integrations: R.pluck('name', dao.Integrations),
   superAdmin: dao.SuperAdmin ? R.pick(adminProperties, createUserModel(dao.SuperAdmin)) : null,
-  organisationId: dao.organisationId,
+  organisationId: dao.organisationId ? dao.organisationId.toString() : null,
   enabledComponents: R.pipe(R.split(','), R.map(replaceChars), R.flatten)(dao.enabledComponents),
   welcomeMailTemplate: dao.welcomeMailTemplate || null,
   createdAt: dateUtils.toISOString(dao.created_at),
