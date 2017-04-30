@@ -26,7 +26,7 @@ module.exports = (bundle, network, newColleagues, [start, end]) => {
   const transformEmail = (email) => ({ email });
 
   const options = {
-    receiver: R.map(transformEmail, bundle.mailTo),
+    blindReceiver: R.map(transformEmail, bundle.mailTo),
     sender: { name: network.superAdmin.fullName, email: network.superAdmin.email },
     subject: `Wekelijkse update - ${network.name}`,
     template: mailTemplateConfig.WEEKLY_UPDATE,
