@@ -9,6 +9,7 @@ module.exports = (dataModel) => ({
   username: dataModel.username,
   firstName: dataModel.firstName,
   lastName: dataModel.lastName,
+  fullName: dataModel.fullName,
   phoneNum: dataModel.phoneNum,
   email: dataModel.email.toLowerCase(),
   addres: dataModel.address,
