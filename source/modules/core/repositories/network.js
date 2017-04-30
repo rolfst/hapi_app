@@ -156,7 +156,6 @@ const addUser = async (attributes) => {
   if (pivotResult) {
     return pivotResult.update(R.merge(attributes, { deletedAt: attributes.deletedAt || null }));
   }
-
   return NetworkUser.create(R.merge(attributes, { user_id: attributes.userId }));
 };
 

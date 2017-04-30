@@ -66,7 +66,7 @@ const hasUser = async (userId, organisationId) => {
   return !!result;
 };
 
-const addUser = async (userId, organisationId, roleType = 'EMPLOYEE', functionId = null) => {
+const addUser = async (userId, organisationId, roleType = 'EMPLOYEE', functionId = null, invitedAt = new Date()) => {
   return OrganisationUser
     .create({
       userId,
@@ -74,6 +74,7 @@ const addUser = async (userId, organisationId, roleType = 'EMPLOYEE', functionId
       organisation_id: organisationId,
       roleType,
       functionId,
+      invitedAt,
     });
 };
 

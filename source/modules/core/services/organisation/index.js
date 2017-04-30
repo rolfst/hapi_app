@@ -26,19 +26,20 @@ const createOptionsFromPayload = R.pick(OPTIONS_WHITELIST);
  * @method userHasRoleInOrganisation
  * @returns {external:Promise.<Boolean>}
  */
-const userHasRoleInOrganisation = async (requestedRole, organisationId, userId) => {
-  logger.debug('Checking user role in organisation', { requestedRole, organisationId, userId });
+const userHasRoleInOrganisation =
+  async (organisationId, userId, requestedRole = ERoleTypes.ANY) => {
+    logger.debug('Checking user role in organisation', { requestedRole, organisationId, userId });
 
-  const organisation = await organisationRepository.findById(organisationId);
-  if (!organisation) throw createError('404', 'Organisation not found.');
+    const organisation = await organisationRepository.findById(organisationId);
+    if (!organisation) throw createError('404', 'Organisation not found.');
 
-  const userMeta = await organisationRepository.getPivot(userId, organisationId);
-  if (!userMeta) throw createError('403');
+    const userMeta = await organisationRepository.getPivot(userId, organisationId);
+    if (!userMeta) throw createError('403');
 
-  if (requestedRole === ERoleTypes.ANY) return true;
+    if (requestedRole === ERoleTypes.ANY) return true;
 
-  return userMeta.roleType === requestedRole;
-};
+    return userMeta.roleType === requestedRole;
+  };
 
 /**
  * Verifies if a user is an admin in a specific organisation
@@ -48,7 +49,7 @@ const userHasRoleInOrganisation = async (requestedRole, organisationId, userId) 
  * @returns {external:Promise.<Boolean>}
  */
 const assertUserIsAdminInOrganisation = async (organisationId, userId) => {
-  if (!await userHasRoleInOrganisation(ERoleTypes.ADMIN, organisationId, userId)) {
+  if (!await userHasRoleInOrganisation(organisationId, userId, ERoleTypes.ADMIN)) {
     throw createError('10020');
   }
 };
@@ -143,7 +144,7 @@ const addUser = async (payload, message) => {
   logger.debug('Adding user to organisation', { payload, message });
 
   await impl.assertThatOrganisationExists(payload.organisationId);
-  await impl.assertThatUserIsAdminInOrganisation(payload.userId, payload.organisationId);
+  await impl.assertThatUserIsAdminInOrganisation(message.credentials.id, payload.organisationId);
 
   return organisationRepository.addUser(payload.userId, payload.organisationId, payload.roleType);
 };

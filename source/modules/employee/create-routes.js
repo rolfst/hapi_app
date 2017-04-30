@@ -25,6 +25,12 @@ const routes = [{
   validator: require('./validators/create-user'),
 }, {
   method: 'POST',
+  url: '/v2/organisations/{organisationId}/users',
+  handler: require(`${baseImport}/invite-user-to-organisation`),
+  validator: require('./validators/create-user-in-organisation'),
+  prefetch: false,
+}, {
+  method: 'POST',
   url: `${basePath}/users/invite`,
   handler: require(`${baseImport}/bulk-invite-users`),
   validator: require('./validators/bulk-invite'),

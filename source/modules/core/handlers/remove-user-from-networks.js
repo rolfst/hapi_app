@@ -11,9 +11,9 @@ module.exports = async (req, reply) => {
 
     await organisationService
       .userHasRoleInOrganisation(
-        organisationService.ERoleTypes.ANY,
         payload.organisationId,
-        payload.userId
+        payload.userId,
+        organisationService.ERoleTypes.ANY
       );
 
     await organisationService.removeUserFromNetworks(payload, message);
