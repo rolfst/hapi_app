@@ -74,6 +74,11 @@ describe('Handler: Users in organisation', () => {
     assert.equal(meta.pagination.total_count, 3);
     assert.equal(meta.pagination.offset, 0);
     assert.equal(meta.pagination.limit, 20);
+
+    assert.property(meta, 'counts');
+    assert.property(meta.counts, 'total');
+    assert.property(meta.counts, 'active');
+    assert.property(meta.counts, 'inactive');
   });
 
   it('should return a limited set of users for organisation', async () => {

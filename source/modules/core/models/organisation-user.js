@@ -8,6 +8,7 @@ module.exports = (dataModel) => ({
   invitedAt: dateUtils.toISOString(dataModel.invitedAt),
   deletedAt: dataModel.deletedAt,
   externalId: dataModel.externalId,
+  lastActive: dataModel.lastActive,
   createdAt: dateUtils.toISOString(dataModel.created_at),
   updatedAt: dateUtils.toISOString(dataModel.updated_at),
 });

@@ -37,6 +37,11 @@ const OrganisationUser = model.define('OrganisationUser', {
     field: 'external_id',
     allowNull: true,
   },
+  lastActive: {
+    type: Sequelize.STRING,
+    field: 'last_active',
+    allowNull: true,
+  },
 }, {
   tableName: 'organisation_user',
   createdAt: 'created_at',
