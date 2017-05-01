@@ -74,7 +74,10 @@ const User = model.define('User', {
   updatedAt: 'updated_at',
   getterMethods: {
     fullName: function () { // eslint-disable-line func-names, object-shorthand
-      return `${this.firstName || ''} ${this.lastName || ''}`;
+      if (this.firstName && this.lastName) return `${this.firstName} ${this.lastName}`;
+      if (this.lastName) return this.lastName;
+      if (this.firstName) return this.firstName;
+      return null;
     },
   },
   instanceMethods: {
