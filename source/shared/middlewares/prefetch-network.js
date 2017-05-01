@@ -15,6 +15,8 @@ module.exports = async (req, reply) => {
     logger.debug('Fetching network', { payload, message });
     const network = await networkService.get(payload, message);
 
+    // NOTE: This will add 2 extra queries to all prefetch routes, but also skips the
+    //         'belongs-to-network' assertion below if the user is an organisation admin
     if (
       network.organisationId
       &&
