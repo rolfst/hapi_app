@@ -340,14 +340,12 @@ async function getOrganisation(payload, message) {
  * @param {string} payload.organisationId - The id that instantiated the object
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method countUsers
- * @return {external:Promise.<number>}
+ * @return {external:Promise.<{ total, active, inactive }>}
  */
 const countUsers = async (payload, message) => {
   logger.debug('Counting objects', { payload, message });
 
-  const whereConstraint = { organisationId: payload.organisationId };
-
-  return organisationRepository.countUsers(whereConstraint);
+  return organisationRepository.countUsers(payload.organisationId);
 };
 
 const assertNetworksAreInOrganisation = async (organisationId, networkIds) => {
