@@ -372,9 +372,7 @@ const listComments = async (payload, message) => {
   const userId = message.credentials.id;
   const exchanges = await exchangeRepo.findAllBy({ id: payload.exchangeId });
   const exchangeComments = await commentRepo.findBy({ exchangeId: exchanges[0].id });
-  const user = await userService.list({
-    userIds: R.concat(R.pluck('userId', exchangeComments), [userId]),
-  }, message);
+  const user = await userService.list({ userIds: R.pluck('userId', exchangeComments) }, message);
   return impl.replaceUsersIn([user], exchangeComments);
 };
 
