@@ -3,6 +3,17 @@ const { Organisation, OrganisationUser, OrganisationNetwork, OrganisationFunctio
 const createModel = require('../models/organisation');
 const createPivotModel = require('../models/organisation-user');
 const createFunctionsModel = require('../models/organisation-function');
+const sequelize = require('../../../shared/configs/sequelize');
+
+const countQuery = `
+SELECT
+  COUNT(*) AS total,
+  COUNT(ou.last_active < NOW() - INTERVAL 1 WEEK) AS inactive
+FROM
+  organisation_user ou
+WHERE
+  ou.organisation_id = :organisationId
+`;
 
 const create = (attributes) => {
   const whitelist = ['name', 'brandIcon', 'externalConfig'];
@@ -176,7 +187,7 @@ const findFunctionForUser = (userId) => {
 };
 
 async function updateUser(userId, organisationId, attributes) {
-  const whitelist = ['functionId', 'roleType', 'invitedAt', 'deletedAt'];
+  const whitelist = ['functionId', 'roleType', 'invitedAt', 'deletedAt', 'lastActive'];
 
   return OrganisationUser
     .update(R.pick(whitelist, attributes), { where: { organisationId, userId } })
@@ -184,9 +195,26 @@ async function updateUser(userId, organisationId, attributes) {
     .then(createPivotModel);
 }
 
-async function countUsers(whereConstraint) {
-  return OrganisationUser.count({ where: whereConstraint });
-}
+const updateOrganisationLink = (whereConstraint, attributes) => {
+  OrganisationUser.update(attributes, { where: whereConstraint });
+};
+
+const countUsers = async (organisationId) => {
+  return sequelize
+    .query(countQuery, {
+      replacements: { organisationId },
+      type: sequelize.QueryTypes.SELECT,
+    })
+    .then((rows) => {
+      const row = R.head(rows);
+
+      return {
+        total: row.total,
+        active: row.total - row.inactive,
+        inactive: row.inactive,
+      };
+    });
+};
 
 exports.addFunction = addFunction;
 exports.addUser = addUser;
@@ -205,4 +233,5 @@ exports.getPivot = getPivot;
 exports.hasUser = hasUser;
 exports.removeFunction = removeFunction;
 exports.updateFunction = updateFunction;
+exports.updateOrganisationLink = updateOrganisationLink;
 exports.updateUser = updateUser;

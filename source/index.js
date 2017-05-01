@@ -1,5 +1,8 @@
 require('dotenv').config();
 require('newrelic');
+require('moment/locale/nl');
+require('moment').locale('nl');
+require('moment-timezone').locale('nl');
 
 const Parse = require('parse/node');
 
