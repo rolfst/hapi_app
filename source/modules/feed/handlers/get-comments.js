@@ -1,13 +1,31 @@
+const R = require('ramda');
 const createServicePayload = require('../../../shared/utils/create-service-payload');
 const responseUtil = require('../../../shared/utils/response');
 const messageService = require('../services/message');
+const userService = require('../../core/services/user');
+const { EIncludeTypes, EUserFields } = require('../../core/definitions');
 
 module.exports = async (req, reply) => {
   try {
     const { payload, message } = createServicePayload(req);
-    const likes = await messageService.listComments(payload, message);
+    const comments = await messageService.listComments(payload, message);
 
-    return reply({ data: responseUtil.toSnakeCase(likes) });
+    const retVal = {
+      data: comments,
+    };
+
+    if (payload.include.includes(EIncludeTypes.USERS)) {
+      retVal.meta = {
+        related: {
+          users: R.map(
+            R.pick([EUserFields.ID, EUserFields.FULL_NAME, EUserFields.PROFILE_IMG]),
+            await userService.list({ userIds: R.pluck('userId', comments) }, message)
+          ),
+        },
+      };
+    }
+
+    return reply(responseUtil.toSnakeCase(retVal));
   } catch (err) {
     return reply(err);
   }
