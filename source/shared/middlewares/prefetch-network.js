@@ -5,6 +5,7 @@ const createError = require('../utils/create-error');
 const serverUtil = require('../utils/server');
 
 const logger = require('../../shared/services/logger')('MIDDLEWARE/prefetchNetwork');
+const organisationService = require('../../modules/core/services/organisation');
 
 module.exports = async (req, reply) => {
   const message = R.merge(req.auth, req.pre);
@@ -13,6 +14,21 @@ module.exports = async (req, reply) => {
   try {
     logger.debug('Fetching network', { payload, message });
     const network = await networkService.get(payload, message);
+
+    // NOTE: This will add 2 extra queries to all prefetch routes, but also skips the
+    //         'belongs-to-network' assertion below if the user is an organisation admin
+    if (
+      network.organisationId
+      &&
+      await organisationService.userHasRoleInOrganisation(
+        network.organisationId,
+        message.credentials.id,
+        organisationService.ERoleTypes.ADMIN
+      )
+    ) {
+      return reply(network);
+    }
+
     await authorizationService.assertThatUserBelongsToTheNetwork({
       userId: message.credentials.id,
       networkId: network.id,
