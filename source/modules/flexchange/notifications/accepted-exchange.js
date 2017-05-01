@@ -1,5 +1,6 @@
 const notifier = require('../../../shared/services/notifier');
 const networkRepo = require('../../core/repositories/network');
+const exchangeRepo = require('../repositories/exchange');
 
 const createNotification = (exchange, substituteUser) => {
   const substitute = substituteUser.fullName;
@@ -12,8 +13,9 @@ const createNotification = (exchange, substituteUser) => {
   };
 };
 
-const send = async (network, exchange, userThatAccepts) => {
+const send = async (network, exchangeId, userThatAccepts) => {
   const admins = await networkRepo.findUsersForNetwork(network.id, { roleType: 'ADMIN' });
+  const exchange = await exchangeRepo.findExchangeById(exchangeId);
   const usersToNotify = admins.filter((u) => u.id !== userThatAccepts.id);
   const notification = createNotification(exchange, userThatAccepts);
 
