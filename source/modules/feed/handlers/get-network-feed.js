@@ -7,13 +7,21 @@ const feedService = require('../services/feed');
 module.exports = async (req, reply) => {
   try {
     const { message } = createServicePayload(req);
-    const totalCountPromise = Promise.all([
-      objectService.count({ parentType: 'network', parentId: req.params.networkId }, message),
-      objectService.count({ parentType: 'user', parentId: message.credentials.id }, message),
-    ]).then(R.sum);
+
+    const totalCountPromise = objectService.count({
+      $or: [
+        { parentType: 'organisation', parentId: message.network.organisationId },
+        { parentType: 'network', parentId: req.params.networkId },
+        { parentType: 'user', parentId: message.credentials.id },
+      ],
+    }, message);
 
     const feedPromise = feedService.makeForNetwork(R.merge(
-      req.query, { networkId: req.params.networkId }), message);
+      req.query, {
+        networkId: req.params.networkId,
+        organisationId: message.network.organisationId,
+      }
+    ), message);
     const [feedItems, count] = await Promise.all([feedPromise, totalCountPromise]);
 
     return reply({

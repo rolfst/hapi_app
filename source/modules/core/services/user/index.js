@@ -5,6 +5,7 @@ const createError = require('../../../../shared/utils/create-error');
 const userRepo = require('../../repositories/user');
 const networkRepo = require('../../repositories/network');
 const networkService = require('../../services/network');
+const organisationRepo = require('../../repositories/organisation');
 
 /**
  * @module modules/core/services/user
@@ -37,9 +38,22 @@ async function listUsersWithNetworkScope(payload, message) {
   logger.debug('Listing users with network scope', { payload, message });
 
   const users = await userRepo.findByIds(payload.userIds, payload.networkId);
+  const userIds = map(users, 'id');
+
   const network = await networkService.get({ networkId: payload.networkId }, message);
-  const metaDataList = await userRepo.findMultipleUserMetaDataForNetwork(
-    map(users, 'id'), network.id);
+
+  const [metaDataList, functions] = await Promise.all([
+    userRepo.findMultipleUserMetaDataForNetwork(userIds, network.id),
+    organisationRepo.findFunctionsForUsers({ $in: userIds }),
+  ]);
+
+  const findFunctionForUser = (user) =>
+    R.pathOr(
+      user.function,
+      ['function', 'name'],
+      R.find(R.propEq('userId', parseInt(user.id, 10)), functions)
+    );
+
   const usersInNetwork = R.filter((user) => R.find(R.propEq('userId', user.id), metaDataList), users);
 
   return Promise.map(usersInNetwork, async (user) => {
@@ -52,6 +66,7 @@ async function listUsersWithNetworkScope(payload, message) {
         deletedAt: metaData.deletedAt,
         invitedAt: metaData.invitedAt,
         integrationAuth: !!metaData.userToken,
+        function: findFunctionForUser(user),
       });
   });
 }
@@ -68,9 +83,10 @@ async function listUsersWithNetworkScope(payload, message) {
  */
 async function getUserWithNetworkScope(payload, message) {
   logger.debug('Get user with network scope', { payload, message });
-  const [user, network] = await Promise.all([
+  const [user, network, organisationUserWithFunction] = await Promise.all([
     userRepo.findUserById(payload.id, payload.networkId),
     networkRepo.findNetworkById(payload.networkId),
+    organisationRepo.findFunctionForUser(payload.id),
   ]);
 
   const networkLink = await userRepo.findNetworkLink({ userId: user.id, networkId: network.id });
@@ -84,9 +100,32 @@ async function getUserWithNetworkScope(payload, message) {
       deletedAt: networkLink.deletedAt,
       invitedAt: networkLink.invitedAt,
       integrationAuth: !!networkLink.userToken,
+      // Function has a fallback in the model
+      function: organisationUserWithFunction
+        ? organisationUserWithFunction.function.name
+        : user.function,
     });
 }
 
-exports.getUserWithNetworkScope = getUserWithNetworkScope;
-exports.listUsersWithNetworkScope = listUsersWithNetworkScope;
+async function getScoped(payload, message) {
+  logger.debug('Fetching user information with scopes', { payload, message });
+
+  const [user, organisations, networks] = await Promise.all([
+    userRepo.findUnscopedById(payload.id),
+    organisationRepo.findForUser(payload.id, true),
+    networkRepo.findNetworksForUser(payload.id, true),
+  ]);
+
+  return R.merge(user, { scopes: { organisations, networks } });
+}
+
+const listUsers = async (payload, message) => {
+  logger.debug('Listing all users', { payload, message });
+  return userRepo.findByIds(payload.userIds);
+};
+
+exports.getScoped = getScoped;
 exports.getUser = getUser;
+exports.getUserWithNetworkScope = getUserWithNetworkScope;
+exports.list = listUsers;
+exports.listUsersWithNetworkScope = listUsersWithNetworkScope;

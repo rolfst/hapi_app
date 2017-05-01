@@ -28,7 +28,7 @@ describe('Remove exchange', () => {
 
   it('should remove the exchange', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}`;
-    const { result, statusCode } = await deleteRequest(endpoint, admin.token);
+    const { result, statusCode } = await deleteRequest(endpoint, null, admin.token);
 
     assert.equal(statusCode, 200);
     assert.equal(result.success, true);

@@ -2,13 +2,57 @@ const R = require('ramda');
 const Promise = require('bluebird');
 const createError = require('../../../../shared/utils/create-error');
 const organisationRepository = require('../../repositories/organisation');
+const userRepository = require('../../repositories/user');
+const networkRepository = require('../../repositories/network');
 const networkService = require('../network');
+const userService = require('../user');
+const impl = require('./implementation');
+const { ERoleTypes } = require('../../definitions');
 
 /**
  * @module modules/core/services/organisation
  */
 
 const logger = require('../../../../shared/services/logger')('CORE/service/object');
+
+const OPTIONS_WHITELIST = ['offset', 'limit'];
+const createOptionsFromPayload = R.pick(OPTIONS_WHITELIST);
+
+/**
+ * Verifies if a user has a specific role in an organisation
+ * @param requestedRole - The role to check for
+ * @param organisationId - The id of the organisation
+ * @param userId - The id of the user
+ * @method userHasRoleInOrganisation
+ * @returns {external:Promise.<Boolean>}
+ */
+const userHasRoleInOrganisation =
+  async (organisationId, userId, requestedRole = ERoleTypes.ANY) => {
+    logger.debug('Checking user role in organisation', { requestedRole, organisationId, userId });
+
+    const organisation = await organisationRepository.findById(organisationId);
+    if (!organisation) throw createError('404', 'Organisation not found.');
+
+    const userMeta = await organisationRepository.getPivot(userId, organisationId);
+    if (!userMeta) throw createError('403');
+
+    if (requestedRole === ERoleTypes.ANY) return true;
+
+    return userMeta.roleType === requestedRole;
+  };
+
+/**
+ * Verifies if a user is an admin in a specific organisation
+ * @param organisationId - The id of the organisation
+ * @param userId - The id of the user
+ * @method assertUserIsAdminInOrganisation
+ * @returns {external:Promise.<Boolean>}
+ */
+const assertUserIsAdminInOrganisation = async (organisationId, userId) => {
+  if (!await userHasRoleInOrganisation(organisationId, userId, ERoleTypes.ADMIN)) {
+    throw createError('10020');
+  }
+};
 
 /**
  * Creates an organisation
@@ -54,13 +98,10 @@ const attachNetwork = (payload, message) => {
 const listNetworks = async (payload, message) => {
   logger.debug('List all network for organisation', { payload, message });
 
-  const organisation = await organisationRepository.findById(payload.organisationId);
-  if (!organisation) throw createError('404', 'Organisation not found.');
-  if (!await organisationRepository.hasUser(message.credentials.id, organisation.id)) {
-    throw createError('403');
-  }
+  await impl.assertThatOrganisationExists(payload.organisationId);
+  await impl.assertThatUserIsMemberOfOrganisation(message.credentials.id, payload.organisationId);
 
-  return networkService.list({ organisationId: organisation.id });
+  return networkService.list({ organisationId: payload.organisationId });
 };
 
 /**
@@ -92,8 +133,8 @@ const listForUser = async (payload, message) => {
 /**
  * Adding an user to organisation
  * @param {object} payload
- * @param {string} payload.organisationId
- * @param {string} payload.userId
+ * @param {string} payload.organisationId - The id of the organisation
+ * @param {string} payload.userId - The id of the user to add
  * @param {UserRoles} payload.roleType
  * @param {Message} message {@link module:shared~Message message}
  * @method addUser
@@ -102,17 +143,305 @@ const listForUser = async (payload, message) => {
 const addUser = async (payload, message) => {
   logger.debug('Adding user to organisation', { payload, message });
 
-  const organisation = await organisationRepository.findById(payload.organisationId);
-  if (!organisation) throw createError('404', 'Organisation not found.');
-
-  const userMeta = await organisationRepository.getPivot(payload.userId, payload.organisationId);
-  if (!userMeta || userMeta.roleType !== 'ADMIN') throw createError('403');
+  await impl.assertThatOrganisationExists(payload.organisationId);
+  await impl.assertThatUserIsAdminInOrganisation(message.credentials.id, payload.organisationId);
 
   return organisationRepository.addUser(payload.userId, payload.organisationId, payload.roleType);
 };
 
-exports.create = create;
-exports.attachNetwork = attachNetwork;
-exports.listNetworks = listNetworks;
-exports.listForUser = listForUser;
+/**
+ * Add a function in an organisation
+ * @param {object} payload
+ * @param {number} payload.organisationId - The id of the orgonisation
+ * @param {string} payload.name - The name of the function to add
+ * @param {Message} message {@link module:shared~Message message}
+ * @return {external:Promise.<OrganisationFunction>}
+ */
+const addFunction = async (payload, message) => {
+  logger.debug('Adding function to organisation', { payload, message });
+
+  await impl.assertThatOrganisationExists(payload.organisationId);
+  await impl.assertThatUserIsAdminInOrganisation(message.credentials.id, payload.organisationId);
+
+  return organisationRepository.addFunction(payload.organisationId, payload.name);
+};
+
+/**
+ * Update a function in an organisation
+ * @param {object} payload
+ * @param {number} payload.organisationId - The id of the orgonisation
+ * @param {string} payload.name - The name of the function to add
+ * @param {Message} message {@link module:shared~Message message}
+ * @return {external:Promise.<OrganisationFunction>}
+ */
+const updateFunction = async (payload, message) => {
+  logger.debug('Updating function in organisation', { payload, message });
+
+  await impl.assertThatOrganisationExists(payload.organisationId);
+  await impl.assertThatUserIsAdminInOrganisation(message.credentials.id, payload.organisationId);
+
+  return organisationRepository.updateFunction(payload.functionId, payload.name);
+};
+
+/**
+ * delete a function from an organisation
+ * @param {object} payload
+ * @param {number} payload.organisationId - The id of the orgonisation
+ * @param {string} payload.functionId - The id of the function to delete
+ * @param {Message} message {@link module:shared~Message message}
+ * @return {external:Promise.<OrganisationFunction>}
+ */
+const deleteFunction = async (payload, message) => {
+  logger.debug('Removing function in organisation', { payload, message });
+
+  await impl.assertThatOrganisationExists(payload.organisationId);
+  await impl.assertThatUserIsAdminInOrganisation(message.credentials.id, payload.organisationId);
+
+  return organisationRepository.removeFunction(payload.functionId);
+};
+
+/**
+ * list functions in an organisation
+ * @param {object} payload
+ * @param {number} payload.organisationId - The id of the organisation
+ * @param {Message} message {@link module:shared~Message message}
+ * @return {external:Promise.<OrganisationFunction>}
+ */
+const listFunctions = async (payload, message) => {
+  logger.debug('List all functions for organisation', { payload, message });
+
+  await impl.assertThatOrganisationExists(payload.organisationId);
+  await impl.assertThatUserIsMemberOfOrganisation(message.credentials.id, payload.organisationId);
+
+  return organisationRepository.findFunctionsInOrganisation(payload.organisationId);
+};
+
+async function listUsers(payload, message) {
+  logger.debug('List all users for organisation', { payload, message });
+
+  await assertUserIsAdminInOrganisation(payload.organisationId, message.credentials.id);
+
+  const options = createOptionsFromPayload(payload);
+  const organisationUsers = await organisationRepository.findUsers(
+    R.omit(OPTIONS_WHITELIST, payload), null, options);
+  const userIds = R.map((user) => user.userId, organisationUsers);
+  const users = await userService.list({ userIds }, message);
+  const findOrganisationUser = (organisationUserId) => R.omit(['function', 'teamIds'],
+    R.find(R.propEq('id', organisationUserId), users));
+
+  return R.map((organisationUser) => {
+    return R.merge(findOrganisationUser(organisationUser.userId.toString()),
+      R.pick(
+        ['externalId', 'roleType', 'invitedAt', 'createdAt', 'deletedAt'],
+        organisationUser
+      )
+    );
+  }, organisationUsers);
+}
+
+/**
+ * Fetches a user with organisational data.
+ * @param {object} payload
+ * @param {number} payload.userId - The id of the orgonisation
+ * @param {number} payload.organisationId - The id of the organisation
+ * @param {Message} message {@link module:shared~Message message}
+ * @method getUser
+ * @returns {external:Promise.<Boolean>}
+ */
+async function getUser(payload, message) {
+  logger.debug('fetches a user in an organisation', { payload, message });
+
+  // TODO - when the callee is the owner of the user record, it should also be allowed
+  await assertUserIsAdminInOrganisation(payload.organisationId, message.credentials.id);
+
+  const [user, organisationUser, networks] = await Promise.all([
+    userRepository.findUser(payload.userId),
+    organisationRepository.getPivot(payload.userId, payload.organisationId),
+    networkRepository.findNetworksForUser(payload.userId),
+  ]);
+
+  return R.merge(R.omit(['teamIds'], user), {
+    networkIds: R.pluck('id', networks),
+    roleType: organisationUser.roleType,
+    functionId: organisationUser.functionId,
+    externalId: organisationUser.externalId,
+    invitedAt: organisationUser.invitedAt,
+    deletedAt: organisationUser.deletedAt,
+    updatedAt: organisationUser.updatedAt,
+  });
+}
+
+/**
+ * Updates a user with organisational data.
+ * @param {object} payload
+ * @param {number} payload.userId - The id of the orgonisation
+ * @param {number} payload.organisationId - The id of the organisation
+ * @param {number} payload.functionId - The id of the function to be assigned to the user.
+ * @param {Message} message {@link module:shared~Message message}
+ */
+async function updateUser(payload, message) {
+  logger.debug('Updates a function for a user in an organisation', { payload, message });
+
+  await assertUserIsAdminInOrganisation(payload.organisationId, message.credentials.id);
+
+  const userWhiteList = [
+    'firstName',
+    'lastName',
+    'email',
+    'password',
+    'dateOfBirth',
+    'phoneNum',
+  ];
+
+  const organisationUserWhiteList = [
+    'functionId',
+    'roleType',
+    'invitedAt',
+    'deletedAt',
+  ];
+
+  const userFields = R.pick(userWhiteList, payload);
+  const organisationUserFields = R.pick(organisationUserWhiteList, payload);
+
+  const updateUserRecord = () => {
+    if (R.isEmpty(userFields)) return Promise.resolve();
+
+    return userRepository.updateUser(payload.userId, userFields);
+  };
+
+  const updateOrganisationUserRecord = () => {
+    if (R.isEmpty(organisationUserFields)) return Promise.resolve();
+
+    return organisationRepository
+      .updateUser(
+        payload.userId,
+        payload.organisationId,
+        organisationUserFields
+      );
+  };
+
+  await updateUserRecord().then(updateOrganisationUserRecord);
+
+  return getUser(payload, message);
+}
+
+async function getOrganisation(payload, message) {
+  logger.debug('Shows an organisation.', { payload, message });
+
+  await impl.assertThatOrganisationExists(payload.organisationId);
+  await impl.assertThatUserIsMemberOfOrganisation(message.credentials.id, payload.organisationId);
+
+  return organisationRepository.findById(payload.organisationId);
+}
+
+/**
+ * Count objects
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.organisationId - The id that instantiated the object
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method countUsers
+ * @return {external:Promise.<number>}
+ */
+const countUsers = async (payload, message) => {
+  logger.debug('Counting objects', { payload, message });
+
+  const whereConstraint = { organisationId: payload.organisationId };
+
+  return organisationRepository.countUsers(whereConstraint);
+};
+
+const assertNetworksAreInOrganisation = async (organisationId, networkIds) => {
+  const organisationNetworks =
+    await networkService.fetchOrganisationNetworks(organisationId, networkIds);
+
+  if (organisationNetworks.length !== networkIds.length) {
+    throw createError('403');
+  }
+};
+
+/**
+ * Add user to networks
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.organisationId - The id of the organisation
+ * @param {string} payload.userId - The id of the user
+ * @param {string} payload.networks - An array of {networkId, roleType}
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method addUserToNetworks
+ */
+const addUserToNetworks = async (payload, message) => {
+  logger.debug('Add user to networks', { payload, message });
+
+  await assertNetworksAreInOrganisation(payload.organisationId, R.pluck('networkId', payload.networks));
+
+  await Promise.map(payload.networks, (singleNetwork) => networkService.addUserToNetwork({
+    networkId: singleNetwork.networkId,
+    userId: payload.userId,
+    roleType: singleNetwork.roleType || ERoleTypes.EMPLOYEE,
+  }));
+};
+
+/**
+ * Update user in networks
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.organisationId - The id of the organisation
+ * @param {string} payload.userId - The id of the user
+ * @param {string} payload.networks - An array of {networkId, roleType}
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method updateUserInNetworks
+ */
+const updateUserInNetworks = async (payload, message) => {
+  logger.debug('Update user in networks', { payload, message });
+
+  await assertNetworksAreInOrganisation(payload.organisationId, R.pluck('networkId', payload.networks));
+
+  await Promise.map(
+    payload.networks,
+    (singleNetwork) =>
+      networkService.updateUser(singleNetwork.networkId, payload.userId, {
+        roleType: singleNetwork.roleType || ERoleTypes.EMPLOYEE,
+      })
+  );
+};
+
+/**
+ * Remove user from networks
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.organisationId - The id of the organisation
+ * @param {string} payload.userId - The id of the user
+ * @param {string} payload.networks - An array of networkIds
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method removeUserFromNetworks
+ */
+const removeUserFromNetworks = async (payload, message) => {
+  logger.debug('Remove users from networks', { payload, message });
+
+  await assertNetworksAreInOrganisation(payload.organisationId, payload.networks);
+
+  await Promise.map(
+    payload.networks,
+    (networkId) => networkService.removeUser(networkId, payload.userId)
+  );
+};
+
+exports.ERoleTypes = ERoleTypes;
+
+exports.assertNetworksAreInOrganisation = assertNetworksAreInOrganisation;
+exports.addFunction = addFunction;
 exports.addUser = addUser;
+exports.addUserToNetworks = addUserToNetworks;
+exports.getUser = getUser;
+exports.assertUserIsAdminInOrganisation = assertUserIsAdminInOrganisation;
+exports.attachNetwork = attachNetwork;
+exports.countUsers = countUsers;
+exports.create = create;
+exports.deleteFunction = deleteFunction;
+exports.getOrganisation = getOrganisation;
+exports.listForUser = listForUser;
+exports.listFunctions = listFunctions;
+exports.listNetworks = listNetworks;
+exports.listUsers = listUsers;
+exports.removeUserFromNetworks = removeUserFromNetworks;
+exports.updateFunction = updateFunction;
+exports.updateUser = updateUser;
+exports.updateUserInNetworks = updateUserInNetworks;
+exports.userHasRoleInOrganisation = userHasRoleInOrganisation;

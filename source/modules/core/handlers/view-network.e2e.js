@@ -42,6 +42,7 @@ describe('View network', async () => {
     assert.property(data, 'super_admin');
     assert.property(data, 'has_integration');
     assert.property(data, 'enabled_components');
+    assert.property(data, 'organisation_id');
     assert.property(data, 'created_at');
     assert.isBoolean(data.has_integration);
     assert.isArray(data.enabled_components);

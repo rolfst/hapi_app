@@ -45,7 +45,12 @@ const makeFeed = async (payload, options, message, extraWhereConstraint = {}) =>
       parentType: payload.parentType,
       parentId: payload.parentId,
     }],
-    $and: { networkId: payload.networkId },
+    $and: {
+      $or: [
+        { networkId: payload.networkId },
+        { networkId: null },
+      ],
+    },
   };
 
   // Since extraWhereConstraint can either be an array or an object,

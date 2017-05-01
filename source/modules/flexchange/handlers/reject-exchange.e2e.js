@@ -15,7 +15,7 @@ describe('Reject exchange', () => {
   let employee;
   let network;
   let exchange;
-  let approvedExchange;
+  let approvedExchangeId;
 
   before(async () => {
     [admin, employee] = await Promise.all([
@@ -48,7 +48,7 @@ describe('Reject exchange', () => {
     await Promise.all([acceptAPromise, declineAPromise, acceptBPromise]);
 
     exchange = exchangeA;
-    approvedExchange = await approveExchange(exchangeB, admin, admin.id);
+    approvedExchangeId = await approveExchange(exchangeB, admin, admin.id);
   });
 
   after(() => testHelper.cleanAll());
@@ -73,7 +73,7 @@ describe('Reject exchange', () => {
   });
 
   it('should fail when trying to reject a response from an already approved exchange', async () => {
-    const endpoint = `/v2/networks/${network.id}/exchanges/${approvedExchange.id}`;
+    const endpoint = `/v2/networks/${network.id}/exchanges/${approvedExchangeId}`;
     const payload = { action: 'reject', user_id: admin.id };
     const { statusCode } = await patchRequest(endpoint, payload, admin.token);
 

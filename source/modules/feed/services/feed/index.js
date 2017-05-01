@@ -18,6 +18,7 @@ const feedOptions = R.pick(['limit', 'offset', 'include']);
  * Making a feed for a network
  * @param {object} payload - Object containing payload data
  * @param {string} payload.networkId - The id of network to create feed for
+ * @param {string} payload.organisationId - The id of organisation to include messages for
  * @param {string} payload.include - The sub resources to include
  * @param {number} payload.limit - The limit of the resultset for pagination
  * @param {number} payload.offset - The offset of the resultset for pagination
@@ -42,6 +43,9 @@ const makeForNetwork = async (payload, message) => {
   }, {
     parentType: 'user',
     parentId: message.credentials.id,
+  }, {
+    parentType: 'organisation',
+    parentId: payload.organisationId,
   }];
 
   const feedPayload = {

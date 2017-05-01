@@ -28,26 +28,8 @@ const FILTER_PROPERTIES = ['start', 'end'];
 
 const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
 
-/**
- * Lists exchanges for network by id
- * @param {object} payload - Object containing payload data
- * @param {string[]} payload.exchangeIds - The id of the exchanges to list
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method list
- * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange}
- */
-const list = async (payload, message) => {
-  logger.debug('Listing exchanges', { payload, message });
-
-  const [exchanges, responsesForExchanges, valuesForExchanges] = await Promise.all([
-    exchangeRepo.findByIds(payload.exchangeIds),
-    exchangeResponseRepo.findAllWhere({
-      exchangeId: { $in: payload.exchangeIds } }),
-    exchangeValueRepo.findAllWhere({
-      exchangeId: { $in: payload.exchangeIds },
-    }).then(impl.groupValuesPerExchange),
-  ]);
-
+const populateConstraintedExchanges = async (
+  exchanges, responsesForExchanges, valuesForExchanges, message) => {
   const occuringUsers = await R.pipe(
     impl.getUserIdsInObjects(['approvedUser', 'approvedBy', 'userId']),
     (userIds) => userService.listUsersWithNetworkScope({
@@ -61,6 +43,11 @@ const list = async (payload, message) => {
     R.find(R.propEq('userId', userId), responsesForExchange(exchangeId));
 
   const findUserById = impl.findUserById(occuringUsers);
+  const occuringExchangeIds = R.pluck('id', exchanges);
+  const comments = await R.pipeP(
+    (exchangeIds) => commentRepo.findBy({ exchangeId: { $in: exchangeIds } }),
+    R.groupBy((comment) => comment.exchangeId)
+  )(occuringExchangeIds);
 
   // TODO this result doesn't show comments
   return R.map((exchange) => R.merge(exchange, {
@@ -70,10 +57,64 @@ const list = async (payload, message) => {
     approvedUser: findUserById(exchange.approvedUserId),
     responseStatus: impl.createResponseStatus(
       responseForUser(message.credentials.id, exchange.id)),
-    responses: impl.replaceUsersInResponses(
+    responses: impl.replaceUsersIn(
       occuringUsers, responsesForExchange(exchange.id)),
+    Comments: impl.replaceUsersIn(occuringUsers, R.defaultTo([], comments[exchange.id])),
   }), exchanges);
 };
+
+/**
+ * Lists exchanges for network by id
+ * This method still allows to filter on start end limit and offset but does not take in account
+ * the current user
+ * @param {object} payload - Object containing payload data
+ * @param {string[]} payload.exchangeIds - The id of the exchanges to list
+ * @param {string} [payload.start] - date when to start searching
+ * @param {string} [payload.end] - date when to end searching
+ * @param {number} [payload.limit] - max amount to retrieve
+ * @param {number} [payload.offset] - where to start fetching results in the found exchanges
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method list
+ * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange}
+ */
+async function listBasic(payload, message) {
+  const filter = R.pick(['start', 'end', 'limit', 'offset'], payload);
+  const exchangesAndAttributes = await Promise.all([
+    exchangeRepo.findByIds(payload.exchangeIds, null, filter),
+    exchangeResponseRepo.findAllWhere({
+      exchangeId: { $in: payload.exchangeIds } }),
+    exchangeValueRepo.findAllWhere({
+      exchangeId: { $in: payload.exchangeIds },
+    }).then(impl.groupValuesPerExchange),
+  ]);
+
+  return populateConstraintedExchanges(...exchangesAndAttributes, message);
+}
+async function list(payload, message) {
+  logger.debug('Listing exchanges', { payload, message });
+
+  return listBasic(payload, message);
+}
+/**
+ * Lists exchanges for network by id
+ * This method does not take filters into account
+ * @param {object} payload - Object containing payload data
+ * @param {string[]} payload.exchangeIds - The id of the exchanges to list
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange}
+ */
+async function listConstrainted(payload, message) {
+  const exchangesAndAttributes = await Promise.all([
+    exchangeRepo.findByIds(payload.exchangeIds),
+    exchangeResponseRepo.findAllWhere({
+      exchangeId: { $in: payload.exchangeIds } }),
+    exchangeValueRepo.findAllWhere({
+      exchangeId: { $in: payload.exchangeIds },
+    }).then(impl.groupValuesPerExchange),
+  ]);
+
+  return populateConstraintedExchanges(...exchangesAndAttributes, message);
+}
 
 /**
  * Lists the possible receivers for an exchange
@@ -139,9 +180,9 @@ const acceptExchange = async (payload, message) => {
     sourceId: payload.exchangeId,
   });
 
-  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+  const exchanges = await listConstrainted({ exchangeIds: [payload.exchangeId] }, message);
 
-  return exchanges[0];
+  return R.head(exchanges);
 };
 
 /**
@@ -180,9 +221,9 @@ const approveExchange = async (payload, message) => {
     });
   }
 
-  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+  const exchanges = await listConstrainted({ exchangeIds: [payload.exchangeId] }, message);
 
-  return exchanges[0];
+  return R.head(exchanges);
 };
 
 /**
@@ -224,7 +265,7 @@ const declineExchange = async (payload, message) => {
     sourceId: payload.exchangeId,
   });
 
-  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+  const exchanges = await listConstrainted({ exchangeIds: [payload.exchangeId] }, message);
 
   return exchanges[0];
 };
@@ -290,12 +331,11 @@ const rejectExchange = async (payload, message) => {
 
   impl.validateExchangeResponse(exchangeResponse);
 
-  const rejectedExchange = await exchangeRepo.rejectExchange(
+  const rejectedExchangeId = await exchangeRepo.rejectExchange(
     exchange, message.credentials, payload.userId);
-  await rejectedExchange.reload();
   // TODO: Fire ExchangeWasRejected event
 
-  const exchanges = await list({ exchangeIds: [payload.exchangeId] }, message);
+  const exchanges = await listConstrainted({ exchangeIds: [rejectedExchangeId] }, message);
 
   return exchanges[0];
 };
@@ -310,9 +350,12 @@ const rejectExchange = async (payload, message) => {
  * Promise with an Exchange
  */
 const getExchange = async (payload, message) => {
-  const { credentials } = message;
   // TODO this result shows comments
-  return exchangeRepo.findExchangeById(payload.exchangeId, credentials.id);
+  const exchanges = await listConstrainted({ exchangeIds: [payload.exchangeId] }, message);
+
+  const result = R.head(exchanges);
+  if (!result) { throw createError('404'); }
+  return result;
 };
 
 /**
@@ -326,10 +369,10 @@ const getExchange = async (payload, message) => {
  */
 const listComments = async (payload, message) => {
   logger.debug('Listing comments for exchange', { payload, message });
-  const userId = message.credentials.id;
-  const exchange = await exchangeRepo.findExchangeById(payload.exchangeId, userId);
-
-  return commentRepo.findCommentsByExchange(exchange);
+  const exchanges = await exchangeRepo.findAllBy({ id: payload.exchangeId });
+  const exchangeComments = await commentRepo.findBy({ exchangeId: exchanges[0].id });
+  const users = await userService.list({ userIds: R.pluck('userId', exchangeComments) }, message);
+  return impl.replaceUsersIn(users, exchangeComments);
 };
 
 /**
@@ -381,26 +424,6 @@ const listAvailableUsersForShift = async (payload, message) => {
 };
 
 /**
- * Lists exchanges for a team.
- * @param {object} payload - Object containing payload data
- * @param {string} payload.teamId - The id of the shift to fetch
- * @param {string} payload.start - start of the offset
- * @param {string} payload.end - end of the offset
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method listExchangesForTeam
- * @return {external:Promise.<Exchange[]>} {@link module:modules/flexchange~Exchange Exchange} -
- * Promise with a list of Exchanges for team
- */
-const listExchangesForTeam = async (payload, message) => {
-  const filter = R.pick(FILTER_PROPERTIES, payload);
-  const team = await teamRepo.findTeamById(payload.teamId);
-  const exchanges = await exchangeRepo.findExchangesByTeam(
-    team.id, message.credentials.id, filter);
-
-  return exchanges;
-};
-
-/**
  * Lists exchanges for a user.
  * @param {object} payload - Object containing payload data
  * @param {string} payload.userId - The id of the shift to fetch
@@ -414,8 +437,10 @@ const listExchangesForTeam = async (payload, message) => {
 const listPersonalizedExchanges = async (payload, message) => {
   const filter = R.pick(FILTER_PROPERTIES, payload);
 
-  return exchangeRepo.findExchangesByUserAndNetwork(
+  const exchangeIds = await exchangeRepo.findExchangesByUserAndNetwork(
     message.credentials.id, message.network.id, filter);
+
+  return listConstrainted({ exchangeIds }, message);
 };
 
 /**
@@ -449,7 +474,7 @@ const listExchangesForUser = async (payload, message) => {
     userId: user.id, networkId: message.network.id,
   }, impl.createDateWhereConstraint(filter.start, filter.end)));
 
-  return list({
+  return listConstrainted({
     exchangeIds: R.concat(exchangeIds, R.pluck('id', createdExchangesByUser)) },
     message);
 };
@@ -505,7 +530,9 @@ const createExchange = async (payload, message) => {
     });
   }
 
-  return exchangeRepo.findExchangeById(createdExchange.id);
+  const exchanges = await listConstrainted({ exchangeIds: [createdExchange.id] }, message);
+
+  return R.head(exchanges);
 };
 
 /**
@@ -539,12 +566,15 @@ const createExchangeComment = async (payload, message) => {
   const data = { text: payload.text, userId: message.credentials.id };
   const createdExchangeComment = await commentRepo.createExchangeComment(payload.exchangeId, data);
 
+  const user = await userService.getUser({ userId: message.credentials.id }, message);
+
   const exchangeComment = await commentRepo.findCommentById(createdExchangeComment.id);
+  const populatedComment = impl.mergeWithUsers([user], exchangeComment);
 
   // TODO activate notifications
   // commentNotifier.send(exchangeComment);
 
-  return exchangeComment;
+  return populatedComment;
 };
 
 /**
@@ -558,12 +588,10 @@ const createExchangeComment = async (payload, message) => {
  * Promise with a list of Exchanges for a user
  */
 const listMyAcceptedExchanges = async (payload, message) => {
-  const responses = await exchangeResponseRepo.findAcceptedExchangeResponsesForUser(
-    message.credentials.id);
-  const exchanges = await exchangeRepo.findExchangeByIds(
-    map(responses, 'exchangeId'), message.credentials.id);
+  const exchangeIds = await exchangeResponseRepo.findAllExchangeIdsBy(
+    { userId: message.credentials.id, response: 1 });
 
-  return exchanges;
+  return listConstrainted({ exchangeIds }, message);
 };
 
 exports.acceptExchange = acceptExchange;
@@ -578,7 +606,6 @@ exports.list = list;
 exports.listActivities = listActivities;
 exports.listAvailableUsersForShift = listAvailableUsersForShift;
 exports.listComments = listComments;
-exports.listExchangesForTeam = listExchangesForTeam;
 exports.listExchangesForUser = listExchangesForUser;
 exports.listMyAcceptedExchanges = listMyAcceptedExchanges;
 exports.listMyShifts = listMyShifts;

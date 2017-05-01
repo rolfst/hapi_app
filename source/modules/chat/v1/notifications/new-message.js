@@ -2,7 +2,8 @@ const notifier = require('../../../../shared/services/notifier');
 
 const createNotification = (message) => {
   return {
-    text: `${message.createdBy.fullName}: ${message.text}`,
+    headings: `${message.createdBy.fullName}`,
+    text: message.text,
     data: {
       id: message.conversation.id,
       type: 'conversation',

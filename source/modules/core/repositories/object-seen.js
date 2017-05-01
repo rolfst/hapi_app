@@ -59,7 +59,13 @@ const findObjectsSeenByUser = (objectIds, userId) => {
   });
 };
 
+const deleteAll = () => ObjectSeen.findAll()
+  .then((ids) => ObjectSeen.destroy({
+    where: { id: { $in: R.pluck('id', ids) } },
+  }));
+
 exports.create = create;
+exports.deleteAll = deleteAll;
 exports.findBy = findBy;
 exports.findObjectsSeenByUser = findObjectsSeenByUser;
 exports.findSeenCountsForObjects = findSeenCountsForObjects;

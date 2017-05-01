@@ -73,7 +73,8 @@ const createResponseStatus = (exchangeResponse) => {
   ])(exchangeResponse);
 };
 
-const networkType = (exchange) => ({ type: 'network', id: exchange.values[0] || null });
+// TODO is this correct? it used to be: exchange.values[0]
+const networkType = (exchange) => ({ type: 'network', id: exchange.networkId || null });
 const teamType = (exchange) => ({ type: 'team', ids: exchange.values });
 const shiftType = (exchange) => ({ type: 'team', ids: exchange.teamId ? [exchange.teamId] : null });
 
@@ -125,12 +126,16 @@ const findUserById = R.curry((users, id) => {
   )(match);
 });
 
-const replaceUsersInResponses = (users, responses) => {
+const mergeWithUsers = R.curry((users, sub) => {
   const userById = findUserById(users);
 
-  return R.map((response) => R.merge(response, {
-    user: userById(response.userId),
-  }), responses);
+  return R.assoc('user', userById(sub.userId), sub);
+});
+
+const replaceUsersIn = (users, responses) => {
+  const mergeToResponse = mergeWithUsers(users);
+
+  return R.map(mergeToResponse, responses);
 };
 
 exports.addValues = addValues;
@@ -143,5 +148,6 @@ exports.groupValuesPerExchange = groupValuesPerExchange;
 exports.makeCreatedInObject = makeCreatedInObject;
 exports.mapShiftsWithExchangeAndTeam = mapShiftsWithExchangeAndTeam;
 exports.mergeShiftWithExchangeAndTeam = mergeShiftWithExchangeAndTeam;
-exports.replaceUsersInResponses = replaceUsersInResponses;
+exports.mergeWithUsers = mergeWithUsers;
+exports.replaceUsersIn = replaceUsersIn;
 exports.validateExchangeResponse = validateExchangeResponse;

@@ -3,6 +3,7 @@ const R = require('ramda');
 const Promise = require('bluebird');
 const createError = require('../../../shared/utils/create-error');
 const createUserModel = require('../models/user');
+const toUnscoped = require('../models/detailed-user');
 const createNetworkLinkModel = require('../models/network-link');
 const createCredentialsModel = require('../models/credentials');
 const { User, Network, NetworkUser, Team } = require('./dao');
@@ -61,7 +62,6 @@ const findByIds = async (userIds, networkId = null) => {
   if (networkId) {
     includes = R.map(R.merge(R.__, { where: { networkId } }), includes);
   }
-
   const options = R.merge({ include: includes }, { where: { id: { $in: userIds } } });
   const result = await User.findAll(options);
 
@@ -107,6 +107,18 @@ const findUserBy = async (attributes) => {
   const result = await User.findOne({
     where: R.pick(['username', 'email'], attributes),
   });
+  if (!result) return null;
+
+  return toModel(result);
+};
+
+/**
+ * finds a User without any scopes
+ * @param {number} id
+ * @returns {external:Promise.<User>} {@link module:modules/core~User User}
+ */
+const findUser = async (id) => {
+  const result = await User.findById(id);
   if (!result) return null;
 
   return toModel(result);
@@ -291,6 +303,24 @@ const userBelongsToNetwork = async (userId, networkId) => {
 };
 
 /**
+ * Finds a user
+ * @param {string} userId - identifier how the user is known
+ * @param {string} networkId - identifier for what network the user need to be
+ * retrieved
+ * @param {string} [scoped=true] - flag to specifiy whether a user needs to be fetched
+ * with network scoped attributes
+ * @method findByIds
+ * @return {external:Promise.<User>} {@link module:modules/core~User User}
+ */
+const findUnscopedById = async (userId) => {
+  const user = await User.findOne({ where: { id: userId } });
+
+  if (!user) throw createError('404', `The user with id '${userId}' could not be found.`);
+
+  return toUnscoped(user);
+};
+
+/**
  * @param {string} userId - identifier for user to delete
  * @method deleteById
  * @return {external:Promise.<number>} Promise with amount of objects removed
@@ -313,6 +343,8 @@ exports.findCredentialsForUser = findCredentialsForUser;
 exports.findExternalUsers = findExternalUsers;
 exports.findMultipleUserMetaDataForNetwork = findMultipleUserMetaDataForNetwork;
 exports.findNetworkLink = findNetworkLink;
+exports.findUnscopedById = findUnscopedById;
+exports.findUser = findUser;
 exports.findUserBy = findUserBy;
 exports.findUserById = findUserById;
 exports.userBelongsToNetwork = userBelongsToNetwork;

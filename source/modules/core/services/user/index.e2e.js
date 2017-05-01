@@ -3,27 +3,40 @@ const R = require('ramda');
 const testHelpers = require('../../../../shared/test-utils/helpers');
 const teamRepository = require('../../repositories/team');
 const userService = require('./index');
+const organisationRepo = require('../../repositories/organisation');
 
 describe('Service: User', () => {
   describe('listUsersWithNetworkScope', () => {
     let createdTeams;
     let serviceResult;
+    let employee;
+    let organisation;
+    let createdFunction;
 
     before(async () => {
-      const [admin, employee] = await Promise.all([
+      let admin = null;
+      [admin, employee, organisation] = await Promise.all([
         testHelpers.createUser(),
         testHelpers.createUser(),
+        testHelpers.createOrganisation(),
       ]);
 
-      const network = await testHelpers.createNetwork({ userId: admin.id });
-      await testHelpers.addUserToNetwork({ networkId: network.id, userId: employee.id });
+      let network = null;
+      [network, createdFunction] = await Promise.all([
+        testHelpers.createNetwork({ userId: admin.id }),
+        testHelpers.createOrganisationFunction(organisation.id),
+      ]);
 
       createdTeams = await Promise.all([
-        testHelpers.addTeamToNetwork(network.id),
-        testHelpers.addTeamToNetwork(network.id),
+        testHelpers.createTeamInNetwork(network.id),
+        testHelpers.createTeamInNetwork(network.id),
       ]);
 
-      await teamRepository.addUserToTeam(createdTeams[0].id, employee.id);
+      await Promise.all([
+        teamRepository.addUserToTeam(createdTeams[0].id, employee.id),
+        testHelpers.addUserToNetwork({ networkId: network.id, userId: employee.id }),
+        organisationRepo.addUser(employee.id, organisation.id, undefined, createdFunction.id),
+      ]);
 
       serviceResult = await userService.listUsersWithNetworkScope({
         userIds: [admin.id, employee.id],
@@ -37,6 +50,18 @@ describe('Service: User', () => {
       const actual = R.find(R.propEq('roleType', 'EMPLOYEE'), serviceResult);
 
       assert.include(actual.teamIds, createdTeams[0].id);
+    });
+
+    it('should include a function', async () => {
+      const actual = R.find(R.always(true), serviceResult);
+
+      assert.property(actual, 'function');
+    });
+
+    it('organisation function should override default function on user', async () => {
+      const actual = R.find(R.propEq('id', employee.id), serviceResult);
+
+      assert.equal(actual.function, createdFunction.name);
     });
   });
 });
