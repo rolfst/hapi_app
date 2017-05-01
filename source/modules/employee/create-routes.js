@@ -10,7 +10,7 @@ const routes = [{
   handler: require(`${baseImport}/view-my-profile`),
 }, {
   method: 'GET',
-  url: '/users/me',
+  url: '/v2/users/me',
   handler: require(`${baseImport}/view-my-scoped-profile`),
   prefetch: false,
 }, {
