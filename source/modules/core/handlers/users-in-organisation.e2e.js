@@ -79,6 +79,7 @@ describe('Handler: Users in organisation', () => {
     assert.property(meta.counts, 'total');
     assert.property(meta.counts, 'active');
     assert.property(meta.counts, 'inactive');
+    assert.property(meta.counts, 'not_registered');
   });
 
   it('should return a limited set of users for organisation', async () => {
