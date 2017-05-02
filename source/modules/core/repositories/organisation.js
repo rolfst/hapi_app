@@ -208,9 +208,11 @@ const countUsers = async (organisationId) => {
     .then((rows) => {
       const row = R.head(rows);
 
+      row.inactive -= row.invited;
+
       return {
         total: row.total,
-        active: row.total - row.inactive,
+        active: row.invited - row.inactive,
         inactive: row.inactive,
         not_registered: row.total - row.invited,
       };
