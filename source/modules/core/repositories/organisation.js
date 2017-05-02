@@ -8,11 +8,11 @@ const sequelize = require('../../../shared/configs/sequelize');
 const countQuery = `
 SELECT
   COUNT(*) AS total,
-  COUNT(ou.last_active < NOW() - INTERVAL 1 WEEK) AS inactive
-FROM
-  organisation_user ou
-WHERE
-  ou.organisation_id = :organisationId
+  COUNT(ou.last_active < NOW() - INTERVAL 1 WEEK) AS inactive,
+  COUNT(ou.invited_at) AS invited
+FROM organisation_user ou
+WHERE ou.organisation_id = :organisationId
+AND ou.deleted_at IS NULL
 `;
 
 const create = (attributes) => {
@@ -212,6 +212,7 @@ const countUsers = async (organisationId) => {
         total: row.total,
         active: row.total - row.inactive,
         inactive: row.inactive,
+        not_registered: row.total - row.invited,
       };
     });
 };
