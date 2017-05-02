@@ -12,12 +12,12 @@ module.exports = (actor, parent, messageObject) => {
   const poll = R.find(R.propEq('objectType', 'poll'), object.children);
 
   const headings = R.cond([
-    [hasPoll, R.always(`Er is een poll geplaatst door ${defaultHeadings}`)],
+    [hasPoll, R.always(`${defaultHeadings}`)],
     [R.T, R.always(defaultHeadings)],
   ])(object);
 
   const text = R.cond([
-    [hasPoll, () => `${poll.source.question} (${poll.source.options.length} opties)`],
+    [hasPoll, () => `Poll: ${poll.source.question} (${poll.source.options.length} opties)`],
     [hasAttachment, () => `(afbeelding) ${object.source.text}`],
     [R.T, R.always(object.source.text)],
   ])(object);

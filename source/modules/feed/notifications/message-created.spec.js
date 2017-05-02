@@ -1,7 +1,7 @@
 const { assert } = require('chai');
 const notification = require('./message-created');
 
-describe('Notification: created message', () => {
+describe.only('Notification: created message', () => {
   it('should send a notification', () => {
     const actor = { fullName: 'Foo User' };
     const message = {
@@ -53,8 +53,8 @@ describe('Notification: created message', () => {
 
     const actual = notification(actor, parent, message);
 
-    assert.equal(actual.headings, 'Er is een poll geplaatst door Foo User @ Bar Team');
-    assert.equal(actual.text, 'Poll question (3 opties)');
+    assert.equal(actual.headings, 'Foo User @ Bar Team');
+    assert.equal(actual.text, 'Poll: Poll question (3 opties)');
     assert.equal(actual.data.id, '1');
     assert.equal(actual.data.type, 'message');
     assert.equal(actual.data.track_name, 'message_created');
