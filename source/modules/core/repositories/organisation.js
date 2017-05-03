@@ -5,14 +5,24 @@ const createPivotModel = require('../models/organisation-user');
 const createFunctionsModel = require('../models/organisation-function');
 const sequelize = require('../../../shared/configs/sequelize');
 
-const countQuery = `
+const countQueryTotalAndLoggedIn = `
 SELECT
   COUNT(*) AS total,
-  COUNT(ou.last_active < NOW() - INTERVAL 1 WEEK) AS inactive,
-  COUNT(ou.invited_at) AS invited
+  COUNT(u.last_login) AS loggedIn
 FROM organisation_user ou
-WHERE ou.organisation_id = :organisationId
-AND ou.deleted_at IS NULL
+LEFT JOIN users AS u ON ou.user_id = u.id
+WHERE
+  ou.organisation_id = :organisationId AND
+  ou.deleted_at IS NULL
+`;
+const countQueryInactive = `
+SELECT
+  COUNT(*) AS inactive
+FROM organisation_user
+WHERE
+  organisation_id = :organisationId AND
+  deleted_at IS NULL AND
+  last_active < NOW() - INTERVAL 1 WEEK
 `;
 
 const create = (attributes) => {
@@ -199,24 +209,22 @@ const updateOrganisationLink = (whereConstraint, attributes) => {
   OrganisationUser.update(attributes, { where: whereConstraint });
 };
 
-const countUsers = async (organisationId) => {
-  return sequelize
-    .query(countQuery, {
-      replacements: { organisationId },
-      type: sequelize.QueryTypes.SELECT,
-    })
-    .then((rows) => {
-      const row = R.head(rows);
+const countUsers = (organisationId) => {
+  const payload = { replacements: { organisationId }, type: sequelize.QueryTypes.SELECT };
 
-      row.inactive -= row.invited;
-
-      return {
-        total: row.total,
-        active: row.invited - row.inactive,
-        inactive: row.inactive,
-        not_registered: row.total - row.invited,
-      };
-    });
+  return Promise.all([
+    sequelize.query(countQueryTotalAndLoggedIn, payload),
+    sequelize.query(countQueryInactive, payload),
+  ])
+    .then(([
+      [{ total, loggedIn }],
+      [{ inactive }],
+    ]) => ({
+      total,
+      inactive,
+      active: loggedIn - inactive,
+      not_registered: total - loggedIn,
+    }));
 };
 
 exports.addFunction = addFunction;
