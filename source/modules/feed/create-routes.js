@@ -27,6 +27,7 @@ const routes = [{
   method: 'GET',
   url: '/v2/messages/{messageId}/comments',
   handler: require('./handlers/get-comments'),
+  validator: require('./validators/get-comments'),
   prefetch: false,
 }, {
   method: 'POST',
