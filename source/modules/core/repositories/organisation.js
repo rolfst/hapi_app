@@ -166,6 +166,28 @@ const findFunction = async (functionIdOrWhereConstraint) => {
  * @return {external:Promise.<user[]>}
  */
 const findUsers = async (constraint, attributes = {}, options = null) => {
+  if (constraint.q) {
+    return sequelize.query(`
+        SELECT
+          organisation_user.user_id AS userId,
+          organisation_user.role_type AS roleType,
+          DATE_FORMAT(organisation_user.invited_at, '%Y-%m-%dT%T.000Z') AS invitedAt,
+          DATE_FORMAT(organisation_user.created_at, '%Y-%m-%dT%T.000Z') AS createdAt,
+          organisation_user.deleted_at AS deletedAt,
+          CONCAT(users.first_name, ' ', users.last_name) AS fullName
+        FROM users
+        LEFT JOIN organisation_user ON users.id = organisation_user.user_id
+        WHERE organisation_user.organisation_id = :organisationId
+        HAVING fullName LIKE :q
+      `, {
+        replacements: {
+          q: `%${constraint.q}%`,
+          organisationId: constraint.organisationId,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      });
+  }
+
   const query = R.merge(options, { where: constraint }, attributes);
 
   return OrganisationUser.findAll(query);
