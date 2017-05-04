@@ -1,7 +1,7 @@
 const { assert } = require('chai');
 const notification = require('./message-created');
 
-describe.only('Notification: created message', () => {
+describe('Notification: created message', () => {
   it('should send a notification', () => {
     const actor = { fullName: 'Foo User' };
     const message = {
