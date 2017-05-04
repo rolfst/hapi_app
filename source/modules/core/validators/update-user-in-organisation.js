@@ -10,7 +10,7 @@ module.exports = {
       email: Joi.string().email(),
       password: Joi.string(),
       dateOfBirth: Joi.date().format('YYYY-MM-DD'),
-      phoneNum: Joi.string(),
+      phoneNum: Joi.string().regex(/(^(((0)[1-9]{2}[0-9][-]?[1-9][0-9]{5})|((\\+31|0|0031)[1-9][0-9][-]?[1-9][0-9]{6}))$)|(^(((\\+31|0|0031)6){1}[1-9]{1}[0-9]{7})$)/i),
     })
     .rename('function_id', 'functionId')
     .rename('role_type', 'roleType')
