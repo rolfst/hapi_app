@@ -5,7 +5,7 @@ const OrganisationService = require('../services/organisation');
 const { ERoleTypes } = require('../definitions');
 const dateUtils = require('../../../shared/utils/date');
 
-describe.only('Handler: Update user in organisation', () => {
+describe('Handler: Update user in organisation', () => {
   let organisation;
   let admin;
   let otherUser;
