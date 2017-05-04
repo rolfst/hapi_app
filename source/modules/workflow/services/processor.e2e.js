@@ -29,7 +29,9 @@ describe.only('Workflow processor', async () => {
   it('should generate a query', async () => {
     const query = workflowProcessor.buildQuery(organisation.id, workflow.conditions);
 
-    assert.notEmpty(query);
+    console.log(query);
+
+    assert.isString(query);
   });
 });
 
