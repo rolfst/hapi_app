@@ -11,19 +11,14 @@ module.exports = (actor, parent, messageObject) => {
   const defaultHeadings = parent.name ? `${actor.fullName} @ ${parent.name}` : `${actor.fullName}`;
   const poll = R.find(R.propEq('objectType', 'poll'), object.children);
 
-  const headings = R.cond([
-    [hasPoll, R.always(`Er is een poll geplaatst door ${defaultHeadings}`)],
-    [R.T, R.always(defaultHeadings)],
-  ])(object);
-
   const text = R.cond([
-    [hasPoll, () => `${poll.source.question} (${poll.source.options.length} opties)`],
+    [hasPoll, () => `Poll: ${poll.source.question} (${poll.source.options.length} opties)`],
     [hasAttachment, () => `(afbeelding) ${object.source.text}`],
     [R.T, R.always(object.source.text)],
   ])(object);
 
   return {
-    headings,
+    headings: defaultHeadings,
     text,
     data: { id: object.source.id, type: 'message', track_name: 'message_created' },
   };
