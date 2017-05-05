@@ -71,4 +71,10 @@ describe('Handler: Get comments', () => {
 
     assert.deepEqual(impossibleUser, expectedUser);
   });
+
+  it('should include related users in meta.related without include query param', async () => {
+    const { statusCode } = await getRequest(`${endpoint}`, organisationAdmin.token);
+
+    assert.equal(statusCode, 200);
+  });
 });
