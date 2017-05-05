@@ -13,10 +13,10 @@ describe('Handler: Users in organisation', () => {
     [organisationA, organisationB, ...users] = await Promise.all([
       testHelpers.createOrganisation(),
       testHelpers.createOrganisation(),
-      testHelpers.createUser({ firstName: 'test', lastName: 'test' }),
+      testHelpers.createUser({ firstName: 'test', lastName: 'trial' }),
+      testHelpers.createUser({ firstName: 'taal', lastName: 'spellen' }),
       testHelpers.createUser({ firstName: 'pelt', lastName: 'spellen' }),
-      testHelpers.createUser({ firstName: 'pelt', lastName: 'spellen' }),
-      testHelpers.createUser(),
+      testHelpers.createUser({ firstName: 'Jean-Claude', lastName: 'van Damme' }),
     ]);
 
     const [networkA, networkB] = await Promise.all([
@@ -106,42 +106,67 @@ describe('Handler: Users in organisation', () => {
     assert.equal(result.error_code, '403');
   });
 
-  it(`should return a set of users for organisation where mutliple organisations have a member with the same name,
-    based on a query`,
-    async () => {
-      const endpoint = `/v2/organisations/${organisationA.id}/users?q=pel`;
+  describe('filter on query', () => {
+    it(`should return a set of users for organisation where mutliple organisations have a member
+      with the same name, based on a query`,
+      async () => {
+        const endpoint = `/v2/organisations/${organisationA.id}/users?q=pel`;
+        const { statusCode, result } = await getRequest(endpoint, users[0].token);
+
+        assert.equal(statusCode, 200);
+        assert.lengthOf(result.data, 1);
+      }
+    );
+
+    it('should return a set of users for organisation based on a query', async () => {
+      const endpoint = `/v2/organisations/${organisationA.id}/users?q=test`;
       const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
       assert.equal(statusCode, 200);
       assert.lengthOf(result.data, 1);
+
+      const actual = result.data[0];
+
+      assert.property(actual, 'id');
+      assert.property(actual, 'first_name');
+      assert.property(actual, 'last_name');
+      assert.property(actual, 'full_name');
+      assert.property(actual, 'phone_num');
+      assert.property(actual, 'type');
+      assert.property(actual, 'id');
+      assert.property(actual, 'username');
+      assert.property(actual, 'email');
+      assert.property(actual, 'external_id');
+      assert.property(actual, 'integration_auth');
+      assert.property(actual, 'role_type');
+      assert.property(actual, 'profile_img');
+      assert.property(actual, 'date_of_birth');
+      assert.property(actual, 'created_at');
+      assert.property(actual, 'last_login');
+      assert.property(actual, 'invited_at');
+      assert.property(actual, 'deleted_at');
     });
 
-  it('should return a set of users for organisation based on a query', async () => {
-    const endpoint = `/v2/organisations/${organisationA.id}/users?q=test`;
-    const { statusCode, result } = await getRequest(endpoint, users[0].token);
+    it('should return a set of users with users that have a space in last name, based on a query',
+      async () => {
+        const endpoint = `/v2/organisations/${organisationA.id}/users?q=n D`;
+        const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
-    assert.equal(statusCode, 200);
-    assert.lengthOf(result.data, 1);
+        assert.equal(statusCode, 200);
+        assert.lengthOf(result.data, 1);
+      }
+    );
 
-    const actual = result.data[0];
+    it(`should return a set of users with users that have a hyphen in first name,
+      case-insensitive, based on a query`,
+      async () => {
+        const endpoint = `/v2/organisations/${organisationA.id}/users?q=n-c`;
+        const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
-    assert.property(actual, 'id');
-    assert.property(actual, 'first_name');
-    assert.property(actual, 'last_name');
-    assert.property(actual, 'full_name');
-    assert.property(actual, 'phone_num');
-    assert.property(actual, 'type');
-    assert.property(actual, 'id');
-    assert.property(actual, 'username');
-    assert.property(actual, 'email');
-    assert.property(actual, 'external_id');
-    assert.property(actual, 'integration_auth');
-    assert.property(actual, 'role_type');
-    assert.property(actual, 'profile_img');
-    assert.property(actual, 'date_of_birth');
-    assert.property(actual, 'created_at');
-    assert.property(actual, 'last_login');
-    assert.property(actual, 'invited_at');
-    assert.property(actual, 'deleted_at');
+        assert.equal(statusCode, 200);
+        assert.lengthOf(result.data, 1);
+        assert.equal(result.data[0].first_name, 'Jean-Claude');
+      }
+    );
   });
 });
