@@ -108,13 +108,12 @@ describe('Handler: Users in organisation', () => {
 
   describe('Filtering', () => {
     it('should only search for users that are member of the organisation', async () => {
-        const endpoint = `/v2/organisations/${organisationA.id}/users?q=pel`;
-        const { statusCode, result } = await getRequest(endpoint, users[0].token);
+      const endpoint = `/v2/organisations/${organisationA.id}/users?q=pel`;
+      const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
-        assert.equal(statusCode, 200);
-        assert.lengthOf(result.data, 1);
-      }
-    );
+      assert.equal(statusCode, 200);
+      assert.lengthOf(result.data, 1);
+    });
 
     it('should handle just text query', async () => {
       const endpoint = `/v2/organisations/${organisationA.id}/users?q=test`;
@@ -146,22 +145,20 @@ describe('Handler: Users in organisation', () => {
     });
 
     it('should handle spaces', async () => {
-        const endpoint = `/v2/organisations/${organisationA.id}/users?q=n%20D`;
-        const { statusCode, result } = await getRequest(endpoint, users[0].token);
+      const endpoint = `/v2/organisations/${organisationA.id}/users?q=n%20D`;
+      const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
-        assert.equal(statusCode, 200);
-        assert.lengthOf(result.data, 1);
-      }
-    );
+      assert.equal(statusCode, 200);
+      assert.lengthOf(result.data, 1);
+    });
 
     it('should handle hyphens', async () => {
-        const endpoint = `/v2/organisations/${organisationA.id}/users?q=n-c`;
-        const { statusCode, result } = await getRequest(endpoint, users[0].token);
+      const endpoint = `/v2/organisations/${organisationA.id}/users?q=n-c`;
+      const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
-        assert.equal(statusCode, 200);
-        assert.lengthOf(result.data, 1);
-        assert.equal(result.data[0].first_name, 'Jean-Claude');
-      }
-    );
+      assert.equal(statusCode, 200);
+      assert.lengthOf(result.data, 1);
+      assert.equal(result.data[0].first_name, 'Jean-Claude');
+    });
   });
 });
