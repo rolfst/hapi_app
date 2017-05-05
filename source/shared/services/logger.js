@@ -72,10 +72,10 @@ const currentLogLevel = ELogLevel.indexOf((() => {
 })());
 
 // Minimum loglevel that is sent to stderr, the rest goes to stdout
-const errorLogLevel = ELogLevel.indexOf(LogLevel[logConfig.errorLogLevel]);
+const errorLogLevel = ELogLevel.indexOf(logConfig.errorLogLevel);
 
 // Minimum loglevel that is exported to an external service like datadog or sentry (or both)
-const exportLogLevel = ELogLevel.indexOf(LogLevel[logConfig.errorLogLevel]);
+const exportLogLevel = ELogLevel.indexOf(logConfig.errorLogLevel);
 
 const bunyanConfig = {
   streams: [],
