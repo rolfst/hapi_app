@@ -106,10 +106,8 @@ describe('Handler: Users in organisation', () => {
     assert.equal(result.error_code, '403');
   });
 
-  describe('filter on query', () => {
-    it(`should return a set of users for organisation where mutliple organisations have a member
-      with the same name, based on a query`,
-      async () => {
+  describe('Filtering', () => {
+    it('should only search for users that are member of the organisation', async () => {
         const endpoint = `/v2/organisations/${organisationA.id}/users?q=pel`;
         const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
@@ -118,7 +116,7 @@ describe('Handler: Users in organisation', () => {
       }
     );
 
-    it('should return a set of users for organisation based on a query', async () => {
+    it('should handle just text query', async () => {
       const endpoint = `/v2/organisations/${organisationA.id}/users?q=test`;
       const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
@@ -147,9 +145,8 @@ describe('Handler: Users in organisation', () => {
       assert.property(actual, 'deleted_at');
     });
 
-    it('should return a set of users with users that have a space in last name, based on a query',
-      async () => {
-        const endpoint = `/v2/organisations/${organisationA.id}/users?q=n D`;
+    it('should handle spaces', async () => {
+        const endpoint = `/v2/organisations/${organisationA.id}/users?q=n%20D`;
         const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
         assert.equal(statusCode, 200);
@@ -157,9 +154,7 @@ describe('Handler: Users in organisation', () => {
       }
     );
 
-    it(`should return a set of users with users that have a hyphen in first name,
-      case-insensitive, based on a query`,
-      async () => {
+    it('should handle hyphens', async () => {
         const endpoint = `/v2/organisations/${organisationA.id}/users?q=n-c`;
         const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
