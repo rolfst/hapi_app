@@ -35,10 +35,7 @@ describe('Workflow handler: remove workflow', () => {
   after(() => testHelper.cleanAll());
 
   it('should remove a workflow for an admin', async () => {
-    const { statusCode } = await deleteRequest(
-      removeUrl,
-      admin.token
-    );
+    const { statusCode } = await deleteRequest(removeUrl, null, admin.token);
 
     assert.equal(statusCode, 200);
 
@@ -49,19 +46,13 @@ describe('Workflow handler: remove workflow', () => {
   });
 
   it('should fail for an employee', async () => {
-    const { statusCode } = await deleteRequest(
-      removeUrl,
-      employee.token
-    );
+    const { statusCode } = await deleteRequest(removeUrl, null, employee.token);
 
     assert.equal(statusCode, 403);
   });
 
   it('should fail for user not in organisation', async () => {
-    const { statusCode } = await deleteRequest(
-      removeUrl,
-      otherUser.token
-    );
+    const { statusCode } = await deleteRequest(removeUrl, null, otherUser.token);
 
     assert.equal(statusCode, 403);
   });
@@ -101,10 +92,7 @@ describe('Workflow handler: remove trigger', () => {
   after(() => testHelper.cleanAll());
 
   it('should remove a workflow for an admin', async () => {
-    const { statusCode } = await deleteRequest(
-      removeUrl,
-      admin.token
-    );
+    const { statusCode } = await deleteRequest(removeUrl, null, admin.token);
 
     assert.equal(statusCode, 200);
 
@@ -115,19 +103,13 @@ describe('Workflow handler: remove trigger', () => {
   });
 
   it('should fail for an employee', async () => {
-    const { statusCode } = await deleteRequest(
-      removeUrl,
-      employee.token
-    );
+    const { statusCode } = await deleteRequest(removeUrl, null, employee.token);
 
     assert.equal(statusCode, 403);
   });
 
   it('should fail for user not in organisation', async () => {
-    const { statusCode } = await deleteRequest(
-      removeUrl,
-      otherUser.token
-    );
+    const { statusCode } = await deleteRequest(removeUrl, null, otherUser.token);
 
     assert.equal(statusCode, 403);
   });
@@ -167,10 +149,7 @@ describe('Workflow handler: remove condition', () => {
   after(() => testHelper.cleanAll());
 
   it('should remove a workflow for an admin', async () => {
-    const { statusCode } = await deleteRequest(
-      removeUrl,
-      admin.token
-    );
+    const { statusCode } = await deleteRequest(removeUrl, null, admin.token);
 
     assert.equal(statusCode, 200);
 
@@ -181,19 +160,13 @@ describe('Workflow handler: remove condition', () => {
   });
 
   it('should fail for an employee', async () => {
-    const { statusCode } = await deleteRequest(
-      removeUrl,
-      employee.token
-    );
+    const { statusCode } = await deleteRequest(removeUrl, null, employee.token);
 
     assert.equal(statusCode, 403);
   });
 
   it('should fail for user not in organisation', async () => {
-    const { statusCode } = await deleteRequest(
-      removeUrl,
-      otherUser.token
-    );
+    const { statusCode } = await deleteRequest(removeUrl, null, otherUser.token);
 
     assert.equal(statusCode, 403);
   });
@@ -233,10 +206,7 @@ describe('Workflow handler: remove action', () => {
   after(() => testHelper.cleanAll());
 
   it('should remove a workflow for an admin', async () => {
-    const { statusCode } = await deleteRequest(
-      removeUrl,
-      admin.token
-    );
+    const { statusCode } = await deleteRequest(removeUrl, null, admin.token);
 
     assert.equal(statusCode, 200);
 
@@ -247,19 +217,13 @@ describe('Workflow handler: remove action', () => {
   });
 
   it('should fail for an employee', async () => {
-    const { statusCode } = await deleteRequest(
-      removeUrl,
-      employee.token
-    );
+    const { statusCode } = await deleteRequest(removeUrl, null, employee.token);
 
     assert.equal(statusCode, 403);
   });
 
   it('should fail for user not in organisation', async () => {
-    const { statusCode } = await deleteRequest(
-      removeUrl,
-      otherUser.token
-    );
+    const { statusCode } = await deleteRequest(removeUrl, null, otherUser.token);
 
     assert.equal(statusCode, 403);
   });
