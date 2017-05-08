@@ -9,7 +9,7 @@ module.exports = () => {
   });
 
   // In production we want a global error handler from the raven client
-  if (process.env.API_ENV === 'production') {
+  if (process.env.API_ENV === 'production' && !process.env.FORCE_SENTRY_LOG) {
     client = client.install();
   }
 
