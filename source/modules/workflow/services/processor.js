@@ -10,7 +10,6 @@ FROM
   organisation_user ou
   %joins
 WHERE
-  ou.organisation_id = %organisation_id
   %where
 GROUP BY
   ou.user_id
@@ -97,7 +96,7 @@ R.forEachObjIndexed((table, tableName) => {
   }
 }, structure);
 
-const castToArrayAndEscape = R.map(sequelize.escape, R.split(','));
+const castToArrayAndEscape = R.map(sequelize.escape.bind(sequelize), R.split(','));
 
 const buildQuery = (organisationId, conditions) => {
   logger.info('buildQuery', { organisationId, conditions });
@@ -122,10 +121,10 @@ const buildQuery = (organisationId, conditions) => {
     joins.push(name);
   };
 
-  let whereConditions = [];
+  let whereConditions = [`ou.organisation_id = ${sequelize.escape(organisationId)}`];
 
   if (conditions) {
-    whereConditions = conditions.map((condition) => {
+    R.forEach((condition) => {
       if (!Object.prototype.hasOwnProperty.call(selectables, condition.field)) throw new Error('Unknown field');
 
       addJoin(selectables[condition.field].join);
@@ -145,12 +144,12 @@ const buildQuery = (organisationId, conditions) => {
           escapedValue = sequelize.escape(condition.value);
           break;
 
-        case EConditionOperators.CONTAINS:
+        case EConditionOperators.IN:
           operator = 'IN';
           escapedValue = `(${castToArrayAndEscape(condition.value)})`;
           break;
 
-        case EConditionOperators.DOESNTCONTAIN:
+        case EConditionOperators.NOT_IN:
           operator = 'NOT IN';
           escapedValue = `(${castToArrayAndEscape(condition.value)})`;
           break;
@@ -159,8 +158,8 @@ const buildQuery = (organisationId, conditions) => {
           throw new Error('Invalid operator');
       }
 
-      return `${fieldName} ${operator} ${escapedValue}`;
-    });
+      whereConditions.push(`${fieldName} ${operator} ${escapedValue}`);
+    }, conditions);
   }
 
   const buildJoins = R.filter(R.identity(), R.map((table) => {
@@ -173,8 +172,7 @@ const buildQuery = (organisationId, conditions) => {
 
   return baseQuery
     .replace('%joins', buildJoins.join('\n  '))
-    .replace('%where', whereConditions.join(' AND '))
-    .replace('%organisation_id', sequelize.escape(organisationId));
+    .replace('%where', whereConditions.join('\n  AND '));
 };
 
 exports.buildQuery = buildQuery;

@@ -2,6 +2,7 @@
 const { assert } = require('chai');
 const testHelper = require('../../../shared/test-utils/helpers');
 const workflowProcessor = require('./processor');
+const { EConditionOperators } = require('../definitions');
 
 describe('Workflow processor', async () => {
   let admin;
@@ -30,9 +31,11 @@ describe('Workflow processor', async () => {
   });
 
   it('should generate a query', async () => {
-    const query = workflowProcessor.buildQuery(organisation.id, workflow.conditions);
-
-    // console.log(organisation, workflow, query);
+    const query = workflowProcessor.buildQuery(organisation.id, workflow.conditions.concat([{
+      field: 'network.id',
+      operator: EConditionOperators.IN,
+      value: '1,2,3',
+    }]));
 
     assert.isString(query);
   });
