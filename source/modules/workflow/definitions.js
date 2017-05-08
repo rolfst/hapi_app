@@ -11,6 +11,7 @@ exports.EConditionOperators = {
   LESS_THAN_OR_EQUAL: '<=',
   NOT: '!=',
   CONTAINS: 'in',
+  DOESNTCONTAIN: 'notin',
 };
 
 exports.EActionTypes = {

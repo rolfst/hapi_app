@@ -29,7 +29,7 @@ describe.only('Workflow processor', async () => {
   it('should generate a query', async () => {
     const query = workflowProcessor.buildQuery(organisation.id, workflow.conditions);
 
-    console.log(query);
+    console.log(organisation, workflow, query);
 
     assert.isString(query);
   });

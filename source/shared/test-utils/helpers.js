@@ -357,13 +357,13 @@ async function createCompleteWorkFlow(organisationId, name = randomString()) {
         workflowId: createdWorkFlow.id,
         field: 'user.age',
         operator: workflowRepository.EConditionOperators.GREATER_THAN_OR_EQUAL,
-        value: '25',
+        value: '18',
       }),
       workflowRepository.createCondition({
         workflowId: createdWorkFlow.id,
-        field: 'user.gender',
-        operator: workflowRepository.EConditionOperators.EQUAL,
-        value: 'm',
+        field: 'user.age',
+        operator: workflowRepository.EConditionOperators.LESS_THAN_OR_EQUAL,
+        value: '50',
       }),
     ]),
     Promise.all([
@@ -378,7 +378,11 @@ async function createCompleteWorkFlow(organisationId, name = randomString()) {
     ]),
   ]);
 
-  return [createdWorkFlow, createdTriggers, createdConditions, createdActions];
+  return R.merge(createdWorkFlow, {
+    triggers: createdTriggers,
+    conditions: createdConditions,
+    actions: createdActions,
+  });
 }
 
 /**

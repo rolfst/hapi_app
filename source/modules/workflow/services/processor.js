@@ -1,5 +1,6 @@
 const R = require('ramda');
 const sequelize = require('../../../shared/configs/sequelize');
+const { EConditionOperators } = require('../definitions');
 const logger = require('../../../shared/services/logger')('WORKFLOW/service/processor');
 
 const baseQuery = `
@@ -28,6 +29,9 @@ const structure = {
       'created_at',
       'updated_at',
     ],
+    calculatedFields: {
+      age: 'TIMESTAMPDIFF(YEAR, u.date_of_birth, CURDATE())',
+    },
   },
   organisation_user: {
     identifier: 'ou',
@@ -76,16 +80,31 @@ const selectables = {};
 
 // Get all selectable fields and precompile some info
 R.mapObjIndexed((table, tableName) => {
-  R.mapObjIndexed((field, fieldName) => {
+  R.map((fieldName) => {
     selectables[`${tableName}.${fieldName}`] = {
       join: tableName,
       identifier: `${table.identifier}.${fieldName}`,
     };
-  });
-});
+  }, table.fields);
+
+  if (table.calculatedFields) {
+    R.mapObjIndexed((selector, fieldName) => {
+      selectables[`${tableName}.${fieldName}`] = {
+        join: tableName,
+        identifier: `${selector}`,
+      };
+    }, table.calculatedFields);
+  }
+}, structure);
+
+const castToArrayAndEscape = R.map(sequelize.escape, R.split(','));
 
 const buildQuery = (organisationId, conditions) => {
   logger.info('buildQuery', { organisationId, conditions });
+
+  if (!organisationId) {
+    throw new Error('No organisation id supplied!');
+  }
 
   const joins = [];
   const addJoin = (name, skipDependency) => {
@@ -103,15 +122,46 @@ const buildQuery = (organisationId, conditions) => {
     joins.push(name);
   };
 
-  addJoin('user');
-  addJoin('network');
+  let whereConditions = [];
 
-  const whereConditions = [];
-  const params = {
-    organisation_id: organisationId,
-  };
+  if (conditions) {
+    whereConditions = conditions.map((condition) => {
+      if (!selectables.hasOwnProperty(condition.field)) throw new Error('Unknown field');
 
-  // TODO - build where conditions
+      addJoin(selectables[condition.field].join);
+
+      const fieldName = selectables[condition.field].identifier;
+      let operator;
+      let escapedValue;
+
+      switch (condition.operator) {
+        case EConditionOperators.EQUAL:
+        case EConditionOperators.GREATER_THAN:
+        case EConditionOperators.LESS_THAN:
+        case EConditionOperators.GREATER_THAN_OR_EQUAL:
+        case EConditionOperators.LESS_THAN_OR_EQUAL:
+        case EConditionOperators.NOT:
+          operator = condition.operator;
+          escapedValue = sequelize.escape(condition.value);
+          break;
+
+        case EConditionOperators.CONTAINS:
+          operator = 'IN';
+          escapedValue = `(${castToArrayAndEscape(condition.value)})`;
+          break;
+
+        case EConditionOperators.DOESNTCONTAIN:
+          operator = 'NOT IN';
+          escapedValue = `(${castToArrayAndEscape(condition.value)})`;
+          break;
+
+        default:
+          throw new Error('Invalid operator');
+      }
+
+      return `${fieldName} ${operator} ${escapedValue}`;
+    });
+  }
 
   const buildJoins = R.filter(R.identity(), R.map((table) => {
     if (structure[table].hasOwnProperty('joinSQL')) {
