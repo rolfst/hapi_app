@@ -62,7 +62,6 @@ const findByIds = async (userIds, networkId = null) => {
   if (networkId) {
     includes = R.map(R.merge(R.__, { where: { networkId } }), includes);
   }
-
   const options = R.merge({ include: includes }, { where: { id: { $in: userIds } } });
   const result = await User.findAll(options);
 

@@ -51,13 +51,14 @@ describe('Handler: View my scoped profile', () => {
   after(() => testHelpers.cleanAll());
 
   it('should return correct user object', async () => {
-    const endpoint = '/users/me';
+    const endpoint = '/v2/users/me';
     const { result: { data } } = await getRequest(endpoint, admin.token);
 
     assert.equal(data.id, admin.id);
     assert.equal(data.username, admin.username);
     assert.equal(data.first_name, admin.firstName);
     assert.equal(data.last_name, admin.lastName);
+    assert.equal(data.full_name, admin.fullName);
     assert.equal(data.phone_num, admin.phoneNum);
     assert.equal(data.email, admin.email);
     assert.equal(data.date_of_birth, admin.dateOfBirth);
@@ -89,7 +90,7 @@ describe('Handler: View my scoped profile', () => {
   });
 
   it('should return correct user object for network without integration', async () => {
-    const endpoint = '/users/me';
+    const endpoint = '/v2/users/me';
     const { result: { data } } = await getRequest(endpoint, admin.token);
 
     assert.equal(data.id, admin.id);
@@ -104,7 +105,7 @@ describe('Handler: View my scoped profile', () => {
   });
 
   it('should return correct user object for network with integration', async () => {
-    const endpoint = '/users/me';
+    const endpoint = '/v2/users/me';
     const { result: { data } } = await getRequest(endpoint, admin.token);
 
     assert.equal(data.id, admin.id);

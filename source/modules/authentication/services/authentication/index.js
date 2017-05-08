@@ -1,6 +1,7 @@
 const createError = require('../../../../shared/utils/create-error');
 const tokenUtil = require('../../../../shared/utils/token');
 const userRepo = require('../../../core/repositories/user');
+const organisationRepo = require('../../../core/repositories/organisation');
 const Mixpanel = require('../../../../shared/services/mixpanel');
 const firstLoginEvent = require('../../analytics/first-login-event');
 const impl = require('./implementation');
@@ -33,7 +34,11 @@ const delegate = async (payload, message) => {
   const user = await userRepo.findUserById(decodedToken.sub, null, false);
   const { accessToken } = await impl.createAuthenticationTokens(user.id, message.deviceName);
 
-  userRepo.updateNetworkLink({ userId: user.id }, { lastActive: new Date() });
+  const repoWhere = { userId: user.id };
+  const repoAttributes = { lastActive: new Date() };
+
+  userRepo.updateNetworkLink(repoWhere, repoAttributes);
+  organisationRepo.updateOrganisationLink(repoWhere, repoAttributes);
 
   return { accessToken };
 };

@@ -50,7 +50,7 @@ describe('Handler: Update user in organisation', () => {
       email: 'test@test.com',
       password: 'foo',
       date_of_birth: '1980-01-01',
-      phone_num: 'test',
+      phone_num: '0102334449',
     };
 
     updateUrl = `/v2/organisations/${organisation.id}/users/${organisationUser.id}`;
