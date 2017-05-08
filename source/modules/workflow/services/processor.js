@@ -121,7 +121,7 @@ const buildQuery = (organisationId, conditions) => {
     joins.push(name);
   };
 
-  let whereConditions = [`ou.organisation_id = ${sequelize.escape(organisationId)}`];
+  const whereConditions = [`ou.organisation_id = ${sequelize.escape(organisationId)}`];
 
   if (conditions) {
     R.forEach((condition) => {
