@@ -1,7 +1,7 @@
 const { assert } = require('chai');
 const testHelper = require('../../../shared/test-utils/helpers');
 const { postRequest } = require('../../../shared/test-utils/request');
-const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../h');
+const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../definitions');
 
 describe('Workflow handler: create workflow', () => {
   const workflowFixture = {

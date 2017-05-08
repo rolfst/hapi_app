@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const { EConditionOperators } = require('../../workflow/h');
+const { EConditionOperators } = require('../../workflow/definitions');
 
 module.exports = {
   payload: Joi.object().keys({

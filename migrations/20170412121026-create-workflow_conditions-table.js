@@ -1,6 +1,6 @@
 'use strict';
 
-const { EConditionOperators } = require('../source/modules/workflow/h');
+const { EConditionOperators } = require('../source/modules/workflow/definitions');
 
 module.exports = {
   up: function (queryInterface, Sequelize) {

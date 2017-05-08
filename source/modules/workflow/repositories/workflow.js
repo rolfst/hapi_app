@@ -5,7 +5,7 @@ const createTriggerModel = require('../models/trigger');
 const createConditionModel = require('../models/condition');
 const createActionModel = require('../models/action');
 // const createActionDoneModel = require('../models/actiondone');
-const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../h');
+const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../definitions');
 const dateUtils = require('../../../shared/utils/date');
 
 const buildWhereConstraint = (idOrWhereConstraint) => (
