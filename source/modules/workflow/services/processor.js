@@ -79,8 +79,8 @@ const structure = {
 const selectables = {};
 
 // Get all selectable fields and precompile some info
-R.mapObjIndexed((table, tableName) => {
-  R.map((fieldName) => {
+R.forEachObjIndexed((table, tableName) => {
+  R.forEach((fieldName) => {
     selectables[`${tableName}.${fieldName}`] = {
       join: tableName,
       identifier: `${table.identifier}.${fieldName}`,
@@ -88,7 +88,7 @@ R.mapObjIndexed((table, tableName) => {
   }, table.fields);
 
   if (table.calculatedFields) {
-    R.mapObjIndexed((selector, fieldName) => {
+    R.forEachObjIndexed((selector, fieldName) => {
       selectables[`${tableName}.${fieldName}`] = {
         join: tableName,
         identifier: `${selector}`,
@@ -110,9 +110,9 @@ const buildQuery = (organisationId, conditions) => {
   const addJoin = (name, skipDependency) => {
     if (joins.includes(name)) return;
 
-    if (!structure.hasOwnProperty(name)) throw new Error('invalid join');
+    if (!Object.prototype.hasOwnProperty.call(structure, name)) throw new Error('invalid join');
 
-    if (structure[name].hasOwnProperty('depends')) {
+    if (Object.prototype.hasOwnProperty.call(structure[name], 'depends')) {
       R.forEach((depName) => {
         // The second parameter to addJoin prevents cyclic dependencies
         if (depName !== skipDependency) addJoin(depName, name);
@@ -126,7 +126,7 @@ const buildQuery = (organisationId, conditions) => {
 
   if (conditions) {
     whereConditions = conditions.map((condition) => {
-      if (!selectables.hasOwnProperty(condition.field)) throw new Error('Unknown field');
+      if (!Object.prototype.hasOwnProperty.call(selectables, condition.field)) throw new Error('Unknown field');
 
       addJoin(selectables[condition.field].join);
 
@@ -164,7 +164,7 @@ const buildQuery = (organisationId, conditions) => {
   }
 
   const buildJoins = R.filter(R.identity(), R.map((table) => {
-    if (structure[table].hasOwnProperty('joinSQL')) {
+    if (Object.prototype.hasOwnProperty.call(structure[table], 'joinSQL')) {
       return structure[table].joinSQL;
     }
 
@@ -178,4 +178,3 @@ const buildQuery = (organisationId, conditions) => {
 };
 
 exports.buildQuery = buildQuery;
-
