@@ -4,6 +4,7 @@ const authenticate = require('./authenticate');
 const blueprints = require('./blueprints');
 const organisationService = require('../../modules/core/services/organisation');
 const organisationRepository = require('../../modules/core/repositories/organisation');
+const workflowRepository = require('../../modules/workflow/repositories/workflow');
 const networkService = require('../../modules/core/services/network');
 const exchangeRepo = require('../../modules/flexchange/repositories/exchange');
 const integrationRepo = require('../../modules/core/repositories/integration');
@@ -333,11 +334,121 @@ async function deletePoll(poll) {
 }
 
 /**
+ * Creates a complete workflow object with some dummy triggers, conditions and actions
+ * @param {number} organisationId
+ * @param {string} Optional: name
+ * @method createCompleteWorkFlow
+ * @return {external:Array<WorkFlow, Triggers, Conditions, Action>}
+ */
+async function createCompleteWorkFlow(organisationId, name = randomString()) {
+  const createdWorkFlow = await workflowRepository
+    .create({ organisationId, name });
+
+  const [createdTriggers, createdConditions, createdActions] = await Promise.all([
+    Promise.all([
+      workflowRepository.createTrigger({
+        workflowId: createdWorkFlow.id,
+        type: workflowRepository.ETriggerTypes.DATETIME,
+        value: '2017-01-01',
+      }),
+    ]),
+    Promise.all([
+      workflowRepository.createCondition({
+        workflowId: createdWorkFlow.id,
+        field: 'user.age',
+        operator: workflowRepository.EConditionOperators.GREATER_THAN_OR_EQUAL,
+        value: '25',
+      }),
+      workflowRepository.createCondition({
+        workflowId: createdWorkFlow.id,
+        field: 'user.gender',
+        operator: workflowRepository.EConditionOperators.EQUAL,
+        value: 'm',
+      }),
+    ]),
+    Promise.all([
+      workflowRepository.createAction({
+        workflowId: createdWorkFlow.id,
+        type: workflowRepository.EActionTypes.MESSAGE,
+        meta: {
+          senderId: 1,
+          content: 'Too old for stocking',
+        },
+      }),
+    ]),
+  ]);
+
+  return [createdWorkFlow, createdTriggers, createdConditions, createdActions];
+}
+
+/**
+ * Creates a workflow object
+ * @param {number} organisationId
+ * @param {string} Optional: name
+ * @method createWorkFlow
+ * @return {external:Array<WorkFlow, Triggers, Conditions, Action>}
+ */
+async function createWorkFlow(organisationId, name = randomString()) {
+  return workflowRepository
+    .create({ organisationId, name });
+}
+
+/**
+ * Creates a workflow trigger
+ * @param {number} workflowId
+ * @param {string} Optional: type (ETriggerTypes)
+ * @param {date|string} Optional: value
+ * @method createTrigger
+ * @return {external:Array<WorkFlow, Triggers, Conditions, Action>}
+ */
+async function createTrigger(
+  workflowId,
+  type = workflowRepository.ETriggerTypes.DATETIME,
+  value = randomString()
+) {
+  return workflowRepository
+    .createTrigger({ workflowId, type, value });
+}
+
+/**
+ * Creates a workflow condition
+ * @param {number} workflowId
+ * @param {string} Optional: field
+ * @param {string} Optional: operator (EConditionOperators)
+ * @param {string} Optional: value
+ * @method createCondition
+ * @return {external:Array<WorkFlow, Triggers, Conditions, Action>}
+ */
+async function createCondition(
+  workflowId,
+  field = randomString(),
+  operator = workflowRepository.EConditionOperators.EQUAL,
+  value = randomString()
+) {
+  return workflowRepository
+    .createCondition({ workflowId, field, operator, value });
+}
+
+/**
+ * Creates a workflow action
+ * @param {number} workflowId
+ * @param {string} Optional: type (EActionTypes)
+ * @param {object|string} Optional: meta
+ * @method createAction
+ * @return {external:Array<WorkFlow, Triggers, Conditions, Action>}
+ */
+async function createAction(workflowId, type = workflowRepository.EActionTypes.MESSAGE, meta = {}) {
+  return workflowRepository
+    .createAction({ workflowId, type, meta });
+}
+
+/**
  * Deletes all data in the database
  * @method cleanAll
  */
 async function cleanAll() {
   await organisationRepository.deleteAll();
+  await workflowRepository.deleteAll();
 
   const networks = await networkRepo.findAll();
   const admins = R.map((network) => network.superAdmin, networks);
@@ -378,3 +489,8 @@ exports.findAllExchanges = findAllExchanges;
 exports.getLoginToken = getLoginToken;
 exports.hapiFile = hapiFile;
 exports.randomString = randomString;
+exports.createCompleteWorkFlow = createCompleteWorkFlow;
+exports.createWorkFlow = createWorkFlow;
+exports.createTrigger = createTrigger;
+exports.createCondition = createCondition;
+exports.createAction = createAction;

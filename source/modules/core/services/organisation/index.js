@@ -5,8 +5,8 @@ const organisationRepository = require('../../repositories/organisation');
 const userRepository = require('../../repositories/user');
 const networkRepository = require('../../repositories/network');
 const networkService = require('../network');
-const userService = require('../user');
 const impl = require('./implementation');
+const userService = require('../user');
 const { ERoleTypes } = require('../../definitions');
 
 /**
@@ -436,6 +436,7 @@ exports.deleteFunction = deleteFunction;
 exports.getOrganisation = getOrganisation;
 exports.listForUser = listForUser;
 exports.listFunctions = listFunctions;
+exports.userHasRoleInOrganisation = userHasRoleInOrganisation;
 exports.listNetworks = listNetworks;
 exports.listUsers = listUsers;
 exports.removeUserFromNetworks = removeUserFromNetworks;
