@@ -13,10 +13,10 @@ module.exports = async (req, reply) => {
     logger.debug('Fetching workflow', { payload, message });
 
     if (
-      !await organisationService.userHasRoleInOrganisation(
-        organisationService.ERoleTypes.ADMIN,
+      !(await organisationService.userHasRoleInOrganisation(
         payload.organisationId,
-        message.credentials.id)
+        message.credentials.id,
+        organisationService.ERoleTypes.ADMIN))
     ) {
       throw createError('403');
     }

@@ -9,10 +9,10 @@ module.exports = async (req, reply) => {
     const { payload, message } = createServicePayload(req);
 
     if (
-      !await organisationService.userHasRoleInOrganisation(
-        organisationService.ERoleTypes.ADMIN,
+      !(await organisationService.userHasRoleInOrganisation(
         payload.organisationId,
-        message.credentials.id)
+        message.credentials.id,
+        organisationService.ERoleTypes.ADMIN))
     ) {
       throw createError('403');
     }

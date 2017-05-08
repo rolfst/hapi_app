@@ -5,7 +5,12 @@ const createServicePayload = require('../../../shared/utils/create-service-paylo
 module.exports = async (req, reply) => {
   try {
     const { message, payload } = createServicePayload(req);
-    const [data, count] = await Promise.all([
+    if (payload.q) {
+      const result = await organisationService.listUsers(payload, message);
+
+      return reply({ data: responseUtil.toSnakeCase(result) });
+    }
+    const [data, counts] = await Promise.all([
       organisationService.listUsers(payload, message),
       organisationService.countUsers(payload, message),
     ]);
@@ -16,8 +21,9 @@ module.exports = async (req, reply) => {
         pagination: {
           limit: req.query.limit,
           offset: req.query.offset,
-          total_count: count,
+          total_count: counts.total,
         },
+        counts,
       },
     });
   } catch (err) {

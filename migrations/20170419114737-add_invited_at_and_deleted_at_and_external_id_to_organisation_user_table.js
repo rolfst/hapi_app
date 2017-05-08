@@ -38,42 +38,39 @@ module.exports = {
 /*
   -- migration query per organisation, keeping it here because we don't have a .sql folder
 
-INSERT INTO
-  organisation_user (
-    organisation_id,
-    user_id,
-    role_type,
-    function_id,
-    invited_at,
-    deleted_at,
-    external_id,
-    created_at,
-    updated_at
-  )
-SELECT
-  1 organisation_id,
-  nu.user_id user_id,
-  'EMPLOYEE' role_type,
-  null function_id,
-  MIN(nu.invited_at) invited_at,
-  CASE
-    WHEN COUNT(nu.deleted_at IS NULL) > 0
-      THEN NULL
-	  ELSE MAX(nu.deleted_at)
-  END deleted_at,
-  null external_id,
-  MIN(nu.invited_at) created_at,
-  NOW() updated_at
-FROM
-  network_user nu
-WHERE
-  -- network id's
-  nu.id IN (
-    1, 2, 3
-  )
-GROUP BY
-  nu.user_id
-;
+  INSERT INTO
+    organisation_user (
+      organisation_id,
+      user_id,
+      role_type,
+      function_id,
+      invited_at,
+      deleted_at,
+      external_id,
+      created_at,
+      updated_at
+    )
+  SELECT
+    n.organisation_id organisation_id,
+    nu.user_id user_id,
+    'EMPLOYEE' role_type,
+    null function_id,
+    MIN(IF(nu.invited_at IS NULL, null, nu.invited_at)) invited_at,
+    CASE
+      WHEN COUNT(nu.deleted_at IS NULL) > 0
+        THEN NULL
+        ELSE MAX(IF(nu.deleted_at IS NULL, null, nu.deleted_at))
+    END deleted_at,
+    NULL external_id,
+    MIN(IF(nu.invited_at IS NULL, NOW(), nu.invited_at)) created_at,
+    NOW() updated_at
+  FROM
+    network_user nu
+    LEFT JOIN networks n ON n.id = nu.network_id
+  WHERE
+    NOT n.organisation_id IS NULL
+  GROUP BY
+    CONCAT(nu.user_id, n.organisation_id)
+  ;
 
 */
-

@@ -30,7 +30,7 @@ describe('Handler: Delete functions in organisation', () => {
 
   it('should delete a function', async () => {
     const endpoint = `/v2/organisations/${organisation.id}/functions/${existingFunction.id}`;
-    const { statusCode } = await deleteRequest(endpoint, admin.token);
+    const { statusCode } = await deleteRequest(endpoint, null, admin.token);
 
     assert.equal(statusCode, 200, 'Request is successful');
 
@@ -41,14 +41,14 @@ describe('Handler: Delete functions in organisation', () => {
 
   it('should fail when user isn\'t an admin in the organisation', async () => {
     const endpoint = `/v2/organisations/${organisation.id}/functions/${existingFunction.id}`;
-    const { statusCode } = await deleteRequest(endpoint, organisationUser.token);
+    const { statusCode } = await deleteRequest(endpoint, null, organisationUser.token);
 
     assert.equal(statusCode, 403);
   });
 
   it('should fail when user isn\'t in the organisation', async () => {
     const endpoint = `/v2/organisations/${organisation.id}/functions/${existingFunction.id}`;
-    const { statusCode } = await deleteRequest(endpoint, otherUser.token);
+    const { statusCode } = await deleteRequest(endpoint, null, otherUser.token);
 
     assert.equal(statusCode, 403);
   });

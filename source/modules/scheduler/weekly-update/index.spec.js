@@ -92,7 +92,7 @@ describe('Weekly update', () => {
     assert.equal(actualFirstMail.options.subject, expected.subject);
     assert.equal(actualFirstMail.data['-networkName-'], expected.networkName);
     assert.equal(actualFirstMail.data['-colleagues-'], expected.colleagues);
-    assert.deepEqual(actualFirstMail.options.receiver, [{ email: 'liam+1@flex-appeal.nl' }]);
+    assert.deepEqual(actualFirstMail.options.blindReceiver, [{ email: 'liam+1@flex-appeal.nl' }]);
     assert.equal(actualFirstMail.data['-messages-'], '<div><b>3</b><b>2</b><b>4</b></div>');
     assert.isDefined(actualFirstMail.data['-dates-']);
 
@@ -101,7 +101,7 @@ describe('Weekly update', () => {
     assert.equal(actualSecondMail.data['-networkName-'], expected.networkName);
     assert.equal(actualSecondMail.data['-colleagues-'], expected.colleagues);
     assert.equal(actualSecondMail.data['-messages-'], '<div><b>5</b><b>3</b><b>2</b></div>');
-    assert.deepEqual(actualSecondMail.options.receiver, [
+    assert.deepEqual(actualSecondMail.options.blindReceiver, [
       { email: 'liam+2@flex-appeal.nl' }, { email: 'liam+3@flex-appeal.nl' },
     ]);
     assert.isDefined(actualSecondMail.data['-dates-']);

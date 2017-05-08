@@ -44,6 +44,7 @@ describe('Handler: View my profile', () => {
     assert.equal(data.username, employee.username);
     assert.equal(data.first_name, employee.firstName);
     assert.equal(data.last_name, employee.lastName);
+    assert.equal(data.full_name, employee.fullName);
     assert.equal(data.phone_num, employee.phoneNum);
     assert.equal(data.email, employee.email);
     assert.equal(data.date_of_birth, employee.dateOfBirth);
@@ -62,6 +63,7 @@ describe('Handler: View my profile', () => {
     assert.equal(data.username, admin.username);
     assert.equal(data.first_name, admin.firstName);
     assert.equal(data.last_name, admin.lastName);
+    assert.equal(data.full_name, admin.fullName);
     assert.equal(data.phone_num, admin.phoneNum);
     assert.equal(data.email, admin.email);
     assert.equal(data.date_of_birth, admin.dateOfBirth);
@@ -80,6 +82,7 @@ describe('Handler: View my profile', () => {
     assert.equal(data.username, admin.username);
     assert.equal(data.first_name, admin.firstName);
     assert.equal(data.last_name, admin.lastName);
+    assert.equal(data.full_name, admin.fullName);
     assert.equal(data.phone_num, admin.phoneNum);
     assert.equal(data.email, admin.email);
     assert.equal(data.date_of_birth, admin.dateOfBirth);

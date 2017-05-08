@@ -10,7 +10,7 @@ const routes = [{
   handler: require(`${baseImport}/view-my-profile`),
 }, {
   method: 'GET',
-  url: '/users/me',
+  url: '/v2/users/me',
   handler: require(`${baseImport}/view-my-scoped-profile`),
   prefetch: false,
 }, {
@@ -23,6 +23,12 @@ const routes = [{
   url: `${basePath}/users`,
   handler: require(`${baseImport}/invite-user`),
   validator: require('./validators/create-user'),
+}, {
+  method: 'POST',
+  url: '/v2/organisations/{organisationId}/users',
+  handler: require(`${baseImport}/invite-user-to-organisation`),
+  validator: require('./validators/create-user-in-organisation'),
+  prefetch: false,
 }, {
   method: 'POST',
   url: `${basePath}/users/invite`,

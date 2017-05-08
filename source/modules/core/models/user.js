@@ -28,6 +28,8 @@ module.exports = (dao) => R.merge(
     dateOfBirth: dao.dateOfBirth ? dateUtils.toISOString(dao.dateOfBirth) : null,
     createdAt: dateUtils.toISOString(dao.created_at),
     lastLogin: dao.lastLogin ? dateUtils.toISOString(dao.lastLogin) : null,
+    // TODO: replace with actual value
+    lastActive: dao.lastLogin ? dateUtils.toISOString(dao.lastLogin) : null,
     invitedAt: dao.invitedAt ? dateUtils.toISOString(dao.invitedAt) : null,
     deletedAt: dao.deletedAt || null,
   }

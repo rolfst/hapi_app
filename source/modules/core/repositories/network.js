@@ -156,7 +156,6 @@ const addUser = async (attributes) => {
   if (pivotResult) {
     return pivotResult.update(R.merge(attributes, { deletedAt: attributes.deletedAt || null }));
   }
-
   return NetworkUser.create(R.merge(attributes, { user_id: attributes.userId }));
 };
 
@@ -276,6 +275,16 @@ const createIntegrationNetwork = async ({
   return findNetworkById(network.id);
 };
 
+const removeUser = (networkId, userId) => {
+  return NetworkUser.destroy({ where: { networkId, userId } });
+};
+
+const updateUser = (networkId, userId, attributes) => {
+  const whitelist = ['roleType'];
+
+  return NetworkUser.update(R.pick(whitelist, attributes), { where: { networkId, userId } });
+};
+
 exports.addUser = addUser;
 exports.addIntegrationToNetwork = addIntegrationToNetwork;
 exports.createIntegrationNetwork = createIntegrationNetwork;
@@ -292,5 +301,7 @@ exports.findNetworkIntegration = findNetworkIntegration;
 exports.findNetworksForUser = findNetworksForUser;
 exports.findTeamsForNetwork = findTeamsForNetwork;
 exports.findUsersForNetwork = findUsersForNetwork;
+exports.removeUser = removeUser;
 exports.setImportDateOnNetworkIntegration = setImportDateOnNetworkIntegration;
 exports.updateNetwork = updateNetwork;
+exports.updateUser = updateUser;

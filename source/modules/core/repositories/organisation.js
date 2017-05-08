@@ -3,6 +3,27 @@ const { Organisation, OrganisationUser, OrganisationNetwork, OrganisationFunctio
 const createModel = require('../models/organisation');
 const createPivotModel = require('../models/organisation-user');
 const createFunctionsModel = require('../models/organisation-function');
+const sequelize = require('../../../shared/configs/sequelize');
+
+const countQueryTotalAndLoggedIn = `
+SELECT
+  COUNT(*) AS total,
+  COUNT(u.last_login) AS loggedIn
+FROM organisation_user ou
+LEFT JOIN users AS u ON ou.user_id = u.id
+WHERE
+  ou.organisation_id = :organisationId AND
+  ou.deleted_at IS NULL
+`;
+const countQueryInactive = `
+SELECT
+  COUNT(*) AS inactive
+FROM organisation_user
+WHERE
+  organisation_id = :organisationId AND
+  deleted_at IS NULL AND
+  last_active < NOW() - INTERVAL 1 WEEK
+`;
 
 const create = (attributes) => {
   const whitelist = ['name', 'brandIcon', 'externalConfig'];
@@ -66,7 +87,7 @@ const hasUser = async (userId, organisationId) => {
   return !!result;
 };
 
-const addUser = async (userId, organisationId, roleType = 'EMPLOYEE', functionId = null) => {
+const addUser = async (userId, organisationId, roleType = 'EMPLOYEE', functionId = null, invitedAt = new Date()) => {
   return OrganisationUser
     .create({
       userId,
@@ -74,6 +95,7 @@ const addUser = async (userId, organisationId, roleType = 'EMPLOYEE', functionId
       organisation_id: organisationId,
       roleType,
       functionId,
+      invitedAt,
     });
 };
 
@@ -144,6 +166,28 @@ const findFunction = async (functionIdOrWhereConstraint) => {
  * @return {external:Promise.<user[]>}
  */
 const findUsers = async (constraint, attributes = {}, options = null) => {
+  if (constraint.q) {
+    return sequelize.query(`
+        SELECT
+          organisation_user.user_id AS userId,
+          organisation_user.role_type AS roleType,
+          DATE_FORMAT(organisation_user.invited_at, '%Y-%m-%dT%T.000Z') AS invitedAt,
+          DATE_FORMAT(organisation_user.created_at, '%Y-%m-%dT%T.000Z') AS createdAt,
+          organisation_user.deleted_at AS deletedAt,
+          CONCAT(users.first_name, ' ', users.last_name) AS fullName
+        FROM users
+        LEFT JOIN organisation_user ON users.id = organisation_user.user_id
+        WHERE organisation_user.organisation_id = :organisationId
+        HAVING fullName LIKE :q
+      `, {
+        replacements: {
+          q: `%${constraint.q}%`,
+          organisationId: constraint.organisationId,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      });
+  }
+
   const query = R.merge(options, { where: constraint }, attributes);
 
   return OrganisationUser.findAll(query);
@@ -175,7 +219,7 @@ const findFunctionForUser = (userId) => {
 };
 
 async function updateUser(userId, organisationId, attributes) {
-  const whitelist = ['functionId', 'roleType', 'invitedAt', 'deletedAt'];
+  const whitelist = ['functionId', 'roleType', 'invitedAt', 'deletedAt', 'lastActive'];
 
   return OrganisationUser
     .update(R.pick(whitelist, attributes), { where: { organisationId, userId } })
@@ -183,9 +227,27 @@ async function updateUser(userId, organisationId, attributes) {
     .then(createPivotModel);
 }
 
-async function countUsers(whereConstraint) {
-  return OrganisationUser.count({ where: whereConstraint });
-}
+const updateOrganisationLink = (whereConstraint, attributes) => {
+  OrganisationUser.update(attributes, { where: whereConstraint });
+};
+
+const countUsers = (organisationId) => {
+  const payload = { replacements: { organisationId }, type: sequelize.QueryTypes.SELECT };
+
+  return Promise.all([
+    sequelize.query(countQueryTotalAndLoggedIn, payload),
+    sequelize.query(countQueryInactive, payload),
+  ])
+    .then(([
+      [{ total, loggedIn }],
+      [{ inactive }],
+    ]) => ({
+      total,
+      inactive,
+      active: loggedIn - inactive,
+      not_registered: total - loggedIn,
+    }));
+};
 
 exports.addFunction = addFunction;
 exports.addUser = addUser;
@@ -204,4 +266,5 @@ exports.getPivot = getPivot;
 exports.hasUser = hasUser;
 exports.removeFunction = removeFunction;
 exports.updateFunction = updateFunction;
+exports.updateOrganisationLink = updateOrganisationLink;
 exports.updateUser = updateUser;

@@ -183,6 +183,17 @@ const update = async (payload, message) => {
   return networkRepo.updateNetwork(payload.networkId, R.pick(UPDATE_PROPERTIES, payload));
 };
 
+const fetchOrganisationNetworks = (organisationId, networkIds) => {
+  return networkRepo
+    .findWhere({ organisationId, id: { $in: networkIds } });
+};
+
+const removeUser = (networkId, userId) => networkRepo.removeUser(networkId, userId);
+
+const updateUser = (networkId, userId, attributes) =>
+  networkRepo.updateUser(networkId, userId, attributes);
+
+exports.fetchOrganisationNetworks = fetchOrganisationNetworks;
 exports.listTeamsForNetwork = listTeamsForNetwork;
 exports.listNetworksForUser = listNetworksForUser;
 exports.listAllUsersForNetwork = listAllUsersForNetwork;
@@ -191,4 +202,6 @@ exports.list = list;
 exports.create = create;
 exports.addUserToNetwork = addUserToNetwork;
 exports.listActiveUsersForNetwork = listActiveUsersForNetwork;
+exports.removeUser = removeUser;
 exports.update = update;
+exports.updateUser = updateUser;

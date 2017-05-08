@@ -3,23 +3,12 @@ const { createRoutes } = require('../../shared/utils/create-routes');
 
 const routes = [{
   method: 'GET',
-  url: '/v2/organisations/{organisationId}/networks',
-  handler: require('./handlers/networks-for-organisation'),
-  prefetch: false,
-}, {
-  method: 'GET',
   url: '/v2/networks/{networkId}',
   handler: require('./handlers/view-network'),
 }, {
   method: 'GET',
   url: '/v2/users/me/networks',
   handler: require('./handlers/networks-for-user'),
-  prefetch: false,
-}, {
-  method: 'GET',
-  url: '/v2/users/me/organisations',
-  handler: require('./handlers/organisations-for-user'),
-  validator: require('./validators/organisations-for-user'),
   prefetch: false,
 }, {
   method: 'GET',
@@ -41,6 +30,19 @@ const routes = [{
   handler: require('./handlers/seen-objects'),
   validator: require('./validators/seen-objects'),
   prefetch: false,
+}];
+
+const organisationRoutes = [{
+  method: 'GET',
+  url: '/v2/organisations/{organisationId}/networks',
+  handler: require('./handlers/networks-for-organisation'),
+  prefetch: false,
+}, {
+  method: 'GET',
+  url: '/v2/users/me/organisations',
+  handler: require('./handlers/organisations-for-user'),
+  validator: require('./validators/organisations-for-user'),
+  prefetch: false,
 }, {
   method: 'GET',
   url: '/v2/organisations/{organisationId}/users/{userId}',
@@ -52,6 +54,24 @@ const routes = [{
   url: '/v2/organisations/{organisationId}/users/{userId}',
   handler: require('./handlers/update-user-in-organisation'),
   validator: require('./validators/update-user-in-organisation'),
+  prefetch: false,
+}, {
+  method: 'POST',
+  url: '/v2/organisations/{organisationId}/users/{userId}/networks',
+  handler: require('./handlers/add-user-to-networks'),
+  validator: require('./validators/add-user-to-networks'),
+  prefetch: false,
+}, {
+  method: 'PUT',
+  url: '/v2/organisations/{organisationId}/users/{userId}/networks',
+  handler: require('./handlers/update-user-in-networks'),
+  validator: require('./validators/update-user-in-networks'),
+  prefetch: false,
+}, {
+  method: 'DELETE',
+  url: '/v2/organisations/{organisationId}/users/{userId}/networks',
+  handler: require('./handlers/remove-user-from-networks'),
+  validator: require('./validators/remove-user-from-networks'),
   prefetch: false,
 }, {
   method: 'GET',
@@ -90,4 +110,4 @@ const routes = [{
   prefetch: false,
 }];
 
-module.exports = createRoutes(routes);
+module.exports = createRoutes([...routes, ...organisationRoutes]);

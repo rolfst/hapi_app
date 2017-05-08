@@ -369,11 +369,10 @@ const getExchange = async (payload, message) => {
  */
 const listComments = async (payload, message) => {
   logger.debug('Listing comments for exchange', { payload, message });
-  const userId = message.credentials.id;
-  const exchanges = await exchangeRepo.findAllBy({ id: payload.exchangeId, userId });
-  const user = await userService.getUser({ userId }, message);
+  const exchanges = await exchangeRepo.findAllBy({ id: payload.exchangeId });
   const exchangeComments = await commentRepo.findBy({ exchangeId: exchanges[0].id });
-  return impl.replaceUsersIn([user], exchangeComments);
+  const users = await userService.list({ userIds: R.pluck('userId', exchangeComments) }, message);
+  return impl.replaceUsersIn(users, exchangeComments);
 };
 
 /**
