@@ -95,6 +95,7 @@ const buildQuery = (organisationId, conditions) => {
 
     if (structure[name].hasOwnProperty('depends')) {
       R.forEach((depName) => {
+        // The second parameter to addJoin prevents cyclic dependencies
         if (depName !== skipDependency) addJoin(depName, name);
       }, structure[name].depends);
     }
