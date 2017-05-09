@@ -152,7 +152,7 @@ describe('Workflow handler: update trigger', () => {
 describe('Workflow handler: update condition', () => {
   const conditionFixture = {
     field: 'changedtothat',
-    operator: workflowRepo.EConditionOperators.CONTAINS,
+    operator: workflowRepo.EConditionOperators.IN,
     value: 'changedtothis',
   };
 

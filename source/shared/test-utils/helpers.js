@@ -359,12 +359,6 @@ async function createCompleteWorkFlow(organisationId, name = randomString()) {
         operator: workflowRepository.EConditionOperators.GREATER_THAN_OR_EQUAL,
         value: '18',
       }),
-      workflowRepository.createCondition({
-        workflowId: createdWorkFlow.id,
-        field: 'user.age',
-        operator: workflowRepository.EConditionOperators.LESS_THAN_OR_EQUAL,
-        value: '50',
-      }),
     ]),
     Promise.all([
       workflowRepository.createAction({

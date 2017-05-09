@@ -1,24 +1,29 @@
 const R = require('ramda');
 const sequelize = require('../../../shared/configs/sequelize');
 const { EConditionOperators } = require('../definitions');
-const logger = require('../../../shared/services/logger')('WORKFLOW/service/processor');
+const logger = require('../../../shared/services/logger')('WORKFLOW/services/query-generator');
+
+const selector = 'ou.user_id';
+
+const groupBy = 'ou.user_id';
 
 const baseQuery = `
 SELECT
-  ou.user_id
+  %selector
 FROM
   organisation_user ou
   %joins
 WHERE
   %where
-GROUP BY
-  ou.user_id
+%groupBy
+%orderBy
+%limit
 `;
 
 const structure = {
   user: {
     identifier: 'u',
-    joinSQL: 'LEFT JOIN users u ON u.id = ou.user_id',
+    joinSQL: 'JOIN users u ON u.id = ou.user_id',
     fields: [
       'id',
       'username',
@@ -50,7 +55,7 @@ const structure = {
       'network',
     ],
     // The join for network is also here because otherwise it would create a cyclic dependency
-    joinSQL: 'LEFT JOIN networks n ON n.organisation_id = ou.organisation_id\n  LEFT JOIN network_user nu ON (nu.network_id = n.id AND ou.user_id = nu.user_id)',
+    joinSQL: 'JOIN networks n ON n.organisation_id = ou.organisation_id\n  JOIN network_user nu ON (nu.network_id = n.id AND ou.user_id = nu.user_id)',
     fields: [
       'id',
       'role_type',
@@ -87,10 +92,10 @@ R.forEachObjIndexed((table, tableName) => {
   }, table.fields);
 
   if (table.calculatedFields) {
-    R.forEachObjIndexed((selector, fieldName) => {
+    R.forEachObjIndexed((select, fieldName) => {
       selectables[`${tableName}.${fieldName}`] = {
         join: tableName,
-        identifier: `${selector}`,
+        identifier: `${select}`,
       };
     }, table.calculatedFields);
   }
@@ -98,7 +103,12 @@ R.forEachObjIndexed((table, tableName) => {
 
 const castToArrayAndEscape = R.map(sequelize.escape.bind(sequelize), R.split(','));
 
-const buildQuery = (organisationId, conditions) => {
+const buildQuery = (organisationId, conditions = null, {
+  count,
+  limit,
+  offset,
+  orderBy,
+} = {}) => {
   logger.info('buildQuery', { organisationId, conditions });
 
   if (!organisationId) {
@@ -170,9 +180,18 @@ const buildQuery = (organisationId, conditions) => {
     return null;
   }, joins));
 
+  const selectorStatement = count ? `COUNT(DISTINCT ${selector}) count` : `${selector} userId`;
+  const groupByStatement = count ? '' : `GROUP BY\n  ${groupBy}\n`;
+  const limitStatement = limit || offset ? `LIMIT ${offset || 0}, ${limit || 50}\n` : '';
+  const orderByStatement = orderBy ? `ORDER BY ${orderBy}\n` : '';
+
   return baseQuery
+    .replace('%selector', selectorStatement)
+    .replace('%groupBy\n', groupByStatement)
     .replace('%joins', buildJoins.join('\n  '))
-    .replace('%where', whereConditions.join('\n  AND '));
+    .replace('%where', whereConditions.join('\n  AND '))
+    .replace('%limit\n', limitStatement)
+    .replace('%orderBy\n', orderByStatement);
 };
 
-exports.buildQuery = buildQuery;
+module.exports = buildQuery;

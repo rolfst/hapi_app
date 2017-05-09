@@ -1,10 +1,10 @@
 // const R = require('ramda');
 const { assert } = require('chai');
 const testHelper = require('../../../shared/test-utils/helpers');
-const workflowProcessor = require('./processor');
+const queryGenerator = require('./query-generator');
 const { EConditionOperators } = require('../definitions');
 
-describe('Workflow processor', async () => {
+describe('Workflow query generator', async () => {
   let admin;
   let employee;
   let otherUser;
@@ -28,14 +28,14 @@ describe('Workflow processor', async () => {
       testHelper.addUserToOrganisation(employee.id, organisation.id),
       testHelper.addUserToOrganisation(otherUser.id, otherOrganisation.id),
     ]);
+
+    const extraCondition = await testHelper.createCondition(workflow.id, 'network.id', EConditionOperators.IN, '1,2,3');
+
+    workflow.conditions.push(extraCondition);
   });
 
   it('should generate a query', async () => {
-    const query = workflowProcessor.buildQuery(organisation.id, workflow.conditions.concat([{
-      field: 'network.id',
-      operator: EConditionOperators.IN,
-      value: '1,2,3',
-    }]));
+    const query = queryGenerator(organisation.id, workflow.conditions);
 
     assert.isString(query);
   });
