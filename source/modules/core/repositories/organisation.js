@@ -5,24 +5,19 @@ const createPivotModel = require('../models/organisation-user');
 const createFunctionsModel = require('../models/organisation-function');
 const sequelize = require('../../../shared/configs/sequelize');
 
-const countQueryTotalAndLoggedIn = `
+const countQuery = `
 SELECT
-  COUNT(*) AS total,
-  COUNT(u.last_login) AS loggedIn
-FROM organisation_user ou
-LEFT JOIN users AS u ON ou.user_id = u.id
-WHERE
-  ou.organisation_id = :organisationId AND
-  ou.deleted_at IS NULL
-`;
-const countQueryInactive = `
-SELECT
-  COUNT(*) AS inactive
-FROM organisation_user
-WHERE
-  organisation_id = :organisationId AND
-  deleted_at IS NULL AND
-  last_active < NOW() - INTERVAL 1 WEEK
+  COUNT(*) total,
+  COUNT(u.last_login) loggedIn,
+  COUNT(CASE WHEN NOT ou.last_active IS NULL AND ou.last_active < NOW() - INTERVAL 1 WEEK THEN 1 END) inactive
+FROM
+  organisation_user ou
+  LEFT JOIN users u ON ou.user_id = u.id
+WHERE 
+  ou.organisation_id = :organisationId
+  AND ou.deleted_at IS NULL
+GROUP BY
+  ou.organisation_id
 `;
 
 const create = (attributes) => {
@@ -232,16 +227,12 @@ const updateOrganisationLink = (whereConstraint, attributes) => {
 };
 
 const countUsers = (organisationId) => {
-  const payload = { replacements: { organisationId }, type: sequelize.QueryTypes.SELECT };
-
-  return Promise.all([
-    sequelize.query(countQueryTotalAndLoggedIn, payload),
-    sequelize.query(countQueryInactive, payload),
-  ])
-    .then(([
-      [{ total, loggedIn }],
-      [{ inactive }],
-    ]) => ({
+  return sequelize
+    .query(countQuery, {
+      replacements: { organisationId },
+      type: sequelize.QueryTypes.SELECT,
+    })
+    .then(([{ total, inactive, loggedIn }]) => ({
       total,
       inactive,
       active: loggedIn - inactive,

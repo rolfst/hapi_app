@@ -104,6 +104,7 @@ async function getUserWithNetworkScope(payload, message) {
       function: organisationUserWithFunction
         ? organisationUserWithFunction.function.name
         : user.function,
+      lastActive: networkLink.lastActive,
     });
 }
 
