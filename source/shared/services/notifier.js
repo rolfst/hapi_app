@@ -8,37 +8,44 @@ function trackPushNotification(notification, user) {
   return Mixpanel.track({ name: 'Push Notification Sent', data: notification.data }, user.id);
 }
 
-async function send(users, notification, networkId = null, organisationId = null) {
-  const emails = R.reject(R.isNil, R.pluck('email', users));
-  const data = {
-    app_id: process.env.ONESIGNAL_APP_ID,
-    headings: notification.headings ? {
-      en: notification.headings,
-    } : null,
-    contents: {
-      en: notification.text,
-    },
-    android_group: 'flex_appeal_message',
-    ios_badgeType: 'Increase',
-    ios_badgeCount: 1,
-    data: R.merge(notification.data, {
-      organisation_id: organisationId,
-      network_id: networkId,
+const createEmailChunks = (users, emailsInChunk = 100) => R.pipe(
+  R.pluck('email'),
+  R.reject(R.isNil),
+  R.splitEvery(emailsInChunk)
+)(users);
+
+const createData = R.curry((notification, { organisationId, networkId }, emailValues) => ({
+  app_id: process.env.ONESIGNAL_APP_ID,
+  headings: notification.headings ? {
+    en: notification.headings,
+  } : null,
+  contents: {
+    en: notification.text,
+  },
+  android_group: 'flex_appeal_message',
+  ios_badgeType: 'Increase',
+  ios_badgeCount: 1,
+  data: R.merge(notification.data, {
+    organisation_id: organisationId,
+    network_id: networkId,
+  }),
+  filters: R.intersperse({
+    operator: 'OR',
+  }, R.map(
+    (email) => ({
+      field: 'email',
+      value: email,
     }),
-    filters: R.intersperse({
-      operator: 'OR',
-    }, R.map(
-      (email) => ({
-        field: 'email',
-        value: email,
-      }),
-      emails)
-    ),
-  };
+    emailValues)
+  ),
+}));
 
-  logger.debug('Sending Push Notification', { data, emails });
+const sendNotification = R.curry((notification, payload, emailValues) => {
+  const data = createData(notification, payload, emailValues);
 
-  const result = await fetch('https://onesignal.com/api/v1/notifications', {
+  logger.debug('Sending notification chunk to OneSignal', data);
+
+  return fetch('https://onesignal.com/api/v1/notifications', {
     method: 'POST',
     body: JSON.stringify(data),
     headers: {
@@ -46,17 +53,38 @@ async function send(users, notification, networkId = null, organisationId = null
       Authorization: `Basic ${process.env.ONESIGNAL_API_KEY}`,
     },
   });
+});
 
-  const json = await result.json();
+async function send(users, notification, networkId = null, organisationId = null) {
+  logger.debug('Sending push notification', { users, notification, networkId, organisationId });
 
-  logger.debug('Response from Push Notification provider', { response: json });
+  const promises = R.pipe(
+    createEmailChunks,
+    R.map(sendNotification(notification, { organisationId, networkId }))
+  )(users);
 
-  if (result.ok) {
+  const responses = await Promise.all(promises)
+    .catch((err) => logger.error('Error while sending notification', err));
+
+  if (!responses) return false;
+
+  responses.forEach(async (result, i) => {
+    if (result.ok) {
+      logger.debug(`Succesfully send notifications to chunk ${i}/${responses.length}`);
+    } else {
+      const json = await result.json();
+      logger.error(`Error sending push notification to chunk ${i}/${responses.length}`, { response: json });
+    }
+  });
+
+  if (R.none(R.propEq('ok', false))) {
+    logger.debug('Succesfully send all notification chunks');
     users.forEach((user) => trackPushNotification(notification, user));
-  } else {
-    logger.error('Error sending Push Notification', { response: json });
   }
 }
 
+exports.createEmailChunks = createEmailChunks;
+exports.createData = createData;
+exports.sendNotification = sendNotification;
 exports.send = send;
 exports.trackPushNotification = trackPushNotification;
