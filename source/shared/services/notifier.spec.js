@@ -61,7 +61,7 @@ describe('Notifier', () => {
         { id: '2', username: 'test2@flex-appeal.nl', email: 'test2@flex-appeal.nl' },
       ];
 
-      notifier.send(users, notifications).catch(console.log);
+      notifier.send(users, notifications);
 
       assert.equal(mixpanelClient.track.callCount, 2);
     });
