@@ -70,14 +70,14 @@ async function send(users, notification, networkId = null, organisationId = null
 
   responses.forEach(async (result, i) => {
     if (result.ok) {
-      logger.debug(`Succesfully send notifications to chunk ${i}/${responses.length}`);
+      logger.debug(`Succesfully send notifications to chunk ${i + 1}/${responses.length}`);
     } else {
       const json = await result.json();
-      logger.error(`Error sending push notification to chunk ${i}/${responses.length}`, { response: json });
+      logger.error(`Error sending push notification to chunk ${i + 1}/${responses.length}`, { response: json });
     }
   });
 
-  if (R.none(R.propEq('ok', false))) {
+  if (R.all(R.prop('ok'), responses)) {
     logger.debug('Succesfully send all notification chunks');
     users.forEach((user) => trackPushNotification(notification, user));
   }
