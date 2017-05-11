@@ -39,29 +39,8 @@ const getIncludes = async (hasInclude, objects) => {
   return Promise.props(includes);
 };
 
-const makeFeed = async (payload, options, message, extraWhereConstraint = {}) => {
-  const whereConstraint = {
-    $or: [{
-      parentType: payload.parentType,
-      parentId: payload.parentId,
-    }],
-    $and: {
-      $or: [
-        { networkId: payload.networkId },
-        { networkId: null },
-      ],
-    },
-  };
-
-  // Since extraWhereConstraint can either be an array or an object,
-  // the spread syntax does not work in all cases
-  if (Array.isArray(extraWhereConstraint)) {
-    whereConstraint.$or = [...extraWhereConstraint, ...whereConstraint.$or];
-  } else {
-    whereConstraint.$or = [extraWhereConstraint, ...whereConstraint.$or];
-  }
-
-  const relatedObjects = await objectRepository.findBy(whereConstraint, {
+const makeFeed = async (constraint, options, message) => {
+  const relatedObjects = await objectRepository.findBy(constraint, {
     limit: options.limit,
     offset: options.offset,
     order: [['created_at', 'DESC']],
@@ -92,5 +71,31 @@ const makeFeed = async (payload, options, message, extraWhereConstraint = {}) =>
   return R.map(createObjectWithIncludes, objectsWithSources);
 };
 
+function composeSpecialisedQueryForFeed(payload, extraWhereConstraint = {}) {
+  const whereConstraint = {
+    $or: [{
+      parentType: payload.parentType,
+      parentId: payload.parentId,
+    }],
+    $and: {
+      $or: [
+        { networkId: payload.networkId },
+        { networkId: null },
+      ],
+    },
+  };
+
+  // Since extraWhereConstraint can either be an array or an object,
+  // the spread syntax does not work in all cases
+  if (Array.isArray(extraWhereConstraint)) {
+    whereConstraint.$or = [...extraWhereConstraint, ...whereConstraint.$or];
+  } else {
+    whereConstraint.$or = [extraWhereConstraint, ...whereConstraint.$or];
+  }
+
+  return whereConstraint;
+}
+
+exports.composeSpecialisedQueryForFeed = composeSpecialisedQueryForFeed;
 exports.getIncludes = getIncludes;
 exports.makeFeed = makeFeed;

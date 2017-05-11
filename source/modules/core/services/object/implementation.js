@@ -5,6 +5,7 @@ const attachmentService = require('../../../attachment/services/attachment');
 const privateMessageService = require('../../../chat/v2/services/private-message');
 const feedMessageService = require('../../../feed/services/message');
 const objectRepository = require('../../repositories/object');
+const { EObjectTypes } = require('../../definitions');
 
 const whereTypeAndId = (type, id) => R.both(R.propEq('type', type), R.propEq('id', id));
 const findSource = (type, id, sources) => R.find(whereTypeAndId(type, id), sources) || null;
@@ -23,6 +24,7 @@ const compareObject = R.curry((object1, object2) => R.and(
 const findSourcesForType = R.curry((message, values, type) => R.cond([
   [R.equals('private_message'), () => privateMessageService.list({ messageIds: values }, message)],
   [R.equals('feed_message'), () => feedMessageService.list({ messageIds: values }, message)],
+  [R.equals('organisation_message'), () => feedMessageService.list({ messageIds: values }, message)],
   [R.equals('exchange'), () => flexchangeService.list({ exchangeIds: values }, message)],
   [R.equals('poll'), () => pollService.list({ pollIds: values }, message)],
   [R.equals('attachment'), () => attachmentService.list({ attachmentIds: values }, message)],
@@ -31,12 +33,20 @@ const findSourcesForType = R.curry((message, values, type) => R.cond([
 const findChildrenForType = R.curry((values, type) => R.cond([
   [R.equals('feed_message'), () => objectRepository.findBy({
     parentType: 'feed_message', parentId: { $in: values } })],
+  [R.equals('organisation_message'), () => objectRepository.findBy({
+    parentType: 'organisation', parentId: { $in: values } })],
   [R.equals('private_message'), () => objectRepository.findBy({
     parentType: 'private_message', parentId: { $in: values } })],
 ])(type, values));
 
 const addSourceToObject = R.curry((sources, object) =>
-  R.merge(object, { source: findSource(object.objectType, object.sourceId, sources) }));
+  // We make an exception for organisation_message otherwise we always call the feed_message
+  R.merge(object, {
+    source: findSource(
+      object.objectType === EObjectTypes.ORGANISATION_MESSAGE
+      ? EObjectTypes.FEED_MESSAGE
+      : object.objectType, object.sourceId, sources),
+  }));
 
 const findChildren = (objectsWithSource, object) =>
   R.filter(compareObject(R.__, object), objectsWithSource);

@@ -1,9 +1,11 @@
 const R = require('ramda');
+const Promise = require('bluebird');
 const createError = require('../../../../shared/utils/create-error');
 const networkService = require('../../../core/services/network');
 const userService = require('../../../core/services/user');
 const teamService = require('../../../core/services/team');
 const impl = require('./implementation');
+const { EObjectTypes } = require('../../../core/definitions');
 
 /**
  * @module modules/feed/services/feed
@@ -39,24 +41,48 @@ const makeForNetwork = async (payload, message) => {
 
   const extraWhereConstraint = [{
     parentId: { $in: R.pipe(filterTeams, pluckId)(teams) },
-    parentType: 'team',
+    parentType: EObjectTypes.TEAM,
   }, {
-    parentType: 'user',
+    parentType: EObjectTypes.USER,
     parentId: message.credentials.id,
   }, {
-    parentType: 'organisation',
+    parentType: EObjectTypes.ORGANISATION,
     parentId: payload.organisationId,
   }];
 
   const feedPayload = {
     networkId: payload.networkId,
-    parentType: 'network',
+    parentType: EObjectTypes.NETWORK,
     parentId: payload.networkId,
   };
-
-  return impl.makeFeed(feedPayload, feedOptions(payload), message, extraWhereConstraint);
+  const constraint = impl.composeSpecialisedQueryForFeed(feedPayload, extraWhereConstraint);
+  return impl.makeFeed(constraint, feedOptions(payload), message);
 };
 
+/**
+ * Making a feed for a network
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.networkId - The id of network to create feed for
+ * @param {string} payload.organisationId - The id of organisation to include messages for
+ * @param {string} payload.include - The sub resources to include
+ * @param {number} payload.limit - The limit of the resultset for pagination
+ * @param {number} payload.offset - The offset of the resultset for pagination
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method makeForOrganisation
+ * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
+ */
+const makeForOrganisation = async (payload, message) => {
+  logger.debug('Making feed for organisation', { payload, message });
+
+  const feedPayload = {
+    parentType: EObjectTypes.ORGANISATION,
+    parentId: payload.organisationId,
+    organisationId: payload.organisationId,
+  };
+  const options = R.pick(['limit', 'offset', 'include'], payload);
+
+  return impl.makeFeed(feedPayload, options, message);
+};
 /**
  * Making a feed for a team
  * @param {object} payload - Object containing payload data
@@ -80,12 +106,14 @@ const makeForTeam = async (payload, message) => {
   const network = await networkService.get({ networkId: team.networkId }, message);
   const feedPayload = {
     networkId: team.networkId,
-    parentType: 'team',
+    parentType: EObjectTypes.TEAM,
     parentId: payload.teamId,
   };
 
-  return impl.makeFeed(feedPayload, feedOptions(payload), R.assoc('network', network, message));
+  const constraint = impl.composeSpecialisedQueryForFeed(feedPayload);
+  return impl.makeFeed(constraint, feedOptions(payload), R.assoc('network', network, message));
 };
 
 exports.makeForNetwork = makeForNetwork;
+exports.makeForOrganisation = makeForOrganisation;
 exports.makeForTeam = makeForTeam;
