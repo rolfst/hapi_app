@@ -15,6 +15,7 @@ module.exports = (dataModel) => {
     lastCheck: dataModel.lastCheck ? dateUtils.toISOString(dataModel.lastCheck) : null,
     createdAt: dataModel.created_at ? dateUtils.toISOString(dataModel.created_at) : null,
     updatedAt: dataModel.updated_at ? dateUtils.toISOString(dataModel.updated_at) : null,
+    done: !!dataModel.done,
     triggers: null, // Set in service
     conditions: null, // Set in service
     actions: null, // Set in service

@@ -24,6 +24,7 @@ const WorkFlow = model.define('WorkFlow', {
     type: Sequelize.DATE,
     field: 'last_check',
   },
+  done: Sequelize.BOOLEAN,
 }, {
   tableName: 'workflows',
   createdAt: 'created_at',

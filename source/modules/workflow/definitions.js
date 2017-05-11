@@ -19,3 +19,4 @@ exports.EActionTypes = {
   MESSAGE: 'message',
 };
 
+exports.WORKER_INTERVAL = 25;

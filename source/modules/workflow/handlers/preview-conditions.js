@@ -17,7 +17,8 @@ module.exports = async (req, reply) => {
       throw createError('403');
     }
 
-    const data = await workflowExecutor.previewConditions(payload.organisationId, payload.conditions);
+    const data =
+      await workflowExecutor.previewConditions(payload.organisationId, payload.conditions);
 
     return reply({ data: responseUtil.toSnakeCase(data) });
   } catch (err) {
