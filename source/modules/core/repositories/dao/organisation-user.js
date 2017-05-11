@@ -38,7 +38,7 @@ const OrganisationUser = model.define('OrganisationUser', {
     allowNull: true,
   },
   lastActive: {
-    type: Sequelize.STRING,
+    type: Sequelize.DATE,
     field: 'last_active',
     allowNull: true,
   },

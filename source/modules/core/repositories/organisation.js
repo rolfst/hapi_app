@@ -164,7 +164,7 @@ const findFunction = async (functionIdOrWhereConstraint) => {
  * @return {external:Promise.<user[]>}
  */
 const findUsers = async (constraint, attributes = {}, options = null) => {
-  const query = R.merge(options, { where: constraint }, attributes);
+  const query = R.merge(options, { where: constraint }, { attributes });
 
   return OrganisationUser.findAll(query);
 };
