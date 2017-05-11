@@ -24,7 +24,7 @@ const pluckIds = R.pluck('id');
 const headOrNull = (arr) => R.defaultTo(null, R.head(arr));
 
 const create = (attributes) => {
-  const whitelist = ['organisationId', 'name', 'meta', 'startDate', 'expirationDate', 'lastCheck'];
+  const whitelist = ['organisationId', 'name', 'meta', 'startDate', 'expirationDate', 'lastCheck', 'done'];
 
   return WorkFlow
     .create(R.pick(whitelist, attributes))
