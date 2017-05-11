@@ -35,6 +35,12 @@ const routes = [{
   handler: require(`${handlerPath}/fetch-workflow`),
   validator: require(`${validatorPath}/fetch-workflow`),
   prefetch: false,
+}, {
+  method: 'POST',
+  url: `${baseUrl}/workflows/preview`,
+  handler: require(`${handlerPath}/preview-conditions`),
+  validator: require(`${validatorPath}/preview-conditions`),
+  prefetch: false,
 }];
 
 const subBaseUrl = `${baseUrl}/workflows/{workflowId}`;
