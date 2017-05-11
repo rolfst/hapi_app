@@ -91,3 +91,4 @@ const fetchAndProcessWorkflows = () => {
 };
 
 exports.fetchAndProcessWorkflows = fetchAndProcessWorkflows;
+exports.processWorkflow = processWorkflow;
