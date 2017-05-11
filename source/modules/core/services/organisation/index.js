@@ -229,14 +229,15 @@ async function listUsers(payload, message) {
   const findOrganisationUser = (organisationUserId) => R.omit(['function', 'teamIds'],
     R.find(R.propEq('id', organisationUserId), users));
 
-  return R.map((organisationUser) => {
-    return R.merge(findOrganisationUser(organisationUser.userId.toString()),
+  return R.map((organisationUser) => (
+    R.merge(
+      findOrganisationUser(organisationUser.userId.toString()),
       R.pick(
-        ['externalId', 'roleType', 'invitedAt', 'createdAt', 'deletedAt'],
+        ['externalId', 'roleType', 'invitedAt', 'createdAt', 'updatedAt', 'deletedAt', 'lastActive'],
         organisationUser
       )
-    );
-  }, organisationUsers);
+    )
+  ), organisationUsers);
 }
 
 /**

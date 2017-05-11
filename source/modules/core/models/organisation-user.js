@@ -9,6 +9,6 @@ module.exports = (dao) => ({
   deletedAt: dao.deletedAt ? dateUtils.toISOString(dao.deletedAt) : null,
   externalId: dao.externalId,
   lastActive: dao.lastActive ? dateUtils.toISOString(dao.lastActive) : null,
-  createdAt: dao.createdAt ? dateUtils.toISOString(dao.createdAt) : null,
-  updatedAt: dao.updatedAt ? dateUtils.toISOString(dao.updatedAt) : null,
+  createdAt: dao.created_at ? dateUtils.toISOString(dao.created_at) : null,
+  updatedAt: dao.updated_at ? dateUtils.toISOString(dao.updated_at) : null,
 });

@@ -61,10 +61,12 @@ describe('Handler: Users in organisation', () => {
     assert.property(actual, 'role_type');
     assert.property(actual, 'profile_img');
     assert.property(actual, 'date_of_birth');
-    assert.property(actual, 'created_at');
+    assert.isString(actual.created_at);
+    assert.isString(actual.updated_at);
     assert.property(actual, 'last_login');
     assert.property(actual, 'invited_at');
     assert.property(actual, 'deleted_at');
+    assert.property(actual, 'last_active');
   });
 
   it('should return a users count for organisation the meta', async () => {

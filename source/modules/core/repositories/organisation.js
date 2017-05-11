@@ -161,7 +161,8 @@ const findFunction = async (functionIdOrWhereConstraint) => {
 const findUsers = async (constraint, attributes = {}, options = null) => {
   const query = R.merge(options, { where: constraint }, { attributes });
 
-  return OrganisationUser.findAll(query);
+  return OrganisationUser.findAll(query)
+    .then(R.map(createPivotModel));
 };
 
 const findFunctionsForUsers = async (userId) => {
