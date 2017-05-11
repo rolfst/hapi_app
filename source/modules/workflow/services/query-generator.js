@@ -77,6 +77,10 @@ const structure = {
   },
 };
 
+const actionDoneJoin = 'LEFT JOIN workflow_actionsdone wad ON (wad.workflow_id = %workflowId AND wad.user_id = ou.user_id)';
+
+const actionDoneWhere = 'wad.id IS NULL';
+
 /*
  *  Precompile some things
  */
@@ -108,6 +112,7 @@ const buildQuery = (organisationId, conditions = null, {
   limit,
   offset,
   orderBy,
+  workflowId,
 } = {}) => {
   logger.info('buildQuery', { organisationId, conditions });
 
@@ -132,6 +137,11 @@ const buildQuery = (organisationId, conditions = null, {
   };
 
   const whereConditions = [`ou.organisation_id = ${sequelize.escape(organisationId)}`];
+
+  // if workflow id was supplied, we have to ignore users in actions_done
+  if (workflowId) {
+    whereConditions.push(actionDoneWhere);
+  }
 
   if (conditions) {
     R.forEach((condition) => {
@@ -164,6 +174,11 @@ const buildQuery = (organisationId, conditions = null, {
           escapedValue = `(${castToArrayAndEscape(condition.value)})`;
           break;
 
+        case EConditionOperators.CONTAINS:
+          operator = 'LIKE';
+          escapedValue = sequelize.escape(`%${condition.value}%`);
+          break;
+
         default:
           throw new Error('Invalid operator');
       }
@@ -172,13 +187,22 @@ const buildQuery = (organisationId, conditions = null, {
     }, conditions);
   }
 
-  const buildJoins = R.filter(R.identity(), R.map((table) => {
-    if (Object.prototype.hasOwnProperty.call(structure[table], 'joinSQL')) {
-      return structure[table].joinSQL;
+  const buildJoins = () => {
+    const joinStatements = R.filter(R.identity(), R.map((table) => {
+      if (Object.prototype.hasOwnProperty.call(structure[table], 'joinSQL')) {
+        return structure[table].joinSQL;
+      }
+
+      return null;
+    }, joins));
+
+    // if workflow id was supplied, we have to ignore users in actions_done
+    if (workflowId) {
+      joinStatements.push(actionDoneJoin.replace('%workflowId', workflowId));
     }
 
-    return null;
-  }, joins));
+    return joinStatements;
+  };
 
   const selectorStatement = count ? `COUNT(DISTINCT ${selector}) count` : `${selector} userId`;
   const groupByStatement = count ? '' : `GROUP BY\n  ${groupBy}\n`;
