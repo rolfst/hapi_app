@@ -411,7 +411,7 @@ const updateUserInNetworks = async (payload, message) => {
  * @method removeUserFromNetworks
  */
 const removeUserFromNetworks = async (payload, message) => {
-  logger.debug('Remove users from networks', { payload, message });
+  logger.debug('Remove user from networks', { payload, message });
 
   await assertNetworksAreInOrganisation(payload.organisationId, payload.networks);
 
@@ -419,6 +419,20 @@ const removeUserFromNetworks = async (payload, message) => {
     payload.networks,
     (networkId) => networkService.removeUser(networkId, payload.userId)
   );
+};
+
+/**
+ * Remove user from organisation
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.organisationId - The id of the organisation
+ * @param {string} payload.userId - The id of the user
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method removeUserFromNetworks
+ */
+const removeUserFromOrganisation = async (payload, message) => {
+  logger.debug('Remove user from organisation', { payload, message });
+
+  return organisationRepository.removeUser(payload.organisationId, payload.userId);
 };
 
 exports.ERoleTypes = ERoleTypes;
@@ -439,6 +453,7 @@ exports.listFunctions = listFunctions;
 exports.listNetworks = listNetworks;
 exports.listUsers = listUsers;
 exports.removeUserFromNetworks = removeUserFromNetworks;
+exports.removeUserFromOrganisation = removeUserFromOrganisation;
 exports.updateFunction = updateFunction;
 exports.updateUser = updateUser;
 exports.updateUserInNetworks = updateUserInNetworks;

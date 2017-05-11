@@ -1,9 +1,10 @@
 const R = require('ramda');
-const { Organisation, OrganisationUser, OrganisationNetwork, OrganisationFunction } = require('./dao');
+const { Organisation, OrganisationUser, OrganisationFunction, NetworkUser } = require('./dao');
 const createModel = require('../models/organisation');
 const createPivotModel = require('../models/organisation-user');
 const createFunctionsModel = require('../models/organisation-function');
 const sequelize = require('../../../shared/configs/sequelize');
+const networkRepository = require('./network');
 
 const countQueryTotalAndLoggedIn = `
 SELECT
@@ -98,9 +99,6 @@ const addUser = async (userId, organisationId, roleType = 'EMPLOYEE', functionId
       invitedAt,
     });
 };
-
-const attachNetwork = async (networkId, organisationId) => OrganisationNetwork
-  .create({ networkId, organisationId });
 
 const deleteAll = () => {
   return Promise.all([
@@ -227,9 +225,19 @@ const countUsers = (organisationId) => {
     }));
 };
 
+const removeUser = async (organisationId, userId) => {
+  const networkIds = await networkRepository.findWhere({ organisationId })
+    .then(R.pluck('id'));
+  const attributes = { deletedAt: new Date() };
+
+  return Promise.all([
+    OrganisationUser.update(attributes, { where: { organisationId, userId } }),
+    NetworkUser.update(attributes, { where: { userId, networkId: { $in: networkIds } } }),
+  ]);
+};
+
 exports.addFunction = addFunction;
 exports.addUser = addUser;
-exports.attachNetwork = attachNetwork;
 exports.countUsers = countUsers;
 exports.create = create;
 exports.deleteAll = deleteAll;
@@ -243,6 +251,7 @@ exports.findUsers = findUsers;
 exports.getPivot = getPivot;
 exports.hasUser = hasUser;
 exports.removeFunction = removeFunction;
+exports.removeUser = removeUser;
 exports.updateFunction = updateFunction;
 exports.updateOrganisationLink = updateOrganisationLink;
 exports.updateUser = updateUser;
