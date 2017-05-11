@@ -73,12 +73,11 @@ describe('Handler: Invite user to organisation', () => {
     assert.equal(result.data.email, payload.email);
     const actualOrganisation = result.data.scopes.organisations[0];
     assert.equal(actualOrganisation.role_type, payload.role_type.toUpperCase());
-    assert.isDefined(actualOrganisation.invited_at);
+    assert.isString(actualOrganisation.invited_at);
     const actualNetwork = result.data.scopes.networks[0];
     assert.equal(actualNetwork.role_type, ERoleTypes.EMPLOYEE);
     assert.equal(actualNetwork.role_type, payload.networks[0].role_type.toUpperCase());
-    assert.isDefined(actualNetwork.invited_at);
-    assert.isTrue(typeof actualNetwork.invited_at === 'string');
+    assert.isString(actualNetwork.invited_at);
   });
 
   it('should add to the organisation as employee', async () => {

@@ -1,6 +1,7 @@
 const sequelize = require('../../../shared/configs/sequelize');
 const logger = require('../../../shared/services/logger')('WORKFLOW/services/executor');
 const queryGenerator = require('./query-generator');
+const { CONCURRENT_USERS } = require('../definitions');
 
 const executeQuery = (query) => {
   logger.info('executeQuery', { query });
@@ -21,4 +22,18 @@ const previewConditions = (organisationId, conditions) => {
     });
 };
 
+const fetchUnhandledUsersBatch = (workflow) => {
+  logger.info('fetchUnhandledUsers', { workflow });
+
+  const query = queryGenerator(
+    workflow.organisationId,
+    workflow.conditions,
+    { workflowId: workflow.id, limit: CONCURRENT_USERS }
+  );
+
+  return executeQuery(query);
+};
+
+exports.executeQuery = executeQuery;
+exports.fetchUnhandledUsersBatch = fetchUnhandledUsersBatch;
 exports.previewConditions = previewConditions;

@@ -1,5 +1,5 @@
 const R = require('ramda');
-const { WorkFlow, Trigger, Condition, Action/* , ActionDone */ } = require('./dao');
+const { WorkFlow, Trigger, Condition, Action, ActionDone } = require('./dao');
 const createWorkFlowModel = require('../models/workflow');
 const createTriggerModel = require('../models/trigger');
 const createConditionModel = require('../models/condition');
@@ -213,12 +213,17 @@ const deleteAll = () => {
       .then(pluckIds)
       .then(completeQueryOptionsPipe)
       .then(Action.destroy),
-    // ActionDone
-    //   .findAll()
-    //   .then(pluckIds)
-    //   .then(completeQueryOptionsPipe)
-    //   .then(ActionDone.destroy),
+    ActionDone
+      .findAll()
+      .then(pluckIds)
+      .then(completeQueryOptionsPipe)
+      .then(ActionDone.destroy),
   ]);
+};
+
+const markUsersHandled = (workflowId, userIds) => {
+  return ActionDone
+    .bulkCreate(userIds.map((userId) => ({ workflowId, userId })));
 };
 
 // Carry along enums for easy access later
@@ -248,3 +253,4 @@ exports.updateAction = updateAction;
 exports.destroyAction = destroyAction;
 exports.findOneAction = findOneAction;
 exports.deleteAll = deleteAll;
+exports.markUsersHandled = markUsersHandled;

@@ -20,3 +20,5 @@ exports.EActionTypes = {
 };
 
 exports.WORKER_INTERVAL = 25;
+
+exports.CONCURRENT_USERS = 10;

@@ -5,10 +5,10 @@ module.exports = (dataModel) => ({
   userId: dataModel.userId,
   functionId: dataModel.functionId,
   roleType: dataModel.roleType,
-  invitedAt: dateUtils.toISOString(dataModel.invitedAt),
-  deletedAt: dataModel.deletedAt,
+  invitedAt: dataModel.invitedAt ? dateUtils.toISOString(dataModel.invitedAt) : null,
+  deletedAt: dataModel.deletedAt ? dateUtils.toISOString(dataModel.deletedAt) : null,
   externalId: dataModel.externalId,
-  lastActive: dataModel.lastActive,
+  lastActive: dataModel.lastActive ? dateUtils.toISOString(dataModel.lastActive) : null,
   createdAt: dateUtils.toISOString(dataModel.created_at),
   updatedAt: dateUtils.toISOString(dataModel.updated_at),
 });

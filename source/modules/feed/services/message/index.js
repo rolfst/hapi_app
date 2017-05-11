@@ -8,6 +8,7 @@ const messageRepository = require('../../repositories/message');
 const likeRepository = require('../../repositories/like');
 const commentRepository = require('../../repositories/comment');
 const impl = require('./implementation');
+const { EObjectTypes } = require('../../../core/definitions');
 
 /**
  * @module modules/feed/services/message
@@ -179,6 +180,11 @@ const create = async (payload, message) => {
     [R.propEq('type', 'team'), R.prop('networkId')],
     [R.T, R.prop('id')],
   ])(parent);
+  const objectType = await R.cond([
+    [R.propEq('type', EObjectTypes.ORGANISATION), R.always(EObjectTypes.ORGANISATION_MESSAGE)],
+    [R.T, R.always('feed_message')],
+  ])(parent);
+
 
   const organisationId =
     R.ifElse(R.propEq('parentType', 'organisation'), R.prop('parentId'), R.always(null))(payload);
@@ -196,11 +202,12 @@ const create = async (payload, message) => {
   });
 
   const createdObject = await objectService.create({
+    organisationId,
     networkId,
     userId: message.credentials.id,
     parentType: payload.parentType,
     parentId: payload.parentId,
-    objectType: 'feed_message',
+    objectType,
     sourceId: createdMessage.id,
   }, message);
 
