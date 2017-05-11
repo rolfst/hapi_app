@@ -268,6 +268,7 @@ async function getUser(payload, message) {
     invitedAt: organisationUser.invitedAt,
     deletedAt: organisationUser.deletedAt,
     updatedAt: organisationUser.updatedAt,
+    lastActive: organisationUser.lastActive,
   });
 }
 

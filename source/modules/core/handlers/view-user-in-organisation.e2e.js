@@ -73,5 +73,6 @@ describe('Handler: View user in organisation', () => {
     assert.property(data, 'invited_at');
     assert.property(data, 'deleted_at');
     assert.property(data, 'function_id');
+    assert.property(data, 'last_active');
   });
 });
