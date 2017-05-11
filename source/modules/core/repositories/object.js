@@ -18,7 +18,7 @@ const isObject = R.is(Object);
  * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
 const create = async (attributes) => {
-  const whitelist = ['userId', 'networkId', 'parentType', 'parentId', 'objectType', 'sourceId'];
+  const whitelist = ['userId', 'networkId', 'parentType', 'parentId', 'objectType', 'sourceId', 'organisationId'];
   const result = await _Object.create(R.pick(whitelist, attributes));
 
   return createDomainObject(result);

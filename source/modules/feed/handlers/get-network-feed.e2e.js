@@ -50,13 +50,13 @@ describe('Handler: Get network feed', () => {
       messageService.create({
         parentType: 'organisation',
         parentId: organisation.id,
-        messageType: EMessageTypes.ORGANISATION,
+        messageType: EMessageTypes.DEFAULT,
         text: 'Organisation message #1',
       }, { credentials: organisationAdmin }),
       messageService.create({
         parentType: 'organisation',
         parentId: organisation.id,
-        messageType: EMessageTypes.ORGANISATION,
+        messageType: EMessageTypes.DEFAULT,
         text: 'Organisation message #2',
       }, { credentials: organisationAdmin }),
     ]);
@@ -74,6 +74,7 @@ describe('Handler: Get network feed', () => {
     const organisationMessageaInFeed = R.filter(R.propEq('parent_type', 'organisation'), result.data);
 
     assert.lengthOf(organisationMessageaInFeed, createdMessages.length);
+    assert.lengthOf(result.data, 7);
   });
 
   it('should fail if user is not a member of the network', async () => {

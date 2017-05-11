@@ -2,27 +2,29 @@ const R = require('ramda');
 const createServicePayload = require('../../../shared/utils/create-service-payload');
 const responseUtil = require('../../../shared/utils/response');
 const objectService = require('../../core/services/object');
+const organisationService = require('../../core/services/organisation');
 const { EObjectTypes } = require('../../core/definitions');
 const feedService = require('../services/feed');
 
 module.exports = async (req, reply) => {
   try {
-    const { message } = createServicePayload(req);
+    const { payload, message } = createServicePayload(req);
+    await organisationService.userHasRoleInOrganisation(
+      payload.organisationId, message.credentials.id);
 
     const totalCountPromise = objectService.count({
       constraint: {
-        $or: [
-          { parentType: EObjectTypes.ORGANISATION, parentId: message.network.organisationId },
-          { parentType: EObjectTypes.NETWORK, parentId: req.params.networkId },
-          { parentType: EObjectTypes.USER, parentId: message.credentials.id },
-        ],
+        $and: {
+          parentType: EObjectTypes.ORGANISATION,
+          parentId: payload.organisationId,
+          organisationId: payload.organisationId,
+        },
       },
     }, message);
 
-    const feedPromise = feedService.makeForNetwork(R.merge(
+    const feedPromise = feedService.makeForOrganisation(R.merge(
       req.query, {
-        networkId: req.params.networkId,
-        organisationId: message.network.organisationId,
+        organisationId: payload.organisationId,
       }
     ), message);
     const [feedItems, count] = await Promise.all([feedPromise, totalCountPromise]);
