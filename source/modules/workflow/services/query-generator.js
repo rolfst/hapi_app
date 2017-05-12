@@ -75,6 +75,27 @@ const structure = {
       'name',
     ],
   },
+  team: {
+    identifier: 't',
+    joinSQL: 'JOIN teams t ON (t.network_id = n.id)',
+    depends: [
+      'network',
+    ],
+    fields: [
+      'id',
+      'name',
+    ],
+  },
+  team_user: {
+    identifier: 't',
+    joinSQL: 'JOIN team_user tu ON (tu.team_id = t.id AND tu.user_id = ou.user_id)',
+    depends: [
+      'team',
+    ],
+    fields: [
+      'id',
+    ],
+  },
 };
 
 const actionDoneJoin = 'LEFT JOIN workflow_actionsdone wad ON (wad.workflow_id = %workflowId AND wad.user_id = ou.user_id)';
