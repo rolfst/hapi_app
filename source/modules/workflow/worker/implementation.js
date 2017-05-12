@@ -8,7 +8,7 @@ const messageService = require('../../feed/services/message');
 const { EMessageTypes } = require('../../feed/definitions');
 const logger = require('../../../shared/services/logger')('WORKFLOW/worker/implementation');
 
-const fetchDueWorkflowIds = `
+const fetchDueWorkflowIdsQuery = `
 SELECT
   DISTINCT w.id
 FROM
@@ -34,6 +34,9 @@ WHERE
 ;
 `;
 
+const fetchDueWorkflowIds = () =>
+  Promise.resolve(workflowExecutor.executeQuery(fetchDueWorkflowIdsQuery));
+
 const doActionForUser = (workflowUserId, action, userId) => {
   switch (action.type) {
     case EActionTypes.MESSAGE:
@@ -53,6 +56,7 @@ const doActionForUser = (workflowUserId, action, userId) => {
 };
 
 const processWorkflowPart = (workflow) => {
+  // TODO - do with new Promise and setTimeout to avoid hitting the callstack limit
   return workflowExecutor
     .fetchUnhandledUsersBatch(workflow)
     .then((userIds) => {
@@ -79,10 +83,14 @@ const processWorkflow = (workflowId) => {
       return workflowRepo
         .update(workflow.id, { lastCheck: new Date() })
         .then(() => {
+          // TODO - do with new Promise and setTimeout to avoid hitting the callstack limit
           return processWorkflowPart(workflow)
             .then(() => {
               return workflowRepo
-                .update(workflow.id, { done: true, lastCheck: new Date() });
+                .update(workflow.id, { done: true, lastCheck: new Date() })
+                .then(() => {
+                  logger.info('Processed workflow', workflow);
+                });
             });
         });
     })
@@ -96,9 +104,7 @@ const processWorkflow = (workflowId) => {
 };
 
 const fetchAndProcessWorkflows = () => {
-  // first do a Promise.resolve so we always return a bluebird promise
-  return Promise
-    .resolve(workflowExecutor.executeQuery(fetchDueWorkflowIds))
+  return fetchDueWorkflowIds()
     .then((workflowIds) => {
       if (!workflowIds.length) return;
 
@@ -116,4 +122,5 @@ const fetchAndProcessWorkflows = () => {
 };
 
 exports.fetchAndProcessWorkflows = fetchAndProcessWorkflows;
+exports.fetchDueWorkflowIds = fetchDueWorkflowIds;
 exports.processWorkflow = processWorkflow;

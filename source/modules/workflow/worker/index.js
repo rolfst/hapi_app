@@ -39,8 +39,8 @@ function shutdown() {
   shuttingDown = true;
 }
 
-function exitHandler(signal) {
-  logger.info(`Workflow worker received shutdown signal (${signal})`);
+function exitHandler(signal, msg) {
+  logger.info(`Workflow worker received shutdown signal (${signal})`, msg);
   shutdown();
 }
 
