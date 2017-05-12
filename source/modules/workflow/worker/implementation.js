@@ -37,6 +37,9 @@ WHERE
 const doActionForUser = (workflowUserId, action, userId) => {
   switch (action.type) {
     case EActionTypes.MESSAGE:
+      // Without a user id we cannot continue
+      if (!workflowUserId) throw new Error('Cannot send message without a sender id');
+
       // meta should contain the usual message content (like body, files and polls)
       return messageService.create(R.merge({
         messageType: EMessageTypes.ORGANISATION,
