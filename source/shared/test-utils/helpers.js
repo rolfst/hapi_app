@@ -99,6 +99,7 @@ const createOrganisationFunction = (organisationId, name = randomString()) => {
  * @param {Object} networkAttributes
  * @param {string} networkAttributes.userId
  * @param {string} [networkAttributes.externalId]
+ * @param {string} [networkAttributes.organisationId]
  * @param {string} [networkAttributes.name]
  * @param {string} [networkAttributes.integrationName]
  * @param {string} [networkAttributes.userExternalId]
