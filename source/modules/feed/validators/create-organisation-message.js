@@ -1,22 +1,13 @@
 const Joi = require('joi');
-const { EConditionOperators } = require('../../workflow/definitions');
+const { MESSAGE_SCHEME } = require('../../feed/definitions');
+const { CONDITIONS_SCHEME } = require('../../workflow/definitions');
 
 module.exports = {
-  payload: Joi.object().keys({
-    text: Joi.string().allow(null).allow(''),
-    files: Joi.any(),
-    pollQuestion: Joi.string().label('poll_question'),
-    pollOptions: Joi.array().items(Joi.string(), Joi.number()).label('poll_options'),
-    conditions: Joi.array().items(Joi.object().keys({
-      field: Joi.string().required(),
-      operator: Joi.string().required().valid(Object.values(EConditionOperators)),
-      value: Joi.string().required(),
-    })),
-  })
-    .rename('poll_question', 'pollQuestion')
-    .rename('poll_options', 'pollOptions')
-    .disallow([null, {}])
-    .and('pollQuestion', 'pollOptions'),
+  payload: MESSAGE_SCHEME.concat(
+    Joi.object().keys({
+      conditions: CONDITIONS_SCHEME,
+    })
+  ),
   params: {
     organisationId: Joi.number().required(),
   },
