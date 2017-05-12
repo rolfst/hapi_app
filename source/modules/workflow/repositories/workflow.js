@@ -198,26 +198,6 @@ const deleteAll = () => {
       .then(pluckIds)
       .then(completeQueryOptionsPipe)
       .then(WorkFlow.destroy),
-    Trigger
-      .findAll()
-      .then(pluckIds)
-      .then(completeQueryOptionsPipe)
-      .then(Trigger.destroy),
-    Condition
-      .findAll()
-      .then(pluckIds)
-      .then(completeQueryOptionsPipe)
-      .then(Condition.destroy),
-    Action
-      .findAll()
-      .then(pluckIds)
-      .then(completeQueryOptionsPipe)
-      .then(Action.destroy),
-    ActionDone
-      .findAll()
-      .then(pluckIds)
-      .then(completeQueryOptionsPipe)
-      .then(ActionDone.destroy),
   ]);
 };
 

@@ -233,7 +233,7 @@ const buildQuery = (organisationId, conditions = null, {
   return baseQuery
     .replace('%selector', selectorStatement)
     .replace('%groupBy\n', groupByStatement)
-    .replace('%joins', buildJoins.join('\n  '))
+    .replace('%joins', buildJoins().join('\n  '))
     .replace('%where', whereConditions.join('\n  AND '))
     .replace('%limit\n', limitStatement)
     .replace('%orderBy\n', orderByStatement);
