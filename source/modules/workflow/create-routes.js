@@ -8,8 +8,8 @@ const baseUrl = '/v2/organisations/{organisationId}';
 const routes = [{
   method: 'POST',
   url: `${baseUrl}/workflows`,
-  handler: require(`${handlerPath}/create-workflow`),
-  validator: require(`${validatorPath}/create-workflow`),
+  handler: require(`${handlerPath}/create-complete-workflow`),
+  validator: require(`${validatorPath}/create-complete-workflow`),
   prefetch: false,
 }, {
   method: 'PUT',
@@ -40,12 +40,6 @@ const routes = [{
   url: `${baseUrl}/workflows/preview`,
   handler: require(`${handlerPath}/preview-conditions`),
   validator: require(`${validatorPath}/preview-conditions`),
-  prefetch: false,
-}, {
-  method: 'POST',
-  url: `${baseUrl}/workflows/complete`,
-  handler: require(`${handlerPath}/create-complete-workflow`),
-  validator: require(`${validatorPath}/create-complete-workflow`),
   prefetch: false,
 }];
 
