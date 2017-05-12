@@ -162,7 +162,13 @@ const listTeamsForNetwork = async (payload, message) => {
     message: message || null,
   });
 
-  return teamService.list({ teamIds: R.pluck('id', result) }, message);
+  const teams = await teamService.list({ teamIds: R.pluck('id', result) }, message);
+  const userWithScope = await userService
+    .getUserWithNetworkScope({ id: message.credentials.id, networkId: payload.networkId }, message);
+
+  if (userWithScope.roleType === 'EMPLOYEE') return R.filter(R.prop('isMember'), teams);
+
+  return teams;
 };
 
 /**
