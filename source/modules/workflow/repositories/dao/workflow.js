@@ -7,6 +7,11 @@ const WorkFlow = model.define('WorkFlow', {
     field: 'organisation_id',
     allowNull: false,
   },
+  userId: {
+    type: Sequelize.INTEGER,
+    field: 'user_id',
+    defaultValue: null,
+  },
   name: {
     type: Sequelize.STRING,
     allowNull: false,

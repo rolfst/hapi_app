@@ -1,7 +1,11 @@
+const R = require('ramda');
 const Promise = require('bluebird');
 const workflowRepo = require('../repositories/workflow');
 const workflowExecutor = require('../services/executor');
-const { ETriggerTypes } = require('../definitions');
+const { ETriggerTypes, EActionTypes } = require('../definitions');
+const { EParentTypes } = require('../../core/definitions');
+const messageService = require('../../feed/services/message');
+const { EMessageTypes } = require('../../feed/definitions');
 const logger = require('../../../shared/services/logger')('WORKFLOW/worker/implementation');
 
 const fetchDueWorkflowIds = `
@@ -30,6 +34,21 @@ WHERE
 ;
 `;
 
+const doActionForUser = (workflowUserId, action, userId) => {
+  switch (action.type) {
+    case EActionTypes.MESSAGE:
+      // meta should contain the usual message content (like body, files and polls)
+      return messageService.create(R.merge({
+        messageType: EMessageTypes.ORGANISATION,
+        parentType: EParentTypes.USER,
+        parentId: userId,
+      }, action.meta), { credentials: { id: workflowUserId } });
+
+    default:
+      return Promise.reject(new Error('Unknown action'));
+  }
+};
+
 const processWorkflowPart = (workflow) => {
   return workflowExecutor
     .fetchUnhandledUsersBatch(workflow)
@@ -37,8 +56,9 @@ const processWorkflowPart = (workflow) => {
       if (!userIds.length) return;
 
       return Promise
-      // TODO: do action here
-        .map(userIds, (userId) => Promise.resolve(userId))
+        .map(userIds, (userId) => Promise
+          .map(workflow.actions, (action) =>
+            doActionForUser(workflow.userId, action, userId)))
         .then(() => {
           return workflowRepo
             .markUsersHandled(workflow.id, userIds)

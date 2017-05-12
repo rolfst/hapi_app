@@ -35,6 +35,7 @@ const structure = {
     ],
     calculatedFields: {
       age: 'TIMESTAMPDIFF(YEAR, u.date_of_birth, CURDATE())',
+      full_name: 'CONCAT_WS(\' \', u.first_name, u.last_name)',
     },
   },
   organisation_user: {
@@ -75,25 +76,25 @@ const structure = {
       'name',
     ],
   },
-  team: {
-    identifier: 't',
-    joinSQL: 'JOIN teams t ON (t.network_id = n.id)',
-    depends: [
-      'network',
-    ],
-    fields: [
-      'id',
-      'name',
-    ],
-  },
   team_user: {
     identifier: 't',
-    joinSQL: 'JOIN team_user tu ON (tu.team_id = t.id AND tu.user_id = ou.user_id)',
+    joinSQL: 'JOIN teams t ON (t.network_id = n.id)\n  JOIN team_user tu ON (tu.team_id = t.id AND tu.user_id = ou.user_id)',
     depends: [
+      'network',
       'team',
     ],
     fields: [
       'id',
+    ],
+  },
+  team: {
+    identifier: 't',
+    depends: [
+      'team_user',
+    ],
+    fields: [
+      'id',
+      'name',
     ],
   },
 };

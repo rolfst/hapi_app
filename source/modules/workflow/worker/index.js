@@ -36,6 +36,8 @@ function run() {
 }
 
 function shutdown() {
+  if (shuttingDown) return;
+
   logger.info('Stopping workflow worker');
   shuttingDown = true;
 }

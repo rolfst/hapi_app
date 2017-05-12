@@ -67,6 +67,7 @@ describe('Workflow handler: create complete workflow', () => {
     const createdWorkFlow = result.data;
     assert.property(createdWorkFlow, 'id');
     assert.equal(createdWorkFlow.organisation_id, organisation.id);
+    assert.equal(createdWorkFlow.user_id, admin.id);
     assert.equal(createdWorkFlow.name, workflowFixture.name);
     assert.property(createdWorkFlow, 'meta');
     assert.property(createdWorkFlow, 'start_date');

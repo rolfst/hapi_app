@@ -324,12 +324,20 @@ async function createCompleteWorkflow(payload, message) {
     actions,
   } = payload;
 
-  const workflowData = R.ifElse(
-    isNullOrEmpty,
-    R.always({ organisationId, name, meta, startDate, expirationDate }),
-    R.always({ organisationId, name, meta, startDate, expirationDate, done: true })
+  const userId = message.credentials.id;
+
+  const workflowData = { organisationId, userId, name, meta, startDate, expirationDate };
+
+  const directTrigger = R.find(
+    R.propEq('type', workFlowRepo.ETriggerTypes.DIRECT));
+
+  const buildWorkflowData = R.ifElse(
+    R.either(isNullOrEmpty, R.complement(R.pipe(directTrigger, isNullOrEmpty))),
+    R.always(R.assoc('done', true, workflowData)),
+    R.always(workflowData)
   );
-  const data = workflowData(triggers);
+
+  const data = buildWorkflowData(triggers);
   const createdWorkFlow = await workFlowRepo.create(data);
   const addWorkflowId = R.assoc('workflowId', createdWorkFlow.id);
   const wfTriggers = R.map(addWorkflowId,

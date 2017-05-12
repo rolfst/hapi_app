@@ -22,3 +22,11 @@ exports.EObjectTypes = {
   TEAM: 'team',
   USER: 'user',
 };
+
+exports.EParentTypes = {
+  ORGANISATION: 'organisation',
+  NETWORK: 'network',
+  TEAM: 'team',
+  EXCHANGE: 'exchange',
+  USER: 'user',
+};

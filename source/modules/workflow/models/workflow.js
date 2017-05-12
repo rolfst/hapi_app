@@ -6,6 +6,7 @@ module.exports = (dataModel) => {
   return {
     id: dataModel.id,
     organisationId: parseInt(dataModel.organisationId, 10), // Somehow the dao gives a string
+    userId: dataModel.userId,
     name: dataModel.name,
     meta: dataModel.meta ? JSON.parse(dataModel.meta) : null,
     startDate: dataModel.start_date ? dateUtils.toISOString(dataModel.start_date) : null,
