@@ -35,7 +35,9 @@ WHERE
 `;
 
 const fetchDueWorkflowIds = () =>
-  Promise.resolve(workflowExecutor.executeQuery(fetchDueWorkflowIdsQuery));
+  Promise.resolve(workflowExecutor
+    .executeQuery(fetchDueWorkflowIdsQuery)
+    .then(workflowExecutor.pluckUserIds));
 
 const doActionForUser = (workflowUserId, action, userId) => {
   switch (action.type) {

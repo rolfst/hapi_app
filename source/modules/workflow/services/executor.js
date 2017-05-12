@@ -1,3 +1,4 @@
+const R = require('ramda');
 const sequelize = require('../../../shared/configs/sequelize');
 const logger = require('../../../shared/services/logger')('WORKFLOW/services/executor');
 const queryGenerator = require('./query-generator');
@@ -8,6 +9,8 @@ const executeQuery = (query) => {
 
   return sequelize.query(query, { type: sequelize.QueryTypes.SELECT });
 };
+
+const pluckUserIds = R.pluck('userId');
 
 const previewConditions = (organisationId, conditions) => {
   logger.info('previewConditions', { organisationId, conditions });
@@ -36,4 +39,5 @@ const fetchUnhandledUsersBatch = (workflow) => {
 
 exports.executeQuery = executeQuery;
 exports.fetchUnhandledUsersBatch = fetchUnhandledUsersBatch;
+exports.pluckUserIds = pluckUserIds;
 exports.previewConditions = previewConditions;
