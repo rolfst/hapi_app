@@ -21,7 +21,7 @@ exports.EActionTypes = {
   MESSAGE: 'message',
 };
 
-exports.WORKER_INTERVAL = 25;
+exports.WORKER_INTERVAL = 1000;
 
 exports.CONCURRENT_USERS = 10;
 

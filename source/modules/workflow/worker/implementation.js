@@ -97,6 +97,8 @@ const fetchAndProcessWorkflows = () => {
   return Promise
     .resolve(workflowExecutor.executeQuery(fetchDueWorkflowIds))
     .then((workflowIds) => {
+      if (!workflowIds.length) return;
+
       const processWorkflowP = Promise.map(workflowIds, processWorkflow);
 
       return Promise

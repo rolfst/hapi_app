@@ -28,9 +28,6 @@ function run() {
     .finally(() => {
       running = false;
 
-      // we're testing, so stop after one run
-      if (process.env.API_ENV === 'testing') return;
-
       scheduleNextRun();
     });
 }
