@@ -1,8 +1,11 @@
+const R = require('ramda');
+const Promise = require('bluebird');
 const workFlowRepo = require('../repositories/workflow');
 const createError = require('../../../shared/utils/create-error');
 
 const logger = require('../../../shared/services/logger')('workflow/service');
 
+const isNullOrEmpty = R.either(R.isEmpty, R.isNil);
 const assertWorkflowBelongsToOrganisation = (workflow, organisationId) => {
   if (!workflow) {
     throw createError('404');
@@ -309,6 +312,87 @@ const removeAction = async (payload, message) => {
   return workFlowRepo.destroyAction(payload.actionId);
 };
 
+async function createCompleteWorkflow(payload, message) {
+  const {
+    organisationId,
+    name,
+    meta,
+    startDate,
+    expirationDate,
+    triggers,
+    conditions,
+    actions,
+  } = payload;
+
+  const workflowData = R.ifElse(
+    isNullOrEmpty,
+    R.always({ organisationId, name, meta, startDate, expirationDate }),
+    R.always({ organisationId, name, meta, startDate, expirationDate, done: true })
+  );
+  const data = workflowData(triggers);
+  const createdWorkFlow = await workFlowRepo.create(data);
+  const addWorkflowId = R.assoc('workflowId', createdWorkFlow.id);
+  const wfTriggers = R.map(addWorkflowId,
+    R.ifElse(
+      isNullOrEmpty,
+      R.always([{ type: workFlowRepo.ETriggerTypes.DIRECT }]),
+      R.identity)(triggers));
+  const wfConditions = R.map(addWorkflowId, conditions);
+  const wfActions = R.map(addWorkflowId, actions);
+
+  return Promise.all([
+    Promise.map(wfTriggers, (trigger) =>
+      workFlowRepo.createTrigger({
+        workflowId: trigger.workflowId,
+        type: trigger.type,
+        value: trigger.value,
+      })
+    ),
+    Promise.map(wfConditions, (condition) =>
+      workFlowRepo.createCondition({
+        workflowId: createdWorkFlow.id,
+        field: condition.field,
+        operator: condition.operator,
+        value: condition.value,
+      })
+    ),
+    Promise.map(wfActions, (action) =>
+      workFlowRepo.createAction({
+        workflowId: action.workflowId,
+        type: action.type,
+        meta: action.meta,
+      })
+    ),
+  ])
+  .then(([createdTriggers, createdConditions, createdActions]) => {
+    const foundDirectTrigger = R.find(
+      R.propEq('type', workFlowRepo.ETriggerTypes.DIRECT), createdTriggers);
+    if (foundDirectTrigger) {
+      /* TODO
+      workflowExcecuter.executeWorkflow().then(() =>
+        return R.mergeAll(createdWorkFlow, [createdTriggers, createdConditions, createdActions]);
+      )
+      .catch (err) {
+        logger.error(`Failure creating complete workflow for: ${createdWorkFlow.id}`,
+          { message, payload, err });
+        workFlowRepo.update({ id: createdWorkflow.id, done: false });
+        throw createError('40000');
+      }
+      */
+    }
+    return R.mergeAll([
+      createdWorkFlow,
+      { triggers: createdTriggers },
+      { conditions: createdConditions },
+      { actions: createdActions },
+    ]);
+  })
+  .catch((error) => {
+    logger.error(`Failure creating complete workflow for: ${createdWorkFlow.id}`, { message, payload, error });
+    workFlowRepo.destroy(createdWorkFlow.id);
+  });
+}
+
 // Carry along enums for easy access later
 exports.ETriggerTypes = workFlowRepo.ETriggerTypes;
 exports.EConditionOperators = workFlowRepo.EConditionOperators;
@@ -328,3 +412,4 @@ exports.removeCondition = removeCondition;
 exports.createAction = createAction;
 exports.updateAction = updateAction;
 exports.removeAction = removeAction;
+exports.createCompleteWorkflow = createCompleteWorkflow;

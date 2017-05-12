@@ -1,12 +1,28 @@
+const R = require('ramda');
 const { assert } = require('chai');
 const testHelper = require('../../../shared/test-utils/helpers');
 const { postRequest } = require('../../../shared/test-utils/request');
 const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../definitions');
 
-describe('Workflow handler: create workflow', () => {
+describe('Workflow handler: create complete workflow', () => {
   const workflowFixture = {
     name: 'test workflow',
   };
+  const actionFixture = [{
+    type: EActionTypes.MESSAGE,
+    meta: {
+      content: 'something',
+    },
+  }];
+  const conditionFixture = [{
+    field: 'user.birthdate',
+    operator: EConditionOperators.EQUAL,
+    value: '2018-01-01',
+  }];
+  const triggerFixture = [{
+    type: ETriggerTypes.DATETIME,
+    value: '2018-01-01 13:00:00',
+  }];
 
   let admin;
   let employee;
@@ -34,16 +50,21 @@ describe('Workflow handler: create workflow', () => {
   after(() => testHelper.cleanAll());
 
   it('should create a workflow for an admin', async () => {
+    const payload = R.mergeAll([
+      workflowFixture,
+      { triggers: triggerFixture },
+      { actions: actionFixture },
+      { conditions: conditionFixture },
+    ]);
     const { statusCode, result } = await postRequest(
       createUrl,
-      workflowFixture,
+      payload,
       admin.token
     );
 
     assert.equal(statusCode, 200);
 
     const createdWorkFlow = result.data;
-
     assert.property(createdWorkFlow, 'id');
     assert.equal(createdWorkFlow.organisation_id, organisation.id);
     assert.equal(createdWorkFlow.name, workflowFixture.name);
@@ -52,9 +73,9 @@ describe('Workflow handler: create workflow', () => {
     assert.property(createdWorkFlow, 'expiration_date');
     assert.property(createdWorkFlow, 'created_at');
     assert.property(createdWorkFlow, 'updated_at');
-    assert.property(createdWorkFlow, 'triggers');
-    assert.property(createdWorkFlow, 'conditions');
-    assert.property(createdWorkFlow, 'actions');
+    assert.isArray(createdWorkFlow.triggers);
+    assert.isArray(createdWorkFlow.conditions);
+    assert.isArray(createdWorkFlow.actions);
   });
 
   it('should fail for an employee', async () => {
@@ -297,4 +318,3 @@ describe('Workflow handler: create action', async () => {
     assert.equal(statusCode, 403);
   });
 });
-
