@@ -15,7 +15,6 @@ const actionScheme = Joi.object().keys({
   meta: Joi.alternatives(Joi.string(), Joi.object()).required(),
 });
 
-
 module.exports = {
   payload: Joi.object().keys({
     name: Joi.string().required(),
