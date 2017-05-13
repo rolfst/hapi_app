@@ -4,16 +4,19 @@ const testHelper = require('../../../shared/test-utils/helpers');
 const { exchangeTypes } = require('../repositories/dao/exchange');
 const { getRequest } = require('../../../shared/test-utils/request');
 const { createExchange } = require('../repositories/exchange');
+const { createExchangeComment } = require('../repositories/comment');
 const { create } = require('../../core/repositories/team');
 
 describe('View exchange', () => {
   let admin;
+  let user;
   let network;
   let exchange;
 
   before(async () => {
-    admin = await testHelper.createUser();
+    [admin, user] = await Promise.all([testHelper.createUser(), testHelper.createUser()]);
     network = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
+    testHelper.addUserToNetwork({ networkId: network.id, userId: user.id, roleType: 'EMPLOYEE' });
 
     exchange = await createExchange(admin.id, network.id, {
       date: moment().format('YYYY-MM-DD'),
@@ -65,6 +68,23 @@ describe('View exchange', () => {
 
     assert.equal(statusCode, 200);
     assert.deepEqual(result.data.created_in, { type: 'network', id: network.id });
+  });
+
+  it('should return users for comments', async () => {
+    const newExchange = await createExchange(admin.id, network.id, {
+      type: exchangeTypes.USER,
+      values: [admin.id],
+      date: moment().subtract(2, 'weeks').format('YYYY-MM-DD'),
+      title: 'Test shift in past',
+    });
+    const commentPayload = { text: 'Test', userId: user.id };
+    await createExchangeComment(newExchange.id, commentPayload);
+
+    const endpoint = `/v2/networks/${network.id}/exchanges/${newExchange.id}`;
+    const { result, statusCode } = await getRequest(endpoint, admin.token);
+
+    assert.equal(statusCode, 200);
+    assert.isNotNull(result.data.comments[0].user);
   });
 
   it('should fail when exchange cannot be found', async () => {
