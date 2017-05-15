@@ -11,6 +11,7 @@ const executeQuery = (query) => {
 };
 
 const pluckUserIds = R.pluck('userId');
+const pluckIds = R.pluck('id');
 
 const previewConditions = (organisationId, conditions) => {
   logger.info('previewConditions', { organisationId, conditions });
@@ -34,10 +35,12 @@ const fetchUnhandledUsersBatch = (workflow) => {
     { workflowId: workflow.id, limit: CONCURRENT_USERS }
   );
 
-  return executeQuery(query);
+  return executeQuery(query)
+    .then(pluckUserIds);
 };
 
 exports.executeQuery = executeQuery;
 exports.fetchUnhandledUsersBatch = fetchUnhandledUsersBatch;
+exports.pluckIds = pluckIds;
 exports.pluckUserIds = pluckUserIds;
 exports.previewConditions = previewConditions;

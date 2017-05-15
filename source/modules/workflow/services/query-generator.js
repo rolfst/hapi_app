@@ -3,6 +3,9 @@ const sequelize = require('../../../shared/configs/sequelize');
 const { EConditionOperators } = require('../definitions');
 const logger = require('../../../shared/services/logger')('WORKFLOW/services/query-generator');
 
+const escape = (val) => sequelize.escape(val);
+const castToArrayAndEscape = R.map(escape, R.split(','));
+
 const selector = 'ou.user_id';
 
 const groupBy = 'ou.user_id';
@@ -127,8 +130,6 @@ R.forEachObjIndexed((table, tableName) => {
   }
 }, structure);
 
-const castToArrayAndEscape = R.map(sequelize.escape.bind(sequelize), R.split(','));
-
 const buildQuery = (organisationId, conditions = null, {
   count,
   limit,
@@ -183,7 +184,7 @@ const buildQuery = (organisationId, conditions = null, {
         case EConditionOperators.LESS_THAN_OR_EQUAL:
         case EConditionOperators.NOT:
           operator = condition.operator;
-          escapedValue = sequelize.escape(condition.value);
+          escapedValue = escape(condition.value);
           break;
 
         case EConditionOperators.IN:
@@ -198,7 +199,7 @@ const buildQuery = (organisationId, conditions = null, {
 
         case EConditionOperators.CONTAINS:
           operator = 'LIKE';
-          escapedValue = sequelize.escape(`%${condition.value}%`);
+          escapedValue = escape(`%${condition.value}%`);
           break;
 
         default:

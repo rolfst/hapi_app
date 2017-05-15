@@ -4,7 +4,7 @@ const createWorkFlowModel = require('../models/workflow');
 const createTriggerModel = require('../models/trigger');
 const createConditionModel = require('../models/condition');
 const createActionModel = require('../models/action');
-// const createActionDoneModel = require('../models/actiondone');
+const createActionDoneModel = require('../models/action-done');
 const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../definitions');
 const dateUtils = require('../../../shared/utils/date');
 
@@ -201,10 +201,13 @@ const deleteAll = () => {
   ]);
 };
 
-const markUsersHandled = (workflowId, userIds) => {
-  return ActionDone
-    .bulkCreate(userIds.map((userId) => ({ workflowId, userId })));
-};
+const markUserHandled = (workflowId, userId) =>
+  ActionDone.create({ workflowId, userId });
+
+const findHandledUsers = (workflowId) =>
+  ActionDone
+    .findAll({ where: { workflowId } })
+    .then(R.map(createActionDoneModel));
 
 // Carry along enums for easy access later
 exports.ETriggerTypes = ETriggerTypes;
@@ -233,4 +236,5 @@ exports.updateAction = updateAction;
 exports.destroyAction = destroyAction;
 exports.findOneAction = findOneAction;
 exports.deleteAll = deleteAll;
-exports.markUsersHandled = markUsersHandled;
+exports.findHandledUsers = findHandledUsers;
+exports.markUserHandled = markUserHandled;

@@ -15,7 +15,7 @@ FROM
   workflows w
   LEFT JOIN workflow_triggers t ON (t.workflow_id = w.id)
 WHERE
-  w.done = 0
+  IFNULL(w.done, 0) = 0
   AND (
        w.start_date IS NULL
   OR w.start_date > NOW()
@@ -28,7 +28,7 @@ WHERE
        t.type = '${ETriggerTypes.DIRECT}'
     OR (
           t.type = '${ETriggerTypes.DATETIME}'
-      AND CAST(t.value AS DATETIME) >= NOW()
+      AND CAST(t.value AS DATETIME) <= NOW()
     )
   )
 ;
@@ -37,7 +37,7 @@ WHERE
 const fetchDueWorkflowIds = () =>
   Promise.resolve(workflowExecutor
     .executeQuery(fetchDueWorkflowIdsQuery)
-    .then(workflowExecutor.pluckUserIds));
+    .then(workflowExecutor.pluckIds));
 
 const doActionForUser = (workflowUserId, action, userId) => {
   switch (action.type) {
@@ -67,11 +67,10 @@ const processWorkflowPart = (workflow) => {
       return Promise
         .map(userIds, (userId) => Promise
           .map(workflow.actions, (action) =>
-            doActionForUser(workflow.userId, action, userId)))
+            doActionForUser(workflow.userId, action, userId)
+              .then(() => workflowRepo.markUserHandled(workflow.id, userId))))
         .then(() => {
-          return workflowRepo
-            .markUsersHandled(workflow.id, userIds)
-            .then(processWorkflowPart(workflow));
+          return processWorkflowPart(workflow);
         });
     });
 };

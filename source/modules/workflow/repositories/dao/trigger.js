@@ -14,7 +14,6 @@ const Trigger = model.define('Trigger', {
   },
   value: {
     type: Sequelize.STRING,
-    allowNull: false,
   },
 }, {
   tableName: 'workflow_triggers',
