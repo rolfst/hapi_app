@@ -10,6 +10,7 @@ const workerImplementation = require('./implementation');
 describe('Workflow worker: implementation', () => {
   let admin;
   let employee;
+  let otherEmployee;
   let organisation;
 
   let network;
@@ -17,7 +18,7 @@ describe('Workflow worker: implementation', () => {
   let workflow;
 
   before(async () => {
-    [admin, employee, , organisation] = await Promise.all([
+    [admin, employee, otherEmployee, organisation] = await Promise.all([
       testHelper.createUser(),
       testHelper.createUser(),
       testHelper.createUser(),
@@ -28,6 +29,7 @@ describe('Workflow worker: implementation', () => {
       testHelper.createNetwork({ organisationId: organisation.id, userId: admin.id }),
       testHelper.addUserToOrganisation(admin.id, organisation.id, 'ADMIN'),
       testHelper.addUserToOrganisation(employee.id, organisation.id),
+      testHelper.addUserToOrganisation(otherEmployee.id, organisation.id),
     ]);
 
     await testHelper.addUserToNetwork(
