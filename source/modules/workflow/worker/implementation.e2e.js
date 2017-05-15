@@ -7,10 +7,9 @@ const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../definit
 const { ERoleTypes } = require('../../core/definitions');
 const workerImplementation = require('./implementation');
 
-describe.only('Workflow worker: implementation', () => {
+describe('Workflow worker: implementation', () => {
   let admin;
   let employee;
-  let otherUser;
   let organisation;
 
   let network;
@@ -18,7 +17,7 @@ describe.only('Workflow worker: implementation', () => {
   let workflow;
 
   before(async () => {
-    [admin, employee, otherUser, organisation] = await Promise.all([
+    [admin, employee, , organisation] = await Promise.all([
       testHelper.createUser(),
       testHelper.createUser(),
       testHelper.createUser(),
