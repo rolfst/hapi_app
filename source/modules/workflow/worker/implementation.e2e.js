@@ -3,6 +3,7 @@ const { assert } = require('chai');
 const testHelper = require('../../../shared/test-utils/helpers');
 const workflowService = require('../services/workflow');
 const workflowRepository = require('../repositories/workflow');
+const workflowExecutor = require('../services/executor');
 const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../definitions');
 const { ERoleTypes } = require('../../core/definitions');
 const workerImplementation = require('./implementation');
@@ -10,7 +11,6 @@ const workerImplementation = require('./implementation');
 describe('Workflow worker: implementation', () => {
   let admin;
   let employee;
-  let otherEmployee;
   let organisation;
 
   let network;
@@ -18,8 +18,7 @@ describe('Workflow worker: implementation', () => {
   let workflow;
 
   before(async () => {
-    [admin, employee, otherEmployee, organisation] = await Promise.all([
-      testHelper.createUser(),
+    [admin, employee, organisation] = await Promise.all([
       testHelper.createUser(),
       testHelper.createUser(),
       testHelper.createOrganisation(),
@@ -29,7 +28,6 @@ describe('Workflow worker: implementation', () => {
       testHelper.createNetwork({ organisationId: organisation.id, userId: admin.id }),
       testHelper.addUserToOrganisation(admin.id, organisation.id, 'ADMIN'),
       testHelper.addUserToOrganisation(employee.id, organisation.id),
-      testHelper.addUserToOrganisation(otherEmployee.id, organisation.id),
     ]);
 
     await testHelper.addUserToNetwork(
@@ -72,6 +70,17 @@ describe('Workflow worker: implementation', () => {
 
     const handledUsers = R.pluck('userId', await workflowRepository.findHandledUsers(workflow.id));
 
-    assert.deepEqual(R.map(String, handledUsers), [admin.id, employee.id]);
+    const actualHandledUsers = R.map(String, handledUsers).sort();
+    const expectedHandledUsers = [admin.id, employee.id].sort();
+
+    assert.deepEqual(actualHandledUsers, expectedHandledUsers);
+
+    const unhandledUsers = await workflowExecutor.fetchUnhandledUsersBatch(workflow);
+
+    assert.lengthOf(unhandledUsers, 0);
+
+    const doneWorkflow = await workflowService.fetchOne({ workflowId: workflow.id });
+
+    assert.isTrue(doneWorkflow.done);
   });
 });

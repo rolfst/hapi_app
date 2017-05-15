@@ -32,7 +32,7 @@ const create = (attributes) => {
 };
 
 const update = (id, attributes) => {
-  const whitelist = ['organisationId', 'userId', 'name', 'meta', 'startDate', 'expirationDate', 'lastCheck'];
+  const whitelist = ['organisationId', 'userId', 'name', 'meta', 'startDate', 'expirationDate', 'lastCheck', 'done'];
 
   return WorkFlow
     .update(R.pick(whitelist, attributes), { where: { id } })
