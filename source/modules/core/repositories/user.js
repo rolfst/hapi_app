@@ -90,8 +90,7 @@ const findUserById = async (userId, networkId, scoped = true) => {
     : {};
   const user = await User.findOne(R.merge(includes, { where: { id: userId } }));
 
-  if (!user)
-    throw createError('403', `The user with id '${userId}' could not be found.`);
+  if (!user) throw createError('403', `The user with id '${userId}' could not be found.`);
 
   return toModel(user);
 };
