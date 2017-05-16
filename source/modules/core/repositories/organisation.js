@@ -164,16 +164,16 @@ const findUsers = async (constraint, attributes = {}, options = null) => {
   if (constraint.q) {
     return sequelize.query(`
         SELECT
-          organisation_user.user_id AS userId,
-          organisation_user.role_type AS roleType,
-          DATE_FORMAT(organisation_user.invited_at, '%Y-%m-%dT%T.000Z') AS invitedAt,
-          DATE_FORMAT(organisation_user.created_at, '%Y-%m-%dT%T.000Z') AS createdAt,
-          organisation_user.deleted_at AS deletedAt,
-          CONCAT(users.first_name, ' ', users.last_name) AS fullName
-        FROM users
-        LEFT JOIN organisation_user ON users.id = organisation_user.user_id
-        WHERE organisation_user.organisation_id = :organisationId
-        HAVING fullName LIKE :q
+          ou.user_id AS userId,
+          ou.role_type AS roleType,
+          DATE_FORMAT(ou.invited_at, '%Y-%m-%dT%T.000Z') AS invitedAt,
+          DATE_FORMAT(ou.created_at, '%Y-%m-%dT%T.000Z') AS createdAt,
+          ou.deleted_at AS deletedAt,
+          CONCAT(u.first_name, ' ', u.last_name) AS fullName
+        FROM organisation_user ou
+          JOIN users u ON ou.user_id = u.id
+        WHERE ou.organisation_id = :organisationId
+          AND CONCAT(u.first_name, ' ', u.last_name) LIKE :q
       `, {
         replacements: {
           q: `%${constraint.q}%`,
@@ -183,7 +183,7 @@ const findUsers = async (constraint, attributes = {}, options = null) => {
       });
   }
 
-  const query = R.merge(options, { where: constraint }, attributes);
+  const query = R.merge(options, { where: constraint }, { attributes });
 
   return OrganisationUser.findAll(query);
 };

@@ -223,7 +223,7 @@ async function listUsers(payload, message) {
 
   const options = createOptionsFromPayload(payload);
   const organisationUsers = await organisationRepository.findUsers(
-    R.omit(OPTIONS_WHITELIST, payload), null, options);
+    R.merge(R.omit(OPTIONS_WHITELIST, payload), { deletedAt: null }), null, options);
   const userIds = R.map((user) => user.userId, organisationUsers);
   const users = await userService.list({ userIds }, message);
   const findOrganisationUser = (organisationUserId) => R.omit(['function', 'teamIds'],
