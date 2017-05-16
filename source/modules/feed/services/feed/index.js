@@ -4,6 +4,8 @@ const createError = require('../../../../shared/utils/create-error');
 const networkService = require('../../../core/services/network');
 const userService = require('../../../core/services/user');
 const teamService = require('../../../core/services/team');
+const objectService = require('../../../core/services/object');
+const coreQueries = require('../../../core/repositories/queries');
 const impl = require('./implementation');
 const { EObjectTypes } = require('../../../core/definitions');
 
@@ -56,6 +58,7 @@ const makeForNetwork = async (payload, message) => {
     parentId: payload.networkId,
   };
   const constraint = impl.composeSpecialisedQueryForFeed(feedPayload, extraWhereConstraint);
+
   return impl.makeFeed(constraint, feedOptions(payload), message);
 };
 
@@ -114,6 +117,55 @@ const makeForTeam = async (payload, message) => {
   return impl.makeFeed(constraint, feedOptions(payload), R.assoc('network', network, message));
 };
 
+async function makeForPerson(payload, message) {
+  const [networkIds, teamIds] = await Promise.all([
+    coreQueries
+      .executeQuery(coreQueries.QUERIES.FETCH_ELIGIBLE_NETWORK_IDS, {
+        organisationId: payload.organisationId,
+        userId: message.credentials.id,
+      })
+      .then(coreQueries.pluckIds),
+    coreQueries
+      .executeQuery(coreQueries.QUERIES.FETCH_ELIGIBLE_TEAM_IDS, {
+        organisationId: payload.organisationId,
+        userId: message.credentials.id,
+      })
+      .then(coreQueries.pluckIds),
+  ]);
+
+  const constraint = {
+    $or: [
+      {
+        parentType: EObjectTypes.ORGANISATION,
+        parentId: payload.organisationId,
+        organisationId: payload.organisationId,
+      },
+      {
+        parentType: EObjectTypes.NETWORK,
+        parentId: { $in: networkIds },
+      },
+      {
+        parentType: EObjectTypes.TEAM,
+        parentId: { $in: teamIds },
+      },
+      {
+        parentType: EObjectTypes.USER,
+        parentId: message.credentials.id,
+        organisationId: payload.organisationId,
+      },
+    ],
+  };
+
+  const totalCountPromise = objectService.count({ constraint }, message);
+  const feedPromise = impl.makeFeed(constraint, feedOptions(payload), message);
+  const [count, feedItems] = await Promise.all([
+    totalCountPromise, feedPromise,
+  ]);
+
+  return { count, feedItems };
+}
+
 exports.makeForNetwork = makeForNetwork;
+exports.makeForPerson = makeForPerson;
 exports.makeForOrganisation = makeForOrganisation;
 exports.makeForTeam = makeForTeam;

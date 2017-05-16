@@ -129,7 +129,6 @@ const create = async (payload, message) => {
  */
 const count = async (payload, message) => {
   logger.debug('Counting objects', { payload, message });
-
   if (payload.constraint) return objectRepository.count(payload.constraint);
 
   const whitelistAttrs = ['userId', 'parentType', 'parentId', 'objectType', 'organisationId'];
