@@ -103,7 +103,6 @@ describe('Condition reach', () => {
     [admin] = await Promise.all(
       [testHelper.createUser(), testHelper.createUser()]);
 
-
     otherUsers = await Promise.map(R.range(0, 8), () => testHelper.createUser());
     testHelper.addUserToOrganisation(admin.id, organisation.id, ERoleTypes.ADMIN);
 
@@ -156,11 +155,18 @@ describe('Condition reach', () => {
 
     const { result: { data } } = await postRequest(
       endpoint, { conditions: [conditionFixture] }, admin.token);
-    const matchingIds = await testConditions(organisation.id, [conditionFixture]);
+    const actualIds = await testConditions(organisation.id, [conditionFixture]);
 
     // we have to add the admin to the expected user here
-    assert.equal(data.count, (networkAUsers.concat(networkBUsers).length) + 1);
-    assert.equal(data.count, matchingIds.length);
+    const expectedIds =
+      R.map(
+        (networkUser) => networkUser.userId,
+        R.uniq(R.concat(R.concat(networkAUsers, networkBUsers), [{ userId: admin.id }]))
+      );
+
+    assert.equal(data.count, expectedIds.length, 'Expected Network Ids');
+    assert.equal(data.count, actualIds.length, 'Matching Network Ids');
+    assert.deepEqual(expectedIds.sort(), actualIds.sort());
   });
 
   it('should only reach users in the team specified', async () => {
@@ -172,13 +178,13 @@ describe('Condition reach', () => {
     };
     const { result: { data } } = await postRequest(
       endpoint, { conditions: [conditionFixture] }, admin.token);
-    const matchingIds = await testConditions(organisation.id, [conditionFixture]);
-    const expectedTeamIds = R.map(
+    const actualIds = await testConditions(organisation.id, [conditionFixture]);
+    const expectedIds = R.map(
       (teamUser) => teamUser.userId, R.uniq(R.concat(teamAUsers, teamCUsers))
     );
 
-    assert.equal(data.count, expectedTeamIds.length, 'Expected Team Ids');
-    assert.equal(data.count, matchingIds.length, 'matching Team Ids');
-    assert.deepEqual(expectedTeamIds, matchingIds);
+    assert.equal(data.count, expectedIds.length, 'Expected Team Ids');
+    assert.equal(data.count, actualIds.length, 'Matching Team Ids');
+    assert.deepEqual(expectedIds.sort(), actualIds.sort());
   });
 });
