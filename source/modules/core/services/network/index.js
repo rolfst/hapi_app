@@ -242,6 +242,8 @@ const updateUserInNetwork = async (payload) => {
     'deletedAt',
   ];
 
+  // TODO: verify this user is actually in the network or organisation
+
   const userFields = R.pick(userWhiteList, payload);
   const networkUserFields = R.pick(networkUserWhiteList, payload);
 
@@ -263,8 +265,13 @@ const updateUserInNetwork = async (payload) => {
 
   await updateUserRecord().then(updateOrganisationUserRecord);
 
-  return userRepo.findUserById(payload.userId, payload.networkId);
+  return userService.getUserWithNetworkScope({
+    id: payload.userId,
+    networkId: payload.networkId,
+  });
 };
+
+exports.ERoleTypes = ERoleTypes;
 
 exports.fetchOrganisationNetworks = fetchOrganisationNetworks;
 exports.listTeamsForNetwork = listTeamsForNetwork;

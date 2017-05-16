@@ -288,7 +288,7 @@ const updateUser = (networkId, userId, attributes) => {
 const getNetworkUser = (networkId, userId) => {
   return NetworkUser
     .findOne({ where: { networkId, userId } })
-    .then(createNetworkLinkModel);
+    .then((record) => (record ? createNetworkLinkModel(record) : null));
 };
 
 exports.addUser = addUser;
