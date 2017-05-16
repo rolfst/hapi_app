@@ -62,6 +62,11 @@ const User = model.define('User', {
   role: {
     type: Sequelize.VIRTUAL,
   },
+  playerId: {
+    type: Sequelize.STRING,
+    allowNull: true,
+    field: 'player_id',
+  },
   lastLogin: {
     type: Sequelize.DATE,
     allowNull: true,

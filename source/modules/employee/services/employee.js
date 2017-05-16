@@ -20,7 +20,7 @@ const EmployeeDispatcher = require('../dispatcher');
  */
 const updateEmployee = async (payload, message) => {
   // TODO move this functionality to the core module
-  const whitelist = [
+  let whitelist = [
     'firstName',
     'lastName',
     'email',
@@ -29,7 +29,18 @@ const updateEmployee = async (payload, message) => {
     'zipCode',
     'dateOfBirth',
     'phoneNum',
+    'playerId',
   ];
+
+  // TODO - this function only works for the current user, make it so it can also work for admins
+
+  if (payload.playerId) {
+    const user = await userRepo.findUser(message.credentials.id);
+
+    if (user.playerId) {
+      whitelist = R.without(['playerId'], whitelist);
+    }
+  }
 
   const attributes = R.pick(whitelist, payload);
   await userRepo.updateUser(message.credentials.id, attributes);

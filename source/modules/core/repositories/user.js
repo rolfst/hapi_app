@@ -179,8 +179,7 @@ const findCredentialsForUser = async (username) => {
  * @return {external:Promise.<User>} {@link module:modules/core~User User}
  */
 const updateUser = async (userId, attributes) => {
-  const user = await User.findById(userId);
-  await user.update(attributes);
+  await User.update(attributes, { where: { id: userId } });
 
   return findUserById(userId, null, false);
 };
