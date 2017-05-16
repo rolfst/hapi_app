@@ -1,7 +1,9 @@
 const R = require('ramda');
 const createError = require('../../../../shared/utils/create-error');
 const networkRepo = require('../../repositories/network');
+const organisationRepo = require('../../repositories/organisation');
 const userService = require('../user');
+const userRepo = require('../../repositories/user');
 const teamService = require('../team');
 const { ERoleTypes } = require('../../definitions');
 
@@ -10,6 +12,30 @@ const { ERoleTypes } = require('../../definitions');
  */
 
 const logger = require('../../../../shared/services/logger')('CORE/service/network');
+
+/**
+ * Verifies if a user has a specific role in a network (or is organisation admin)
+ * @param requestedRole - The role to check for
+ * @param networkId - The id of the organisation
+ * @param userId - The id of the user
+ * @method userHasRoleInNetwork
+ * @returns {external:Promise.<Boolean>}
+ */
+const userHasRoleInNetwork = async (networkId, userId, requestedRole = ERoleTypes.ANY) => {
+  const network = await networkRepo.findNetworkById(networkId);
+  if (!network) throw createError('404', 'Network not found.');
+
+  const networkUser = await networkRepo.getNetworkUser(networkId, userId);
+  if (networkUser) {
+    if (requestedRole === ERoleTypes.ANY || networkUser.roleType === requestedRole) return true;
+  }
+
+  // We didn't find a networkUser with the right credentials, but an organisation admin is also ok
+  const organisationUser = await organisationRepo.getPivot(userId, network.organisationId);
+  if (!organisationUser) return false;
+
+  return organisationUser.roleType === ERoleTypes.ADMIN;
+};
 
 /**
  * Retrieve a single network;
@@ -200,6 +226,46 @@ const removeUser = (networkId, userId) => networkRepo.removeUser(networkId, user
 const updateUser = (networkId, userId, attributes) =>
   networkRepo.updateUser(networkId, userId, attributes);
 
+const updateUserInNetwork = async (payload) => {
+  const userWhiteList = [
+    'firstName',
+    'lastName',
+    'email',
+    'password',
+    'dateOfBirth',
+    'phoneNum',
+  ];
+
+  const networkUserWhiteList = [
+    'roleType',
+    'invitedAt',
+    'deletedAt',
+  ];
+
+  const userFields = R.pick(userWhiteList, payload);
+  const networkUserFields = R.pick(networkUserWhiteList, payload);
+
+  const updateUserRecord = () => {
+    if (R.isEmpty(userFields)) return Promise.resolve();
+
+    return userRepo.updateUser(payload.userId, userFields);
+  };
+
+  const updateOrganisationUserRecord = () => {
+    if (R.isEmpty(networkUserFields)) return Promise.resolve();
+
+    return userRepo
+      .updateNetworkLink(
+        { userId: payload.userId, networkId: payload.networkId },
+        networkUserFields
+      );
+  };
+
+  await updateUserRecord().then(updateOrganisationUserRecord);
+
+  return userRepo.findUserById(payload.userId, payload.networkId);
+};
+
 exports.fetchOrganisationNetworks = fetchOrganisationNetworks;
 exports.listTeamsForNetwork = listTeamsForNetwork;
 exports.listNetworksForUser = listNetworksForUser;
@@ -212,3 +278,5 @@ exports.listActiveUsersForNetwork = listActiveUsersForNetwork;
 exports.removeUser = removeUser;
 exports.update = update;
 exports.updateUser = updateUser;
+exports.updateUserInNetwork = updateUserInNetwork;
+exports.userHasRoleInNetwork = userHasRoleInNetwork;
