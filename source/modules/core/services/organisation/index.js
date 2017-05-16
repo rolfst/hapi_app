@@ -105,6 +105,17 @@ const listNetworks = async (payload, message) => {
 };
 
 /**
+ * Lists all teamids within an organisation
+ * @param {object} payload
+ * @param {string} payload.oranisationId - the organisation for which the teamIds need to be
+ * retrieved
+ * @returns {number[]}
+ */
+function listTeamIds(payload) {
+  return organisationRepository.findTeamIds(payload.organisationId);
+}
+
+/**
  * Listing organisations for a user
  * @param {object} payload
  * @param {string} payload.userId - The id of the user to list organisations for
@@ -439,6 +450,7 @@ exports.listForUser = listForUser;
 exports.listFunctions = listFunctions;
 exports.userHasRoleInOrganisation = userHasRoleInOrganisation;
 exports.listNetworks = listNetworks;
+exports.listTeamIds = listTeamIds;
 exports.listUsers = listUsers;
 exports.removeUserFromNetworks = removeUserFromNetworks;
 exports.updateFunction = updateFunction;

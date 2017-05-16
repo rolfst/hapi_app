@@ -201,15 +201,16 @@ const create = async (payload, message) => {
     messageType: payload.messageType || 'default_message',
   });
 
-  const createdObject = await objectService.create({
-    organisationId,
+  const data = {
     networkId,
+    organisationId,
     userId: message.credentials.id,
     parentType: payload.parentType,
     parentId: payload.parentId,
     objectType,
     sourceId: createdMessage.id,
-  }, message);
+  };
+  const createdObject = await objectService.create(data, message);
 
   await messageRepository.update(createdMessage.id, { objectId: createdObject.id });
 
@@ -224,6 +225,7 @@ const create = async (payload, message) => {
 
     const createObjects = Promise.map(filesArray, (attachmentId) => objectService.create({
       networkId,
+      organisationId,
       userId: message.credentials.id,
       parentType: 'feed_message',
       parentId: createdMessage.id,

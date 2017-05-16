@@ -150,6 +150,24 @@ const findFunction = async (functionIdOrWhereConstraint) => {
     : null;
 };
 
+async function findTeamIds(organisationId) {
+  return sequelize.query(`
+    SELECT
+      t.id
+    FROM
+      teams t
+      JOIN networks n ON t.network_id = n.id
+    WHERE
+      n.organisation_id = :organisationId
+  `, {
+    replacements: {
+      organisationId,
+    },
+    type: sequelize.QueryTypes.SELECT,
+  }
+  ).then(R.pluck('id'));
+}
+
 /**
  * find All users by constraint
  * @param {object} constraint
@@ -252,6 +270,7 @@ exports.findFunction = findFunction;
 exports.findFunctionForUser = findFunctionForUser;
 exports.findFunctionsForUsers = findFunctionsForUsers;
 exports.findFunctionsInOrganisation = findFunctionsInOrganisation;
+exports.findTeamIds = findTeamIds;
 exports.findUsers = findUsers;
 exports.getPivot = getPivot;
 exports.hasUser = hasUser;
