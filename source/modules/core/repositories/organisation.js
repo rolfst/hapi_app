@@ -59,7 +59,7 @@ const findForUser = async (userId, includePivot = false) => {
   return R.map((organisationUser) => {
     return R.merge(organisationUser,
       R.pick(
-        ['name', 'id'],
+        ['name', 'id', 'brandIcon'],
         findOrganisationPivot(organisationUser.organisationId.toString())
       )
     );
