@@ -99,7 +99,6 @@ describe('Condition reach', () => {
   let endpoint;
 
   before(async () => {
-    testHelper.cleanAll();
     organisation = await testHelper.createOrganisation();
     [admin] = await Promise.all(
       [testHelper.createUser(), testHelper.createUser()]);
@@ -139,6 +138,7 @@ describe('Condition reach', () => {
         R.slice(5, 6, otherUsers),
         (user) => testHelper.addUserToTeam(teamC.id, user.id)
       ),
+      Promise.map(otherUsers, (user) => testHelper.addUserToOrganisation(user.id, organisation.id)),
     ]);
 
     endpoint = `/v2/organisations/${organisation.id}/workflows/preview`;
@@ -177,8 +177,8 @@ describe('Condition reach', () => {
       (teamUser) => teamUser.userId, R.uniq(R.concat(teamAUsers, teamCUsers))
     );
 
-    assert.equal(data.count, expectedTeamIds.length);
-    assert.equal(data.count, matchingIds.length, '');
+    assert.equal(data.count, expectedTeamIds.length, 'Expected Team Ids');
+    assert.equal(data.count, matchingIds.length, 'matching Team Ids');
     assert.deepEqual(expectedTeamIds, matchingIds);
   });
 });
