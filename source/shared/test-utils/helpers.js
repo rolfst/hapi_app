@@ -1,5 +1,6 @@
 const R = require('ramda');
 const Promise = require('bluebird');
+const uuid = require('uuid-v4');
 const authenticate = require('./authenticate');
 const blueprints = require('./blueprints');
 const organisationService = require('../../modules/core/services/organisation');
@@ -198,7 +199,7 @@ async function getLoginToken({ username, password }) {
  * @return {external:Promise<User>} {@link module:modules/core~User User}
  */
 async function createUser(userAttributes = {}) {
-  const username = `test-user-${Math.floor(Math.random() * 1000)}`;
+  const username = `test-user-${uuid()}`;
   const attributes = R.merge({
     username,
     email: `${username}@example.com`,
