@@ -13,6 +13,7 @@ const networkRepo = require('../../core/repositories/network');
 const userRepo = require('../../core/repositories/user');
 const teamRepo = require('../../core/repositories/team');
 const organisationService = require('../../core/services/organisation');
+const organisationRepo = require('../../core/repositories/organisation');
 const EmployeeDispatcher = require('../dispatcher');
 const impl = require('./implementation');
 const { ERoleTypes } = require('../../core/definitions');
@@ -121,6 +122,11 @@ const inviteUser = async (payload, message) => {
   }
 
   if (teamIds && teamIds.length > 0) await teamRepo.addUserToTeams(teamIds, user.id);
+
+  if (network.organisationId) {
+    const organisationUser = await organisationRepo.getPivot(user.id, network.organisationId);
+    if (!organisationUser) await organisationRepo.addUser(user.id, network.organisationId);
+  }
 
   const createdUser = await userService.getUserWithNetworkScope({
     id: user.id, networkId: network.id });
