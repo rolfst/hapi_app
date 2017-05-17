@@ -5,7 +5,7 @@ const UserService = require('../services/user');
 const { ERoleTypes } = require('../definitions');
 const dateUtils = require('../../../shared/utils/date');
 
-describe.only('Handler: Update user in organisation', () => {
+describe('Handler: Update user in organisation', () => {
   let organisation;
   let admin;
   let otherAdmin;
@@ -18,7 +18,14 @@ describe.only('Handler: Update user in organisation', () => {
   let updateFixture;
 
   before(async () => {
-    [organisation, admin, otherAdmin, organisationUser, networkAdmin, otherUser] = await Promise.all([
+    [
+      organisation,
+      admin,
+      otherAdmin,
+      organisationUser,
+      networkAdmin,
+      otherUser,
+    ] = await Promise.all([
       testHelpers.createOrganisation(),
       testHelpers.createUser(),
       testHelpers.createUser(),
@@ -47,7 +54,7 @@ describe.only('Handler: Update user in organisation', () => {
       testHelpers.addUserToNetwork({
         networkId: network.id,
         userId: networkAdmin.id,
-        roleType: ERoleTypes.ADMIN
+        roleType: ERoleTypes.ADMIN,
       }),
     ]);
 
@@ -79,6 +86,17 @@ describe.only('Handler: Update user in organisation', () => {
       organisationUser.token);
 
     assert.equal(statusCode, 403);
+  });
+
+  it('should fail when updating a user not in the network', async () => {
+    const { statusCode, result } = await putRequest(
+      `/v2/networks/${network.id}/users/${otherUser.id}`,
+      updateFixture,
+      admin.token
+    );
+
+    assert.equal(statusCode, 403);
+    assert.equal(result.error_code, '10002');
   });
 
   it('should update a user in the organisation for network admin', async () => {

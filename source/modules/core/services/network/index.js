@@ -242,7 +242,8 @@ const updateUserInNetwork = async (payload) => {
     'deletedAt',
   ];
 
-  // TODO: verify this user is actually in the network or organisation
+  const networkUser = await networkRepo.getNetworkUser(payload.networkId, payload.userId);
+  if (!networkUser) throw createError('10002');
 
   const userFields = R.pick(userWhiteList, payload);
   const networkUserFields = R.pick(networkUserWhiteList, payload);
