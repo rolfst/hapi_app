@@ -1,7 +1,7 @@
 const { assert } = require('chai');
 const { getRequest } = require('../../../shared/test-utils/request');
 const testHelpers = require('../../../shared/test-utils/helpers');
-const { ERoleTypes } = require('../../core/definitions');
+const { ERoleTypes, EObjectTypes } = require('../../core/definitions');
 const { EMessageTypes, DEFAULT_MESSAGE_LIMIT } = require('../definitions');
 const messageService = require('../services/message');
 const R = require('ramda');
@@ -30,7 +30,7 @@ describe('Handler: Get organisation messages', () => {
     // Let's create a bunch of messages
     for (let i = 0, n = 20; i < n; i += 1) {
       createMessages.push(messageService.create({
-        parentType: 'organisation',
+        parentType: EObjectTypes.ORGANISATION,
         parentId: organisation.id,
         messageType: EMessageTypes.ORGANISATION,
         text: `Organisation message ${i}`,

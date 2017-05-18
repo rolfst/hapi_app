@@ -12,6 +12,11 @@ const _Object = model.define('_Object', {
     field: 'network_id',
     allowNull: true,
   },
+  organisationId: {
+    type: Sequelize.INTEGER,
+    field: 'organisation_id',
+    allowNull: true,
+  },
   objectType: {
     type: Sequelize.STRING,
     field: 'object_type',

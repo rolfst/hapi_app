@@ -2,6 +2,7 @@ const R = require('ramda');
 const createServicePayload = require('../../../shared/utils/create-service-payload');
 const responseUtil = require('../../../shared/utils/response');
 const objectService = require('../../core/services/object');
+const { EObjectTypes } = require('../../core/definitions');
 const feedService = require('../services/feed');
 
 module.exports = async (req, reply) => {
@@ -9,11 +10,13 @@ module.exports = async (req, reply) => {
     const { message } = createServicePayload(req);
 
     const totalCountPromise = objectService.count({
-      $or: [
-        { parentType: 'organisation', parentId: message.network.organisationId },
-        { parentType: 'network', parentId: req.params.networkId },
-        { parentType: 'user', parentId: message.credentials.id },
-      ],
+      constraint: {
+        $or: [
+          { parentType: EObjectTypes.ORGANISATION, parentId: message.network.organisationId },
+          { parentType: EObjectTypes.NETWORK, parentId: req.params.networkId },
+          { parentType: EObjectTypes.USER, parentId: message.credentials.id },
+        ],
+      },
     }, message);
 
     const feedPromise = feedService.makeForNetwork(R.merge(

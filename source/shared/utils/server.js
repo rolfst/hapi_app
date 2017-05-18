@@ -23,12 +23,33 @@ const transformBoomToErrorResponse = (boom) => ({
   status_code: boom.output.payload.statusCode,
 });
 
-const logApplicationError = (message, payload, error) => {
-  logger.error('Error from application', {
-    message,
-    payload,
-    err: { message: error.message, stack: error.stack },
-  });
+const logApplicationError = (message, payload, error, context) => {
+  const myError = error;
+
+  myError.context = context || {};
+
+  myError.context.payload = payload;
+
+  myError.message = message;
+
+  logger.error('Error from application', myError);
+};
+
+const errorContextFromRequest = (req) => {
+  const contextData = {
+    extra: {
+      route: {
+        method: req.method,
+        path: req.path,
+      },
+    },
+  };
+
+  if (req.auth && req.auth.credentials) {
+    contextData.user = req.auth.credentials;
+  }
+
+  return contextData;
 };
 
 const onPreResponse = () => (req, reply) => {
@@ -43,14 +64,18 @@ const onPreResponse = () => (req, reply) => {
     let error = req.response;
 
     if (req.response.data && req.response.data.isJoi) {
-      error = createError('422', req.response.data.details[0].message);
+      error = createError('422', req.response.data.details[0].message, errorContextFromRequest(req));
     } else if (req.response.data === null) {
       // Data attribute will be null when Hapi throws an internal error
-      error = createError(req.response.output.statusCode.toString());
+      error = createError(
+        req.response.output.statusCode.toString(),
+        null,
+        errorContextFromRequest(req)
+      );
     }
 
     if (req.response.output.statusCode !== 404) {
-      logApplicationError(message, errorPayload, req.response);
+      logApplicationError(message, errorPayload, req.response, errorContextFromRequest(req));
     }
 
     const errorResponse = transformBoomToErrorResponse(error);
@@ -59,9 +84,9 @@ const onPreResponse = () => (req, reply) => {
   }
 
   if (req.response instanceof Error) {
-    logApplicationError(message, errorPayload, req.response);
+    logApplicationError(message, errorPayload, req.response, errorContextFromRequest(req));
 
-    return reply(transformBoomToErrorResponse(createError('500'))).code('500');
+    return reply(transformBoomToErrorResponse(createError('500', null, errorContextFromRequest(req)))).code('500');
   }
 
   return reply.continue();

@@ -70,6 +70,7 @@ describe('Handler: View my scoped profile', () => {
     assert.isDefined(organisation);
     assert.property(organisation, 'id');
     assert.property(organisation, 'name');
+    assert.property(organisation, 'brand_icon');
     assert.property(organisation, 'role_type');
     assert.property(organisation, 'invited_at');
     assert.equal(organisation.invited_at, dateUtils.toISOString(currentDate));

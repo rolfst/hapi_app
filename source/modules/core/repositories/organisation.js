@@ -15,7 +15,7 @@ FROM
   organisation_user ou
   LEFT JOIN users u ON ou.user_id = u.id
 WHERE
-  ou.organisation_id = :organisationId
+      ou.organisation_id = :organisationId
   AND ou.deleted_at IS NULL
 GROUP BY
   ou.organisation_id
@@ -60,7 +60,7 @@ const findForUser = async (userId, includePivot = false) => {
   return R.map((organisationUser) => {
     return R.merge(organisationUser,
       R.pick(
-        ['name', 'id'],
+        ['name', 'id', 'brandIcon'],
         findOrganisationPivot(organisationUser.organisationId.toString())
       )
     );
@@ -148,6 +148,24 @@ const findFunction = async (functionIdOrWhereConstraint) => {
     : null;
 };
 
+async function findTeamIds(organisationId) {
+  return sequelize.query(`
+    SELECT
+      t.id
+    FROM
+      teams t
+      JOIN networks n ON t.network_id = n.id
+    WHERE
+      n.organisation_id = :organisationId
+  `, {
+    replacements: {
+      organisationId,
+    },
+    type: sequelize.QueryTypes.SELECT,
+  }
+  ).then(R.pluck('id'));
+}
+
 /**
  * find All users by constraint
  * @param {object} constraint
@@ -159,6 +177,28 @@ const findFunction = async (functionIdOrWhereConstraint) => {
  * @return {external:Promise.<user[]>}
  */
 const findUsers = async (constraint, attributes = {}, options = null) => {
+  if (constraint.q) {
+    return sequelize.query(`
+        SELECT
+          ou.user_id AS userId,
+          ou.role_type AS roleType,
+          DATE_FORMAT(ou.invited_at, '%Y-%m-%dT%T.000Z') AS invitedAt,
+          DATE_FORMAT(ou.created_at, '%Y-%m-%dT%T.000Z') AS createdAt,
+          ou.deleted_at AS deletedAt,
+          CONCAT(u.first_name, ' ', u.last_name) AS fullName
+        FROM organisation_user ou
+          JOIN users u ON ou.user_id = u.id
+        WHERE ou.organisation_id = :organisationId
+          AND CONCAT(u.first_name, ' ', u.last_name) LIKE :q
+      `, {
+        replacements: {
+          q: `%${constraint.q}%`,
+          organisationId: constraint.organisationId,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      });
+  }
+
   const query = R.merge(options, { where: constraint }, { attributes });
 
   return OrganisationUser.findAll(query)
@@ -204,12 +244,12 @@ const updateOrganisationLink = (whereConstraint, attributes) => {
 };
 
 const countUsers = (organisationId) => {
-  const payload = { replacements: { organisationId }, type: sequelize.QueryTypes.SELECT };
-
-  return sequelize.query(countQuery, payload)
-    .then((
-      [{ total, loggedIn, inactive }]
-    ) => ({
+  return sequelize
+    .query(countQuery, {
+      replacements: { organisationId },
+      type: sequelize.QueryTypes.SELECT,
+    })
+    .then(([{ total, inactive, loggedIn }]) => ({
       total,
       inactive,
       active: loggedIn - inactive,
@@ -239,6 +279,7 @@ exports.findFunction = findFunction;
 exports.findFunctionForUser = findFunctionForUser;
 exports.findFunctionsForUsers = findFunctionsForUsers;
 exports.findFunctionsInOrganisation = findFunctionsInOrganisation;
+exports.findTeamIds = findTeamIds;
 exports.findUsers = findUsers;
 exports.getPivot = getPivot;
 exports.hasUser = hasUser;

@@ -8,8 +8,20 @@ const routes = [{
   validator: require('./validators/get-feed'),
 }, {
   method: 'GET',
+  url: '/v3/organisations/{organisationId}/news',
+  handler: require('./handlers/get-organisation-feed'),
+  validator: require('./validators/get-feed'),
+  prefetch: false,
+}, {
+  method: 'GET',
   url: '/v3/teams/{teamId}/feed',
   handler: require('./handlers/get-team-feed'),
+  validator: require('./validators/get-feed'),
+  prefetch: false,
+}, {
+  method: 'GET',
+  url: '/v3/organisations/{organisationId}/feed',
+  handler: require('./handlers/get-cantina-feed'),
   validator: require('./validators/get-feed'),
   prefetch: false,
 }, {

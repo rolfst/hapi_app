@@ -22,19 +22,25 @@ const stripCreateErrorFromStacktrace = (error) => {
   return newError;
 };
 
-const createError = (code, developerMessage) => {
+const createError = (code, developerMessage, context = null) => {
   const FILTER_PROPERTIES = ['type', 'detail', 'code'];
   const error = pick(errors[code.toString()], FILTER_PROPERTIES);
 
   if (!error) throw new Error(`Specify a valid HTTP status code, received ${code}`);
 
-  const boomError = Boom.create(error.code, developerMessage || error.detail, {
+  let boomError = Boom.create(error.code, developerMessage || error.detail, {
     errorType: error.type,
     errorCode: code.toString(),
   });
 
   // We modify the stacktrace so our entry point isn't createError()
-  return stripCreateErrorFromStacktrace(boomError);
+  boomError = stripCreateErrorFromStacktrace(boomError);
+
+  if (context) {
+    boomError.context = context;
+  }
+
+  return boomError;
 };
 
 module.exports = createError;

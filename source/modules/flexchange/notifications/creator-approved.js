@@ -1,8 +1,11 @@
+const R = require('ramda');
 const moment = require('moment');
 const notifier = require('../../../shared/services/notifier');
 const notificationUtils = require('../utils/notification');
+const userService = require('../../core/services/user');
+const exchangeRepo = require('../repositories/exchange');
 
-const createNotification = (exchange) => {
+const createNotification = (exchange, approvedUser) => {
   const date = moment(exchange.date).calendar(null, {
     sameDay: '[van] [vandaag]',
     nextDay: '[van] [morgen]',
@@ -11,16 +14,22 @@ const createNotification = (exchange) => {
   });
 
   return {
-    text: `${exchange.ApprovedUser.fullName} heeft je shift ${date} van ` +
+    text: `${approvedUser.fullName} heeft je shift ${date} van ` +
       `${notificationUtils.createTimeText(exchange)} overgenomen.`,
     data: { id: exchange.id, type: 'exchange', track_name: 'exchange_approved_creator' },
   };
 };
 
-const send = async (exchange) => {
-  const notification = createNotification(exchange);
+const send = async (id) => {
+  const exchanges = await exchangeRepo.findAllBy({ id });
+  const exchange = R.head(exchanges);
+  const [creator, approvedUser] = await Promise.all([
+    userService.getUser({ userId: exchange.userId }),
+    userService.getUser({ userId: exchange.approvedUserId }),
+  ]);
+  const notification = createNotification(exchange, approvedUser);
 
-  return notifier.send([exchange.User], notification);
+  return notifier.send([creator], notification);
 };
 
 exports.createNotification = createNotification;

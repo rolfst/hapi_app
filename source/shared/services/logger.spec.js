@@ -19,27 +19,32 @@ describe('Logger', () => {
     loggerStub.info.reset();
     logger.info('hi', { foo: 'baz' });
 
-    const expectedArgs = [{
-      err: null,
-      message: {},
-      context: { foo: 'baz' },
-    }, 'hi'];
+    const expectedArgs = [{ foo: 'baz' }, 'hi'];
 
     assert.equal(loggerStub.info.callCount, 1);
     assert.deepEqual(loggerStub.info.firstCall.args, expectedArgs);
   });
 
   it('should replace Streams in payload', () => {
-    loggerStub.info.reset();
-    logger.info('hi', { payload: { foo: 'Ok', file: new stream.Readable({ objectMode: true }) } });
+    const filteredObject = loggerService.removeStreamsFromContext({
+      context: {
+        payload: {
+          foo: 'Ok',
+          file: new stream.Readable({ objectMode: true }),
+        },
+      },
+    });
 
-    const expectedArgs = [{
-      err: null,
-      message: {},
-      context: { file: 'Readable Stream', foo: 'Ok' },
-    }, 'hi'];
+    const expectedObject = {
+      context: {
+        payload: {
+          file: 'Readable Stream',
+          foo: 'Ok',
+        },
+      },
+    };
 
-    assert.deepEqual(loggerStub.info.firstCall.args, expectedArgs);
+    assert.deepEqual(filteredObject, expectedObject);
   });
 
   it('should log on debug level', () => {
@@ -47,9 +52,7 @@ describe('Logger', () => {
     logger.debug('hi', { message: defaultMessage });
 
     const expectedArgs = [{
-      err: null,
       message: { artifacts: { requestId: 'rid:002' } },
-      context: {},
     }, 'hi'];
 
     assert.equal(loggerStub.debug.callCount, 1);
@@ -61,10 +64,9 @@ describe('Logger', () => {
     loggerStub.debug.reset();
     const extraObject = { extra: 'extraobject' };
     const extraObject2 = { extra: 'extraobject2', nested: { greetings: 'hello' } };
-    logger.debug('hi', { extraObject, extraObject2, message: defaultMessage });
+    logger.debug('hi', { context: { extraObject, extraObject2 }, message: defaultMessage });
 
     const expectedArgs = [{
-      err: null,
       message: { artifacts: { requestId: 'rid:002' } },
       context: { extraObject, extraObject2 },
     }, 'hi'];
@@ -80,9 +82,7 @@ describe('Logger', () => {
     logger.warn('hi', { message: defaultMessage });
 
     const expectedArgs = [{
-      err: null,
       message: { artifacts: { requestId: 'rid:002' } },
-      context: {},
     }, 'hi'];
 
     assert.equal(loggerStub.warn.callCount, 1);
@@ -91,52 +91,15 @@ describe('Logger', () => {
   });
 
   it('should log on warning level with error', () => {
-    let error;
     loggerStub.warn.reset();
 
     try {
-      throw createError('10006');
+      throw createError('10006', defaultMessage);
     } catch (e) {
-      error = e;
-      logger.warn('warning', { message: defaultMessage, err: e });
+      logger.warn('warning', e);
     }
 
-    const expectedArgs = [{
-      err: error.stack,
-      message: { artifacts: { requestId: 'rid:002' } },
-      context: {
-        statusCode: error.output.statusCode,
-        errorCode: error.data.errorCode,
-      },
-    }, 'warning'];
-
     assert.equal(loggerStub.warn.callCount, 1);
-    assert.deepEqual(loggerStub.warn.firstCall.args, expectedArgs);
-  });
-
-  it('should log on warning level with error without artifacts', () => {
-    let error;
-    const message = { artifacts: undefined };
-    loggerStub.warn.reset();
-
-    try {
-      throw createError('10006');
-    } catch (e) {
-      error = e;
-      logger.warn('warning', { message, err: e });
-    }
-
-    const expectedArgs = [{
-      err: error.stack,
-      message: {},
-      context: {
-        statusCode: error.output.statusCode,
-        errorCode: error.data.errorCode,
-      },
-    }, 'warning'];
-
-    assert.equal(loggerStub.warn.callCount, 1);
-    assert.deepEqual(loggerStub.warn.firstCall.args, expectedArgs);
   });
 
   it('should log on error level without error', () => {
@@ -144,9 +107,7 @@ describe('Logger', () => {
     logger.error('error', { message: defaultMessage });
 
     const expectedArgs = [{
-      err: null,
       message: { artifacts: { requestId: 'rid:002' } },
-      context: {},
     }, 'error'];
 
     assert.equal(loggerStub.error.callCount, 1);
@@ -154,82 +115,15 @@ describe('Logger', () => {
   });
 
   it('should log on error level with error', () => {
-    let error;
     loggerStub.error.reset();
 
     try {
-      throw createError('10006');
+      throw createError('10006', defaultMessage);
     } catch (e) {
-      error = e;
-      logger.error('error', { message: defaultMessage, err: e });
+      logger.error('error', e);
     }
 
-    const expectedArgs = [{
-      err: error.stack,
-      message: { artifacts: { requestId: 'rid:002' } },
-      context: {
-        statusCode: error.output.statusCode,
-        errorCode: error.data.errorCode,
-      },
-    }, 'error'];
-
     assert.equal(loggerStub.error.callCount, 1);
-    assert.deepEqual(loggerStub.error.firstCall.args, expectedArgs);
-  });
-
-  it('should log on error level with error and no artifacts', () => {
-    let error;
-    const message = { artifacts: undefined };
-    loggerStub.error.reset();
-
-    try {
-      throw createError('10006');
-    } catch (e) {
-      error = e;
-      logger.error('error', { message, err: e });
-    }
-
-    const expectedArgs = [{
-      err: error.stack,
-      message: {},
-      context: {
-        statusCode: error.output.statusCode,
-        errorCode: error.data.errorCode,
-      },
-    }, 'error'];
-
-    assert.equal(loggerStub.error.callCount, 1);
-    assert.deepEqual(loggerStub.error.firstCall.args, expectedArgs);
-  });
-
-  it('should log on error level with error and multiple context objects', () => {
-    let error;
-    const extraObject = { extra: 'extraobject' };
-    const extraObject2 = { extra: 'extraobject2', nested: { greetings: 'hello' } };
-    loggerStub.error.reset();
-
-    try {
-      throw createError('10006');
-    } catch (e) {
-      error = e;
-      logger.error('error', { message: defaultMessage, extraObject, extraObject2, err: e });
-    }
-
-    const expectedArgs = [{
-      err: error.stack,
-      message: { artifacts: { requestId: 'rid:002' } },
-      context: {
-        extraObject,
-        extraObject2,
-        statusCode: error.output.statusCode,
-        errorCode: error.data.errorCode,
-      },
-    }, 'error'];
-
-    assert.equal(loggerStub.error.callCount, 1);
-    assert.notProperty(loggerStub.error.firstCall.args, 'err');
-    assert.lengthOf(Object.keys(loggerStub.error.firstCall.args[0].context), 4);
-    assert.deepEqual(loggerStub.error.firstCall.args, expectedArgs);
   });
 
   it('should log a fatal message', () => {

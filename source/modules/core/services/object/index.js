@@ -118,22 +118,23 @@ const create = async (payload, message) => {
 /**
  * Count objects
  * @param {object} payload - Object containing payload data
- * @param {string} payload.userId - The id that instantiated the object
- * @param {string} payload.parentType - The type of parent to get objects for
- * @param {string} payload.parentId - The id of the parent
- * @param {string} payload.objectType - The type of object
+ * @param {object} [payload.constraint] - Query constraint that is directly passed to model
+ * @param {string} [payload.userId] - The id that instantiated the object
+ * @param {string} [payload.parentType] - The type of parent to get objects for
+ * @param {string} [payload.parentId] - The id of the parent
+ * @param {string} [payload.objectType] - The type of object
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method count
  * @return {external:Promise.<number>}
  */
 const count = async (payload, message) => {
   logger.debug('Counting objects', { payload, message });
+  if (payload.constraint) return objectRepository.count(payload.constraint);
 
-  const whitelistAttrs = ['userId', 'parentType', 'parentId', 'objectType'];
-  const attributes = R.flatten([R.pick(whitelistAttrs, payload)]);
-  const whereConstraint = { $or: attributes };
+  const whitelistAttrs = ['userId', 'parentType', 'parentId', 'objectType', 'organisationId'];
+  const attributes = [R.pick(whitelistAttrs, payload)];
 
-  return objectRepository.count(whereConstraint);
+  return objectRepository.count({ $or: attributes });
 };
 
 /**

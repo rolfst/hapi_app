@@ -17,6 +17,7 @@ module.exports = (dao) => R.merge(
   {
     type: 'user',
     id: dao.id.toString(),
+    playerId: dao.playerId,
     username: dao.username.toLowerCase(),
     email: dao.email.toLowerCase(),
     externalId: dao.externalId ? dao.externalId.toString() : null,

@@ -13,10 +13,10 @@ describe('Handler: Users in organisation', () => {
     [organisationA, organisationB, ...users] = await Promise.all([
       testHelpers.createOrganisation(),
       testHelpers.createOrganisation(),
-      testHelpers.createUser(),
-      testHelpers.createUser(),
-      testHelpers.createUser(),
-      testHelpers.createUser(),
+      testHelpers.createUser({ firstName: 'test', lastName: 'trial' }),
+      testHelpers.createUser({ firstName: 'taal', lastName: 'spellen' }),
+      testHelpers.createUser({ firstName: 'pelt', lastName: 'spellen' }),
+      testHelpers.createUser({ firstName: 'Jean-Claude', lastName: 'van Damme' }),
     ]);
 
     const [networkA, networkB] = await Promise.all([
@@ -120,5 +120,61 @@ describe('Handler: Users in organisation', () => {
 
     // 1 user is in a different organisation and 1 was deleted, so we should get users.length - 2
     assert.lengthOf(result.data, users.length - 2);
+  });
+
+  describe('Filtering', () => {
+    it('should only search for users that are member of the organisation', async () => {
+      const endpoint = `/v2/organisations/${organisationA.id}/users?q=pel`;
+      const { statusCode, result } = await getRequest(endpoint, users[0].token);
+
+      assert.equal(statusCode, 200);
+      assert.lengthOf(result.data, 1);
+    });
+
+    it('should handle just text query', async () => {
+      const endpoint = `/v2/organisations/${organisationA.id}/users?q=test`;
+      const { statusCode, result } = await getRequest(endpoint, users[0].token);
+
+      assert.equal(statusCode, 200);
+      assert.lengthOf(result.data, 1);
+
+      const actual = result.data[0];
+
+      assert.property(actual, 'id');
+      assert.property(actual, 'first_name');
+      assert.property(actual, 'last_name');
+      assert.property(actual, 'full_name');
+      assert.property(actual, 'phone_num');
+      assert.property(actual, 'type');
+      assert.property(actual, 'id');
+      assert.property(actual, 'username');
+      assert.property(actual, 'email');
+      assert.property(actual, 'external_id');
+      assert.property(actual, 'integration_auth');
+      assert.property(actual, 'role_type');
+      assert.property(actual, 'profile_img');
+      assert.property(actual, 'date_of_birth');
+      assert.property(actual, 'created_at');
+      assert.property(actual, 'last_login');
+      assert.property(actual, 'invited_at');
+      assert.property(actual, 'deleted_at');
+    });
+
+    it('should handle spaces', async () => {
+      const endpoint = `/v2/organisations/${organisationA.id}/users?q=n%20D`;
+      const { statusCode, result } = await getRequest(endpoint, users[0].token);
+
+      assert.equal(statusCode, 200);
+      assert.lengthOf(result.data, 1);
+    });
+
+    it('should handle hyphens', async () => {
+      const endpoint = `/v2/organisations/${organisationA.id}/users?q=n-c`;
+      const { statusCode, result } = await getRequest(endpoint, users[0].token);
+
+      assert.equal(statusCode, 200);
+      assert.lengthOf(result.data, 1);
+      assert.equal(result.data[0].first_name, 'Jean-Claude');
+    });
   });
 });

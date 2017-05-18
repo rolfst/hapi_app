@@ -72,10 +72,10 @@ const currentLogLevel = ELogLevel.indexOf((() => {
 })());
 
 // Minimum loglevel that is sent to stderr, the rest goes to stdout
-const errorLogLevel = ELogLevel.indexOf(LogLevel[logConfig.errorLogLevel]);
+const errorLogLevel = ELogLevel.indexOf(logConfig.errorLogLevel);
 
 // Minimum loglevel that is exported to an external service like datadog or sentry (or both)
-const exportLogLevel = ELogLevel.indexOf(LogLevel[logConfig.errorLogLevel]);
+const exportLogLevel = ELogLevel.indexOf(logConfig.exportLogLevel);
 
 const bunyanConfig = {
   streams: [],
@@ -121,32 +121,24 @@ ELogLevel.forEach((logLevel, severity) => {
   ));
 });
 
-const makeMessage = R.pipe(
-  R.pick(['credentials', 'artifacts', 'network']),
-  R.reject(R.isNil)
-);
-
-const buildLogContext = (args = {}) => {
-  let payloadWithoutStreams = {};
-
-  if (args.payload) {
-    payloadWithoutStreams = Object.keys(args.payload).reduce((obj, key) => {
-      return (args.payload[key] instanceof stream.Readable) ?
-        R.merge(obj, { [key]: 'Readable Stream' }) :
-        R.merge(obj, { [key]: args.payload[key] });
-    }, {});
+const removeStreamsFromObject = R.mapObjIndexed((value) => {
+  if (value instanceof stream.Readable) {
+    return 'Readable Stream';
   }
 
-  const payload = R.merge(R.omit(['err', 'message', 'payload'], args), payloadWithoutStreams);
+  return value;
+});
 
-  if (args.err && args.err.output) payload.statusCode = args.err.output.statusCode;
-  if (args.err && args.err.data) payload.errorCode = args.err.data.errorCode;
+const removeStreamsFromContext = (data) => {
+  if (!data || !data.context || !data.context.payload) {
+    return data;
+  }
 
-  return {
-    err: args.err ? args.err.stack : null,
-    message: args.message ? makeMessage(args.message) : {},
-    context: payload,
-  };
+  const newData = data;
+
+  newData.context.payload = removeStreamsFromObject(newData.context.payload);
+
+  return newData;
 };
 
 const getLogger = (name) => bunyan.createLogger(R.merge({ name }, bunyanConfig));
@@ -164,29 +156,27 @@ const exportLog = async (severity, message, data, flattenedData = null) => {
     return;
   }
 
-/*  Raven.context(() => {
-    // Should we add user context?
-    if (data.user) {
-      Raven.setContext({
-        user: data.user
-      });
+  Raven.context(() => {
+    // Should we add context?
+    if (data.context) {
+      Raven.setContext(data.context);
     }
-*/
+
     // Send entry to sentry
     //  - Concerning log level, sentry uses the same naming convention we do but in lowercase
-  if (data instanceof Error) {
-    Raven.captureException(data, {
-      level: ELogLevel[severity].toLowerCase(),
-      extra: { message },
-    });
-  } else {
-    // Make sure we have flattened data
-    Raven.captureMessage(flattenedData || buildLogContext(data), {
-      level: ELogLevel[severity].toLowerCase(),
-      extra: { message },
-    });
-  }
-//  });
+    if (data instanceof Error) {
+      Raven.captureException(data, {
+        level: ELogLevel[severity].toLowerCase(),
+        extra: { message },
+      });
+    } else {
+      // Make sure we have flattened data
+      Raven.captureMessage(flattenedData || removeStreamsFromContext(data), {
+        level: ELogLevel[severity].toLowerCase(),
+        extra: { message },
+      });
+    }
+  });
 
   // Send errors and stuff to sentry and datadog
   return true;
@@ -210,7 +200,7 @@ const createLogger = (loggerOrName) => {
      * @method debug - logs at a debug level
      */
     debug(message, data) {
-      const flattenedData = buildLogContext(data);
+      const flattenedData = removeStreamsFromContext(data);
 
       logger.debug(flattenedData, message);
 
@@ -224,7 +214,7 @@ const createLogger = (loggerOrName) => {
      * @method info - logs at a info level
      */
     info(message, data) {
-      const flattenedData = buildLogContext(data);
+      const flattenedData = removeStreamsFromContext(data);
 
       logger.info(flattenedData, message);
 
@@ -239,7 +229,7 @@ const createLogger = (loggerOrName) => {
      * @method warn - logs at a warning level
      */
     warn(message, data) {
-      const flattenedData = buildLogContext(data);
+      const flattenedData = removeStreamsFromContext(data);
 
       logger.warn(flattenedData, message);
 
@@ -254,7 +244,7 @@ const createLogger = (loggerOrName) => {
      * @method error - logs at a error level
      */
     error(message, data) {
-      const flattenedData = buildLogContext(data);
+      const flattenedData = removeStreamsFromContext(data);
 
       logger.error(flattenedData, message);
 
@@ -278,4 +268,5 @@ module.exports.LogLevel = LogLevel;
 module.exports.ELogLevel = ELogLevel;
 
 // Backwards compatibility - these should be removed sometime (still used in a test or 2)
+module.exports.removeStreamsFromContext = removeStreamsFromContext;
 module.exports.createLogger = createLogger;

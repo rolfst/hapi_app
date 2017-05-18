@@ -5,8 +5,8 @@ const organisationRepository = require('../../repositories/organisation');
 const userRepository = require('../../repositories/user');
 const networkRepository = require('../../repositories/network');
 const networkService = require('../network');
-const userService = require('../user');
 const impl = require('./implementation');
+const userService = require('../user');
 const { ERoleTypes } = require('../../definitions');
 
 /**
@@ -103,6 +103,17 @@ const listNetworks = async (payload, message) => {
 
   return networkService.list({ organisationId: payload.organisationId });
 };
+
+/**
+ * Lists all teamids within an organisation
+ * @param {object} payload
+ * @param {string} payload.oranisationId - the organisation for which the teamIds need to be
+ * retrieved
+ * @returns {number[]}
+ */
+function listTeamIds(payload) {
+  return organisationRepository.findTeamIds(payload.organisationId);
+}
 
 /**
  * Listing organisations for a user
@@ -452,7 +463,9 @@ exports.deleteFunction = deleteFunction;
 exports.getOrganisation = getOrganisation;
 exports.listForUser = listForUser;
 exports.listFunctions = listFunctions;
+exports.userHasRoleInOrganisation = userHasRoleInOrganisation;
 exports.listNetworks = listNetworks;
+exports.listTeamIds = listTeamIds;
 exports.listUsers = listUsers;
 exports.removeUserFromNetworks = removeUserFromNetworks;
 exports.removeUserFromOrganisation = removeUserFromOrganisation;
