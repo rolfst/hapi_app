@@ -9,7 +9,6 @@ describe('Your exchange approved notification', () => {
     startTime: baseMoment.utc().hour(10).minute(30).toISOString(),
     endTime: baseMoment.utc().hour(13).minute(0).toISOString(),
     User: { id: 2, fullName: 'John Doe' },
-    ApprovedUser: { fullName: 'Pietje overnemer' },
   });
 
   const getLocalTime = (baseMoment) => ({
@@ -18,11 +17,12 @@ describe('Your exchange approved notification', () => {
   });
 
   it('should return a correct notification object for today', () => {
+    const approvedUser = { fullName: 'Pietje overnemer' };
     const futureMoment = moment();
     const exchange = createExchange(futureMoment);
     const localTime = getLocalTime(futureMoment);
 
-    const actual = createNotification(exchange);
+    const actual = createNotification(exchange, approvedUser);
     const expected = {
       text: `Pietje overnemer heeft je shift van vandaag van ${localTime.startTime} ` +
         `tot ${localTime.endTime} overgenomen.`,
@@ -33,11 +33,12 @@ describe('Your exchange approved notification', () => {
   });
 
   it('should return a correct notification object for tomorrow', () => {
+    const approvedUser = { fullName: 'Pietje overnemer' };
     const futureMoment = moment().add(1, 'days');
     const exchange = createExchange(futureMoment);
     const localTime = getLocalTime(futureMoment);
 
-    const actual = createNotification(exchange);
+    const actual = createNotification(exchange, approvedUser);
     const expected = {
       text: `Pietje overnemer heeft je shift van morgen van ${localTime.startTime} ` +
         `tot ${localTime.endTime} overgenomen.`,
@@ -48,11 +49,12 @@ describe('Your exchange approved notification', () => {
   });
 
   it('should return a correct notification object for this week', () => {
+    const approvedUser = { fullName: 'Pietje overnemer' };
     const futureMoment = moment().add(2, 'days');
     const exchange = createExchange(futureMoment);
     const localTime = getLocalTime(futureMoment);
 
-    const actual = createNotification(exchange);
+    const actual = createNotification(exchange, approvedUser);
     const expected = {
       text: `Pietje overnemer heeft je shift van ${futureMoment.format('dddd')} ` +
         `van ${localTime.startTime} tot ${localTime.endTime} overgenomen.`,
@@ -63,11 +65,12 @@ describe('Your exchange approved notification', () => {
   });
 
   it('should return a correct notification object for later than this week', () => {
+    const approvedUser = { fullName: 'Pietje overnemer' };
     const futureMoment = moment().add(2, 'weeks');
     const exchange = createExchange(futureMoment);
     const localTime = getLocalTime(futureMoment);
 
-    const actual = createNotification(exchange);
+    const actual = createNotification(exchange, approvedUser);
     const expected = {
       text: `Pietje overnemer heeft je shift op ${futureMoment.format('dddd DD MMMM')} ` +
         `van ${localTime.startTime} tot ${localTime.endTime} overgenomen.`,

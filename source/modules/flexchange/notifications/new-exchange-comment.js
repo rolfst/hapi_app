@@ -3,6 +3,7 @@ const notifier = require('../../../shared/services/notifier');
 const exchangeRepo = require('../repositories/exchange');
 const { findCommentsByExchange } = require('../repositories/comment');
 
+
 const createNotification = (exchange, comment) => {
   const creator = comment.User.fullName;
   const text = comment.text;
@@ -21,7 +22,6 @@ const send = async (comment) => {
   const users = comments.map((c) => c.User).concat(exchange.User);
   const uniqueUsers = _.uniqBy(users, 'id');
   const usersToNotify = uniqueUsers.filter((u) => u.id !== comment.User.id);
-
   const notification = createNotification(exchange, comment);
 
   notifier.send(usersToNotify, notification);

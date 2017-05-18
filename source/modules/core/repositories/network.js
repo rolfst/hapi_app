@@ -285,6 +285,12 @@ const updateUser = (networkId, userId, attributes) => {
   return NetworkUser.update(R.pick(whitelist, attributes), { where: { networkId, userId } });
 };
 
+const getNetworkUser = (networkId, userId) => {
+  return NetworkUser
+    .findOne({ where: { networkId, userId } })
+    .then((record) => (record ? createNetworkLinkModel(record) : null));
+};
+
 exports.addUser = addUser;
 exports.addIntegrationToNetwork = addIntegrationToNetwork;
 exports.createIntegrationNetwork = createIntegrationNetwork;
@@ -301,6 +307,7 @@ exports.findNetworkIntegration = findNetworkIntegration;
 exports.findNetworksForUser = findNetworksForUser;
 exports.findTeamsForNetwork = findTeamsForNetwork;
 exports.findUsersForNetwork = findUsersForNetwork;
+exports.getNetworkUser = getNetworkUser;
 exports.removeUser = removeUser;
 exports.setImportDateOnNetworkIntegration = setImportDateOnNetworkIntegration;
 exports.updateNetwork = updateNetwork;
