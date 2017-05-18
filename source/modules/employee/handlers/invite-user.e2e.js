@@ -47,10 +47,7 @@ describe('Handler: Invite user', () => {
   after(() => testHelpers.cleanAll());
 
   it('should add to the network as admin', async () => {
-    const payload = R.merge(
-      userFixtureA,
-      { role_type: 'admin' }
-    );
+    const payload = R.merge(userFixtureA, { role_type: 'admin' });
 
     const { result, statusCode } = await postRequest(endpoint, payload, admin.token);
 
@@ -60,10 +57,7 @@ describe('Handler: Invite user', () => {
   });
 
   it('should add to the network as employee', async () => {
-    const payload = R.merge(
-      userFixtureB,
-      { role_type: 'employee' }
-    );
+    const payload = R.merge(userFixtureB, { role_type: 'employee' });
 
     const { result, statusCode } = await postRequest(endpoint, payload, admin.token);
 
