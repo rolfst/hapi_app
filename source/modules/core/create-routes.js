@@ -56,6 +56,12 @@ const organisationRoutes = [{
   validator: require('./validators/update-user-in-organisation'),
   prefetch: false,
 }, {
+  method: 'DELETE',
+  url: '/v2/organisations/{organisationId}/users/{userId}',
+  handler: require('./handlers/remove-user-from-organisation'),
+  validator: require('./validators/remove-user-from-organisation'),
+  prefetch: false,
+}, {
   method: 'POST',
   url: '/v2/organisations/{organisationId}/users/{userId}/networks',
   handler: require('./handlers/add-user-to-networks'),

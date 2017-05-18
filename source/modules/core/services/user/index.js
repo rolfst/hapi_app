@@ -99,6 +99,7 @@ async function getUserWithNetworkScope(payload, message) {
       externalId: networkLink.externalId,
       deletedAt: networkLink.deletedAt,
       invitedAt: networkLink.invitedAt,
+      lastActive: networkLink.lastActive,
       integrationAuth: !!networkLink.userToken,
       // Function has a fallback in the model
       function: organisationUserWithFunction
