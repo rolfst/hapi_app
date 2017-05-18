@@ -22,3 +22,5 @@ exports.EObjectTypes = {
   TEAM: 'team',
   USER: 'user',
 };
+
+exports.PHONENUM_REGEX = /^(00\s*31|\+31|0)\s*[1-9](\s*[0-9]){6,8}$/;

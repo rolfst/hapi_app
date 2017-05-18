@@ -11,11 +11,14 @@ SELECT
   COUNT(*) total,
   COUNT(u.last_login) loggedIn,
   COUNT(CASE WHEN NOT ou.last_active IS NULL AND ou.last_active < NOW() - INTERVAL 1 WEEK THEN 1 END) inactive
-FROM organisation_user ou
-LEFT JOIN users u ON ou.user_id = u.id
-WHERE ou.organisation_id = :organisationId
-AND ou.deleted_at IS NULL
-GROUP BY ou.organisation_id
+FROM
+  organisation_user ou
+  LEFT JOIN users u ON ou.user_id = u.id
+WHERE
+      ou.organisation_id = :organisationId
+  AND ou.deleted_at IS NULL
+GROUP BY
+  ou.organisation_id
 `;
 
 const create = (attributes) => {

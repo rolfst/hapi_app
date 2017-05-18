@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const { PHONENUM_REGEX } = require('../definitions');
 
 module.exports = {
   payload: Joi.object()
@@ -9,8 +10,8 @@ module.exports = {
       lastName: Joi.string(),
       email: Joi.string().email(),
       password: Joi.string(),
-      dateOfBirth: Joi.date().format('YYYY-MM-DD'),
-      phoneNum: Joi.string().regex(/(^(((0)[1-9]{2}[0-9][-]?[1-9][0-9]{5})|((\\+31|0|0031)[1-9][0-9][-]?[1-9][0-9]{6}))$)|(^(((\\+31|0|0031)6){1}[1-9]{1}[0-9]{7})$)/i),
+      dateOfBirth: Joi.date().format('YYYY-MM-DD').allow(null),
+      phoneNum: Joi.string().regex(PHONENUM_REGEX).allow(null),
     })
     .rename('function_id', 'functionId')
     .rename('role_type', 'roleType')
