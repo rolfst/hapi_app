@@ -49,35 +49,26 @@ describe('Workflow handler: preview conditions', () => {
   after(() => testHelper.cleanAll());
 
   it('should preview conditions for an admin', async () => {
-    const { statusCode, result } = await postRequest(
-      endpoint,
-      { conditions: [conditionFixture] },
-      admin.token
-    );
+    const { statusCode, result } = await postRequest(endpoint, {
+      conditions: [conditionFixture],
+    }, admin.token);
 
     assert.equal(statusCode, 200);
-
-    const previewData = result.data;
-
-    assert.property(previewData, 'count');
+    assert.property(result.data, 'count');
   });
 
   it('should fail for an employee', async () => {
-    const { statusCode } = await postRequest(
-      endpoint,
-      { conditions: [conditionFixture] },
-      employee.token
-    );
+    const { statusCode } = await postRequest(endpoint, {
+      conditions: [conditionFixture],
+    }, employee.token);
 
     assert.equal(statusCode, 403);
   });
 
   it('should fail for user not in organisation', async () => {
-    const { statusCode } = await postRequest(
-      endpoint,
-      { conditions: [conditionFixture] },
-      otherUser.token
-    );
+    const { statusCode } = await postRequest(endpoint, {
+      conditions: [conditionFixture],
+    }, otherUser.token);
 
     assert.equal(statusCode, 403);
   });
@@ -99,9 +90,11 @@ describe('Condition reach', () => {
   let endpoint;
 
   before(async () => {
-    organisation = await testHelper.createOrganisation();
-    [admin] = await Promise.all(
-      [testHelper.createUser(), testHelper.createUser()]);
+    [organisation, admin] = await Promise.all([
+      testHelper.createOrganisation(),
+      testHelper.createUser(),
+      testHelper.createUser(),
+    ]);
 
     otherUsers = await Promise.map(R.range(0, 8), () => testHelper.createUser());
     testHelper.addUserToOrganisation(admin.id, organisation.id, ERoleTypes.ADMIN);
@@ -158,11 +151,7 @@ describe('Condition reach', () => {
     const actualIds = await testConditions(organisation.id, [conditionFixture]);
 
     // we have to add the admin to the expected user here
-    const expectedIds =
-      R.map(
-        (networkUser) => networkUser.userId,
-        R.uniq(R.concat(R.concat(networkAUsers, networkBUsers), [{ userId: admin.id }]))
-      );
+    const expectedIds = R.uniq(R.pluck('userId', R.flatten([networkAUsers, networkBUsers, [{ userId: admin.id }]])));
 
     assert.equal(data.count, expectedIds.length, 'Expected Network Ids');
     assert.equal(data.count, actualIds.length, 'Matching Network Ids');
@@ -176,15 +165,16 @@ describe('Condition reach', () => {
       operator: EConditionOperators.IN,
       value: teamIds.toString(),
     };
-    const { result: { data } } = await postRequest(
-      endpoint, { conditions: [conditionFixture] }, admin.token);
-    const actualIds = await testConditions(organisation.id, [conditionFixture]);
-    const expectedIds = R.map(
-      (teamUser) => teamUser.userId, R.uniq(R.concat(teamAUsers, teamCUsers))
-    );
 
-    assert.equal(data.count, expectedIds.length, 'Expected Team Ids');
-    assert.equal(data.count, actualIds.length, 'Matching Team Ids');
+    const { result } = await postRequest(endpoint, {
+      conditions: [conditionFixture],
+    }, admin.token);
+
+    const actualIds = await testConditions(organisation.id, [conditionFixture]);
+    const expectedIds = R.pluck('userId', R.uniq(R.concat(teamAUsers, teamCUsers));
+
+    assert.equal(result.data.count, expectedIds.length, 'Expected Team Ids');
+    assert.equal(result.data.count, actualIds.length, 'Matching Team Ids');
     assert.deepEqual(expectedIds.sort(), actualIds.sort());
   });
 });
