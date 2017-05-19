@@ -19,8 +19,9 @@ module.exports = () => ({
 
       return reply.continue({ credentials: authenticationResult.credentials, artifacts });
     } catch (err) {
-      const message = { artifacts };
-      logger.error('Error in Authenticator Strategy', { err, message });
+      const myError = err;
+      myError.artifacts = artifacts;
+      logger.error('Error in Authenticator Strategy', myError);
 
       // This is to make old API logic backwards compatible with clients
       // that have not updated yet.
