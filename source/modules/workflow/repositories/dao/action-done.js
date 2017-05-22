@@ -13,7 +13,7 @@ const ActionDone = model.define('ActionDone', {
     allowNull: false,
   },
 }, {
-  tableName: 'workflow_actions',
+  tableName: 'workflow_actionsdone',
   createdAt: 'created_at',
   updatedAt: 'updated_at',
 });

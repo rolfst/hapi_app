@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 const model = require('../../../../shared/configs/sequelize');
-const { EActionTypes } = require('../../h');
+const { EActionTypes } = require('../../definitions');
 
 const Action = model.define('Action', {
   workflowId: {

@@ -1,11 +1,11 @@
 const R = require('ramda');
-const { WorkFlow, Trigger, Condition, Action/* , ActionDone */ } = require('./dao');
+const { WorkFlow, Trigger, Condition, Action, ActionDone } = require('./dao');
 const createWorkFlowModel = require('../models/workflow');
 const createTriggerModel = require('../models/trigger');
 const createConditionModel = require('../models/condition');
 const createActionModel = require('../models/action');
-// const createActionDoneModel = require('../models/actiondone');
-const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../h');
+const createActionDoneModel = require('../models/action-done');
+const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../definitions');
 const dateUtils = require('../../../shared/utils/date');
 
 const buildWhereConstraint = (idOrWhereConstraint) => (
@@ -23,19 +23,17 @@ const pluckIds = R.pluck('id');
 
 const headOrNull = (arr) => R.defaultTo(null, R.head(arr));
 
-const create = (attributes) => {
-  const whitelist = ['organisationId', 'name', 'meta', 'startDate', 'expirationDate', 'lastCheck'];
+const validWorkflowAttributes = ['organisationId', 'userId', 'name', 'meta', 'startDate', 'expirationDate', 'lastCheck', 'done'];
 
+const create = (attributes) => {
   return WorkFlow
-    .create(R.pick(whitelist, attributes))
+    .create(R.pick(validWorkflowAttributes, attributes))
     .then(createWorkFlowModel);
 };
 
 const update = (id, attributes) => {
-  const whitelist = ['organisationId', 'name', 'meta', 'startDate', 'expirationDate', 'lastCheck'];
-
   return WorkFlow
-    .update(R.pick(whitelist, attributes), { where: { id } })
+    .update(R.pick(validWorkflowAttributes, attributes), { where: { id } })
     .then(createWorkFlowModel);
 };
 
@@ -198,28 +196,16 @@ const deleteAll = () => {
       .then(pluckIds)
       .then(completeQueryOptionsPipe)
       .then(WorkFlow.destroy),
-    Trigger
-      .findAll()
-      .then(pluckIds)
-      .then(completeQueryOptionsPipe)
-      .then(Trigger.destroy),
-    Condition
-      .findAll()
-      .then(pluckIds)
-      .then(completeQueryOptionsPipe)
-      .then(Condition.destroy),
-    Action
-      .findAll()
-      .then(pluckIds)
-      .then(completeQueryOptionsPipe)
-      .then(Action.destroy),
-    // ActionDone
-    //   .findAll()
-    //   .then(pluckIds)
-    //   .then(completeQueryOptionsPipe)
-    //   .then(ActionDone.destroy),
   ]);
 };
+
+const markUserHandled = (workflowId, userId) =>
+  ActionDone.create({ workflowId, userId });
+
+const findHandledUsers = (workflowId) =>
+  ActionDone
+    .findAll({ where: { workflowId } })
+    .then(R.map(createActionDoneModel));
 
 // Carry along enums for easy access later
 exports.ETriggerTypes = ETriggerTypes;
@@ -248,3 +234,5 @@ exports.updateAction = updateAction;
 exports.destroyAction = destroyAction;
 exports.findOneAction = findOneAction;
 exports.deleteAll = deleteAll;
+exports.findHandledUsers = findHandledUsers;
+exports.markUserHandled = markUserHandled;

@@ -23,4 +23,12 @@ exports.EObjectTypes = {
   USER: 'user',
 };
 
+exports.EParentTypes = {
+  ORGANISATION: 'organisation',
+  NETWORK: 'network',
+  TEAM: 'team',
+  EXCHANGE: 'exchange',
+  USER: 'user',
+};
+
 exports.PHONENUM_REGEX = /^(00\s*31|\+31|0)\s*[1-9](\s*[0-9]){6,8}$/;

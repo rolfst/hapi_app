@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 const model = require('../../../../shared/configs/sequelize');
-const { ETriggerTypes } = require('../../h');
+const { ETriggerTypes } = require('../../definitions');
 
 const Trigger = model.define('Trigger', {
   workflowId: {
@@ -14,7 +14,6 @@ const Trigger = model.define('Trigger', {
   },
   value: {
     type: Sequelize.STRING,
-    allowNull: false,
   },
 }, {
   tableName: 'workflow_triggers',

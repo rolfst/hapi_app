@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const { ETriggerTypes } = require('../h');
+const { ETriggerTypes } = require('../definitions');
 
 module.exports = {
   payload: Joi.object().keys({

@@ -1,6 +1,6 @@
 'use strict';
 
-const { EActionTypes } = require('../source/modules/workflow/h');
+const { EActionTypes } = require('../source/modules/workflow/definitions');
 
 module.exports = {
   up: function (queryInterface, Sequelize) {

@@ -9,6 +9,8 @@ describe('Workflow handler: fetch workflows', () => {
   let otherUser;
   let organisation;
 
+  let endpoint;
+
   before(async () => {
     [admin, employee, otherUser, organisation] = await Promise.all([
       testHelper.createUser(),
@@ -27,15 +29,14 @@ describe('Workflow handler: fetch workflows', () => {
       testHelper.createWorkFlow(organisation.id),
       testHelper.createWorkFlow(organisation.id),
     ]);
+
+    endpoint = `/v2/organisations/${organisation.id}/workflows`;
   });
 
   after(() => testHelper.cleanAll());
 
   it('should fetch an array of workflows for this organisation', async () => {
-    const { statusCode, result } = await getRequest(
-      `/v2/organisations/${organisation.id}/workflows`,
-      admin.token
-    );
+    const { statusCode, result } = await getRequest(endpoint, admin.token);
 
     assert.equal(statusCode, 200);
 
@@ -55,19 +56,13 @@ describe('Workflow handler: fetch workflows', () => {
   });
 
   it('should fail for an employee', async () => {
-    const { statusCode } = await getRequest(
-      `/v2/organisations/${organisation.id}/workflows`,
-      employee.token
-    );
+    const { statusCode } = await getRequest(endpoint, employee.token);
 
     assert.equal(statusCode, 403);
   });
 
   it('should fail for user not in organisation', async () => {
-    const { statusCode } = await getRequest(
-      `/v2/organisations/${organisation.id}/workflows`,
-      otherUser.token
-    );
+    const { statusCode } = await getRequest(endpoint, otherUser.token);
 
     assert.equal(statusCode, 403);
   });

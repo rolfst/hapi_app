@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const { EActionTypes } = require('../h');
+const { EActionTypes } = require('../definitions');
 
 module.exports = {
   payload: Joi.object().keys({

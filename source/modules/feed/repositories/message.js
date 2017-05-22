@@ -57,6 +57,7 @@ const update = async (messageId, attributes) => {
   const result = await FeedMessage.findOne({
     where: { id: messageId },
   });
+
   const message = await result.update(attributes);
 
   return createFeedMessageModel(message);
