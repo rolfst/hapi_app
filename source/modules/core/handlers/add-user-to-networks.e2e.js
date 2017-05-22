@@ -12,6 +12,7 @@ describe('Handler: Add user to networks', () => {
   let admin;
   let organisationUser;
   let otherUser;
+  let organisationAdmin;
 
   let networkA;
   let networkB;
@@ -20,9 +21,11 @@ describe('Handler: Add user to networks', () => {
   let endpoint;
 
   before(async () => {
-    [differentOrganisation, organisation, admin, organisationUser, otherUser] = await Promise.all([
+    [differentOrganisation, organisation, admin, organisationUser, otherUser, organisationAdmin] =
+    await Promise.all([
       testHelpers.createOrganisation(),
       testHelpers.createOrganisation(),
+      testHelpers.createUser(),
       testHelpers.createUser(),
       testHelpers.createUser(),
       testHelpers.createUser(),
@@ -42,6 +45,7 @@ describe('Handler: Add user to networks', () => {
         organisationId: differentOrganisation.id,
       }),
       organisationRepo.addUser(admin.id, organisation.id, 'ADMIN'),
+      organisationRepo.addUser(organisationAdmin.id, organisation.id, 'ADMIN'),
       organisationRepo.addUser(organisationUser.id, organisation.id),
     ]);
 
@@ -84,5 +88,14 @@ describe('Handler: Add user to networks', () => {
     ] }, admin.token);
 
     assert.equal(statusCode, 403);
+  });
+
+  it('should succeed when organisationAdmin doesn\'t belong to the network', async () => {
+    endpoint = `/v2/organisations/${organisation.id}/users/${organisationUser.id}/networks`;
+    const { statusCode } = await postRequest(endpoint, { networks: [
+      { network_id: networkB.id },
+    ] }, organisationAdmin.token);
+
+    assert.equal(statusCode, 200);
   });
 });

@@ -34,11 +34,8 @@ const delegate = async (payload, message) => {
   const user = await userRepo.findUserById(decodedToken.sub, null, false);
   const { accessToken } = await impl.createAuthenticationTokens(user.id, message.deviceName);
 
-  const repoWhere = { userId: user.id };
-  const repoAttributes = { lastActive: new Date() };
-
-  userRepo.updateNetworkLink(repoWhere, repoAttributes);
-  organisationRepo.updateOrganisationLink(repoWhere, repoAttributes);
+  userRepo.updateNetworkLink({ user_id: user.id }, { lastActive: new Date() });
+  organisationRepo.updateOrganisationLink({ userId: user.id }, { lastActive: new Date() });
 
   return { accessToken };
 };
@@ -60,7 +57,9 @@ const authenticate = async (payload, message) => {
   Mixpanel.registerProfile(user);
 
   if (user.lastLogin === null) Mixpanel.track(firstLoginEvent(), user.id);
-  userRepo.updateNetworkLink({ userId: user.id }, { lastActive: new Date() });
+
+  userRepo.updateNetworkLink({ user_id: user.id }, { lastActive: new Date() });
+  organisationRepo.updateOrganisationLink({ userId: user.id }, { lastActive: new Date() });
 
   return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, user };
 };

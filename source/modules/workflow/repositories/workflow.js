@@ -23,19 +23,17 @@ const pluckIds = R.pluck('id');
 
 const headOrNull = (arr) => R.defaultTo(null, R.head(arr));
 
-const create = (attributes) => {
-  const whitelist = ['organisationId', 'userId', 'name', 'meta', 'startDate', 'expirationDate', 'lastCheck', 'done'];
+const validWorkflowAttributes = ['organisationId', 'userId', 'name', 'meta', 'startDate', 'expirationDate', 'lastCheck', 'done'];
 
+const create = (attributes) => {
   return WorkFlow
-    .create(R.pick(whitelist, attributes))
+    .create(R.pick(validWorkflowAttributes, attributes))
     .then(createWorkFlowModel);
 };
 
 const update = (id, attributes) => {
-  const whitelist = ['organisationId', 'userId', 'name', 'meta', 'startDate', 'expirationDate', 'lastCheck', 'done'];
-
   return WorkFlow
-    .update(R.pick(whitelist, attributes), { where: { id } })
+    .update(R.pick(validWorkflowAttributes, attributes), { where: { id } })
     .then(createWorkFlowModel);
 };
 

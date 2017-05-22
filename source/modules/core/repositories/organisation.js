@@ -1,9 +1,10 @@
 const R = require('ramda');
-const { Organisation, OrganisationUser, OrganisationNetwork, OrganisationFunction } = require('./dao');
+const { Organisation, OrganisationUser, OrganisationFunction, NetworkUser } = require('./dao');
 const createModel = require('../models/organisation');
 const createPivotModel = require('../models/organisation-user');
 const createFunctionsModel = require('../models/organisation-function');
 const sequelize = require('../../../shared/configs/sequelize');
+const networkRepository = require('./network');
 
 const countQuery = `
 SELECT
@@ -13,8 +14,8 @@ SELECT
 FROM
   organisation_user ou
   LEFT JOIN users u ON ou.user_id = u.id
-WHERE 
-  ou.organisation_id = :organisationId
+WHERE
+      ou.organisation_id = :organisationId
   AND ou.deleted_at IS NULL
 GROUP BY
   ou.organisation_id
@@ -59,7 +60,7 @@ const findForUser = async (userId, includePivot = false) => {
   return R.map((organisationUser) => {
     return R.merge(organisationUser,
       R.pick(
-        ['name', 'id'],
+        ['name', 'id', 'brandIcon'],
         findOrganisationPivot(organisationUser.organisationId.toString())
       )
     );
@@ -93,9 +94,6 @@ const addUser = async (userId, organisationId, roleType = 'EMPLOYEE', functionId
       invitedAt,
     });
 };
-
-const attachNetwork = async (networkId, organisationId) => OrganisationNetwork
-  .create({ networkId, organisationId });
 
 const deleteAll = () => {
   return Promise.all([
@@ -150,6 +148,24 @@ const findFunction = async (functionIdOrWhereConstraint) => {
     : null;
 };
 
+async function findTeamIds(organisationId) {
+  return sequelize.query(`
+    SELECT
+      t.id
+    FROM
+      teams t
+      JOIN networks n ON t.network_id = n.id
+    WHERE
+      n.organisation_id = :organisationId
+  `, {
+    replacements: {
+      organisationId,
+    },
+    type: sequelize.QueryTypes.SELECT,
+  }
+  ).then(R.pluck('id'));
+}
+
 /**
  * find All users by constraint
  * @param {object} constraint
@@ -164,16 +180,16 @@ const findUsers = async (constraint, attributes = {}, options = null) => {
   if (constraint.q) {
     return sequelize.query(`
         SELECT
-          organisation_user.user_id AS userId,
-          organisation_user.role_type AS roleType,
-          DATE_FORMAT(organisation_user.invited_at, '%Y-%m-%dT%T.000Z') AS invitedAt,
-          DATE_FORMAT(organisation_user.created_at, '%Y-%m-%dT%T.000Z') AS createdAt,
-          organisation_user.deleted_at AS deletedAt,
-          CONCAT(users.first_name, ' ', users.last_name) AS fullName
-        FROM users
-        LEFT JOIN organisation_user ON users.id = organisation_user.user_id
-        WHERE organisation_user.organisation_id = :organisationId
-        HAVING fullName LIKE :q
+          ou.user_id AS userId,
+          ou.role_type AS roleType,
+          DATE_FORMAT(ou.invited_at, '%Y-%m-%dT%T.000Z') AS invitedAt,
+          DATE_FORMAT(ou.created_at, '%Y-%m-%dT%T.000Z') AS createdAt,
+          ou.deleted_at AS deletedAt,
+          CONCAT(u.first_name, ' ', u.last_name) AS fullName
+        FROM organisation_user ou
+          JOIN users u ON ou.user_id = u.id
+        WHERE ou.organisation_id = :organisationId
+          AND CONCAT(u.first_name, ' ', u.last_name) LIKE :q
       `, {
         replacements: {
           q: `%${constraint.q}%`,
@@ -183,9 +199,10 @@ const findUsers = async (constraint, attributes = {}, options = null) => {
       });
   }
 
-  const query = R.merge(options, { where: constraint }, attributes);
+  const query = R.merge(options, { where: constraint }, { attributes });
 
-  return OrganisationUser.findAll(query);
+  return OrganisationUser.findAll(query)
+    .then(R.map(createPivotModel));
 };
 
 const findFunctionsForUsers = async (userId) => {
@@ -240,9 +257,19 @@ const countUsers = (organisationId) => {
     }));
 };
 
+const removeUser = async (organisationId, userId) => {
+  const networkIds = await networkRepository.findWhere({ organisationId })
+    .then(R.pluck('id'));
+  const attributes = { deletedAt: new Date() };
+
+  return Promise.all([
+    OrganisationUser.update(attributes, { where: { organisationId, userId } }),
+    NetworkUser.update(attributes, { where: { userId, networkId: { $in: networkIds } } }),
+  ]);
+};
+
 exports.addFunction = addFunction;
 exports.addUser = addUser;
-exports.attachNetwork = attachNetwork;
 exports.countUsers = countUsers;
 exports.create = create;
 exports.deleteAll = deleteAll;
@@ -252,10 +279,12 @@ exports.findFunction = findFunction;
 exports.findFunctionForUser = findFunctionForUser;
 exports.findFunctionsForUsers = findFunctionsForUsers;
 exports.findFunctionsInOrganisation = findFunctionsInOrganisation;
+exports.findTeamIds = findTeamIds;
 exports.findUsers = findUsers;
 exports.getPivot = getPivot;
 exports.hasUser = hasUser;
 exports.removeFunction = removeFunction;
+exports.removeUser = removeUser;
 exports.updateFunction = updateFunction;
 exports.updateOrganisationLink = updateOrganisationLink;
 exports.updateUser = updateUser;

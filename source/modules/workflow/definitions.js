@@ -21,8 +21,10 @@ exports.EActionTypes = {
   MESSAGE: 'message',
 };
 
+// Amount of ms to wait before starting another iteration of the workflow processor
 exports.WORKER_INTERVAL = 1000;
 
+// Maximum users to concurrently take action on
 exports.CONCURRENT_USERS = 10;
 
 exports.CONDITION_SCHEME = Joi.object().keys({

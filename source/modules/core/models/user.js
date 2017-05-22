@@ -17,6 +17,7 @@ module.exports = (dao) => R.merge(
   {
     type: 'user',
     id: dao.id.toString(),
+    playerId: dao.playerId,
     username: dao.username.toLowerCase(),
     email: dao.email.toLowerCase(),
     externalId: dao.externalId ? dao.externalId.toString() : null,
@@ -29,7 +30,7 @@ module.exports = (dao) => R.merge(
     createdAt: dateUtils.toISOString(dao.created_at),
     lastLogin: dao.lastLogin ? dateUtils.toISOString(dao.lastLogin) : null,
     // TODO: replace with actual value
-    lastActive: dao.lastLogin ? dateUtils.toISOString(dao.lastLogin) : null,
+    lastActive: dao.lastActive ? dateUtils.toISOString(dao.lastActive) : null,
     invitedAt: dao.invitedAt ? dateUtils.toISOString(dao.invitedAt) : null,
     deletedAt: dao.deletedAt || null,
   }

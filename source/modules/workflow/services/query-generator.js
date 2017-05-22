@@ -23,6 +23,17 @@ WHERE
 %limit
 `;
 
+/*
+ *  structure of tables
+ *
+ *  {
+ *    [virtual table name]: {
+ *      identifier: [identifier used in sql statement],
+ *      joinSQL: [sql to inject when using this join],
+ *      fields: [array of fields available in table],
+ *    }
+ *  }
+ */
 const structure = {
   user: {
     identifier: 'u',

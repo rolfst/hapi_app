@@ -3,10 +3,10 @@ const Promise = require('bluebird');
 const { assert } = require('chai');
 const testHelper = require('../../../shared/test-utils/helpers');
 const { postRequest } = require('../../../shared/test-utils/request');
-const { EConditionOperators } = require('../definitions');
 const { ERoleTypes } = require('../../core/definitions');
 const queryGenerator = require('../services/query-generator');
 const workflowExecutor = require('../services/executor');
+const { EConditionOperators } = require('../definitions');
 
 const testConditions = (organisationId, conditions) => {
   const info = queryGenerator(organisationId, conditions);

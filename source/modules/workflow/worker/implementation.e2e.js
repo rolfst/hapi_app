@@ -65,7 +65,7 @@ describe('Workflow worker: implementation', () => {
     assert.isDefined(currentWorkflow);
   });
 
-  it('should send the message to all network members and mark them as handled', async () => {
+  it.only('should send the message to all network members and mark them as handled', async () => {
     await workerImplementation.fetchAndProcessWorkflows();
 
     const handledUsers = R.pluck('userId', await workflowRepository.findHandledUsers(workflow.id));

@@ -13,6 +13,13 @@ const executeQuery = (query) => {
 const pluckUserIds = R.pluck('userId');
 const pluckIds = R.pluck('id');
 
+/**
+ * Get a reach count for the conditions provided
+ * @param {number] organisationId
+ * @param {Array<WorkflowConditions>} conditions
+ * @method previewConditions
+ * @returns {Promise.<{ count }>}
+ */
 const previewConditions = (organisationId, conditions) => {
   logger.info('previewConditions', { organisationId, conditions });
 
@@ -26,6 +33,11 @@ const previewConditions = (organisationId, conditions) => {
     });
 };
 
+/**
+ * Fetch the next batch of users that not have been under action for a particular workflow
+ * @param {Workflow} workflow
+ * @returns {Promise.<Array<{number} userIds>>}
+ */
 const fetchUnhandledUsersBatch = (workflow) => {
   logger.info('fetchUnhandledUsers', { workflow });
 

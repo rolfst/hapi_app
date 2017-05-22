@@ -30,11 +30,14 @@ const isExpired = (date) => moment(date).diff(moment(), 'days') < 0;
 
 const populateConstraintedExchanges = async (
   exchanges, responsesForExchanges, valuesForExchanges, message) => {
+  const occuringExchangeIds = R.pluck('id', exchanges);
+  const allComments = await commentRepo.findBy({ exchangeId: { $in: occuringExchangeIds } });
+
   const occuringUsers = await R.pipe(
     impl.getUserIdsInObjects(['approvedUser', 'approvedBy', 'userId']),
     (userIds) => userService.listUsersWithNetworkScope({
       networkId: message.network.id, userIds }, message)
-  )(R.concat(exchanges, responsesForExchanges));
+  )(R.flatten([exchanges, responsesForExchanges, allComments]));
 
   const responsesForExchange = (exchangeId) =>
     R.filter(R.propEq('exchangeId', exchangeId), responsesForExchanges) || [];
@@ -43,11 +46,7 @@ const populateConstraintedExchanges = async (
     R.find(R.propEq('userId', userId), responsesForExchange(exchangeId));
 
   const findUserById = impl.findUserById(occuringUsers);
-  const occuringExchangeIds = R.pluck('id', exchanges);
-  const comments = await R.pipeP(
-    (exchangeIds) => commentRepo.findBy({ exchangeId: { $in: exchangeIds } }),
-    R.groupBy((comment) => comment.exchangeId)
-  )(occuringExchangeIds);
+  const comments = R.groupBy(R.prop('exchangeId'), allComments);
 
   // TODO this result doesn't show comments
   return R.map((exchange) => R.merge(exchange, {

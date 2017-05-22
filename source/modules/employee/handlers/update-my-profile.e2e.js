@@ -31,6 +31,7 @@ describe('Handler: update my profile', () => {
     assert.equal(data.email, employee.email);
     assert.equal(data.date_of_birth, employee.dateOfBirth);
     assert.equal(data.integration_auth, false);
+    assert.equal(data.player_id, null);
     assert.equal(data.role_type, 'EMPLOYEE');
   });
 
@@ -56,5 +57,24 @@ describe('Handler: update my profile', () => {
       endpoint, { id: '0002222' }, employee.token);
 
     assert.equal(statusCode, 422);
+  });
+
+  it('should return an updated playerId', async () => {
+    const endpoint = `/v2/networks/${network.id}/users/me`;
+    const payload = { player_id: 'playerId' };
+    const { result: { data } } = await putRequest(
+      endpoint, payload, employee.token);
+
+    assert.equal(data.player_id, 'playerId');
+  });
+
+  it('should return an original playerId', async () => {
+    const endpoint = `/v2/networks/${network.id}/users/me`;
+    const payload = { player_id: 'playerId' };
+    await putRequest(endpoint, payload, employee.token);
+    const { result: { data } } = await putRequest(
+      endpoint, { player_id: 'updated_PlayerId' }, employee.token);
+
+    assert.equal(data.player_id, 'playerId');
   });
 });

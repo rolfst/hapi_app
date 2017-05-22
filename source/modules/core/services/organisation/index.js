@@ -105,6 +105,17 @@ const listNetworks = async (payload, message) => {
 };
 
 /**
+ * Lists all teamids within an organisation
+ * @param {object} payload
+ * @param {string} payload.oranisationId - the organisation for which the teamIds need to be
+ * retrieved
+ * @returns {number[]}
+ */
+function listTeamIds(payload) {
+  return organisationRepository.findTeamIds(payload.organisationId);
+}
+
+/**
  * Listing organisations for a user
  * @param {object} payload
  * @param {string} payload.userId - The id of the user to list organisations for
@@ -223,20 +234,21 @@ async function listUsers(payload, message) {
 
   const options = createOptionsFromPayload(payload);
   const organisationUsers = await organisationRepository.findUsers(
-    R.omit(OPTIONS_WHITELIST, payload), null, options);
+    R.merge(R.omit(OPTIONS_WHITELIST, payload), { deletedAt: null }), null, options);
   const userIds = R.map((user) => user.userId, organisationUsers);
   const users = await userService.list({ userIds }, message);
   const findOrganisationUser = (organisationUserId) => R.omit(['function', 'teamIds'],
     R.find(R.propEq('id', organisationUserId), users));
 
-  return R.map((organisationUser) => {
-    return R.merge(findOrganisationUser(organisationUser.userId.toString()),
+  return R.map((organisationUser) => (
+    R.merge(
+      findOrganisationUser(organisationUser.userId.toString()),
       R.pick(
-        ['externalId', 'roleType', 'invitedAt', 'createdAt', 'deletedAt'],
+        ['externalId', 'roleType', 'invitedAt', 'createdAt', 'updatedAt', 'deletedAt', 'lastActive'],
         organisationUser
       )
-    );
-  }, organisationUsers);
+    )
+  ), organisationUsers);
 }
 
 /**
@@ -412,7 +424,7 @@ const updateUserInNetworks = async (payload, message) => {
  * @method removeUserFromNetworks
  */
 const removeUserFromNetworks = async (payload, message) => {
-  logger.debug('Remove users from networks', { payload, message });
+  logger.debug('Remove user from networks', { payload, message });
 
   await assertNetworksAreInOrganisation(payload.organisationId, payload.networks);
 
@@ -420,6 +432,20 @@ const removeUserFromNetworks = async (payload, message) => {
     payload.networks,
     (networkId) => networkService.removeUser(networkId, payload.userId)
   );
+};
+
+/**
+ * Remove user from organisation
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.organisationId - The id of the organisation
+ * @param {string} payload.userId - The id of the user
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method removeUserFromNetworks
+ */
+const removeUserFromOrganisation = async (payload, message) => {
+  logger.debug('Remove user from organisation', { payload, message });
+
+  return organisationRepository.removeUser(payload.organisationId, payload.userId);
 };
 
 exports.ERoleTypes = ERoleTypes;
@@ -439,8 +465,10 @@ exports.listForUser = listForUser;
 exports.listFunctions = listFunctions;
 exports.userHasRoleInOrganisation = userHasRoleInOrganisation;
 exports.listNetworks = listNetworks;
+exports.listTeamIds = listTeamIds;
 exports.listUsers = listUsers;
 exports.removeUserFromNetworks = removeUserFromNetworks;
+exports.removeUserFromOrganisation = removeUserFromOrganisation;
 exports.updateFunction = updateFunction;
 exports.updateUser = updateUser;
 exports.updateUserInNetworks = updateUserInNetworks;

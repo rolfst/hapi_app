@@ -20,6 +20,12 @@ const routes = [{
   prefetch: false,
 }, {
   method: 'GET',
+  url: '/v3/organisations/{organisationId}/feed',
+  handler: require('./handlers/get-cantina-feed'),
+  validator: require('./validators/get-feed'),
+  prefetch: false,
+}, {
+  method: 'GET',
   url: '/v2/messages/{messageId}',
   handler: require('./handlers/get-message'),
   validator: require('./validators/get-message'),

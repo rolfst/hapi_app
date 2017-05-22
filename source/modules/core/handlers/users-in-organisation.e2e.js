@@ -61,10 +61,12 @@ describe('Handler: Users in organisation', () => {
     assert.property(actual, 'role_type');
     assert.property(actual, 'profile_img');
     assert.property(actual, 'date_of_birth');
-    assert.property(actual, 'created_at');
+    assert.isString(actual.created_at);
+    assert.isString(actual.updated_at);
     assert.property(actual, 'last_login');
     assert.property(actual, 'invited_at');
     assert.property(actual, 'deleted_at');
+    assert.property(actual, 'last_active');
   });
 
   it('should return a users count for organisation the meta', async () => {
@@ -104,6 +106,20 @@ describe('Handler: Users in organisation', () => {
 
     assert.equal(statusCode, 403);
     assert.equal(result.error_code, '403');
+  });
+
+  it('should not return deleted users', async () => {
+    // First remove a user from the organisation
+    await organisationRepo.updateOrganisationLink({
+      organisationId: organisationA.id,
+      userId: users[0].id,
+    }, { deletedAt: new Date() });
+
+    const endpoint = `/v2/organisations/${organisationA.id}/users`;
+    const { result } = await getRequest(endpoint, users[0].token);
+
+    // 1 user is in a different organisation and 1 was deleted, so we should get users.length - 2
+    assert.lengthOf(result.data, users.length - 2);
   });
 
   describe('Filtering', () => {

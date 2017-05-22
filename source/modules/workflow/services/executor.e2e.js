@@ -1,4 +1,3 @@
-// const R = require('ramda');
 const Promise = require('bluebird');
 const { assert } = require('chai');
 const testHelper = require('../../../shared/test-utils/helpers');
