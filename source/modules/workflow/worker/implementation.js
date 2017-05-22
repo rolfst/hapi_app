@@ -100,7 +100,7 @@ const processWorkflow = (workflowId) => {
 
       myErr.payload = { workflowId };
 
-      logger.error('Workflow processing failed', myErr);
+      throw myErr;
     });
 };
 

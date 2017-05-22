@@ -1,4 +1,3 @@
-// const R = require('ramda');
 const { assert } = require('chai');
 const testHelper = require('../../../shared/test-utils/helpers');
 const queryGenerator = require('./query-generator');

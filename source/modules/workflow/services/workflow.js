@@ -1,6 +1,7 @@
 const R = require('ramda');
 const Promise = require('bluebird');
 const workFlowRepo = require('../repositories/workflow');
+const workFlowProcessor = require('../worker/implementation');
 const createError = require('../../../shared/utils/create-error');
 
 const logger = require('../../../shared/services/logger')('workflow/service');
@@ -375,25 +376,27 @@ async function createCompleteWorkflow(payload, message) {
   .then(([createdTriggers, createdConditions, createdActions]) => {
     const foundDirectTrigger = R.find(
       R.propEq('type', workFlowRepo.ETriggerTypes.DIRECT), createdTriggers);
+
+    const completeWorkflow = R.merge(createdWorkFlow, {
+      triggers: createdTriggers,
+      conditions: createdConditions,
+      actions: createdActions,
+    });
+
     if (foundDirectTrigger) {
-      /* TODO
-      workflowExcecuter.executeWorkflow().then(() =>
-        return R.mergeAll(createdWorkFlow, [createdTriggers, createdConditions, createdActions]);
-      )
-      .catch (err) {
-        logger.error(`Failure creating complete workflow for: ${createdWorkFlow.id}`,
-          { message, payload, err });
-        workFlowRepo.update({ id: createdWorkflow.id, done: false });
-        throw createError('40000');
-      }
-      */
+      workFlowProcessor
+        .processWorkflow(completeWorkflow)
+        .catch((err) => {
+          const myErr = err;
+
+          myErr.artifacts = { message, payload };
+
+          logger.error(`Failure creating complete workflow for: ${createdWorkFlow.id}`, myErr);
+          workFlowRepo.update({ id: createdWorkFlow.id, done: false });
+        });
     }
-    return R.mergeAll([
-      createdWorkFlow,
-      { triggers: createdTriggers },
-      { conditions: createdConditions },
-      { actions: createdActions },
-    ]);
+
+    return completeWorkflow;
   })
   .catch((error) => {
     logger.error(`Failure creating complete workflow for: ${createdWorkFlow.id}`, { message, payload, error });

@@ -171,7 +171,7 @@ describe('Condition reach', () => {
     }, admin.token);
 
     const actualIds = await testConditions(organisation.id, [conditionFixture]);
-    const expectedIds = R.pluck('userId', R.uniq(R.concat(teamAUsers, teamCUsers));
+    const expectedIds = R.pluck('userId', R.uniq(R.concat(teamAUsers, teamCUsers)));
 
     assert.equal(result.data.count, expectedIds.length, 'Expected Team Ids');
     assert.equal(result.data.count, actualIds.length, 'Matching Team Ids');
