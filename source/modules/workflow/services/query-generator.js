@@ -193,6 +193,10 @@ const buildQuery = (organisationId, conditions = null, {
 
       switch (condition.operator) {
         case EConditionOperators.EQUAL:
+          operator = '=';
+          escapedValue = escape(condition.value);
+          break;
+
         case EConditionOperators.GREATER_THAN:
         case EConditionOperators.LESS_THAN:
         case EConditionOperators.GREATER_THAN_OR_EQUAL:
