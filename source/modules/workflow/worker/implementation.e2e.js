@@ -24,7 +24,7 @@ describe('Workflow worker: implementation', () => {
 
   before(async () => {
     await testHelper.cleanAll();
-    
+
     [admin, employee, organisation] = await Promise.all([
       testHelper.createUser(),
       testHelper.createUser(),
