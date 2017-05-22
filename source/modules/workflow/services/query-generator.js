@@ -31,6 +31,10 @@ WHERE
  *      identifier: [identifier used in sql statement],
  *      joinSQL: [sql to inject when using this join],
  *      fields: [array of fields available in table],
+ *      calculatedFields: {
+ *        property: 'sql to calculate this property'
+ *      },
+ *      depends: [array of virtual table names on which this join depends],
  *    }
  *  }
  */

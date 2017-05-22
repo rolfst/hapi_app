@@ -1,11 +1,14 @@
 const R = require('ramda');
 const { assert } = require('chai');
+const sinon = require('sinon');
 const testHelper = require('../../../shared/test-utils/helpers');
 const workflowService = require('../services/workflow');
 const workflowRepository = require('../repositories/workflow');
 const workflowExecutor = require('../services/executor');
 const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../definitions');
-const { ERoleTypes } = require('../../core/definitions');
+const { ERoleTypes, EParentTypes } = require('../../core/definitions');
+const messageService = require('../../feed/services/message');
+const { EMessageTypes } = require('../../feed/definitions');
 const workerImplementation = require('./implementation');
 
 describe('Workflow worker: implementation', () => {
@@ -16,6 +19,8 @@ describe('Workflow worker: implementation', () => {
   let network;
 
   let workflow;
+
+  let messageServiceSpy;
 
   before(async () => {
     [admin, employee, organisation] = await Promise.all([
@@ -53,9 +58,14 @@ describe('Workflow worker: implementation', () => {
         },
       }],
     }, { credentials: admin });
+
+    messageServiceSpy = sinon.spy(messageService, 'create');
   });
 
-  after(() => testHelper.cleanAll());
+  after(() => {
+    testHelper.cleanAll();
+    messageServiceSpy.restore();
+  });
 
   it('should select the workflow to be processed', async () => {
     const due = await workerImplementation.fetchDueWorkflowIds();
@@ -65,13 +75,26 @@ describe('Workflow worker: implementation', () => {
     assert.isDefined(currentWorkflow);
   });
 
-  it.only('should send the message to all network members and mark them as handled', async () => {
+  it('should send the message to all network members and mark them as handled', async () => {
     await workerImplementation.fetchAndProcessWorkflows();
 
     const handledUsers = R.pluck('userId', await workflowRepository.findHandledUsers(workflow.id));
 
     const actualHandledUsers = R.map(String, handledUsers).sort();
     const expectedHandledUsers = [admin.id, employee.id].sort();
+
+    assert.equal(messageServiceSpy.callCount, actualHandledUsers.length);
+
+    const sortedMessageServiceCalls =
+      R.sort((arg1, arg2) => arg1[0].userId - arg2[0].userId, messageServiceSpy.args);
+    const expectedMessageServiceArgs = R.map((userId) => ([{
+      messageType: EMessageTypes.ORGANISATION,
+      parentType: EParentTypes.USER,
+      parentId: parseInt(userId, 10),
+      text: workflow.actions[0].meta.text,
+    }, { credentials: { id: parseInt(admin.id, 10) } }]), expectedHandledUsers);
+
+    assert.deepEqual(sortedMessageServiceCalls, expectedMessageServiceArgs);
 
     assert.deepEqual(actualHandledUsers, expectedHandledUsers);
 
