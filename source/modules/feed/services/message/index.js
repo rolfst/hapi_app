@@ -181,7 +181,7 @@ const create = async (payload, message) => {
     [R.T, R.prop('id')],
   ])(parent);
   const objectType = await R.cond([
-    [R.identity(R.has('objectType', payload)), R.identity(R.prop('objectType', payload))],
+    [R.always(R.has('objectType', payload)), R.always(R.prop('objectType', payload))],
     [R.propEq('type', EObjectTypes.ORGANISATION), R.always(EObjectTypes.ORGANISATION_MESSAGE)],
     [R.T, R.always('feed_message')],
   ])(parent);

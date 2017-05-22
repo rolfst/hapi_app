@@ -11,7 +11,7 @@ const messageService = require('../../feed/services/message');
 const { EMessageTypes } = require('../../feed/definitions');
 const workerImplementation = require('./implementation');
 
-describe.only('Workflow worker: implementation', () => {
+describe('Workflow worker: implementation', () => {
   let admin;
   let employee;
   let organisation;
@@ -23,6 +23,8 @@ describe.only('Workflow worker: implementation', () => {
   let messageServiceSpy;
 
   before(async () => {
+    await testHelper.cleanAll();
+    
     [admin, employee, organisation] = await Promise.all([
       testHelper.createUser(),
       testHelper.createUser(),
