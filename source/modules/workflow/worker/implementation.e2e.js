@@ -63,8 +63,9 @@ describe('Workflow worker: implementation', () => {
   });
 
   after(() => {
-    testHelper.cleanAll();
     messageServiceSpy.restore();
+
+    return testHelper.cleanAll();
   });
 
   it('should select the workflow to be processed', async () => {

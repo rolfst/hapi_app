@@ -18,6 +18,7 @@ describe('Authenticator strategy', () => {
       testHelper.createUser({ password: 'foo' }),
       testHelper.createUser({ password: 'bar' }),
     ]);
+
     employee = user;
 
     flexAppeal = await testHelper.createNetwork({ name: 'flexappeal', userId: admin.id });

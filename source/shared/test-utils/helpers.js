@@ -204,7 +204,7 @@ async function createUser(userAttributes = {}) {
   const attributes = R.merge({
     username,
     email: `${username}@example.com`,
-    password: `pw#${Math.floor(Math.random() * 1000)}`,
+    password: `pw#${Math.floor(Math.random() * 100000)}`,
   }, userAttributes);
 
   const user = await userRepo.createUser(R.merge(blueprints.users.admin, attributes));
