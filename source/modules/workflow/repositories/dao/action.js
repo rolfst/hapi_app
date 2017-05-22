@@ -16,6 +16,10 @@ const Action = model.define('Action', {
     type: Sequelize.TEXT,
     allowNull: false,
   },
+  sourceId: {
+    type: Sequelize.INTEGER,
+    field: 'source_id',
+  },
 }, {
   tableName: 'workflow_actions',
   createdAt: 'created_at',

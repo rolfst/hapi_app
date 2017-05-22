@@ -5,6 +5,7 @@ const workflowExecutor = require('../services/executor');
 const { ETriggerTypes, EActionTypes } = require('../definitions');
 const { EParentTypes, EObjectTypes } = require('../../core/definitions');
 const messageService = require('../../feed/services/message');
+const messageRepo = require('../../feed/repositories/message');
 const { EMessageTypes } = require('../../feed/definitions');
 const logger = require('../../../shared/services/logger')('WORKFLOW/worker/implementation');
 
@@ -43,7 +44,7 @@ const doActionForUser = (organisationId, workflowUserId, action, userId) => {
   switch (action.type) {
     case EActionTypes.MESSAGE:
       // Without a user id we cannot continue
-      if (!workflowUserId) throw new Error('Cannot send message without a sender id');
+      if (!action.sourceId) throw new Error('No message added to action!');
 
       // meta should contain the usual message content (like body, files and polls)
       return messageService.create(R.merge({
@@ -77,6 +78,20 @@ const processWorkflowPart = (workflow) => {
     });
 };
 
+const prepareWorkflowData = (workflow) => {
+  R.forEach((action) => {
+    if (action.sourceId) return;
+
+    switch (action.type) {
+      case EActionTypes.MESSAGE:
+        const createdMessage = messageRepo.create({
+
+        })
+        break;
+    }
+  }, workflow.actions);
+};
+
 const processWorkflow = (workflowId) => {
   return workflowRepo
     .findOneWithData(workflowId)
@@ -86,6 +101,10 @@ const processWorkflow = (workflowId) => {
       return workflowRepo
         .update(workflow.id, { lastCheck: new Date() })
         .then(() => {
+          // TODO - prepare workflow data like messages that have to be created
+
+          // TODO - if there are no conditions do a doAction routine
+
           // TODO - do with new Promise and setTimeout to avoid hitting the callstack limit
           return processWorkflowPart(workflow)
             .then(() => {

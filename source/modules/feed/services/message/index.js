@@ -264,6 +264,105 @@ const create = async (payload, message) => {
 };
 
 /**
+ * Creates a message as authenticated user without associated object
+ * @param {object} payload - Object containing payload data
+ * @param {string} payload.organisationId - The id of the organisation
+ * @param {string} payload.text - The text of the message
+ * @param {object} payload.files - The id of attachments that should be associated
+ * @param {object} payload.pollQuestion - The poll question
+ * @param {array} payload.pollOptions - The poll options
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method createWithoutObject
+ * @return {external:Promise.<Message>} {@link module:Message message}
+ */
+const createWithoutObject = async (payload, message) => {
+  logger.debug('Creating message without object', { payload, message });
+
+  const checkPayload = R.compose(isAvailable, R.prop(R.__, payload));
+
+  const createdMessage = await messageRepository.create({
+    parentType: 'FlexAppeal\\Entities\\DEPRECATED', // Backwards compatibility for PHP API
+    parentId: 0,
+    objectId: null,
+    text: payload.text,
+    createdBy: message.credentials.id,
+    messageType: payload.messageType || 'default_message',
+  });
+
+  if (checkPayload('files')) {
+    await attachmentService.assertAttachmentsExist({ attachmentIds: payload.files }, message);
+
+    const filesArray = R.flatten([payload.files]);
+    const updateMessageIds = Promise.map(filesArray, (attachmentId) => attachmentService.update({
+      whereConstraint: { id: attachmentId },
+      attributes: { messageId: createdMessage.id },
+    }));
+
+    const createObjects = Promise.map(filesArray, (attachmentId) => objectService.create({
+      networkId: null,
+      organisationId: payload.organisationId,
+      userId: message.credentials.id,
+      parentType: 'feed_message', // TODO - check if this actually works
+      parentId: createdMessage.id,
+      objectType: 'attachment',
+      sourceId: attachmentId,
+    }, message).then((attachmentObject) => attachmentService.update({
+      whereConstraint: { id: attachmentObject.sourceId },
+      attributes: { objectId: attachmentObject.id },
+    }, message)));
+
+    await Promise.all([updateMessageIds, createObjects]);
+  }
+
+  if (checkPayload('pollOptions') && checkPayload('pollQuestion')) {
+    await impl.createPollResource(createdMessage, message)(
+      R.pick(['pollOptions', 'pollQuestion'], payload));
+  }
+
+  return createdMessage;
+};
+
+/**
+ * Creates an object for a message
+ * @param {object} payload - Object containing payload data
+ * @param {string} [payload.organisationId] - The id of the organisation
+ * @param {string} [payload.networkId] - The id of the network
+ * @param {string} payload.parentType - The type of parent to create the object for
+ * @param {string} payload.parentId - The id of the parent
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method createObjectForMessage
+ * @return {external:Promise.<Message>} {@link module:Message message}
+ */
+const createObjectForMessage = async (payload, message) => {
+  logger.debug('Creating object for message', { payload, message });
+
+  const createdObject = await objectService.create({
+    networkId: payload.networkId || null,
+    organisationId: payload.organisationId || null,
+    userId: message.credentials.id,
+    parentType: payload.parentType,
+    parentId: payload.parentId,
+    objectType: payload.objectType,
+    sourceId: payload.sourceId,
+  }, message);
+
+  const parent = await objectService.getParent(R.pick(['parentType', 'parentId'], payload));
+
+  const objectWithSourceAndChildren = await objectService.getWithSourceAndChildren({
+    objectId: createdObject.id,
+  }, message);
+
+  FeedDispatcher.emit('message.created', {
+    parent,
+    organisationId: payload.organisationId || null,
+    networkId: payload.networkId || null,
+    actor: message.credentials,
+    object: objectWithSourceAndChildren,
+    credentials: message.credentials,
+  });
+};
+
+/**
  * Updates a message as authenticated user with an associated object entry.
  * @param {object} payload - Object containing payload data
  * @param {string} payload.parentType - The type of parent to create the object for
@@ -331,6 +430,8 @@ const remove = async (payload, message) => {
 
 exports.countByOrganisation = countByOrganisation;
 exports.create = create;
+exports.createWithoutObject = createWithoutObject;
+exports.createObjectForMessage = createObjectForMessage;
 exports.getAsObject = getAsObject;
 exports.like = like;
 exports.list = list;
