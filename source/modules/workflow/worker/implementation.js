@@ -48,7 +48,7 @@ const doActionForUser = (organisationId, workflowUserId, action, userId) => {
       // meta should contain the usual message content (like body, files and polls)
       return messageService.create(R.merge({
         organisationId,
-        objectType: EObjectTypes.ORGANISATION,
+        objectType: EObjectTypes.ORGANISATION_MESSAGE,
         messageType: EMessageTypes.ORGANISATION,
         parentType: EParentTypes.USER,
         parentId: userId,

@@ -7,7 +7,7 @@ const teamService = require('../../../core/services/team');
 const objectService = require('../../../core/services/object');
 const coreQueries = require('../../../core/repositories/queries');
 const impl = require('./implementation');
-const { EObjectTypes } = require('../../../core/definitions');
+const { EObjectTypes, EParentTypes } = require('../../../core/definitions');
 
 /**
  * @module modules/feed/services/feed
@@ -63,28 +63,43 @@ const makeForNetwork = async (payload, message) => {
 };
 
 /**
- * Making a feed for a network
+ * Making a feed for an organisation
  * @param {object} payload - Object containing payload data
- * @param {string} payload.networkId - The id of network to create feed for
  * @param {string} payload.organisationId - The id of organisation to include messages for
  * @param {string} payload.include - The sub resources to include
  * @param {number} payload.limit - The limit of the resultset for pagination
  * @param {number} payload.offset - The offset of the resultset for pagination
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method makeForOrganisation
- * @return {external:Promise.<Object[]>} {@link module:modules/feed~Object}
+ * @return {external:Promise.<{ count, feedItems }>} {@link module:modules/feed~Object}
  */
 const makeForOrganisation = async (payload, message) => {
   logger.debug('Making feed for organisation', { payload, message });
 
-  const feedPayload = {
-    parentType: EObjectTypes.ORGANISATION,
-    parentId: payload.organisationId,
-    organisationId: payload.organisationId,
-  };
   const options = R.pick(['limit', 'offset', 'include'], payload);
 
-  return impl.makeFeed(feedPayload, options, message);
+  const constraint = {
+    $or: [
+      {
+        parentType: EParentTypes.ORGANISATION,
+        parentId: payload.organisationId,
+        organisationId: payload.organisationId,
+      },
+      {
+        objectType: EObjectTypes.ORGANISATION_MESSAGE,
+        parentType: EParentTypes.USER,
+        parentId: message.credentials.id,
+      },
+    ],
+  };
+
+  const totalCountPromise = objectService.count({ constraint }, message);
+  const feedPromise = impl.makeFeed(constraint, options, message);
+  const [count, feedItems] = await Promise.all([
+    totalCountPromise, feedPromise,
+  ]);
+
+  return { count, feedItems };
 };
 /**
  * Making a feed for a team
