@@ -8,7 +8,7 @@ const messageRepository = require('../../repositories/message');
 const likeRepository = require('../../repositories/like');
 const commentRepository = require('../../repositories/comment');
 const impl = require('./implementation');
-const { EObjectTypes } = require('../../../core/definitions');
+const { EObjectTypes, EParentTypes } = require('../../../core/definitions');
 
 /**
  * @module modules/feed/services/message
@@ -181,13 +181,16 @@ const create = async (payload, message) => {
     [R.T, R.prop('id')],
   ])(parent);
   const objectType = await R.cond([
+    [R.identity(R.has('objectType', payload)), R.identity(R.prop('objectType', payload))],
     [R.propEq('type', EObjectTypes.ORGANISATION), R.always(EObjectTypes.ORGANISATION_MESSAGE)],
     [R.T, R.always('feed_message')],
   ])(parent);
 
-
-  const organisationId =
-    R.ifElse(R.propEq('parentType', 'organisation'), R.prop('parentId'), R.always(null))(payload);
+  const organisationId = await R.cond([
+    [R.propEq('parentType', EParentTypes.ORGANISATION), R.prop('parentId')],
+    [R.has('organisationId'), R.prop('organisationId')],
+    [R.T, R.always(null)],
+  ])(payload);
 
   const parentEntity = `${payload.parentType.slice(0, 1)
       .toUpperCase()}${payload.parentType.slice(1)}`;

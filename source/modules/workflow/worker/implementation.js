@@ -3,7 +3,7 @@ const Promise = require('bluebird');
 const workflowRepo = require('../repositories/workflow');
 const workflowExecutor = require('../services/executor');
 const { ETriggerTypes, EActionTypes } = require('../definitions');
-const { EParentTypes } = require('../../core/definitions');
+const { EParentTypes, EObjectTypes } = require('../../core/definitions');
 const messageService = require('../../feed/services/message');
 const { EMessageTypes } = require('../../feed/definitions');
 const logger = require('../../../shared/services/logger')('WORKFLOW/worker/implementation');
@@ -39,7 +39,7 @@ const fetchDueWorkflowIds = () =>
     .executeQuery(fetchDueWorkflowIdsQuery)
     .then(workflowExecutor.pluckIds));
 
-const doActionForUser = (workflowUserId, action, userId) => {
+const doActionForUser = (organisationId, workflowUserId, action, userId) => {
   switch (action.type) {
     case EActionTypes.MESSAGE:
       // Without a user id we cannot continue
@@ -47,6 +47,8 @@ const doActionForUser = (workflowUserId, action, userId) => {
 
       // meta should contain the usual message content (like body, files and polls)
       return messageService.create(R.merge({
+        organisationId,
+        objectType: EObjectTypes.ORGANISATION,
         messageType: EMessageTypes.ORGANISATION,
         parentType: EParentTypes.USER,
         parentId: userId,
@@ -67,7 +69,7 @@ const processWorkflowPart = (workflow) => {
       return Promise
         .map(userIds, (userId) => Promise
           .map(workflow.actions, (action) =>
-            doActionForUser(workflow.userId, action, userId)
+            doActionForUser(workflow.organisationId, workflow.userId, action, userId)
               .then(() => workflowRepo.markUserHandled(workflow.id, userId))))
         .then(() => {
           return processWorkflowPart(workflow);

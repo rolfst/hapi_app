@@ -6,12 +6,12 @@ const workflowService = require('../services/workflow');
 const workflowRepository = require('../repositories/workflow');
 const workflowExecutor = require('../services/executor');
 const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../definitions');
-const { ERoleTypes, EParentTypes } = require('../../core/definitions');
+const { ERoleTypes, EParentTypes, EObjectTypes } = require('../../core/definitions');
 const messageService = require('../../feed/services/message');
 const { EMessageTypes } = require('../../feed/definitions');
 const workerImplementation = require('./implementation');
 
-describe('Workflow worker: implementation', () => {
+describe.only('Workflow worker: implementation', () => {
   let admin;
   let employee;
   let organisation;
@@ -86,16 +86,16 @@ describe('Workflow worker: implementation', () => {
 
     assert.equal(messageServiceSpy.callCount, actualHandledUsers.length);
 
-    const sortedMessageServiceCalls =
-      R.sort((arg1, arg2) => arg1[0].userId - arg2[0].userId, messageServiceSpy.args);
-    const expectedMessageServiceArgs = R.map((userId) => ([{
-      messageType: EMessageTypes.ORGANISATION,
-      parentType: EParentTypes.USER,
-      parentId: parseInt(userId, 10),
-      text: workflow.actions[0].meta.text,
-    }, { credentials: { id: parseInt(admin.id, 10) } }]), expectedHandledUsers);
-
-    assert.deepEqual(sortedMessageServiceCalls, expectedMessageServiceArgs);
+    R.forEach((userId) => {
+      assert(messageServiceSpy.calledWith({
+        organisationId: parseInt(organisation.id, 10),
+        objectType: EObjectTypes.ORGANISATION,
+        messageType: EMessageTypes.ORGANISATION,
+        parentType: EParentTypes.USER,
+        parentId: parseInt(userId, 10),
+        text: workflow.actions[0].meta.text,
+      }, { credentials: { id: parseInt(admin.id, 10) } }));
+    }, actualHandledUsers);
 
     assert.deepEqual(actualHandledUsers, expectedHandledUsers);
 
