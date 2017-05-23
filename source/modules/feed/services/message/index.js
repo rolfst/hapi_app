@@ -267,6 +267,7 @@ const create = async (payload, message) => {
  * Creates a message as authenticated user without associated object
  * @param {object} payload - Object containing payload data
  * @param {string} payload.organisationId - The id of the organisation
+ * @param {string} payload.messageType - The type of message to create
  * @param {string} payload.text - The text of the message
  * @param {object} payload.files - The id of attachments that should be associated
  * @param {object} payload.pollQuestion - The poll question
@@ -329,6 +330,8 @@ const createWithoutObject = async (payload, message) => {
  * @param {string} [payload.networkId] - The id of the network
  * @param {string} payload.parentType - The type of parent to create the object for
  * @param {string} payload.parentId - The id of the parent
+ * @param {string} payload.objectType - The type of object
+ * @param {string} payload.sourceId - The id of the source
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method createObjectForMessage
  * @return {external:Promise.<Message>} {@link module:Message message}

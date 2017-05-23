@@ -20,9 +20,10 @@ describe('Workflow worker: implementation', () => {
 
   let workflow;
 
-  let messageServiceSpy;
+  let createMessageSpy;
+  let createObjectSpy;
 
-  before(async () => {
+  beforeEach(async () => {
     await testHelper.cleanAll();
 
     [admin, employee, organisation] = await Promise.all([
@@ -61,11 +62,13 @@ describe('Workflow worker: implementation', () => {
       }],
     }, { credentials: admin });
 
-    messageServiceSpy = sinon.spy(messageService, 'create');
+    createMessageSpy = sinon.spy(messageService, 'createWithoutObject');
+    createObjectSpy = sinon.spy(messageService, 'createObjectForMessage');
   });
 
-  after(() => {
-    messageServiceSpy.restore();
+  afterEach(() => {
+    createMessageSpy.restore();
+    createObjectSpy.restore();
 
     return testHelper.cleanAll();
   });
@@ -86,16 +89,23 @@ describe('Workflow worker: implementation', () => {
     const actualHandledUsers = R.map(String, handledUsers).sort();
     const expectedHandledUsers = [admin.id, employee.id].sort();
 
-    assert.equal(messageServiceSpy.callCount, actualHandledUsers.length);
+    assert(createMessageSpy.called);
 
+    assert(createMessageSpy.calledWith(R.merge(workflow.actions[0].meta, {
+      organisationId: parseInt(organisation.id, 10),
+      messageType: EMessageTypes.ORGANISATION,
+    }), { credentials: { id: parseInt(admin.id, 10) } }));
+
+    const createdMessageId = (await createMessageSpy.returnValues[0]).id;
+
+    assert.equal(createObjectSpy.callCount, actualHandledUsers.length);
     R.forEach((userId) => {
-      assert(messageServiceSpy.calledWith({
+      assert(createObjectSpy.calledWith({
         organisationId: parseInt(organisation.id, 10),
-        objectType: EObjectTypes.ORGANISATION,
-        messageType: EMessageTypes.ORGANISATION,
+        objectType: EObjectTypes.ORGANISATION_MESSAGE,
+        sourceId: createdMessageId,
         parentType: EParentTypes.USER,
         parentId: parseInt(userId, 10),
-        text: workflow.actions[0].meta.text,
       }, { credentials: { id: parseInt(admin.id, 10) } }));
     }, actualHandledUsers);
 
@@ -108,5 +118,29 @@ describe('Workflow worker: implementation', () => {
     const doneWorkflow = await workflowService.fetchOne({ workflowId: workflow.id });
 
     assert.isTrue(doneWorkflow.done);
+  });
+
+  it('should make one object when there are no conditions', async () => {
+    await workflowService.removeCondition({
+      organisationId: parseInt(organisation.id, 10),
+      conditionId: workflow.conditions[0].id,
+    }, { credentials: admin });
+
+    await workerImplementation.fetchAndProcessWorkflows();
+
+    assert(createMessageSpy.calledWith(R.merge(workflow.actions[0].meta, {
+      organisationId: parseInt(organisation.id, 10),
+      messageType: EMessageTypes.ORGANISATION,
+    }), { credentials: { id: parseInt(admin.id, 10) } }));
+
+    const createdMessageId = (await createMessageSpy.returnValues[0]).id;
+
+    assert(createObjectSpy.calledWith({
+      organisationId: parseInt(organisation.id, 10),
+      objectType: EObjectTypes.ORGANISATION_MESSAGE,
+      sourceId: createdMessageId,
+      parentType: EParentTypes.ORGANISATION,
+      parentId: parseInt(organisation.id, 10),
+    }, { credentials: { id: parseInt(admin.id, 10) } }));
   });
 });
