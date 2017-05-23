@@ -128,6 +128,9 @@ describe('Workflow worker: implementation', () => {
 
     await workerImplementation.fetchAndProcessWorkflows();
 
+    assert.equal(createMessageSpy.called, 1);
+    assert.equal(createObjectSpy.called, 1);
+
     assert(createMessageSpy.calledWith(R.merge(workflow.actions[0].meta, {
       organisationId: parseInt(organisation.id, 10),
       messageType: EMessageTypes.ORGANISATION,

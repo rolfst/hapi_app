@@ -6,7 +6,6 @@ const workflowExecutor = require('../services/executor');
 const { ETriggerTypes, EActionTypes } = require('../definitions');
 const { EParentTypes, EObjectTypes } = require('../../core/definitions');
 const messageService = require('../../feed/services/message');
-const messageRepo = require('../../feed/repositories/message');
 const { EMessageTypes } = require('../../feed/definitions');
 const logger = require('../../../shared/services/logger')('WORKFLOW/worker/implementation');
 
@@ -42,33 +41,33 @@ const fetchDueWorkflowIds = () =>
     .then(workflowExecutor.pluckIds));
 
 const doAction = (workflow, action, userId = null) => {
-  switch (action.type) {
-    case EActionTypes.MESSAGE:
-      // Without a source id we cannot continue
-      if (!action.sourceId) throw new Error('No message added to action!');
+  if (action.type === EActionTypes.MESSAGE) {
+    // Without a source id we cannot continue
+    if (!action.sourceId) throw new Error('No message added to action!');
 
-      if (userId) {
-        return messageService.createObjectForMessage({
-          organisationId: workflow.organisationId,
-          objectType: EObjectTypes.ORGANISATION_MESSAGE,
-          sourceId: action.sourceId,
-          parentType: EParentTypes.USER,
-          parentId: userId,
-        }, { credentials: { id: workflow.userId } });
-      }
+    const basicPayload = {
+      organisationId: workflow.organisationId,
+      objectType: EObjectTypes.ORGANISATION_MESSAGE,
+      sourceId: action.sourceId,
+    };
 
-      // Organisation wide message
-      return messageService.createObjectForMessage({
-        organisationId: workflow.organisationId,
-        objectType: EObjectTypes.ORGANISATION_MESSAGE,
-        sourceId: action.sourceId,
-        parentType: EParentTypes.ORGANISATION,
-        parentId: workflow.organisationId,
-      }, { credentials: { id: workflow.userId } });
+    const basicMessage = { credentials: { id: workflow.userId } };
 
-    default:
-      return Promise.reject(new Error('Unknown action'));
+    if (userId) {
+      return messageService.createObjectForMessage(R.merge(basicPayload, {
+        parentType: EParentTypes.USER,
+        parentId: userId,
+      }), basicMessage);
+    }
+
+    // Organisation wide message
+    return messageService.createObjectForMessage(R.merge(basicPayload, {
+      parentType: EParentTypes.ORGANISATION,
+      parentId: workflow.organisationId,
+    }), basicMessage);
   }
+
+  return Promise.reject(new Error('Unknown action'));
 };
 
 const processWorkflowPart = (workflow) => {
