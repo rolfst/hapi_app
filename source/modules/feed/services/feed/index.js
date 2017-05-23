@@ -86,9 +86,9 @@ const makeForOrganisation = async (payload, message) => {
         organisationId: payload.organisationId,
       },
       {
-        objectType: EObjectTypes.ORGANISATION_MESSAGE,
         parentType: EParentTypes.USER,
         parentId: message.credentials.id,
+        objectType: EObjectTypes.ORGANISATION_MESSAGE,
       },
     ],
   };
