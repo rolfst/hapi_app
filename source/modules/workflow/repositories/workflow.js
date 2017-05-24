@@ -153,7 +153,7 @@ const findOneCondition = (conditionIdOrWhereConstraints) => {
 };
 
 const createAction = (attributes) => {
-  const whitelist = ['workflowId', 'type', 'meta'];
+  const whitelist = ['workflowId', 'type', 'meta', 'sourceId'];
 
   const pickedAttributes = R.pick(whitelist, attributes);
 
@@ -167,7 +167,7 @@ const createAction = (attributes) => {
 };
 
 const updateAction = (id, attributes) => {
-  const whitelist = ['workflowId', 'type', 'meta'];
+  const whitelist = ['workflowId', 'type', 'meta', 'sourceId'];
 
   const pickedAttributes = R.pick(whitelist, attributes);
 

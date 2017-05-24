@@ -1,3 +1,4 @@
+/* eslint no-param-reassign: ["error", { "props": false }] */
 const R = require('ramda');
 const Promise = require('bluebird');
 const workflowRepo = require('../repositories/workflow');
@@ -39,24 +40,34 @@ const fetchDueWorkflowIds = () =>
     .executeQuery(fetchDueWorkflowIdsQuery)
     .then(workflowExecutor.pluckIds));
 
-const doActionForUser = (organisationId, workflowUserId, action, userId) => {
-  switch (action.type) {
-    case EActionTypes.MESSAGE:
-      // Without a user id we cannot continue
-      if (!workflowUserId) throw new Error('Cannot send message without a sender id');
+const doAction = (workflow, action, userId = null) => {
+  if (action.type === EActionTypes.MESSAGE) {
+    // Without a source id we cannot continue
+    if (!action.sourceId) throw new Error('No message added to action!');
 
-      // meta should contain the usual message content (like body, files and polls)
-      return messageService.create(R.merge({
-        organisationId,
-        objectType: EObjectTypes.ORGANISATION_MESSAGE,
-        messageType: EMessageTypes.ORGANISATION,
+    const basicPayload = {
+      organisationId: workflow.organisationId,
+      objectType: EObjectTypes.ORGANISATION_MESSAGE,
+      sourceId: action.sourceId,
+    };
+
+    const basicMessage = { credentials: { id: workflow.userId } };
+
+    if (userId) {
+      return messageService.createObjectForMessage(R.merge(basicPayload, {
         parentType: EParentTypes.USER,
         parentId: userId,
-      }, action.meta), { credentials: { id: workflowUserId } });
+      }), basicMessage);
+    }
 
-    default:
-      return Promise.reject(new Error('Unknown action'));
+    // Organisation wide message
+    return messageService.createObjectForMessage(R.merge(basicPayload, {
+      parentType: EParentTypes.ORGANISATION,
+      parentId: workflow.organisationId,
+    }), basicMessage);
   }
+
+  return Promise.reject(new Error('Unknown action'));
 };
 
 const processWorkflowPart = (workflow) => {
@@ -69,12 +80,33 @@ const processWorkflowPart = (workflow) => {
       return Promise
         .map(userIds, (userId) => Promise
           .map(workflow.actions, (action) =>
-            doActionForUser(workflow.organisationId, workflow.userId, action, userId)
+            doAction(workflow, action, userId)
               .then(() => workflowRepo.markUserHandled(workflow.id, userId))))
         .then(() => {
           return processWorkflowPart(workflow);
         });
     });
+};
+
+const prepareWorkflowData = async (workflow) => {
+  await Promise.map(workflow.actions, async (action) => {
+    if (action.sourceId) return;
+
+    if (action.type === EActionTypes.MESSAGE) {
+      const createdMessage = await messageService.createWithoutObject(R.merge(action.meta, {
+        organisationId: workflow.organisationId,
+        messageType: EMessageTypes.ORGANISATION,
+      }), { credentials: { id: workflow.userId } });
+
+      action.sourceId = createdMessage.id;
+
+      if (action.id) {
+        await workflowRepo.updateAction(action.id, { sourceId: action.sourceId });
+      }
+    }
+  });
+
+  return workflow;
 };
 
 const processWorkflow = (workflowId) => {
@@ -85,7 +117,14 @@ const processWorkflow = (workflowId) => {
 
       return workflowRepo
         .update(workflow.id, { lastCheck: new Date() })
+        .then(() => prepareWorkflowData(workflow))
         .then(() => {
+          if (!workflow.conditions || !workflow.conditions.length) {
+            // if any action fails, it will not be completed as done and could
+            //   potentially create unlimited messages
+            return Promise.map(workflow.actions, (action) => doAction(workflow, action));
+          }
+
           // TODO - do with new Promise and setTimeout to avoid hitting the callstack limit
           return processWorkflowPart(workflow)
             .then(() => {
