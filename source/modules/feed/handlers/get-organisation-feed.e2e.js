@@ -1,7 +1,7 @@
 const { assert } = require('chai');
 const { getRequest } = require('../../../shared/test-utils/request');
 const testHelpers = require('../../../shared/test-utils/helpers');
-const { ERoleTypes, EObjectTypes } = require('../../core/definitions');
+const { ERoleTypes, EObjectTypes, EParentTypes } = require('../../core/definitions');
 const { EMessageTypes } = require('../../feed/definitions');
 const messageService = require('../services/message');
 const R = require('ramda');
@@ -61,6 +61,13 @@ describe('Handler: Get organisation news', () => {
         messageType: EMessageTypes.ORGANISATION,
         text: 'Organisation message #2',
       }, { credentials: organisationAdmin }),
+      messageService.create({
+        organisationId: organisationA.id,
+        objectType: EObjectTypes.ORGANISATION_MESSAGE,
+        parentType: EParentTypes.USER,
+        parentId: organisationAdmin.id,
+        text: 'Directed organisation message',
+      }, { credentials: organisationAdmin }),
     ]);
   });
 
@@ -73,9 +80,16 @@ describe('Handler: Get organisation news', () => {
     assert.equal(statusCode, 200);
 
     const organisationMessageaInFeed = R.filter(R.propEq('parent_type', 'organisation'), result.data);
-    assert.lengthOf(result.data, 2);
+    const directedOrganisationMessagesInFeed = R.filter(R.allPass([
+      R.propEq('object_type', EObjectTypes.ORGANISATION_MESSAGE),
+      R.propEq('parent_type', EParentTypes.USER),
+      R.propEq('parent_id', organisationAdmin.id),
+    ]), result.data);
+
+    assert.lengthOf(directedOrganisationMessagesInFeed, 1);
+    assert.lengthOf(result.data, 3);
     assert.lengthOf(organisationMessageaInFeed, 2);
-    assert.equal(result.meta.pagination.total_count, 2);
+    assert.equal(result.meta.pagination.total_count, 3);
   });
 
   it('should not fail if user is not a member of the network within the same organisation', async () => {

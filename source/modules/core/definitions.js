@@ -15,9 +15,9 @@ exports.EUserFields = {
 };
 
 exports.EObjectTypes = {
-  ORGANISATION: 'organisation',
   ORGANISATION_MESSAGE: 'organisation_message',
   FEED_MESSAGE: 'feed_message',
+  ORGANISATION: 'organisation',
   NETWORK: 'network',
   TEAM: 'team',
   USER: 'user',
