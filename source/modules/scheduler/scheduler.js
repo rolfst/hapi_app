@@ -44,7 +44,6 @@ const removeOutdatedShiftsJob = new CronJob({
   cronTime: '05 * * * *', // Every day at 0:05
   onTick() {
     try {
-      logger.debug('Removing objects for outdated exchanges');
       removeShifts.run();
     } catch (err) {
       logger.error('Removing objects for outdated exchanges failed', err);
