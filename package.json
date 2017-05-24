@@ -8,6 +8,7 @@
     "start:acc": "cross-env NODE_ENV=production API_ENV=acceptance node ./source/index.js",
     "start:prod": "cross-env NODE_ENV=production API_ENV=production node ./source/index.js",
     "start:cron": "cross-env NODE_ENV=production API_ENV=production node ./source/modules/scheduler/scheduler.js",
+    "seed:demo": "cross-env NODE_ENV=acceptance API_ENV=acceptance node ./scripts/seed-demo-environment",
     "dev": "cross-env NODE_ENV=debug API_ENV=development node ./source/index.js",
     "test": "npm run test:unit && npm run test:e2e",
     "test:e2e": "API_ENV=testing mocha --opts ./mocha.opts source/**/*.e2e.js",
