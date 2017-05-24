@@ -32,20 +32,20 @@ describe('remove exchanges', () => {
     await testHelper.addUserToNetwork({ networkId: network.id, userId: employee.id });
 
     const currentExchanges = R.map(
-      (num) => exchangeService.createExchange({
+      (no) => exchangeService.createExchange({
         date: moment().format('YYYY-MM-DD'),
         type: exchangeTypes.NETWORK,
-        title: `Test exchange to approve: ${num}`,
+        title: `Test exchange to approve: ${no}`,
         values: [network.id],
       }, {
         network,
         credentials: admin,
       }), R.range(0, 5));
     const outdatedExchanges = R.map(
-      (num) => exchangeService.createExchange({
+      (no) => exchangeService.createExchange({
         date: moment().subtract(1, 'days').format('YYYY-MM-DD'),
         type: exchangeTypes.NETWORK,
-        title: `Test exchange to approve: ${num}`,
+        title: `Test exchange to approve: ${no}`,
         values: [network.id],
       }, {
         network,
@@ -60,7 +60,7 @@ describe('remove exchanges', () => {
     return testHelper.cleanAll();
   });
 
-  it('remove objects of outdated exchanges', async () => {
+  it('remove out dated exchanges', async () => {
     await unit.run();
     const remainingExchanges = await exchangeRepo.findAllBy();
     const remainingObjects = await objectRepo.findBy();
