@@ -91,7 +91,7 @@ describe('Workflow worker: implementation', () => {
     R.forEach((userId) => {
       assert(messageServiceSpy.calledWith({
         organisationId: parseInt(organisation.id, 10),
-        objectType: EObjectTypes.ORGANISATION,
+        objectType: EObjectTypes.ORGANISATION_MESSAGE,
         messageType: EMessageTypes.ORGANISATION,
         parentType: EParentTypes.USER,
         parentId: parseInt(userId, 10),
