@@ -3,7 +3,6 @@ const { assert } = require('chai');
 const sinon = require('sinon');
 const testHelper = require('../../../shared/test-utils/helpers');
 const { postRequest } = require('../../../shared/test-utils/request');
-const messageService = require('../../feed/services/message');
 const workFlowProcessor = require('../worker/implementation');
 const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../definitions');
 

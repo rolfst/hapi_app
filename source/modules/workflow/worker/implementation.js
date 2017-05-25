@@ -135,7 +135,7 @@ const processWorkflow = (workflow) => {
     .catch((err) => {
       const myErr = err;
 
-      myErr.payload = { workflowId };
+      myErr.payload = { workflow };
 
       throw myErr;
     });
