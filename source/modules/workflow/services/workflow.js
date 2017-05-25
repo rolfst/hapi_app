@@ -357,14 +357,16 @@ async function createCompleteWorkflow(payload, message) {
         value: trigger.value,
       })
     ),
-    Promise.map(wfConditions, (condition) =>
-      workFlowRepo.createCondition({
-        workflowId: createdWorkFlow.id,
-        field: condition.field,
-        operator: condition.operator,
-        value: condition.value,
-      })
-    ),
+    wfConditions.length === 0
+      ? Promise.resolve([])
+      : Promise.map(wfConditions, (condition) =>
+          workFlowRepo.createCondition({
+            workflowId: createdWorkFlow.id,
+            field: condition.field,
+            operator: condition.operator,
+            value: condition.value,
+          })
+        ),
     Promise.map(wfActions, (action) =>
       workFlowRepo.createAction({
         workflowId: action.workflowId,

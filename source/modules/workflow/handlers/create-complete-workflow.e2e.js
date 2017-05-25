@@ -24,6 +24,17 @@ describe('Workflow handler: create complete workflow', () => {
     value: '2018-01-01 13:00:00',
   }];
 
+  const directMessageWorkflowFixture = {
+    triggers: [{
+      type: ETriggerTypes.DIRECT,
+    }],
+    conditions: [{ field: 'user.age', operator: EConditionOperators.EQUAL, value: '18' }],
+    actions: [{
+      type: EActionTypes.MESSAGE,
+      meta: { text: 'direct!' },
+    }],
+  };
+
   let admin;
   let employee;
   let otherUser;
@@ -97,6 +108,16 @@ describe('Workflow handler: create complete workflow', () => {
     );
 
     assert.equal(statusCode, 403);
+  });
+
+  it.only('should send a message when trigger type is direct', async () => {
+    const { statusCode } = await postRequest(
+      createUrl,
+      directMessageWorkflowFixture,
+      admin.token
+    );
+
+    assert.equal(statusCode, 200);
   });
 });
 

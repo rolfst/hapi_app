@@ -12,9 +12,7 @@ const Trigger = model.define('Trigger', {
     type: Sequelize.ENUM.apply(null, Object.values(ETriggerTypes)),
     allowNull: false,
   },
-  value: {
-    type: Sequelize.STRING,
-  },
+  value: Sequelize.STRING,
 }, {
   tableName: 'workflow_triggers',
   createdAt: 'created_at',
