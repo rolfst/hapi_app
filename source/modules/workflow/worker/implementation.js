@@ -109,30 +109,26 @@ const prepareWorkflowData = async (workflow) => {
   return workflow;
 };
 
-const processWorkflow = (workflowId) => {
+const processWorkflow = (workflow) => {
+  logger.info('Started processing workflow', workflow);
+
   return workflowRepo
-    .findOneWithData(workflowId)
-    .then((workflow) => {
-      logger.info('Started processing workflow', workflow);
+    .update(workflow.id, { lastCheck: new Date() })
+    .then(() => prepareWorkflowData(workflow))
+    .then(() => {
+      if (!workflow.conditions || !workflow.conditions.length) {
+        // if any action fails, it will not be completed as done and could
+        //   potentially create unlimited messages
+        return Promise.map(workflow.actions, (action) => doAction(workflow, action));
+      }
 
-      return workflowRepo
-        .update(workflow.id, { lastCheck: new Date() })
-        .then(() => prepareWorkflowData(workflow))
+      // TODO - do with new Promise and setTimeout to avoid hitting the callstack limit
+      return processWorkflowPart(workflow)
         .then(() => {
-          if (!workflow.conditions || !workflow.conditions.length) {
-            // if any action fails, it will not be completed as done and could
-            //   potentially create unlimited messages
-            return Promise.map(workflow.actions, (action) => doAction(workflow, action));
-          }
-
-          // TODO - do with new Promise and setTimeout to avoid hitting the callstack limit
-          return processWorkflowPart(workflow)
+          return workflowRepo
+            .update(workflow.id, { done: true, lastCheck: new Date() })
             .then(() => {
-              return workflowRepo
-                .update(workflow.id, { done: true, lastCheck: new Date() })
-                .then(() => {
-                  logger.info('Processed workflow', workflow);
-                });
+              logger.info('Processed workflow', workflow);
             });
         });
     })
@@ -150,7 +146,8 @@ const fetchAndProcessWorkflows = () => {
     .then((workflowIds) => {
       if (!workflowIds.length) return;
 
-      const processWorkflowP = Promise.map(workflowIds, processWorkflow);
+      const processWorkflowP = Promise.map(workflowIds, (workflowId) => workflowRepo
+        .findOneWithData(workflowId).then(processWorkflow));
 
       return Promise
         .any(processWorkflowP)

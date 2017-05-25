@@ -1,7 +1,10 @@
 const R = require('ramda');
 const { assert } = require('chai');
+const sinon = require('sinon');
 const testHelper = require('../../../shared/test-utils/helpers');
 const { postRequest } = require('../../../shared/test-utils/request');
+const messageService = require('../../feed/services/message');
+const workFlowProcessor = require('../worker/implementation');
 const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../definitions');
 
 describe('Workflow handler: create complete workflow', () => {
@@ -42,6 +45,8 @@ describe('Workflow handler: create complete workflow', () => {
 
   let createUrl;
 
+  let processWorkflowSpy;
+
   before(async () => {
     [admin, employee, otherUser, organisation] = await Promise.all([
       testHelper.createUser(),
@@ -54,6 +59,8 @@ describe('Workflow handler: create complete workflow', () => {
       testHelper.addUserToOrganisation(admin.id, organisation.id, 'ADMIN'),
       testHelper.addUserToOrganisation(employee.id, organisation.id),
     ]);
+
+    processWorkflowSpy = sinon.spy(workFlowProcessor, 'processWorkflow');
 
     createUrl = `/v2/organisations/${organisation.id}/workflows`;
   });
@@ -110,7 +117,7 @@ describe('Workflow handler: create complete workflow', () => {
     assert.equal(statusCode, 403);
   });
 
-  it.only('should send a message when trigger type is direct', async () => {
+  it('should process workflow immediately when trigger type is direct', async () => {
     const { statusCode } = await postRequest(
       createUrl,
       directMessageWorkflowFixture,
@@ -118,6 +125,7 @@ describe('Workflow handler: create complete workflow', () => {
     );
 
     assert.equal(statusCode, 200);
+    assert(processWorkflowSpy.called);
   });
 });
 
