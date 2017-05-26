@@ -35,12 +35,14 @@ describe('Workflow handler: view workflow stats', () => {
 
   let admin;
   let employee;
+  let otherUser;
   let organisation;
 
   let endpoint;
 
   before(async () => {
-    [admin, employee, organisation] = await Promise.all([
+    [admin, employee, otherUser, organisation] = await Promise.all([
+      testHelper.createUser(),
       testHelper.createUser(),
       testHelper.createUser(),
       testHelper.createOrganisation(),
@@ -63,7 +65,7 @@ describe('Workflow handler: view workflow stats', () => {
       ),
     ]).delay(2000);
 
-    endpoint = `/v2/organisations/${organisation.id}/workflows/stats`;
+    endpoint = `/v2/organisations/${organisation.id}/workflows`;
   });
 
   after(() => testHelper.cleanAll());
@@ -80,6 +82,36 @@ describe('Workflow handler: view workflow stats', () => {
       assert.isArray(workflow.actions);
       assert.property(workflow, 'reach_count');
       assert.property(workflow, 'seen_count');
+      assert.property(workflow, 'likes');
+      assert.property(workflow, 'comments');
+      assert.property(workflow, 'last_interaction');
     });
+  });
+
+  it('should allow pagination', async () => {
+    const { statusCode: statusCodeA, result: resultA } = await getRequest(`${endpoint}?limit=1`, admin.token);
+    const { statusCode: statusCodeB, result: resultB } = await getRequest(`${endpoint}?limit=1&offset=1`, admin.token);
+
+    assert.equal(statusCodeA, 200);
+    assert.isArray(resultA.data);
+    assert.lengthOf(resultA.data, 1);
+
+    assert.equal(statusCodeB, 200);
+    assert.isArray(resultB.data);
+    assert.lengthOf(resultB.data, 1);
+
+    assert.notDeepEqual(resultA.data, resultB.data);
+  });
+
+  it('should fail for an employee', async () => {
+    const { statusCode } = await getRequest(endpoint, employee.token);
+
+    assert.equal(statusCode, 403);
+  });
+
+  it('should fail for user not in organisation', async () => {
+    const { statusCode } = await getRequest(endpoint, otherUser.token);
+
+    assert.equal(statusCode, 403);
   });
 });

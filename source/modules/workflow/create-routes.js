@@ -26,8 +26,8 @@ const routes = [{
 }, {
   method: 'GET',
   url: `${baseUrl}/workflows`,
-  handler: require(`${handlerPath}/fetch-workflows`),
-  validator: require(`${validatorPath}/fetch-workflows`),
+  handler: require(`${handlerPath}/view-stats`),
+  validator: require(`${validatorPath}/view-stats`),
   prefetch: false,
 }, {
   method: 'GET',
@@ -40,12 +40,6 @@ const routes = [{
   url: `${baseUrl}/workflows/preview`,
   handler: require(`${handlerPath}/preview-conditions`),
   validator: require(`${validatorPath}/preview-conditions`),
-  prefetch: false,
-}, {
-  method: 'GET',
-  url: `${baseUrl}/workflows/stats`,
-  handler: require(`${handlerPath}/view-stats`),
-  validator: require(`${validatorPath}/view-stats`),
   prefetch: false,
 }];
 

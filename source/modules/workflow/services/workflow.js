@@ -17,7 +17,18 @@ SELECT
       THEN COUNT(os_org.id)
   WHEN NOT o_user.id IS NULL
       THEN COUNT(os_user.id)
-  END seenCount
+  END seenCount,
+  COUNT(fc.id) comments,
+  COUNT(l.id) likes,
+  CASE
+    WHEN NOT fc.updated_at IS NULL AND NOT l.created_at IS NULL
+      THEN GREATEST(fc.updated_at, l.created_at)
+  WHEN NOT fc.updated_at IS NULL
+      THEN MAX(fc.updated_at)
+  WHEN NOT l.created_at IS NULL
+      THEN MAX(l.created_at)
+  ELSE NULL
+  END lastInteraction
 FROM
   workflows w
   LEFT JOIN workflow_actions wa ON (wa.type = 'message' AND wa.workflow_id = w.id)
@@ -25,6 +36,8 @@ FROM
   LEFT JOIN object_seen os_org ON (os_org.object_id = o_org.id)
   LEFT JOIN objects o_user ON (o_user.object_type = 'organisation_message' AND o_user.parent_type = 'user' AND o_user.source_id = wa.source_id)
   LEFT JOIN object_seen os_user ON (os_user.object_id = o_user.id)
+  LEFT JOIN feed_comments fc ON (fc.message_id = wa.source_id)
+  LEFT JOIN likes l ON (l.message_id = wa.source_id)
 WHERE
       w.organisation_id = :organisationId
   AND w.id IN (:workflowIds)
