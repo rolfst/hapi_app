@@ -26,14 +26,26 @@ const headOrNull = (arr) => R.defaultTo(null, R.head(arr));
 const validWorkflowAttributes = ['organisationId', 'userId', 'name', 'meta', 'startDate', 'expirationDate', 'lastCheck', 'done'];
 
 const create = (attributes) => {
+  const pickedAttributes = R.pick(validWorkflowAttributes, attributes);
+
+  if (typeof pickedAttributes.meta === 'object') {
+    pickedAttributes.meta = JSON.stringify(pickedAttributes.meta);
+  }
+
   return WorkFlow
-    .create(R.pick(validWorkflowAttributes, attributes))
+    .create(pickedAttributes)
     .then(createWorkFlowModel);
 };
 
 const update = (id, attributes) => {
+  const pickedAttributes = R.pick(validWorkflowAttributes, attributes);
+
+  if (typeof pickedAttributes.meta === 'object') {
+    pickedAttributes.meta = JSON.stringify(pickedAttributes.meta);
+  }
+
   return WorkFlow
-    .update(R.pick(validWorkflowAttributes, attributes), { where: { id } })
+    .update(pickedAttributes, { where: { id } })
     .then(createWorkFlowModel);
 };
 
@@ -239,6 +251,7 @@ exports.createAction = createAction;
 exports.updateAction = updateAction;
 exports.destroyAction = destroyAction;
 exports.findOneAction = findOneAction;
+exports.findAllActions = findAllActions;
 exports.deleteAll = deleteAll;
 exports.findHandledUsers = findHandledUsers;
 exports.markUserHandled = markUserHandled;

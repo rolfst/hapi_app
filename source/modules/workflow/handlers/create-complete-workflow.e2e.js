@@ -17,7 +17,7 @@ describe('Workflow handler: create complete workflow', () => {
     },
   }];
   const conditionFixture = [{
-    field: 'user.birthdate',
+    field: 'user.date_of_birth',
     operator: EConditionOperators.EQUAL,
     value: '2018-01-01',
   }];

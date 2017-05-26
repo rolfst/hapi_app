@@ -145,7 +145,5 @@ describe('Workflow worker: implementation', () => {
       parentType: EParentTypes.ORGANISATION,
       parentId: parseInt(organisation.id, 10),
     }, { credentials: { id: parseInt(admin.id, 10) } }));
-
-    process.exit();
   });
 });

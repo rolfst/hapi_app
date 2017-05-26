@@ -6,7 +6,7 @@ const { getRequest } = require('../../../shared/test-utils/request');
 const workflowService = require('../services/workflow');
 const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../definitions');
 
-describe('Workflow handler: create complete workflow', () => {
+describe('Workflow handler: view workflow stats', () => {
   const workflowFixtureA = {
     triggers: [{
       type: ETriggerTypes.DIRECT,
@@ -35,14 +35,12 @@ describe('Workflow handler: create complete workflow', () => {
 
   let admin;
   let employee;
-  let otherUser;
   let organisation;
 
   let endpoint;
 
   before(async () => {
-    [admin, employee, otherUser, organisation] = await Promise.all([
-      testHelper.createUser(),
+    [admin, employee, organisation] = await Promise.all([
       testHelper.createUser(),
       testHelper.createUser(),
       testHelper.createOrganisation(),
@@ -70,9 +68,18 @@ describe('Workflow handler: create complete workflow', () => {
 
   after(() => testHelper.cleanAll());
 
-  it.only('should retrieve statistics about the workflows', async () => {
+  it('should retrieve statistics about the workflows', async () => {
     const { statusCode, result } = await getRequest(endpoint, admin.token);
 
-    console.log('--==--', statusCode, result);
+    assert.equal(statusCode, 200);
+
+    assert.isArray(result.data);
+    assert.lengthOf(result.data, 2);
+
+    R.forEach((workflow) => {
+      assert.isArray(workflow.actions);
+      assert.property(workflow, 'reach_count');
+      assert.property(workflow, 'seen_count');
+    });
   });
 });
