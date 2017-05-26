@@ -3,7 +3,7 @@ const testHelpers = require('../../../shared/test-utils/helpers');
 const { postRequest } = require('../../../shared/test-utils/request');
 const objectService = require('../services/object');
 
-describe('Seen objects handler', () => {
+describe('Handler: Seen objects', () => {
   let admin;
   let createdMessages;
 
@@ -47,17 +47,33 @@ describe('Seen objects handler', () => {
       createdMessages[1].id,
     ];
 
-    const { statusCode, result } = await postRequest(
-      '/v2/seen_objects', {
-        ids: idsToMark,
-      },
-      admin.token
-    );
+    const { statusCode, result } = await postRequest('/v2/seen_objects', {
+      ids: idsToMark,
+    }, admin.token);
 
     assert.equal(statusCode, 200);
+    assert.deepEqual(result.data, idsToMark);
+  });
 
-    const changedRecords = result.data;
+  it('should fail when marking already seen objects', async () => {
+    const idsToMark = [
+      createdMessages[0].id,
+      createdMessages[1].id,
+    ];
 
-    assert.deepEqual(changedRecords, idsToMark);
+    const { statusCode, result } = await postRequest('/v2/seen_objects', {
+      ids: idsToMark,
+    }, admin.token);
+
+    assert.equal(statusCode, 403);
+    assert.equal(result.error_code, '50001');
+  });
+
+  it('should fail when passing non-existing object ids', async () => {
+    const { statusCode, result } = await postRequest('/v2/seen_objects', {
+      ids: [0],
+    }, admin.token);
+
+    assert.equal(statusCode, 422);
   });
 });
