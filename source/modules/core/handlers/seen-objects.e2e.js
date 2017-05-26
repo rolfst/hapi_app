@@ -70,7 +70,7 @@ describe('Handler: Seen objects', () => {
   });
 
   it('should fail when passing non-existing object ids', async () => {
-    const { statusCode, result } = await postRequest('/v2/seen_objects', {
+    const { statusCode } = await postRequest('/v2/seen_objects', {
       ids: [0],
     }, admin.token);
 

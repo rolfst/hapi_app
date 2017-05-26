@@ -1,7 +1,6 @@
 const R = require('ramda');
 const Promise = require('bluebird');
 const Sequelize = require('sequelize');
-// const dbConnection = require('../../../../shared/configs/sequelize');
 const createError = require('../../../../shared/utils/create-error');
 const networkRepository = require('../../../core/repositories/network');
 const teamRepository = require('../../../core/repositories/team');
