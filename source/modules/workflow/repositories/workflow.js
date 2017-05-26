@@ -40,9 +40,9 @@ const update = (id, attributes) => {
 const destroy = (id) =>
   WorkFlow.destroy({ where: { id } });
 
-const findAll = (workflowIdsOrWhereConstraints) => {
+const findAll = (workflowIdsOrWhereConstraints, options) => {
   return WorkFlow
-    .findAll({ where: buildWhereConstraint(workflowIdsOrWhereConstraints) })
+    .findAll(R.merge(options, { where: buildWhereConstraint(workflowIdsOrWhereConstraints) }))
     .then(R.map(createWorkFlowModel));
 };
 
@@ -187,6 +187,12 @@ const findOneAction = (actionIdOrWhereConstraints) => {
   return Action
     .findOne({ where: buildWhereConstraint(actionIdOrWhereConstraints) })
     .then(createActionModel);
+};
+
+const findAllActions = (workflowId) => {
+  return Action
+    .findAll({ where: { workflowId } })
+    .then(R.map(createActionModel));
 };
 
 const deleteAll = () => {

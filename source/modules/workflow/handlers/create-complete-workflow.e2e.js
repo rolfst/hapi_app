@@ -125,6 +125,7 @@ describe('Workflow handler: create complete workflow', () => {
 
     assert.equal(statusCode, 200);
     assert(processWorkflowSpy.called);
+    assert.isObject(processWorkflowSpy.args[0][0]);
   });
 });
 

@@ -41,6 +41,12 @@ const routes = [{
   handler: require(`${handlerPath}/preview-conditions`),
   validator: require(`${validatorPath}/preview-conditions`),
   prefetch: false,
+}, {
+  method: 'GET',
+  url: `${baseUrl}/workflows/stats`,
+  handler: require(`${handlerPath}/view-stats`),
+  validator: require(`${validatorPath}/view-stats`),
+  prefetch: false,
 }];
 
 const subBaseUrl = `${baseUrl}/workflows/{workflowId}`;

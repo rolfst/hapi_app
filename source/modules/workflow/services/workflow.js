@@ -2,11 +2,45 @@ const R = require('ramda');
 const Promise = require('bluebird');
 const workFlowRepo = require('../repositories/workflow');
 const workFlowProcessor = require('../worker/implementation');
+const workFlowExecutor = require('./executor');
 const createError = require('../../../shared/utils/create-error');
 
 const logger = require('../../../shared/services/logger')('workflow/service');
 
 const isNullOrEmpty = R.either(R.isEmpty, R.isNil);
+
+const workflowStatsQuery = `
+SELECT
+  w.id,
+  CASE
+    WHEN NOT wad.id IS NULL
+      THEN COUNT(wad.id)
+  ELSE NULL
+  END reachCount,
+  CASE
+    WHEN NOT o_org.id IS NULL
+      THEN COUNT(os_org.id)
+  WHEN NOT o_user.id IS NULL
+      THEN COUNT(os_user.id)
+  END seenCount
+FROM
+  workflows w
+  LEFT JOIN workflow_actions wa ON (wa.type = 'message' AND wa.workflow_id = w.id)
+  LEFT JOIN objects o_org ON (o_org.object_type = 'organisation_message' AND o_org.parent_type = 'organisation' AND o_org.source_id = wa.source_id)
+  LEFT JOIN object_seen os_org ON (os_org.object_id = o_org.id)
+  LEFT JOIN objects o_user ON (o_user.object_type = 'organisation_message' AND o_user.parent_type = 'user' AND o_user.source_id = wa.source_id)
+  LEFT JOIN object_seen os_user ON (os_user.object_id = o_user.id)
+  LEFT JOIN workflow_actionsdone wad ON (wad.workflow_id = w.id)
+WHERE
+      w.organisation_id = :organisationId
+  AND w.id IN (:workflowIds)
+  AND NOT w.id IS NULL
+  AND NOT wa.id IS NULL
+GROUP BY
+  w.id
+;
+`;
+
 const assertWorkflowBelongsToOrganisation = (workflow, organisationId) => {
   if (!workflow) {
     throw createError('404');
@@ -406,6 +440,33 @@ async function createCompleteWorkflow(payload, message) {
   });
 }
 
+/**
+ * Workflow stats
+ * @param {object} payload - Object containing the params
+ * @param {number} payload.organisationId - The id of the organisation
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method workflowStats
+ * @return {external:Promise.<Object>} {@link module:modules/action~Object}
+ */
+const stats = async (payload, message) => {
+  const workflows = await workFlowRepo.findAll(
+    { organisationId: payload.organisationId },
+    { limit: payload.limit, offset: payload.offset }
+  );
+
+  const [workflowStats, workflowActions] = await Promise.all([
+    workFlowExecutor.executeQuery(
+      workflowStatsQuery,
+      { workflowIds: workFlowExecutor.pluckIds(workflows), organisationId: payload.organisationId }
+    ),
+    workFlowRepo.
+  ]);
+
+
+
+  return workflows;
+};
+
 // Carry along enums for easy access later
 exports.ETriggerTypes = workFlowRepo.ETriggerTypes;
 exports.EConditionOperators = workFlowRepo.EConditionOperators;
@@ -426,3 +487,4 @@ exports.createAction = createAction;
 exports.updateAction = updateAction;
 exports.removeAction = removeAction;
 exports.createCompleteWorkflow = createCompleteWorkflow;
+exports.stats = stats;
