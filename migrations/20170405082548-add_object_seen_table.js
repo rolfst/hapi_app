@@ -11,11 +11,21 @@ module.exports = {
         },
         object_id: {
           type: Sequelize.INTEGER.UNSIGNED,
-          allowNull: false
+          allowNull: false,
+          references: {
+            model: 'objects',
+            key: 'id',
+            onDelete: 'cascade',
+          },
         },
         user_id: {
           type: Sequelize.INTEGER.UNSIGNED,
-          allowNull: false
+          allowNull: true,
+          references: {
+            model: 'users',
+            key: 'id',
+            onDelete: 'set null',
+          },
         },
         created_at: {
           type: Sequelize.DATE,
