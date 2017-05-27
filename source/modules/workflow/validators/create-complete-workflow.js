@@ -3,7 +3,11 @@ const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../definit
 
 const triggerScheme = Joi.object().keys({
   type: Joi.string().required().valid(Object.values(ETriggerTypes)),
-  value: Joi.alternatives().when('type', { is: ETriggerTypes.DIRECT, then: Joi.string(), otherwise: Joi.string().required() }),
+  value: Joi.alternatives().when('type', {
+    is: ETriggerTypes.DIRECT,
+    then: Joi.string(),
+    otherwise: Joi.string().required(),
+  }),
 });
 const conditionScheme = Joi.object().keys({
   field: Joi.string().required(),
