@@ -126,9 +126,7 @@ const processWorkflow = (workflow) => {
 
         return workflowRepo
           .update(workflow.id, updateData)
-          .then(() => {
-            logger.info('Processed workflow', workflow);
-          });
+          .then(() => logger.info('Processed workflow', workflow));
       };
 
       if (!workflow.conditions || !workflow.conditions.length) {

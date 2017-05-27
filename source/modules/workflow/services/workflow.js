@@ -480,7 +480,7 @@ const stats = async (payload) => {
   ]);
 
   const findStats = (workflowId) => R.find(R.propEq('id', workflowId), workflowStats);
-  const findActions = (workflowId) => R.find(R.propEq('workflowId', workflowId), workflowActions);
+  const findActions = (workflowId) => R.filter(R.propEq('workflowId', workflowId), workflowActions);
 
   const addExtraData = (workflow) => {
     const wStats = findStats(workflow.id);
@@ -492,11 +492,17 @@ const stats = async (payload) => {
     }
 
     const seenCount = wStats ? wStats.seenCount : null;
+    const likes = wStats ? wStats.likes : null;
+    const comments = wStats ? wStats.comments : null;
+    const lastInteraction = wStats ? wStats.lastInteraction : null;
 
     return R.merge(workflow, {
       reachCount,
       seenCount,
       actions,
+      likes,
+      comments,
+      lastInteraction,
     });
   };
 

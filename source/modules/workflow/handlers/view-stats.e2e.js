@@ -80,12 +80,17 @@ describe('Workflow handler: view workflow stats', () => {
 
     R.forEach((workflow) => {
       assert.isArray(workflow.actions);
+      assert.isAtLeast(workflow.actions.length, 1);
+      R.forEach((action) => {
+        assert.property(action, 'type');
+        assert.property(action, 'meta');
+      }, workflow.actions);
       assert.property(workflow, 'reach_count');
       assert.property(workflow, 'seen_count');
       assert.property(workflow, 'likes');
       assert.property(workflow, 'comments');
       assert.property(workflow, 'last_interaction');
-    });
+    }, result.data);
   });
 
   it('should allow pagination', async () => {
