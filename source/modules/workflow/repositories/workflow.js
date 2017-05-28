@@ -26,23 +26,35 @@ const headOrNull = (arr) => R.defaultTo(null, R.head(arr));
 const validWorkflowAttributes = ['organisationId', 'userId', 'name', 'meta', 'startDate', 'expirationDate', 'lastCheck', 'done'];
 
 const create = (attributes) => {
+  const pickedAttributes = R.pick(validWorkflowAttributes, attributes);
+
+  if (typeof pickedAttributes.meta === 'object') {
+    pickedAttributes.meta = JSON.stringify(pickedAttributes.meta);
+  }
+
   return WorkFlow
-    .create(R.pick(validWorkflowAttributes, attributes))
+    .create(pickedAttributes)
     .then(createWorkFlowModel);
 };
 
 const update = (id, attributes) => {
+  const pickedAttributes = R.pick(validWorkflowAttributes, attributes);
+
+  if (typeof pickedAttributes.meta === 'object') {
+    pickedAttributes.meta = JSON.stringify(pickedAttributes.meta);
+  }
+
   return WorkFlow
-    .update(R.pick(validWorkflowAttributes, attributes), { where: { id } })
+    .update(pickedAttributes, { where: { id } })
     .then(createWorkFlowModel);
 };
 
 const destroy = (id) =>
   WorkFlow.destroy({ where: { id } });
 
-const findAll = (workflowIdsOrWhereConstraints) => {
+const findAll = (workflowIdsOrWhereConstraints, options) => {
   return WorkFlow
-    .findAll({ where: buildWhereConstraint(workflowIdsOrWhereConstraints) })
+    .findAll(R.merge(options, { where: buildWhereConstraint(workflowIdsOrWhereConstraints) }))
     .then(R.map(createWorkFlowModel));
 };
 
@@ -189,6 +201,12 @@ const findOneAction = (actionIdOrWhereConstraints) => {
     .then(createActionModel);
 };
 
+const findAllActions = (workflowId) => {
+  return Action
+    .findAll({ where: { workflowId } })
+    .then(R.map(createActionModel));
+};
+
 const deleteAll = () => {
   return Promise.all([
     WorkFlow
@@ -233,6 +251,7 @@ exports.createAction = createAction;
 exports.updateAction = updateAction;
 exports.destroyAction = destroyAction;
 exports.findOneAction = findOneAction;
+exports.findAllActions = findAllActions;
 exports.deleteAll = deleteAll;
 exports.findHandledUsers = findHandledUsers;
 exports.markUserHandled = markUserHandled;

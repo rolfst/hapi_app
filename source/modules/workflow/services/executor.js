@@ -4,10 +4,10 @@ const logger = require('../../../shared/services/logger')('WORKFLOW/services/exe
 const queryGenerator = require('./query-generator');
 const { CONCURRENT_USERS } = require('../definitions');
 
-const executeQuery = (query) => {
+const executeQuery = (query, replacements) => {
   logger.info('executeQuery', { query });
 
-  return sequelize.query(query, { type: sequelize.QueryTypes.SELECT });
+  return sequelize.query(query, { type: sequelize.QueryTypes.SELECT, replacements });
 };
 
 const pluckUserIds = R.pluck('userId');

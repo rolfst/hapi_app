@@ -2,11 +2,52 @@ const R = require('ramda');
 const Promise = require('bluebird');
 const workFlowRepo = require('../repositories/workflow');
 const workFlowProcessor = require('../worker/implementation');
+const workFlowExecutor = require('./executor');
 const createError = require('../../../shared/utils/create-error');
 
 const logger = require('../../../shared/services/logger')('workflow/service');
 
 const isNullOrEmpty = R.either(R.isEmpty, R.isNil);
+
+const workflowSeenCountQuery = `
+SELECT
+  w.id,
+  CASE
+    WHEN NOT o_org.id IS NULL
+      THEN COUNT(os_org.id)
+  WHEN NOT o_user.id IS NULL
+      THEN COUNT(os_user.id)
+  END seenCount,
+  COUNT(fc.id) comments,
+  COUNT(l.id) likes,
+  CASE
+    WHEN NOT fc.updated_at IS NULL AND NOT l.created_at IS NULL
+      THEN GREATEST(fc.updated_at, l.created_at)
+  WHEN NOT fc.updated_at IS NULL
+      THEN MAX(fc.updated_at)
+  WHEN NOT l.created_at IS NULL
+      THEN MAX(l.created_at)
+  ELSE NULL
+  END lastInteraction
+FROM
+  workflows w
+  LEFT JOIN workflow_actions wa ON (wa.type = 'message' AND wa.workflow_id = w.id)
+  LEFT JOIN objects o_org ON (o_org.object_type = 'organisation_message' AND o_org.parent_type = 'organisation' AND o_org.source_id = wa.source_id)
+  LEFT JOIN object_seen os_org ON (os_org.object_id = o_org.id)
+  LEFT JOIN objects o_user ON (o_user.object_type = 'organisation_message' AND o_user.parent_type = 'user' AND o_user.source_id = wa.source_id)
+  LEFT JOIN object_seen os_user ON (os_user.object_id = o_user.id)
+  LEFT JOIN feed_comments fc ON (fc.message_id = wa.source_id)
+  LEFT JOIN likes l ON (l.message_id = wa.source_id)
+WHERE
+      w.organisation_id = :organisationId
+  AND w.id IN (:workflowIds)
+  AND NOT w.id IS NULL
+  AND NOT wa.id IS NULL
+GROUP BY
+  w.id
+;
+`;
+
 const assertWorkflowBelongsToOrganisation = (workflow, organisationId) => {
   if (!workflow) {
     throw createError('404');
@@ -357,14 +398,16 @@ async function createCompleteWorkflow(payload, message) {
         value: trigger.value,
       })
     ),
-    Promise.map(wfConditions, (condition) =>
-      workFlowRepo.createCondition({
-        workflowId: createdWorkFlow.id,
-        field: condition.field,
-        operator: condition.operator,
-        value: condition.value,
-      })
-    ),
+    wfConditions.length === 0
+      ? Promise.resolve([])
+      : Promise.map(wfConditions, (condition) =>
+          workFlowRepo.createCondition({
+            workflowId: createdWorkFlow.id,
+            field: condition.field,
+            operator: condition.operator,
+            value: condition.value,
+          })
+        ),
     Promise.map(wfActions, (action) =>
       workFlowRepo.createAction({
         workflowId: action.workflowId,
@@ -373,11 +416,19 @@ async function createCompleteWorkflow(payload, message) {
       })
     ),
   ])
-  .then(([createdTriggers, createdConditions, createdActions]) => {
+  .then(async ([createdTriggers, createdConditions, createdActions]) => {
     const foundDirectTrigger = R.find(
       R.propEq('type', workFlowRepo.ETriggerTypes.DIRECT), createdTriggers);
 
+    // Add reach count now
+    const { count } = await workFlowExecutor
+      .previewConditions(createdWorkFlow.organisationId, createdConditions);
+    const newMeta = createdWorkFlow.meta || {};
+    newMeta.reachCount = count;
+    await workFlowRepo.update(createdWorkFlow.id, { meta: newMeta });
+
     const completeWorkflow = R.merge(createdWorkFlow, {
+      meta: newMeta,
       triggers: createdTriggers,
       conditions: createdConditions,
       actions: createdActions,
@@ -404,6 +455,60 @@ async function createCompleteWorkflow(payload, message) {
   });
 }
 
+/**
+ * Workflow stats
+ * @param {object} payload - Object containing the params
+ * @param {number} payload.organisationId - The id of the organisation
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method workflowStats
+ * @return {external:Promise.<Object>} {@link module:modules/action~Object}
+ */
+const stats = async (payload) => {
+  const workflows = await workFlowRepo.findAll(
+    { organisationId: payload.organisationId },
+    { limit: payload.limit, offset: payload.offset }
+  );
+
+  const workflowIds = workFlowExecutor.pluckIds(workflows);
+
+  const [workflowStats, workflowActions] = await Promise.all([
+    workFlowExecutor.executeQuery(
+      workflowSeenCountQuery,
+      { workflowIds, organisationId: payload.organisationId }
+    ),
+    workFlowRepo.findAllActions({ $in: workflowIds }),
+  ]);
+
+  const findStats = (workflowId) => R.find(R.propEq('id', workflowId), workflowStats);
+  const findActions = (workflowId) => R.filter(R.propEq('workflowId', workflowId), workflowActions);
+
+  const addExtraData = (workflow) => {
+    const wStats = findStats(workflow.id);
+    const actions = findActions(workflow.id);
+
+    let reachCount = null;
+    if (!reachCount && workflow.meta && workflow.meta.reachCount) {
+      reachCount = workflow.meta.reachCount;
+    }
+
+    const seenCount = wStats ? wStats.seenCount : null;
+    const likes = wStats ? wStats.likes : null;
+    const comments = wStats ? wStats.comments : null;
+    const lastInteraction = wStats ? wStats.lastInteraction : null;
+
+    return R.merge(workflow, {
+      reachCount,
+      seenCount,
+      actions,
+      likes,
+      comments,
+      lastInteraction,
+    });
+  };
+
+  return R.map(addExtraData, workflows);
+};
+
 // Carry along enums for easy access later
 exports.ETriggerTypes = workFlowRepo.ETriggerTypes;
 exports.EConditionOperators = workFlowRepo.EConditionOperators;
@@ -424,3 +529,4 @@ exports.createAction = createAction;
 exports.updateAction = updateAction;
 exports.removeAction = removeAction;
 exports.createCompleteWorkflow = createCompleteWorkflow;
+exports.stats = stats;

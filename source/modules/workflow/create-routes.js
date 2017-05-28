@@ -26,8 +26,8 @@ const routes = [{
 }, {
   method: 'GET',
   url: `${baseUrl}/workflows`,
-  handler: require(`${handlerPath}/fetch-workflows`),
-  validator: require(`${validatorPath}/fetch-workflows`),
+  handler: require(`${handlerPath}/list-workflows`),
+  validator: require(`${validatorPath}/list-workflows`),
   prefetch: false,
 }, {
   method: 'GET',
