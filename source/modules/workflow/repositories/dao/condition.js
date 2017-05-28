@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 const model = require('../../../../shared/configs/sequelize');
-const { EConditionOperators } = require('../../h');
+const { EConditionOperators } = require('../../definitions');
 
 const Condition = model.define('Condition', {
   workflowId: {

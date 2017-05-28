@@ -2,7 +2,7 @@ const R = require('ramda');
 const { assert } = require('chai');
 const testHelper = require('../../../shared/test-utils/helpers');
 const workFlowRepo = require('./workflow');
-const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../h');
+const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../definitions');
 
 describe('Workflow repository', () => {
   let admin;

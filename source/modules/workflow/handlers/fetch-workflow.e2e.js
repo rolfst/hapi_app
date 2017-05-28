@@ -2,16 +2,15 @@ const { assert } = require('chai');
 const testHelper = require('../../../shared/test-utils/helpers');
 const { getRequest } = require('../../../shared/test-utils/request');
 
-describe('Workflow handler: create workflow', () => {
+describe('Workflow handler: fetch workflow', () => {
   let admin;
   let employee;
   let otherUser;
   let organisation;
 
   let createdWorkFlow;
-  let createdTriggers;
-  let createdConditions;
-  let createdActions;
+
+  let endpoint;
 
   before(async () => {
     [admin, employee, otherUser, organisation] = await Promise.all([
@@ -27,17 +26,15 @@ describe('Workflow handler: create workflow', () => {
     ]);
 
     // First create a complete workflow
-    [createdWorkFlow, createdTriggers, createdConditions, createdActions] =
-      await testHelper.createCompleteWorkFlow(organisation.id);
+    createdWorkFlow = await testHelper.createCompleteWorkFlow(organisation.id);
+
+    endpoint = `/v2/organisations/${organisation.id}/workflows/${createdWorkFlow.id}`;
   });
 
   after(() => testHelper.cleanAll());
 
   it('should fetch a complete workflow for an admin', async () => {
-    const { statusCode, result } = await getRequest(
-      `/v2/organisations/${organisation.id}/workflows/${createdWorkFlow.id}`,
-      admin.token
-    );
+    const { statusCode, result } = await getRequest(endpoint, admin.token);
 
     assert.equal(statusCode, 200);
 
@@ -52,27 +49,21 @@ describe('Workflow handler: create workflow', () => {
     assert.property(actualWorkFlow, 'created_at');
     assert.property(actualWorkFlow, 'updated_at');
     assert.isArray(actualWorkFlow.triggers);
-    assert.lengthOf(actualWorkFlow.triggers, createdTriggers.length);
+    assert.lengthOf(actualWorkFlow.triggers, createdWorkFlow.triggers.length);
     assert.isArray(actualWorkFlow.conditions);
-    assert.lengthOf(actualWorkFlow.conditions, createdConditions.length);
+    assert.lengthOf(actualWorkFlow.conditions, createdWorkFlow.conditions.length);
     assert.isArray(actualWorkFlow.actions);
-    assert.lengthOf(actualWorkFlow.actions, createdActions.length);
+    assert.lengthOf(actualWorkFlow.actions, createdWorkFlow.actions.length);
   });
 
   it('should fail for an employee', async () => {
-    const { statusCode } = await getRequest(
-      `/v2/organisations/${organisation.id}/workflows/${createdWorkFlow.id}`,
-      employee.token
-    );
+    const { statusCode } = await getRequest(endpoint, employee.token);
 
     assert.equal(statusCode, 403);
   });
 
   it('should fail for user not in organisation', async () => {
-    const { statusCode } = await getRequest(
-      `/v2/organisations/${organisation.id}/workflows/${createdWorkFlow.id}`,
-      otherUser.token
-    );
+    const { statusCode } = await getRequest(endpoint, otherUser.token);
 
     assert.equal(statusCode, 403);
   });

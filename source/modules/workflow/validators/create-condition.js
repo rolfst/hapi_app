@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const { EConditionOperators } = require('../h');
+const { EConditionOperators } = require('../definitions');
 
 module.exports = {
   payload: Joi.object().keys({

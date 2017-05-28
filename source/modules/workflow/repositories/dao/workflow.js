@@ -7,6 +7,11 @@ const WorkFlow = model.define('WorkFlow', {
     field: 'organisation_id',
     allowNull: false,
   },
+  userId: {
+    type: Sequelize.INTEGER,
+    field: 'user_id',
+    defaultValue: null,
+  },
   name: {
     type: Sequelize.STRING,
     allowNull: false,
@@ -24,6 +29,7 @@ const WorkFlow = model.define('WorkFlow', {
     type: Sequelize.DATE,
     field: 'last_check',
   },
+  done: Sequelize.BOOLEAN,
 }, {
   tableName: 'workflows',
   createdAt: 'created_at',

@@ -17,7 +17,7 @@ module.exports = async (req, reply) => {
       throw createError('403');
     }
 
-    const data = await workflowService.create(payload, message);
+    const data = await workflowService.createCompleteWorkflow(payload, message);
 
     return reply({ data: responseUtil.toSnakeCase(data) });
   } catch (err) {

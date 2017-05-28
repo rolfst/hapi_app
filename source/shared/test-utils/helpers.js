@@ -100,6 +100,7 @@ const createOrganisationFunction = (organisationId, name = randomString()) => {
  * @param {Object} networkAttributes
  * @param {string} networkAttributes.userId
  * @param {string} [networkAttributes.externalId]
+ * @param {string} [networkAttributes.organisationId]
  * @param {string} [networkAttributes.name]
  * @param {string} [networkAttributes.integrationName]
  * @param {string} [networkAttributes.userExternalId]
@@ -203,7 +204,7 @@ async function createUser(userAttributes = {}) {
   const attributes = R.merge({
     username,
     email: `${username}@example.com`,
-    password: `pw#${Math.floor(Math.random() * 1000)}`,
+    password: `pw#${Math.floor(Math.random() * 100000)}`,
   }, userAttributes);
 
   const user = await userRepo.createUser(R.merge(blueprints.users.admin, attributes));
@@ -358,13 +359,7 @@ async function createCompleteWorkFlow(organisationId, name = randomString()) {
         workflowId: createdWorkFlow.id,
         field: 'user.age',
         operator: workflowRepository.EConditionOperators.GREATER_THAN_OR_EQUAL,
-        value: '25',
-      }),
-      workflowRepository.createCondition({
-        workflowId: createdWorkFlow.id,
-        field: 'user.gender',
-        operator: workflowRepository.EConditionOperators.EQUAL,
-        value: 'm',
+        value: '18',
       }),
     ]),
     Promise.all([
@@ -379,7 +374,11 @@ async function createCompleteWorkFlow(organisationId, name = randomString()) {
     ]),
   ]);
 
-  return [createdWorkFlow, createdTriggers, createdConditions, createdActions];
+  return R.merge(createdWorkFlow, {
+    triggers: createdTriggers,
+    conditions: createdConditions,
+    actions: createdActions,
+  });
 }
 
 /**

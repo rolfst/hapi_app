@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 const model = require('../../../../shared/configs/sequelize');
-const { EActionTypes } = require('../../h');
+const { EActionTypes } = require('../../definitions');
 
 const Action = model.define('Action', {
   workflowId: {
@@ -15,6 +15,10 @@ const Action = model.define('Action', {
   meta: {
     type: Sequelize.TEXT,
     allowNull: false,
+  },
+  sourceId: {
+    type: Sequelize.INTEGER,
+    field: 'source_id',
   },
 }, {
   tableName: 'workflow_actions',

@@ -1,6 +1,6 @@
 'use strict';
 
-const { ETriggerTypes } = require('../source/modules/workflow/h');
+const { ETriggerTypes } = require('../source/modules/workflow/definitions');
 
 module.exports = {
   up: function (queryInterface, Sequelize) {
