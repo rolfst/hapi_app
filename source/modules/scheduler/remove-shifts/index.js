@@ -2,7 +2,6 @@ const R = require('ramda');
 const moment = require('moment');
 require('moment/locale/nl');
 require('moment-timezone').locale('nl');
-const Promise = require('bluebird');
 const Logger = require('../../../shared/services/logger');
 const exchangeRepo = require('../../flexchange/repositories/exchange');
 const objectRepo = require('../../core/repositories/object');
@@ -28,7 +27,7 @@ const run = async () => {
 
   logger.info('Removing objects for outdated exchanges', { count: objects.length });
 
-  return Promise.map(R.pluck('id', objects), objectRepo.deleteById);
+  return objectRepo.deleteBy({ id: { $in: R.pluck('id', objects) } });
 };
 
 exports.run = run;
