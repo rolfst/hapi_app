@@ -161,13 +161,8 @@ const deleteTeamsByIds = async (payload) => {
   return Promise.map(payload.teamIds, teamRepository.deleteById);
 };
 
-const findById = async (teamId) => {
-  return teamRepository.findById(teamId);
-};
-
 exports.create = create;
 exports.deleteTeamsByIds = deleteTeamsByIds;
-exports.findById = findById;
 exports.get = get;
 exports.list = list;
 exports.listMembersForTeams = listMembersForTeams;
