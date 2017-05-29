@@ -1,4 +1,5 @@
 const R = require('ramda');
+const Promise = require('bluebird');
 const { assert } = require('chai');
 const testHelper = require('../../../shared/test-utils/helpers');
 const workFlowRepo = require('./workflow');
@@ -30,6 +31,7 @@ describe('Workflow repository', () => {
       organisationId: organisation.id,
       name: 'test workflow',
     });
+
     const [createdTriggers, createdConditions, createdActions] = await Promise.all([
       Promise.all([
         workFlowRepo.createTrigger({
@@ -65,13 +67,12 @@ describe('Workflow repository', () => {
     ]);
 
     const completeWorkFlow = await workFlowRepo.findOneWithData(createdWorkFlow.id);
+    const omitExtraData = R.omit(['triggers', 'conditions', 'actions']);
 
-    const expectedResult = R.merge(createdWorkFlow, {
-      triggers: createdTriggers,
-      conditions: createdConditions,
-      actions: createdActions,
-    });
-
-    assert.deepEqual(completeWorkFlow, expectedResult);
+    assert.deepEqual(omitExtraData(completeWorkFlow), omitExtraData(createdWorkFlow));
+    assert.includeDeepMembers(createdTriggers, completeWorkFlow.triggers);
+    assert.includeDeepMembers(createdConditions, completeWorkFlow.conditions);
+    assert.includeDeepMembers(createdConditions, completeWorkFlow.conditions);
+    assert.includeDeepMembers(createdActions, completeWorkFlow.actions);
   });
 });
