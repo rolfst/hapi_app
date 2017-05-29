@@ -12,7 +12,7 @@ const exchangeService = require('../../flexchange/services/flexchange');
 const exchangeRepo = require('../../flexchange/repositories/exchange');
 const unit = require('../remove-shifts');
 
-describe('remove exchanges', () => {
+describe('Scheduler: Remove exchanges', () => {
   let sandbox;
   let network;
 
