@@ -109,37 +109,42 @@ const prepareWorkflowData = async (workflow) => {
   return workflow;
 };
 
-const processWorkflow = (workflowId) => {
+const processWorkflow = (workflow) => {
+  logger.info('Started processing workflow', workflow);
+
   return workflowRepo
-    .findOneWithData(workflowId)
-    .then((workflow) => {
-      logger.info('Started processing workflow', workflow);
+    .update(workflow.id, { lastCheck: new Date() })
+    .then(() => prepareWorkflowData(workflow))
+    .then(() => {
+      const finished = async () => {
+        const newMeta = workflow.meta || {};
+        const { count } = await workflowExecutor
+          .previewConditions(workflow.organisationId, workflow.conditions);
+        newMeta.reachCount = count;
 
-      return workflowRepo
-        .update(workflow.id, { lastCheck: new Date() })
-        .then(() => prepareWorkflowData(workflow))
-        .then(() => {
-          if (!workflow.conditions || !workflow.conditions.length) {
-            // if any action fails, it will not be completed as done and could
-            //   potentially create unlimited messages
-            return Promise.map(workflow.actions, (action) => doAction(workflow, action));
-          }
+        const updateData = { done: true, lastCheck: new Date(), meta: newMeta };
 
-          // TODO - do with new Promise and setTimeout to avoid hitting the callstack limit
-          return processWorkflowPart(workflow)
-            .then(() => {
-              return workflowRepo
-                .update(workflow.id, { done: true, lastCheck: new Date() })
-                .then(() => {
-                  logger.info('Processed workflow', workflow);
-                });
-            });
-        });
+        return workflowRepo
+          .update(workflow.id, updateData)
+          .then(() => logger.info('Processed workflow', workflow));
+      };
+
+      if (!workflow.conditions || !workflow.conditions.length) {
+        // if any action fails, it will not be completed as done and could
+        //   potentially create unlimited messages
+        return Promise
+          .map(workflow.actions, (action) => doAction(workflow, action))
+          .then(finished);
+      }
+
+      // TODO - do with new Promise and setTimeout to avoid hitting the callstack limit
+      return processWorkflowPart(workflow)
+        .then(finished);
     })
     .catch((err) => {
       const myErr = err;
 
-      myErr.payload = { workflowId };
+      myErr.payload = { workflow };
 
       throw myErr;
     });
@@ -150,7 +155,8 @@ const fetchAndProcessWorkflows = () => {
     .then((workflowIds) => {
       if (!workflowIds.length) return;
 
-      const processWorkflowP = Promise.map(workflowIds, processWorkflow);
+      const processWorkflowP = Promise.map(workflowIds, (workflowId) => workflowRepo
+        .findOneWithData(workflowId).then(processWorkflow));
 
       return Promise
         .any(processWorkflowP)

@@ -201,8 +201,11 @@ const createUser = async (attributes) => {
   ];
 
   const user = await User.create(
-    R.merge(R.pick(whitelistedAttributes, attributes),
-    { profileImg: sample(dummyProfileImgPaths) }));
+    R.merge(R.pick(whitelistedAttributes, attributes), {
+      profileImg: !!attributes.profileImg
+        ? attributes.profileImg
+        : sample(dummyProfileImgPaths),
+    }));
 
   return findUserById(user.id, null, false);
 };

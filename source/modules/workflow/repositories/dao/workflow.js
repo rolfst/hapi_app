@@ -12,10 +12,7 @@ const WorkFlow = model.define('WorkFlow', {
     field: 'user_id',
     defaultValue: null,
   },
-  name: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
+  name: Sequelize.STRING,
   meta: Sequelize.TEXT,
   startDate: {
     type: Sequelize.DATE,

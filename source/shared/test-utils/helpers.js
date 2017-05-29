@@ -448,7 +448,6 @@ async function createAction(workflowId, type = workflowRepository.EActionTypes.M
  */
 async function cleanAll() {
   await organisationRepository.deleteAll();
-  await workflowRepository.deleteAll();
 
   const networks = await networkRepo.findAll();
   const admins = R.map((network) => network.superAdmin, networks);

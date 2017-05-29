@@ -79,16 +79,10 @@ describe('Handler: Get organisation news', () => {
 
     assert.equal(statusCode, 200);
 
-    const organisationMessageaInFeed = R.filter(R.propEq('parent_type', 'organisation'), result.data);
-    const directedOrganisationMessagesInFeed = R.filter(R.allPass([
-      R.propEq('object_type', EObjectTypes.ORGANISATION_MESSAGE),
-      R.propEq('parent_type', EParentTypes.USER),
-      R.propEq('parent_id', organisationAdmin.id),
-    ]), result.data);
+    const organisationMessagesInFeed = R.filter(R.propEq('parent_type', 'organisation'), result.data);
 
-    assert.lengthOf(directedOrganisationMessagesInFeed, 1);
     assert.lengthOf(result.data, 3);
-    assert.lengthOf(organisationMessageaInFeed, 2);
+    assert.lengthOf(organisationMessagesInFeed, 3);
     assert.equal(result.meta.pagination.total_count, 3);
   });
 

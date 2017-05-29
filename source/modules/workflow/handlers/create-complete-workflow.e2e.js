@@ -1,7 +1,9 @@
 const R = require('ramda');
 const { assert } = require('chai');
+const sinon = require('sinon');
 const testHelper = require('../../../shared/test-utils/helpers');
 const { postRequest } = require('../../../shared/test-utils/request');
+const workFlowProcessor = require('../worker/implementation');
 const { ETriggerTypes, EConditionOperators, EActionTypes } = require('../definitions');
 
 describe('Workflow handler: create complete workflow', () => {
@@ -15,7 +17,7 @@ describe('Workflow handler: create complete workflow', () => {
     },
   }];
   const conditionFixture = [{
-    field: 'user.birthdate',
+    field: 'user.date_of_birth',
     operator: EConditionOperators.EQUAL,
     value: '2018-01-01',
   }];
@@ -24,12 +26,25 @@ describe('Workflow handler: create complete workflow', () => {
     value: '2018-01-01 13:00:00',
   }];
 
+  const directMessageWorkflowFixture = {
+    triggers: [{
+      type: ETriggerTypes.DIRECT,
+    }],
+    conditions: [{ field: 'user.age', operator: EConditionOperators.EQUAL, value: '18' }],
+    actions: [{
+      type: EActionTypes.MESSAGE,
+      meta: { text: 'direct!' },
+    }],
+  };
+
   let admin;
   let employee;
   let otherUser;
   let organisation;
 
   let createUrl;
+
+  let processWorkflowSpy;
 
   before(async () => {
     [admin, employee, otherUser, organisation] = await Promise.all([
@@ -43,6 +58,8 @@ describe('Workflow handler: create complete workflow', () => {
       testHelper.addUserToOrganisation(admin.id, organisation.id, 'ADMIN'),
       testHelper.addUserToOrganisation(employee.id, organisation.id),
     ]);
+
+    processWorkflowSpy = sinon.spy(workFlowProcessor, 'processWorkflow');
 
     createUrl = `/v2/organisations/${organisation.id}/workflows`;
   });
@@ -97,6 +114,18 @@ describe('Workflow handler: create complete workflow', () => {
     );
 
     assert.equal(statusCode, 403);
+  });
+
+  it('should process workflow immediately when trigger type is direct', async () => {
+    const { statusCode } = await postRequest(
+      createUrl,
+      directMessageWorkflowFixture,
+      admin.token
+    );
+
+    assert.equal(statusCode, 200);
+    assert(processWorkflowSpy.called);
+    assert.isObject(processWorkflowSpy.args[0][0]);
   });
 });
 

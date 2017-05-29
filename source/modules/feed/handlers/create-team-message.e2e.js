@@ -18,7 +18,7 @@ describe('Handler: Create team message', () => {
     poll_question: 'POlly',
   };
 
-  let createUrl;
+  let endpoint;
 
   before(async () => {
     admin = await testHelpers.createUser();
@@ -34,19 +34,17 @@ describe('Handler: Create team message', () => {
       }),
     ]);
 
-    createUrl = `/v3/teams/${team.id}/feed`;
+    endpoint = `/v3/teams/${team.id}/feed`;
   });
 
   after(() => testHelpers.cleanAll());
 
   it('should create a poll', async () => {
-    const { statusCode, result } = await postRequest(createUrl, pollFixture, admin.token);
+    const { statusCode, result } = await postRequest(endpoint, pollFixture, admin.token);
+    const pollChild = R.find(R.propEq('object_type', 'poll'), result.data.children);
 
     assert.equal(statusCode, 200);
     assert.isArray(result.data.children);
-
-    const pollChild = R.find(R.propEq('object_type', 'poll'), result.data.children);
-
     assert.isDefined(pollChild);
     assert.lengthOf(pollChild.source.options, 3);
   });

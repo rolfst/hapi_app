@@ -162,9 +162,9 @@ const getAsObject = async (payload, message) => {
  * @param {string} payload.parentType - The type of parent to create the object for
  * @param {string} payload.parentId - The id of the parent
  * @param {string} payload.text - The text of the message
- * @param {object} payload.files - The id of attachments that should be associated
- * @param {object} payload.pollQuestion - The poll question
- * @param {array} payload.pollOptions - The poll options
+ * @param {string[]} payload.files - The id of attachments that should be associated
+ * @param {string} payload.pollQuestion - The poll question
+ * @param {string[]} payload.pollOptions - The poll options
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method create
  * @return {external:Promise.<Message>} {@link module:feed~Message message}
@@ -175,18 +175,19 @@ const create = async (payload, message) => {
   const checkPayload = R.compose(isAvailable, R.prop(R.__, payload));
   const parent = await objectService.getParent(R.pick(['parentType', 'parentId'], payload));
 
-  const networkId = await R.cond([
+  const networkId = R.cond([
     [R.propEq('type', 'organisation'), R.always(null)],
     [R.propEq('type', 'team'), R.prop('networkId')],
     [R.T, R.prop('id')],
   ])(parent);
-  const objectType = await R.cond([
+
+  const objectType = R.cond([
     [R.always(R.has('objectType', payload)), R.always(R.prop('objectType', payload))],
     [R.propEq('type', EObjectTypes.ORGANISATION), R.always(EObjectTypes.ORGANISATION_MESSAGE)],
     [R.T, R.always('feed_message')],
   ])(parent);
 
-  const organisationId = await R.cond([
+  const organisationId = R.cond([
     [R.propEq('parentType', EParentTypes.ORGANISATION), R.prop('parentId')],
     [R.has('organisationId'), R.prop('organisationId')],
     [R.T, R.always(null)],
