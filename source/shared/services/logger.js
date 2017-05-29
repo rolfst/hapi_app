@@ -129,7 +129,7 @@ const removeStreamsFromObject = R.mapObjIndexed((value) => {
   return value;
 });
 
-const removeStreamsFromContext = (data) => {
+const removeStreamsFromContext = (data = null) => {
   if (!data || !data.context || !data.context.payload) {
     return data;
   }
