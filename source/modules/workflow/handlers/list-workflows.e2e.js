@@ -87,8 +87,10 @@ describe('Workflow handler: view workflow stats', () => {
       }, workflow.actions);
       assert.property(workflow, 'reach_count');
       assert.property(workflow, 'seen_count');
-      assert.property(workflow, 'likes');
-      assert.property(workflow, 'comments');
+      assert.isNotNull(workflow.seen_count);
+      assert.property(workflow, 'likes_count');
+      assert.isNotNull(workflow.likes_count);
+      assert.property(workflow, 'comments_count');
       assert.property(workflow, 'last_interaction');
     }, result.data);
   });
@@ -97,9 +99,17 @@ describe('Workflow handler: view workflow stats', () => {
     const { statusCode: statusCodeA, result: resultA } = await getRequest(`${endpoint}?limit=1`, admin.token);
     const { statusCode: statusCodeB, result: resultB } = await getRequest(`${endpoint}?limit=1&offset=1`, admin.token);
 
+    assert.equal(resultA.meta.pagination.limit, 1);
+    assert.equal(resultA.meta.pagination.offset, 0);
+    assert.equal(resultA.meta.pagination.total_count, 2);
+
     assert.equal(statusCodeA, 200);
     assert.isArray(resultA.data);
     assert.lengthOf(resultA.data, 1);
+
+    assert.equal(resultB.meta.pagination.limit, 1);
+    assert.equal(resultB.meta.pagination.offset, 1);
+    assert.equal(resultB.meta.pagination.total_count, 2);
 
     assert.equal(statusCodeB, 200);
     assert.isArray(resultB.data);

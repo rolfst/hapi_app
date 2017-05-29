@@ -8,6 +8,7 @@ module.exports = (dataModel) => ({
   parentType: dataModel.parentType,
   parentId: dataModel.parentId.toString(),
   createdAt: dateUtils.toISOString(dataModel.created_at),
+  organisationId: dataModel.organisationId,
   seen: false, // Filled in object repo
   seenCount: null, // Filled in object repo
 });

@@ -52,6 +52,9 @@ const update = (id, attributes) => {
 const destroy = (id) =>
   WorkFlow.destroy({ where: { id } });
 
+const count = (workflowIdsOrWhereConstraints) =>
+  WorkFlow.count({ where: buildWhereConstraint(workflowIdsOrWhereConstraints) });
+
 const findAll = (workflowIdsOrWhereConstraints, options) => {
   return WorkFlow
     .findAll(R.merge(options, { where: buildWhereConstraint(workflowIdsOrWhereConstraints) }))
@@ -233,6 +236,7 @@ exports.EActionTypes = EActionTypes;
 exports.create = create;
 exports.update = update;
 exports.destroy = destroy;
+exports.count = count;
 exports.findAll = findAll;
 exports.findOne = findOne;
 exports.findAllWithData = findAllWithData;

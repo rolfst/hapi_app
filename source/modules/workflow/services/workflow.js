@@ -1,9 +1,10 @@
 const R = require('ramda');
 const Promise = require('bluebird');
+const workFlowExecutor = require('./executor');
 const workFlowRepo = require('../repositories/workflow');
 const workFlowProcessor = require('../worker/implementation');
-const workFlowExecutor = require('./executor');
 const createError = require('../../../shared/utils/create-error');
+const dateUtils = require('../../../shared/utils/date');
 
 const logger = require('../../../shared/services/logger')('workflow/service');
 
@@ -18,8 +19,8 @@ SELECT
   WHEN NOT o_user.id IS NULL
       THEN COUNT(os_user.id)
   END seenCount,
-  COUNT(fc.id) comments,
-  COUNT(l.id) likes,
+  COUNT(fc.id) commentsCount,
+  COUNT(l.id) likesCount,
   CASE
     WHEN NOT fc.updated_at IS NULL AND NOT l.created_at IS NULL
       THEN GREATEST(fc.updated_at, l.created_at)
@@ -464,10 +465,17 @@ async function createCompleteWorkflow(payload, message) {
  * @return {external:Promise.<Object>} {@link module:modules/action~Object}
  */
 const stats = async (payload) => {
-  const workflows = await workFlowRepo.findAll(
-    { organisationId: payload.organisationId },
-    { limit: payload.limit, offset: payload.offset }
-  );
+  const [workflows, count] = await Promise.all([
+    workFlowRepo.findAll(
+      { organisationId: payload.organisationId },
+      {
+        limit: payload.limit,
+        offset: payload.offset,
+        order: [['created_at', 'DESC']],
+      }
+    ),
+    workFlowRepo.count({ organisationId: payload.organisationId }),
+  ]);
 
   const workflowIds = workFlowExecutor.pluckIds(workflows);
 
@@ -491,22 +499,26 @@ const stats = async (payload) => {
       reachCount = workflow.meta.reachCount;
     }
 
-    const seenCount = wStats ? wStats.seenCount : null;
-    const likes = wStats ? wStats.likes : null;
-    const comments = wStats ? wStats.comments : null;
-    const lastInteraction = wStats ? wStats.lastInteraction : null;
+    const seenCount = wStats ? wStats.seenCount : 0;
+    const likesCount = wStats ? wStats.likesCount : 0;
+    const commentsCount = wStats ? wStats.commentsCount : 0;
+    const lastInteraction =
+      wStats && wStats.lastInteraction ? dateUtils.toISOString(wStats.lastInteraction) : null;
 
     return R.merge(workflow, {
       reachCount,
       seenCount,
       actions,
-      likes,
-      comments,
+      likesCount,
+      commentsCount,
       lastInteraction,
     });
   };
 
-  return R.map(addExtraData, workflows);
+  return {
+    data: R.map(addExtraData, workflows),
+    count,
+  };
 };
 
 // Carry along enums for easy access later
