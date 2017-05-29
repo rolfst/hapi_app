@@ -35,6 +35,9 @@ module.exports = {
           defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
           allowNull: false
         }
+      }, {
+        charset: 'utf8',
+        collate: 'utf8_unicode_ci'
       })
       .then(() => {
         return queryInterface
