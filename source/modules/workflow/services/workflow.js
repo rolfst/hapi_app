@@ -1,9 +1,10 @@
 const R = require('ramda');
 const Promise = require('bluebird');
+const workFlowExecutor = require('./executor');
 const workFlowRepo = require('../repositories/workflow');
 const workFlowProcessor = require('../worker/implementation');
-const workFlowExecutor = require('./executor');
 const createError = require('../../../shared/utils/create-error');
+const dateUtils = require('../../../shared/utils/date');
 
 const logger = require('../../../shared/services/logger')('workflow/service');
 
@@ -501,7 +502,8 @@ const stats = async (payload) => {
     const seenCount = wStats ? wStats.seenCount : 0;
     const likesCount = wStats ? wStats.likesCount : 0;
     const commentsCount = wStats ? wStats.commentsCount : 0;
-    const lastInteraction = wStats ? wStats.lastInteraction : null;
+    const lastInteraction =
+      wStats && wStats.lastInteraction ? dateUtils.toISOString(wStats.lastInteraction) : null;
 
     return R.merge(workflow, {
       reachCount,
