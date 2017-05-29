@@ -77,7 +77,7 @@ async function create(payload, message) {
   ChatDispatcher.emit('message.created', {
     conversation,
     object: output,
-    token: message.artifacts.authenticationToken,
+    token: message.artifacts && message.artifacts.authenticationToken,
   });
 
   return output;
