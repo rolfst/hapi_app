@@ -1,6 +1,5 @@
 const R = require('ramda');
 const Promise = require('bluebird');
-const Sequelize = require('sequelize');
 const createError = require('../../../../shared/utils/create-error');
 const networkRepository = require('../../../core/repositories/network');
 const teamRepository = require('../../../core/repositories/team');
@@ -238,23 +237,13 @@ const get = async (payload, message) => {
 const markAsSeen = async (payload, message) => {
   logger.debug('Marking object(s) as read', { payload, message });
 
-  try {
-    const createdRecords = await Promise.map(payload.ids, (id) =>
-      objectSeenRepository.create({
-        objectId: id,
-        userId: message.credentials.id,
-      }));
+  const createdRecords = await Promise.map(payload.ids, (id) =>
+    objectSeenRepository.create({
+      objectId: id,
+      userId: message.credentials.id,
+    }, { ignore: true }));
 
-    return R.pipe(R.pluck('objectId'), R.reject(R.isNil))(createdRecords);
-  } catch (err) {
-    if (err instanceof Sequelize.UniqueConstraintError) {
-      throw createError(50001, 'You cannot read the same object twice ;).');
-    } else if (err instanceof Sequelize.ForeignKeyConstraintError) {
-      throw createError(422, 'Payload containing non-existing object ids.');
-    }
-
-    throw err;
-  }
+  return R.pipe(R.pluck('objectId'), R.reject(R.isNil))(createdRecords);
 };
 
 exports.count = count;

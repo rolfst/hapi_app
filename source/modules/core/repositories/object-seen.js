@@ -8,12 +8,13 @@ const createDomainObject = require('../models/object-seen');
  * @param {object} attributes - Object containing the attributes
  * @param {string} attributes.userId - The id of the user that viewed the object
  * @param {string} attributes.objectId - The id of object that has been viewed
+ * @param {object} opts - Options directly passed to the model
  * @method create
  * @return {external:Promise.<Object>} {@link module:modules/feed~Object}
  */
-const create = async (attributes) => {
+const create = async (attributes, opts = {}) => {
   const whitelist = ['userId', 'objectId'];
-  const result = await ObjectSeen.create(R.pick(whitelist, attributes));
+  const result = await ObjectSeen.create(R.pick(whitelist, attributes), opts);
 
   return createDomainObject(result);
 };

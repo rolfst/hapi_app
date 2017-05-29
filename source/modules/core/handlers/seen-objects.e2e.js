@@ -55,25 +55,24 @@ describe('Handler: Seen objects', () => {
     assert.deepEqual(result.data, idsToMark);
   });
 
-  it('should fail when marking already seen objects', async () => {
+  it('should not fail when marking already seen objects', async () => {
     const idsToMark = [
       createdMessages[0].id,
       createdMessages[1].id,
     ];
 
-    const { statusCode, result } = await postRequest('/v2/seen_objects', {
+    const { statusCode } = await postRequest('/v2/seen_objects', {
       ids: idsToMark,
     }, admin.token);
 
-    assert.equal(statusCode, 403);
-    assert.equal(result.error_code, '50001');
+    assert.equal(statusCode, 200);
   });
 
-  it('should fail when passing non-existing object ids', async () => {
+  it('should not fail when passing non-existing object ids', async () => {
     const { statusCode } = await postRequest('/v2/seen_objects', {
       ids: [0],
     }, admin.token);
 
-    assert.equal(statusCode, 422);
+    assert.equal(statusCode, 200);
   });
 });
