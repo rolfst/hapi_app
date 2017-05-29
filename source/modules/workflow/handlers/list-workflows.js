@@ -21,9 +21,18 @@ module.exports = async (req, reply) => {
       throw createError('403');
     }
 
-    const data = await workflowService.stats(payload, message);
+    const { data, count } = await workflowService.stats(payload, message);
 
-    return reply({ data: responseUtil.toSnakeCase(data) });
+    return reply({
+      data: responseUtil.toSnakeCase(data),
+      meta: {
+        pagination: {
+          limit: payload.limit,
+          offset: payload.offset,
+          total_count: count,
+        },
+      },
+    });
   } catch (err) {
     return reply(err);
   }
