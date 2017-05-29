@@ -137,12 +137,24 @@ const listLikes = async (payload, message) => {
  */
 const getAsObject = async (payload, message) => {
   logger.debug('Finding message', { payload, message });
-  const result = await messageRepository.findById(payload.messageId);
+  const messageResult = await messageRepository.findById(payload.messageId);
 
-  if (!result) throw createError('404');
+  if (!messageResult) throw createError('404');
+
+  let objectId = messageResult.objectId;
+
+  // organisation messages don't have an object linked in the message model
+  if (!objectId) {
+    const matchingObject = await objectService.get({
+      objectType: EObjectTypes.ORGANISATION_MESSAGE,
+      sourceId: messageResult.id,
+    });
+
+    objectId = matchingObject.id;
+  }
 
   const objectWithSourceAndChildren = await objectService.getWithSourceAndChildren({
-    objectId: result.objectId,
+    objectId,
   }, message);
 
   if (R.contains('comments', payload.include || [])) {
