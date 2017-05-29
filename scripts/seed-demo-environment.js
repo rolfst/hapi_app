@@ -9,28 +9,62 @@ const teamRepository = require('../source/modules/core/repositories/team');
 const messageService = require('../source/modules/feed/services/message');
 const commentService = require('../source/modules/feed/services/comment');
 const flexchangeService = require('../source/modules/flexchange/services/flexchange');
+const privateMessageService = require('../source/modules/chat/v2/services/private-message');
+const conversationService = require('../source/modules/chat/v2/services/conversation');
 
 const USERS_BLUEPRINT = require('../seeds/users');
-const SUPERMARKT_BLUEPRINT = require('../seeds/organisation');
+const SUPERMARKT_BLUEPRINT = require('../seeds/organisation-retail');
+const RESTAURANT_BLUEPRINT = require('../seeds/organisation-horeca');
+const PRIVATE_MESSAGE_BLUEPRINT = require('../seeds/private-messages');
 
-const main = async (organisationBlueprint) => {
-  await testHelpers.cleanAll();
+const findUserBlueprint = (email) => R.find(R.propEq('email', email), USERS_BLUEPRINT);
 
-  const users = await Promise.map(USERS_BLUEPRINT, (user) => userRepository.createUser({
+const seedUsers = async () => {
+  const createdUsers = await Promise.map(USERS_BLUEPRINT, (user) => userRepository.createUser({
     username: user.email,
     email: user.email,
     firstName: user.firstName,
     lastName: user.lastName,
     phoneNum: null,
     dateOfBirth: null,
+    profileImg: user.profileImg || null,
     password: '1337%Demo',
   }));
 
-  const findUser = (email) => R.find(R.propEq('email', email), users);
-  const findUserBlueprint = (email) => R.find(R.propEq('email', email), USERS_BLUEPRINT);
+  return createdUsers.reduce((acc, user) => {
+    acc[user.email] = user;
+
+    return acc;
+  }, {});
+};
+
+const seedPrivateMessages = async (usersByEmail) => {
+  // Create private messages
+  await Promise.map(PRIVATE_MESSAGE_BLUEPRINT, async (privateMessageFromBlueprint) => {
+    return conversationService.create({
+      type: 'PRIVATE',
+      participantIds: [usersByEmail[privateMessageFromBlueprint.participants[1]].id],
+    }, {
+      credentials: usersByEmail[privateMessageFromBlueprint.participants[0]],
+    }).then((createdConversation) => {
+      return Promise.map(privateMessageFromBlueprint.messages, async (message) => {
+        return privateMessageService.create({
+          conversationId: createdConversation.id,
+          text: message.text,
+        }, { credentials: usersByEmail[message.creator] });
+      });
+    });
+  });
+};
+
+const seedOrganisation = async (organisationBlueprint, usersByEmail) => {
   const roleForOrganisation = (email) => {
     return R.contains(email, organisationBlueprint.admins) ? 'ADMIN' : 'EMPLOYEE';
   };
+
+  const usersArray = Object.keys(usersByEmail).map((email) => {
+    return usersByEmail[email];
+  });
 
   // Create organisation
   const organisation = await organisationService.create({
@@ -38,14 +72,14 @@ const main = async (organisationBlueprint) => {
     brandIcon: null,
   });
 
-  await Promise.map(users, (user) => organisationRepository.addUser(
+  await Promise.map(usersArray, (user) => organisationRepository.addUser(
     user.id, organisation.id, roleForOrganisation(user.email), null));
 
   // Create networks with teams and users
   await Promise.map(organisationBlueprint.networks, async (networkFromBlueprint) => {
     // Create the network
     const createdNetwork = await networkService.create({
-      userId: findUser(networkFromBlueprint.admin).id,
+      userId: usersByEmail[networkFromBlueprint.admin].id,
       name: networkFromBlueprint.name,
       organisationId: organisation.id,
     });
@@ -54,12 +88,12 @@ const main = async (organisationBlueprint) => {
     await Promise.map(networkFromBlueprint.teams || [], (teamFromBlueprint) => {
       return teamRepository.create({ name: teamFromBlueprint.name, networkId: createdNetwork.id })
         .then((createdTeam) => Promise.map(teamFromBlueprint.members, (memberEmail) => {
-          return teamRepository.addUserToTeam(createdTeam.id, findUser(memberEmail).id);
+          return teamRepository.addUserToTeam(createdTeam.id, usersByEmail[memberEmail].id);
         }));
     });
 
     // Add users to network
-    await Promise.map(users, async (user) => {
+    await Promise.map(usersArray, async (user) => {
       await networkService.addUserToNetwork({
         networkId: createdNetwork.id,
         userId: user.id,
@@ -84,13 +118,13 @@ const main = async (organisationBlueprint) => {
       const createdMessageObject = await messageService.create(
         R.merge(messagePayloadFromBlueprint, {
           parentType: 'network', parentId: createdNetwork.id,
-        }), { credentials: findUser(messageFromBlueprint.creator), network: createdNetwork });
+        }), { credentials: usersByEmail[messageFromBlueprint.creator], network: createdNetwork });
 
       // Create comments for message
       await Promise.map(messageFromBlueprint.comments || [], (commentFromBlueprint) => {
         return commentService.create({
           messageId: createdMessageObject.sourceId,
-          userId: findUser(commentFromBlueprint.creator).id,
+          userId: usersByEmail[commentFromBlueprint.creator].id,
           text: commentFromBlueprint.text,
         });
       });
@@ -99,8 +133,8 @@ const main = async (organisationBlueprint) => {
       await Promise.map(messageFromBlueprint.likes || [], (likeFromBlueprint) => {
         return messageService.like({
           messageId: createdMessageObject.sourceId,
-          userId: findUser(likeFromBlueprint).id,
-        }, { credentials: findUser(likeFromBlueprint), network: createdNetwork });
+          userId: usersByEmail[likeFromBlueprint].id,
+        }, { credentials: usersByEmail[likeFromBlueprint], network: createdNetwork });
       });
     });
 
@@ -116,7 +150,7 @@ const main = async (organisationBlueprint) => {
         values: [createdNetwork.id],
         description: exchangeFromBlueprint.description || null,
       }, {
-        credentials: findUser(exchangeFromBlueprint.creator),
+        credentials: usersByEmail[exchangeFromBlueprint.creator],
         network: createdNetwork,
       });
     });
@@ -125,4 +159,12 @@ const main = async (organisationBlueprint) => {
   });
 };
 
-main(SUPERMARKT_BLUEPRINT);
+(() => {
+  testHelpers.cleanAll().then(async () => {
+    const usersByEmail = await seedUsers();
+
+    seedPrivateMessages(usersByEmail);
+    seedOrganisation(SUPERMARKT_BLUEPRINT, usersByEmail);
+    seedOrganisation(RESTAURANT_BLUEPRINT, usersByEmail);
+  });
+})();
