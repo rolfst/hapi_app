@@ -58,11 +58,9 @@ const list = async (payload, message) => {
 const listWithSourceAndChildren = async (payload, message, userId = null) => {
   logger.debug('Listing objects with sources', { payload, message });
 
-  const objects = await objectRepository.findBy(
-    { id: { $in: payload.objectIds } },
-    createOptionsFromPayload(payload),
-    userId
-    );
+  const objects = await objectRepository.findBy({
+    id: { $in: payload.objectIds },
+  }, createOptionsFromPayload(payload), userId);
 
   const promisedChildren = objectsForTypeValuePair(
     impl.findChildrenForType, sourceIdsPerType(objects));
