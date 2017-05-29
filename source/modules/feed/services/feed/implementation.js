@@ -1,6 +1,7 @@
 const R = require('ramda');
 const Promise = require('bluebird');
 const objectRepository = require('../../../core/repositories/object');
+const { EObjectTypes, EParentTypes } = require('../../../core/definitions');
 const objectService = require('../../../core/services/object');
 const messageService = require('../message');
 
@@ -68,7 +69,16 @@ const makeFeed = async (constraint, options, message) => {
     [R.T, R.identity],
   ]);
 
-  return R.map(createObjectWithIncludes, objectsWithSources);
+  const transformParentValues = (object) => R.merge(object, {
+    parentType: object.objectType === EObjectTypes.ORGANISATION_MESSAGE
+      ? EParentTypes.ORGANISATION
+      : object.parentType,
+    parentId: object.objectType === EObjectTypes.ORGANISATION_MESSAGE
+      ? object.organisationId
+      : object.parentId,
+  });
+
+  return R.map(R.pipe(createObjectWithIncludes, transformParentValues), objectsWithSources);
 };
 
 function composeSpecialisedQueryForFeed(payload, extraWhereConstraint = {}) {
