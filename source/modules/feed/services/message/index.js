@@ -161,6 +161,9 @@ const getAsObject = async (payload, message) => {
  * @param {object} payload - Object containing payload data
  * @param {string} payload.parentType - The type of parent to create the object for
  * @param {string} payload.parentId - The id of the parent
+ * @param {string} [payload.messageType] - The type of the message. Defaults to default_message.
+ * @param {string} [payload.organisationId] - The id of the organisation to send for.
+ * @param {string} [payload.networkId] - The id of the network to send for.
  * @param {string} payload.text - The text of the message
  * @param {string[]} payload.files - The id of attachments that should be associated
  * @param {string} payload.pollQuestion - The poll question
@@ -176,22 +179,23 @@ const create = async (payload, message) => {
   const parent = await objectService.getParent(R.pick(['parentType', 'parentId'], payload));
 
   const networkId = R.cond([
-    [R.propEq('type', 'organisation'), R.always(null)],
-    [R.propEq('type', 'team'), R.prop('networkId')],
-    [R.T, R.prop('id')],
+    [R.has('networkId'), R.prop('networkId')],
+    [R.propEq('type', EParentTypes.ORGANISATION), R.always(null)],
+    [R.propEq('type', EParentTypes.TEAM), R.prop('networkId')],
+    [R.T, R.always(null)],
   ])(parent);
+
+  const organisationId = R.cond([
+    [R.has('organisationId'), R.prop('organisationId')],
+    [R.propEq('parentType', EParentTypes.ORGANISATION), R.prop('parentId')],
+    [R.T, R.always(null)],
+  ])(payload);
 
   const objectType = R.cond([
     [R.always(R.has('objectType', payload)), R.always(R.prop('objectType', payload))],
     [R.propEq('type', EObjectTypes.ORGANISATION), R.always(EObjectTypes.ORGANISATION_MESSAGE)],
     [R.T, R.always('feed_message')],
   ])(parent);
-
-  const organisationId = R.cond([
-    [R.propEq('parentType', EParentTypes.ORGANISATION), R.prop('parentId')],
-    [R.has('organisationId'), R.prop('organisationId')],
-    [R.T, R.always(null)],
-  ])(payload);
 
   const parentEntity = `${payload.parentType.slice(0, 1)
       .toUpperCase()}${payload.parentType.slice(1)}`;
