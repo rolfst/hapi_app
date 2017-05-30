@@ -25,9 +25,9 @@ module.exports = {
     meta: Joi.string(),
     startDate: Joi.date().format('YYYY-MM-DD').label('start_date'),
     expirationDate: Joi.date().format('YYYY-MM-DD').label('expiration_date'),
-    triggers: Joi.array().items(triggerScheme),
+    triggers: Joi.array().items(triggerScheme).default([]),
     actions: Joi.array().items(actionScheme).min(1),
-    conditions: Joi.array().items(conditionScheme),
+    conditions: Joi.array().items(conditionScheme).default([]),
   })
     .rename('start_date', 'startDate')
     .rename('expiration_date', 'expirationDate'),

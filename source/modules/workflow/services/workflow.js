@@ -14,7 +14,7 @@ const countCommentsQuery = `
 SELECT
   w.id,
   COUNT(fc.id) AS commentsCount,
-  MAX(COALESCE(fc.created_at, 0)) AS lastCommentActivity
+  MAX(fc.created_at) AS lastCommentActivity
 FROM
   workflows w
     LEFT JOIN workflow_actions wa ON (wa.type = 'message' AND wa.workflow_id = w.id)
@@ -33,7 +33,7 @@ const countLikesQuery = `
 SELECT
   w.id,
   COUNT(l.id) AS likesCount,
-  MAX(COALESCE(l.created_at, 0)) AS lastLikeActivity
+  MAX(l.created_at) AS lastLikeActivity
 FROM
   workflows w
     LEFT JOIN workflow_actions wa ON (wa.type = 'message' AND wa.workflow_id = w.id)
@@ -540,8 +540,8 @@ const stats = async (payload) => {
     const likesCount = likesCountRes ? likesCountRes.likesCount : 0;
     const commentsCount = commentsCountRes ? commentsCountRes.commentsCount : 0;
     const lastInteraction = (() => {
-      const lastLikeActivity = R.prop('lastLikeActivity', likesCountRes);
-      const lastCommentActivity = R.prop('lastCommentActivity', commentsCountRes);
+      const lastLikeActivity = likesCountRes ? likesCountRes.lastLikeActivity : null;
+      const lastCommentActivity = commentsCountRes ? commentsCountRes.lastCommentActivity : null;
 
       if (!lastLikeActivity && !lastCommentActivity) {
         return null;

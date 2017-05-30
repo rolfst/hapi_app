@@ -173,8 +173,13 @@ const usersForParent = async (payload, message) => {
   logger.debug('Retrieving users for parent of object', { payload, message });
 
   const result = await R.cond([
+    [R.equals('organisation'), () => organisationRepository
+      .findUsers({ organisationId: payload.parentId, deletedAt: null })
+      .then(R.pluck('userId'))
+      .then(userRepository.findByIds)],
     [R.equals('network'), () => networkRepository.findUsersForNetwork(payload.parentId)],
     [R.equals('team'), () => teamRepository.findMembers(payload.parentId)],
+    [R.equals('user'), () => userRepository.findUserById(payload.parentId, null, false)],
     [R.T, R.F],
   ])(payload.parentType);
 
