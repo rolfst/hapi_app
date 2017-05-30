@@ -14,7 +14,7 @@ const countCommentsQuery = `
 SELECT
   w.id,
   COUNT(fc.id) AS commentsCount,
-  MAX(COALESCE(fc.created_at, 0)) AS lastCommentActivity
+  MAX(fc.created_at) AS lastCommentActivity
 FROM
   workflows w
     LEFT JOIN workflow_actions wa ON (wa.type = 'message' AND wa.workflow_id = w.id)
@@ -33,7 +33,7 @@ const countLikesQuery = `
 SELECT
   w.id,
   COUNT(l.id) AS likesCount,
-  MAX(COALESCE(l.created_at, 0)) AS lastLikeActivity
+  MAX(l.created_at) AS lastLikeActivity
 FROM
   workflows w
     LEFT JOIN workflow_actions wa ON (wa.type = 'message' AND wa.workflow_id = w.id)
