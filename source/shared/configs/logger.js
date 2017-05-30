@@ -10,7 +10,7 @@ exports.exportLogLevel = 'WARNING';
 exports.defaultLogLevels = {
   acceptance: 'INFO',
   ci: null,
-  development: 'DEBUG',
+  development: 'INFO',
   production: 'WARNING',
   testing: 'WARNING',
 };
