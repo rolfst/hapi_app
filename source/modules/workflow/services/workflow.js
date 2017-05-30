@@ -540,16 +540,21 @@ const stats = async (payload) => {
     const likesCount = likesCountRes ? likesCountRes.likesCount : 0;
     const commentsCount = commentsCountRes ? commentsCountRes.commentsCount : 0;
     const lastInteraction = (() => {
-      if (!likesCountRes && !commentsCountRes) return null;
+      const lastLikeActivity = R.prop('lastLikeActivity', likesCountRes);
+      const lastCommentActivity = R.prop('lastCommentActivity', commentsCountRes);
+
+      if (!lastLikeActivity && !lastCommentActivity) {
+        return null;
+      }
 
       let retVal;
 
-      if (!likesCountRes) retVal = commentsCountRes.lastCommentActivity;
-      if (!commentsCountRes) retVal = likesCountRes.lastLikeActivity;
+      if (!lastLikeActivity) retVal = lastCommentActivity;
+      if (!lastCommentActivity) retVal = lastLikeActivity;
       if (!retVal) {
-        retVal = commentsCountRes.lastCommentActivity > likesCountRes.lastLikeActivity
-          ? commentsCountRes.lastCommentActivity
-          : likesCountRes.lastLikeActivity;
+        retVal = lastCommentActivity > lastLikeActivity
+          ? lastCommentActivity
+          : lastLikeActivity;
       }
 
       return dateUtils.toISOString(retVal);
