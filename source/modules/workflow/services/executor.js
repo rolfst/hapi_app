@@ -5,7 +5,7 @@ const queryGenerator = require('./query-generator');
 const { CONCURRENT_USERS } = require('../definitions');
 
 const executeQuery = (query, replacements) => {
-  logger.info('executeQuery', { query });
+  logger.debug('executeQuery', { query });
 
   return sequelize.query(query, { type: sequelize.QueryTypes.SELECT, replacements });
 };
