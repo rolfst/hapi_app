@@ -551,7 +551,7 @@ const stats = async (payload) => {
 
       if (!lastLikeActivity) retVal = lastCommentActivity;
       if (!lastCommentActivity) retVal = lastLikeActivity;
-      if (!retVal) {
+      if (lastLikeActivity && lastCommentActivity) {
         retVal = lastCommentActivity > lastLikeActivity
           ? lastCommentActivity
           : lastLikeActivity;
