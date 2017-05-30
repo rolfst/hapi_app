@@ -540,8 +540,8 @@ const stats = async (payload) => {
     const likesCount = likesCountRes ? likesCountRes.likesCount : 0;
     const commentsCount = commentsCountRes ? commentsCountRes.commentsCount : 0;
     const lastInteraction = (() => {
-      const lastLikeActivity = R.prop('lastLikeActivity', likesCountRes);
-      const lastCommentActivity = R.prop('lastCommentActivity', commentsCountRes);
+      const lastLikeActivity = likesCountRes ? likesCountRes.lastLikeActivity : null;
+      const lastCommentActivity = commentsCountRes ? commentsCountRes.lastCommentActivity : null;
 
       if (!lastLikeActivity && !lastCommentActivity) {
         return null;
