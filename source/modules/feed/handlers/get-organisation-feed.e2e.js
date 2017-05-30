@@ -1,10 +1,10 @@
 const { assert } = require('chai');
+const R = require('ramda');
 const { getRequest } = require('../../../shared/test-utils/request');
 const testHelpers = require('../../../shared/test-utils/helpers');
 const { ERoleTypes, EObjectTypes, EParentTypes } = require('../../core/definitions');
 const { EMessageTypes } = require('../../feed/definitions');
 const messageService = require('../services/message');
-const R = require('ramda');
 
 describe('Handler: Get organisation news', () => {
   let organisationA;
@@ -43,7 +43,6 @@ describe('Handler: Get organisation news', () => {
     const createMessages = R.map((i) => messageService.create({
       parentType: 'network',
       parentId: networkA.id,
-      messageType: EMessageTypes.DEFAULT,
       text: `Network message ${i}`,
     }, { credentials: organisationAdmin }), R.range(0, 5));
 
@@ -62,11 +61,11 @@ describe('Handler: Get organisation news', () => {
         text: 'Organisation message #2',
       }, { credentials: organisationAdmin }),
       messageService.create({
-        organisationId: organisationA.id,
-        objectType: EObjectTypes.ORGANISATION_MESSAGE,
         parentType: EParentTypes.USER,
         parentId: organisationAdmin.id,
+        objectType: EObjectTypes.ORGANISATION_MESSAGE,
         text: 'Directed organisation message',
+        organisationId: organisationA.id,
       }, { credentials: organisationAdmin }),
     ]);
   });

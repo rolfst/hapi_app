@@ -57,11 +57,9 @@ const list = async (payload, message) => {
 const listWithSourceAndChildren = async (payload, message, userId = null) => {
   logger.debug('Listing objects with sources', { payload, message });
 
-  const objects = await objectRepository.findBy(
-    { id: { $in: payload.objectIds } },
-    createOptionsFromPayload(payload),
-    userId
-    );
+  const objects = await objectRepository.findBy({
+    id: { $in: payload.objectIds },
+  }, createOptionsFromPayload(payload), userId);
 
   const promisedChildren = objectsForTypeValuePair(
     impl.findChildrenForType, sourceIdsPerType(objects));
@@ -239,16 +237,13 @@ const get = async (payload, message) => {
 const markAsSeen = async (payload, message) => {
   logger.debug('Marking object(s) as read', { payload, message });
 
-  const createdRecords = await Promise.map(payload.ids, (id) => {
-    return objectSeenRepository
-      .create({
-        objectId: id,
-        userId: message.credentials.id,
-      })
-      .catch(() => {}); // We swallow errors since we only return seen object ids anyway
-  });
+  const createdRecords = await Promise.map(payload.ids, (id) =>
+    objectSeenRepository.create({
+      objectId: id,
+      userId: message.credentials.id,
+    }, { ignore: true }));
 
-  return R.filter(R.identity(), R.pluck('objectId', createdRecords));
+  return R.pipe(R.pluck('objectId'), R.reject(R.isNil))(createdRecords);
 };
 
 exports.count = count;
