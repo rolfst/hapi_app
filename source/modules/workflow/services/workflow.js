@@ -10,35 +10,57 @@ const logger = require('../../../shared/services/logger')('workflow/service');
 
 const isNullOrEmpty = R.either(R.isEmpty, R.isNil);
 
-const workflowSeenCountQuery = `
+const countCommentsQuery = `
 SELECT
   w.id,
-  CASE
-    WHEN NOT o_org.id IS NULL
-      THEN COUNT(os_org.id)
-  WHEN NOT o_user.id IS NULL
-      THEN COUNT(os_user.id)
-  END seenCount,
-  COUNT(fc.id) commentsCount,
-  COUNT(l.id) likesCount,
-  CASE
-    WHEN NOT fc.updated_at IS NULL AND NOT l.created_at IS NULL
-      THEN GREATEST(fc.updated_at, l.created_at)
-  WHEN NOT fc.updated_at IS NULL
-      THEN MAX(fc.updated_at)
-  WHEN NOT l.created_at IS NULL
-      THEN MAX(l.created_at)
-  ELSE NULL
-  END lastInteraction
+  COUNT(fc.id) AS commentsCount,
+  MAX(COALESCE(fc.created_at, 0)) AS lastCommentActivity
 FROM
   workflows w
-  LEFT JOIN workflow_actions wa ON (wa.type = 'message' AND wa.workflow_id = w.id)
-  LEFT JOIN objects o_org ON (o_org.object_type = 'organisation_message' AND o_org.parent_type = 'organisation' AND o_org.source_id = wa.source_id)
-  LEFT JOIN object_seen os_org ON (os_org.object_id = o_org.id)
-  LEFT JOIN objects o_user ON (o_user.object_type = 'organisation_message' AND o_user.parent_type = 'user' AND o_user.source_id = wa.source_id)
-  LEFT JOIN object_seen os_user ON (os_user.object_id = o_user.id)
-  LEFT JOIN feed_comments fc ON (fc.message_id = wa.source_id)
-  LEFT JOIN likes l ON (l.message_id = wa.source_id)
+    LEFT JOIN workflow_actions wa ON (wa.type = 'message' AND wa.workflow_id = w.id)
+    LEFT JOIN feed_comments fc ON (fc.message_id = wa.source_id)
+WHERE
+      w.organisation_id = :organisationId
+  AND w.id IN (:workflowIds)
+  AND NOT w.id IS NULL
+  AND NOT wa.id IS NULL
+GROUP BY
+  w.id
+;
+`;
+
+const countLikesQuery = `
+SELECT
+  w.id,
+  COUNT(l.id) AS likesCount,
+  MAX(COALESCE(l.created_at, 0)) AS lastLikeActivity
+FROM
+  workflows w
+    LEFT JOIN workflow_actions wa ON (wa.type = 'message' AND wa.workflow_id = w.id)
+    LEFT JOIN likes l ON (l.message_id = wa.source_id)
+WHERE
+      w.organisation_id = :organisationId
+  AND w.id IN (:workflowIds)
+  AND NOT w.id IS NULL
+  AND NOT wa.id IS NULL
+GROUP BY
+  w.id
+;
+`;
+
+const countObjectSeen = `
+SELECT
+  w.id,
+  COUNT(os.id) seenCount
+FROM
+  workflows w
+    LEFT JOIN workflow_actions wa ON (wa.type = 'message' AND wa.workflow_id = w.id)
+    LEFT JOIN objects o ON (
+      o.object_type = 'organisation_message'
+      AND o.source_id = wa.source_id
+      AND (o.parent_type = 'organisation' OR o.parent_type = 'user')
+    )
+    LEFT JOIN object_seen os ON (os.object_id = o.id)
 WHERE
       w.organisation_id = :organisationId
   AND w.id IN (:workflowIds)
@@ -479,19 +501,34 @@ const stats = async (payload) => {
 
   const workflowIds = workFlowExecutor.pluckIds(workflows);
 
-  const [workflowStats, workflowActions] = await Promise.all([
+  const [
+    workflowCommentCounts,
+    workflowLikeCounts,
+    workflowSeenCounts,
+    workflowActions,
+  ] = await Promise.all([
     workFlowExecutor.executeQuery(
-      workflowSeenCountQuery,
+      countCommentsQuery,
+      { workflowIds, organisationId: payload.organisationId }
+    ),
+    workFlowExecutor.executeQuery(
+      countLikesQuery,
+      { workflowIds, organisationId: payload.organisationId }
+    ),
+    workFlowExecutor.executeQuery(
+      countObjectSeen,
       { workflowIds, organisationId: payload.organisationId }
     ),
     workFlowRepo.findAllActions({ $in: workflowIds }),
   ]);
 
-  const findStats = (workflowId) => R.find(R.propEq('id', workflowId), workflowStats);
+  const findIdInArray = (id, arr) => R.find(R.propEq('id', id), arr);
   const findActions = (workflowId) => R.filter(R.propEq('workflowId', workflowId), workflowActions);
 
   const addExtraData = (workflow) => {
-    const wStats = findStats(workflow.id);
+    const commentsCountRes = findIdInArray(workflow.id, workflowCommentCounts);
+    const likesCountRes = findIdInArray(workflow.id, workflowLikeCounts);
+    const seenCountRes = findIdInArray(workflow.id, workflowSeenCounts);
     const actions = findActions(workflow.id);
 
     let reachCount = null;
@@ -499,11 +536,29 @@ const stats = async (payload) => {
       reachCount = workflow.meta.reachCount;
     }
 
-    const seenCount = wStats ? wStats.seenCount : 0;
-    const likesCount = wStats ? wStats.likesCount : 0;
-    const commentsCount = wStats ? wStats.commentsCount : 0;
-    const lastInteraction =
-      wStats && wStats.lastInteraction ? dateUtils.toISOString(wStats.lastInteraction) : null;
+    const seenCount = seenCountRes ? seenCountRes.seenCount : 0;
+    const likesCount = likesCountRes ? likesCountRes.likesCount : 0;
+    const commentsCount = commentsCountRes ? commentsCountRes.commentsCount : 0;
+    const lastInteraction = (() => {
+      const lastLikeActivity = R.prop('lastLikeActivity', likesCountRes);
+      const lastCommentActivity = R.prop('lastCommentActivity', commentsCountRes);
+
+      if (!lastLikeActivity && !lastCommentActivity) {
+        return null;
+      }
+
+      let retVal;
+
+      if (!lastLikeActivity) retVal = lastCommentActivity;
+      if (!lastCommentActivity) retVal = lastLikeActivity;
+      if (lastLikeActivity && lastCommentActivity) {
+        retVal = lastCommentActivity > lastLikeActivity
+          ? lastCommentActivity
+          : lastLikeActivity;
+      }
+
+      return dateUtils.toISOString(retVal);
+    })();
 
     return R.merge(workflow, {
       reachCount,
