@@ -94,7 +94,7 @@ describe('Workflow worker: implementation', () => {
     assert(createMessageSpy.calledWith(R.merge(workflow.actions[0].meta, {
       organisationId: parseInt(organisation.id, 10),
       messageType: EMessageTypes.ORGANISATION,
-    }), { credentials: { id: parseInt(admin.id, 10) } }));
+    }), { credentials: { id: parseInt(admin.id, 10) }, network: { id: 0 } }));
 
     const createdMessageId = (await createMessageSpy.returnValues[0]).id;
 
@@ -134,7 +134,7 @@ describe('Workflow worker: implementation', () => {
     assert(createMessageSpy.calledWith(R.merge(workflow.actions[0].meta, {
       organisationId: parseInt(organisation.id, 10),
       messageType: EMessageTypes.ORGANISATION,
-    }), { credentials: { id: parseInt(admin.id, 10) } }));
+    }), { credentials: { id: parseInt(admin.id, 10) }, network: { id: 0 } }));
 
     const createdMessageId = (await createMessageSpy.returnValues[0]).id;
 
