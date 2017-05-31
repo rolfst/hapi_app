@@ -1,0 +1,39 @@
+module.exports = (brandingOptions) => {
+  return [{
+    firstName: 'Sandra',
+    lastName: 'Dijkshoorn',
+    email: `organisatiebeheerder@${brandingOptions.mailExtension}`,
+    roleType: 'ADMIN',
+    profileImg: 'organisatiebeheerder-1.jpg',
+  }, {
+    firstName: 'Johan',
+    lastName: 'Kools',
+    email: `beheerder@${brandingOptions.mailExtension}`,
+    roleType: 'ADMIN',
+    profileImg: 'beheerder-1.jpg',
+  }, {
+    firstName: 'Amber',
+    lastName: 'Berends',
+    email: `beheerder-2@${brandingOptions.mailExtension}`,
+    roleType: 'ADMIN',
+    profileImg: 'beheerder-2.jpg',
+  }, {
+    firstName: 'Piet',
+    lastName: 'Swinkels',
+    email: `medewerker@${brandingOptions.mailExtension}`,
+    roleType: 'EMPLOYEE',
+    profileImg: 'medewerker-1.jpg',
+  }, {
+    firstName: 'Jantje',
+    lastName: 'Kaffa',
+    email: `medewerker-2@${brandingOptions.mailExtension}`,
+    roleType: 'EMPLOYEE',
+    profileImg: 'medewerker-2.jpg',
+  }, {
+    firstName: 'Thomas',
+    lastName: 'Adriaanse',
+    email: `medewerker-3@${brandingOptions.mailExtension}`,
+    roleType: 'EMPLOYEE',
+    profileImg: 'medewerker-3.jpg',
+  }];
+};
