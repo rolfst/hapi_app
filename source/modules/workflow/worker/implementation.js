@@ -9,9 +9,9 @@ const messageService = require('../../feed/services/message');
 const { EMessageTypes } = require('../../feed/definitions');
 const logger = require('../../../shared/services/logger')('WORKFLOW/worker/implementation');
 
-const renameKeys = R.curry((keysMap, obj) =>
-  R.reduce((acc, key) => R.assoc(keysMap[key] || key, obj[key], acc), {}, R.keys(obj))
-);
+const renameKeys = (keysMap, obj) => {
+  return R.reduce((acc, key) => R.assoc(keysMap[key] || key, obj[key], acc), {}, R.keys(obj));
+};
 
 const fetchDueWorkflowIdsQuery = `
 SELECT
