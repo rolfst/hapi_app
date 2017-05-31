@@ -66,7 +66,7 @@ const assertUserIsAdminInOrganisation = async (organisationId, userId) => {
 const create = (payload, message) => {
   logger.debug('Creating organisation', { payload, message });
 
-  return organisationRepository.create({ name: payload.name });
+  return organisationRepository.create(R.pick(['name', 'brandIcon'], payload));
 };
 
 /**
