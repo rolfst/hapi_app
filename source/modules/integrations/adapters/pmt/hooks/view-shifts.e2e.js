@@ -21,20 +21,18 @@ describe('PMT view shifts hook', () => {
       .reply(200, stubs.shifts_found_200);
 
     const actual = await hook(testHelper.DEFAULT_NETWORK_EXTERNALID, TOKEN)(knownId);
-    const expected = blueprints.found_shift;
 
-    assert.deepEqual(actual, expected);
+    assert.deepEqual(actual, blueprints.found_shift);
   });
 
-  it('should return undefined when wrong id provided', async () => {
+  it('should return null when wrong id provided', async () => {
     nock(testHelper.DEFAULT_NETWORK_EXTERNALID)
       .get(`${ENDPOINT}/${TODAY}`)
       .reply(200, stubs.shifts_found_200);
 
     const actual = await hook(testHelper.DEFAULT_NETWORK_EXTERNALID, TOKEN)();
-    const expected = undefined;
 
-    assert.deepEqual(actual, expected);
+    assert.deepEqual(actual, null);
   });
 
   // can't force to fail on no token provided
