@@ -7,5 +7,7 @@ module.exports = (baseStoreUrl, token) => async () => {
   const endpoint = `${baseStoreUrl}/me/shifts/${date}`;
   const result = await client.get(endpoint, token);
 
+  if (!result.payload.shifts) return [];
+
   return result.payload.shifts.map(shiftSerializer);
 };

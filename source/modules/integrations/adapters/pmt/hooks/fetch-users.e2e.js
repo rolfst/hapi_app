@@ -20,4 +20,14 @@ describe('PMT fetch users hook', () => {
 
     assert.deepEqual(actual, expected);
   });
+
+  it('should return empty array on 500 error', async () => {
+    nock(testHelper.DEFAULT_NETWORK_EXTERNALID)
+      .get(ENDPOINT)
+      .reply('500');
+
+    const actual = await hook(testHelper.DEFAULT_NETWORK_EXTERNALID)();
+
+    assert.deepEqual(actual, []);
+  });
 });
