@@ -49,22 +49,32 @@ const update = (id, attributes) => {
     .then(createWorkFlowModel);
 };
 
-const destroy = (id) =>
-  WorkFlow.destroy({ where: { id } });
+const destroy = (id) => WorkFlow.destroy({ where: { id } });
 
-const count = (workflowIdsOrWhereConstraints) =>
-  WorkFlow.count({ where: buildWhereConstraint(workflowIdsOrWhereConstraints) });
+const count = async (workflowIdsOrWhereConstraints) => {
+  const [totalCount, pendingCount] = await Promise.all([
+    WorkFlow.count({ where: buildWhereConstraint(workflowIdsOrWhereConstraints) }),
+    WorkFlow.count({ where: R.merge(
+      buildWhereConstraint(workflowIdsOrWhereConstraints),
+      { done: null }
+    ) }),
+  ]);
 
-const findAll = (workflowIdsOrWhereConstraints, options) => {
-  return WorkFlow
+  return {
+    total_count: totalCount,
+    pending_count: pendingCount,
+    send_count: totalCount - pendingCount,
+  };
+};
+
+const findAll = (workflowIdsOrWhereConstraints, options) =>
+  WorkFlow
     .findAll(R.merge(options, { where: buildWhereConstraint(workflowIdsOrWhereConstraints) }))
     .then(R.map(createWorkFlowModel));
-};
 
-const findOne = (workflowIdOrWhereConstraints) => {
-  return findAll(buildWhereConstraint(workflowIdOrWhereConstraints))
+const findOne = (workflowIdOrWhereConstraints) =>
+  findAll(buildWhereConstraint(workflowIdOrWhereConstraints))
     .then(headOrNull);
-};
 
 const findAllWithData = async (workflowIdsOrWhereConstraints) => {
   const workFlows = await WorkFlow
@@ -88,10 +98,9 @@ const findAllWithData = async (workflowIdsOrWhereConstraints) => {
   return R.map(addData, workFlows);
 };
 
-const findOneWithData = (workflowIdOrWhereConstraints) => {
-  return findAllWithData(buildWhereConstraint(workflowIdOrWhereConstraints))
+const findOneWithData = (workflowIdOrWhereConstraints) =>
+  findAllWithData(buildWhereConstraint(workflowIdOrWhereConstraints))
     .then(headOrNull);
-};
 
 const createTrigger = (attributes) => {
   const whitelist = ['workflowId', 'type', 'value'];
@@ -121,14 +130,12 @@ const updateTrigger = (id, attributes) => {
     .then(createTriggerModel);
 };
 
-const destroyTrigger = (id) =>
-  Trigger.destroy({ where: { id } });
+const destroyTrigger = (id) => Trigger.destroy({ where: { id } });
 
-const findOneTrigger = (triggerIdOrWhereConstraints) => {
-  return Trigger
+const findOneTrigger = (triggerIdOrWhereConstraints) =>
+  Trigger
     .findOne({ where: buildWhereConstraint(triggerIdOrWhereConstraints) })
     .then(createTriggerModel);
-};
 
 const createCondition = (attributes) => {
   const whitelist = ['workflowId', 'field', 'operator', 'value'];
@@ -158,14 +165,12 @@ const updateCondition = (id, attributes) => {
     .then(createConditionModel);
 };
 
-const destroyCondition = (id) =>
-  Condition.destroy({ where: { id } });
+const destroyCondition = (id) => Condition.destroy({ where: { id } });
 
-const findOneCondition = (conditionIdOrWhereConstraints) => {
-  return Condition
+const findOneCondition = (conditionIdOrWhereConstraints) =>
+  Condition
     .findOne({ where: buildWhereConstraint(conditionIdOrWhereConstraints) })
     .then(createConditionModel);
-};
 
 const createAction = (attributes) => {
   const whitelist = ['workflowId', 'type', 'meta', 'sourceId'];
@@ -195,33 +200,27 @@ const updateAction = (id, attributes) => {
     .then(createActionModel);
 };
 
-const destroyAction = (id) =>
-  Action.destroy({ where: { id } });
+const destroyAction = (id) => Action.destroy({ where: { id } });
 
-const findOneAction = (actionIdOrWhereConstraints) => {
-  return Action
+const findOneAction = (actionIdOrWhereConstraints) =>
+  Action
     .findOne({ where: buildWhereConstraint(actionIdOrWhereConstraints) })
     .then(createActionModel);
-};
 
-const findAllActions = (workflowId) => {
-  return Action
+const findAllActions = (workflowId) =>
+  Action
     .findAll({ where: { workflowId } })
     .then(R.map(createActionModel));
-};
 
-const deleteAll = () => {
-  return Promise.all([
-    WorkFlow
-      .findAll()
-      .then(pluckIds)
-      .then(completeQueryOptionsPipe)
-      .then(WorkFlow.destroy),
-  ]);
-};
+const deleteAll = () => Promise.all([
+  WorkFlow
+    .findAll()
+    .then(pluckIds)
+    .then(completeQueryOptionsPipe)
+    .then(WorkFlow.destroy),
+]);
 
-const markUserHandled = (workflowId, userId) =>
-  ActionDone.create({ workflowId, userId });
+const markUserHandled = (workflowId, userId) => ActionDone.create({ workflowId, userId });
 
 const findHandledUsers = (workflowId) =>
   ActionDone

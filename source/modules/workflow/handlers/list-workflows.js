@@ -1,3 +1,4 @@
+const R = require('ramda');
 const responseUtil = require('../../../shared/utils/response');
 const createServicePayload = require('../../../shared/utils/create-service-payload');
 const workflowService = require('../services/workflow');
@@ -21,16 +22,15 @@ module.exports = async (req, reply) => {
       throw createError('403');
     }
 
-    const { data, count } = await workflowService.stats(payload, message);
+    const { data, counts } = await workflowService.stats(payload, message);
 
     return reply({
       data: responseUtil.toSnakeCase(data),
       meta: {
-        pagination: {
+        pagination: R.merge({
           limit: payload.limit,
           offset: payload.offset,
-          total_count: count,
-        },
+        }, counts),
       },
     });
   } catch (err) {
