@@ -9,6 +9,10 @@ const messageService = require('../../feed/services/message');
 const { EMessageTypes } = require('../../feed/definitions');
 const logger = require('../../../shared/services/logger')('WORKFLOW/worker/implementation');
 
+const renameKeys = R.curry((keysMap, obj) =>
+  R.reduce((acc, key) => R.assoc(keysMap[key] || key, obj[key], acc), {}, R.keys(obj))
+);
+
 const fetchDueWorkflowIdsQuery = `
 SELECT
   DISTINCT w.id
@@ -93,10 +97,19 @@ const prepareWorkflowData = async (workflow) => {
     if (action.sourceId) return;
 
     if (action.type === EActionTypes.MESSAGE) {
-      const createdMessage = await messageService.createWithoutObject(R.merge(action.meta, {
+      const messageData = R.merge(renameKeys({
+        poll_question: 'pollQuestion',
+        poll_options: 'pollOptions',
+      }, action.meta), {
         organisationId: workflow.organisationId,
         messageType: EMessageTypes.ORGANISATION,
-      }), { credentials: { id: workflow.userId } });
+      });
+
+      const createdMessage = await messageService
+        .createWithoutObject(messageData, {
+          credentials: { id: workflow.userId },
+          network: { id: 0 },
+        });
 
       action.sourceId = createdMessage.id;
 
