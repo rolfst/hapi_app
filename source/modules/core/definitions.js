@@ -15,6 +15,9 @@ exports.EUserFields = {
 };
 
 exports.EObjectTypes = {
+  ATTACHMENT: 'attachment', // Virtual
+  POLL: 'poll', // Virtual
+  PRIVATE_MESSAGE: 'private_message',
   ORGANISATION_MESSAGE: 'organisation_message',
   FEED_MESSAGE: 'feed_message',
   ORGANISATION: 'organisation',
