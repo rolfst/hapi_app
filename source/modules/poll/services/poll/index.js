@@ -54,7 +54,7 @@ const get = async (payload, message) => {
 /**
  * Creates a poll
  * @param {object} payload - Object containing payload data
- * @param {string} payload.networkId - Id of the network the poll is placed in
+ * @param {string} payload.messageId - Id of the message the poll is placed in
  * @param {array} payload.options - Poll options to create
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method create
@@ -64,8 +64,7 @@ const create = async (payload, message) => {
   logger.debug('Creating poll', { payload, message });
 
   const poll = await pollRepository.create({
-    networkId: payload.networkId,
-    userId: message.credentials.id,
+    messageId: payload.messageId,
     question: payload.question,
   });
 

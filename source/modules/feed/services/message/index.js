@@ -3,6 +3,7 @@ const Promise = require('bluebird');
 const createError = require('../../../../shared/utils/create-error');
 const attachmentService = require('../../../attachment/services/attachment');
 const objectService = require('../../../core/services/object');
+const pollService = require('../../../poll/services/poll');
 const FeedDispatcher = require('../../dispatcher');
 const messageRepository = require('../../repositories/message');
 const likeRepository = require('../../repositories/like');
@@ -260,8 +261,11 @@ const create = async (payload, message) => {
   }
 
   if (checkPayload('pollOptions') && checkPayload('pollQuestion')) {
-    await impl.createPollResource(createdMessage, message)(
-      R.pick(['pollOptions', 'pollQuestion'], payload));
+    await pollService.create({
+      messageId: createdMessage.id,
+      options: payload.pollOptions,
+      question: payload.pollQuestion,
+    }, message);
   }
 
   const objectWithSourceAndChildren = await objectService.getWithSourceAndChildren({
@@ -333,8 +337,11 @@ const createWithoutObject = async (payload, message) => {
   }
 
   if (checkPayload('pollOptions') && checkPayload('pollQuestion')) {
-    await impl.createPollResource(createdMessage, message)(
-      R.pick(['pollOptions', 'pollQuestion'], payload));
+    await pollService.create({
+      messageId: createdMessage.id,
+      options: payload.pollOptions,
+      question: payload.pollQuestion,
+    }, message);
   }
 
   return createdMessage;

@@ -106,10 +106,7 @@ const prepareWorkflowData = async (workflow) => {
       });
 
       const createdMessage = await messageService
-        .createWithoutObject(messageData, {
-          credentials: { id: workflow.userId },
-          network: { id: 0 },
-        });
+        .createWithoutObject(messageData, { credentials: { id: workflow.userId } });
 
       action.sourceId = createdMessage.id;
 

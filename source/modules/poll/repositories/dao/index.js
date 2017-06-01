@@ -3,10 +3,6 @@ const PollModel = require('./poll');
 const PollOptionModel = require('./poll-option');
 const PollVoteModel = require('./poll-vote');
 
-PollModel.belongsTo(UserModel, {
-  foreignKey: 'user_id',
-});
-
 PollModel.hasMany(PollOptionModel, {
   foreignKey: 'poll_id',
   as: 'Options',

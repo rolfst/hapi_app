@@ -2,14 +2,17 @@ const { assert } = require('chai');
 const R = require('ramda');
 const testHelper = require('../../../../shared/test-utils/helpers');
 const pollService = require('./index');
+const messageService = require('../../../feed/services/message');
 
-describe('Service: Poll', () => {
+describe.only('Service: Poll', () => {
   let employee;
   let flexAppeal;
   let pmt;
   let message;
   let defaultPayload;
   let defaultVotePayload;
+
+  let createdMessage;
 
   before(async () => {
     const [admin, user] = await Promise.all([
@@ -29,8 +32,13 @@ describe('Service: Poll', () => {
     flexAppeal = await testHelper.createNetwork({ userId: admin.id, name: 'flexappeal' });
 
     message = { credentials: { id: employee.id } };
+
+    createdMessage = await messageService.createWithoutObject({
+      text: 'meh',
+    }, { credentials: admin })
+
     defaultPayload = {
-      networkId: flexAppeal.id,
+      messageId: createdMessage.id,
       question: 'help in what way?',
       options: ['Option A', 'Option B', 'Option C'],
     };
@@ -44,8 +52,7 @@ describe('Service: Poll', () => {
     const actual = poll;
 
     assert.equal(actual.type, 'poll');
-    assert.equal(actual.networkId, flexAppeal.id);
-    assert.equal(actual.userId, employee.id);
+    assert.equal(actual.messageId, createdMessage.id);
     assert.equal(actual.totalVoteCount, 0);
     assert.equal(actual.question, 'help in what way?');
     assert.lengthOf(actual.options, 3);
