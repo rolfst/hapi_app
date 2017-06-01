@@ -27,11 +27,13 @@ module.exports = async (req, reply) => {
     return reply({
       data: responseUtil.toSnakeCase(data),
       meta: {
-        pagination: R.merge({
+        pagination: {
           limit: payload.limit,
           offset: payload.offset,
-          test: 'asd',
-        }, counts),
+          total_count: counts.total_count,
+        },
+        sent_count: counts.sent_count,
+        pending_count: counts.pending_count,
       },
     });
   } catch (err) {
