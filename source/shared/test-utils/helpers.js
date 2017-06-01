@@ -458,10 +458,7 @@ async function cleanAll() {
   await objectSeenRepo.deleteAll();
   await activityRepo.deleteAll();
   await integrationRepo.deleteAll();
-  await pollRepo.deleteAll()
-    .catch((err) => {
-      console.log(err);
-    });
+  await pollRepo.deleteAll();
 }
 
 exports.DEFAULT_INTEGRATION = DEFAULT_INTEGRATION;

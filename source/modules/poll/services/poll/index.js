@@ -89,6 +89,8 @@ const vote = async (payload, message) => {
 
   await impl.assertThatPollExists(payload.pollId);
 
+  await pollRepository.clearVotes(payload.pollId, message.credentials.id);
+
   const voteForOption = (optionId) => pollRepository.vote({
     optionId, pollId: payload.pollId, userId: message.credentials.id });
 
