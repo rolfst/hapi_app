@@ -30,6 +30,7 @@ module.exports = async (req, reply) => {
         pagination: R.merge({
           limit: payload.limit,
           offset: payload.offset,
+          test: 'asd',
         }, counts),
       },
     });
