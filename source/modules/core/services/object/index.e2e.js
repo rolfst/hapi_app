@@ -182,6 +182,8 @@ describe('Service: Object', () => {
         parentType: 'network',
         parentId: network.id,
         text: 'Do you want to join us tomorrow?',
+        pollQuestion: 'Wat wil je eten?',
+        pollOptions: ['Banaan', 'Aardbei'],
       }, { network, credentials: admin });
 
       const actual = await objectService.listWithSourceAndChildren({
@@ -192,18 +194,26 @@ describe('Service: Object', () => {
       await objectService.remove({
         parentType: 'feed_message', parentId: createdMessageObject.sourceId });
 
-      const objectWithChildren = R.find(R.propEq('id', createdMessageObject.id), actual);
-      const objectWithoutChildren = R.find(R.propEq('id', createdMessageObject2.id), actual);
+      const objectWithAttachment = R.find(R.propEq('id', createdMessageObject.id), actual);
+      const objectWithPoll = R.find(R.propEq('id', createdMessageObject2.id), actual);
 
       Storage.upload.restore();
 
       assert.lengthOf(actual, 2);
-      assert.deepEqual(objectWithoutChildren.children, []);
-      assert.property(objectWithChildren, 'children');
-      assert.lengthOf(objectWithChildren.children, 1);
-      assert.equal(objectWithChildren.children[0].parentType, 'feed_message');
-      assert.equal(objectWithChildren.children[0].parentId, createdMessageObject.sourceId);
-      assert.equal(objectWithChildren.children[0].source.type, 'attachment');
+      assert.property(objectWithAttachment, 'children');
+      assert.lengthOf(objectWithAttachment.children, 1);
+      assert.equal(objectWithAttachment.children[0].parentType, 'feed_message');
+      assert.equal(objectWithAttachment.children[0].parentId, createdMessageObject.sourceId);
+      assert.deepEqual(
+        objectWithAttachment.children[0].source,
+        createdMessageObject.children[0].source
+      );
+
+      assert.property(objectWithPoll, 'children');
+      assert.lengthOf(objectWithPoll.children, 1);
+      assert.equal(objectWithPoll.children[0].parentType, 'feed_message');
+      assert.equal(objectWithPoll.children[0].parentId, createdMessageObject2.sourceId);
+      assert.deepEqual(objectWithPoll.children[0].source, createdMessageObject2.children[0].source);
     });
 
     it('should support object_type: private_message', async () => {
