@@ -35,7 +35,7 @@ describe('Service: Attachment', () => {
 
       assert.isDefined(actual);
       assert.equal(actual.type, 'attachment');
-      assert.property(actual, 'objectId');
+      assert.property(actual, 'messageId');
       assert.property(actual, 'path');
       assert.equal(actual.path, `https://assets.flex-appeal.nl/development/attachments/${fileName}`);
       assert.property(actual, 'createdAt');
