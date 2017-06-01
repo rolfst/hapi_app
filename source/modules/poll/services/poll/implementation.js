@@ -9,20 +9,19 @@ const createOption = R.curry((pollId, text, order) => (
 
 /**
  * Check if poll exists
- * @param {string} networkId - Id of the current network
  * @param {string} pollId - Id of the poll
  * @method assertThatPollExists
  * @return {boolean|Error}
  */
-const assertThatPollExistsAndUserHasPermission = async (networkId, pollId) => {
+const assertThatPollExists = async (pollId) => {
   const poll = await pollRepository.findById(pollId, null);
 
-  if (!poll || !networkId || networkId !== poll.networkId) {
+  if (!poll) {
     throw createError('403');
   }
 
   return true;
 };
 
-exports.assertThatPollExistsAndUserHasPermission = assertThatPollExistsAndUserHasPermission;
+exports.assertThatPollExists = assertThatPollExists;
 exports.createOption = createOption;

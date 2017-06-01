@@ -32,7 +32,7 @@ module.exports = {
           model: 'users',
           key: 'id',
         },
-        onDelete: 'cascade',
+        onDelete: 'set null',
       },
       created_at: {
         type: Sequelize.DATE,
