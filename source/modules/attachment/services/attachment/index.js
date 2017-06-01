@@ -13,6 +13,7 @@ const logger = require('../../../../shared/services/logger')('attachment/service
  * Lists selected attachments
  * @param {object} payload - Object containing payload data
  * @param {string[]} payload.attachmentIds - Ids of the attachments to get
+ * @param {object} [payload.constraint] - Pass query constraint
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method list
  * @return {external:Promise.<Attachment[]>} {@link
@@ -20,6 +21,10 @@ const logger = require('../../../../shared/services/logger')('attachment/service
  */
 const list = async (payload, message) => {
   logger.debug('Finding multiple attachments', { payload, message });
+
+  if (payload.constraint) {
+    return attachmentRepo.findBy(payload.constraint);
+  }
 
   return attachmentRepo.findBy({ id: { $in: payload.attachmentIds } });
 };
