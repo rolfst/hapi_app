@@ -101,7 +101,7 @@ const create = async (payload, message) => {
 const vote = async (payload, message) => {
   logger.debug('Voting on poll', { payload, message });
 
-  // await impl.assertThatPollExistsAndUserHasPermission(payload.networkId, payload.pollId);
+  await impl.assertThatPollExists(payload.pollId);
   await pollRepository.clearVotes(payload.pollId, message.credentials.id);
 
   const voteForOption = (optionId) => pollRepository.vote({

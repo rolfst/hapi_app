@@ -1,4 +1,3 @@
-const UserModel = require('../../../core/repositories/dao/user');
 const PollModel = require('./poll');
 const PollOptionModel = require('./poll-option');
 const PollVoteModel = require('./poll-vote');
