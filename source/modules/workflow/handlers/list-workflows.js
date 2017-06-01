@@ -21,7 +21,10 @@ module.exports = async (req, reply) => {
       throw createError('403');
     }
 
-    const { data, counts } = await workflowService.stats(payload, message);
+    const [data, counts] = await Promise.all([
+      workflowService.listWorkflows(payload, message),
+      workflowService.countWorkflows(payload, message),
+    ]);
 
     return reply({
       data: responseUtil.toSnakeCase(data),
@@ -29,10 +32,10 @@ module.exports = async (req, reply) => {
         pagination: {
           limit: payload.limit,
           offset: payload.offset,
-          total_count: counts.total_count,
+          total_count: counts.totalCount,
         },
-        sent_count: counts.sent_count,
-        pending_count: counts.pending_count,
+        sent_count: counts.sentCount,
+        pending_count: counts.pendingCount,
       },
     });
   } catch (err) {
