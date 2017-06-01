@@ -112,8 +112,8 @@ describe('Workflow handler: view workflow stats', () => {
     assert.equal(resultB.meta.pagination.limit, 1);
     assert.equal(resultB.meta.pagination.offset, 1);
     assert.equal(resultB.meta.pagination.total_count, 2);
-    assert.equal(resultB.meta.pagination.send_count, 1);
-    assert.equal(resultB.meta.pagination.pending_count, 1);
+    assert.equal(resultB.meta.send_count, 1);
+    assert.equal(resultB.meta.pending_count, 1);
 
     assert.equal(statusCodeB, 200);
     assert.isArray(resultB.data);

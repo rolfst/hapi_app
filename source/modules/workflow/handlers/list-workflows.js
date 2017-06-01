@@ -1,4 +1,3 @@
-const R = require('ramda');
 const responseUtil = require('../../../shared/utils/response');
 const createServicePayload = require('../../../shared/utils/create-service-payload');
 const workflowService = require('../services/workflow');
