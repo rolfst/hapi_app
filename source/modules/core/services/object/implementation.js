@@ -30,14 +30,41 @@ const findSourcesForType = R.curry((message, values, type) => R.cond([
   [R.equals('attachment'), () => attachmentService.list({ attachmentIds: values }, message)],
 ])(type, values));
 
-const findChildrenForType = R.curry((values, type) => R.cond([
-  [R.equals('feed_message'), () => objectRepository.findBy({
-    parentType: 'feed_message', parentId: { $in: values } })],
-  [R.equals('organisation_message'), () => objectRepository.findBy({
-    parentType: 'organisation', parentId: { $in: values } })],
-  [R.equals('private_message'), () => objectRepository.findBy({
-    parentType: 'private_message', parentId: { $in: values } })],
-])(type, values));
+const createDummyObject = (parentType, source, objectType) => ({
+  parentType,
+  source,
+  objectType,
+  id: source.messageId,
+  sourceId: source.id,
+  parentId: source.messageId,
+  createdAt: source.createdAt,
+});
+
+const findChildrenForType = (type, sourceIds, message) => {
+  switch (type) {
+    case EObjectTypes.FEED_MESSAGE:
+    case EObjectTypes.ORGANISATION_MESSAGE:
+      return Promise.all([
+        attachmentService
+          .list({ constraint: { messageId: { $in: sourceIds } } }, message)
+          .then(R.map((attachment) =>
+            createDummyObject(type, attachment, EObjectTypes.ATTACHMENT)
+          )),
+        pollService
+          .list({ constraint: { messageId: { $in: sourceIds } } }, message)
+          .then(R.map((poll) =>
+            createDummyObject(type, poll, EObjectTypes.POLL)
+          )),
+      ]).then(R.flatten);
+    case EObjectTypes.PRIVATE_MESSAGE:
+      return objectRepository.findBy({
+        parentType: type,
+        parentId: { $in: sourceIds },
+      });
+    default:
+      return [];
+  }
+};
 
 const addSourceToObject = R.curry((sources, object) =>
   // We make an exception for organisation_message otherwise we always call the feed_message
