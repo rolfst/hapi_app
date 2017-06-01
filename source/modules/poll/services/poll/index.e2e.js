@@ -4,7 +4,7 @@ const testHelper = require('../../../../shared/test-utils/helpers');
 const pollService = require('./index');
 const messageService = require('../../../feed/services/message');
 
-describe.only('Service: Poll', () => {
+describe('Service: Poll', () => {
   let employee;
   let flexAppeal;
   let pmt;
