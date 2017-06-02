@@ -63,7 +63,7 @@ const count = async (workflowIdsOrWhereConstraints) => {
   return {
     totalCount,
     pendingCount,
-    sentCount: totalCount - pendingCount,
+    processedCount: totalCount - pendingCount,
   };
 };
 
@@ -108,7 +108,7 @@ const createTrigger = (attributes) => {
   const pickedAttributes = R.pick(whitelist, attributes);
 
   if (pickedAttributes.value instanceof Date) {
-    pickedAttributes.value = dateUtils.toISOString(pickedAttributes.value);
+    pickedAttributes.value = dateUtils.toUTC(pickedAttributes.value);
   }
 
   return Trigger
@@ -122,7 +122,7 @@ const updateTrigger = (id, attributes) => {
   const pickedAttributes = R.pick(whitelist, attributes);
 
   if (pickedAttributes.value instanceof Date) {
-    pickedAttributes.value = dateUtils.toISOString(pickedAttributes.value);
+    pickedAttributes.value = dateUtils.toUTC(pickedAttributes.value);
   }
 
   return Trigger

@@ -25,7 +25,8 @@ const getIncludes = async (hasInclude, objects) => {
   const hasType = (type) => anyWithType(type, objects);
   const includes = { comments: [], likes: [] };
 
-  if (hasType('feed_message')) {
+  // TODO - verify if this works
+  if (hasType('feed_message') || hasType(EObjectTypes.ORGANISATION_MESSAGE)) {
     const messageIds = getSourceIdsForType('feed_message', objects);
 
     if (hasInclude('comments')) {

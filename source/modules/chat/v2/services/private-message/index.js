@@ -2,6 +2,7 @@ const R = require('ramda');
 const Promise = require('bluebird');
 const createError = require('../../../../../shared/utils/create-error');
 const attachmentService = require('../../../../attachment/services/attachment');
+const attachmentDefinitions = require('../../../../attachment/definitions');
 const objectService = require('../../../../core/services/object');
 const privateMessageRepository = require('../../repositories/private-message');
 const conversationRepository = require('../../repositories/conversation');
@@ -54,18 +55,13 @@ async function create(payload, message) {
   if (payload.files) {
     await attachmentService.assertAttachmentsExist({ attachmentIds: payload.files }, message);
 
-    const filesArray = R.flatten([payload.files]);
-    await Promise.map(filesArray, (attachmentId) => objectService.create({
-      networkId: null,
-      userId: message.credentials.id,
-      parentType: 'private_message',
-      parentId: createdMessage.id,
-      objectType: 'attachment',
-      sourceId: attachmentId,
-    }, message).then((createdObject) => attachmentService.update({
-      whereConstraint: { id: createdObject.sourceId },
-      attributes: { objectId: createdObject.id },
-    }, message)));
+    await Promise.map(R.flatten([payload.files]), (attachmentId) => attachmentService.update({
+      whereConstraint: { id: attachmentId },
+      attributes: {
+        parentType: attachmentDefinitions.EParentTypes.PRIVATE_MESSAGE,
+        parentId: createdMessage.id,
+      },
+    }, message));
   }
 
   const createdObject = await objectService.create(createObjectPayload(createdMessage));

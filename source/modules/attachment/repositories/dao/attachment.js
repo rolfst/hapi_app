@@ -7,6 +7,16 @@ const Attachment = model.define('Attachment', {
     field: 'message_id',
     allowNull: true,
   },
+  parentType: {
+    type: Sequelize.STRING,
+    field: 'parent_type',
+    allowNull: true,
+  },
+  parentId: {
+    type: Sequelize.INTEGER,
+    field: 'parent_id',
+    allowNull: true,
+  },
   objectId: {
     type: Sequelize.INTEGER,
     field: 'object_id',
