@@ -37,7 +37,7 @@ const findRelatedUsersForObjects = async (objects) => {
   );
 };
 
-const findRelatedUsersForObject = (object) => findRelatedUsersForObjects([object]).then(R.head);
+const findRelatedUsersForObject = (object) => findRelatedUsersForObjects([object]);
 
 /**
  * Making a feed for a network
