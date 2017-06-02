@@ -31,7 +31,7 @@ pubsub.asyncOn('exchange.created', async (payload) => {
 
   Promise.all(createObjectsForReceivers);
 
-  createdNotifier.send(exchangeReceivers, payload.exchange);
+  createdNotifier.send(exchangeReceivers, payload.exchange, network);
   Mixpanel.track(newExchangeEvent(network, exchange), credentials.id);
   Intercom.createEvent(credentials.username, 'exchange.create', intercomEventPayload);
   Intercom.incrementAttribute(credentials.username, 'created_shifts');
@@ -41,8 +41,8 @@ pubsub.asyncOn('exchange.approved', (payload) => {
   const { exchange, network, approvedUser } = payload;
 
   objectService.remove({ objectType: 'exchange', sourceId: exchange.id });
-  creatorNotifier.send(exchange);
-  substituteNotifier.send(exchange);
+  creatorNotifier.send(exchange, network);
+  substituteNotifier.send(exchange, network);
   Mixpanel.track(approveExchangeEvent(network, payload.exchange), approvedUser.id);
   Intercom.incrementAttribute(approvedUser.email, 'exchanged_shifts');
 });

@@ -20,7 +20,7 @@ const createNotification = (exchange, approvedUser) => {
   };
 };
 
-const send = async (id) => {
+const send = async (id, network) => {
   const exchanges = await exchangeRepo.findAllBy({ id });
   const exchange = R.head(exchanges);
   const [creator, approvedUser] = await Promise.all([
@@ -29,7 +29,7 @@ const send = async (id) => {
   ]);
   const notification = createNotification(exchange, approvedUser);
 
-  return notifier.send([creator], notification);
+  return notifier.send([creator], notification, network.id, network.organisationId);
 };
 
 exports.createNotification = createNotification;
