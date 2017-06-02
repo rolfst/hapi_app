@@ -2,6 +2,7 @@ const R = require('ramda');
 const Promise = require('bluebird');
 const createError = require('../../../../shared/utils/create-error');
 const attachmentService = require('../../../attachment/services/attachment');
+const attachmentDefinitions = require('../../../attachment/definitions');
 const objectService = require('../../../core/services/object');
 const pollService = require('../../../poll/services/poll');
 const FeedDispatcher = require('../../dispatcher');
@@ -243,7 +244,7 @@ const create = async (payload, message) => {
       attributes: {
         messageId: createdMessage.id,
         parentId: createdMessage.id,
-        parentType: payload.messageType,
+        parentType: payload.messageType || attachmentDefinitions.EParentTypes.FEED_MESSAGE,
       },
     }));
   }
