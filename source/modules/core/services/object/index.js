@@ -63,7 +63,7 @@ const listWithSourceAndChildren = async (payload, message, userId = null) => {
 
   const promisedChildren = R.mapObjIndexed(
     (sourceIds, type) => impl.findChildrenForType(type, sourceIds, message),
-    sourceIdsPerType(objects)git add 
+    sourceIdsPerType(objects)
   );
 
   const children = await Promise.props(promisedChildren)
