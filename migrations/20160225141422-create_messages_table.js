@@ -27,7 +27,7 @@ module.exports = {
       },
       created_by: {
         type: Sequelize.INTEGER.UNSIGNED,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'users',
           key: 'id',
