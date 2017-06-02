@@ -9,10 +9,9 @@ const ENDPOINT = '/departments';
 
 describe('PMT fetch teams hook', () => {
   nock.disableNetConnect();
+  const credentials = { username: 'validUsername', password: 'validPassword' };
 
   it('should succeed when credentials are correct', async () => {
-    const credentials = { username: 'validUsername', password: 'validPassword' };
-
     nock(testHelper.DEFAULT_NETWORK_EXTERNALID)
       .get(ENDPOINT)
       .reply('200', stubs.departments_200);
@@ -21,5 +20,15 @@ describe('PMT fetch teams hook', () => {
     const expected = blueprints.teams;
 
     assert.deepEqual(actual, expected);
+  });
+
+  it('should return empty array on 500 error', async () => {
+    nock(testHelper.DEFAULT_NETWORK_EXTERNALID)
+      .get(ENDPOINT)
+      .reply('500');
+
+    const actual = await hook(testHelper.DEFAULT_NETWORK_EXTERNALID)(credentials);
+
+    assert.deepEqual(actual, []);
   });
 });

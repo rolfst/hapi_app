@@ -45,5 +45,16 @@ describe('Service: Attachment', () => {
 
       assert.equal(statusCode, 200);
     });
+
+    it('should create a attachment without having a network', async () => {
+      const ENDPOINT_URL = '/v2/files';
+      const form = new FormData();
+      form.append('file', Buffer('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64').toString());
+      const promisiedStream = await streamToPromise(form);
+      const { statusCode } = await postRequest(
+        ENDPOINT_URL, promisiedStream, form.getHeaders(), admin.token);
+
+      assert.equal(statusCode, 200);
+    });
   });
 });

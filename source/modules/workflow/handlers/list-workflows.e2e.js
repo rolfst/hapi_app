@@ -1,4 +1,5 @@
 const R = require('ramda');
+const moment = require('moment');
 const { assert } = require('chai');
 const Promise = require('bluebird');
 const testHelper = require('../../../shared/test-utils/helpers');
@@ -20,7 +21,8 @@ describe('Workflow handler: view workflow stats', () => {
 
   const workflowFixtureB = {
     triggers: [{
-      type: ETriggerTypes.DIRECT,
+      type: ETriggerTypes.DATETIME,
+      value: moment().add(1, 'days').toISOString(),
     }],
     conditions: [{
       field: 'user.id',
@@ -110,6 +112,8 @@ describe('Workflow handler: view workflow stats', () => {
     assert.equal(resultB.meta.pagination.limit, 1);
     assert.equal(resultB.meta.pagination.offset, 1);
     assert.equal(resultB.meta.pagination.total_count, 2);
+    assert.equal(resultB.meta.sent_count, 1);
+    assert.equal(resultB.meta.pending_count, 1);
 
     assert.equal(statusCodeB, 200);
     assert.isArray(resultB.data);

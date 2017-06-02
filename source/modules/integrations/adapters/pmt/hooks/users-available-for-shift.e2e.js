@@ -38,9 +38,19 @@ describe('PMT available users hook', () => {
       .get(`/shift/${AVAILABLE_SHIFTID}/available`)
       .reply(403, stubs.available_users_forbidden_403);
 
-    const availableUsersForShiftHook = hook(testHelper.DEFAULT_NETWORK_EXTERNALID,
-      TOKEN)(AVAILABLE_SHIFTID);
+    const availableUsersForShiftHook = hook(
+      testHelper.DEFAULT_NETWORK_EXTERNALID, TOKEN)(AVAILABLE_SHIFTID);
 
     return assert.isRejected(availableUsersForShiftHook, new RegExp(createError('403').message));
+  });
+
+  it('should return empty array on 500 error', async () => {
+    nock(testHelper.DEFAULT_NETWORK_EXTERNALID)
+      .get(`/shift/${AVAILABLE_SHIFTID}/available`)
+      .reply('500');
+
+    const actual = await hook(testHelper.DEFAULT_NETWORK_EXTERNALID, TOKEN)(AVAILABLE_SHIFTID);
+
+    assert.deepEqual(actual, []);
   });
 });

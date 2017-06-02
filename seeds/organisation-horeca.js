@@ -1,83 +1,119 @@
-const moment = require('moment');
+const usersBlueprint = require('./blueprints/users');
+const messagesBlueprint = require('./blueprints/messages');
+const exchangesBlueprint = require('./blueprints/exchanges');
+const privateMessagesBlueprint = require('./blueprints/private-messages');
 
-module.exports = {
-  name: 'Restaurant B.V.',
-  admins: ['organisatiebeheerder-1@flex-appeal.nl'],
-  networks: [{
-    name: 'Restaurant Leiden',
-    admin: 'beheerder-1@flex-appeal.nl',
-    teams: [{
-      name: 'Runners',
-      members: ['medewerker-1@flex-appeal.nl', 'medewerker-2@flex-appeal.nl', 'medewerker-2@flex-appeal.nl'],
-    }, {
-      name: 'Keuken',
-      members: ['medewerker-1@flex-appeal.nl', 'medewerker-2@flex-appeal.nl', 'medewerker-2@flex-appeal.nl'],
-    }, {
-      name: 'Gastvrouwen',
-      members: ['medewerker-1@flex-appeal.nl', 'medewerker-2@flex-appeal.nl'],
-    }, {
-      name: 'Bar',
-      members: ['medewerker-1@flex-appeal.nl', 'medewerker-2@flex-appeal.nl'],
-    }, {
-      name: 'Management',
-      members: ['beheerder-1@flex-appeal.nl', 'beheerder-2@flex-appeal.nl', 'beheerder-3@flex-appeal.nl'],
-    }],
-    messages: [{
-      text: 'Hoi allemaal 👋! Welkom in Restaurant B.V. Vanaf nu gebruiken wij Flex-Appeal als intern communicatie middel.',
-      creator: 'organisatiebeheerder-1@flex-appeal.nl',
-      comments: [{
-        text: 'Bedankt Sandra! 👏',
-        creator: 'medewerker-1@flex-appeal.nl',
+module.exports = (_brandingOptions) => {
+  const brandingOptions = Object.assign({}, {
+    organisationName: 'Restaurant B.V',
+    networkPrefix: 'Filiaal',
+    mailExtension: 'restaurant.nl',
+    brandIcon: null,
+  }, _brandingOptions);
+
+  return {
+    name: brandingOptions.organisationName,
+    admins: [`organisatiebeheerder@${brandingOptions.mailExtension}`],
+    brandIcon: brandingOptions.brandIcon,
+    users: usersBlueprint(brandingOptions),
+    networks: [{
+      name: `${brandingOptions.networkPrefix} Leiden`,
+      admin: `beheerder@${brandingOptions.mailExtension}`,
+      users: [
+        `organisatiebeheerder@${brandingOptions.mailExtension}`,
+        `beheerder@${brandingOptions.mailExtension}`,
+        `beheerder-2@${brandingOptions.mailExtension}`,
+        `medewerker@${brandingOptions.mailExtension}`,
+        `medewerker-2@${brandingOptions.mailExtension}`,
+        `medewerker-3@${brandingOptions.mailExtension}`,
+      ],
+      teams: [{
+        name: 'Runners',
+        members: [`medewerker@${brandingOptions.mailExtension}`, `medewerker-2@${brandingOptions.mailExtension}`],
       }, {
-        text: 'Hoi Sandra, bedankt! De app ziet er goed uit! 👍',
-        creator: 'medewerker-2@flex-appeal.nl',
+        name: 'Keuken',
+        members: [`medewerker@${brandingOptions.mailExtension}`, `medewerker-2@${brandingOptions.mailExtension}`],
+      }, {
+        name: 'Bar',
+        members: [`medewerker@${brandingOptions.mailExtension}`],
+      }, {
+        name: 'Gastvrouwen',
+        members: [`medewerker-2@${brandingOptions.mailExtension}`],
+      }, {
+        name: 'Management',
+        members: [`medewerker-2@${brandingOptions.mailExtension}`],
       }],
-      likes: ['beheerder-1@flex-appeal.nl', 'medewerker-1@flex-appeal.nl', 'medewerker-2@flex-appeal.nl'],
+      messages: messagesBlueprint(brandingOptions),
+      exchanges: exchangesBlueprint(brandingOptions),
     }, {
-      pollQuestion: 'Wat vinden jullie van de nieuwe kantine?',
-      pollOptions: ['Mooier 😻', 'Gezelliger 👌', 'Saai 😕 ', 'Geen verandering 😞'],
-      creator: 'beheerder-1@flex-appeal.nl',
-      likes: ['beheerder-1@flex-appeal.nl', 'beheerder-2@flex-appeal.nl', 'medewerker-2@flex-appeal.nl'],
+      name: `${brandingOptions.networkPrefix} Voorburg`,
+      admin: `beheerder@${brandingOptions.mailExtension}`,
+      users: [
+        `organisatiebeheerder@${brandingOptions.mailExtension}`,
+        `beheerder@${brandingOptions.mailExtension}`,
+        `beheerder-2@${brandingOptions.mailExtension}`,
+        `medewerker-3@${brandingOptions.mailExtension}`,
+      ],
+      teams: [{
+        name: 'Runners',
+        members: [
+          `medewerker@${brandingOptions.mailExtension}`,
+          `medewerker-2@${brandingOptions.mailExtension}`,
+        ],
+      }, {
+        name: 'Keuken',
+        members: [
+          `medewerker@${brandingOptions.mailExtension}`,
+          `medewerker-2@${brandingOptions.mailExtension}`,
+        ],
+      }, {
+        name: 'Bar',
+        members: [
+          `medewerker@${brandingOptions.mailExtension}`,
+        ],
+      }, {
+        name: 'Gastvrouwen',
+        members: [
+          `medewerker-2@${brandingOptions.mailExtension}`,
+        ],
+      }],
+    }, {
+      name: `${brandingOptions.networkPrefix} Haarlem`,
+      admin: `beheerder@${brandingOptions.mailExtension}`,
+      users: [
+        `organisatiebeheerder@${brandingOptions.mailExtension}`,
+        `beheerder@${brandingOptions.mailExtension}`,
+      ],
+    }, {
+      name: `${brandingOptions.networkPrefix} Sassenheim`,
+      admin: `beheerder@${brandingOptions.mailExtension}`,
+      users: [
+        `organisatiebeheerder@${brandingOptions.mailExtension}`,
+        `beheerder@${brandingOptions.mailExtension}`,
+      ],
+    }, {
+      name: `${brandingOptions.networkPrefix} Amsterdam`,
+      admin: `beheerder@${brandingOptions.mailExtension}`,
+      users: [
+        `organisatiebeheerder@${brandingOptions.mailExtension}`,
+        `beheerder@${brandingOptions.mailExtension}`,
+      ],
+    }, {
+      name: 'Regio Managers',
+      admin: `organisatiebeheerder@${brandingOptions.mailExtension}`,
+      users: [
+        `organisatiebeheerder@${brandingOptions.mailExtension}`,
+        `beheerder@${brandingOptions.mailExtension}`,
+        `beheerder-2@${brandingOptions.mailExtension}`,
+      ],
+      teams: [{
+        name: 'Algemeen',
+        members: [
+          `beheerder@${brandingOptions.mailExtension}`,
+          `beheerder-2@${brandingOptions.mailExtension}`,
+        ],
+      }],
     }],
-    exchanges: [{
-      date: moment().toISOString(),
-      startTime: moment().hours(14).minutes(30).toISOString(),
-      endTime: moment().hours(21).minutes(0).toISOString(),
-      description: 'Ik heb een bruiloft van een goede vriendin.',
-      creator: 'medewerker-2@flex-appeal.nl',
-    }, {
-      date: moment().add(1, 'days').toISOString(),
-      startTime: moment().add(1, 'days').hours(9).minutes(0).toISOString(),
-      endTime: moment().add(1, 'days').hours(16).minutes(45).toISOString(),
-      creator: 'medewerker-1@flex-appeal.nl',
-    }, {
-      date: moment().add(1, 'days').toISOString(),
-      startTime: moment().add(1, 'days').hours(16).minutes(30).toISOString(),
-      endTime: moment().add(1, 'days').hours(19).minutes(45).toISOString(),
-      creator: 'medewerker-1@flex-appeal.nl',
-    }],
-  }, {
-    name: 'Restaurant Voorburg',
-    admin: 'beheerder-1@flex-appeal.nl',
-    teams: [{
-      name: 'Runners',
-      members: ['medewerker-1@flex-appeal.nl', 'medewerker-2@flex-appeal.nl'],
-    }, {
-      name: 'Keuken',
-      members: ['medewerker-1@flex-appeal.nl', 'medewerker-2@flex-appeal.nl'],
-    }, {
-      name: 'Bar',
-      members: ['medewerker-1@flex-appeal.nl'],
-    }, {
-      name: 'Gastvrouwen',
-      members: ['medewerker-2@flex-appeal.nl'],
-    }],
-  }, {
-    name: 'Regio Managers',
-    admin: 'organisatiebeheerder-1@flex-appeal.nl',
-    teams: [{
-      name: 'Algemeen',
-      members: ['beheerder-1@flex-appeal.nl', 'beheerder-2@flex-appeal.nl'],
-    }],
-  }],
+    privateMessages: privateMessagesBlueprint(brandingOptions),
+  };
 };

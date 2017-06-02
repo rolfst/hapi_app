@@ -17,7 +17,7 @@ const handleRequest = async (response, endpoint) => {
   try {
     json = await response.json();
   } catch (e) {
-    json = { error: undefinedError };
+    json = [];
   }
 
   if (status === 400 && json.error.toLowerCase().match(/token|expired/g)) {
@@ -30,6 +30,8 @@ const handleRequest = async (response, endpoint) => {
     throw createError('10008', json.error);
   } else if (status === 401 && json.error === 'Incorrect username or password.') {
     throw createError('10004');
+  } else if (status === 404) {
+    throw createError('404');
   }
 
   return { status, json };
