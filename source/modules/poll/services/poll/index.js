@@ -18,10 +18,24 @@ const addResultToPoll = R.curry((poll, results) => {
 const list = async (payload, message) => {
   logger.debug('Finding multiple polls', { payload, message });
 
-  const promises = [
-    pollRepository.findBy({ id: { $in: payload.pollIds } }),
-    pollVoteRepository.findBy({ pollId: { $in: payload.pollIds }, userId: message.credentials.id }),
-  ];
+  let promises;
+
+  if (payload.constraint) {
+    const polls = await pollRepository.findBy(payload.constraint);
+
+    promises = [
+      Promise.resolve(polls),
+      pollVoteRepository.findBy({ pollId: { $in: R.pluck('id', polls) }, userId: message.credentials.id }),
+    ];
+  } else {
+    promises = [
+      pollRepository.findBy({ id: { $in: payload.pollIds } }),
+      pollVoteRepository.findBy({
+        pollId: { $in: payload.pollIds },
+        userId: message.credentials.id,
+      }),
+    ];
+  }
 
   const [polls, votes] = await Promise.all(promises);
   const resultsByPoll = R.groupBy(R.prop('pollId'), votes);
@@ -54,7 +68,7 @@ const get = async (payload, message) => {
 /**
  * Creates a poll
  * @param {object} payload - Object containing payload data
- * @param {string} payload.networkId - Id of the network the poll is placed in
+ * @param {string} payload.messageId - Id of the message the poll is placed in
  * @param {array} payload.options - Poll options to create
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method create
@@ -64,8 +78,7 @@ const create = async (payload, message) => {
   logger.debug('Creating poll', { payload, message });
 
   const poll = await pollRepository.create({
-    networkId: payload.networkId,
-    userId: message.credentials.id,
+    messageId: payload.messageId,
     question: payload.question,
   });
 
@@ -88,7 +101,7 @@ const create = async (payload, message) => {
 const vote = async (payload, message) => {
   logger.debug('Voting on poll', { payload, message });
 
-  await impl.assertThatPollExistsAndUserHasPermission(payload.networkId, payload.pollId);
+  await impl.assertThatPollExists(payload.pollId);
   await pollRepository.clearVotes(payload.pollId, message.credentials.id);
 
   const voteForOption = (optionId) => pollRepository.vote({

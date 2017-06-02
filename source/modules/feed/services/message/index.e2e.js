@@ -7,6 +7,7 @@ const testHelpers = require('../../../../shared/test-utils/helpers');
 const Storage = require('../../../../shared/services/storage');
 const pollService = require('../../../poll/services/poll');
 const attachmentService = require('../../../attachment/services/attachment');
+const attachmentDefinitions = require('../../../attachment/definitions');
 const objectService = require('../../../core/services/object');
 const commentService = require('../comment');
 const messageService = require('./index');
@@ -146,29 +147,13 @@ describe('Service: Message', () => {
     });
 
     it('should create a poll entry if resource is present', async () => {
-      const objects = await objectService.list({
-        parentType: 'feed_message',
-        parentId: createdMessage.sourceId,
-      });
-
-      const pollEntry = await pollService.get({
-        pollId: objects[0].sourceId }, { credentials: admin });
+      const pollEntry = await pollService.list({
+        constraint: { messageId: createdMessage.sourceId },
+      }, { credentials: admin }).then(R.head);
 
       assert.isDefined(pollEntry);
-      assert.equal(pollEntry.networkId, network.id);
-      assert.equal(pollEntry.userId, admin.id);
-    });
-
-    it('should create object entry for poll if resource is present', async () => {
-      const expected = await objectService.list({
-        parentType: 'feed_message',
-        parentId: createdMessage.sourceId,
-      });
-
-      assert.lengthOf(expected, 1);
-      assert.equal(expected[0].userId, admin.id);
-      assert.equal(expected[0].objectType, 'poll');
-      assert.isDefined(expected[0].sourceId);
+      assert.equal(pollEntry.messageId, createdMessage.sourceId);
+      assert.equal(pollEntry.question, createdMessage.children[0].source.question);
     });
 
     it('should create object entry for message', async () => {
@@ -227,18 +212,24 @@ describe('Service: Message', () => {
       assert.equal(createdMessage.children[0].objectType, 'attachment');
       assert.equal(createdMessage.children[0].source.path,
         'https://assets.flex-appeal.nl/development/attachments/image.jpg');
-      assert.equal(createdMessage.children[0].source.objectId, createdMessage.children[0].id);
+      assert.equal(
+        createdMessage.children[0].source.parentType,
+        attachmentDefinitions.EParentTypes.FEED_MESSAGE
+      );
+      assert.equal(createdMessage.children[0].source.parentId, createdMessage.children[0].id);
     });
 
     it('should create an attachment entry if resource is present', async () => {
-      const objects = await objectService.list({
-        parentType: 'feed_message',
-        parentId: createdMessage.sourceId,
+      const attachmentEntry = await attachmentService.get({
+        whereConstraint: {
+          parentType: attachmentDefinitions.EParentTypes.FEED_MESSAGE,
+          parentId: createdMessage.sourceId,
+        },
       });
 
-      const attachmentEntry = await attachmentService.get({ attachmentId: objects[0].sourceId });
-
       assert.isDefined(attachmentEntry);
+      assert.equal(attachmentEntry.parentId, createdMessage.sourceId);
+      assert.equal(attachmentEntry.parentType, attachmentDefinitions.EParentTypes.FEED_MESSAGE);
       assert.equal(attachmentEntry.path,
         'https://assets.flex-appeal.nl/development/attachments/image.jpg');
     });
@@ -250,18 +241,6 @@ describe('Service: Message', () => {
       assert.property(expected, 'objectId');
       assert.equal(expected.text, 'My cool message');
       assert.property(expected, 'createdAt');
-    });
-
-    it('should create object entry for attachment if resource is present', async () => {
-      const expected = await objectService.list({
-        parentType: 'feed_message',
-        parentId: createdMessage.sourceId,
-      });
-
-      assert.lengthOf(expected, 1);
-      assert.equal(expected[0].userId, admin.id);
-      assert.equal(expected[0].objectType, 'attachment');
-      assert.isDefined(expected[0].sourceId);
     });
 
     it('should throw error when providing invalid attachment ids', async () => {
