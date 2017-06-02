@@ -33,7 +33,7 @@ WHERE
        t.type = '${ETriggerTypes.DIRECT}'
     OR (
           t.type = '${ETriggerTypes.DATETIME}'
-      AND CAST(t.value AS DATETIME) <= NOW()
+      AND CAST(t.value AS DATETIME) >= NOW() - INTERVAL 2 HOURS
     )
   )
 ;
