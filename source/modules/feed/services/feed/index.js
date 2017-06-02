@@ -17,12 +17,27 @@ const logger = require('../../../../shared/services/logger')('FEED/service/feed'
 
 const pluckId = R.pluck('id');
 const feedOptions = R.pick(['limit', 'offset', 'include']);
-const findUserIdsInObjects = R.reduce(
-  (acc, obj) => {
-    return acc.concat([obj.userId]).concat(R.pluck('userId', obj.comments));
-  },
-  []
-);
+
+const findUserIdsInObjects = (objects) => R.uniq(R.reduce((acc, object) => {
+  let localArray = acc.concat(object.userId);
+
+  if (object.comments) localArray = localArray.concat(R.pluck('userId', object.comments));
+  if (object.likes) localArray = localArray.concat(R.pluck('userId', object.likes));
+
+  return localArray;
+}, [], objects));
+
+const pickNeededUserFields =
+  R.pick([EUserFields.ID, EUserFields.FULL_NAME, EUserFields.PROFILE_IMG]);
+
+const findRelatedUsersForObjects = async (objects) => {
+  return R.map(
+    pickNeededUserFields,
+    await userService.list({ userIds: findUserIdsInObjects(objects) })
+  );
+};
+
+const findRelatedUsersForObject = (object) => findRelatedUsersForObjects([object]).then(R.head);
 
 /**
  * Making a feed for a network
@@ -65,13 +80,9 @@ const makeForNetwork = async (payload, message) => {
   };
   const constraint = impl.composeSpecialisedQueryForFeed(feedPayload, extraWhereConstraint);
 
-  const feedItems = impl.makeFeed(constraint, feedOptions(payload), message);
-  const relatedUsers = R.map(
-    R.pick([EUserFields.ID, EUserFields.FULL_NAME, EUserFields.PROFILE_IMG]),
-    await userService.list({ userIds: findUserIdsInObjects(feedItems) }, message)
-  );
+  const feedItems = await impl.makeFeed(constraint, feedOptions(payload), message);
 
-  return { feedItems, relatedUsers };
+  return { feedItems, relatedUsers: findRelatedUsersForObjects(feedItems) };
 };
 
 /**
@@ -110,12 +121,8 @@ const makeForOrganisation = async (payload, message) => {
   const [count, feedItems] = await Promise.all([
     totalCountPromise, feedPromise,
   ]);
-  const relatedUsers = R.map(
-    R.pick([EUserFields.ID, EUserFields.FULL_NAME, EUserFields.PROFILE_IMG]),
-    await userService.list({ userIds: findUserIdsInObjects(feedItems) }, message)
-  );
 
-  return { count, feedItems, relatedUsers };
+  return { count, feedItems, relatedUsers: findRelatedUsersForObjects(feedItems) };
 };
 /**
  * Making a feed for a team
@@ -145,7 +152,9 @@ const makeForTeam = async (payload, message) => {
   };
 
   const constraint = impl.composeSpecialisedQueryForFeed(feedPayload);
-  return impl.makeFeed(constraint, feedOptions(payload), R.assoc('network', network, message));
+  const feedItems = await impl.makeFeed(constraint, feedOptions(payload), R.assoc('network', network, message));
+
+  return { feedItems, relatedUsers: findRelatedUsersForObjects(feedItems) };
 };
 
 async function makeForPerson(payload, message) {
@@ -193,15 +202,12 @@ async function makeForPerson(payload, message) {
     totalCountPromise, feedPromise,
   ]);
 
-  const relatedUsers = R.map(
-    R.pick([EUserFields.ID, EUserFields.FULL_NAME, EUserFields.PROFILE_IMG]),
-    await userService.list({ userIds: findUserIdsInObjects(feedItems) }, message)
-  );
-
-  return { count, feedItems, relatedUsers };
+  return { count, feedItems, relatedUsers: findRelatedUsersForObjects(feedItems) };
 }
 
 exports.makeForNetwork = makeForNetwork;
 exports.makeForPerson = makeForPerson;
 exports.makeForOrganisation = makeForOrganisation;
 exports.makeForTeam = makeForTeam;
+exports.findRelatedUsersForObjects = findRelatedUsersForObjects;
+exports.findRelatedUsersForObject = findRelatedUsersForObject;

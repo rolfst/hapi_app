@@ -90,19 +90,19 @@ describe('Service: Feed', () => {
         networkId: network.id,
       }, { network, credentials: employee });
 
-      assert.lengthOf(actual, 3);
-      assert.notProperty(actual[0], 'comments');
-      assert.notProperty(actual[0], 'likes');
-      assert.equal(actual[0].objectType, 'exchange');
-      assert.equal(actual[0].parentType, 'user');
-      assert.equal(actual[0].parentId, employee.id);
-      assert.equal(actual[0].sourceId, createdExchange.id);
-      assert.equal(actual[1].objectType, 'feed_message');
-      assert.equal(actual[1].parentType, 'network');
-      assert.equal(actual[1].source.text, 'Second message for feed');
-      assert.equal(actual[2].objectType, 'feed_message');
-      assert.equal(actual[2].parentType, 'network');
-      assert.equal(actual[2].source.text, 'Message for feed');
+      assert.lengthOf(actual.feedItems, 3);
+      assert.notProperty(actual.feedItems[0], 'comments');
+      assert.notProperty(actual.feedItems[0], 'likes');
+      assert.equal(actual.feedItems[0].objectType, 'exchange');
+      assert.equal(actual.feedItems[0].parentType, 'user');
+      assert.equal(actual.feedItems[0].parentId, employee.id);
+      assert.equal(actual.feedItems[0].sourceId, createdExchange.id);
+      assert.equal(actual.feedItems[1].objectType, 'feed_message');
+      assert.equal(actual.feedItems[1].parentType, 'network');
+      assert.equal(actual.feedItems[1].source.text, 'Second message for feed');
+      assert.equal(actual.feedItems[2].objectType, 'feed_message');
+      assert.equal(actual.feedItems[2].parentType, 'network');
+      assert.equal(actual.feedItems[2].source.text, 'Message for feed');
     });
 
     it('should return all messages for admin', async () => {
@@ -110,9 +110,9 @@ describe('Service: Feed', () => {
         networkId: network.id,
       }, { network, credentials: admin });
 
-      assert.equal(actual[0].objectType, 'feed_message');
-      assert.equal(actual[0].parentType, 'team');
-      assert.equal(actual[0].source.text, 'First message for team');
+      assert.equal(actual.feedItems[0].objectType, 'feed_message');
+      assert.equal(actual.feedItems[0].parentType, 'team');
+      assert.equal(actual.feedItems[0].source.text, 'First message for team');
     });
 
     it('should return feed models for subset with limit and offset query', async () => {
@@ -122,11 +122,11 @@ describe('Service: Feed', () => {
         limit: 2,
       }, { network, credentials: employee });
 
-      assert.lengthOf(actual, 2);
-      assert.equal(actual[0].objectType, 'feed_message');
-      assert.equal(actual[0].source.text, 'Second message for feed');
-      assert.equal(actual[1].objectType, 'feed_message');
-      assert.equal(actual[1].source.text, 'Message for feed');
+      assert.lengthOf(actual.feedItems, 2);
+      assert.equal(actual.feedItems[0].objectType, 'feed_message');
+      assert.equal(actual.feedItems[0].source.text, 'Second message for feed');
+      assert.equal(actual.feedItems[1].objectType, 'feed_message');
+      assert.equal(actual.feedItems[1].source.text, 'Message for feed');
     });
 
     it('should include comments sub-resources via query parameter', async () => {
@@ -141,8 +141,8 @@ describe('Service: Feed', () => {
         include: ['comments'],
       }, { network, credentials: admin });
 
-      const commentedMessage = R.find(R.propEq('sourceId', createdMessages[0].sourceId), actual);
-      const uncommentedMessage = R.find(R.propEq('sourceId', createdMessages[1].sourceId), actual);
+      const commentedMessage = R.find(R.propEq('sourceId', createdMessages[0].sourceId), actual.feedItems);
+      const uncommentedMessage = R.find(R.propEq('sourceId', createdMessages[1].sourceId), actual.feedItems);
 
       assert.lengthOf(uncommentedMessage.comments, 0);
       assert.lengthOf(commentedMessage.comments, 1);
@@ -156,7 +156,7 @@ describe('Service: Feed', () => {
         networkId: network.id,
       }, { network, credentials: admin });
 
-      const teamMessage = R.find(R.propEq('parentType', 'team'), actual);
+      const teamMessage = R.find(R.propEq('parentType', 'team'), actual.feedItems);
 
       assert.isDefined(teamMessage);
       assert.equal(teamMessage.source.text, 'First message for team');
@@ -173,7 +173,7 @@ describe('Service: Feed', () => {
         include: ['likes'],
       }, { network, credentials: admin });
 
-      const likedMessage = R.find(R.propEq('sourceId', createdMessages[1].sourceId), actual);
+      const likedMessage = R.find(R.propEq('sourceId', createdMessages[1].sourceId), actual.feedItems);
 
       assert.lengthOf(likedMessage.likes, 1);
       assert.equal(likedMessage.likes[0].userId, admin.id);
@@ -185,8 +185,8 @@ describe('Service: Feed', () => {
         include: ['likes', 'comments'],
       }, { network, credentials: admin });
 
-      const likedMessage = R.find(R.propEq('sourceId', createdMessages[1].sourceId), actual);
-      const commentedMessage = R.find(R.propEq('sourceId', createdMessages[0].sourceId), actual);
+      const likedMessage = R.find(R.propEq('sourceId', createdMessages[1].sourceId), actual.feedItems);
+      const commentedMessage = R.find(R.propEq('sourceId', createdMessages[0].sourceId), actual.feedItems);
 
       assert.lengthOf(likedMessage.likes, 1);
       assert.equal(likedMessage.likes[0].userId, admin.id);
@@ -210,14 +210,14 @@ describe('Service: Feed', () => {
         networkId: network.id,
       }, { network, credentials: employee });
 
-      const exchangeObjects = R.filter(R.propEq('objectType', 'exchange'), actual);
+      const exchangeObjects = R.filter(R.propEq('objectType', 'exchange'), actual.feedItems);
 
       assert.lengthOf(exchangeObjects, 1);
       assert.equal(exchangeObjects[0].source.networkId, network.id);
     });
 
     it('should return feed models from team', async () => {
-      const actual = await feedService.makeForTeam({
+      const { feedItems: actual } = await feedService.makeForTeam({
         teamId: team.id,
       }, { network, credentials: admin });
 
@@ -243,8 +243,8 @@ describe('Service: Feed', () => {
         include: ['comments'],
       }, { network, credentials: admin });
 
-      const seenMessage = R.find(R.propEq('id', createdMessages[0].id), actual);
-      const unseenMessage = R.find(R.propEq('id', createdMessages[1].id), actual);
+      const seenMessage = R.find(R.propEq('id', createdMessages[0].id), actual.feedItems);
+      const unseenMessage = R.find(R.propEq('id', createdMessages[1].id), actual.feedItems);
 
       assert.property(seenMessage, 'seen', 'seen message has seen property');
       assert.property(unseenMessage, 'seen', 'unseen message has seen property');
