@@ -5,7 +5,6 @@ const attachmentService = require('../../../attachment/services/attachment');
 const attachmentDefinitions = require('../../../attachment/definitions');
 const privateMessageService = require('../../../chat/v2/services/private-message');
 const feedMessageService = require('../../../feed/services/message');
-const objectRepository = require('../../repositories/object');
 const { EObjectTypes } = require('../../definitions');
 
 const whereTypeAndId = (type, id) => R.both(R.propEq('type', type), R.propEq('id', id));
