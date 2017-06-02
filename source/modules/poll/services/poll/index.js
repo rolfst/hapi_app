@@ -18,10 +18,24 @@ const addResultToPoll = R.curry((poll, results) => {
 const list = async (payload, message) => {
   logger.debug('Finding multiple polls', { payload, message });
 
-  const promises = [
-    pollRepository.findBy({ id: { $in: payload.pollIds } }),
-    pollVoteRepository.findBy({ pollId: { $in: payload.pollIds }, userId: message.credentials.id }),
-  ];
+  let promises;
+
+  if (payload.constraint) {
+    const polls = await pollRepository.findBy(payload.constraint);
+
+    promises = [
+      Promise.resolve(polls),
+      pollVoteRepository.findBy({ pollId: { $in: R.pluck('id', polls) }, userId: message.credentials.id }),
+    ];
+  } else {
+    promises = [
+      pollRepository.findBy({ id: { $in: payload.pollIds } }),
+      pollVoteRepository.findBy({
+        pollId: { $in: payload.pollIds },
+        userId: message.credentials.id,
+      }),
+    ];
+  }
 
   const [polls, votes] = await Promise.all(promises);
   const resultsByPoll = R.groupBy(R.prop('pollId'), votes);
@@ -88,7 +102,6 @@ const vote = async (payload, message) => {
   logger.debug('Voting on poll', { payload, message });
 
   await impl.assertThatPollExists(payload.pollId);
-
   await pollRepository.clearVotes(payload.pollId, message.credentials.id);
 
   const voteForOption = (optionId) => pollRepository.vote({

@@ -2,6 +2,7 @@ const R = require('ramda');
 const flexchangeService = require('../../../flexchange/services/flexchange');
 const pollService = require('../../../poll/services/poll');
 const attachmentService = require('../../../attachment/services/attachment');
+const attachmentDefinitions = require('../../../attachment/definitions');
 const privateMessageService = require('../../../chat/v2/services/private-message');
 const feedMessageService = require('../../../feed/services/message');
 const objectRepository = require('../../repositories/object');
@@ -30,14 +31,47 @@ const findSourcesForType = R.curry((message, values, type) => R.cond([
   [R.equals('attachment'), () => attachmentService.list({ attachmentIds: values }, message)],
 ])(type, values));
 
-const findChildrenForType = R.curry((values, type) => R.cond([
-  [R.equals('feed_message'), () => objectRepository.findBy({
-    parentType: 'feed_message', parentId: { $in: values } })],
-  [R.equals('organisation_message'), () => objectRepository.findBy({
-    parentType: 'organisation', parentId: { $in: values } })],
-  [R.equals('private_message'), () => objectRepository.findBy({
-    parentType: 'private_message', parentId: { $in: values } })],
-])(type, values));
+const findLinkedAttachments = (parentIds, message) => {
+  return attachmentService
+    .list({ constraint: {
+      parentId: { $in: parentIds } },
+      parentType: attachmentDefinitions.EParentTypes.FEED_MESSAGE,
+    }, message)
+    .then(R.map((attachment) => ({
+      parentType: attachment.parentType,
+      source: attachment,
+      objectType: EObjectTypes.ATTACHMENT,
+      id: attachment.parentId,
+      sourceId: attachment.id,
+      parentId: attachment.parentId,
+      createdAt: attachment.createdAt,
+    })));
+};
+
+const findChildrenForType = (type, sourceIds, message) => {
+  switch (type) {
+    case EObjectTypes.FEED_MESSAGE:
+    case EObjectTypes.ORGANISATION_MESSAGE:
+      return Promise.all([
+        findLinkedAttachments(sourceIds, message),
+        pollService
+          .list({ constraint: { messageId: { $in: sourceIds } } }, message)
+          .then(R.map((poll) => ({
+            parentType: type,
+            source: poll,
+            objectType: EObjectTypes.POLL,
+            id: poll.messageId,
+            sourceId: poll.id,
+            parentId: poll.messageId,
+            createdAt: poll.createdAt,
+          }))),
+      ]).then(R.flatten);
+    case EObjectTypes.PRIVATE_MESSAGE:
+      return findLinkedAttachments(sourceIds, message);
+    default:
+      return [];
+  }
+};
 
 const addSourceToObject = R.curry((sources, object) =>
   // We make an exception for organisation_message otherwise we always call the feed_message
