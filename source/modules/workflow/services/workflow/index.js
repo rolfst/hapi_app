@@ -479,29 +479,28 @@ async function createCompleteWorkflow(payload, message) {
 }
 
 /**
- * Workflow stats
+ * List workflows
  * @param {object} payload - Object containing the params
  * @param {number} payload.organisationId - The id of the organisation
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method workflowStats
  * @return {external:Promise.<Object>} {@link module:modules/action~Object}
  */
-const stats = async (payload) => {
-  const [workflows, counts] = await Promise.all([
-    workFlowRepo.findAll(
-      { organisationId: payload.organisationId },
-      {
-        limit: payload.limit,
-        offset: payload.offset,
-        order: [['created_at', 'DESC']],
-      }
-    ),
-    workFlowRepo.count({ organisationId: payload.organisationId }),
-  ]);
+const listWorkflows = async (payload, message) => {
+  logger.debug('List workflows', { payload, message });
+
+  const workflows = await workFlowRepo.findAll(
+    { organisationId: payload.organisationId },
+    {
+      limit: payload.limit,
+      offset: payload.offset,
+      order: [['created_at', 'DESC']],
+    }
+  );
 
   const workflowIds = workFlowExecutor.pluckIds(workflows);
 
-  if (workflowIds.length === 0) return { data: [], counts };
+  if (workflowIds.length === 0) return [];
 
   const countsQueryReplacements = { workflowIds, organisationId: payload.organisationId };
 
@@ -512,10 +511,21 @@ const stats = async (payload) => {
     workFlowRepo.findAllActions({ $in: workflowIds }),
   ]);
 
-  return {
-    data: R.map(impl.addExtraData(subCounts), workflows),
-    counts,
-  };
+  return R.map(impl.addExtraData(subCounts), workflows);
+};
+
+/**
+ * Count workflows
+ * @param {object} payload - Object containing the params
+ * @param {number} payload.organisationId - The id of the organisation
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method workflowStats
+ * @return {external:Promise.<Object>} {@link module:modules/action~Object}
+ */
+const countWorkflows = async (payload, message) => {
+  logger.debug('Count workflows', { payload, message });
+
+  return workFlowRepo.count({ organisationId: payload.organisationId });
 };
 
 // Carry along enums for easy access later
@@ -538,4 +548,5 @@ exports.createAction = createAction;
 exports.updateAction = updateAction;
 exports.removeAction = removeAction;
 exports.createCompleteWorkflow = createCompleteWorkflow;
-exports.stats = stats;
+exports.listWorkflows = listWorkflows;
+exports.countWorkflows = countWorkflows;
