@@ -32,7 +32,9 @@ const getIncludes = async (hasInclude, objects) => {
 
   // TODO - verify if this works
   if (hasType(EObjectTypes.FEED_MESSAGE) || hasType(EObjectTypes.ORGANISATION_MESSAGE)) {
-    const messageIds = getSourceIdsForType([EObjectTypes.FEED_MESSAGE, EObjectTypes.ORGANISATION_MESSAGE], objects);
+    const messageIds = getSourceIdsForType(
+      [EObjectTypes.FEED_MESSAGE, EObjectTypes.ORGANISATION_MESSAGE],
+      objects);
 
     if (hasInclude('comments')) {
       includes.comments = messageService.listComments({ messageIds });

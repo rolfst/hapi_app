@@ -71,7 +71,6 @@ describe('Handler: Get organisation news', () => {
       }, { credentials: organisationAdmin }),
     ]);
     messageToBeFollowedUp = R.head(R.slice(-2, -1, messages));
-    console.log(messageToBeFollowedUp)
   });
 
   after(() => testHelpers.cleanAll());
@@ -104,7 +103,7 @@ describe('Handler: Get organisation news', () => {
     assert.equal(statusCode, 403);
   });
 
-  describe.only('meta', () => {
+  describe('meta', () => {
     before(async () => {
       await commentService.create({
         messageId: messageToBeFollowedUp.source.id,
