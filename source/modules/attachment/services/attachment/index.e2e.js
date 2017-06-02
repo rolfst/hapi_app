@@ -89,6 +89,8 @@ describe('Service: Attachment', () => {
       }, { credentials: admin });
     });
 
+    after(() => sandbox.restore());
+
     it('should update parent values', async () => {
       const result = await attachmentService.update({
         whereConstraint: { id: createdAttachment.id },
