@@ -61,9 +61,10 @@ const listWithSourceAndChildren = async (payload, message, userId = null) => {
     id: { $in: payload.objectIds },
   }, createOptionsFromPayload(payload), userId);
 
-  const promisedChildren = R.mapObjIndexed((sourceIds, type) => {
-    return impl.findChildrenForType(type, sourceIds, message);
-  }, sourceIdsPerType(objects));
+  const promisedChildren = R.mapObjIndexed(
+    (sourceIds, type) => impl.findChildrenForType(type, sourceIds, message),
+    sourceIdsPerType(objects)
+  );
 
   const children = await Promise.props(promisedChildren)
     .then(R.pipe(R.values, R.flatten));
