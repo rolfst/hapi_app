@@ -7,7 +7,7 @@ const teamService = require('../../../core/services/team');
 const objectService = require('../../../core/services/object');
 const coreQueries = require('../../../core/repositories/queries');
 const impl = require('./implementation');
-const { EObjectTypes, EParentTypes } = require('../../../core/definitions');
+const { EObjectTypes, EParentTypes, EUserFields } = require('../../../core/definitions');
 
 /**
  * @module modules/feed/services/feed
@@ -17,6 +17,12 @@ const logger = require('../../../../shared/services/logger')('FEED/service/feed'
 
 const pluckId = R.pluck('id');
 const feedOptions = R.pick(['limit', 'offset', 'include']);
+const relatedIdsFrom = R.reduce(
+  (acc, obj) => {
+    return acc.concat([obj.userId]).concat(R.pluck('userId', obj.children));
+  },
+  []
+);
 
 /**
  * Making a feed for a network
@@ -59,7 +65,13 @@ const makeForNetwork = async (payload, message) => {
   };
   const constraint = impl.composeSpecialisedQueryForFeed(feedPayload, extraWhereConstraint);
 
-  return impl.makeFeed(constraint, feedOptions(payload), message);
+  const feedItems = impl.makeFeed(constraint, feedOptions(payload), message);
+  const relatedUsers = R.map(
+    R.pick([EUserFields.ID, EUserFields.FULL_NAME, EUserFields.PROFILE_IMG]),
+    await userService.list({ userIds: relatedIdsFrom(feedItems) }, message)
+  );
+
+  return { feedItems, relatedUsers };
 };
 
 /**
@@ -98,8 +110,12 @@ const makeForOrganisation = async (payload, message) => {
   const [count, feedItems] = await Promise.all([
     totalCountPromise, feedPromise,
   ]);
+  const relatedUsers = R.map(
+    R.pick([EUserFields.ID, EUserFields.FULL_NAME, EUserFields.PROFILE_IMG]),
+    await userService.list({ userIds: relatedIdsFrom(feedItems) }, message)
+  );
 
-  return { count, feedItems };
+  return { count, feedItems, relatedUsers };
 };
 /**
  * Making a feed for a team
@@ -177,7 +193,12 @@ async function makeForPerson(payload, message) {
     totalCountPromise, feedPromise,
   ]);
 
-  return { count, feedItems };
+  const relatedUsers = R.map(
+    R.pick([EUserFields.ID, EUserFields.FULL_NAME, EUserFields.PROFILE_IMG]),
+    await userService.list({ userIds: relatedIdsFrom(feedItems) }, message)
+  );
+
+  return { count, feedItems, relatedUsers };
 }
 
 exports.makeForNetwork = makeForNetwork;
