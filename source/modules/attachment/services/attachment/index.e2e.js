@@ -9,13 +9,12 @@ const AttachmentDAO = require('../../repositories/dao/attachment');
 
 describe('Service: Attachment', () => {
   let admin;
-  let sandbox;
+  const sandbox = sinon.sandbox.create();
   let network;
   let fileName;
 
   describe('create', () => {
     before(async () => {
-      sandbox = sinon.sandbox.create();
       fileName = 'image.jpg';
       sandbox.stub(Storage, 'upload').returns(Promise.resolve(fileName));
 
@@ -31,10 +30,14 @@ describe('Service: Attachment', () => {
     it('should create a attachment', async () => {
       const actual = await attachmentService.create({
         fileStream: new stream.Readable(),
+        parentType: 'foo',
+        parentId: '23',
       }, { credentials: admin });
 
       assert.isDefined(actual);
       assert.equal(actual.type, 'attachment');
+      assert.equal(actual.parentType, 'foo');
+      assert.equal(actual.parentId, '23');
       assert.property(actual, 'messageId');
       assert.property(actual, 'path');
       assert.equal(actual.path, `https://assets.flex-appeal.nl/development/attachments/${fileName}`);
@@ -42,9 +45,20 @@ describe('Service: Attachment', () => {
       assert.isNotNull(actual.createdAt);
     });
 
+    it('parentType and parentId should default be null when not passed', async () => {
+      const actual = await attachmentService.create({
+        fileStream: new stream.Readable(),
+      }, { credentials: admin });
+
+      assert.equal(actual.parentType, null);
+      assert.equal(actual.parentId, null);
+    });
+
     it('should set message_id for backwards compatibility', async () => {
       const attachment = await attachmentService.create({
         fileStream: new stream.Readable(),
+        parentType: 'foo',
+        parentId: '23',
       }, { credentials: admin });
 
       const createdMessage = await messageService.create({
@@ -60,6 +74,29 @@ describe('Service: Attachment', () => {
       });
 
       assert.equal(attachmentResult.messageId, createdMessage.sourceId);
+    });
+  });
+
+  describe('update', () => {
+    let createdAttachment;
+
+    before(async () => {
+      fileName = 'image.jpg';
+      sandbox.stub(Storage, 'upload').returns(Promise.resolve(fileName));
+
+      createdAttachment = await attachmentService.create({
+        fileStream: new stream.Readable(),
+      }, { credentials: admin });
+    });
+
+    it('should update parent values', async () => {
+      const result = await attachmentService.update({
+        whereConstraint: { id: createdAttachment.id },
+        attributes: { parentType: 'foo', parentId: '23' },
+      }, { credentials: admin });
+
+      assert.equal(result.parentType, 'foo');
+      assert.equal(result.parentId, '23');
     });
   });
 });

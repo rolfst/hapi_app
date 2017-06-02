@@ -28,12 +28,12 @@ const findById = (id) => Attachment
 
 /**
  * Create a new attachment
- * @param {string} path - Attachment attributes
+ * @param {string} attributes - Attachment attributes
  * @method create
  * @return {external:Promise.<Attachment>} - Create attachment promise
  */
-const create = (path) => Attachment
-  .create({ path })
+const create = (attributes) => Attachment
+  .create(R.pick(['path', 'parentType', 'parentId'], attributes))
   .then(createAttachmentModel);
 
 const deleteById = (attachmentId) => Attachment

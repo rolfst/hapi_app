@@ -68,7 +68,8 @@ describe('Handler: Create message (v2)', () => {
     assert.equal(result.data.children[0].parent_id, result.data.source_id);
     assert.property(result.data.children[0], 'source');
     assert.equal(result.data.children[0].source.type, 'attachment');
-    assert.equal(result.data.children[0].source.object_id, result.data.children[0].id);
+    assert.equal(result.data.children[0].source.parent_id, result.data.source_id);
+    assert.equal(result.data.children[0].source.parent_type, 'private_message');
     assert.equal(result.data.children[0].source.id, result.data.children[0].source_id);
     assert.property(result.data.children[0].source, 'path');
   });
