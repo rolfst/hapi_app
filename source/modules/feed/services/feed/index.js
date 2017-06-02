@@ -19,7 +19,7 @@ const pluckId = R.pluck('id');
 const feedOptions = R.pick(['limit', 'offset', 'include']);
 const relatedIdsFrom = R.reduce(
   (acc, obj) => {
-    return acc.concat([obj.userId]).concat(R.pluck('userId', obj.children));
+    return acc.concat([obj.userId]).concat(R.pluck('userId', obj.comments));
   },
   []
 );

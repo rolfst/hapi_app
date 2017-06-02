@@ -113,18 +113,14 @@ describe('Handler: Get organisation news', () => {
       });
     });
 
+    after(() => testHelpers.deleteComment());
+
     it('should include users related to feed including comments', async () => {
       getUrl = `/v3/organisations/${organisationA.id}/news?include=comments`;
       const { statusCode, result } = await getRequest(getUrl, organisationAdmin.token);
 
       assert.equal(statusCode, 200);
-
-      const organisationMessagesInFeed = R.filter(R.propEq('parent_type', 'organisation'), result.data);
-
-  console.log(JSON.stringify(result.meta, null, 2))
-      assert.lengthOf(result.data, 3);
-      assert.lengthOf(organisationMessagesInFeed, 3);
-      assert.equal(result.meta.pagination.total_count, 3);
+      assert.lengthOf(result.meta.related.users, 2);
     });
   });
 });
