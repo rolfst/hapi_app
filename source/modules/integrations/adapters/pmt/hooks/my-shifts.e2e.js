@@ -34,4 +34,14 @@ describe('PMT my shifts hook', () => {
 
     return assert.isRejected(myShiftHook, new RegExp(createError('403').message));
   });
+
+  it('should return empty array on 500 error', async () => {
+    nock(testHelper.DEFAULT_NETWORK_EXTERNALID)
+      .get(`${ENDPOINT}/${TODAY}`)
+      .reply('500');
+
+    const actual = await hook(testHelper.DEFAULT_NETWORK_EXTERNALID)();
+
+    assert.deepEqual(actual, []);
+  });
 });

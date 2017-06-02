@@ -13,29 +13,26 @@ describe('PMT view shifts hook', () => {
   const ENDPOINT = '/me/shifts';
   const TOKEN = 'aefacbadb0123456789';
   const TODAY = moment().format('DD-MM-YYYY');
+  const knownId = '27362216';
 
   it('should succeed when token provided', async () => {
-    const knownId = '27362216';
-
     nock(testHelper.DEFAULT_NETWORK_EXTERNALID)
       .get(`${ENDPOINT}/${TODAY}`)
       .reply(200, stubs.shifts_found_200);
 
     const actual = await hook(testHelper.DEFAULT_NETWORK_EXTERNALID, TOKEN)(knownId);
-    const expected = blueprints.found_shift;
 
-    assert.deepEqual(actual, expected);
+    assert.deepEqual(actual, blueprints.found_shift);
   });
 
-  it('should return undefined when wrong id provided', async () => {
+  it('should return null when wrong id provided', async () => {
     nock(testHelper.DEFAULT_NETWORK_EXTERNALID)
       .get(`${ENDPOINT}/${TODAY}`)
       .reply(200, stubs.shifts_found_200);
 
     const actual = await hook(testHelper.DEFAULT_NETWORK_EXTERNALID, TOKEN)();
-    const expected = undefined;
 
-    assert.deepEqual(actual, expected);
+    assert.deepEqual(actual, null);
   });
 
   // can't force to fail on no token provided
@@ -47,5 +44,15 @@ describe('PMT view shifts hook', () => {
     const viewShiftHook = hook(testHelper.DEFAULT_NETWORK_EXTERNALID)();
 
     return assert.isRejected(viewShiftHook, new RegExp(createError('403').message));
+  });
+
+  it('should return null on 500 error', async () => {
+    nock(testHelper.DEFAULT_NETWORK_EXTERNALID)
+      .get(`${ENDPOINT}/${TODAY}`)
+      .reply('500');
+
+    const actual = await hook(testHelper.DEFAULT_NETWORK_EXTERNALID, TOKEN)(knownId);
+
+    assert.deepEqual(actual, null);
   });
 });
