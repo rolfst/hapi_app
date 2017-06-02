@@ -80,12 +80,10 @@ const listWithSourceAndChildren = async (payload, message, userId = null) => {
     children: impl.findChildren(objectsWithSource, object),
   });
 
-  const result = R.pipe(
+  return R.pipe(
     R.pluck('id'),
     R.map(R.pipe(findObjectById, addChildrenToObject))
   )(objects);
-
-  return result;
 };
 
 /**
