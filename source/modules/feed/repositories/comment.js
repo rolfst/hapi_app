@@ -22,5 +22,11 @@ const create = async (attributes) => Comment
   .create(attributes)
   .then(createCommentModel);
 
+const deleteAll = () => Comment.findAll()
+  .then((comments) => Comment.destroy({
+    where: { id: { $in: R.pluck('id', comments) } },
+  }));
+
 exports.create = create;
 exports.findBy = findBy;
+exports.deleteAll = deleteAll;

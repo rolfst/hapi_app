@@ -15,6 +15,7 @@ const teamRepo = require('../../modules/core/repositories/team');
 const activityRepo = require('../../modules/core/repositories/activity');
 const objectRepo = require('../../modules/core/repositories/object');
 const objectSeenRepo = require('../../modules/core/repositories/object-seen');
+const commentsRepo = require('../../modules/feed/repositories/comment');
 const pollRepo = require('../../modules/poll/repositories/poll');
 const { postRequest } = require('./request');
 
@@ -335,6 +336,10 @@ async function deletePoll(poll) {
   return pollRepo.deleteById(poll.id);
 }
 
+async function deleteComment() {
+  return commentsRepo.deleteAll();
+}
+
 /**
  * Creates a complete workflow object with some dummy triggers, conditions and actions
  * @param {number} organisationId
@@ -477,6 +482,7 @@ exports.createNetworkWithIntegration = createNetworkWithIntegration;
 exports.createUser = createUser;
 exports.createUserForNewNetwork = createUserForNewNetwork;
 exports.deleteActivity = deleteActivity;
+exports.deleteComment = deleteComment;
 exports.deleteExchange = deleteExchange;
 exports.deleteIntegration = deleteIntegration;
 exports.deletePoll = deletePoll;
