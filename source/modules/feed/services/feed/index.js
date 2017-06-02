@@ -17,7 +17,7 @@ const logger = require('../../../../shared/services/logger')('FEED/service/feed'
 
 const pluckId = R.pluck('id');
 const feedOptions = R.pick(['limit', 'offset', 'include']);
-const relatedIdsFrom = R.reduce(
+const findUserIdsInObjects = R.reduce(
   (acc, obj) => {
     return acc.concat([obj.userId]).concat(R.pluck('userId', obj.comments));
   },
@@ -68,7 +68,7 @@ const makeForNetwork = async (payload, message) => {
   const feedItems = impl.makeFeed(constraint, feedOptions(payload), message);
   const relatedUsers = R.map(
     R.pick([EUserFields.ID, EUserFields.FULL_NAME, EUserFields.PROFILE_IMG]),
-    await userService.list({ userIds: relatedIdsFrom(feedItems) }, message)
+    await userService.list({ userIds: findUserIdsInObjects(feedItems) }, message)
   );
 
   return { feedItems, relatedUsers };
@@ -112,7 +112,7 @@ const makeForOrganisation = async (payload, message) => {
   ]);
   const relatedUsers = R.map(
     R.pick([EUserFields.ID, EUserFields.FULL_NAME, EUserFields.PROFILE_IMG]),
-    await userService.list({ userIds: relatedIdsFrom(feedItems) }, message)
+    await userService.list({ userIds: findUserIdsInObjects(feedItems) }, message)
   );
 
   return { count, feedItems, relatedUsers };
@@ -195,7 +195,7 @@ async function makeForPerson(payload, message) {
 
   const relatedUsers = R.map(
     R.pick([EUserFields.ID, EUserFields.FULL_NAME, EUserFields.PROFILE_IMG]),
-    await userService.list({ userIds: relatedIdsFrom(feedItems) }, message)
+    await userService.list({ userIds: findUserIdsInObjects(feedItems) }, message)
   );
 
   return { count, feedItems, relatedUsers };
