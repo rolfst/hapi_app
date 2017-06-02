@@ -63,7 +63,7 @@ const count = async (workflowIdsOrWhereConstraints) => {
   return {
     totalCount,
     pendingCount,
-    sentCount: totalCount - pendingCount,
+    processedCount: totalCount - pendingCount,
   };
 };
 

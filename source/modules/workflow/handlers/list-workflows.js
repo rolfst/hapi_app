@@ -35,7 +35,7 @@ module.exports = async (req, reply) => {
           total_count: counts.totalCount,
         },
         sent_count: counts.sentCount,
-        pending_count: counts.pendingCount,
+        processed_count: counts.processedCount,
       },
     });
   } catch (err) {
