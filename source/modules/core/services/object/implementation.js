@@ -30,21 +30,34 @@ const findSourcesForType = R.curry((message, values, type) => R.cond([
   [R.equals('attachment'), () => attachmentService.list({ attachmentIds: values }, message)],
 ])(type, values));
 
+const createAttachmentObject = R.map((attachment) => ({
+  parentType: attachment.parentType,
+  source: attachment,
+  objectType: EObjectTypes.ATTACHMENT,
+  id: attachment.parentId,
+  sourceId: attachment.id,
+  parentId: attachment.parentId,
+  createdAt: attachment.createdAt,
+}));
+
+const createPollObject = (parentType) => R.map((poll) => ({
+  parentType,
+  source: poll,
+  objectType: EObjectTypes.POLL,
+  id: poll.messageId,
+  sourceId: poll.id,
+  parentId: poll.messageId,
+  createdAt: poll.createdAt,
+}));
+
+
 const findLinkedAttachments = (parentIds, message) => {
   return attachmentService
     .list({ constraint: {
       parentId: { $in: parentIds } },
       parentType: attachmentDefinitions.EParentTypes.FEED_MESSAGE,
     }, message)
-    .then(R.map((attachment) => ({
-      parentType: attachment.parentType,
-      source: attachment,
-      objectType: EObjectTypes.ATTACHMENT,
-      id: attachment.parentId,
-      sourceId: attachment.id,
-      parentId: attachment.parentId,
-      createdAt: attachment.createdAt,
-    })));
+    .then(createAttachmentObject);
 };
 
 const findChildrenForType = (type, sourceIds, message) => {
@@ -55,15 +68,7 @@ const findChildrenForType = (type, sourceIds, message) => {
         findLinkedAttachments(sourceIds, message),
         pollService
           .list({ constraint: { messageId: { $in: sourceIds } } }, message)
-          .then(R.map((poll) => ({
-            parentType: type,
-            source: poll,
-            objectType: EObjectTypes.POLL,
-            id: poll.messageId,
-            sourceId: poll.id,
-            parentId: poll.messageId,
-            createdAt: poll.createdAt,
-          }))),
+          .then(createPollObject(type)),
       ]).then(R.flatten);
     case EObjectTypes.PRIVATE_MESSAGE:
       return findLinkedAttachments(sourceIds, message);
