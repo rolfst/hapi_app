@@ -21,7 +21,7 @@ module.exports = async (req, reply) => {
           total_count: count,
         },
         related: {
-          users: relatedUsers,
+          users: responseUtil.toSnakeCase(relatedUsers),
         },
       },
     });

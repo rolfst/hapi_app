@@ -11,9 +11,8 @@ module.exports = async (req, reply) => {
       payload.organisationId, message.credentials.id);
 
     const { feedItems, count, relatedUsers } = await feedService.makeForOrganisation(R.merge(
-      req.query, {
-        organisationId: payload.organisationId,
-      }
+      req.query,
+      { organisationId: payload.organisationId }
     ), message);
 
     return reply({
@@ -25,7 +24,7 @@ module.exports = async (req, reply) => {
           total_count: count,
         },
         related: {
-          users: relatedUsers,
+          users: responseUtil.toSnakeCase(relatedUsers),
         },
       },
     });
