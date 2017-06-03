@@ -244,7 +244,7 @@ const create = async (payload, message) => {
       attributes: {
         messageId: createdMessage.id,
         parentId: createdMessage.id,
-        parentType: attachmentDefinitions.EParentTypes.FEED_MESSAGE,
+        parentType: payload.messageType || attachmentDefinitions.EParentTypes.FEED_MESSAGE,
       },
     }));
   }
@@ -303,26 +303,14 @@ const createWithoutObject = async (payload, message) => {
   if (checkPayload('files')) {
     await attachmentService.assertAttachmentsExist({ attachmentIds: payload.files }, message);
 
-    const filesArray = R.flatten([payload.files]);
-    const updateMessageIds = Promise.map(filesArray, (attachmentId) => attachmentService.update({
+    await Promise.map(R.flatten([payload.files]), (attachmentId) => attachmentService.update({
       whereConstraint: { id: attachmentId },
-      attributes: { messageId: createdMessage.id },
+      attributes: {
+        messageId: createdMessage.id,
+        parentId: createdMessage.id,
+        parentType: payload.messageType,
+      },
     }));
-
-    const createObjects = Promise.map(filesArray, (attachmentId) => objectService.create({
-      networkId: null,
-      organisationId: payload.organisationId,
-      userId: message.credentials.id,
-      parentType: 'feed_message', // TODO - check if this actually works
-      parentId: createdMessage.id,
-      objectType: 'attachment',
-      sourceId: attachmentId,
-    }, message).then((attachmentObject) => attachmentService.update({
-      whereConstraint: { id: attachmentObject.sourceId },
-      attributes: { objectId: attachmentObject.id },
-    }, message)));
-
-    await Promise.all([updateMessageIds, createObjects]);
   }
 
   if (checkPayload('pollOptions') && checkPayload('pollQuestion')) {
