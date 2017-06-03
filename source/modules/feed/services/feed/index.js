@@ -81,8 +81,9 @@ const makeForNetwork = async (payload, message) => {
   const constraint = impl.composeSpecialisedQueryForFeed(feedPayload, extraWhereConstraint);
 
   const feedItems = await impl.makeFeed(constraint, feedOptions(payload), message);
+  const relatedUsers = await findRelatedUsersForObjects(feedItems);
 
-  return { feedItems, relatedUsers: findRelatedUsersForObjects(feedItems) };
+  return { feedItems, relatedUsers };
 };
 
 /**
@@ -116,13 +117,14 @@ const makeForOrganisation = async (payload, message) => {
     ],
   };
 
-  const totalCountPromise = objectService.count({ constraint }, message);
-  const feedPromise = impl.makeFeed(constraint, options, message);
   const [count, feedItems] = await Promise.all([
-    totalCountPromise, feedPromise,
+    objectService.count({ constraint }, message),
+    impl.makeFeed(constraint, options, message),
   ]);
 
-  return { count, feedItems, relatedUsers: findRelatedUsersForObjects(feedItems) };
+  const relatedUsers = await findRelatedUsersForObjects(feedItems);
+
+  return { count, feedItems, relatedUsers };
 };
 /**
  * Making a feed for a team
@@ -153,8 +155,9 @@ const makeForTeam = async (payload, message) => {
 
   const constraint = impl.composeSpecialisedQueryForFeed(feedPayload);
   const feedItems = await impl.makeFeed(constraint, feedOptions(payload), R.assoc('network', network, message));
+  const relatedUsers = await findRelatedUsersForObjects(feedItems);
 
-  return { feedItems, relatedUsers: findRelatedUsersForObjects(feedItems) };
+  return { feedItems, relatedUsers };
 };
 
 async function makeForPerson(payload, message) {
@@ -201,8 +204,9 @@ async function makeForPerson(payload, message) {
   const [count, feedItems] = await Promise.all([
     totalCountPromise, feedPromise,
   ]);
+  const relatedUsers = await findRelatedUsersForObjects(feedItems);
 
-  return { count, feedItems, relatedUsers: findRelatedUsersForObjects(feedItems) };
+  return { count, feedItems, relatedUsers };
 }
 
 exports.makeForNetwork = makeForNetwork;
