@@ -11,8 +11,13 @@ const messageIdEq = R.propEq('messageId');
 const findIncludes = (object, includes) => (typeEq('feed_message') ?
   R.defaultTo(null, R.filter(messageIdEq(object.sourceId), includes)) : null);
 const anyWithType = (type, objects) => R.any(typeEq(type), objects);
-const getSourceIdsForType = (type, objects) => R.pipe(
-  R.filter(typeEq(type)), R.pluck('sourceId'))(objects);
+const getSourceIdsForTypes = (types, objects) => R.reduce(
+  (acc, type) => acc.concat(R.pipe(
+    R.filter(typeEq(type)),
+    R.pluck('sourceId')
+  )(objects)),
+  [],
+  types);
 
 /**
  * Get resources that belong to object as child.
@@ -25,9 +30,10 @@ const getIncludes = async (hasInclude, objects) => {
   const hasType = (type) => anyWithType(type, objects);
   const includes = { comments: [], likes: [] };
 
-  // TODO - verify if this works
-  if (hasType('feed_message') || hasType(EObjectTypes.ORGANISATION_MESSAGE)) {
-    const messageIds = getSourceIdsForType('feed_message', objects);
+  if (hasType(EObjectTypes.FEED_MESSAGE) || hasType(EObjectTypes.ORGANISATION_MESSAGE)) {
+    const messageIds = getSourceIdsForTypes(
+      [EObjectTypes.FEED_MESSAGE, EObjectTypes.ORGANISATION_MESSAGE],
+      objects);
 
     if (hasInclude('comments')) {
       includes.comments = messageService.listComments({ messageIds });

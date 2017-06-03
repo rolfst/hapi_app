@@ -16,7 +16,7 @@ module.exports = async (req, reply) => {
       throw createError('403');
     }
 
-    const { feedItems, count } = await feedService.makeForPerson(payload, message);
+    const { feedItems, count, relatedUsers } = await feedService.makeForPerson(payload, message);
 
     return reply({
       data: responseUtil.toSnakeCase(feedItems),
@@ -25,6 +25,9 @@ module.exports = async (req, reply) => {
           limit: req.query.limit,
           offset: req.query.offset,
           total_count: count,
+        },
+        related: {
+          users: responseUtil.toSnakeCase(relatedUsers),
         },
       },
     });
