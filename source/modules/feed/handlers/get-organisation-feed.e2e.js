@@ -4,6 +4,7 @@ const { getRequest } = require('../../../shared/test-utils/request');
 const testHelpers = require('../../../shared/test-utils/helpers');
 const { ERoleTypes, EObjectTypes, EParentTypes } = require('../../core/definitions');
 const { EMessageTypes } = require('../../feed/definitions');
+const commentService = require('../services/comment');
 const messageService = require('../services/message');
 
 describe('Handler: Get organisation news', () => {
@@ -12,6 +13,7 @@ describe('Handler: Get organisation news', () => {
   let organisationAdmin;
   let otherUser;
   let otherOrganisationUser;
+  let messageToBeFollowedUp;
 
   let getUrl;
 
@@ -46,7 +48,7 @@ describe('Handler: Get organisation news', () => {
       text: `Network message ${i}`,
     }, { credentials: organisationAdmin }), R.range(0, 5));
 
-    await Promise.all([
+    const messages = await Promise.all([
       ...createMessages,
       messageService.create({
         parentType: EObjectTypes.ORGANISATION,
@@ -68,6 +70,7 @@ describe('Handler: Get organisation news', () => {
         organisationId: organisationA.id,
       }, { credentials: organisationAdmin }),
     ]);
+    messageToBeFollowedUp = R.head(R.slice(-2, -1, messages));
   });
 
   after(() => testHelpers.cleanAll());
@@ -98,5 +101,25 @@ describe('Handler: Get organisation news', () => {
     const { statusCode } = await getRequest(getUrl, otherOrganisationUser.token);
 
     assert.equal(statusCode, 403);
+  });
+
+  describe('meta', () => {
+    before(async () => {
+      await commentService.create({
+        messageId: messageToBeFollowedUp.source.id,
+        userId: otherUser.id,
+        text: 'My insanely impossible comment',
+      });
+    });
+
+    after(() => testHelpers.deleteComment());
+
+    it('should include users related to feed including comments', async () => {
+      getUrl = `/v3/organisations/${organisationA.id}/news?include=comments`;
+      const { statusCode, result } = await getRequest(getUrl, organisationAdmin.token);
+
+      assert.equal(statusCode, 200);
+      assert.lengthOf(result.meta.related.users, 2);
+    });
   });
 });

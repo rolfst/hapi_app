@@ -13,6 +13,7 @@ const logger = require('../../../../shared/services/logger')('attachment/service
  * Lists selected attachments
  * @param {object} payload - Object containing payload data
  * @param {string[]} payload.attachmentIds - Ids of the attachments to get
+ * @param {object} [payload.constraint] - Pass query constraint
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method list
  * @return {external:Promise.<Attachment[]>} {@link
@@ -20,6 +21,10 @@ const logger = require('../../../../shared/services/logger')('attachment/service
  */
 const list = async (payload, message) => {
   logger.debug('Finding multiple attachments', { payload, message });
+
+  if (payload.constraint) {
+    return attachmentRepo.findBy(payload.constraint);
+  }
 
   return attachmentRepo.findBy({ id: { $in: payload.attachmentIds } });
 };
@@ -61,6 +66,9 @@ const update = async (payload, message) => {
  * Creates a attachment
  * @param {object} payload - Object containing payload data
  * @param {Stream} payload.fileStream - The file to upload
+ * @param {string} payload.parentType - Parent can be private_message or feed_message
+ * @param {string} payload.parentId - Id of the linked parent
+ * @param {string} payload.messageId - Id of the message for backwards compatibility
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @example
  * const attachment = await attachmentService.create({...
@@ -79,7 +87,12 @@ const create = async (payload, message) => {
 
   const path = await Storage.upload(payload.fileStream, 'attachments');
 
-  return attachmentRepo.create(path);
+  return attachmentRepo.create({
+    path,
+    messageId: payload.messageId || null,
+    parentType: payload.parentType || null,
+    parentId: payload.parentId || null,
+  });
 };
 
 /**

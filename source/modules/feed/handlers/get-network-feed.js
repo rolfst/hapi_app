@@ -25,7 +25,8 @@ module.exports = async (req, reply) => {
         organisationId: message.network.organisationId,
       }
     ), message);
-    const [feedItems, count] = await Promise.all([feedPromise, totalCountPromise]);
+    const [{ feedItems, relatedUsers }, count] =
+      await Promise.all([feedPromise, totalCountPromise]);
 
     return reply({
       data: responseUtil.toSnakeCase(feedItems),
@@ -34,6 +35,9 @@ module.exports = async (req, reply) => {
           limit: req.query.limit,
           offset: req.query.offset,
           total_count: count,
+        },
+        related: {
+          users: responseUtil.toSnakeCase(relatedUsers),
         },
       },
     });

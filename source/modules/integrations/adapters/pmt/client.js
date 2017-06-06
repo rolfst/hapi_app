@@ -1,5 +1,6 @@
 const fetch = require('isomorphic-fetch');
 const createError = require('../../../../shared/utils/create-error');
+const userRepository = require('../../../core/repositories/user');
 
 const logger = require('../../../../shared/services/logger')('PMT/adapter/client');
 
@@ -9,7 +10,7 @@ const createFormEncodedString = (data) => {
   }).join('&');
 };
 
-const handleRequest = async (response, endpoint) => {
+const handleRequest = async (response, endpoint, token) => {
   let json;
   const status = response.status;
   const undefinedError = `${endpoint}: ${response.statusText}`;
@@ -17,10 +18,12 @@ const handleRequest = async (response, endpoint) => {
   try {
     json = await response.json();
   } catch (e) {
-    json = { error: undefinedError };
+    json = [];
   }
 
   if (status === 400 && json.error.toLowerCase().match(/token|expired/g)) {
+    await userRepository.updateNetworkLink({ userToken: token }, { userToken: null });
+
     throw createError('10005');
   } else if (status === 403) {
     throw createError('403');
@@ -30,6 +33,8 @@ const handleRequest = async (response, endpoint) => {
     throw createError('10008', json.error);
   } else if (status === 401 && json.error === 'Incorrect username or password.') {
     throw createError('10004');
+  } else if (status === 404) {
+    throw createError('404');
   }
 
   return { status, json };
@@ -46,10 +51,9 @@ async function makeRequest(endpoint, token = null, method = 'GET', data = {}, me
     body: createFormEncodedString(data),
   };
 
-
   logger.debug('Fetching from integration', { endpoint, options, message });
   const response = await fetch(endpoint, options);
-  const { status, json } = await handleRequest(response, endpoint);
+  const { status, json } = await handleRequest(response, endpoint, token);
 
   if (status !== 200) {
     logger.error('Error occured when fetching data from integration', {

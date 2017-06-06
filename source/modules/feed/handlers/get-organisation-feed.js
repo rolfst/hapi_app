@@ -10,10 +10,9 @@ module.exports = async (req, reply) => {
     await organisationService.userHasRoleInOrganisation(
       payload.organisationId, message.credentials.id);
 
-    const { feedItems, count } = await feedService.makeForOrganisation(R.merge(
-      req.query, {
-        organisationId: payload.organisationId,
-      }
+    const { feedItems, count, relatedUsers } = await feedService.makeForOrganisation(R.merge(
+      req.query,
+      { organisationId: payload.organisationId }
     ), message);
 
     return reply({
@@ -23,6 +22,9 @@ module.exports = async (req, reply) => {
           limit: req.query.limit,
           offset: req.query.offset,
           total_count: count,
+        },
+        related: {
+          users: responseUtil.toSnakeCase(relatedUsers),
         },
       },
     });

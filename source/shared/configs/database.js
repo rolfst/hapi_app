@@ -21,11 +21,11 @@ exports.development = {
 };
 
 exports.acceptance = {
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
+  host: process.env.ACCEPTANCE_DB_HOST,
+  database: process.env.ACCEPTANCE_DB_NAME,
+  username: process.env.ACCEPTANCE_DB_USERNAME,
+  password: process.env.ACCEPTANCE_DB_PASSWORD,
+  port: process.env.ACCEPTANCE_DB_PORT,
   dialect: 'mysql',
   migrationStorageTableName: 'sequelize_migrations',
 };

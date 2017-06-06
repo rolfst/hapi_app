@@ -1,12 +1,12 @@
 const R = require('ramda');
 const Promise = require('bluebird');
-const workFlowExecutor = require('./executor');
-const workFlowRepo = require('../repositories/workflow');
-const workFlowProcessor = require('../worker/implementation');
-const createError = require('../../../shared/utils/create-error');
-const dateUtils = require('../../../shared/utils/date');
+const workFlowExecutor = require('../executor');
+const workFlowRepo = require('../../repositories/workflow');
+const workFlowProcessor = require('../../worker/implementation');
+const createError = require('../../../../shared/utils/create-error');
+const impl = require('./implementation');
 
-const logger = require('../../../shared/services/logger')('workflow/service');
+const logger = require('../../../../shared/services/logger')('workflow/service');
 
 const isNullOrEmpty = R.either(R.isEmpty, R.isNil);
 
@@ -479,101 +479,53 @@ async function createCompleteWorkflow(payload, message) {
 }
 
 /**
- * Workflow stats
+ * List workflows
  * @param {object} payload - Object containing the params
  * @param {number} payload.organisationId - The id of the organisation
  * @param {Message} message {@link module:shared~Message message} - Object containing meta data
  * @method workflowStats
  * @return {external:Promise.<Object>} {@link module:modules/action~Object}
  */
-const stats = async (payload) => {
-  const [workflows, count] = await Promise.all([
-    workFlowRepo.findAll(
-      { organisationId: payload.organisationId },
-      {
-        limit: payload.limit,
-        offset: payload.offset,
-        order: [['created_at', 'DESC']],
-      }
-    ),
-    workFlowRepo.count({ organisationId: payload.organisationId }),
-  ]);
+const listWorkflows = async (payload, message) => {
+  logger.debug('List workflows', { payload, message });
+
+  const workflows = await workFlowRepo.findAll(
+    { organisationId: payload.organisationId },
+    {
+      limit: payload.limit,
+      offset: payload.offset,
+      order: [['created_at', 'DESC']],
+    }
+  );
 
   const workflowIds = workFlowExecutor.pluckIds(workflows);
 
-  const [
-    workflowCommentCounts,
-    workflowLikeCounts,
-    workflowSeenCounts,
-    workflowActions,
-  ] = await Promise.all([
-    workFlowExecutor.executeQuery(
-      countCommentsQuery,
-      { workflowIds, organisationId: payload.organisationId }
-    ),
-    workFlowExecutor.executeQuery(
-      countLikesQuery,
-      { workflowIds, organisationId: payload.organisationId }
-    ),
-    workFlowExecutor.executeQuery(
-      countObjectSeen,
-      { workflowIds, organisationId: payload.organisationId }
-    ),
+  if (workflowIds.length === 0) return [];
+
+  const countsQueryReplacements = { workflowIds, organisationId: payload.organisationId };
+
+  const subCounts = await Promise.all([
+    workFlowExecutor.executeQuery(countCommentsQuery, countsQueryReplacements),
+    workFlowExecutor.executeQuery(countLikesQuery, countsQueryReplacements),
+    workFlowExecutor.executeQuery(countObjectSeen, countsQueryReplacements),
     workFlowRepo.findAllActions({ $in: workflowIds }),
   ]);
 
-  const findIdInArray = (id, arr) => R.find(R.propEq('id', id), arr);
-  const findActions = (workflowId) => R.filter(R.propEq('workflowId', workflowId), workflowActions);
+  return R.map(impl.addExtraData(subCounts), workflows);
+};
 
-  const addExtraData = (workflow) => {
-    const commentsCountRes = findIdInArray(workflow.id, workflowCommentCounts);
-    const likesCountRes = findIdInArray(workflow.id, workflowLikeCounts);
-    const seenCountRes = findIdInArray(workflow.id, workflowSeenCounts);
-    const actions = findActions(workflow.id);
+/**
+ * Count workflows
+ * @param {object} payload - Object containing the params
+ * @param {number} payload.organisationId - The id of the organisation
+ * @param {Message} message {@link module:shared~Message message} - Object containing meta data
+ * @method workflowStats
+ * @return {external:Promise.<Object>} {@link module:modules/action~Object}
+ */
+const countWorkflows = async (payload, message) => {
+  logger.debug('Count workflows', { payload, message });
 
-    let reachCount = null;
-    if (!reachCount && workflow.meta && workflow.meta.reachCount) {
-      reachCount = workflow.meta.reachCount;
-    }
-
-    const seenCount = seenCountRes ? seenCountRes.seenCount : 0;
-    const likesCount = likesCountRes ? likesCountRes.likesCount : 0;
-    const commentsCount = commentsCountRes ? commentsCountRes.commentsCount : 0;
-    const lastInteraction = (() => {
-      const lastLikeActivity = likesCountRes ? likesCountRes.lastLikeActivity : null;
-      const lastCommentActivity = commentsCountRes ? commentsCountRes.lastCommentActivity : null;
-
-      if (!lastLikeActivity && !lastCommentActivity) {
-        return null;
-      }
-
-      let retVal;
-
-      if (!lastLikeActivity) retVal = lastCommentActivity;
-      if (!lastCommentActivity) retVal = lastLikeActivity;
-      if (lastLikeActivity && lastCommentActivity) {
-        retVal = lastCommentActivity > lastLikeActivity
-          ? lastCommentActivity
-          : lastLikeActivity;
-      }
-
-      return dateUtils.toISOString(retVal);
-    })();
-
-    return R.merge(workflow, {
-      reachCount,
-      seenCount,
-      actions,
-      likesCount,
-      commentsCount,
-      lastInteraction,
-    });
-  };
-
-  return {
-    data: R.map(addExtraData, workflows),
-    count,
-  };
+  return workFlowRepo.count({ organisationId: payload.organisationId });
 };
 
 // Carry along enums for easy access later
@@ -596,4 +548,5 @@ exports.createAction = createAction;
 exports.updateAction = updateAction;
 exports.removeAction = removeAction;
 exports.createCompleteWorkflow = createCompleteWorkflow;
-exports.stats = stats;
+exports.listWorkflows = listWorkflows;
+exports.countWorkflows = countWorkflows;

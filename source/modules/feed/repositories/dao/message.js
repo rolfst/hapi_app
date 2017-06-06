@@ -43,7 +43,7 @@ const Message = model.define('FeedMessage', {
   createdBy: {
     type: Sequelize.INTEGER,
     field: 'created_by',
-    allowNull: false,
+    allowNull: true,
   },
 }, {
   tableName: 'messages',

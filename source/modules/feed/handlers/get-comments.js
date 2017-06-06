@@ -3,7 +3,7 @@ const createServicePayload = require('../../../shared/utils/create-service-paylo
 const responseUtil = require('../../../shared/utils/response');
 const messageService = require('../services/message');
 const userService = require('../../core/services/user');
-const { EIncludeTypes, EUserFields } = require('../../core/definitions');
+const { EUserFields } = require('../../core/definitions');
 
 module.exports = async (req, reply) => {
   try {
@@ -12,18 +12,15 @@ module.exports = async (req, reply) => {
 
     const retVal = {
       data: comments,
-    };
-
-    if (payload.include.includes(EIncludeTypes.USERS)) {
-      retVal.meta = {
+      meta: {
         related: {
           users: R.map(
             R.pick([EUserFields.ID, EUserFields.FULL_NAME, EUserFields.PROFILE_IMG]),
             await userService.list({ userIds: R.pluck('userId', comments) }, message)
           ),
         },
-      };
-    }
+      },
+    };
 
     return reply(responseUtil.toSnakeCase(retVal));
   } catch (err) {
