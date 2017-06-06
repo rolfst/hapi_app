@@ -1,5 +1,6 @@
 const R = require('ramda');
 const moment = require('moment');
+const Sequelize = require('sequelize');
 const createError = require('../../../shared/utils/create-error');
 const createNetworkModel = require('../models/network');
 const createScopedInfoModel = require('../models/network-scope');
@@ -35,9 +36,21 @@ const findAll = async () => {
   return R.map(createNetworkModel, networks);
 };
 
-const findWhere = async (whereConstraint) => Network
+const findWhere = (whereConstraint) => Network
   .findAll({ include: defaultIncludes, where: whereConstraint })
   .then(R.map(createNetworkModel));
+
+const countsUsersInNetwork = (networkIds) => NetworkUser
+  .findAll({
+    attributes: [
+      ['network_id', 'id'],
+      [Sequelize.fn('COUNT', 'id'), 'usersCount'],
+    ],
+    where: { network_id: { $in: networkIds } },
+    group: ['network_id'],
+  })
+  .then(R.pluck('dataValues'))
+  .then(R.map(R.pick(['id', 'usersCount'])));
 
 /**
  * @param {Network} data  - partial Network object as search criteria
@@ -312,3 +325,4 @@ exports.removeUser = removeUser;
 exports.setImportDateOnNetworkIntegration = setImportDateOnNetworkIntegration;
 exports.updateNetwork = updateNetwork;
 exports.updateUser = updateUser;
+exports.countsUsersInNetwork = countsUsersInNetwork;

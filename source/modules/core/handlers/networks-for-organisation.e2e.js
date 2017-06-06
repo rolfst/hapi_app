@@ -36,6 +36,7 @@ describe('Handler: Networks for organisation', () => {
     const { result } = await getRequest(endpoint, admin.token);
 
     assert.lengthOf(result.data, 2);
+    assert.equal(result.data[0].users_count, 1);
   });
 
   it('should fail when user doesnt belong to the organisation', async () => {
