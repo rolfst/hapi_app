@@ -44,7 +44,7 @@ WHERE
 //   timezone based on the server timezone and the client timezone
 const fetchDueWorkflowIds = () =>
   Promise.resolve(workflowExecutor
-    .executeQuery(fetchDueWorkflowIdsQuery, { currentTime: dateUtils.toUTC(new Date()) })
+    .executeQuery(fetchDueWorkflowIdsQuery, { currentTime: dateUtils.toUTC() })
     .then(workflowExecutor.pluckIds));
 
 const doAction = (workflow, action, userId = null) => {
