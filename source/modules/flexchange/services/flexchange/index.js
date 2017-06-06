@@ -213,10 +213,9 @@ const approveExchange = async (payload, message) => {
 
   if (approvedExchange) {
     FlexchangeDispatcher.emit('exchange.approved', {
-      exchange: approvedExchange,
+      exchange: await exchangeRepo.getApprovedExchange(approvedExchange),
       network: message.network,
       credentials: message.credentials,
-      approvedUser: exchangeResponse.User,
     });
   }
 

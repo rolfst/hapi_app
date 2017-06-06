@@ -444,6 +444,16 @@ async function rejectExchange(exchange, rejectingUser, userIdToReject) {
   return exchange.id;
 }
 
+const getApprovedExchange = (exchangeId) => Exchange
+  .findOne({
+    where: { id: exchangeId },
+    include: [
+      { model: User },
+      { model: User, as: 'Approver' },
+      { model: User, as: 'ApprovedUser' },
+    ],
+  });
+
 exports.acceptExchange = acceptExchange;
 exports.approveExchange = approveExchange;
 exports.createExchange = createExchange;
@@ -466,3 +476,4 @@ exports.incrementExchangeDeclineCount = incrementExchangeDeclineCount;
 exports.rejectExchange = rejectExchange;
 exports.respondToExchange = respondToExchange;
 exports.updateExchangeById = updateExchangeById;
+exports.getApprovedExchange = getApprovedExchange;
