@@ -8,6 +8,7 @@ const { EParentTypes, EObjectTypes } = require('../../core/definitions');
 const messageService = require('../../feed/services/message');
 const { EMessageTypes } = require('../../feed/definitions');
 const logger = require('../../../shared/services/logger')('WORKFLOW/worker/implementation');
+const dateUtils = require('../../../shared/utils/date');
 
 const renameKeys = (keysMap, obj) => {
   return R.reduce((acc, key) => R.assoc(keysMap[key] || key, obj[key], acc), {}, R.keys(obj));
@@ -33,15 +34,17 @@ WHERE
        t.type = '${ETriggerTypes.DIRECT}'
     OR (
           t.type = '${ETriggerTypes.DATETIME}'
-      AND NOW() >= CAST(t.value AS DATETIME)
+      AND :currentTime >= CAST(t.value AS DATETIME)
     )
   )
 ;
 `;
 
+// This function sends the date/time we want since mysql tries to think for us and calculates
+//   timezone based on the server timezone and the client timezone
 const fetchDueWorkflowIds = () =>
   Promise.resolve(workflowExecutor
-    .executeQuery(fetchDueWorkflowIdsQuery)
+    .executeQuery(fetchDueWorkflowIdsQuery, { currentTime: dateUtils.toPlainDateTime(new Date()) })
     .then(workflowExecutor.pluckIds));
 
 const doAction = (workflow, action, userId = null) => {

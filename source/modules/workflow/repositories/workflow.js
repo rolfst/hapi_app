@@ -108,7 +108,7 @@ const createTrigger = (attributes) => {
   const pickedAttributes = R.pick(whitelist, attributes);
 
   if (pickedAttributes.value instanceof Date) {
-    pickedAttributes.value = dateUtils.toUTC(pickedAttributes.value);
+    pickedAttributes.value = dateUtils.toPlainDateTime(pickedAttributes.value);
   }
 
   return Trigger
@@ -122,7 +122,7 @@ const updateTrigger = (id, attributes) => {
   const pickedAttributes = R.pick(whitelist, attributes);
 
   if (pickedAttributes.value instanceof Date) {
-    pickedAttributes.value = dateUtils.toUTC(pickedAttributes.value);
+    pickedAttributes.value = dateUtils.toPlainDateTime(pickedAttributes.value);
   }
 
   return Trigger
