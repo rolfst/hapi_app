@@ -101,7 +101,11 @@ const listNetworks = async (payload, message) => {
   await impl.assertThatOrganisationExists(payload.organisationId);
   await impl.assertThatUserIsMemberOfOrganisation(message.credentials.id, payload.organisationId);
 
-  return networkService.list({ organisationId: payload.organisationId });
+  const networks = await networkService.list({ organisationId: payload.organisationId });
+  const counts = await networkRepository.countsUsersInNetwork(R.pluck('id', networks))
+    .then(R.reduce((acc, network) => R.assoc(network.id, network.usersCount, acc), {}));
+
+  return R.map((network) => R.assoc('usersCount', counts[network.id] || 0, network), networks);
 };
 
 /**

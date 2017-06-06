@@ -31,13 +31,13 @@ const findById = async (id, includes = defaultIncludes) => {
 /**
  * Create a new poll
  * @param {object} attributes - Poll attributes
- * @param {string} attributes.userId - Id of the user creating the poll
- * @param {string} attributes.networkId - Id of the network the poll is placed in
+ * @param {object} attributes.question
+ * @param {string} attributes.messageId
  * @method create
  * @return {external:Promise} - Create poll promise
  */
 const create = async (attributes) => {
-  const poll = await Poll.create(attributes);
+  const poll = await Poll.create(R.pick(['question', 'messageId'], attributes));
 
   return createPollModel(poll);
 };

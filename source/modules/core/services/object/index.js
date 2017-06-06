@@ -17,7 +17,7 @@ const logger = require('../../../../shared/services/logger')('CORE/service/objec
 
 const objectsForTypeValuePair = (fn, pairs) => Object.keys(pairs)
   .map((key) => fn(pairs[key], key));
-const getSources = R.pipeP(Promise.all, R.values, R.flatten, R.reject(R.isNil));
+const fetchPromises = R.pipeP(Promise.all, R.values, R.flatten, R.reject(R.isNil));
 const groupByObjectType = R.groupBy(R.prop('objectType'));
 const sourceIdsPerType = R.pipe(groupByObjectType, R.map(R.pluck('sourceId')));
 const createOptionsFromPayload = R.pipe(
@@ -61,13 +61,17 @@ const listWithSourceAndChildren = async (payload, message, userId = null) => {
     id: { $in: payload.objectIds },
   }, createOptionsFromPayload(payload), userId);
 
-  const promisedChildren = objectsForTypeValuePair(
-    impl.findChildrenForType, sourceIdsPerType(objects));
-  const children = await getSources(promisedChildren);
+  const promisedChildren = R.mapObjIndexed(
+    (sourceIds, type) => impl.findChildrenForType(type, sourceIds, message),
+    sourceIdsPerType(objects)
+  );
+
+  const children = await Promise.props(promisedChildren)
+    .then(R.pipe(R.values, R.flatten));
 
   const sourceIds = R.merge(sourceIdsPerType(objects), sourceIdsPerType(children));
   const promisedSources = objectsForTypeValuePair(impl.findSourcesForType(message), sourceIds);
-  const sources = await getSources(promisedSources);
+  const sources = await fetchPromises(promisedSources);
 
   const objectsWithSource = R.map(impl.addSourceToObject(sources), R.concat(objects, children));
   const findObjectById = (objectId) => R.find(R.propEq('id', objectId), objectsWithSource);

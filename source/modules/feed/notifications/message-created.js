@@ -8,7 +8,19 @@ module.exports = (actor, parent, messageObject) => {
   // fallback on children
   object.children = object.children || [];
 
-  const defaultHeadings = parent.name ? `${actor.fullName} @ ${parent.name}` : `${actor.fullName}`;
+  let defaultHeadings;
+
+  switch (true) {
+    case !!parent.name && !!actor.fullName:
+      defaultHeadings = `${actor.fullName} @ ${parent.name}`;
+      break;
+    case !!parent.name:
+      defaultHeadings = parent.name;
+      break;
+    default:
+      defaultHeadings = actor.fullName;
+  }
+
   const poll = R.find(R.propEq('objectType', 'poll'), object.children);
 
   const text = R.cond([

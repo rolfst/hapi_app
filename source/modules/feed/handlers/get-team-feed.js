@@ -7,7 +7,7 @@ const feedService = require('../services/feed');
 module.exports = async (req, reply) => {
   try {
     const { message } = createServicePayload(req);
-    const [feedItems, count] = await Promise.all([
+    const [{ feedItems, relatedUsers }, count] = await Promise.all([
       feedService.makeForTeam(R.merge(req.query, { teamId: req.params.teamId }), message),
       objectService.count({ parentType: 'team', parentId: req.params.teamId }, message),
     ]);
@@ -19,6 +19,9 @@ module.exports = async (req, reply) => {
           limit: req.query.limit,
           offset: req.query.offset,
           total_count: count,
+        },
+        related: {
+          users: responseUtil.toSnakeCase(relatedUsers),
         },
       },
     });

@@ -71,13 +71,4 @@ describe('Handler: Get comments', () => {
 
     assert.deepEqual(impossibleUser, expectedUser);
   });
-
-  it('should not include meta without include query param', async () => {
-    const { statusCode, result } = await getRequest(`${endpoint}`, organisationAdmin.token);
-
-    assert.equal(statusCode, 200);
-    assert.notProperty(result, 'meta');
-    assert.property(result, 'data');
-    assert.isArray(result.data);
-  });
 });
