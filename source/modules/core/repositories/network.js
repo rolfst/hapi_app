@@ -40,17 +40,23 @@ const findWhere = (whereConstraint) => Network
   .findAll({ include: defaultIncludes, where: whereConstraint })
   .then(R.map(createNetworkModel));
 
-const countsUsersInNetwork = (networkIds) => NetworkUser
-  .findAll({
-    attributes: [
-      ['network_id', 'id'],
-      [Sequelize.fn('COUNT', 'id'), 'usersCount'],
-    ],
-    where: { network_id: { $in: networkIds } },
-    group: ['network_id'],
-  })
-  .then(R.pluck('dataValues'))
-  .then(R.map(R.pick(['id', 'usersCount'])));
+const countsUsersInNetwork = (networkIds, includeDeletedUsers = false) => {
+  const whereConstraint = { network_id: { $in: networkIds } };
+
+  if (!includeDeletedUsers) whereConstraint.deleted_at = null;
+
+  return NetworkUser
+    .findAll({
+      attributes: [
+        ['network_id', 'id'],
+        [Sequelize.fn('COUNT', 'id'), 'usersCount'],
+      ],
+      where: whereConstraint,
+      group: ['network_id'],
+    })
+    .then(R.pluck('dataValues'))
+    .then(R.map(R.pick(['id', 'usersCount'])));
+};
 
 /**
  * @param {Network} data  - partial Network object as search criteria
