@@ -34,7 +34,7 @@ WHERE
        t.type = '${ETriggerTypes.DIRECT}'
     OR (
           t.type = '${ETriggerTypes.DATETIME}'
-      AND :currentTime >= CAST(t.value AS DATETIME)
+      AND :currentTime >= t.value
     )
   )
 ;
