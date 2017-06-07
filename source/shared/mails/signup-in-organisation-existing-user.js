@@ -6,14 +6,13 @@ module.exports = (organisation, user, password, invitor) => {
     '-companyName-': organisation.name, // TODO: UTF-8 encode
     '-invitationSenderFirstName-': invitor.firstName,
     '-email-': user.email,
-    '-password-': password,
   };
 
   const options = {
     receiver: { email: user.email },
     sender: { name: invitor.fullName, email: invitor.email },
     subject: `Je inlog gegevens voor het Flex-Appeal organisatie ${organisation.name}`,
-    template: mailTemplateConfig.NEW_USER,
+    template: mailTemplateConfig.EXISTING_USER_IN_SYSTEM,
   };
 
   return { data, options };
