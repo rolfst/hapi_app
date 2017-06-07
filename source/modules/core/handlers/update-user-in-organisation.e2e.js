@@ -58,11 +58,11 @@ describe('Handler: Update user in organisation', () => {
 
   after(() => testHelpers.cleanAll());
 
-  it('should fail when user isn\'t in the organisation', async () => {
+  it('should fail when updating user isn\'t in the organisation', async () => {
     const { statusCode, result } = await putRequest(updateUrl, updateFixture, otherUser.token);
 
     assert.equal(statusCode, 403);
-    assert.equal(result.error_code, '403');
+    assert.equal(result.error_code, '10020');
   });
 
   it('should fail when user isn\'t an admin in the organisation', async () => {

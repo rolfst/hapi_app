@@ -105,7 +105,7 @@ describe('Handler: Users in organisation', () => {
     const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
     assert.equal(statusCode, 403);
-    assert.equal(result.error_code, '403');
+    assert.equal(result.error_code, '10020');
   });
 
   it('should not return deleted users', async () => {
