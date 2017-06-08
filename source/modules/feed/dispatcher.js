@@ -35,7 +35,12 @@ pubsub.asyncOn('message.created', async (payload) => {
   const [organisation, network, usersToNotify] =
     await Promise.all([organisationP, networkP, usersToNotifyP]);
 
-  Notifier.send(usersToNotify, notification, payload.networkId, payload.organisationId);
+  Notifier.send(
+    usersToNotify,
+    notification,
+    network ? network.id : null,
+    organisation ? organisation.id : network.organisationId
+  );
 
   let trackData;
 

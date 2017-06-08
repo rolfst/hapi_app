@@ -14,11 +14,12 @@ const acceptanceNotifier = require('../notifications/accepted-exchange');
 const createdNotifier = require('../notifications/exchange-created');
 const substituteNotifier = require('../notifications/substitute-approved');
 
-describe.only('Create exchange comment', () => {
+describe('Create exchange comment', () => {
   let admin;
   let network;
   let exchange;
 
+  let sandbox;
   let dispatcherEmitSpy;
 
   before(async () => {
@@ -41,7 +42,10 @@ describe.only('Create exchange comment', () => {
     });
   });
 
-  after(() => testHelper.cleanAll());
+  after(() => {
+    sandbox.restore();
+    return testHelper.cleanAll()
+  });
 
   it('should create comment for exchange', async () => {
     const endpoint = `/v2/networks/${network.id}/exchanges/${exchange.id}/comments`;
