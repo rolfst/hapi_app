@@ -5,7 +5,7 @@ const notificationUtils = require('../utils/notification');
 const userService = require('../../core/services/user');
 const exchangeRepo = require('../repositories/exchange');
 
-const createNotification = (exchange, creator) => {
+const createNotification = (exchange) => {
   const date = moment(exchange.date).calendar(null, {
     sameDay: '[vandaag]',
     nextDay: '[morgen]',
@@ -14,22 +14,16 @@ const createNotification = (exchange, creator) => {
   });
 
   return {
-    text: `Je hebt de shift van ${creator.fullName} overgenomen. Je werkt ${date} van ` +
+    text: `Je hebt de shift van ${creator.User.getFullName()} overgenomen. Je werkt ${date} van ` +
       `${notificationUtils.createTimeText(exchange)}.`,
     data: { id: exchange.id, type: 'exchange', track_name: 'exchange_approved_substitute' },
   };
 };
 
-const send = async (id, network) => {
-  const exchanges = await exchangeRepo.findAllBy({ id });
-  const exchange = R.head(exchanges);
-  const [creator, approvedUser] = await Promise.all([
-    userService.getUser({ userId: exchange.userId }),
-    userService.getUser({ userId: exchange.approvedUserId }),
-  ]);
-  const notification = createNotification(exchange, creator);
+const send = async (exchange, network) => {
+  const notification = createNotification(exchange);
 
-  return notifier.send([approvedUser], notification, network.id, network.organisationId);
+  return notifier.send([exchange.ApprovedUser], notification, network.id, network.organisationId);
 };
 
 exports.createNotification = createNotification;

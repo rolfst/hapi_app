@@ -4,7 +4,6 @@ const moment = require('moment');
 const sinon = require('sinon');
 const Promise = require('bluebird');
 const testHelper = require('../../../shared/test-utils/helpers');
-const acceptanceNotifier = require('../notifications/accepted-exchange');
 const { patchRequest } = require('../../../shared/test-utils/request');
 const objectRepository = require('../../core/repositories/object');
 const { exchangeTypes } = require('../repositories/dao/exchange');
@@ -12,11 +11,12 @@ const exchangeService = require('../services/flexchange');
 const dispatcher = require('../dispatcher');
 const Mixpanel = require('../../../shared/services/mixpanel');
 const Intercom = require('../../../shared/services/intercom');
+const acceptanceNotifier = require('../notifications/accepted-exchange');
 const creatorNotifier = require('../notifications/creator-approved');
 const createdNotifier = require('../notifications/exchange-created');
 const substituteNotifier = require('../notifications/substitute-approved');
 
-describe.only('Approve exchange', () => {
+describe('Approve exchange', () => {
   let sandbox;
   let admin;
   let employee;

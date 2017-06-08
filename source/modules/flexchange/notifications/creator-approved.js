@@ -20,9 +20,7 @@ const createNotification = (exchange) => {
   };
 };
 
-const send = async (id, network) => {
-  const exchanges = await exchangeRepo.findAllBy({ id });
-  const exchange = R.head(exchanges);
+const send = async (exchange, network) => {
   const notification = createNotification(exchange);
 
   return notifier.send([exchange.User], notification, network.id, network.organisationId);
