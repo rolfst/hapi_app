@@ -84,6 +84,7 @@ describe('Handler: View my scoped profile', () => {
     assert.property(aNetwork, 'role_type');
     assert.property(aNetwork, 'invited_at');
     assert.property(aNetwork, 'deleted_at');
+    assert.property(aNetwork, 'integration_auth');
 
     // TODO these fields are not in spec but are in the database
     // assert.equal(data.address, admin.address);

@@ -1,5 +1,6 @@
 const R = require('ramda');
 const moment = require('moment');
+const Sequelize = require('sequelize');
 const createError = require('../../../shared/utils/create-error');
 const createNetworkModel = require('../models/network');
 const createScopedInfoModel = require('../models/network-scope');
@@ -35,9 +36,27 @@ const findAll = async () => {
   return R.map(createNetworkModel, networks);
 };
 
-const findWhere = async (whereConstraint) => Network
+const findWhere = (whereConstraint) => Network
   .findAll({ include: defaultIncludes, where: whereConstraint })
   .then(R.map(createNetworkModel));
+
+const countsUsersInNetwork = (networkIds, includeDeletedUsers = false) => {
+  const whereConstraint = { network_id: { $in: networkIds } };
+
+  if (!includeDeletedUsers) whereConstraint.deleted_at = null;
+
+  return NetworkUser
+    .findAll({
+      attributes: [
+        ['network_id', 'id'],
+        [Sequelize.fn('COUNT', 'id'), 'usersCount'],
+      ],
+      where: whereConstraint,
+      group: ['network_id'],
+    })
+    .then(R.pluck('dataValues'))
+    .then(R.map(R.pick(['id', 'usersCount'])));
+};
 
 /**
  * @param {Network} data  - partial Network object as search criteria
@@ -135,9 +154,18 @@ const findNetworksForUser = async (userId, includePivot = false) => {
     .then(R.map(createScopedInfoModel));
   const findNetworkPivot = (networkId) => R.find(R.propEq('id', networkId), networkResult);
 
+  const pickFromPivot = (networkUser) => R.merge(R.pick([
+    'name',
+    'id',
+    'organisationId',
+    'invitedAt',
+    'createdAt',
+    'deletedAt',
+  ], networkUser), { integrationAuth: !!networkUser.userToken });
+
   return R.map((networkUser) => R.merge(
     networkUser,
-    R.pick(['name', 'id', 'organisationId', 'invitedAt', 'createdAt', 'deletedAt'], findNetworkPivot(networkUser.networkId.toString()))
+    pickFromPivot(findNetworkPivot(networkUser.networkId.toString()))
   ), pivotResult);
 };
 
@@ -312,3 +340,4 @@ exports.removeUser = removeUser;
 exports.setImportDateOnNetworkIntegration = setImportDateOnNetworkIntegration;
 exports.updateNetwork = updateNetwork;
 exports.updateUser = updateUser;
+exports.countsUsersInNetwork = countsUsersInNetwork;
