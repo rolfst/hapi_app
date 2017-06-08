@@ -5,7 +5,7 @@ const createServicePayload = require('../../../shared/utils/create-service-paylo
 module.exports = async (req, reply) => {
   try {
     const { message, payload } = createServicePayload(req);
-    if (payload.q) {
+    if (payload.q || payload.select) {
       const result = await organisationService.listUsers(payload, message);
 
       return reply({ data: responseUtil.toSnakeCase(result) });

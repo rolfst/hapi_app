@@ -1,6 +1,9 @@
 const R = require('ramda');
 const Promise = require('bluebird');
 const createError = require('../../../../shared/utils/create-error');
+const queryGenerator = require('../../../workflow/services/query-generator');
+const workflowExcutor = require('../../../workflow/services/executor');
+const { EConditionOperators } = require('../../../workflow/definitions');
 const organisationRepository = require('../../repositories/organisation');
 const userRepository = require('../../repositories/user');
 const networkRepository = require('../../repositories/network');
@@ -17,6 +20,31 @@ const logger = require('../../../../shared/services/logger')('CORE/service/objec
 
 const OPTIONS_WHITELIST = ['offset', 'limit'];
 const createOptionsFromPayload = R.pick(OPTIONS_WHITELIST);
+
+const selectUsers = async (organisationId, select, options) => {
+  let condition = null;
+  let query = null;
+  switch (select) {
+    case 'admin':
+      condition = { field: 'organisation_user.role_type', operator: EConditionOperators.EQUAL, value: ERoleTypes.ADMIN };
+      break;
+    case 'active':
+      condition = { field: 'organisation_user.is_active', operator: EConditionOperators.EQUAL, value: true };
+      break;
+    case 'inactive':
+      condition = { field: 'organisation_user.is_active', operator: EConditionOperators.EQUAL, value: false };
+      break;
+    default:
+      condition = { field: 'organisation_user.is_active', operator: EConditionOperators.EQUAL, value: false };
+      break;
+  }
+
+  query = queryGenerator(organisationId, [condition], options);
+  const result = await workflowExcutor.executeQuery(query);
+
+  return result;
+};
+
 
 /**
  * Verifies if a user has a specific role in an organisation
@@ -230,15 +258,7 @@ const listFunctions = async (payload, message) => {
 
   return organisationRepository.findFunctionsInOrganisation(payload.organisationId);
 };
-
-async function listUsers(payload, message) {
-  logger.debug('List all users for organisation', { payload, message });
-
-  await assertUserIsAdminInOrganisation(payload.organisationId, message.credentials.id);
-
-  const options = createOptionsFromPayload(payload);
-  const organisationUsers = await organisationRepository.findUsers(
-    R.merge(R.omit(OPTIONS_WHITELIST, payload), { deletedAt: null }), null, options);
+async function fetchOrganisationUsers(organisationUsers, message) {
   const userIds = R.map((user) => user.userId, organisationUsers);
   const users = await userService.list({ userIds }, message);
   const findOrganisationUser = (organisationUserId) => R.omit(['function', 'teamIds'],
@@ -253,6 +273,23 @@ async function listUsers(payload, message) {
       )
     )
   ), organisationUsers);
+}
+
+async function listUsers(payload, message) {
+  logger.debug('List all users for organisation', { payload, message });
+
+  await assertUserIsAdminInOrganisation(payload.organisationId, message.credentials.id);
+
+  const options = createOptionsFromPayload(payload);
+  let organisationUsers = null;
+  if (!payload.select) {
+    organisationUsers = await organisationRepository.findUsers(
+      R.merge(R.omit(OPTIONS_WHITELIST, payload), { deletedAt: null }), null, options);
+  } else {
+    organisationUsers = await selectUsers(payload.organisationId, payload.select, options);
+  }
+
+  return fetchOrganisationUsers(organisationUsers, message);
 }
 
 /**
@@ -471,6 +508,7 @@ exports.userHasRoleInOrganisation = userHasRoleInOrganisation;
 exports.listNetworks = listNetworks;
 exports.listTeamIds = listTeamIds;
 exports.listUsers = listUsers;
+exports.selectUsers = selectUsers;
 exports.removeUserFromNetworks = removeUserFromNetworks;
 exports.removeUserFromOrganisation = removeUserFromOrganisation;
 exports.updateFunction = updateFunction;

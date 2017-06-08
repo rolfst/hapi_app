@@ -67,6 +67,9 @@ const structure = {
       'invited_at',
       'deleted_at',
     ],
+    calculatedFields: {
+      is_active: 'IF(NOT ou.last_active IS NULL OR ou.last_active < NOW() - INTERVAL 1 WEEK, 1, 0)',
+    },
   },
   network_user: {
     identifier: 'nu',
@@ -82,6 +85,9 @@ const structure = {
       'invited_at',
       'deleted_at',
     ],
+    calculatedFields: {
+      is_active: 'IF(NOT nu.last_active IS NULL OR nu.last_active < NOW() - INTERVAL 1 WEEK, 1, 0)',
+    },
   },
   network: {
     identifier: 'n',
@@ -183,7 +189,7 @@ const buildQuery = (organisationId, conditions = null, {
 
   if (conditions) {
     R.forEach((condition) => {
-      if (!Object.prototype.hasOwnProperty.call(selectables, condition.field)) throw new Error('Unknown field');
+      if (!Object.prototype.hasOwnProperty.call(selectables, condition.field)) throw new Error(`Unknown field: ${condition.field}`);
 
       addJoin(selectables[condition.field].join);
 
