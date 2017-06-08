@@ -1,4 +1,5 @@
 const { assert } = require('chai');
+const moment = require('moment');
 const testHelpers = require('../../../shared/test-utils/helpers');
 const organisationService = require('../services/organisation');
 const organisationRepo = require('../repositories/organisation');
@@ -17,6 +18,7 @@ describe('Handler: Users in organisation', () => {
       testHelpers.createUser({ firstName: 'taal', lastName: 'spellen' }),
       testHelpers.createUser({ firstName: 'pelt', lastName: 'spellen' }),
       testHelpers.createUser({ firstName: 'Jean-Claude', lastName: 'van Damme' }),
+      testHelpers.createUser(),
     ]);
 
     const [networkA, networkB] = await Promise.all([
@@ -33,7 +35,9 @@ describe('Handler: Users in organisation', () => {
       organisationRepo.addUser(users[2].id, organisationA.id, 'ADMIN'),
       organisationRepo.addUser(users[3].id, organisationA.id, 'ADMIN'),
       organisationRepo.addUser(users[1].id, organisationB.id, 'ADMIN'),
+      organisationRepo.addUser(users[4].id, organisationA.id),
     ]);
+    await organisationRepo.updateUser(users[4].id, organisationA.id, { lastActive: moment().subtract('days', 1) });
   });
 
   after(() => testHelpers.cleanAll());
@@ -43,7 +47,7 @@ describe('Handler: Users in organisation', () => {
     const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
     assert.equal(statusCode, 200);
-    assert.lengthOf(result.data, 3);
+    assert.lengthOf(result.data, 4);
 
     const actual = result.data[0];
     assert.property(actual, 'id');
@@ -73,7 +77,7 @@ describe('Handler: Users in organisation', () => {
     const endpoint = `/v2/organisations/${organisationA.id}/users`;
     const { result: { meta } } = await getRequest(endpoint, users[0].token);
 
-    assert.equal(meta.pagination.total_count, 3);
+    assert.equal(meta.pagination.total_count, 4);
     assert.equal(meta.pagination.offset, 0);
     assert.equal(meta.pagination.limit, 20);
 
@@ -175,6 +179,30 @@ describe('Handler: Users in organisation', () => {
       assert.equal(statusCode, 200);
       assert.lengthOf(result.data, 1);
       assert.equal(result.data[0].first_name, 'Jean-Claude');
+    });
+
+    it('should only search for users that are admins of the organisation', async () => {
+      const endpoint = `/v2/organisations/${organisationA.id}/users?select=admin`;
+      const { statusCode, result } = await getRequest(endpoint, users[0].token);
+
+      assert.equal(statusCode, 200);
+      assert.lengthOf(result.data, 3);
+    });
+
+    it('should only search for users that are inactive users of the organisation', async () => {
+      const endpoint = `/v2/organisations/${organisationA.id}/users?select=inactive`;
+      const { statusCode, result } = await getRequest(endpoint, users[0].token);
+
+      assert.equal(statusCode, 200);
+      assert.lengthOf(result.data, 3);
+    });
+
+    it('should only search for users that are active users of the organisation', async () => {
+      const endpoint = `/v2/organisations/${organisationA.id}/users?select=active`;
+      const { statusCode, result } = await getRequest(endpoint, users[0].token);
+
+      assert.equal(statusCode, 200);
+      assert.lengthOf(result.data, 1);
     });
   });
 });
