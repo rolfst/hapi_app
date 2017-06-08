@@ -446,7 +446,7 @@ const removeUserFromOrganisation = async (payload, message) => {
   logger.debug('Remove user from organisation', { payload, message });
 
   if (!await userHasRoleInOrganisation(payload.organisationId, payload.userId)) {
-    throw createError('10021', '');
+    throw createError('10021');
   }
 
   return organisationRepository.removeUser(payload.organisationId, payload.userId);

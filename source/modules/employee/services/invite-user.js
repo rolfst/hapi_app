@@ -23,14 +23,14 @@ const { ERoleTypes } = require('../../core/definitions');
  * @module modules/employee/services/inviteUser
  */
 
-const userStates = {
+const EUserStates = {
   NEW_USER: 'new',
   EXISTING_USER_IN_ORGANISATION: 'existing_in_organisation',
   EXISTING_USER_NOT_IN_ORGANISATION: 'existing_not_in_organisation',
 };
 
 const addToNetworks = async (networks, user) => {
-  await Promise.map(networks, (network) => networkRepo.addUser({
+  return Promise.map(networks, (network) => networkRepo.addUser({
     userId: user.id,
     networkId: network.id,
     roleType: network.roleType,
@@ -225,11 +225,11 @@ const inviteNewUserToOrganisation = async (
 
 const findUserState = async (organisation, user) => {
   if (!user) {
-    return userStates.NEW_USER;
+    return EUserStates.NEW_USER;
   } else if (await organisationService.userHasRoleInOrganisation(organisation.id, user.id)) {
-    return userStates.EXISTING_USER_IN_ORGANISATION;
+    return EUserStates.EXISTING_USER_IN_ORGANISATION;
   }
-  return userStates.EXISTING_USER_NOT_IN_ORGANISATION;
+  return EUserStates.EXISTING_USER_NOT_IN_ORGANISATION;
 };
 
 /**
@@ -261,9 +261,8 @@ const inviteUserToOrganisation = async (payload, message) => {
   const userState = await findUserState(organisation, user);
 
   switch (userState) {
-    case userStates.EXISTING_USER_NOT_IN_ORGANISATION:
+    case EUserStates.EXISTING_USER_NOT_IN_ORGANISATION:
       await (async () => {
-        // existing user not in organisation => add to organisation, add to networks,
         await organisationService.addUser(
           {
             organisationId: organisation.id,
@@ -277,16 +276,14 @@ const inviteUserToOrganisation = async (payload, message) => {
         mailer.send(addedToOrganisationMail(organisation, user, message.credentials));
       })();
       break;
-    case userStates.EXISTING_USER_IN_ORGANISATION:
+    case EUserStates.EXISTING_USER_IN_ORGANISATION:
       await (async () => {
-        // existing user in organisation => add to networks,
         await addToNetworks(networks, user);
         mailer.send(addedToNetworksInOrganisationMail(organisation, user, message));
       })();
       break;
     default:
       await (async () => {
-        // no user => new user, inviteNewUserToOrganisationAndNetworks),
         const plainPassword = passwordUtil.plainRandom();
         const attributes = {
           firstName,

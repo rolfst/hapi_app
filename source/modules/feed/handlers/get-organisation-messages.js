@@ -8,8 +8,8 @@ module.exports = async (req, reply) => {
   try {
     const { payload, message } = createServicePayload(req);
 
-    if (!await organisationService
-      .userHasRoleInOrganisation(payload.organisationId, message.credentials.id)) {
+    if (!await organisationService.userHasRoleInOrganisation(
+      payload.organisationId, message.credentials.id)) {
       throw createError('10021');
     }
 
