@@ -8,5 +8,6 @@ module.exports = {
     limit: Joi.number().min(1).default(20),
     offset: Joi.number().min(0).default(0),
     q: Joi.string().min(3),
-  }),
+    select: Joi.string().valid('active', 'inactive', 'admin', 'notactivated'),
+  }).nand('q', 'select'),
 };
