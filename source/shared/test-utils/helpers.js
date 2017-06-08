@@ -409,7 +409,7 @@ async function createWorkFlow(organisationId, name = randomString()) {
 async function createTrigger(
   workflowId,
   type = workflowRepository.ETriggerTypes.DATETIME,
-  value = randomString()
+  value = '2010-01-01 13:00:00'
 ) {
   return workflowRepository
     .createTrigger({ workflowId, type, value });
