@@ -27,6 +27,17 @@ exports.WORKER_INTERVAL = 1000;
 // Maximum users to concurrently take action on
 exports.CONCURRENT_USERS = 10;
 
+exports.TRIGGER_SCHEME = Joi.object().keys({
+  type: Joi.string().required().valid(Object.values(exports.ETriggerTypes)),
+  value: Joi.alternatives().when('type', {
+    is: exports.ETriggerTypes.DATETIME,
+    then: Joi.string().required(),
+    otherwise: Joi.string(),
+  }),
+});
+
+exports.TRIGGERS_SCHEME = Joi.array().items(exports.TRIGGER_SCHEME);
+
 exports.CONDITION_SCHEME = Joi.object().keys({
   field: Joi.string().required(),
   operator: Joi.string().required().valid(Object.values(exports.EConditionOperators)),
@@ -34,3 +45,10 @@ exports.CONDITION_SCHEME = Joi.object().keys({
 });
 
 exports.CONDITIONS_SCHEME = Joi.array().items(exports.CONDITION_SCHEME);
+
+exports.ACTION_SCHEME = Joi.object().keys({
+  type: Joi.string().required().valid(Object.values(exports.EActionTypes)),
+  meta: Joi.alternatives(Joi.string(), Joi.object()).required(),
+});
+
+exports.ACTIONS_SCHEME = Joi.array().items(exports.ACTION_SCHEME);

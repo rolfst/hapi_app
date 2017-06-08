@@ -77,7 +77,7 @@ describe('Workflow handler: update workflow', () => {
 describe('Workflow handler: update trigger', () => {
   const triggerFixture = {
     type: workflowRepo.ETriggerTypes.DATETIME,
-    value: 'changedtothis',
+    value: '2030-01-01 01:01:01',
   };
 
   let admin;
