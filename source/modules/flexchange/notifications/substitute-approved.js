@@ -1,9 +1,6 @@
-const R = require('ramda');
 const moment = require('moment');
 const notifier = require('../../../shared/services/notifier');
 const notificationUtils = require('../utils/notification');
-const userService = require('../../core/services/user');
-const exchangeRepo = require('../repositories/exchange');
 
 const createNotification = (exchange) => {
   const date = moment(exchange.date).calendar(null, {
@@ -14,7 +11,7 @@ const createNotification = (exchange) => {
   });
 
   return {
-    text: `Je hebt de shift van ${creator.User.getFullName()} overgenomen. Je werkt ${date} van ` +
+    text: `Je hebt de shift van ${exchange.User.getFullName()} overgenomen. Je werkt ${date} van ` +
       `${notificationUtils.createTimeText(exchange)}.`,
     data: { id: exchange.id, type: 'exchange', track_name: 'exchange_approved_substitute' },
   };

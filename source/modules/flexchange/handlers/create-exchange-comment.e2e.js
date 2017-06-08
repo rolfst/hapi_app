@@ -44,7 +44,7 @@ describe('Create exchange comment', () => {
 
   after(() => {
     sandbox.restore();
-    return testHelper.cleanAll()
+    return testHelper.cleanAll();
   });
 
   it('should create comment for exchange', async () => {

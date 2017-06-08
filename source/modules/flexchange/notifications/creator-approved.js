@@ -1,9 +1,6 @@
-const R = require('ramda');
 const moment = require('moment');
 const notifier = require('../../../shared/services/notifier');
 const notificationUtils = require('../utils/notification');
-const userService = require('../../core/services/user');
-const exchangeRepo = require('../repositories/exchange');
 
 const createNotification = (exchange) => {
   const date = moment(exchange.date).calendar(null, {

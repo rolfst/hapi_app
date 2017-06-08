@@ -23,7 +23,7 @@ describe('Feed: Dispatcher', () => {
       sandbox.stub(notifier, 'send');
       sandbox.stub(objectService, 'usersForParent').returns(Promise.resolve(usersForParent));
       sandbox.stub(networkService, 'get').returns(Promise.resolve({
-        networkId: '123', name: 'testNetwork' }));
+        id: '123', name: 'testNetwork' }));
 
       Dispatcher.emit('message.created', {
         actor: { fullName: 'John Doe' },
@@ -49,7 +49,7 @@ describe('Feed: Dispatcher', () => {
       sandbox.stub(notifier, 'send');
       sandbox.stub(objectService, 'usersForParent').returns(Promise.reject(new Error('Failure')));
       sandbox.stub(networkService, 'get').returns(Promise.resolve({
-        networkId: '123', name: 'testNetwork' }));
+        id: '123', name: 'testNetwork' }));
 
       Dispatcher.emit('message.created', {
         actor: { fullName: 'John Doe' },
@@ -72,7 +72,7 @@ describe('Feed: Dispatcher', () => {
       sandbox.stub(notifier, 'send');
       sandbox.stub(objectService, 'usersForParent').returns(Promise.resolve(usersForParent));
       sandbox.stub(networkService, 'get').returns(Promise.resolve({
-        networkId: '123', name: 'testNetwork' }));
+        id: '123', name: 'testNetwork' }));
 
       Dispatcher.emit('message.created', {
         actor: { id: '1', fullName: 'John Doe' },
@@ -125,7 +125,7 @@ describe('Feed: Dispatcher', () => {
       sandbox.stub(notifier, 'send');
       sandbox.stub(objectService, 'usersForParent').returns(Promise.resolve(usersForParent));
       sandbox.stub(networkService, 'get').returns(Promise.resolve({
-        networkId: '123', name: 'testNetwork' }));
+        id: '123', name: 'testNetwork' }));
 
       Dispatcher.emit('message.created', {
         actor: { id: '1', fullName: 'John Doe' },

@@ -19,10 +19,10 @@ describe('Substitude flexchange notification', () => {
   it('should return a correct notification object for today', () => {
     const futureMoment = moment();
     const exchange = createExchange(futureMoment);
-    const creator = { id: 2, fullName: 'John Doe' };
+    exchange.User = { id: 2, getFullName: () => 'John Doe' };
     const localTime = getLocalTime(futureMoment);
 
-    const actual = createNotification(exchange, creator);
+    const actual = createNotification(exchange);
     const expected = {
       text: 'Je hebt de shift van John Doe overgenomen. Je werkt vandaag ' +
         `van ${localTime.startTime} tot ${localTime.endTime}.`,
@@ -35,10 +35,10 @@ describe('Substitude flexchange notification', () => {
   it('should return a correct notification object for tomorrow', () => {
     const futureMoment = moment().add(1, 'days');
     const exchange = createExchange(futureMoment);
-    const creator = { id: 2, fullName: 'John Doe' };
+    exchange.User = { id: 2, getFullName: () => 'John Doe' };
     const localTime = getLocalTime(futureMoment);
 
-    const actual = createNotification(exchange, creator);
+    const actual = createNotification(exchange);
     const expected = {
       text: 'Je hebt de shift van John Doe overgenomen. Je werkt morgen ' +
         `van ${localTime.startTime} tot ${localTime.endTime}.`,
@@ -51,10 +51,10 @@ describe('Substitude flexchange notification', () => {
   it('should return a correct notification object for this week', () => {
     const futureMoment = moment().add(2, 'days');
     const exchange = createExchange(futureMoment);
-    const creator = { id: 2, fullName: 'John Doe' };
+    exchange.User = { id: 2, getFullName: () => 'John Doe' };
     const localTime = getLocalTime(futureMoment);
 
-    const actual = createNotification(exchange, creator);
+    const actual = createNotification(exchange);
     const expected = {
       text: 'Je hebt de shift van John Doe overgenomen. Je werkt ' +
         `${futureMoment.format('dddd')} van ${localTime.startTime} tot ${localTime.endTime}.`,
@@ -67,10 +67,10 @@ describe('Substitude flexchange notification', () => {
   it('should return a correct notification object for later than this week', () => {
     const futureMoment = moment().add(2, 'weeks');
     const exchange = createExchange(futureMoment);
-    const creator = { id: 2, fullName: 'John Doe' };
+    exchange.User = { id: 2, getFullName: () => 'John Doe' };
     const localTime = getLocalTime(futureMoment);
 
-    const actual = createNotification(exchange, creator);
+    const actual = createNotification(exchange);
     const expected = {
       text: 'Je hebt de shift van John Doe overgenomen. Je werkt ' +
         `${futureMoment.format('dddd D MMMM')} van ${localTime.startTime} ` +

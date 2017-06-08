@@ -63,7 +63,7 @@ pubsub.asyncOn('exchange.accepted', async (payload) => {
 });
 
 pubsub.asyncOn('exchange.comment', async (payload) => {
-  commentNotifier.send(exchangeComment);
+  commentNotifier.send(payload.exchangeComment, payload.network);
 });
 
 module.exports = pubsub;

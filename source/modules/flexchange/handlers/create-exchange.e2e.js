@@ -5,7 +5,6 @@ const moment = require('moment');
 const Promise = require('bluebird');
 const testHelper = require('../../../shared/test-utils/helpers');
 const stubs = require('../../../shared/test-utils/stubs');
-const notifier = require('../../../shared/services/notifier');
 const { postRequest } = require('../../../shared/test-utils/request');
 const teamRepo = require('../../core/repositories/team');
 const objectService = require('../../core/services/object');
