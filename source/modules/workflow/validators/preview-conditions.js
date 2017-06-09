@@ -1,13 +1,9 @@
 const Joi = require('joi');
-const { EConditionOperators } = require('../definitions');
+const { CONDITIONS_SCHEME } = require('../definitions');
 
 module.exports = {
   payload: Joi.object().keys({
-    conditions: Joi.array().min(1).items(Joi.object().keys({
-      field: Joi.string().required(),
-      operator: Joi.string().required().valid(Object.values(EConditionOperators)),
-      value: Joi.string().required(),
-    })),
+    conditions: CONDITIONS_SCHEME.min(1),
   }),
   params: Joi.object().keys({
     organisationId: Joi.number().required(),
