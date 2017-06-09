@@ -10,7 +10,7 @@ const networkRepository = require('../../repositories/network');
 const networkService = require('../network');
 const impl = require('./implementation');
 const userService = require('../user');
-const { ERoleTypes } = require('../../definitions');
+const { ERoleTypes, ESEARCH_SELECTORS } = require('../../definitions');
 
 /**
  * @module modules/core/services/organisation
@@ -25,17 +25,17 @@ const selectUsers = async (organisationId, select, options) => {
   let condition = null;
   let query = null;
   switch (select) {
-    case 'admin':
+    case ESEARCH_SELECTORS.ADMIN:
       condition = { field: 'organisation_user.role_type', operator: EConditionOperators.EQUAL, value: ERoleTypes.ADMIN };
       break;
-    case 'active':
+    case ESEARCH_SELECTORS.ACTIVE:
       condition = { field: 'organisation_user.is_active', operator: EConditionOperators.EQUAL, value: true };
       break;
-    case 'inactive':
+    case ESEARCH_SELECTORS.INACTIVE:
       condition = { field: 'organisation_user.is_active', operator: EConditionOperators.EQUAL, value: false };
       break;
     default:
-      condition = { field: 'organisation_user.is_active', operator: EConditionOperators.EQUAL, value: false };
+      condition = { field: 'organisation_user.last_active', operator: EConditionOperators.IS, value: null };
       break;
   }
 
@@ -258,6 +258,7 @@ const listFunctions = async (payload, message) => {
 
   return organisationRepository.findFunctionsInOrganisation(payload.organisationId);
 };
+
 async function fetchOrganisationUsers(organisationUsers, message) {
   const userIds = R.map((user) => user.userId, organisationUsers);
   const users = await userService.list({ userIds }, message);
@@ -275,6 +276,13 @@ async function fetchOrganisationUsers(organisationUsers, message) {
   ), organisationUsers);
 }
 
+/**
+ * Lists all Users in the organisation
+ * @param {object} payload
+ * @param {Message} message {@link module:shared~Message message}
+ * @method listUsers
+ * @returns {external:Promise<User[]>}
+ */
 async function listUsers(payload, message) {
   logger.debug('List all users for organisation', { payload, message });
 
