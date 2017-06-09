@@ -68,7 +68,7 @@ const structure = {
       'deleted_at',
     ],
     calculatedFields: {
-      is_active: 'IF(NOT ou.last_active IS NULL OR ou.last_active < NOW() - INTERVAL 1 WEEK, 1, 0)',
+      is_active: 'IF(NOT ou.last_active IS NULL AND ou.last_active >= NOW() - INTERVAL 1 WEEK, 1, 0)',
     },
   },
   network_user: {
@@ -86,7 +86,7 @@ const structure = {
       'deleted_at',
     ],
     calculatedFields: {
-      is_active: 'IF(NOT nu.last_active IS NULL OR nu.last_active < NOW() - INTERVAL 1 WEEK, 1, 0)',
+      is_active: 'IF(NOT nu.last_active IS NULL AND nu.last_active >= NOW() - INTERVAL 1 WEEK, 1, 0)',
     },
   },
   network: {
@@ -203,6 +203,7 @@ const buildQuery = (organisationId, conditions = null, {
           escapedValue = escape(condition.value);
           break;
 
+        case EConditionOperators.IS:
         case EConditionOperators.GREATER_THAN:
         case EConditionOperators.LESS_THAN:
         case EConditionOperators.GREATER_THAN_OR_EQUAL:
