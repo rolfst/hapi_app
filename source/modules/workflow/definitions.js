@@ -15,7 +15,6 @@ exports.EConditionOperators = {
   IN: 'in',
   NOT_IN: 'not_in',
   CONTAINS: 'like',
-  IS: 'IS',
 };
 
 exports.EActionTypes = {

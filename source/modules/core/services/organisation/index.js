@@ -35,7 +35,7 @@ const selectUsers = async (organisationId, select, options) => {
       condition = { field: 'organisation_user.is_active', operator: EConditionOperators.EQUAL, value: false };
       break;
     default:
-      condition = { field: 'organisation_user.last_active', operator: EConditionOperators.IS, value: null };
+      condition = { field: 'organisation_user.last_active', operator: EConditionOperators.EQUAL, value: null };
       break;
   }
 
