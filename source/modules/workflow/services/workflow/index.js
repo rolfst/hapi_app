@@ -504,14 +504,16 @@ const listWorkflows = async (payload, message) => {
 
   const countsQueryReplacements = { workflowIds, organisationId: payload.organisationId };
 
-  const subCounts = await Promise.all([
+  const [commentCounts, likeCounts, seenCounts, actions, triggers] = await Promise.all([
     workFlowExecutor.executeQuery(countCommentsQuery, countsQueryReplacements),
     workFlowExecutor.executeQuery(countLikesQuery, countsQueryReplacements),
     workFlowExecutor.executeQuery(countObjectSeen, countsQueryReplacements),
     workFlowRepo.findAllActions({ $in: workflowIds }),
+    workFlowRepo.findAllTriggers({ $in: workflowIds }),
   ]);
 
-  return R.map(impl.addExtraData(subCounts), workflows);
+  const addExtraData = impl.addExtraData(commentCounts, likeCounts, seenCounts, actions, triggers);
+  return R.map(addExtraData, workflows);
 };
 
 /**

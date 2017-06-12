@@ -87,6 +87,10 @@ describe('Workflow handler: view workflow stats', () => {
         assert.property(action, 'type');
         assert.property(action, 'meta');
       }, workflow.actions);
+      R.forEach((action) => {
+        assert.property(action, 'type');
+        assert.property(action, 'value');
+      }, workflow.triggers);
       assert.property(workflow, 'reach_count');
       assert.property(workflow, 'seen_count');
       assert.isNotNull(workflow.seen_count);
