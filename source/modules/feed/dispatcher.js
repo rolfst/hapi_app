@@ -35,11 +35,17 @@ pubsub.asyncOn('message.created', async (payload) => {
   const [organisation, network, usersToNotify] =
     await Promise.all([organisationP, networkP, usersToNotifyP]);
 
+  let organisationId = organisation ? organisation.id : null;
+
+  if (!organisationId && network) {
+    organisationId = network.organisationId;
+  }
+
   Notifier.send(
     usersToNotify,
     notification,
     network ? network.id : null,
-    organisation ? organisation.id : network.organisationId
+    organisationId
   );
 
   let trackData;
@@ -54,7 +60,7 @@ pubsub.asyncOn('message.created', async (payload) => {
         'Created At': moment().toISOString(),
       },
     };
-  } else {
+  } else if (organisation) {
     trackData = {
       name: 'Created Message',
       data: {

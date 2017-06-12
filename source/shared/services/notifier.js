@@ -56,6 +56,14 @@ const sendNotification = R.curry((notification, payload, emailValues) => {
   });
 });
 
+/**
+ * Send a notification
+ * @param users - Users to send to
+ * @param notification - Notification Data
+ * @param [networkId] - The network id to use
+ * @param [organisationId] - If not supplied and networkId is specified, get it from the network
+ * @returns {boolean}
+ */
 async function send(users, notification, networkId = null, organisationId = null) {
   logger.debug('Sending push notification', { users, notification, networkId, organisationId });
 
