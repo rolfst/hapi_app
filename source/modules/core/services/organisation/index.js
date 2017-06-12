@@ -62,7 +62,7 @@ const userHasRoleInOrganisation =
     if (!organisation) throw createError('404', 'Organisation not found.');
 
     const userMeta = await organisationRepository.getPivot(userId, organisationId);
-    if (!userMeta) throw createError('403');
+    if (!userMeta) return false;
 
     if (requestedRole === ERoleTypes.ANY) return true;
 
@@ -494,6 +494,10 @@ const removeUserFromNetworks = async (payload, message) => {
 const removeUserFromOrganisation = async (payload, message) => {
   logger.debug('Remove user from organisation', { payload, message });
 
+  if (!await userHasRoleInOrganisation(payload.organisationId, payload.userId)) {
+    throw createError('10021');
+  }
+
   return organisationRepository.removeUser(payload.organisationId, payload.userId);
 };
 
@@ -512,7 +516,6 @@ exports.deleteFunction = deleteFunction;
 exports.getOrganisation = getOrganisation;
 exports.listForUser = listForUser;
 exports.listFunctions = listFunctions;
-exports.userHasRoleInOrganisation = userHasRoleInOrganisation;
 exports.listNetworks = listNetworks;
 exports.listTeamIds = listTeamIds;
 exports.listUsers = listUsers;

@@ -7,6 +7,7 @@ const createError = require('../../../shared/utils/create-error');
 const signupMail = require('../../../shared/mails/signup');
 const signupInOrganisationMail = require('../../../shared/mails/signup-in-organisation');
 const addedToNetworkMail = require('../../../shared/mails/added-to-network');
+const addedToNetworksInOrganisationMail = require('../../../shared/mails/added-to-networks-in-organisation');
 const addedToOrganisationMail = require('../../../shared/mails/added-to-organisation');
 const userService = require('../../core/services/user');
 const networkRepo = require('../../core/repositories/network');
@@ -21,6 +22,21 @@ const { ERoleTypes } = require('../../core/definitions');
 /**
  * @module modules/employee/services/inviteUser
  */
+
+const EUserStates = {
+  NEW_USER: 'new',
+  EXISTING_USER_IN_ORGANISATION: 'existing_in_organisation',
+  EXISTING_USER_NOT_IN_ORGANISATION: 'existing_not_in_organisation',
+};
+
+const addToNetworks = async (networks, user) => {
+  return Promise.map(networks, (network) => networkRepo.addUser({
+    userId: user.id,
+    networkId: network.id,
+    roleType: network.roleType,
+    invitedAt: new Date(),
+  }));
+};
 
 /**
  * Invites a new user to a network
@@ -176,30 +192,18 @@ const inviteUsers = async (payload, message) => {
 
 /**
  * Invites a new user to an organisation
- * @param {Network} network - network to invite into
+ * @param {Network} organisation - organisation to invite into
  * @param {object} payload - The user properties for the new user
- * @param {string} payload.firstName - The first name of the user
- * @param {string} payload.lastName - The last name of the user
- * @param {string} payload.email - The email of the user
- * @param {string} payload.roleType - The {@link module:shared~UserRoles roletype} of the
+ * @param {string} user - The user
+ * @param {string} roleType - The {@link module:shared~UserRoles roletype} of the
  * user in the integration
- * @param {object} payload.networks - network objects
+ * @param {object} networks - network objects
  * @method inviteNewUserToOrganisation
  * @return {external:Promise.<User>} {@link module:modules/core~User} Promise containing
  * the invited user
  */
 const inviteNewUserToOrganisation = async (
-  organisation, { firstName, lastName, email, roleType, networks }, message) => {
-  const plainPassword = passwordUtil.plainRandom();
-  const attributes = {
-    firstName,
-    lastName,
-    username: email,
-    email,
-    password: plainPassword,
-  };
-
-  const user = await userRepo.createUser(attributes);
+  organisation, user, roleType, networks, plainPassword, message) => {
   const invitedAt = new Date();
   await Promise.all([
     organisationService.addUser(
@@ -219,35 +223,14 @@ const inviteNewUserToOrganisation = async (
   return user;
 };
 
-/**
- * Invites an existing user to an organisation
- * @param {Network} network - network to invite into
- * @param {User} user - The {@link module:modules/core~user User} to update
- * @param {string} payload.roleType - The {@link module:shared~UserRoles roletype} of the
- * user in the integration
- * @param {string[]} payload.networkIds - the networks the user needs to be added to
- * @param {Message} message {@link module:shared~Message message} - Object containing meta data
- * @method inviteExistingUserToOrganisation
- * @return {external:Promise.<User>} {@link module:modules/core~User} Promise containing
- * the invited user
- */
-const inviteExistingOrganisationUserToNetwork =
-  async (organisation, user, roleType, networkIds, message) => {
-    await organisationService.userHasRoleInOrganisation(organisation.id, user.id);
-    const userId = user.id;
-
-    await Promise.map((networkId) => networkRepo.addUser({
-      userId,
-      networkId,
-      roleType,
-      invitedAt: new Date(),
-    }), networkIds);
-
-    mailer.send(addedToOrganisationMail(organisation, user, message, message.credentials));
-
-    return user;
-  };
-
+const findUserState = async (organisation, user) => {
+  if (!user) {
+    return EUserStates.NEW_USER;
+  } else if (await organisationService.userHasRoleInOrganisation(organisation.id, user.id)) {
+    return EUserStates.EXISTING_USER_IN_ORGANISATION;
+  }
+  return EUserStates.EXISTING_USER_NOT_IN_ORGANISATION;
+};
 
 /**
  * Invites a user to an organisation
@@ -275,16 +258,47 @@ const inviteUserToOrganisation = async (payload, message) => {
 
   const role = roleType ? roleType.toUpperCase() : ERoleTypes.EMPLOYEE;
   let user = await userRepo.findUserBy({ email });
+  const userState = await findUserState(organisation, user);
 
-  if (user) {
-    await inviteExistingOrganisationUserToNetwork(organisation, user, role);
-  } else {
-    user = await inviteNewUserToOrganisation(
-      organisation,
-      { firstName, lastName, email, roleType: role, networks },
-      message
-      );
+  switch (userState) {
+    case EUserStates.EXISTING_USER_NOT_IN_ORGANISATION:
+      await (async () => {
+        await organisationService.addUser(
+          {
+            organisationId: organisation.id,
+            userId: user.id,
+            roleType: role,
+            invitedAt: new Date(),
+          },
+          message
+        );
+        await addToNetworks(networks, user);
+        mailer.send(addedToOrganisationMail(organisation, user, message.credentials));
+      })();
+      break;
+    case EUserStates.EXISTING_USER_IN_ORGANISATION:
+      await (async () => {
+        await addToNetworks(networks, user);
+        mailer.send(addedToNetworksInOrganisationMail(organisation, user, message));
+      })();
+      break;
+    default:
+      await (async () => {
+        const plainPassword = passwordUtil.plainRandom();
+        const attributes = {
+          firstName,
+          lastName,
+          username: email,
+          email,
+          password: plainPassword,
+        };
+        user = await userRepo.createUser(attributes);
+        user = await inviteNewUserToOrganisation(
+          organisation, user, role, networks, plainPassword, message);
+      })();
+      break;
   }
+  user = await userRepo.findUserBy({ email, organisationId: organisation.id });
 
   const createdUser = await userService.getScoped({ id: user.id }, message);
 

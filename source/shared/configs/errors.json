@@ -89,6 +89,11 @@
     "detail": "The user is not an admin in the organisation.",
     "code": 403
   },
+  "10021": {
+    "type": "not_in_organisation",
+    "detail": "User is not a member in this organisation",
+    "code": 400
+  },
   "20001": {
     "type": "bad_number_of_arguments",
     "detail": "A bad number of arguments is provided for this method",

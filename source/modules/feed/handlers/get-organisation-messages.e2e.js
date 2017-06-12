@@ -68,6 +68,6 @@ describe('Handler: Get organisation messages', () => {
   it('should fail if user is not a member of the organisation', async () => {
     const { statusCode } = await getRequest(getUrl, otherUser.token);
 
-    assert.equal(statusCode, 403);
+    assert.equal(statusCode, 400);
   });
 });
