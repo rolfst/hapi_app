@@ -8,6 +8,7 @@ const organisationRepository = require('../../../core/repositories/organisation'
 const objectRepository = require('../../repositories/object');
 const objectSeenRepository = require('../../repositories/object-seen');
 const impl = require('./implementation');
+const { EObjectTypes } = require('../../../core/definitions');
 
 /**
  * @module modules/core/services/object
@@ -255,12 +256,30 @@ const markAsSeen = async (payload, message) => {
   return R.pipe(R.pluck('objectId'), R.reject(R.isNil))(createdRecords);
 };
 
+async function listForMessages(payload, message) {
+  logger.debug('listing all objects for messages', { payload, message });
+
+  let context = null;
+  if (payload.organisationId) {
+    context = { organisationId: payload.organisationId };
+  } else if (payload.networkId) {
+    context = { networkId: payload.networkid };
+  }
+  const constraint = R.merge(context, {
+    sourceId: { $in: payload.messageIds },
+    objectType: { $in: [EObjectTypes.ORGANISATION_MESSAGE, EObjectTypes.FEED_MESSAGE] },
+  });
+
+  return objectRepository.findBy(constraint);
+}
+
 exports.count = count;
 exports.create = create;
 exports.get = get;
 exports.getParent = getParent;
 exports.getWithSourceAndChildren = getWithSourceAndChildren;
 exports.list = list;
+exports.listForMessages = listForMessages;
 exports.listWithSourceAndChildren = listWithSourceAndChildren;
 exports.markAsSeen = markAsSeen;
 exports.remove = remove;

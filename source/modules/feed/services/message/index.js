@@ -87,9 +87,16 @@ const list = async (payload, message) => {
 const listByOrganisation = async (payload, message) => {
   logger.debug('Listing organisation messages', { payload, message });
 
-  const objectIds = await messageRepository
+  const messageIds = await messageRepository
     .findByOrganisation(payload.organisationId)
-    .then(R.pluck('objectId'));
+    .then(R.pluck('id'));
+  const objectIds = await objectService.listForMessages(
+    {
+      organisationId: payload.organisationId,
+      messageIds,
+    },
+    message)
+  .then(R.pluck('id'));
 
   return objectService.listWithSourceAndChildren({ objectIds }, message);
 };
@@ -143,7 +150,9 @@ const getAsObject = async (payload, message) => {
 
   if (!messageResult) throw createError('404');
 
-  let objectId = messageResult.objectId;
+  let objectId = await objectService.listForMessages({ messageIds: [messageResult.id] })
+  .then(R.pluck('id'))
+  .then(R.head);
 
   // organisation messages don't have an object linked in the message model
   if (!objectId) {
@@ -384,11 +393,14 @@ const update = async (payload, message) => {
 
   const foundMessage = await messageRepository.findById(payload.messageId);
   if (!foundMessage) throw createError('404');
+  const objectId = await objectService.listForMessages({
+    messageIds: [payload.messageId],
+  }).then(R.pluck('id')).then(R.head);
 
-  await impl.assertThatCurrentOwnerHasUpdateRights(foundMessage.objectId, message);
+  await impl.assertThatCurrentOwnerHasUpdateRights(objectId, message);
   await messageRepository.update(foundMessage.id, { text: payload.text });
 
-  return objectService.getWithSourceAndChildren({ objectId: foundMessage.objectId }, message);
+  return objectService.getWithSourceAndChildren({ objectId }, message);
 };
 /**
  * Likes a message

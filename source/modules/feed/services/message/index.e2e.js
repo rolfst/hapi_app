@@ -56,7 +56,6 @@ describe('Service: Message', () => {
 
       assert.lengthOf(actual, 2);
       assert.property(actual[0], 'id');
-      assert.property(actual[0], 'objectId');
       assert.property(actual[0], 'text');
       assert.property(actual[0], 'hasLiked');
       assert.property(actual[0], 'likesCount');
@@ -141,7 +140,6 @@ describe('Service: Message', () => {
       const expected = await messageRepo.findById(createdMessage.sourceId);
 
       assert.isDefined(expected);
-      assert.property(expected, 'objectId');
       assert.equal(expected.text, 'My cool message');
       assert.property(expected, 'createdAt');
     });
@@ -238,7 +236,6 @@ describe('Service: Message', () => {
       const expected = await messageRepo.findById(createdMessage.sourceId);
 
       assert.isDefined(expected);
-      assert.property(expected, 'objectId');
       assert.equal(expected.text, 'My cool message');
       assert.property(expected, 'createdAt');
     });
@@ -294,32 +291,28 @@ describe('Service: Message', () => {
     after(() => testHelpers.cleanAll());
 
     it('should update a message entry', async () => {
-      const updatedMessage = await messageService.update({
+      await messageService.update({
         messageId: createdMessage.source.id,
         text: 'My cool updated message',
       }, { credentials: admin });
 
       const expected = await messageRepo.findById(createdMessage.sourceId);
 
-      assert.equal(updatedMessage.id, expected.objectId);
       assert.isDefined(expected);
-      assert.property(expected, 'objectId');
       assert.equal(expected.text, 'My cool updated message');
       assert.property(expected, 'createdAt');
       assert.isNotNull(expected.createdAt);
     });
 
     it('should update a team message entry by an admin', async () => {
-      const updatedMessage = await messageService.update({
+      await messageService.update({
         messageId: createdTeamMessage.source.id,
         text: 'My cool updated message',
       }, { credentials: admin });
 
       const expected = await messageRepo.findById(createdTeamMessage.sourceId);
 
-      assert.equal(updatedMessage.id, expected.objectId);
       assert.isDefined(expected);
-      assert.property(expected, 'objectId');
       assert.equal(expected.text, 'My cool updated message');
       assert.property(expected, 'createdAt');
       assert.isNotNull(expected.createdAt);
