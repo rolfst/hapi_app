@@ -15,7 +15,7 @@ const pluckIds = R.pluck('id');
 
 /**
  * Get a reach count for the conditions provided
- * @param {number] organisationId
+ * @param {number} organisationId
  * @param {Array<WorkflowConditions>} conditions
  * @method previewConditions
  * @returns {Promise.<{ count }>}

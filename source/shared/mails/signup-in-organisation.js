@@ -12,7 +12,7 @@ module.exports = (organisation, user, password, invitor) => {
   const options = {
     receiver: { email: user.email },
     sender: { name: invitor.fullName, email: invitor.email },
-    subject: `Je inlog gegevens voor het Flex-Appeal netwerk ${organisation.name}`,
+    subject: `Je inlog gegevens voor het Flex-Appeal organisatie ${organisation.name}`,
     template: mailTemplateConfig.NEW_USER,
   };
 

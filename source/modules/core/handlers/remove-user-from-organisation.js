@@ -7,7 +7,6 @@ module.exports = async (req, reply) => {
 
     await organisationService
       .assertUserIsAdminInOrganisation(payload.organisationId, message.credentials.id);
-    await organisationService.userHasRoleInOrganisation(payload.organisationId, payload.userId);
 
     await organisationService.removeUserFromOrganisation(payload, message);
 

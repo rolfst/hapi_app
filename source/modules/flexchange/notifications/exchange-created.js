@@ -17,10 +17,10 @@ const createNotification = (exchange) => {
   };
 };
 
-const send = async (users, exchange) => {
+const send = async (users, exchange, network) => {
   const notification = createNotification(exchange);
 
-  notifier.send(users, notification);
+  notifier.send(users, notification, network.id, network.organisationId);
 };
 
 exports.createNotification = createNotification;

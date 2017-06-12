@@ -14,7 +14,7 @@ const createNotification = (exchange, comment) => {
   };
 };
 
-const send = async (comment) => {
+const send = async (comment, network) => {
   const exchange = await exchangeRepo.findExchangeById(comment.exchangeId);
 
   const comments = await findCommentsByExchange(exchange);
@@ -24,7 +24,7 @@ const send = async (comment) => {
   const usersToNotify = uniqueUsers.filter((u) => u.id !== comment.User.id);
   const notification = createNotification(exchange, comment);
 
-  notifier.send(usersToNotify, notification);
+  notifier.send(usersToNotify, notification, network.id, network.organisationId);
 };
 
 exports.createNotification = createNotification;

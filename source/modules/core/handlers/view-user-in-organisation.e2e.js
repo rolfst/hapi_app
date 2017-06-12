@@ -37,7 +37,7 @@ describe('Handler: View user in organisation', () => {
     const { statusCode, result } = await getRequest(fetchUrl, otherUser.token);
 
     assert.equal(statusCode, 403);
-    assert.equal(result.error_code, '403');
+    assert.equal(result.error_code, '10020');
   });
 
   it('should fail when user isn\'t an admin in the organisation', async () => {

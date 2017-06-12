@@ -15,7 +15,6 @@ const commentRepo = require('../../repositories/comment');
 const exchangeRepo = require('../../repositories/exchange');
 const exchangeValueRepo = require('../../repositories/exchange-value');
 const exchangeResponseRepo = require('../../repositories/exchange-response');
-const acceptanceNotifier = require('../../notifications/accepted-exchange');
 const FlexchangeDispatcher = require('../../dispatcher');
 const impl = require('./implementation');
 
@@ -171,12 +170,10 @@ const acceptExchange = async (payload, message) => {
     { networkId: message.network.id }
   );
 
-  acceptanceNotifier.send(message.network, acceptedExchange, acceptanceUser);
-  objectService.remove({
-    parentType: 'user',
-    parentId: message.credentials.id,
-    objectType: 'exchange',
-    sourceId: payload.exchangeId,
+  FlexchangeDispatcher.emit('exchange.accepted', {
+    acceptedExchange,
+    acceptanceUser,
+    network: message.network,
   });
 
   const exchanges = await listConstrainted({ exchangeIds: [payload.exchangeId] }, message);
@@ -213,10 +210,9 @@ const approveExchange = async (payload, message) => {
 
   if (approvedExchange) {
     FlexchangeDispatcher.emit('exchange.approved', {
-      exchange: approvedExchange,
+      exchange: await exchangeRepo.getApprovedExchange(approvedExchange),
       network: message.network,
       credentials: message.credentials,
-      approvedUser: exchangeResponse.User,
     });
   }
 
@@ -570,8 +566,7 @@ const createExchangeComment = async (payload, message) => {
   const exchangeComment = await commentRepo.findCommentById(createdExchangeComment.id);
   const populatedComment = impl.mergeWithUsers([user], exchangeComment);
 
-  // TODO activate notifications
-  // commentNotifier.send(exchangeComment);
+  FlexchangeDispatcher.emit('exchange.comment', { exchangeComment, network: message.network });
 
   return populatedComment;
 };
