@@ -1,13 +1,20 @@
+const R = require('ramda');
 const { assert } = require('chai');
 const moment = require('moment');
 const sinon = require('sinon');
+const Promise = require('bluebird');
 const testHelper = require('../../../shared/test-utils/helpers');
-const flexchangeDispatcher = require('../dispatcher');
-const acceptanceNotifier = require('../notifications/accepted-exchange');
 const { patchRequest } = require('../../../shared/test-utils/request');
 const objectRepository = require('../../core/repositories/object');
 const { exchangeTypes } = require('../repositories/dao/exchange');
 const exchangeService = require('../services/flexchange');
+const dispatcher = require('../dispatcher');
+const Mixpanel = require('../../../shared/services/mixpanel');
+const Intercom = require('../../../shared/services/intercom');
+const acceptanceNotifier = require('../notifications/accepted-exchange');
+const creatorNotifier = require('../notifications/creator-approved');
+const createdNotifier = require('../notifications/exchange-created');
+const substituteNotifier = require('../notifications/substitute-approved');
 
 describe('Approve exchange', () => {
   let sandbox;
@@ -17,10 +24,18 @@ describe('Approve exchange', () => {
   let acceptedExchange;
   let rejectedExchange;
 
+  let dispatcherEmitSpy;
+
   before(async () => {
     sandbox = sinon.sandbox.create();
-    sandbox.stub(flexchangeDispatcher, 'emit');
+    sandbox.stub(Mixpanel, 'track');
+    sandbox.stub(creatorNotifier, 'send');
+    sandbox.stub(createdNotifier, 'send');
+    sandbox.stub(substituteNotifier, 'send');
     sandbox.stub(acceptanceNotifier, 'send').returns(Promise.resolve(true));
+    sandbox.stub(Intercom, 'createEvent');
+    sandbox.stub(Intercom, 'incrementAttribute');
+    dispatcherEmitSpy = sandbox.spy(dispatcher, 'emit');
 
     [admin, employee] = await Promise.all([
       testHelper.createUser({ username: 'admin@flex-appeal.nl', password: 'foo' }),
@@ -118,5 +133,18 @@ describe('Approve exchange', () => {
     const { statusCode } = await patchRequest(endpoint, payload, employee.token);
 
     assert.equal(statusCode, 403);
+  });
+
+  it('shouldve dispatched with the right properties', async () => {
+    assert(dispatcherEmitSpy.called);
+
+    const args = R.find((argPair) => argPair[0] === 'exchange.approved', dispatcherEmitSpy.args);
+
+    assert.isDefined(args);
+    assert.isObject(args[1].exchange.ApprovedUser);
+    assert.isObject(args[1].exchange.User);
+    assert.isObject(args[1].exchange.Approver);
+    assert.isObject(args[1].exchange);
+    assert.isObject(args[1].network);
   });
 });

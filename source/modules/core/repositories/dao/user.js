@@ -79,13 +79,16 @@ const User = model.define('User', {
   updatedAt: 'updated_at',
   getterMethods: {
     fullName: function () { // eslint-disable-line func-names, object-shorthand
+      return this.getFullName();
+    },
+  },
+  instanceMethods: {
+    getFullName: function () { // eslint-disable-line func-names, object-shorthand
       if (this.firstName && this.lastName) return `${this.firstName} ${this.lastName}`;
       if (this.lastName) return this.lastName;
       if (this.firstName) return this.firstName;
       return null;
     },
-  },
-  instanceMethods: {
     toJSON: function () { // eslint-disable-line func-names, object-shorthand
       let environment = 'production';
       if (process.env.API_ENV === 'acceptance') environment = 'acc';
