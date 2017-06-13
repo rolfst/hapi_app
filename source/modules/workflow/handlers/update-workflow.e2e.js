@@ -1,4 +1,5 @@
 const { assert } = require('chai');
+const moment = require('moment');
 const testHelper = require('../../../shared/test-utils/helpers');
 const { putRequest } = require('../../../shared/test-utils/request');
 const workflowRepo = require('../repositories/workflow');
@@ -125,7 +126,7 @@ describe('Workflow handler: update trigger', () => {
     const updatedTrigger = await workflowRepo.findOneTrigger(createdTrigger.id);
 
     assert.equal(updatedTrigger.type, triggerFixture.type);
-    assert.equal(updatedTrigger.value, triggerFixture.value);
+    assert.equal(updatedTrigger.value, moment(triggerFixture.value).toISOString());
   });
 
   it('should fail for an employee', async () => {
