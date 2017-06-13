@@ -81,8 +81,8 @@ const makeFeed = async (constraint, options, message) => {
       ? EParentTypes.ORGANISATION
       : object.parentType,
     parentId: object.objectType === EObjectTypes.ORGANISATION_MESSAGE
-      ? object.organisationId
-      : object.parentId,
+      ? object.organisationId.toString()
+      : object.parentId.toString(),
   });
 
   return R.map(R.pipe(createObjectWithIncludes, transformParentValues), objectsWithSources);
