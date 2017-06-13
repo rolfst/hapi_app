@@ -566,7 +566,7 @@ const createExchangeComment = async (payload, message) => {
   const exchangeComment = await commentRepo.findCommentById(createdExchangeComment.id);
   const populatedComment = impl.mergeWithUsers([user], exchangeComment);
 
-  FlexchangeDispatcher.emit('exchange.comment', { exchangeComment, network: message.network });
+  FlexchangeDispatcher.emit('exchange.comment', { exchangeComment: populatedComment, network: message.network });
 
   return populatedComment;
 };
