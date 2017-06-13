@@ -92,6 +92,7 @@ pubsub.asyncOn('comment.created', async (payload) => {
     messageId: message.id,
     userId: { $not: comment.userId },
   });
+
   const allUserIds = R.filter(
     R.identity,
     R.uniq([message.userId, comment.userId].concat(R.pluck('userId', allComments)))
