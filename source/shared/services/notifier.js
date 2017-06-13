@@ -72,12 +72,12 @@ async function send(users, notification, networkId = null, organisationId = null
   if (networkId && !useOrganisationId) {
     const network = await networkService.get({ networkId });
 
-    useOrganisationId = network ? network.organinationId : null;
+    useOrganisationId = network ? network.organisationId : null;
   }
 
   const promises = R.pipe(
     createEmailChunks,
-    R.map(sendNotification(notification, { useOrganisationId, networkId }))
+    R.map(sendNotification(notification, { organisationId: useOrganisationId, networkId }))
   )(users);
 
   const responses = await Promise.all(promises)
