@@ -10,4 +10,5 @@ module.exports = (dataModel) => ({
   likesCount: dataModel.likesCount,
   commentsCount: dataModel.commentsCount,
   createdAt: dateUtils.toISOString(dataModel.created_at),
+  createdBy: dataModel.createdBy ? dataModel.createdBy.toString() : null,
 });
