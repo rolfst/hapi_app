@@ -4,7 +4,7 @@ const { createNotification } = require('./new-exchange-comment');
 describe('Exchange comment created notification', () => {
   it('should return a correct notification object', () => {
     const exchange = { id: 1 };
-    const comment = { text: 'Testing', User: { fullName: 'User#1' } };
+    const comment = { text: 'Testing', user: { fullName: 'User#1' } };
 
     const actual = createNotification(exchange, comment);
     const expected = {
