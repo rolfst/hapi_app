@@ -59,7 +59,12 @@ const createSMTPHeader = (mail) => {
 
 const createMailOptions = (mail) => {
   if (!mail.options.sender) throw new Error('No sender defined in mail object.');
-  if (!mail.options.receiver) throw new Error('No receiver defined in mail object.');
+  if ((!mail.options.receiver
+      || (Array.isArray(mail.options.receiver) && mail.options.receiver.length === 0))
+    && (!mail.options.blindReceiver
+      || (Array.isArray(mail.options.blindReceiver) && mail.options.blindReceiver.length === 0))) {
+    throw new Error('No receiver defined in mail object.');
+  }
 
   const mailOptions = {
     subject: mail.options.subject,
@@ -87,7 +92,7 @@ const createMailOptions = (mail) => {
   return mailOptions;
 };
 
-const send = (payload, message = null) => {
+const send = async (payload, message = null) => {
   const mail = createMailOptions(payload);
   logger.debug('Sending email to Sendgrid', { mail: R.omit(['headers'], mail), message });
 

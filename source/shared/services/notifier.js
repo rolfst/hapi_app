@@ -1,6 +1,7 @@
 const fetch = require('isomorphic-fetch');
 const R = require('ramda');
 const Mixpanel = require('./mixpanel');
+const networkService = require('../../modules/core/services/network');
 
 const logger = require('./logger')('SHARED/services/notifier');
 
@@ -55,12 +56,28 @@ const sendNotification = R.curry((notification, payload, emailValues) => {
   });
 });
 
+/**
+ * Send a notification
+ * @param users - Users to send to
+ * @param notification - Notification Data
+ * @param [networkId] - The network id to use
+ * @param [organisationId] - If not supplied and networkId is specified, get it from the network
+ * @returns {boolean}
+ */
 async function send(users, notification, networkId = null, organisationId = null) {
   logger.debug('Sending push notification', { users, notification, networkId, organisationId });
 
+  let useOrganisationId = organisationId;
+
+  if (networkId && !useOrganisationId) {
+    const network = await networkService.get({ networkId });
+
+    useOrganisationId = network ? network.organinationId : null;
+  }
+
   const promises = R.pipe(
     createEmailChunks,
-    R.map(sendNotification(notification, { organisationId, networkId }))
+    R.map(sendNotification(notification, { useOrganisationId, networkId }))
   )(users);
 
   const responses = await Promise.all(promises)

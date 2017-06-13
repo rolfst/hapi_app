@@ -100,7 +100,7 @@ describe('Handler: Get organisation news', () => {
     getUrl = `/v3/organisations/${organisationA.id}/news`;
     const { statusCode } = await getRequest(getUrl, otherOrganisationUser.token);
 
-    assert.equal(statusCode, 403);
+    assert.equal(statusCode, 400);
   });
 
   describe('meta', () => {

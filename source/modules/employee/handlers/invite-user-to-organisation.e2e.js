@@ -1,6 +1,7 @@
 const { assert } = require('chai');
 const R = require('ramda');
 const testHelpers = require('../../../shared/test-utils/helpers');
+const responseUtils = require('../../../shared/utils/response');
 const { postRequest } = require('../../../shared/test-utils/request');
 const organisationService = require('../../core/services/organisation');
 const { ERoleTypes } = require('../../core/definitions');
@@ -33,6 +34,7 @@ describe('Handler: Invite user to organisation', () => {
       organisationService.attachNetwork({
         networkId: networkB.id, organisationId: organisation.id }),
       testHelpers.addUserToOrganisation(admin.id, organisation.id, ERoleTypes.ADMIN),
+      testHelpers.addUserToOrganisation(existingEmployee.id, organisation.id),
       testHelpers.addUserToNetwork({ networkId: networkB.id, userId: existingEmployee.id }),
     ]);
   });
@@ -99,16 +101,20 @@ describe('Handler: Invite user to organisation', () => {
     assert.equal(actualNetwork.role_type, payload.networks[0].role_type.toUpperCase());
   });
 
-  it('should fail when user already belongs to the organisation', async () => {
-    const payload = R.mergeAll([
-      user,
-      { role_type: 'admin' },
-      { networks: [{ id: networkA.id, role_type: 'employee' }] },
-    ]);
+  it('should return with 200 when user is invited but already exists in the system', async () => {
+    const payload = responseUtils.toSnakeCase(
+      R.pick(['firstName', 'lastName', 'email', 'networks', 'role_type'],
+        R.mergeAll([
+          existingEmployee,
+          { role_type: 'employee' },
+          { networks: [{ id: networkA.id, role_type: 'employee' }] },
+        ])
+      )
+    );
 
     const endpoint = `/v2/organisations/${organisation.id}/users`;
     const { statusCode } = await postRequest(endpoint, payload, admin.token);
 
-    assert.equal(statusCode, 422);
+    assert.equal(statusCode, 200);
   });
 });

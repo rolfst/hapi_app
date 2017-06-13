@@ -154,9 +154,18 @@ const findNetworksForUser = async (userId, includePivot = false) => {
     .then(R.map(createScopedInfoModel));
   const findNetworkPivot = (networkId) => R.find(R.propEq('id', networkId), networkResult);
 
+  const pickFromPivot = (networkUser) => R.merge(R.pick([
+    'name',
+    'id',
+    'organisationId',
+    'invitedAt',
+    'createdAt',
+    'deletedAt',
+  ], networkUser), { integrationAuth: !!networkUser.userToken });
+
   return R.map((networkUser) => R.merge(
     networkUser,
-    R.pick(['name', 'id', 'organisationId', 'invitedAt', 'createdAt', 'deletedAt'], findNetworkPivot(networkUser.networkId.toString()))
+    pickFromPivot(findNetworkPivot(networkUser.networkId.toString()))
   ), pivotResult);
 };
 

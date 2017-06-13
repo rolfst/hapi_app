@@ -107,7 +107,7 @@ const createTrigger = (attributes) => {
 
   const pickedAttributes = R.pick(whitelist, attributes);
 
-  if (pickedAttributes.value instanceof Date) {
+  if (pickedAttributes.type === ETriggerTypes.DATETIME) {
     pickedAttributes.value = dateUtils.toUTC(pickedAttributes.value);
   }
 
@@ -121,7 +121,7 @@ const updateTrigger = (id, attributes) => {
 
   const pickedAttributes = R.pick(whitelist, attributes);
 
-  if (pickedAttributes.value instanceof Date) {
+  if (pickedAttributes.type === ETriggerTypes.DATETIME) {
     pickedAttributes.value = dateUtils.toUTC(pickedAttributes.value);
   }
 
@@ -212,6 +212,11 @@ const findAllActions = (workflowId) =>
     .findAll({ where: { workflowId } })
     .then(R.map(createActionModel));
 
+const findAllTriggers = (workflowId) =>
+  Trigger
+    .findAll({ where: { workflowId } })
+    .then(R.map(createTriggerModel));
+
 const deleteAll = () => Promise.all([
   WorkFlow
     .findAll()
@@ -255,6 +260,7 @@ exports.updateAction = updateAction;
 exports.destroyAction = destroyAction;
 exports.findOneAction = findOneAction;
 exports.findAllActions = findAllActions;
+exports.findAllTriggers = findAllTriggers;
 exports.deleteAll = deleteAll;
 exports.findHandledUsers = findHandledUsers;
 exports.markUserHandled = markUserHandled;

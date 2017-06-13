@@ -22,7 +22,7 @@ const send = async (network, exchangeId, userThatAccepts) => {
   const usersToNotify = admins.filter((u) => u.id !== userThatAccepts.id);
   const notification = createNotification(exchange, userThatAccepts);
 
-  notifier.send(usersToNotify, notification);
+  notifier.send(usersToNotify, notification, network.id, network.organisationId);
 };
 
 exports.createNotification = createNotification;
