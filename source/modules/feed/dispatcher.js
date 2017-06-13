@@ -92,13 +92,14 @@ pubsub.asyncOn('comment.created', async (payload) => {
     messageId: message.id,
     userId: { $not: comment.userId },
   });
-  const allUsers = R.filter(
-    (userId) => (userId && userId !== comment.userId),
-    R.uniq([message.userId].concat(R.pluck('userId', allComments)))
+  const allUserIds = R.filter(
+    R.identity,
+    R.uniq([message.userId, comment.userId].concat(R.pluck('userId', allComments)))
   );
 
-  const usersToNotify = await userRepo.findByIds(allUsers);
-  const creator = R.find(R.propEq('id', comment.userId), usersToNotify);
+  const users = await userRepo.findByIds(allUserIds);
+  const usersToNotify = R.filter((userId) => (userId !== comment.userId), users);
+  const creator = R.find(R.propEq('id', comment.userId), users);
 
   // Find the object so we know what network/organisation this comment is from
   const messageObject = R.head(await objectRepo.findBy({
