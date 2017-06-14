@@ -1,7 +1,13 @@
+const Promise = require('bluebird');
 const { assert } = require('chai');
+const objectRepo = require('../../core/repositories/object');
+const { EObjectTypes } = require('../../core/definitions');
+const messageRepo = require('../../feed/repositories/message');
 const testHelper = require('../../../shared/test-utils/helpers');
 const { deleteRequest } = require('../../../shared/test-utils/request');
+const workflowService = require('../services/workflow');
 const workflowRepo = require('../repositories/workflow');
+const { EActionTypes, ETriggerTypes } = require('../definitions');
 
 describe('Workflow handler: remove workflow', () => {
   let admin;
@@ -10,6 +16,7 @@ describe('Workflow handler: remove workflow', () => {
   let organisation;
 
   let createdWorkFlow;
+  let createdAction;
 
   let removeUrl;
 
@@ -27,7 +34,24 @@ describe('Workflow handler: remove workflow', () => {
     ]);
 
     // First create a workflow
-    createdWorkFlow = await testHelper.createWorkFlow(organisation.id);
+    createdWorkFlow = await workflowService.createCompleteWorkflow({
+      organisationId: organisation.id,
+      triggers: [{
+        type: ETriggerTypes.DIRECT,
+      }],
+      conditions: [],
+      actions: [{
+        type: EActionTypes.MESSAGE,
+        meta: {
+          text: 'this should be deleted afterwards',
+        },
+      }],
+    }, { credentials: admin });
+
+    // Wait half a second then retrieve the action
+    createdAction = await Promise
+      .delay(500)
+      .then(() => workflowRepo.findOneAction(createdWorkFlow.actions[0].id));
 
     removeUrl = `/v2/organisations/${organisation.id}/workflows/${createdWorkFlow.id}`;
   });
@@ -55,6 +79,23 @@ describe('Workflow handler: remove workflow', () => {
     const { statusCode } = await deleteRequest(removeUrl, null, otherUser.token);
 
     assert.equal(statusCode, 403);
+  });
+
+  it('should have removed any messages it created', async () => {
+    assert.isNotNull(createdAction.sourceId);
+
+    const [foundObjects, foundMessage] = await Promise.all([
+      objectRepo.findBy({
+        $or: [
+          { objectType: EObjectTypes.FEED_MESSAGE, sourceId: createdAction.sourceId },
+          { objectType: EObjectTypes.ORGANISATION_MESSAGE, sourceId: createdAction.sourceId },
+        ],
+      }),
+      messageRepo.findById(createdAction.sourceId),
+    ]);
+
+    assert.lengthOf(foundObjects, 0);
+    assert.isNull(foundMessage);
   });
 });
 

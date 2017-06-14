@@ -2,7 +2,9 @@ const R = require('ramda');
 const Promise = require('bluebird');
 const workFlowExecutor = require('../executor');
 const workFlowRepo = require('../../repositories/workflow');
+const { EActionTypes } = require('../../definitions');
 const workFlowProcessor = require('../../worker/implementation');
+const messageService = require('../../../feed/services/message');
 const createError = require('../../../../shared/utils/create-error');
 const impl = require('./implementation');
 
@@ -82,6 +84,26 @@ const assertWorkflowBelongsToOrganisation = (workflow, organisationId) => {
 };
 
 /**
+ * Remove items an action has created
+ * @param {object} payload - Object containing workflow data
+ * @param {number} payload.action - The action to remove source for
+ * @method create
+ * @return {external:Promise|*}
+ */
+const cleanActionItems = (payload) => {
+  const { action } = payload;
+
+  // If action has not been processed there is no source id
+  if (!action.sourceId) return;
+
+  switch (action.type) {
+    case EActionTypes.MESSAGE:
+      return messageService.remove({ messageId: action.sourceId });
+    default:
+  }
+};
+
+/**
  * Create workflow
  * @param {object} payload - Object containing workflow data
  * @param {number} payload.organisationId - The id of the organisation
@@ -133,7 +155,12 @@ const remove = async (payload, message) => {
 
   const currentWorkflow = await workFlowRepo.findOne(payload.workflowId);
 
+  // TODO: acl here
   assertWorkflowBelongsToOrganisation(currentWorkflow, payload.organisationId);
+
+  const actions = await workFlowRepo.findAllActions(payload.workflowId);
+
+  await Promise.map(actions, (action) => cleanActionItems({ action }));
 
   return workFlowRepo.destroy(payload.workflowId);
 };
@@ -373,6 +400,8 @@ const removeAction = async (payload, message) => {
   const currentWorkflow = await workFlowRepo.findOne(currentAction.workflowId);
 
   assertWorkflowBelongsToOrganisation(currentWorkflow, payload.organisationId);
+
+  await cleanActionItems({ action: currentAction });
 
   return workFlowRepo.destroyAction(payload.actionId);
 };
