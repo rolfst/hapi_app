@@ -90,7 +90,7 @@ const assertWorkflowBelongsToOrganisation = (workflow, organisationId) => {
  * @method create
  * @return {external:Promise|*}
  */
-const cleanActionItems = (payload) => {
+const removeItemsForAction = (payload) => {
   const { action } = payload;
 
   // If action has not been processed there is no source id
@@ -160,7 +160,7 @@ const remove = async (payload, message) => {
 
   const actions = await workFlowRepo.findAllActions(payload.workflowId);
 
-  await Promise.map(actions, (action) => cleanActionItems({ action }));
+  await Promise.map(actions, (action) => removeItemsForAction({ action }));
 
   return workFlowRepo.destroy(payload.workflowId);
 };
@@ -401,7 +401,7 @@ const removeAction = async (payload, message) => {
 
   assertWorkflowBelongsToOrganisation(currentWorkflow, payload.organisationId);
 
-  await cleanActionItems({ action: currentAction });
+  await removeItemsForAction({ action: currentAction });
 
   return workFlowRepo.destroyAction(payload.actionId);
 };
