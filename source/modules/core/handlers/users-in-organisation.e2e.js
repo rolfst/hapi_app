@@ -1,8 +1,10 @@
 const { assert } = require('chai');
+const moment = require('moment');
 const testHelpers = require('../../../shared/test-utils/helpers');
 const organisationService = require('../services/organisation');
 const organisationRepo = require('../repositories/organisation');
 const { getRequest } = require('../../../shared/test-utils/request');
+const { ESEARCH_SELECTORS } = require('../definitions');
 
 describe('Handler: Users in organisation', () => {
   let organisationA;
@@ -17,6 +19,7 @@ describe('Handler: Users in organisation', () => {
       testHelpers.createUser({ firstName: 'taal', lastName: 'spellen' }),
       testHelpers.createUser({ firstName: 'pelt', lastName: 'spellen' }),
       testHelpers.createUser({ firstName: 'Jean-Claude', lastName: 'van Damme' }),
+      testHelpers.createUser(),
     ]);
 
     const [networkA, networkB] = await Promise.all([
@@ -33,6 +36,11 @@ describe('Handler: Users in organisation', () => {
       organisationRepo.addUser(users[2].id, organisationA.id, 'ADMIN'),
       organisationRepo.addUser(users[3].id, organisationA.id, 'ADMIN'),
       organisationRepo.addUser(users[1].id, organisationB.id, 'ADMIN'),
+      organisationRepo.addUser(users[4].id, organisationA.id),
+    ]);
+    await Promise.all([
+      organisationRepo.updateUser(users[4].id, organisationA.id, { lastActive: moment() }),
+      organisationRepo.updateUser(users[3].id, organisationA.id, { lastActive: moment().subtract('month', 1) }),
     ]);
   });
 
@@ -43,7 +51,7 @@ describe('Handler: Users in organisation', () => {
     const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
     assert.equal(statusCode, 200);
-    assert.lengthOf(result.data, 3);
+    assert.lengthOf(result.data, 4);
 
     const actual = result.data[0];
     assert.property(actual, 'id');
@@ -73,7 +81,7 @@ describe('Handler: Users in organisation', () => {
     const endpoint = `/v2/organisations/${organisationA.id}/users`;
     const { result: { meta } } = await getRequest(endpoint, users[0].token);
 
-    assert.equal(meta.pagination.total_count, 3);
+    assert.equal(meta.pagination.total_count, 4);
     assert.equal(meta.pagination.offset, 0);
     assert.equal(meta.pagination.limit, 20);
 
@@ -105,7 +113,7 @@ describe('Handler: Users in organisation', () => {
     const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
     assert.equal(statusCode, 403);
-    assert.equal(result.error_code, '403');
+    assert.equal(result.error_code, '10020');
   });
 
   it('should not return deleted users', async () => {
@@ -175,6 +183,38 @@ describe('Handler: Users in organisation', () => {
       assert.equal(statusCode, 200);
       assert.lengthOf(result.data, 1);
       assert.equal(result.data[0].first_name, 'Jean-Claude');
+    });
+
+    it('should only search for users that are admins of the organisation', async () => {
+      const endpoint = `/v2/organisations/${organisationA.id}/users?select=${ESEARCH_SELECTORS.ADMIN}`;
+      const { statusCode, result } = await getRequest(endpoint, users[0].token);
+
+      assert.equal(statusCode, 200);
+      assert.lengthOf(result.data, 3);
+    });
+
+    it('should only search for users that are inactive users of the organisation', async () => {
+      const endpoint = `/v2/organisations/${organisationA.id}/users?select=${ESEARCH_SELECTORS.INACTIVE}`;
+      const { statusCode, result } = await getRequest(endpoint, users[0].token);
+
+      assert.equal(statusCode, 200);
+      assert.lengthOf(result.data, 3);
+    });
+
+    it('should only search for users that are active users of the organisation', async () => {
+      const endpoint = `/v2/organisations/${organisationA.id}/users?select=${ESEARCH_SELECTORS.ACTIVE}`;
+      const { statusCode, result } = await getRequest(endpoint, users[0].token);
+
+      assert.equal(statusCode, 200);
+      assert.lengthOf(result.data, 1);
+    });
+
+    it('should only search for users that are not activated users of the organisation', async () => {
+      const endpoint = `/v2/organisations/${organisationA.id}/users?select=${ESEARCH_SELECTORS.NOT_ACTIVATED}`;
+      const { statusCode, result } = await getRequest(endpoint, users[0].token);
+
+      assert.equal(statusCode, 200);
+      assert.lengthOf(result.data, 2);
     });
   });
 });

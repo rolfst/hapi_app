@@ -5,13 +5,16 @@ const moment = require('moment');
 const Promise = require('bluebird');
 const testHelper = require('../../../shared/test-utils/helpers');
 const stubs = require('../../../shared/test-utils/stubs');
-const notifier = require('../../../shared/services/notifier');
 const { postRequest } = require('../../../shared/test-utils/request');
 const teamRepo = require('../../core/repositories/team');
 const objectService = require('../../core/services/object');
 const { exchangeTypes } = require('../repositories/dao/exchange');
 const exchangeRepo = require('../repositories/exchange');
 const exchangeService = require('../services/flexchange');
+const dispatcher = require('../dispatcher');
+const Mixpanel = require('../../../shared/services/mixpanel');
+const Intercom = require('../../../shared/services/intercom');
+const createdNotifier = require('../notifications/exchange-created');
 
 describe('Create exchange', () => {
   let sandbox;
@@ -23,9 +26,15 @@ describe('Create exchange', () => {
   let otherNetworkTeam;
   const pristineNetwork = stubs.pristine_networks_admins[0];
 
+  let dispatcherEmitSpy;
+
   before(async () => {
     sandbox = sinon.sandbox.create();
-    sandbox.stub(notifier, 'send').returns(null);
+    sandbox.stub(Mixpanel, 'track');
+    sandbox.stub(createdNotifier, 'send');
+    sandbox.stub(Intercom, 'createEvent');
+    sandbox.stub(Intercom, 'incrementAttribute');
+    dispatcherEmitSpy = sandbox.spy(dispatcher, 'emit');
 
     admin = await testHelper.createUser();
     employee = await testHelper.createUser();
@@ -88,10 +97,11 @@ describe('Create exchange', () => {
 
     await Promise.delay(1000);
 
-    const createdObject = R.find(R.propEq('sourceId', result.data.id), await objectService.list({
+    const userObjects = await objectService.list({
       parentType: 'user',
       parentId: employee.id,
-    }));
+    });
+    const createdObject = R.find(R.propEq('sourceId', result.data.id), userObjects);
 
     assert.equal(statusCode, 200);
     assert.equal(createdObject.userId, admin.id);
@@ -255,5 +265,16 @@ describe('Create exchange', () => {
     }, admin.token);
 
     assert.equal(statusCode, 422);
+  });
+
+  it('shouldve dispatched with the right properties', async () => {
+    assert(dispatcherEmitSpy.called);
+
+    const args = dispatcherEmitSpy.args[0];
+
+    assert.equal(args[0], 'exchange.created');
+    assert.isObject(args[1].credentials);
+    assert.isObject(args[1].exchange);
+    assert.isObject(args[1].network);
   });
 });

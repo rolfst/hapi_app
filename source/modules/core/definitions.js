@@ -35,3 +35,10 @@ exports.EParentTypes = {
 };
 
 exports.PHONENUM_REGEX = /^(00\s*31|\+31|0)\s*[1-9](\s*[0-9]){6,8}$/;
+
+exports.ESEARCH_SELECTORS = {
+  ACTIVE: 'active',
+  INACTIVE: 'inactive',
+  ADMIN: 'admin',
+  NOT_ACTIVATED: 'not_activated',
+};

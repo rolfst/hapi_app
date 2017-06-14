@@ -1,4 +1,5 @@
 const createServicePayload = require('../../../shared/utils/create-service-payload');
+const createError = require('../../../shared/utils/create-error');
 const responseUtil = require('../../../shared/utils/response');
 const messageService = require('../services/message');
 const organisationService = require('../../core/services/organisation');
@@ -7,8 +8,10 @@ module.exports = async (req, reply) => {
   try {
     const { payload, message } = createServicePayload(req);
 
-    await organisationService
-      .userHasRoleInOrganisation(payload.organisationId, message.credentials.id);
+    if (!await organisationService.userHasRoleInOrganisation(
+      payload.organisationId, message.credentials.id)) {
+      throw createError('10021');
+    }
 
     const [messages, messageCount] = await Promise.all([
       messageService.listByOrganisation(payload, message),

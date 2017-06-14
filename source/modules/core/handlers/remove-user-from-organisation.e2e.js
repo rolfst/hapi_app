@@ -90,6 +90,6 @@ describe('Handler: Remove user from organisation', () => {
     const { statusCode } = await deleteRequest(
       `/v2/organisations/${organisation.id}/users/${otherUser.id}`, null, admin.token);
 
-    assert.equal(statusCode, 403);
+    assert.equal(statusCode, 400);
   });
 });
