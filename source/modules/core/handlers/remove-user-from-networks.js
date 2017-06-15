@@ -7,9 +7,6 @@ module.exports = async (req, reply) => {
     const { payload, message } = createServicePayload(req);
 
     await organisationService
-      .assertUserIsAdminInOrganisation(payload.organisationId, message.credentials.id);
-
-    await organisationService
       .userHasRoleInOrganisation(
         payload.organisationId,
         payload.userId,

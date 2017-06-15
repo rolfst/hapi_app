@@ -2,7 +2,7 @@ const R = require('ramda');
 const AdapterUtil = require('../../../../shared/utils/create-adapter');
 const userRepo = require('../../../core/repositories/user');
 const authenticationRepo = require('../../../core/repositories/authentication');
-const createAccessToken = require('../../../authentication/utils/create-access-token');
+const createAccessToken = require('../../../authorization/utils/create-access-token');
 const impl = require('./implementation');
 
 async function authenticate(payload, message) {

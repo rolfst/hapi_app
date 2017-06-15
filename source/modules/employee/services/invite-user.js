@@ -17,7 +17,7 @@ const organisationService = require('../../core/services/organisation');
 const organisationRepo = require('../../core/repositories/organisation');
 const EmployeeDispatcher = require('../dispatcher');
 const impl = require('./implementation');
-const { ERoleTypes } = require('../../core/definitions');
+const { ERoleTypes } = require('../../authorization/definitions');
 
 /**
  * @module modules/employee/services/inviteUser

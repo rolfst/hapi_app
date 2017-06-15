@@ -133,14 +133,39 @@ const setImportDateOnNetworkIntegration = async (networkId) => {
 
 /**
  * @param {string} userId - userId
+ * @param {boolean} [includePivot=false]
+ * @param {user} [user]
  * @method findNetworksForUser
  * @return {external:Promise.<Integration>} {@link module:modules/core~Integration Integration}
  */
-const findNetworksForUser = async (userId, includePivot = false) => {
-  const pivotResult = await NetworkUser.findAll({
+const findNetworksForUser = async (userId, includePivot = false, user = null) => {
+  let pivotResult = await NetworkUser.findAll({
     where: { userId, deletedAt: null },
   })
   .then(R.map(createNetworkLinkModel));
+
+  if (user) {
+    const scopedNetworksMappedToNetworkUser = R.map(
+      (scopedNetwork) => ({
+        id: null,
+        networkId: scopedNetwork.id.toString(),
+        roleType: scopedNetwork.roleType,
+        userId: null,
+        externalId: null,
+        invitedAt: null,
+        deletedAt: null,
+        lastActive: null,
+        userToken: null,
+      }),
+      user.scopes.networks);
+
+    const mergeWithPivotResultEntry = (networkFromScope) => R.merge(
+      networkFromScope, R.find(R.propEq('networkId', networkFromScope.networkId), pivotResult));
+    pivotResult = R.map(
+      mergeWithPivotResultEntry,
+      Object.values(scopedNetworksMappedToNetworkUser));
+  }
+
 
   if (!includePivot) {
     const networkIds = R.pipe(R.pluck('networkId'), R.uniq)(pivotResult);

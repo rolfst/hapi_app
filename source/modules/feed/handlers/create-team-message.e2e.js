@@ -2,7 +2,7 @@ const R = require('ramda');
 const { assert } = require('chai');
 const { postRequest } = require('../../../shared/test-utils/request');
 const testHelpers = require('../../../shared/test-utils/helpers');
-const { ERoleTypes } = require('../../core/definitions');
+const { ERoleTypes } = require('../../authorization/definitions');
 
 describe('Handler: Create team message', () => {
   let admin;

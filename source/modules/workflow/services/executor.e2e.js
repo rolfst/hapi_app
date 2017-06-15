@@ -3,7 +3,7 @@ const { assert } = require('chai');
 const testHelper = require('../../../shared/test-utils/helpers');
 const workflowExecutor = require('./executor');
 const { EConditionOperators } = require('../definitions');
-const { ERoleTypes } = require('../../core/definitions');
+const { ERoleTypes } = require('../../authorization/definitions');
 
 describe('Workflow executor', async () => {
   let admin;

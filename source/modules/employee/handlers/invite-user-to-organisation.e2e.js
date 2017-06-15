@@ -4,7 +4,7 @@ const testHelpers = require('../../../shared/test-utils/helpers');
 const responseUtils = require('../../../shared/utils/response');
 const { postRequest } = require('../../../shared/test-utils/request');
 const organisationService = require('../../core/services/organisation');
-const { ERoleTypes } = require('../../core/definitions');
+const { ERoleTypes } = require('../../authorization/definitions');
 
 describe('Handler: Invite user to organisation', () => {
   let admin;

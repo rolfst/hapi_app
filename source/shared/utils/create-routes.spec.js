@@ -1,8 +1,7 @@
 const { assert } = require('chai');
-const { omit } = require('lodash');
 const R = require('ramda');
-const preFetchNetwork = require('../middlewares/prefetch-network');
 const systemUnderTest = require('./create-routes');
+const { EPrefetchData } = require('../../modules/authorization/definitions');
 
 describe('createRoutes', () => {
   describe('createRoute', () => {
@@ -12,8 +11,8 @@ describe('createRoutes', () => {
       handler: 'handler',
       config: {
         auth: 'jwt',
-        pre: [{ method: preFetchNetwork, assign: 'network' }],
         validate: 'my_validator',
+        app: { permissions: null, prefetch: EPrefetchData.NETWORK },
       },
     };
 
@@ -36,6 +35,7 @@ describe('createRoutes', () => {
         url: '/foo/baz',
         handler: 'handler',
         validator: 'my_validator',
+        prefetch: EPrefetchData.NETWORK,
         payload: {
           foo: 'baz',
         },
@@ -48,8 +48,8 @@ describe('createRoutes', () => {
         config: {
           auth: 'jwt',
           payload: { foo: 'baz' },
-          pre: [{ method: preFetchNetwork, assign: 'network' }],
           validate: 'my_validator',
+          app: { permissions: null, prefetch: EPrefetchData.NETWORK },
         },
       };
 
@@ -81,7 +81,12 @@ describe('createRoutes', () => {
       };
 
       const actual = systemUnderTest.createRoute(fakeRoute);
-      const expected = R.mergeAll([routeStub, { config: omit(routeStub.config, 'auth', 'pre') }]);
+      const expected = R.merge(routeStub, {
+        config: R.merge(
+          R.omit('auth', routeStub.config),
+          { app: R.omit('prefetch', routeStub.config.app) }
+        ),
+      });
 
       assert.deepEqual(actual, expected);
     });
@@ -100,6 +105,7 @@ describe('createRoutes', () => {
         { config: {
           auth: 'other_strategy',
           validate: 'my_validator',
+          app: { permissions: null },
         } });
 
       assert.deepEqual(actual, expected);
@@ -118,6 +124,7 @@ describe('createRoutes', () => {
       const expected = R.merge(routeStub, { config: {
         auth: 'jwt',
         validate: 'my_validator',
+        app: { permissions: null },
       } });
 
       assert.deepEqual(actual, expected);

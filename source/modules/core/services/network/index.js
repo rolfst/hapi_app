@@ -2,10 +2,12 @@ const R = require('ramda');
 const createError = require('../../../../shared/utils/create-error');
 const networkRepo = require('../../repositories/network');
 const organisationRepo = require('../../repositories/organisation');
+const User = require('../../../authorization/utils/user-cache');
+const { invalidateNetworkCache } = require('../../../authorization/utils/prefetch-caches');
 const userService = require('../user');
 const userRepo = require('../../repositories/user');
 const teamService = require('../team');
-const { ERoleTypes } = require('../../definitions');
+const { ERoleTypes } = require('../../../authorization/definitions');
 
 /**
  * @module modules/core/services/network
@@ -165,10 +167,10 @@ const listAllUsersForNetwork = async (payload, message) => {
  * @return {external:Promise.<Network>} {@link module:modules/core~Network Network} -
  * Promise containing a collections networks
  */
-const listNetworksForUser = async (payload) => {
+const listNetworksForUser = async (payload, message) => {
   logger.debug('List all networks for user', { payload });
 
-  return networkRepo.findNetworksForUser(payload.id);
+  return networkRepo.findNetworksForUser(payload.id, false, message.credentials.user);
 };
 
 /**
@@ -213,7 +215,12 @@ const update = async (payload, message) => {
   logger.debug('Updating network', { payload, message });
 
   const UPDATE_PROPERTIES = ['organisationId', 'name', 'externalId'];
-  return networkRepo.updateNetwork(payload.networkId, R.pick(UPDATE_PROPERTIES, payload));
+  const network =
+    await networkRepo.updateNetwork(payload.networkId, R.pick(UPDATE_PROPERTIES, payload));
+
+  await invalidateNetworkCache(payload.networkId);
+
+  return network;
 };
 
 const fetchOrganisationNetworks = (organisationId, networkIds) => {
@@ -221,7 +228,13 @@ const fetchOrganisationNetworks = (organisationId, networkIds) => {
     .findWhere({ organisationId, id: { $in: networkIds } });
 };
 
-const removeUser = (networkId, userId) => networkRepo.removeUser(networkId, userId);
+const removeUser = async (networkId, userId) => {
+  const result = await networkRepo.removeUser(networkId, userId);
+
+  User.invalidateCache(userId);
+
+  return result;
+};
 
 const updateUser = (networkId, userId, attributes) =>
   networkRepo.updateUser(networkId, userId, attributes);
@@ -265,6 +278,8 @@ const updateUserInNetwork = async (payload) => {
   };
 
   await updateUserRecord().then(updateOrganisationUserRecord);
+
+  await User.invalidateCache(payload.userId);
 
   return userService.getUserWithNetworkScope({
     id: payload.userId,

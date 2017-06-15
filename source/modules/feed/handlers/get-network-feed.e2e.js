@@ -1,7 +1,7 @@
 const { assert } = require('chai');
 const { getRequest } = require('../../../shared/test-utils/request');
 const testHelpers = require('../../../shared/test-utils/helpers');
-const { ERoleTypes } = require('../../core/definitions');
+const { ERoleTypes } = require('../../authorization/definitions');
 const { EMessageTypes } = require('../definitions');
 const messageService = require('../services/message');
 const R = require('ramda');

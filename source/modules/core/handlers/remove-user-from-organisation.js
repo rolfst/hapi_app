@@ -5,9 +5,6 @@ module.exports = async (req, reply) => {
   try {
     const { payload, message } = createServicePayload(req);
 
-    await organisationService
-      .assertUserIsAdminInOrganisation(payload.organisationId, message.credentials.id);
-
     await organisationService.removeUserFromOrganisation(payload, message);
 
     return reply({ success: true });

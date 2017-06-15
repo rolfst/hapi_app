@@ -2,7 +2,7 @@ const { assert } = require('chai');
 const testHelpers = require('../../../shared/test-utils/helpers');
 const { putRequest } = require('../../../shared/test-utils/request');
 const UserService = require('../services/user');
-const { ERoleTypes } = require('../definitions');
+const { ERoleTypes } = require('../../authorization/definitions');
 const dateUtils = require('../../../shared/utils/date');
 
 describe('Handler: Update user in organisation', () => {

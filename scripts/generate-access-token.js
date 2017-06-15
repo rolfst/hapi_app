@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 require('dotenv').config();
-const createAccessToken = require('../source/modules/authentication/utils/create-access-token');
+const createAccessToken = require('../source/modules/authorization/utils/create-access-token');
 const args = require('yargs').argv;
 
 if (!args.userId) {
