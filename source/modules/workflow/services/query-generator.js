@@ -180,7 +180,11 @@ const buildQuery = (organisationId, conditions = null, {
     joins.push(name);
   };
 
-  const whereConditions = [`ou.organisation_id = ${sequelize.escape(organisationId)}`];
+  const whereConditions = [
+    `ou.organisation_id = ${sequelize.escape(organisationId)}`,
+    // NOTE: deleted users are excluded, this is also used in employee management
+    'ou.deleted_at IS NULL',
+  ];
 
   // if workflow id was supplied, we have to ignore users in actions_done
   if (workflowId) {
