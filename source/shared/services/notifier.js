@@ -46,6 +46,16 @@ const sendNotification = R.curry((notification, payload, emailValues) => {
 
   logger.debug('Sending notification chunk to OneSignal', data);
 
+  console.log(JSON.stringify({
+    method: 'POST',
+    url: 'https://onesignal.com/api/v1/notifications',
+    body: data,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Basic ${process.env.ONESIGNAL_API_KEY}`,
+    },
+  }));
+
   return fetch('https://onesignal.com/api/v1/notifications', {
     method: 'POST',
     body: JSON.stringify(data),
@@ -53,7 +63,8 @@ const sendNotification = R.curry((notification, payload, emailValues) => {
       'Content-Type': 'application/json',
       Authorization: `Basic ${process.env.ONESIGNAL_API_KEY}`,
     },
-  });
+  }).then((res) => res.json())
+    .then(console.log);
 });
 
 /**
