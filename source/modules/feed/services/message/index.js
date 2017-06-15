@@ -151,8 +151,8 @@ const getAsObject = async (payload, message) => {
   if (!messageResult) throw createError('404');
 
   let objectId = await objectService.listForMessages({ messageIds: [messageResult.id] })
-  .then(R.pluck('id'))
-  .then(R.head);
+  .then(R.head)
+  .then(R.prop('id'));
 
   // organisation messages don't have an object linked in the message model
   if (!objectId) {
