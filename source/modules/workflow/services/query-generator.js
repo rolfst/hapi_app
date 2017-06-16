@@ -77,7 +77,7 @@ const structure = {
       'network',
     ],
     // The join for network is also here because otherwise it would create a cyclic dependency
-    joinSQL: 'JOIN networks n ON n.organisation_id = ou.organisation_id\n  JOIN network_user nu ON (nu.network_id = n.id AND ou.user_id = nu.user_id)',
+    joinSQL: 'JOIN networks n ON n.organisation_id = ou.organisation_id\n  JOIN network_user nu ON (nu.network_id = n.id AND ou.user_id = nu.user_id AND nu.deleted_at IS NULL)',
     fields: [
       'id',
       'role_type',
@@ -180,7 +180,11 @@ const buildQuery = (organisationId, conditions = null, {
     joins.push(name);
   };
 
-  const whereConditions = [`ou.organisation_id = ${sequelize.escape(organisationId)}`];
+  const whereConditions = [
+    `ou.organisation_id = ${sequelize.escape(organisationId)}`,
+    // NOTE: deleted users are excluded, this is also used in employee management
+    'ou.deleted_at IS NULL',
+  ];
 
   // if workflow id was supplied, we have to ignore users in actions_done
   if (workflowId) {

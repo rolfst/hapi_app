@@ -195,6 +195,7 @@ const create = async (payload, message) => {
   const networkId = R.cond([
     [R.has('networkId'), R.prop('networkId')],
     [R.propEq('type', EParentTypes.ORGANISATION), R.always(null)],
+    [R.propEq('type', EParentTypes.NETWORK), R.prop('id')],
     [R.propEq('type', EParentTypes.TEAM), R.prop('networkId')],
     [R.T, R.always(null)],
   ])(parent);
