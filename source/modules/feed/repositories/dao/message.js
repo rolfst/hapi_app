@@ -18,11 +18,6 @@ const Message = model.define('FeedMessage', {
     field: 'message_type',
     defaultValue: EMessageTypes.DEFAULT,
   },
-  objectId: {
-    type: Sequelize.INTEGER,
-    field: 'object_id',
-    allowNull: true,
-  },
   text: {
     type: Sequelize.STRING,
     field: 'text',
