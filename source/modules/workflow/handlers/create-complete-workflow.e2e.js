@@ -1,6 +1,7 @@
 const R = require('ramda');
 const { assert } = require('chai');
 const sinon = require('sinon');
+const moment = require('moment');
 const testHelper = require('../../../shared/test-utils/helpers');
 const { postRequest } = require('../../../shared/test-utils/request');
 const workFlowProcessor = require('../worker/implementation');
@@ -175,7 +176,7 @@ describe('Workflow handler: create trigger', async () => {
     assert.property(createdWorkFlow, 'id');
     assert.equal(createdWorkFlow.workflow_id, workflow.id);
     assert.equal(createdWorkFlow.type, triggerFixture.type);
-    assert.equal(createdWorkFlow.value, triggerFixture.value);
+    assert.equal(createdWorkFlow.value, moment(triggerFixture.value).toISOString());
     assert.property(createdWorkFlow, 'created_at');
     assert.property(createdWorkFlow, 'updated_at');
   });

@@ -1,7 +1,7 @@
 const R = require('ramda');
-const Promise = require('bluebird');
 const createError = require('../../../../shared/utils/create-error');
 const authorizationService = require('../../../core/services/authorization');
+const { EObjectTypes } = require('../../../core/definitions');
 const userService = require('../../../core/services/user');
 const objectService = require('../../../core/services/object');
 
@@ -11,10 +11,12 @@ const objectService = require('../../../core/services/object');
  * @method removeAttachedObjects
  * @return {Promise}
  */
-const removeAttachedObjects = (messageId) => Promise.all([
-  objectService.remove({ objectType: 'feed_message', sourceId: messageId }),
-  objectService.remove({ parentType: 'feed_message', parentId: messageId }),
-]);
+const removeAttachedObjects = (messageId) => objectService.remove({
+  $or: [
+    { objectType: EObjectTypes.FEED_MESSAGE, sourceId: messageId },
+    { objectType: EObjectTypes.ORGANISATION_MESSAGE, sourceId: messageId },
+  ],
+});
 
 /**
  * Check if the user has permission to view the message

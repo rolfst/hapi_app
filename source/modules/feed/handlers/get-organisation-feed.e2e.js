@@ -2,7 +2,8 @@ const { assert } = require('chai');
 const R = require('ramda');
 const { getRequest } = require('../../../shared/test-utils/request');
 const testHelpers = require('../../../shared/test-utils/helpers');
-const { ERoleTypes, EObjectTypes, EParentTypes } = require('../../core/definitions');
+const { EObjectTypes, EParentTypes } = require('../../core/definitions');
+const { ERoleTypes } = require('../../authorization/definitions');
 const { EMessageTypes } = require('../../feed/definitions');
 const commentService = require('../services/comment');
 const messageService = require('../services/message');
@@ -100,7 +101,7 @@ describe('Handler: Get organisation news', () => {
     getUrl = `/v3/organisations/${organisationA.id}/news`;
     const { statusCode } = await getRequest(getUrl, otherOrganisationUser.token);
 
-    assert.equal(statusCode, 400);
+    assert.equal(statusCode, 403);
   });
 
   describe('meta', () => {

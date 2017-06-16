@@ -4,9 +4,14 @@ const EventEmitter = require('../../shared/services/event-emitter');
 const Notifier = require('../../shared/services/notifier');
 const Mixpanel = require('../../shared/services/mixpanel');
 const objectService = require('../core/services/object');
+const objectRepo = require('../core/repositories/object');
+const { EObjectTypes, EParentTypes } = require('../core/definitions');
 const organisationRepository = require('../core/repositories/organisation');
 const networkService = require('../core/services/network');
+const userRepo = require('../core/repositories/user');
+const commentRepo = require('./repositories/comment');
 const createdMessageNotification = require('./notifications/message-created');
+const createdCommentNotification = require('./notifications/comment-created');
 
 const pubsub = EventEmitter.create();
 
@@ -77,6 +82,56 @@ pubsub.asyncOn('message.created', async (payload) => {
   }
 
   Mixpanel.track(trackData, payload.credentials.id);
+});
+
+pubsub.asyncOn('comment.created', async (payload) => {
+  const { message, comment } = payload;
+
+  // Get all comments so we can notify everyone
+  const allComments = await commentRepo.findBy({
+    messageId: message.id,
+    userId: { $not: comment.userId },
+  });
+
+  const allUserIds = R.filter(
+    R.identity,
+    R.uniq([message.createdBy, comment.userId].concat(R.pluck('userId', allComments)))
+  );
+
+  const users = await userRepo.findByIds(allUserIds);
+  const usersToNotify = R.filter((user) => (user.id !== comment.userId), users);
+  const creator = R.find(R.propEq('id', comment.userId), users);
+
+  // Find the object so we know what network/organisation this comment is from
+  const messageObject = R.head(await objectRepo.findBy({
+    sourceId: message.id,
+    objectType: { $or: [EObjectTypes.FEED_MESSAGE, EObjectTypes.ORGANISATION_MESSAGE] },
+    $or: [
+      { parentType: { $not: EParentTypes.USER } },
+      { parentType: EParentTypes.USER, parentId: comment.userId },
+    ],
+  }));
+
+  if (!messageObject) return;
+
+  const networkId = messageObject && messageObject.networkId ? messageObject.networkId : null;
+  let organisationId =
+    messageObject && messageObject.organisationId ? messageObject.organisationId : null;
+
+  if (!organisationId && networkId) {
+    const network = await networkService.get({ networkId });
+
+    organisationId = network && network.organisationId ? network.organisationId : null;
+  }
+
+  const notification = createdCommentNotification(comment, creator);
+
+  Notifier.send(
+    usersToNotify,
+    notification,
+    networkId,
+    organisationId
+  );
 });
 
 module.exports = pubsub;

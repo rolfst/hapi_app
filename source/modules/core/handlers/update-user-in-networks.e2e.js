@@ -5,7 +5,7 @@ const { putRequest } = require('../../../shared/test-utils/request');
 const organisationRepo = require('../repositories/organisation');
 const { NetworkUser } = require('../repositories/dao');
 const createNetworkUserModel = require('../models/network-link');
-const { ERoleTypes } = require('../definitions');
+const { ERoleTypes } = require('../../authorization/definitions');
 
 describe('Handler: Update user in networks', () => {
   let organisation;

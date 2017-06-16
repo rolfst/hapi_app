@@ -7,10 +7,13 @@ const { EConditionOperators } = require('../../../workflow/definitions');
 const organisationRepository = require('../../repositories/organisation');
 const userRepository = require('../../repositories/user');
 const networkRepository = require('../../repositories/network');
+const User = require('../../../authorization/utils/user-cache');
 const networkService = require('../network');
 const impl = require('./implementation');
 const userService = require('../user');
-const { ERoleTypes, ESEARCH_SELECTORS } = require('../../definitions');
+const { ESEARCH_SELECTORS } = require('../../definitions');
+const { ERoleTypes } = require('../../../authorization/definitions');
+const prefetchCaches = require('../../../authorization/utils/prefetch-caches');
 
 /**
  * @module modules/core/services/organisation
@@ -54,6 +57,7 @@ const selectUsers = async (organisationId, select, options) => {
  * @method userHasRoleInOrganisation
  * @returns {external:Promise.<Boolean>}
  */
+// TODO: this function should be very deprecated, FIX
 const userHasRoleInOrganisation =
   async (organisationId, userId, requestedRole = ERoleTypes.ANY) => {
     logger.debug('Checking user role in organisation', { requestedRole, organisationId, userId });
@@ -106,13 +110,25 @@ const create = (payload, message) => {
  * @method create
  * @return {external:Promise}
  */
-const attachNetwork = (payload, message) => {
+const attachNetwork = async (payload, message) => {
   logger.debug('Attaching network to organisation', { payload, message });
 
-  return networkService.update({
+  const retVal = await networkService.update({
     networkId: payload.networkId,
     organisationId: payload.organisationId,
   }, message);
+
+  prefetchCaches.invalidateNetworkCache(payload.networkId);
+
+  User.filter((key, cachedUser) => {
+    if (cachedUser.hasRoleInNetwork(payload.networkId)) {
+      cachedUser.invalidateCache();
+    }
+
+    return false;
+  });
+
+  return retVal;
 };
 
 /**
@@ -253,9 +269,6 @@ const deleteFunction = async (payload, message) => {
 const listFunctions = async (payload, message) => {
   logger.debug('List all functions for organisation', { payload, message });
 
-  await impl.assertThatOrganisationExists(payload.organisationId);
-  await impl.assertThatUserIsMemberOfOrganisation(message.credentials.id, payload.organisationId);
-
   return organisationRepository.findFunctionsInOrganisation(payload.organisationId);
 };
 
@@ -313,8 +326,6 @@ async function getUser(payload, message) {
   logger.debug('fetches a user in an organisation', { payload, message });
 
   // TODO - when the callee is the owner of the user record, it should also be allowed
-  await assertUserIsAdminInOrganisation(payload.organisationId, message.credentials.id);
-
   const [user, organisationUser, networks] = await Promise.all([
     userRepository.findUser(payload.userId),
     organisationRepository.getPivot(payload.userId, payload.organisationId),
@@ -343,8 +354,6 @@ async function getUser(payload, message) {
  */
 async function updateUser(payload, message) {
   logger.debug('Updates a function for a user in an organisation', { payload, message });
-
-  await assertUserIsAdminInOrganisation(payload.organisationId, message.credentials.id);
 
   const userWhiteList = [
     'firstName',
@@ -384,14 +393,13 @@ async function updateUser(payload, message) {
 
   await updateUserRecord().then(updateOrganisationUserRecord);
 
+  await User.invalidateCache(payload.userId);
+
   return getUser(payload, message);
 }
 
 async function getOrganisation(payload, message) {
   logger.debug('Shows an organisation.', { payload, message });
-
-  await impl.assertThatOrganisationExists(payload.organisationId);
-  await impl.assertThatUserIsMemberOfOrganisation(message.credentials.id, payload.organisationId);
 
   return organisationRepository.findById(payload.organisationId);
 }
@@ -438,6 +446,8 @@ const addUserToNetworks = async (payload, message) => {
     userId: payload.userId,
     roleType: singleNetwork.roleType || ERoleTypes.EMPLOYEE,
   }));
+
+  await User.invalidateCache(payload.userId);
 };
 
 /**
@@ -461,6 +471,8 @@ const updateUserInNetworks = async (payload, message) => {
         roleType: singleNetwork.roleType || ERoleTypes.EMPLOYEE,
       })
   );
+
+  await User.invalidateCache(payload.userId);
 };
 
 /**
@@ -481,6 +493,8 @@ const removeUserFromNetworks = async (payload, message) => {
     payload.networks,
     (networkId) => networkService.removeUser(networkId, payload.userId)
   );
+
+  await User.invalidateCache(payload.userId);
 };
 
 /**
@@ -494,9 +508,12 @@ const removeUserFromNetworks = async (payload, message) => {
 const removeUserFromOrganisation = async (payload, message) => {
   logger.debug('Remove user from organisation', { payload, message });
 
+  // TODO: use message.credentials.user.hasRoleInOrganisation
   if (!await userHasRoleInOrganisation(payload.organisationId, payload.userId)) {
-    throw createError('10021');
+    throw createError('10031');
   }
+
+  await User.invalidateCache(payload.userId);
 
   return organisationRepository.removeUser(payload.organisationId, payload.userId);
 };

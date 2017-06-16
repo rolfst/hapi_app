@@ -1,6 +1,7 @@
 const R = require('ramda');
 const userRepo = require('../../core/repositories/user');
 const userService = require('../../core/services/user');
+const User = require('../../authorization/utils/user-cache');
 const EmployeeDispatcher = require('../dispatcher');
 
 /**
@@ -53,6 +54,8 @@ const updateEmployee = async (payload, message) => {
     network: message.network,
     credentials: message.credentials,
   });
+
+  await User.invalidateCache(message.credentials.id);
 
   return updatedUser;
 };

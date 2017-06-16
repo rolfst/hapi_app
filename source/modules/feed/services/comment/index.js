@@ -1,6 +1,7 @@
 const createError = require('../../../../shared/utils/create-error');
 const messageRepository = require('../../repositories/message');
 const commentRepository = require('../../repositories/comment');
+const dispatcher = require('../../dispatcher');
 
 /**
  * @module modules/feed/services/comment
@@ -40,11 +41,15 @@ const create = async (payload, message) => {
   const messageToComment = await messageRepository.findById(payload.messageId);
   if (!messageToComment) throw createError('404', 'Message not found.');
 
-  return commentRepository.create({
+  const createdComment = await commentRepository.create({
     messageId: payload.messageId,
     userId: payload.userId,
     text: payload.text,
   });
+
+  dispatcher.emit('comment.created', { message: messageToComment, comment: createdComment });
+
+  return createdComment;
 };
 
 exports.create = create;

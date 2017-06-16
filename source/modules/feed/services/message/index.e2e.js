@@ -131,6 +131,7 @@ describe('Service: Message', () => {
       assert.equal(createdMessage.parentId, network.id);
       assert.equal(createdMessage.source.text, 'My cool message');
       assert.equal(createdMessage.children[0].objectType, 'poll');
+      assert.equal(createdMessage.children[0].userId, createdMessage.userId);
       assert.deepEqual(createdMessage.children[0].source.options[0].text, 'Yes');
       assert.deepEqual(createdMessage.children[0].source.options[1].text, 'No');
       assert.deepEqual(createdMessage.children[0].source.options[2].text, 'Ok');

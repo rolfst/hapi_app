@@ -1,3 +1,4 @@
+const R = require('ramda');
 const { assert } = require('chai');
 const moment = require('moment');
 const testHelpers = require('../../../shared/test-utils/helpers');
@@ -113,21 +114,23 @@ describe('Handler: Users in organisation', () => {
     const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
     assert.equal(statusCode, 403);
-    assert.equal(result.error_code, '10020');
+    assert.equal(result.error_code, '10021');
   });
 
   it('should not return deleted users', async () => {
     // First remove a user from the organisation
     await organisationRepo.updateOrganisationLink({
       organisationId: organisationA.id,
-      userId: users[0].id,
+      userId: users[3].id,
     }, { deletedAt: new Date() });
 
     const endpoint = `/v2/organisations/${organisationA.id}/users`;
-    const { result } = await getRequest(endpoint, users[0].token);
+    const { result: { data: fetchedUsers } } = await getRequest(endpoint, users[0].token);
 
-    // 1 user is in a different organisation and 1 was deleted, so we should get users.length - 2
-    assert.lengthOf(result.data, users.length - 2);
+    const validUsers = R.filter(R.propEq('deleted_at', null), fetchedUsers);
+
+    assert.equal(fetchedUsers.length, validUsers.length);
+    assert.equal(fetchedUsers.length, 3);
   });
 
   describe('Filtering', () => {

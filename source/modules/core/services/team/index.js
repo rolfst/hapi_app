@@ -2,8 +2,9 @@ const { map } = require('lodash');
 const Promise = require('bluebird');
 const R = require('ramda');
 const createError = require('../../../../shared/utils/create-error');
-const authorizationService = require('../../services/authorization');
+const prefetchCaches = require('../../../authorization/utils/prefetch-caches');
 const teamRepository = require('../../repositories/team');
+const User = require('../../../authorization/utils/user-cache');
 const userService = require('../user');
 
 /**
@@ -75,12 +76,6 @@ async function list(payload, message) {
 const create = async (payload, message) => {
   logger.debug('Creating team', { payload, message });
 
-  await authorizationService.assertRoleTypeForUser({
-    userId: message.credentials.id,
-    networkId: payload.networkId,
-    roleType: 'ADMIN',
-  }, message);
-
   const attributes = R.pick(['networkId', 'name', 'description', 'isChannel'], payload);
   const team = await teamRepository.create(attributes);
 
@@ -89,7 +84,16 @@ const create = async (payload, message) => {
     team.memberIds = payload.userIds;
     team.isMember = R.contains(message.credentials.id, payload.userIds);
     team.memberCount = payload.userIds.length;
+    await Promise.map(payload.userIds, User.invalidateCache);
   }
+
+  User.filter((key, cachedUser) => {
+    if (cachedUser.hasRoleInNetwork(payload.networkId)) {
+      cachedUser.invalidateCache();
+    }
+
+    return false;
+  });
 
   return team;
 };
@@ -110,12 +114,6 @@ const create = async (payload, message) => {
 const update = async (payload, message) => {
   logger.debug('Updating team', { payload, message });
 
-  await authorizationService.assertRoleTypeForUser({
-    userId: message.credentials.id,
-    networkId: payload.networkId,
-    roleType: 'ADMIN',
-  }, message);
-
   const team = await teamRepository.findTeamById(payload.teamId);
   if (!team) throw createError('404');
 
@@ -125,7 +123,11 @@ const update = async (payload, message) => {
 
   if (payload.userIds) {
     await teamRepository.setUsersForTeam(team.id, payload.userIds);
+
+    await Promise.all(payload.userIds, User.invalidateCache);
   }
+
+  await prefetchCaches.invalidateTeamCache(team.id);
 
   return (await list({ teamIds: [payload.teamId] }, message))[0];
 };
@@ -158,7 +160,21 @@ const listMembersForTeams = async (payload, message) => {
  * Promise containing collection of deleted teams
  */
 const deleteTeamsByIds = async (payload) => {
-  return Promise.map(payload.teamIds, teamRepository.deleteById);
+  User.filter((key, cachedUser) => {
+    if (payload.teamIds.some(cachedUser.isMemberOfTeam)) {
+      cachedUser.invalidateCache();
+    }
+
+    return false;
+  });
+
+  return Promise.map(payload.teamIds, async (teamId) => {
+    const retVal = await teamRepository.deleteById(teamId);
+
+    await prefetchCaches.invalidateTeamCache(teamId);
+
+    return retVal;
+  });
 };
 
 exports.create = create;

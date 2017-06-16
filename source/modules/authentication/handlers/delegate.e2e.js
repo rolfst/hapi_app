@@ -2,7 +2,7 @@
 const { getRequest, postRequest } = require('../../../shared/test-utils/request');
 const testHelper = require('../../../shared/test-utils/helpers');
 const tokenUtil = require('../../../shared/utils/token');
-const createRefreshToken = require('../utils/create-refresh-token');
+const createRefreshToken = require('../../authorization/utils/create-refresh-token');
 
 describe('Delegate', () => {
   let createdUser;

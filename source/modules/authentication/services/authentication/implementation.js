@@ -3,8 +3,8 @@ const bcrypt = require('bcryptjs');
 const createError = require('../../../../shared/utils/create-error');
 const authenticationRepo = require('../../../core/repositories/authentication');
 const userRepo = require('../../../core/repositories/user');
-const createAccessToken = require('../../utils/create-access-token');
-const createRefreshToken = require('../../utils/create-refresh-token');
+const createAccessToken = require('../../../authorization/utils/create-access-token');
+const createRefreshToken = require('../../../authorization/utils/create-refresh-token');
 
 const checkPassword = (hash, plain) => {
   // We have to replace the first characters because of the

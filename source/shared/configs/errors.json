@@ -84,14 +84,24 @@
     "detail": "The user does not belong to the team.",
     "code": 403
   },
+  "10015": {
+    "type": "not_network_admin",
+    "detail": "The user is not an admin in the network.",
+    "code": 403
+  },
   "10020": {
-    "type": "no_admin_in_organisation",
+    "type": "not_organisation_admin",
     "detail": "The user is not an admin in the organisation.",
     "code": 403
   },
   "10021": {
     "type": "not_in_organisation",
-    "detail": "User is not a member in this organisation",
+    "detail": "The user is not a member of the organisation.",
+    "code": 403
+  },
+  "10031": {
+    "type": "target_not_in_organisation",
+    "detail": "The target user is not a member of the organisation.",
     "code": 400
   },
   "20001": {

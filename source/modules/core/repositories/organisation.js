@@ -239,9 +239,8 @@ async function updateUser(userId, organisationId, attributes) {
     .then(createPivotModel);
 }
 
-const updateOrganisationLink = (whereConstraint, attributes) => {
+const updateOrganisationLink = (whereConstraint, attributes) =>
   OrganisationUser.update(attributes, { where: whereConstraint });
-};
 
 const countUsers = (organisationId) => {
   return sequelize

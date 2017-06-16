@@ -78,7 +78,9 @@ const listWithSourceAndChildren = async (payload, message, userId = null) => {
   const findObjectById = (objectId) => R.find(R.propEq('id', objectId), objectsWithSource);
 
   const addChildrenToObject = (object) => R.merge(object, {
-    children: impl.findChildren(objectsWithSource, object),
+    children: R.map((foundChildren) => R.merge(foundChildren, {
+      userId: object.userId,
+    }), impl.findChildren(objectsWithSource, object)),
   });
 
   return R.pipe(

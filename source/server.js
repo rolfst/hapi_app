@@ -1,6 +1,6 @@
 const Hapi = require('hapi');
 const routes = require('./create-routes');
-const jwtStrategy = require('./shared/middlewares/authenticator-strategy');
+const authenticationMiddleware = require('./modules/authentication/middleware');
 const integrationStrategy = require('./shared/middlewares/integration-strategy');
 const serverUtil = require('./shared/utils/server');
 const serverConfig = require('./shared/configs/server');
@@ -32,7 +32,7 @@ const createServer = () => {
   }
 
   // Register schemes + strategies
-  server.auth.scheme('jwt', jwtStrategy);
+  server.auth.scheme('jwt', authenticationMiddleware);
   server.auth.strategy('jwt', 'jwt');
   server.auth.scheme('integration', integrationStrategy);
   server.auth.strategy('integration', 'integration');

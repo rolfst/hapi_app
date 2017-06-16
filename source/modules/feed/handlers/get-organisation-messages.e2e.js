@@ -1,7 +1,8 @@
 const { assert } = require('chai');
 const { getRequest } = require('../../../shared/test-utils/request');
 const testHelpers = require('../../../shared/test-utils/helpers');
-const { ERoleTypes, EObjectTypes } = require('../../core/definitions');
+const { EObjectTypes } = require('../../core/definitions');
+const { ERoleTypes } = require('../../authorization/definitions');
 const { EMessageTypes, DEFAULT_MESSAGE_LIMIT } = require('../definitions');
 const messageService = require('../services/message');
 const R = require('ramda');
@@ -68,6 +69,6 @@ describe('Handler: Get organisation messages', () => {
   it('should fail if user is not a member of the organisation', async () => {
     const { statusCode } = await getRequest(getUrl, otherUser.token);
 
-    assert.equal(statusCode, 400);
+    assert.equal(statusCode, 403);
   });
 });

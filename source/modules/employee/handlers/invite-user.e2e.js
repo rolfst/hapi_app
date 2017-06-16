@@ -2,7 +2,7 @@ const { assert } = require('chai');
 const R = require('ramda');
 const testHelpers = require('../../../shared/test-utils/helpers');
 const { postRequest } = require('../../../shared/test-utils/request');
-const { ERoleTypes } = require('../../core/definitions');
+const { ERoleTypes } = require('../../authorization/definitions');
 const organisationRepo = require('../../core/repositories/organisation');
 
 describe('Handler: Invite user', () => {
