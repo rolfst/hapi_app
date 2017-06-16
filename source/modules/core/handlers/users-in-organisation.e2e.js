@@ -130,6 +130,7 @@ describe('Handler: Users in organisation', () => {
     assert.lengthOf(result.data, users.length - 2);
   });
 
+  // NOTE: there was a user deleted in a previous test
   describe('Filtering', () => {
     it('should only search for users that are member of the organisation', async () => {
       const endpoint = `/v2/organisations/${organisationA.id}/users?q=pel`;
@@ -190,7 +191,7 @@ describe('Handler: Users in organisation', () => {
       const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
       assert.equal(statusCode, 200);
-      assert.lengthOf(result.data, 3);
+      assert.lengthOf(result.data, 2);
     });
 
     it('should only search for users that are inactive users of the organisation', async () => {
@@ -198,7 +199,7 @@ describe('Handler: Users in organisation', () => {
       const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
       assert.equal(statusCode, 200);
-      assert.lengthOf(result.data, 3);
+      assert.lengthOf(result.data, 2);
     });
 
     it('should only search for users that are active users of the organisation', async () => {
@@ -214,7 +215,7 @@ describe('Handler: Users in organisation', () => {
       const { statusCode, result } = await getRequest(endpoint, users[0].token);
 
       assert.equal(statusCode, 200);
-      assert.lengthOf(result.data, 2);
+      assert.lengthOf(result.data, 1);
     });
   });
 });
