@@ -21,7 +21,7 @@ const send = async (comment, network) => {
 
   const users = comments.map((c) => c.User).concat(exchange.User);
   const uniqueUsers = _.uniqBy(users, 'id');
-  const usersToNotify = uniqueUsers.filter((u) => u.id !== comment.user.id);
+  const usersToNotify = uniqueUsers.filter((u) => u.id.toString() !== comment.user.id);
   const notification = createNotification(exchange, comment);
 
   notifier.send(usersToNotify, notification, network.id, network.organisationId);
